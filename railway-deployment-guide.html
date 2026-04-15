@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy Your App Online 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+
+    /* =============================================
+       VIEWPORT BASE CSS — mandatory
+       ============================================= */
+
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    html {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-height: 100%;
+      overflow: hidden;
+      padding: var(--slide-padding);
+    }
+    :root {
+      --title-size: clamp(1.5rem, 5vw, 3.75rem);
+      --h2-size: clamp(1.2rem, 3vw, 2.25rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.6rem);
+      --body-size: clamp(0.8rem, 1.5vw, 1.1rem);
+      --small-size: clamp(0.65rem, 1.1vw, 0.875rem);
+      --cmd-size: clamp(0.6rem, 1.15vw, 0.88rem);
+      --slide-padding: clamp(1rem, 4vw, 4rem);
+      --content-gap: clamp(0.4rem, 1.5vw, 1.25rem);
+      --element-gap: clamp(0.2rem, 0.8vw, 0.75rem);
+    }
+    @media (max-height: 700px) {
+      :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.8rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 2.8vw, 1.75rem);
+        --body-size: clamp(0.72rem, 1.3vw, 0.95rem);
+      }
+    }
+    @media (max-height: 600px) {
+      :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.25rem, 0.8vw, 0.6rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.68rem, 1.2vw, 0.9rem);
+        --cmd-size: clamp(0.55rem, 1vw, 0.78rem);
+      }
+      .nav-dots, .keyboard-hint { display: none; }
+    }
+    @media (max-height: 500px) {
+      :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.62rem, 1vw, 0.82rem);
+      }
+    }
+    @media (max-width: 600px) {
+      :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+      .two-col { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    /* =============================================
+       GLOBAL RESET
+       ============================================= */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Outfit', sans-serif; }
+
+    /* =============================================
+       SLIDE BACKGROUNDS — warm pastel alternating
+       ============================================= */
+    .slide {
+      background: #fef4ee;
+    }
+    .slide:nth-child(even) {
+      background: #f0ecfb;
+    }
+    .slide-title {
+      background: linear-gradient(150deg, #fde8d8 0%, #ede4fa 55%, #d8f0e8 100%);
+    }
+    .slide-done {
+      background: linear-gradient(150deg, #d4f5e9 0%, #d4e8fa 50%, #fde8d8 100%);
+    }
+
+    /* Decorative abstract blobs */
+    .slide::before, .slide::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .slide::before {
+      width: clamp(120px, 22vw, 320px);
+      height: clamp(120px, 22vw, 320px);
+      opacity: 0.13;
+    }
+    .slide::after {
+      width: clamp(60px, 10vw, 160px);
+      height: clamp(60px, 10vw, 160px);
+      opacity: 0.10;
+    }
+    .slide:nth-child(odd)::before  { background: #ff9e6e; top: -6%; right: -4%; }
+    .slide:nth-child(odd)::after   { background: #ff6eb4; bottom: 8%; left: 2%; }
+    .slide:nth-child(even)::before { background: #a07de0; top: -6%; left: -4%; }
+    .slide:nth-child(even)::after  { background: #5ec7e8; bottom: 6%; right: 3%; }
+
+    /* =============================================
+       MAIN CARD
+       ============================================= */
+    .card {
+      background: #ffffff;
+      border-radius: clamp(16px, 2.5vw, 28px);
+      padding: clamp(1.25rem, 2.5vw, 2.5rem);
+      box-shadow:
+        0 4px 24px rgba(0,0,0,0.07),
+        0 1px 6px rgba(0,0,0,0.04);
+      max-width: min(92vw, 780px);
+      max-height: min(84vh, 660px);
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--element-gap);
+      position: relative;
+      z-index: 1;
+      /* Entrance animation — triggered by IntersectionObserver */
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =============================================
+       TITLE CARD
+       ============================================= */
+    .title-card {
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(1.5rem, 3vw, 3rem);
+    }
+    .title-emoji {
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      line-height: 1;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    .title-heading {
+      font-size: var(--title-size);
+      font-weight: 900;
+      color: #1a1a1a;
+      line-height: 1.1;
+    }
+    .title-heading .accent { color: #e05a2b; }
+    .title-sub {
+      font-size: var(--h3-size);
+      color: #666;
+      font-weight: 400;
+      line-height: 1.3;
+    }
+    .badge-row {
+      display: flex;
+      gap: clamp(0.35rem, 0.8vw, 0.65rem);
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: clamp(0.2rem, 0.5vw, 0.5rem);
+    }
+    .badge {
+      border-radius: 999px;
+      padding: 0.3em 0.9em;
+      font-size: var(--small-size);
+      font-weight: 700;
+      background: #ede8fa;
+      color: #6b4fa8;
+    }
+    .badge.peach { background: #fde8d8; color: #c24b1a; }
+    .badge.mint  { background: #d8f5ec; color: #1a8a5e; }
+    .badge.sky   { background: #d8eefa; color: #1a5a8a; }
+
+    /* =============================================
+       STEP LABEL
+       ============================================= */
+    .step-label {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.28em 0.85em;
+      font-size: var(--small-size);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      width: fit-content;
+      flex-shrink: 0;
+    }
+    .col-1 { background: #fde8d8; color: #c24b1a; }
+    .col-2 { background: #d8f5ec; color: #1a8a5e; }
+    .col-3 { background: #e8e0fa; color: #6b4fa8; }
+    .col-4 { background: #d8eefa; color: #1a5a8a; }
+    .col-5 { background: #fdf5d8; color: #8a6a1a; }
+    .col-6 { background: #fde8f0; color: #8a1a4e; }
+    .col-7 { background: #d8f0e8; color: #1a6a50; }
+    .col-8 { background: #e8d8fa; color: #4a1a8a; }
+
+    /* =============================================
+       SLIDE HEADING & TEXT
+       ============================================= */
+    .slide-heading {
+      font-size: var(--h2-size);
+      font-weight: 800;
+      color: #1a1a1a;
+      line-height: 1.15;
+    }
+    .slide-text {
+      font-size: var(--body-size);
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* =============================================
+       STEP LIST
+       ============================================= */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.25rem, 0.7vh, 0.6rem);
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7em;
+      font-size: var(--body-size);
+      color: #333;
+      line-height: 1.4;
+    }
+    .num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: clamp(1.4em, 2.2vw, 1.75em);
+      height: clamp(1.4em, 2.2vw, 1.75em);
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 50%;
+      font-size: calc(var(--body-size) * 0.78);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 0.1em;
+    }
+
+    /* =============================================
+       COMMAND BOX
+       ============================================= */
+    .cmd-box {
+      background: #1a2235;
+      border-radius: clamp(8px, 1.5vw, 14px);
+      padding: clamp(0.65rem, 1.4vw, 1.1rem) clamp(0.9rem, 1.8vw, 1.4rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+      flex-shrink: 0;
+    }
+    .cmd-label {
+      font-size: calc(var(--cmd-size) * 0.9);
+      color: #7a8ea0;
+      font-weight: 500;
+      margin-bottom: 0.15em;
+    }
+    .cmd-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--cmd-size);
+      color: #7efb98;
+      line-height: 1.65;
+    }
+    .cmd-comment {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: calc(var(--cmd-size) * 0.88);
+      color: #5a6e80;
+      line-height: 1.5;
+    }
+    .cmd-section { margin-top: 0.4em; }
+
+    /* =============================================
+       INFO BOX
+       ============================================= */
+    .info-box {
+      background: #fffbec;
+      border-left: 3px solid #f0b429;
+      border-radius: 0 8px 8px 0;
+      padding: clamp(0.45rem, 0.9vw, 0.7rem) clamp(0.7rem, 1.4vw, 1.1rem);
+      font-size: var(--small-size);
+      color: #7a5f20;
+      line-height: 1.5;
+      flex-shrink: 0;
+    }
+
+    /* URL display */
+    .url-display {
+      background: #f0f8ff;
+      border: 2px dashed #7bbcf0;
+      border-radius: clamp(8px, 1.5vw, 12px);
+      padding: clamp(0.5rem, 1.2vw, 0.9rem);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.6rem, 1.2vw, 0.9rem);
+      color: #1a5a8a;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* =============================================
+       TWO-COLUMN GRID
+       ============================================= */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(0.4rem, 1vw, 0.8rem);
+    }
+    .mini-card {
+      background: #f8f8f8;
+      border-radius: clamp(8px, 1.5vw, 14px);
+      padding: clamp(0.55rem, 1.2vw, 0.9rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+    }
+    .mini-icon  { font-size: clamp(1.1rem, 2.2vw, 1.8rem); }
+    .mini-title { font-size: var(--body-size); font-weight: 700; color: #1a1a1a; }
+    .mini-desc  { font-size: var(--small-size); color: #777; line-height: 1.4; }
+
+    /* Checklist (Done slide) */
+    .checklist { display: flex; flex-direction: column; gap: clamp(0.25rem, 0.6vh, 0.5rem); }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65em;
+      font-size: var(--body-size);
+      color: #333;
+    }
+    .check-icon { font-size: calc(var(--body-size) * 1.1); flex-shrink: 0; }
+
+    /* =============================================
+       NAVIGATION DOTS
+       ============================================= */
+    .nav-dots {
+      position: fixed;
+      bottom: clamp(0.75rem, 1.8vh, 1.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: clamp(0.25rem, 0.5vw, 0.45rem);
+      z-index: 200;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      padding: 0.45em 0.9em;
+      border-radius: 999px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.1);
+    }
+    .dot {
+      width: clamp(6px, 0.9vw, 9px);
+      height: clamp(6px, 0.9vw, 9px);
+      border-radius: 50%;
+      background: #ccc;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border: none;
+      padding: 0;
+    }
+    .dot.active { background: #7b55c8; transform: scale(1.35); }
+    .keyboard-hint {
+      position: fixed;
+      bottom: clamp(0.75rem, 1.8vh, 1.4rem);
+      right: clamp(1rem, 3vw, 2rem);
+      font-size: var(--small-size);
+      color: rgba(0,0,0,0.3);
+      font-family: 'Outfit', sans-serif;
+      z-index: 200;
+    }
+
+    /* =============================================
+       SLIDE COUNTER (top-right corner)
+       ============================================= */
+    .slide-counter {
+      position: absolute;
+      top: clamp(0.75rem, 1.5vw, 1.2rem);
+      right: clamp(1rem, 2.5vw, 2rem);
+      font-size: var(--small-size);
+      color: rgba(0,0,0,0.28);
+      font-weight: 600;
+      z-index: 2;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       SLIDE 1 — TITLE
+       ============================================= -->
+  <section class="slide slide-title" id="slide-1">
+    <div class="slide-content" style="align-items:center; justify-content:center;">
+      <div class="card title-card">
+        <div class="title-emoji">🚀</div>
+        <h1 class="title-heading">Put Your App <span class="accent">Online!</span></h1>
+        <p class="title-sub">Share your IELTS website with<br>anyone in the whole world</p>
+        <div class="badge-row">
+          <span class="badge peach">✅ Completely Free</span>
+          <span class="badge sky">⏱️ About 30 minutes</span>
+          <span class="badge mint">🌏 Works anywhere</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">1 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 2 — WHAT IS RAILWAY + WHAT YOU NEED
+       ============================================= -->
+  <section class="slide" id="slide-2">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-1">🚂 Before We Start</span>
+        <h2 class="slide-heading">What is Railway?</h2>
+        <p class="slide-text">Railway is like a <strong>home for your website on the internet</strong>. Right now your app only works on YOUR computer. Railway makes it work for <strong>everyone, 24 hours a day!</strong></p>
+        <p class="slide-text" style="font-weight:600; color:#333; font-size:var(--small-size);">YOU NEED THESE 4 FREE THINGS:</p>
+        <div class="two-col">
+          <div class="mini-card">
+            <div class="mini-icon">💻</div>
+            <div class="mini-title">Git</div>
+            <div class="mini-desc">A tool that saves your code history</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-icon">🐙</div>
+            <div class="mini-title">GitHub Account</div>
+            <div class="mini-desc">A website that stores your code online</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-icon">🚂</div>
+            <div class="mini-title">Railway Account</div>
+            <div class="mini-desc">The service that runs your website</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-icon">🔑</div>
+            <div class="mini-title">Your API Key</div>
+            <div class="mini-desc">From Anthropic — you already have this!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">2 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 3 — STEP 1: INSTALL GIT
+       ============================================= -->
+  <section class="slide" id="slide-3">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-1">Step 1 of 8</span>
+        <h2 class="slide-heading">💻 Install Git</h2>
+        <div class="steps">
+          <div class="step-item">
+            <span class="num">1</span>
+            <span>Open your browser (Chrome, Edge, or Safari)</span>
+          </div>
+          <div class="step-item">
+            <span class="num">2</span>
+            <span>Go to: <strong>git-scm.com/downloads</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">3</span>
+            <span>Click the big <strong>Download</strong> button for your computer</span>
+          </div>
+          <div class="step-item">
+            <span class="num">4</span>
+            <span>Run the installer — just keep clicking <strong>Next → Next → Finish</strong>. No changes needed!</span>
+          </div>
+        </div>
+        <div class="cmd-box">
+          <div class="cmd-label">✅ CHECK IT WORKED — open Terminal (or Command Prompt) and type:</div>
+          <div class="cmd-line">git --version</div>
+          <div class="cmd-comment"># If you see "git version 2.xx.x" — it works! 🎉</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">3 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 4 — STEP 2: CREATE ACCOUNTS
+       ============================================= -->
+  <section class="slide" id="slide-4">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-2">Step 2 of 8</span>
+        <h2 class="slide-heading">🐙 Create Your Free Accounts</h2>
+        <div class="steps">
+          <div class="step-item">
+            <span class="num">1</span>
+            <div>
+              <strong>GitHub</strong> (stores your code online)<br>
+              <span style="color:#777;">Go to <strong>github.com</strong> → click <strong>"Sign up"</strong> → fill in name, email, password</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="num">2</span>
+            <div>
+              <strong>Railway</strong> (runs your website)<br>
+              <span style="color:#777;">Go to <strong>railway.app</strong> → click <strong>"Login"</strong> → choose <strong>"Login with GitHub"</strong></span>
+            </div>
+          </div>
+        </div>
+        <div class="info-box">
+          💡 <strong>Both are 100% free!</strong> No credit card needed. Railway has a free starter plan that's perfect for sharing your app with friends and family.
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">4 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 5 — STEP 3: OPEN TERMINAL
+       ============================================= -->
+  <section class="slide" id="slide-5">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-3">Step 3 of 8</span>
+        <h2 class="slide-heading">🖥️ Open Terminal</h2>
+        <div class="two-col">
+          <div class="mini-card">
+            <div class="mini-icon">🪟</div>
+            <div class="mini-title">Windows</div>
+            <div class="mini-desc">Press <strong>⊞ Win</strong> key → type <strong>cmd</strong> → press <strong>Enter</strong></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-icon">🍎</div>
+            <div class="mini-title">Mac</div>
+            <div class="mini-desc">Press <strong>⌘ + Space</strong> → type <strong>terminal</strong> → press <strong>Enter</strong></div>
+          </div>
+        </div>
+        <p class="slide-text">A black window appears. Now <strong>go to your project folder</strong> by typing:</p>
+        <div class="cmd-box">
+          <div class="cmd-label">Windows — type this (change "ASUS" to your username):</div>
+          <div class="cmd-line">cd C:\Users\ASUS\claude\ielts-lms</div>
+          <div class="cmd-section">
+            <div class="cmd-label">Mac — type this:</div>
+            <div class="cmd-line">cd ~/claude/ielts-lms</div>
+          </div>
+          <div class="cmd-comment"># Press Enter after typing. Nothing bad can happen!</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">5 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 6 — STEP 4: GIT COMMANDS
+       ============================================= -->
+  <section class="slide" id="slide-6">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-4">Step 4 of 8</span>
+        <h2 class="slide-heading">📦 Save Your Code With Git</h2>
+        <p class="slide-text">Type these <strong>3 commands</strong> one by one. Press <strong>Enter</strong> after each one and wait for it to finish.</p>
+        <div class="cmd-box">
+          <div class="cmd-comment"># Command 1 — start tracking this folder</div>
+          <div class="cmd-line">git init</div>
+          <div class="cmd-section">
+            <div class="cmd-comment"># Command 2 — add ALL files to be saved</div>
+            <div class="cmd-line">git add .</div>
+          </div>
+          <div class="cmd-section">
+            <div class="cmd-comment"># Command 3 — save them with a message</div>
+            <div class="cmd-line">git commit -m "first upload"</div>
+          </div>
+        </div>
+        <div class="info-box">
+          💡 Think of <strong>git commit</strong> like pressing <em>Save</em> on a document — but it remembers <strong>every save forever</strong>! You can always go back in time.
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">6 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 7 — STEP 5: UPLOAD TO GITHUB
+       ============================================= -->
+  <section class="slide" id="slide-7">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-5">Step 5 of 8</span>
+        <h2 class="slide-heading">☁️ Upload to GitHub</h2>
+        <div class="steps">
+          <div class="step-item">
+            <span class="num">1</span>
+            <span>Go to <strong>github.com</strong> → click the <strong>+</strong> button (top-right) → click <strong>"New repository"</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">2</span>
+            <span>Name it <strong>ielts-lms</strong> → leave everything else as default → click <strong>"Create repository"</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">3</span>
+            <span>GitHub shows you commands — go back to Terminal and type them <strong>one by one</strong>:</span>
+          </div>
+        </div>
+        <div class="cmd-box">
+          <div class="cmd-line">git remote add origin https://github.com/YOUR-NAME/ielts-lms.git</div>
+          <div class="cmd-line">git branch -M main</div>
+          <div class="cmd-line">git push -u origin main</div>
+          <div class="cmd-comment"># Replace YOUR-NAME with your GitHub username!</div>
+        </div>
+        <div class="info-box">
+          🔑 If it asks for a password → use a <strong>Personal Access Token</strong>. In GitHub: Settings → Developer Settings → Personal Access Tokens → Generate new token (classic)
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">7 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 8 — STEP 6: DEPLOY ON RAILWAY
+       ============================================= -->
+  <section class="slide" id="slide-8">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-6">Step 6 of 8</span>
+        <h2 class="slide-heading">🚂 Deploy on Railway!</h2>
+        <div class="steps">
+          <div class="step-item">
+            <span class="num">1</span>
+            <span>Go to <strong>railway.app</strong> and log in</span>
+          </div>
+          <div class="step-item">
+            <span class="num">2</span>
+            <span>Click <strong>"New Project"</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">3</span>
+            <span>Click <strong>"Deploy from GitHub repo"</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">4</span>
+            <span>Find your <strong>ielts-lms</strong> repo and click it</span>
+          </div>
+          <div class="step-item">
+            <span class="num">5</span>
+            <span>Click <strong>"Deploy Now"</strong> — Railway builds your app automatically! ⏳ Wait 2–3 minutes...</span>
+          </div>
+        </div>
+        <div class="info-box">
+          🎉 You'll see a build log with lots of text scrolling — that's normal! When it says "Deployed" in green, you're done with this step.
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">8 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 9 — STEP 7: ADD SECRET KEYS
+       ============================================= -->
+  <section class="slide" id="slide-9">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-7">Step 7 of 8</span>
+        <h2 class="slide-heading">🔑 Add Your Secret Keys</h2>
+        <p class="slide-text">In Railway: click your project → click the <strong>"Variables"</strong> tab → click <strong>"New Variable"</strong> and add these <strong>4 things</strong>:</p>
+        <div class="cmd-box">
+          <div class="cmd-comment"># Name (left box)          Value (right box)</div>
+          <div class="cmd-line">ANTHROPIC_API_KEY   →   sk-ant-xxxx (your Anthropic key)</div>
+          <div class="cmd-line">JWT_SECRET          →   any-long-random-words-here</div>
+          <div class="cmd-line">STARTING_BALANCE    →   4.98</div>
+          <div class="cmd-line">PORT                →   3000</div>
+        </div>
+        <div class="info-box">
+          🔐 These are like passwords for your app. Railway keeps them safe and hidden. <strong>Never</strong> put your API key directly in your code!
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">9 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 10 — STEP 8: GET YOUR LIVE URL
+       ============================================= -->
+  <section class="slide" id="slide-10">
+    <div class="slide-content" style="align-items:center;">
+      <div class="card">
+        <span class="step-label col-8">Step 8 of 8</span>
+        <h2 class="slide-heading">🌏 Get Your Live Website URL!</h2>
+        <div class="steps">
+          <div class="step-item">
+            <span class="num">1</span>
+            <span>In Railway → click your project → click the <strong>"Settings"</strong> tab</span>
+          </div>
+          <div class="step-item">
+            <span class="num">2</span>
+            <span>Scroll down to <strong>"Domains"</strong> → click <strong>"Generate Domain"</strong></span>
+          </div>
+          <div class="step-item">
+            <span class="num">3</span>
+            <span>Railway gives you a URL — it looks like this:</span>
+          </div>
+        </div>
+        <div class="url-display">
+          https://ielts-lms-production.up.railway.app
+        </div>
+        <p class="slide-text" style="text-align:center; margin-top:0.4em;">
+          Copy it and <strong>share it with anyone!</strong> They can open it on any phone, tablet, or computer from anywhere in the world 📱💻🌍
+        </p>
+      </div>
+    </div>
+    <div class="slide-counter">10 / 11</div>
+  </section>
+
+  <!-- =============================================
+       SLIDE 11 — DONE!
+       ============================================= -->
+  <section class="slide slide-done" id="slide-11">
+    <div class="slide-content" style="align-items:center; justify-content:center;">
+      <div class="card" style="max-width:min(92vw, 680px);">
+        <div style="text-align:center; font-size:clamp(2rem, 6vw, 4.5rem); line-height:1; animation: float 3s ease-in-out infinite;">🎊</div>
+        <h2 class="slide-heading" style="text-align:center;">You Did It!</h2>
+        <p class="slide-text" style="text-align:center; color:#666;">Your IELTS app is now live on the internet!</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon">✅</span><span>Installed Git</span></div>
+          <div class="check-item"><span class="check-icon">✅</span><span>Created GitHub &amp; Railway accounts</span></div>
+          <div class="check-item"><span class="check-icon">✅</span><span>Saved your code with git</span></div>
+          <div class="check-item"><span class="check-icon">✅</span><span>Uploaded to GitHub</span></div>
+          <div class="check-item"><span class="check-icon">✅</span><span>Deployed on Railway + added secret keys</span></div>
+          <div class="check-item"><span class="check-icon">✅</span><span>Got your live URL!</span></div>
+        </div>
+        <div class="info-box">
+          🔄 <strong>Want to update your app later?</strong> Edit your code, then run in Terminal:<br>
+          <code style="font-family:'JetBrains Mono'; font-size:0.9em;">git add .  →  git commit -m "update"  →  git push</code><br>
+          Railway will redeploy automatically! ✨
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">11 / 11</div>
+  </section>
+
+  <!-- =============================================
+       NAVIGATION
+       ============================================= -->
+  <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+  <div class="keyboard-hint">↑ ↓ arrow keys</div>
+
+  <script>
+    /* === SLIDE NAVIGATION === */
+
+    const slides    = document.querySelectorAll('.slide');
+    const navDots   = document.getElementById('navDots');
+    let currentSlide = 0;
+
+    // Build nav dots
+    slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+      btn.addEventListener('click', () => goToSlide(i));
+      navDots.appendChild(btn);
+    });
+
+    function goToSlide(n) {
+      if (n < 0 || n >= slides.length) return;
+      slides[n].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateDots(n) {
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.classList.toggle('active', i === n);
+      });
+      currentSlide = n;
+    }
+
+    // IntersectionObserver — update active dot + trigger card animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const idx = Array.from(slides).indexOf(entry.target);
+          updateDots(idx);
+          // Animate card in
+          const card = entry.target.querySelector('.card');
+          if (card) {
+            // Small delay so user sees the animation on scroll-snap land
+            setTimeout(() => card.classList.add('visible'), 80);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    slides.forEach(s => observer.observe(s));
+
+    // Trigger first card immediately on load
+    window.addEventListener('load', () => {
+      const firstCard = slides[0] && slides[0].querySelector('.card');
+      if (firstCard) setTimeout(() => firstCard.classList.add('visible'), 150);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (['ArrowDown', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+        goToSlide(Math.min(currentSlide + 1, slides.length - 1));
+      } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        e.preventDefault();
+        goToSlide(Math.max(currentSlide - 1, 0));
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(slides.length - 1);
+      }
+    });
+
+    // Touch swipe support
+    let touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const delta = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(delta) > 40) {
+        goToSlide(delta > 0
+          ? Math.min(currentSlide + 1, slides.length - 1)
+          : Math.max(currentSlide - 1, 0));
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>

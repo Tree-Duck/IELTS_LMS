@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IELTS Writing LMS</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="screen">
+    <div class="auth-box">
+      <div class="logo">
+        <div class="logo-icon">✍</div>
+        <h1>IELTS Writing LMS</h1>
+        <p>AI-Powered Writing Assessment</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <div id="login-error" class="error-msg hidden"></div>
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min 6 characters" required />
+        </div>
+        <div id="register-error" class="error-msg hidden"></div>
+        <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-screen" class="screen hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon-sm">✍</span>
+        <span>IELTS LMS</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
+          <span class="nav-icon">⬛</span> Dashboard
+        </button>
+        <button class="nav-item" onclick="showView('submit')" id="nav-submit">
+          <span class="nav-icon">✏️</span> Submit Essay
+        </button>
+        <button class="nav-item" onclick="showView('history')" id="nav-history">
+          <span class="nav-icon">📋</span> My Submissions
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">S</div>
+          <div>
+            <div class="user-name" id="user-name">Student</div>
+            <div class="user-role">Student</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard View -->
+      <div id="view-dashboard" class="view">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p>Welcome back, <span id="welcome-name">Student</span>!</p>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">–</div>
+            <div class="stat-label">Total Submissions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg">–</div>
+            <div class="stat-label">Average Band Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-best">–</div>
+            <div class="stat-label">Best Band Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-graded">–</div>
+            <div class="stat-label">Graded Essays</div>
+          </div>
+        </div>
+
+        <div class="recent-section">
+          <div class="section-header">
+            <h3>Recent Submissions</h3>
+            <button class="btn btn-secondary btn-sm" onclick="showView('submit')">+ New Essay</button>
+          </div>
+          <div id="recent-list">
+            <div class="empty-state">No submissions yet. <a href="#" onclick="showView('submit')">Submit your first essay!</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit View -->
+      <div id="view-submit" class="view hidden">
+        <div class="page-header">
+          <h2>Submit Essay</h2>
+          <p>Write your IELTS essay and receive instant AI feedback</p>
+        </div>
+
+        <div class="submit-layout">
+          <!-- LEFT: Form -->
+          <div class="submit-left">
+            <form class="submit-form" onsubmit="handleSubmit(event)">
+              <div class="form-group">
+                <label>Task Type</label>
+                <div class="task-selector">
+                  <label class="task-option">
+                    <input type="radio" name="task_type" value="task1" onchange="updateTaskInfo()" />
+                    <div class="task-option-card">
+                      <div class="task-option-title">Task 1</div>
+                      <div class="task-option-desc">Describe a graph, chart, table, or diagram</div>
+                      <div class="task-option-meta">Min. 150 words</div>
+                    </div>
+                  </label>
+                  <label class="task-option">
+                    <input type="radio" name="task_type" value="task2" checked onchange="updateTaskInfo()" />
+                    <div class="task-option-card active">
+                      <div class="task-option-title">Task 2</div>
+                      <div class="task-option-desc">Academic essay — argument, opinion, or problem</div>
+                      <div class="task-option-meta">Min. 250 words</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Topic / Chart Type</label>
+                <div class="topic-chips" id="topic-chips">
+                  <!-- Chips injected by JS -->
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="essay-prompt">
+                  Essay Prompt / Question
+                  <button type="button" class="generate-btn" id="generate-btn" onclick="generateTask()">
+                    <span id="generate-btn-icon">✨</span> <span id="generate-btn-label">Generate Task</span>
+                  </button>
+                </label>
+                <textarea id="essay-prompt" rows="4"
+                  placeholder="Paste your own IELTS question here, or click ✨ Generate Task to create one automatically..."
+                  oninput="onPromptInput()" required></textarea>
+              </div>
+
+              <!-- Chart preview (Task 1 only) -->
+              <div id="chart-container" class="chart-container hidden">
+                <div class="chart-header">
+                  <span id="chart-title-label">📊 Chart Preview</span>
+                  <span id="chart-status" class="chart-status"></span>
+                </div>
+                <div id="chart-area">
+                  <canvas id="task1-chart"></canvas>
+                </div>
+                <div id="table-area" class="hidden"></div>
+              </div>
+
+              <!-- Paste-hint nudge -->
+              <div id="paste-hint-nudge" class="paste-hint-nudge hidden">
+                💡 <strong>Your question detected!</strong> Click <em>Generate Hints</em> in the right panel for AI ideas &amp; vocabulary tailored to your topic.
+              </div>
+
+              <div class="form-group">
+                <label for="essay-text">
+                  Your Essay
+                  <span class="word-count-badge" id="word-count-badge">0 words</span>
+                </label>
+                <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount()"></textarea>
+                <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
+              </div>
+
+              <div id="submit-error" class="error-msg hidden"></div>
+              <div id="submit-success" class="success-msg hidden"></div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                  Submit for AI Grading
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- RIGHT: Budget + AI Hints panel -->
+          <div class="submit-right">
+            <div class="budget-bar" id="budget-bar">
+              <span id="budget-remaining">Loading budget...</span>
+              <span id="budget-essays"></span>
+            </div>
+
+            <div class="hints-section">
+              <div class="hints-section-header">
+                <span class="hints-section-title">✨ AI Writing Assistance</span>
+                <button type="button" class="btn-refresh-hints" id="refresh-hints-btn" onclick="requestBothHints()">
+                  Generate Hints
+                </button>
+              </div>
+              <div class="hints-grid-vertical">
+                <div class="hint-card" id="ideas-card">
+                  <div class="hint-card-header">💡 Ideas &amp; Arguments</div>
+                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Click "Generate Hints" to get ideas for your essay.</span></div>
+                </div>
+                <div class="hint-card" id="vocab-card">
+                  <div class="hint-card-header">📚 Vocabulary &amp; Collocations</div>
+                  <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate Hints" to get vocabulary suggestions.</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History View -->
+      <div id="view-history" class="view hidden">
+        <div class="page-header">
+          <h2>My Submissions</h2>
+          <p>Review all your essay submissions and AI feedback</p>
+        </div>
+        <div id="history-list">
+          <div class="loading">Loading submissions...</div>
+        </div>
+      </div>
+
+      <!-- Feedback View -->
+      <div id="view-feedback" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back" onclick="showView('history')">← Back</button>
+          <h2>Essay Feedback</h2>
+        </div>
+        <div id="feedback-content"></div>
+      </div>
+
+      <!-- Rewrite View -->
+      <div id="view-rewrite" class="view hidden">
+        <div class="page-header rewrite-page-header">
+          <div class="rewrite-header-left">
+            <button class="btn-back" onclick="showView('feedback')">← Back to Feedback</button>
+            <h2>AI Rewrite — Band 8+</h2>
+          </div>
+          <p>AI rewrites your essay targeting Band 8.0–8.5 with explanations of what changed</p>
+        </div>
+        <div id="rewrite-content"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
