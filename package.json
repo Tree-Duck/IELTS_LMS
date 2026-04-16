@@ -1,7 +1,7 @@
 {
   "name": "ielts-lms",
   "version": "1.0.0",
-  "description": "IELTS Writing LMS with AI Grading",
+  "description": "SSP's IELTS Writing LMS with AI Grading",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

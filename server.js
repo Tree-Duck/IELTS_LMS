@@ -56,12 +56,12 @@ function generateCode() {
 
 async function sendVerificationEmail(email, name, code) {
   const { error } = await getResend().emails.send({
-    from: 'IELTS Writing LMS <noreply@tintinlab.com>',
+    from: 'SSP's IELTS Writing LMS <noreply@tintinlab.com>',
     to: email,
     subject: 'Your IELTS LMS verification code',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
-        <h2 style="color:#4f46e5;margin-bottom:8px">IELTS Writing LMS</h2>
+        <h2 style="color:#4f46e5;margin-bottom:8px">SSP's IELTS Writing LMS</h2>
         <p style="color:#374151">Hi <strong>${name}</strong>, thanks for registering!</p>
         <p style="color:#374151">Your email verification code is:</p>
         <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
@@ -74,12 +74,12 @@ async function sendVerificationEmail(email, name, code) {
 
 async function sendPasswordResetEmail(email, name, code) {
   const { error } = await getResend().emails.send({
-    from: 'IELTS Writing LMS <noreply@tintinlab.com>',
+    from: 'SSP's IELTS Writing LMS <noreply@tintinlab.com>',
     to: email,
     subject: 'Reset your IELTS LMS password',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
-        <h2 style="color:#4f46e5;margin-bottom:8px">IELTS Writing LMS</h2>
+        <h2 style="color:#4f46e5;margin-bottom:8px">SSP's IELTS Writing LMS</h2>
         <p style="color:#374151">Hi <strong>${name}</strong>,</p>
         <p style="color:#374151">We received a request to reset your password. Your reset code is:</p>
         <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
@@ -676,7 +676,7 @@ app.get('/api/test-email', async (req, res) => {
   if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
   try {
     const { error } = await getResend().emails.send({
-      from: 'IELTS Writing LMS <noreply@tintinlab.com>',
+      from: 'SSP's IELTS Writing LMS <noreply@tintinlab.com>',
       to,
       subject: 'IELTS LMS — email test ✅',
       html: '<p>Email is working correctly!</p>'
@@ -694,7 +694,7 @@ app.post('/api/admin/test-email', authenticate, adminOnly, async (req, res) => {
   const to = req.body.to || req.user.email;
   try {
     const { error: testErr } = await getResend().emails.send({
-      from: 'IELTS Writing LMS <noreply@tintinlab.com>',
+      from: 'SSP's IELTS Writing LMS <noreply@tintinlab.com>',
       to,
       subject: 'IELTS LMS — email test',
       html: '<p>Email is working correctly! ✅</p>'
