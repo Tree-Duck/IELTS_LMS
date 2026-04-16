@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSP's IELTS Writing LMS</title>
+  <title>SSP IELTS</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -13,7 +13,7 @@
     <div class="auth-box">
       <div class="logo">
         <div class="logo-icon">✍</div>
-        <h1>SSP's IELTS Writing LMS</h1>
+        <h1>SSP IELTS</h1>
         <p>AI-Powered Writing Assessment</p>
       </div>
 
@@ -129,7 +129,7 @@
     <aside class="sidebar">
       <div class="sidebar-logo">
         <span class="logo-icon-sm">✍</span>
-        <span>IELTS LMS</span>
+        <span>SSP IELTS</span>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
@@ -141,8 +141,20 @@
         <button class="nav-item" onclick="showView('history')" id="nav-history">
           <span class="nav-icon">📋</span> My Submissions
         </button>
+        <button class="nav-item" onclick="showView('test-list')" id="nav-test-list">
+          <span class="nav-icon">📝</span> Mock Tests
+        </button>
+        <button class="nav-item" onclick="showView('test-history')" id="nav-test-history">
+          <span class="nav-icon">🏆</span> Test Results
+        </button>
         <button class="nav-item hidden" onclick="showView('admin')" id="nav-admin">
           <span class="nav-icon">👥</span> Users
+        </button>
+        <button class="nav-item hidden" onclick="showView('admin-materials')" id="nav-admin-materials">
+          <span class="nav-icon">📚</span> Materials
+        </button>
+        <button class="nav-item" onclick="showView('topic-rater')" id="nav-topic-rater">
+          <span class="nav-icon">⭐</span> Rate Topic
         </button>
         <button class="nav-item" onclick="showView('change-password')" id="nav-change-password">
           <span class="nav-icon">🔑</span> Change Password
@@ -176,16 +188,53 @@
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-avg">–</div>
-            <div class="stat-label">Average Band Score</div>
+            <div class="stat-label">Writing Avg Band</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-best">–</div>
-            <div class="stat-label">Best Band Score</div>
+            <div class="stat-label">Writing Best Band</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-graded">–</div>
             <div class="stat-label">Graded Essays</div>
           </div>
+          <div class="stat-card stat-streak-card">
+            <div class="stat-value stat-streak-value" id="stat-streak">0</div>
+            <div class="stat-label">🔥 Day Streak</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-reading-avg">–</div>
+            <div class="stat-label">Reading Avg Band</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-listening-avg">–</div>
+            <div class="stat-label">Listening Avg Band</div>
+          </div>
+        </div>
+
+        <!-- Target Band Tracker -->
+        <div class="target-band-section" id="target-band-section">
+          <div class="section-header">
+            <h3>🎯 Target Band</h3>
+            <div class="target-band-controls">
+              <select id="target-band-select">
+                <option value="">Set your goal…</option>
+                <option value="4">4.0</option>
+                <option value="4.5">4.5</option>
+                <option value="5">5.0</option>
+                <option value="5.5">5.5</option>
+                <option value="6">6.0</option>
+                <option value="6.5">6.5</option>
+                <option value="7">7.0</option>
+                <option value="7.5">7.5</option>
+                <option value="8">8.0</option>
+                <option value="8.5">8.5</option>
+                <option value="9">9.0</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="handleSetTargetBand()">Save</button>
+            </div>
+          </div>
+          <div id="target-band-bars"></div>
         </div>
 
         <div class="recent-section">
@@ -195,6 +244,16 @@
           </div>
           <div id="recent-list">
             <div class="empty-state">No submissions yet. <a href="#" onclick="showView('submit')">Submit your first essay!</a></div>
+          </div>
+        </div>
+
+        <!-- Progress Chart -->
+        <div class="chart-section hidden" id="chart-section">
+          <div class="section-header">
+            <h3>📈 Progress Over Time</h3>
+          </div>
+          <div class="chart-container-dash">
+            <canvas id="progress-chart"></canvas>
           </div>
         </div>
       </div>
@@ -369,6 +428,110 @@
           <div id="cp-success" class="success-msg hidden"></div>
           <div class="form-actions">
             <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Update Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topic Rater View -->
+      <div id="view-topic-rater" class="view hidden">
+        <div class="page-header">
+          <h2>Task 1 Topic Rater</h2>
+          <p>Paste a Task 1 prompt to get an AI quality assessment</p>
+        </div>
+        <div class="rater-card">
+          <div class="form-group">
+            <label for="rater-prompt">Task 1 Prompt</label>
+            <textarea id="rater-prompt" rows="6" placeholder="The chart below shows the percentage of households in different income brackets in 2020..."></textarea>
+          </div>
+          <button type="button" class="btn btn-primary" id="rater-btn" onclick="rateTopic()">⭐ Rate This Topic</button>
+          <div id="rater-error" class="error-msg hidden"></div>
+          <div id="rater-result" class="hidden"></div>
+        </div>
+      </div>
+
+      <!-- Mock Tests List View -->
+      <div id="view-test-list" class="view hidden">
+        <div class="page-header">
+          <h2>📝 Mock Tests</h2>
+          <p>Practice IELTS Reading and Listening under timed conditions</p>
+        </div>
+        <div class="test-type-tabs">
+          <button class="test-tab-btn active" onclick="switchTestTab('reading')" id="test-tab-reading">Reading</button>
+          <button class="test-tab-btn" onclick="switchTestTab('listening')" id="test-tab-listening">Listening</button>
+        </div>
+        <div id="test-list-content"><div class="loading">Loading tests…</div></div>
+      </div>
+
+      <!-- Test Taking View (full viewport, sidebar hidden via class) -->
+      <div id="view-test-taking" class="view hidden">
+        <div class="test-header">
+          <div class="test-header-left">
+            <span id="test-taking-title" class="test-title-text">Test</span>
+            <div class="section-tabs" id="test-section-tabs"></div>
+          </div>
+          <div class="test-header-right">
+            <div class="test-timer" id="test-timer">60:00</div>
+            <button class="btn btn-primary btn-sm" onclick="submitTest()">Submit Test</button>
+          </div>
+        </div>
+        <div class="test-body">
+          <div class="test-left" id="test-left-panel">
+            <!-- passage or audio player rendered here -->
+          </div>
+          <div class="test-right" id="test-right-panel">
+            <div class="q-nav-section">
+              <div class="q-nav-label">Questions</div>
+              <div class="q-nav-grid" id="q-nav-grid"></div>
+            </div>
+            <div id="test-questions-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Result View -->
+      <div id="view-test-result" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back" onclick="showView('test-history')">← Back to Results</button>
+          <h2 id="test-result-title">Test Result</h2>
+        </div>
+        <div id="test-result-content"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Test History View -->
+      <div id="view-test-history" class="view hidden">
+        <div class="page-header">
+          <h2>🏆 Test Results</h2>
+          <p>Your past Reading and Listening attempts</p>
+        </div>
+        <div id="test-history-content"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Admin Materials View -->
+      <div id="view-admin-materials" class="view hidden">
+        <div class="page-header">
+          <h2>📚 Materials</h2>
+          <p>Create and manage Reading and Listening tests</p>
+        </div>
+        <div class="test-type-tabs">
+          <button class="test-tab-btn active" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
+        </div>
+        <div id="materials-list-content"></div>
+        <div class="materials-create-section">
+          <button class="btn btn-primary" onclick="toggleCreateTestForm()">+ Create New Test</button>
+          <div id="create-test-form" class="hidden">
+            <div class="materials-form-card">
+              <div class="form-group">
+                <label>Test Title</label>
+                <input type="text" id="new-test-title" placeholder="e.g. Academic Reading Test 1" />
+              </div>
+              <div id="sections-container"></div>
+              <div class="form-row-end">
+                <button class="btn btn-secondary" onclick="toggleCreateTestForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitCreateTest()">💾 Save Test</button>
+              </div>
+              <div id="create-test-error" class="error-msg hidden"></div>
+            </div>
           </div>
         </div>
       </div>

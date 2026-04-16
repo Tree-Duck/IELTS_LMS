@@ -297,10 +297,16 @@ function showApp() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
   document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
-  // Show admin nav only for admins
+  // Show admin-only nav items
   const adminNav = document.getElementById('nav-admin');
-  if (currentUser.role === 'admin') adminNav.classList.remove('hidden');
-  else adminNav.classList.add('hidden');
+  const materialsNav = document.getElementById('nav-admin-materials');
+  if (currentUser.role === 'admin') {
+    adminNav.classList.remove('hidden');
+    materialsNav.classList.remove('hidden');
+  } else {
+    adminNav.classList.add('hidden');
+    materialsNav.classList.add('hidden');
+  }
   showView('dashboard');
 }
 
@@ -311,12 +317,27 @@ function showView(name) {
   const navEl = document.getElementById(`nav-${name}`);
   if (navEl) navEl.classList.add('active');
 
+  // Test-taking view hides sidebar
+  if (name === 'test-taking') {
+    document.getElementById('app-screen').classList.add('test-mode');
+  } else {
+    document.getElementById('app-screen').classList.remove('test-mode');
+  }
+
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
   else if (name === 'submit') { if (currentUser && currentUser.role === 'admin') loadBudget(); updateTopicOptions(); }
   else if (name === 'admin') loadAdminUsers();
+  else if (name === 'admin-materials') loadAdminMaterials();
+  else if (name === 'test-list') loadTestList();
+  else if (name === 'test-history') loadTestHistory();
+  else if (name === 'topic-rater') {
+    const resultEl = document.getElementById('rater-result');
+    if (resultEl) resultEl.classList.add('hidden');
+    const errEl = document.getElementById('rater-error');
+    if (errEl) errEl.classList.add('hidden');
+  }
   else if (name === 'change-password') {
-    // clear form on open
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
     document.getElementById('cp-success').classList.add('hidden');
@@ -346,6 +367,7 @@ async function loadAdminUsers() {
               <th>Joined</th>
               <th>Essays</th>
               <th>Avg Band</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -361,6 +383,10 @@ async function loadAdminUsers() {
                 <td>${formatDate(u.created_at)}</td>
                 <td>${u.submission_count}</td>
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
+                <td>${u.id === currentUser.id || u.role === 'admin'
+                  ? '<span class="text-muted">—</span>'
+                  : `<button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>`
+                }</td>
               </tr>
             `).join('')}
           </tbody>
@@ -369,6 +395,16 @@ async function loadAdminUsers() {
     `;
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function confirmDeleteUser(userId, userName) {
+  if (!confirm(`Delete user "${userName}"?\n\nThis will permanently remove their account, all submissions, and all feedback. This cannot be undone.`)) return;
+  try {
+    await api(`/api/admin/users/${userId}`, { method: 'DELETE' });
+    loadAdminUsers(); // refresh table
+  } catch (err) {
+    alert('Failed to delete user: ' + err.message);
   }
 }
 
@@ -402,7 +438,12 @@ async function handleChangePassword() {
 /* ─── Dashboard ──────────────────────────────────────────────────────────── */
 async function loadDashboard() {
   try {
-    const submissions = await api('/api/submissions');
+    const [submissions, profile, testAttempts] = await Promise.all([
+      api('/api/submissions'),
+      api('/api/user/profile').catch(() => ({ current_streak: 0, target_band: null })),
+      api('/api/tests/attempts').catch(() => [])
+    ]);
+
     const graded = submissions.filter(s => s.status === 'graded' && s.overall_band != null);
     const bands = graded.map(s => s.overall_band);
     const avg = bands.length ? (bands.reduce((a, b) => a + b, 0) / bands.length).toFixed(1) : '–';
@@ -412,6 +453,37 @@ async function loadDashboard() {
     document.getElementById('stat-graded').textContent = graded.length;
     document.getElementById('stat-avg').textContent = avg;
     document.getElementById('stat-best').textContent = best;
+
+    // Streak
+    const streak = profile.current_streak || 0;
+    document.getElementById('stat-streak').textContent = streak;
+    const streakCard = document.querySelector('.stat-streak-card');
+    if (streakCard) streakCard.classList.toggle('streak-active', streak > 0);
+
+    // Reading / Listening avg bands from test attempts
+    const completedAttempts = (testAttempts || []).filter(a => a.status === 'completed' && a.score);
+    const readingBands = completedAttempts.filter(a => a.type === 'reading').map(a => a.score.band);
+    const listeningBands = completedAttempts.filter(a => a.type === 'listening').map(a => a.score.band);
+    const readingAvg = readingBands.length ? (readingBands.reduce((a,b)=>a+b,0)/readingBands.length).toFixed(1) : '–';
+    const listeningAvg = listeningBands.length ? (listeningBands.reduce((a,b)=>a+b,0)/listeningBands.length).toFixed(1) : '–';
+    const readingAvgEl = document.getElementById('stat-reading-avg');
+    const listeningAvgEl = document.getElementById('stat-listening-avg');
+    if (readingAvgEl) readingAvgEl.textContent = readingAvg;
+    if (listeningAvgEl) listeningAvgEl.textContent = listeningAvg;
+
+    // Target band tracker
+    renderTargetBandBars(profile.target_band, avg === '–' ? null : parseFloat(avg),
+      readingAvg === '–' ? null : parseFloat(readingAvg),
+      listeningAvg === '–' ? null : parseFloat(listeningAvg));
+
+    // Populate target band select
+    const sel = document.getElementById('target-band-select');
+    if (sel && profile.target_band) {
+      sel.value = String(profile.target_band);
+    }
+
+    // Progress chart
+    renderProgressChart(graded, completedAttempts);
 
     const recentEl = document.getElementById('recent-list');
     const recent = submissions.slice(0, 5);
@@ -435,6 +507,148 @@ async function loadDashboard() {
   } catch (err) {
     console.error('Dashboard load error', err);
   }
+}
+
+function renderTargetBandBars(targetBand, writingAvg, readingAvg, listeningAvg) {
+  const section = document.getElementById('target-band-section');
+  const barsEl = document.getElementById('target-band-bars');
+  if (!section || !barsEl) return;
+
+  if (!targetBand) {
+    barsEl.innerHTML = '<div class="target-band-hint">Set a target band above to track your progress toward your goal.</div>';
+    return;
+  }
+
+  const skills = [
+    { label: 'Writing', avg: writingAvg },
+    { label: 'Reading', avg: readingAvg ?? null },
+    { label: 'Listening', avg: listeningAvg ?? null }
+  ];
+
+  barsEl.innerHTML = skills.map(({ label, avg }) => {
+    const pct = avg !== null ? Math.min(100, Math.round((avg / targetBand) * 100)) : 0;
+    const displayAvg = avg !== null ? avg.toFixed(1) : '–';
+    return `
+      <div class="target-bar-row">
+        <span class="target-bar-label">${label}</span>
+        <div class="target-bar-track">
+          <div class="target-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="target-bar-meta">${displayAvg} / ${targetBand}</span>
+      </div>`;
+  }).join('');
+}
+
+async function handleSetTargetBand() {
+  const sel = document.getElementById('target-band-select');
+  if (!sel || !sel.value) return;
+  try {
+    await api('/api/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ target_band: parseFloat(sel.value) })
+    });
+    loadDashboard();
+  } catch (err) {
+    alert('Failed to save target band: ' + err.message);
+  }
+}
+
+function renderProgressChart(graded, testAttempts) {
+  const section = document.getElementById('chart-section');
+  if (!section) return;
+
+  const completedTests = (testAttempts || []).filter(a => a.status === 'completed' && a.score);
+  const readingAttempts = completedTests.filter(a => a.type === 'reading');
+  const listeningAttempts = completedTests.filter(a => a.type === 'listening');
+
+  if (graded.length < 2 && readingAttempts.length < 2 && listeningAttempts.length < 2) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+
+  const sorted = [...graded].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+  // Build a merged label set of all dates
+  const allDates = [
+    ...sorted.map(s => s.created_at.slice(0, 10)),
+    ...readingAttempts.map(a => (a.submitted_at || a.started_at).slice(0, 10)),
+    ...listeningAttempts.map(a => (a.submitted_at || a.started_at).slice(0, 10))
+  ];
+  const uniqueDates = [...new Set(allDates)].sort();
+  const labels = uniqueDates.map(d => formatDate(d + 'T00:00:00.000Z'));
+
+  const getDataForDates = (items, dateKey, valueKey) =>
+    uniqueDates.map(d => {
+      const item = items.find(i => (i[dateKey] || '').slice(0, 10) === d);
+      return item ? (typeof valueKey === 'function' ? valueKey(item) : item[valueKey]) : null;
+    });
+
+  const datasets = [];
+  if (sorted.length >= 2) {
+    datasets.push({
+      label: 'Writing',
+      data: getDataForDates(sorted, 'created_at', 'overall_band'),
+      borderColor: '#4f46e5',
+      backgroundColor: 'rgba(79,70,229,0.08)',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#4f46e5',
+      pointRadius: 5,
+      tension: 0.3,
+      spanGaps: true
+    });
+  }
+  if (readingAttempts.length >= 2) {
+    datasets.push({
+      label: 'Reading',
+      data: getDataForDates(readingAttempts, 'submitted_at', a => a.score.band),
+      borderColor: '#059669',
+      backgroundColor: 'rgba(5,150,105,0.08)',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#059669',
+      pointRadius: 5,
+      tension: 0.3,
+      spanGaps: true
+    });
+  }
+  if (listeningAttempts.length >= 2) {
+    datasets.push({
+      label: 'Listening',
+      data: getDataForDates(listeningAttempts, 'submitted_at', a => a.score.band),
+      borderColor: '#d97706',
+      backgroundColor: 'rgba(217,119,6,0.08)',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#d97706',
+      pointRadius: 5,
+      tension: 0.3,
+      spanGaps: true
+    });
+  }
+
+  const ctx = document.getElementById('progress-chart').getContext('2d');
+  if (window.progressChart && typeof window.progressChart.destroy === 'function') {
+    window.progressChart.destroy();
+  }
+  window.progressChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top' },
+        tooltip: { callbacks: { label: ctx => `Band ${ctx.parsed.y}` } }
+      },
+      scales: {
+        y: {
+          min: 0, max: 9,
+          ticks: { stepSize: 1 },
+          title: { display: true, text: 'Band Score' }
+        },
+        x: { ticks: { maxRotation: 45 } }
+      }
+    }
+  });
 }
 
 /* ─── History ────────────────────────────────────────────────────────────── */
@@ -950,10 +1164,19 @@ async function viewFeedback(id) {
   }
 }
 
+function exportFeedbackPDF() {
+  window.print();
+}
+
 function renderFeedback(s) {
   const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
   const badgeClass = s.task_type === 'task1' ? 'badge-t1' : 'badge-t2';
   let html = '';
+
+  // PDF export button (only when graded)
+  if (s.status === 'graded' && s.overall_band != null) {
+    html += `<div class="pdf-export-bar"><button id="pdf-btn" class="btn btn-secondary btn-sm" onclick="exportFeedbackPDF()">⬇️ Download PDF</button></div>`;
+  }
 
   // Header card
   html += `
@@ -1289,4 +1512,728 @@ function renderRewriteMarkdown(text) {
   }
 
   return html;
+}
+
+/* ─── Topic Rater ─────────────────────────────────────────────────────────── */
+async function rateTopic() {
+  const promptVal = (document.getElementById('rater-prompt').value || '').trim();
+  const errEl = document.getElementById('rater-error');
+  const resultEl = document.getElementById('rater-result');
+  const btn = document.getElementById('rater-btn');
+
+  errEl.classList.add('hidden');
+  resultEl.classList.add('hidden');
+
+  if (!promptVal) {
+    errEl.textContent = 'Please paste a Task 1 prompt before rating.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Analysing…';
+
+  try {
+    const data = await api('/api/rate-topic', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: promptVal })
+    });
+
+    const scoreColor = (n) => n >= 8 ? '#059669' : n >= 6 ? '#d97706' : '#dc2626';
+    const scoreBar = (n) => {
+      const pct = Math.round((n / 10) * 100);
+      const col = scoreColor(n);
+      return `<div class="rater-bar-track"><div class="rater-bar-fill" style="width:${pct}%;background:${col}"></div></div>`;
+    };
+
+    const improvHtml = Array.isArray(data.improvements) && data.improvements.length
+      ? `<ul class="rater-improvements">${data.improvements.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>`
+      : '';
+
+    resultEl.innerHTML = `
+      <div class="rater-results">
+        <div class="rater-score-grid">
+          <div class="rater-score-card">
+            <div class="rater-score-label">Authenticity</div>
+            <div class="rater-score-value" style="color:${scoreColor(data.authenticity.score)}">${data.authenticity.score}/10</div>
+            ${scoreBar(data.authenticity.score)}
+            <div class="rater-score-comment">${escHtml(data.authenticity.comment)}</div>
+          </div>
+          <div class="rater-score-card">
+            <div class="rater-score-label">Quality</div>
+            <div class="rater-score-value" style="color:${scoreColor(data.quality.score)}">${data.quality.score}/10</div>
+            ${scoreBar(data.quality.score)}
+            <div class="rater-score-comment">${escHtml(data.quality.comment)}</div>
+          </div>
+          <div class="rater-score-card">
+            <div class="rater-score-label">Target Difficulty</div>
+            <div class="rater-score-value">${escHtml(data.difficulty.band)}</div>
+            <div class="rater-score-comment">${escHtml(data.difficulty.comment)}</div>
+          </div>
+          <div class="rater-score-card">
+            <div class="rater-score-label">Visual Type</div>
+            <div class="rater-score-value rater-visual-type">${escHtml(data.visual_type)}</div>
+          </div>
+        </div>
+        ${data.overall ? `<div class="rater-overall"><strong>Overall:</strong> ${escHtml(data.overall)}</div>` : ''}
+        ${improvHtml ? `<div class="rater-improvements-section"><h4>💡 Suggested Improvements</h4>${improvHtml}</div>` : ''}
+      </div>`;
+    resultEl.classList.remove('hidden');
+  } catch (err) {
+    errEl.textContent = 'Rating failed: ' + err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⭐ Rate This Topic';
+  }
+}
+
+/* ─── Mock Tests — List View ─────────────────────────────────────────────── */
+let currentTestTab = 'reading';
+
+function switchTestTab(type) {
+  currentTestTab = type;
+  document.getElementById('test-tab-reading').classList.toggle('active', type === 'reading');
+  document.getElementById('test-tab-listening').classList.toggle('active', type === 'listening');
+  renderTestList();
+}
+
+let _testListCache = null;
+
+async function loadTestList() {
+  const el = document.getElementById('test-list-content');
+  el.innerHTML = '<div class="loading">Loading tests…</div>';
+  try {
+    _testListCache = await api('/api/tests');
+    renderTestList();
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function renderTestList() {
+  const el = document.getElementById('test-list-content');
+  if (!_testListCache) return;
+  const filtered = _testListCache.filter(t => t.type === currentTestTab);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state">No ${currentTestTab} tests available yet.</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(t => {
+    const timeMins = t.type === 'reading' ? 60 : 30;
+    let actionBtn = '';
+    if (t.user_status === 'in_progress') {
+      actionBtn = `<button class="btn btn-warning btn-sm" onclick="startTest(${t.id})">▶ Resume</button>`;
+    } else if (t.user_status === 'completed') {
+      actionBtn = `
+        <button class="btn btn-secondary btn-sm" onclick="viewTestResult(${t.latest_attempt_id})">📊 View Result</button>
+        <button class="btn btn-primary btn-sm" onclick="startTest(${t.id})">Retry</button>`;
+    } else {
+      actionBtn = `<button class="btn btn-primary btn-sm" onclick="startTest(${t.id})">▶ Start Test</button>`;
+    }
+    const bandBadge = t.latest_band != null
+      ? `<span class="band-badge" style="background:${bandColor(t.latest_band)};color:#fff">Band ${t.latest_band}</span>`
+      : '';
+    return `
+      <div class="test-card">
+        <div class="test-card-info">
+          <div class="test-card-title">${escHtml(t.title)}</div>
+          <div class="test-card-meta">${t.section_count} sections · ${t.question_count} questions · ${timeMins} min ${bandBadge}</div>
+        </div>
+        <div class="test-card-actions">${actionBtn}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ─── Mock Tests — Taking ────────────────────────────────────────────────── */
+let currentTestData = null;
+let currentAttemptId = null;
+let currentAnswers = {};
+let currentTestType = null;
+let testTimerInterval = null;
+let testTimeRemaining = 0;
+let currentSectionIndex = 0;
+let autosaveInterval = null;
+
+async function startTest(testId) {
+  try {
+    const data = await api(`/api/tests/${testId}/start`, { method: 'POST' });
+    currentTestData = data.test;
+    currentAttemptId = data.attempt_id;
+    currentAnswers = data.answers || {};
+    currentTestType = data.test.type;
+    testTimeRemaining = data.time_remaining_secs;
+    currentSectionIndex = 0;
+    showView('test-taking');
+    renderTestTaking();
+    startTestTimer();
+    startAutosave(testId);
+  } catch (err) {
+    alert('Failed to start test: ' + err.message);
+  }
+}
+
+function renderTestTaking() {
+  const test = currentTestData;
+  document.getElementById('test-taking-title').textContent = escHtml(test.title);
+
+  // Section tabs
+  const tabsEl = document.getElementById('test-section-tabs');
+  tabsEl.innerHTML = (test.sections || []).map((s, i) =>
+    `<button class="section-tab-btn ${i === currentSectionIndex ? 'active' : ''}" onclick="switchTestSection(${i})">
+      ${test.type === 'reading' ? 'Passage' : 'Section'} ${s.section_number}
+    </button>`
+  ).join('');
+
+  renderTestSection();
+  renderQNav();
+}
+
+function switchTestSection(idx) {
+  currentSectionIndex = idx;
+  document.querySelectorAll('.section-tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderTestSection();
+  renderQNav();
+}
+
+function renderTestSection() {
+  const section = currentTestData.sections[currentSectionIndex];
+  const leftEl = document.getElementById('test-left-panel');
+  const rightEl = document.getElementById('test-right-panel');
+
+  // Left: passage or audio
+  if (currentTestType === 'reading') {
+    leftEl.innerHTML = `
+      <div class="passage-title">${escHtml(section.passage_title || `Passage ${section.section_number}`)}</div>
+      <div class="passage-text">${escHtml(section.passage_text || '').replace(/\n/g, '<br>')}</div>`;
+  } else {
+    const audioHtml = section.audio_url
+      ? `<div class="audio-player-container">
+           <p class="audio-label">🎧 Audio — Section ${section.section_number}</p>
+           <audio controls src="${escHtml(section.audio_url)}" class="audio-player"></audio>
+         </div>`
+      : `<div class="audio-missing">No audio URL provided for this section.</div>`;
+    const transcriptHtml = section.transcript
+      ? `<details class="transcript-details"><summary>Show Transcript</summary><div class="transcript-text">${escHtml(section.transcript).replace(/\n/g,'<br>')}</div></details>`
+      : '';
+    leftEl.innerHTML = audioHtml + transcriptHtml;
+  }
+
+  // Right: question navigator + questions
+  renderQNav();
+  renderQuestions(section);
+}
+
+function renderQNav() {
+  const navEl = document.getElementById('q-nav-grid');
+  const section = currentTestData.sections[currentSectionIndex];
+  const qNums = [];
+  for (const q of (section.questions || [])) {
+    if (q.q_type === 'matching' && q.sub_questions) {
+      for (const sq of q.sub_questions) qNums.push(`${q.q_number}_${sq.label}`);
+    } else {
+      qNums.push(String(q.q_number));
+    }
+  }
+  navEl.innerHTML = qNums.map(k =>
+    `<button class="q-nav-btn ${currentAnswers[k] ? 'answered' : ''}" onclick="scrollToQuestion('${k}')">${k}</button>`
+  ).join('');
+}
+
+function renderQuestions(section) {
+  const container = document.getElementById('test-questions-container');
+  container.innerHTML = (section.questions || []).map(q => renderQuestion(q)).join('');
+}
+
+function renderQuestion(q) {
+  let inputHtml = '';
+  if (q.q_type === 'mcq') {
+    inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
+      `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${k}" ${currentAnswers[q.q_number]===k?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
+    ).join('');
+  } else if (q.q_type === 'tfng') {
+    inputHtml = ['TRUE','FALSE','NOT GIVEN'].map(v =>
+      `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${v}" ${currentAnswers[q.q_number]===v?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> ${v}</label>`
+    ).join('');
+  } else if (q.q_type === 'fill') {
+    inputHtml = `<input type="text" class="q-fill-input" placeholder="Your answer" value="${escHtml(currentAnswers[q.q_number]||'')}" oninput="setAnswer('${q.q_number}',this.value)">`;
+  } else if (q.q_type === 'matching' && q.sub_questions) {
+    const opts = Object.entries(q.options || {}).map(([k,v]) => `<option value="${k}" ${''} >${k}. ${escHtml(v)}</option>`).join('');
+    inputHtml = (q.sub_questions || []).map(sq => {
+      const key = `${q.q_number}_${sq.label}`;
+      return `<div class="matching-row">
+        <span class="matching-label">${escHtml(sq.label)}</span>
+        <select onchange="setAnswer('${key}',this.value)">
+          <option value="">– Select –</option>${opts.replace(`value="${currentAnswers[key]||'__NONE__'}"`, `value="${currentAnswers[key]||''}" selected`)}
+        </select>
+      </div>`;
+    }).join('');
+  }
+  return `<div class="question-block" id="qblock_${q.q_number}">
+    <div class="q-stem"><span class="q-num">Q${q.q_number}.</span> ${escHtml(q.stem)}</div>
+    <div class="q-inputs">${inputHtml}</div>
+  </div>`;
+}
+
+function setAnswer(key, value) {
+  currentAnswers[key] = value;
+  // Update nav button
+  const navBtn = document.querySelector(`.q-nav-btn[onclick*="'${key}'"]`);
+  if (navBtn) navBtn.classList.toggle('answered', !!value);
+}
+
+function scrollToQuestion(key) {
+  const baseKey = key.includes('_') ? key.split('_')[0] : key;
+  const el = document.getElementById(`qblock_${baseKey}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function startTestTimer() {
+  clearInterval(testTimerInterval);
+  updateTimerDisplay();
+  testTimerInterval = setInterval(() => {
+    testTimeRemaining--;
+    updateTimerDisplay();
+    if (testTimeRemaining <= 0) {
+      clearInterval(testTimerInterval);
+      alert('⏰ Time is up! Your test will be submitted automatically.');
+      submitTest();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('test-timer');
+  if (!el) return;
+  const mins = Math.floor(testTimeRemaining / 60);
+  const secs = testTimeRemaining % 60;
+  el.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  el.classList.toggle('timer-warning', testTimeRemaining <= 300);
+}
+
+function startAutosave(testId) {
+  clearInterval(autosaveInterval);
+  autosaveInterval = setInterval(async () => {
+    if (!currentAttemptId) return;
+    try {
+      await api(`/api/tests/${testId}/attempts/${currentAttemptId}/autosave`, {
+        method: 'PUT',
+        body: JSON.stringify({ answers: currentAnswers, time_remaining_secs: testTimeRemaining })
+      });
+    } catch (e) { /* silent */ }
+  }, 30000);
+}
+
+async function submitTest() {
+  clearInterval(testTimerInterval);
+  clearInterval(autosaveInterval);
+  if (!currentAttemptId || !currentTestData) return;
+  try {
+    const result = await api(`/api/tests/${currentTestData.id}/attempts/${currentAttemptId}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ answers: currentAnswers, time_remaining_secs: testTimeRemaining })
+    });
+    // Navigate to result view
+    viewTestResult(result.attempt_id || currentAttemptId);
+  } catch (err) {
+    alert('Submit failed: ' + err.message);
+  }
+}
+
+/* ─── Mock Tests — Result View ───────────────────────────────────────────── */
+let resultPollingInterval = null;
+
+async function viewTestResult(attemptId) {
+  clearInterval(resultPollingInterval);
+  showView('test-result');
+  document.getElementById('test-result-content').innerHTML = '<div class="loading">Loading results…</div>';
+  await fetchAndRenderResult(attemptId);
+}
+
+async function fetchAndRenderResult(attemptId) {
+  try {
+    const attempt = await api(`/api/tests/attempts/${attemptId}`);
+    document.getElementById('test-result-title').textContent = attempt.test ? escHtml(attempt.test.title) : 'Test Result';
+    renderTestResult(attempt);
+
+    // Poll for AI explanations if not yet available
+    if (attempt.status === 'completed' && attempt.score && !attempt.ai_explanations &&
+        attempt.score.wrong_q_numbers && attempt.score.wrong_q_numbers.length > 0) {
+      clearInterval(resultPollingInterval);
+      resultPollingInterval = setInterval(async () => {
+        const updated = await api(`/api/tests/attempts/${attemptId}`).catch(() => null);
+        if (updated && updated.ai_explanations) {
+          clearInterval(resultPollingInterval);
+          renderTestResult(updated);
+        }
+      }, 4000);
+    }
+  } catch (err) {
+    document.getElementById('test-result-content').innerHTML =
+      `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function renderTestResult(attempt) {
+  const el = document.getElementById('test-result-content');
+  if (!attempt.score) {
+    el.innerHTML = '<div class="loading">Scoring…</div>';
+    return;
+  }
+  const { score } = attempt;
+  const bandHtml = `
+    <div class="result-score-card">
+      <div class="result-band" style="color:${bandColor(score.band)}">${score.band}</div>
+      <div class="result-band-label">Band Score</div>
+      <div class="result-raw">${score.raw} / ${score.total} correct</div>
+    </div>`;
+
+  const sectionHtml = (score.section_scores || []).map(s =>
+    `<div class="result-section-row">
+      <span>${attempt.type === 'reading' ? 'Passage' : 'Section'} ${s.section_number}</span>
+      <span>${s.correct} / ${s.total}</span>
+    </div>`
+  ).join('');
+
+  // Full question review
+  let reviewHtml = '';
+  if (attempt.test) {
+    for (const section of (attempt.test.sections || [])) {
+      for (const q of (section.questions || [])) {
+        if (q.q_type === 'matching' && q.sub_questions) {
+          for (const sq of q.sub_questions) {
+            const key = `${q.q_number}_${sq.label}`;
+            const given = attempt.answers[key] || '(blank)';
+            const correct = sq.correct_answer;
+            const isCorrect = given.trim().toUpperCase() === (correct || '').trim().toUpperCase();
+            const expl = attempt.ai_explanations && attempt.ai_explanations[key];
+            reviewHtml += questionReviewHtml(key, `${escHtml(q.stem)} — "${escHtml(sq.label)}"`, given, correct, isCorrect, expl);
+          }
+        } else {
+          const key = String(q.q_number);
+          const given = attempt.answers[key] || '(blank)';
+          const correct = q.correct_answer;
+          const alts = q.accept_alternatives || [];
+          const isCorrect = given.trim().toLowerCase() === (correct||'').trim().toLowerCase() ||
+            alts.map(a=>a.toLowerCase()).includes(given.trim().toLowerCase());
+          const expl = attempt.ai_explanations && attempt.ai_explanations[key];
+          reviewHtml += questionReviewHtml(key, escHtml(q.stem), given, correct, isCorrect, expl);
+        }
+      }
+    }
+  }
+
+  const explNote = !attempt.ai_explanations && score.wrong_q_numbers && score.wrong_q_numbers.length
+    ? `<div class="expl-loading-note">⏳ AI explanations are being generated… check back in a few seconds.</div>`
+    : '';
+
+  el.innerHTML = `
+    ${bandHtml}
+    <div class="result-sections">
+      <h3>Section Breakdown</h3>
+      ${sectionHtml}
+    </div>
+    ${reviewHtml ? `<div class="result-review"><h3>Question Review</h3>${explNote}${reviewHtml}</div>` : ''}`;
+}
+
+function questionReviewHtml(key, stemHtml, given, correct, isCorrect, explanation) {
+  const cls = isCorrect ? 'correct' : 'wrong';
+  const icon = isCorrect ? '✅' : '❌';
+  const corrPart = !isCorrect ? `<span class="correct-answer">Correct: <strong>${escHtml(correct || '')}</strong></span>` : '';
+  const explPart = explanation ? `<div class="ai-explanation-box">💡 ${escHtml(explanation)}</div>` : '';
+  return `<div class="question-result ${cls}">
+    <div class="q-result-header">${icon} <strong>Q${key}</strong>: ${stemHtml}</div>
+    <div class="q-result-answer">Your answer: <em>${escHtml(given)}</em> ${corrPart}</div>
+    ${explPart}
+  </div>`;
+}
+
+/* ─── Mock Tests — History ───────────────────────────────────────────────── */
+async function loadTestHistory() {
+  const el = document.getElementById('test-history-content');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const attempts = await api('/api/tests/attempts');
+    if (!attempts.length) {
+      el.innerHTML = '<div class="empty-state">No test attempts yet. <a href="#" onclick="showView(\'test-list\')">Take a mock test!</a></div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Test</th><th>Type</th><th>Date</th><th>Raw Score</th><th>Band</th><th></th></tr></thead>
+          <tbody>
+            ${attempts.map(a => `
+              <tr>
+                <td>${escHtml(a.test_title)}</td>
+                <td><span class="badge ${a.type==='reading'?'badge-blue':'badge-orange'}">${a.type}</span></td>
+                <td>${a.submitted_at ? formatDate(a.submitted_at) : formatDate(a.started_at)}</td>
+                <td>${a.score ? `${a.score.raw}/${a.score.total}` : '–'}</td>
+                <td>${a.score ? `<span style="color:${bandColor(a.score.band)};font-weight:700">${a.score.band}</span>` : '–'}</td>
+                <td>${a.status==='completed' ? `<button class="btn btn-secondary btn-xs" onclick="viewTestResult(${a.id})">View</button>` : '<span class="badge badge-gray">In Progress</span>'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+/* ─── Admin Materials ────────────────────────────────────────────────────── */
+let currentMaterialsTab = 'reading';
+let _materialsCache = null;
+
+function switchMaterialsTab(type) {
+  currentMaterialsTab = type;
+  document.getElementById('materials-tab-reading').classList.toggle('active', type === 'reading');
+  document.getElementById('materials-tab-listening').classList.toggle('active', type === 'listening');
+  renderMaterialsList();
+  // Reset create form
+  document.getElementById('create-test-form').classList.add('hidden');
+  buildSectionsForm();
+}
+
+async function loadAdminMaterials() {
+  const el = document.getElementById('materials-list-content');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    _materialsCache = await api('/api/admin/tests');
+    buildSectionsForm();
+    renderMaterialsList();
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function renderMaterialsList() {
+  const el = document.getElementById('materials-list-content');
+  if (!_materialsCache) return;
+  const filtered = (_materialsCache || []).filter(t => t.type === currentMaterialsTab);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state">No ${currentMaterialsTab} tests yet.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="materials-list">` + filtered.map(t => `
+    <div class="materials-item">
+      <div class="materials-item-info">
+        <strong>${escHtml(t.title)}</strong>
+        <span class="materials-meta">${t.section_count} sections · ${t.question_count} questions</span>
+      </div>
+      <button class="btn btn-danger btn-xs" onclick="deleteMaterialsTest(${t.id}, '${t.title.replace(/'/g,"\\'")}')">Delete</button>
+    </div>`).join('') + `</div>`;
+}
+
+async function deleteMaterialsTest(id, title) {
+  if (!confirm(`Delete test "${title}" and all its student attempts?`)) return;
+  try {
+    await api(`/api/admin/tests/${id}`, { method: 'DELETE' });
+    _materialsCache = (_materialsCache || []).filter(t => t.id !== id);
+    renderMaterialsList();
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+  }
+}
+
+function toggleCreateTestForm() {
+  const form = document.getElementById('create-test-form');
+  form.classList.toggle('hidden');
+  if (!form.classList.contains('hidden')) buildSectionsForm();
+}
+
+function buildSectionsForm() {
+  const count = currentMaterialsTab === 'reading' ? 3 : 4;
+  const container = document.getElementById('sections-container');
+  if (!container) return;
+  container.innerHTML = Array.from({ length: count }, (_, i) => buildSectionHtml(i + 1)).join('');
+}
+
+function buildSectionHtml(num) {
+  const isReading = currentMaterialsTab === 'reading';
+  const passageOrAudio = isReading
+    ? `<div class="form-group">
+         <label>Passage Title</label>
+         <input type="text" id="sec${num}_title" placeholder="Passage title" />
+       </div>
+       <div class="form-group">
+         <label>Passage Text</label>
+         <textarea id="sec${num}_passage" rows="6" placeholder="Paste the full passage text here…"></textarea>
+       </div>`
+    : `<div class="form-group">
+         <label>Audio URL</label>
+         <input type="url" id="sec${num}_audio" placeholder="https://..." />
+       </div>
+       <div class="form-group">
+         <label>Transcript (optional)</label>
+         <textarea id="sec${num}_transcript" rows="4" placeholder="Paste transcript…"></textarea>
+       </div>`;
+
+  return `<div class="section-form-block">
+    <div class="section-form-header">
+      <h4>${isReading ? 'Passage' : 'Section'} ${num}</h4>
+    </div>
+    ${passageOrAudio}
+    <div id="questions_sec${num}" class="questions-list"></div>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="addQuestion(${num})">+ Add Question</button>
+  </div>`;
+}
+
+let questionCounters = {};
+
+function addQuestion(sectionNum) {
+  if (!questionCounters[sectionNum]) questionCounters[sectionNum] = 0;
+  questionCounters[sectionNum]++;
+  const qIdx = questionCounters[sectionNum];
+  const container = document.getElementById(`questions_sec${sectionNum}`);
+  const div = document.createElement('div');
+  div.className = 'question-builder-row';
+  div.id = `qbuilder_${sectionNum}_${qIdx}`;
+  div.innerHTML = buildQuestionBuilderHtml(sectionNum, qIdx);
+  container.appendChild(div);
+}
+
+function buildQuestionBuilderHtml(sn, qi) {
+  return `<div class="qb-header">
+    <span class="qb-num">Q</span>
+    <input type="number" id="qnum_${sn}_${qi}" placeholder="Q#" class="qb-num-input" min="1" />
+    <select id="qtype_${sn}_${qi}" onchange="updateQuestionFields(${sn},${qi})">
+      <option value="mcq">Multiple Choice</option>
+      <option value="tfng">True/False/Not Given</option>
+      <option value="fill">Fill in Blank</option>
+      <option value="matching">Matching</option>
+    </select>
+    <button class="btn btn-danger btn-xs" onclick="document.getElementById('qbuilder_${sn}_${qi}').remove()">✕</button>
+  </div>
+  <div id="qfields_${sn}_${qi}">
+    ${mcqFieldsHtml(sn, qi)}
+  </div>`;
+}
+
+function updateQuestionFields(sn, qi) {
+  const type = document.getElementById(`qtype_${sn}_${qi}`).value;
+  const container = document.getElementById(`qfields_${sn}_${qi}`);
+  if (type === 'mcq') container.innerHTML = mcqFieldsHtml(sn, qi);
+  else if (type === 'tfng') container.innerHTML = tfngFieldsHtml(sn, qi);
+  else if (type === 'fill') container.innerHTML = fillFieldsHtml(sn, qi);
+  else if (type === 'matching') container.innerHTML = matchingFieldsHtml(sn, qi);
+}
+
+function mcqFieldsHtml(sn, qi) {
+  return `<div class="form-group"><label>Question Stem</label><input type="text" id="qstem_${sn}_${qi}" placeholder="According to the passage…" /></div>
+    <div class="qb-options">
+      ${['A','B','C','D'].map(k => `<div class="qb-opt-row"><strong>${k}.</strong><input type="text" id="qopt_${sn}_${qi}_${k}" placeholder="Option ${k}" /></div>`).join('')}
+    </div>
+    <div class="form-group"><label>Correct Answer</label>
+      <select id="qcorrect_${sn}_${qi}"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
+    </div>`;
+}
+
+function tfngFieldsHtml(sn, qi) {
+  return `<div class="form-group"><label>Statement</label><input type="text" id="qstem_${sn}_${qi}" placeholder="The author believes that…" /></div>
+    <div class="form-group"><label>Correct Answer</label>
+      <select id="qcorrect_${sn}_${qi}"><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select>
+    </div>`;
+}
+
+function fillFieldsHtml(sn, qi) {
+  return `<div class="form-group"><label>Sentence with blank (use ___ for blank)</label><input type="text" id="qstem_${sn}_${qi}" placeholder="The river flows through ___ before reaching the sea." /></div>
+    <div class="form-group"><label>Correct Answer</label><input type="text" id="qcorrect_${sn}_${qi}" placeholder="Answer" /></div>
+    <div class="form-group"><label>Accepted Alternatives (comma-separated)</label><input type="text" id="qalts_${sn}_${qi}" placeholder="alt1, alt2" /></div>`;
+}
+
+function matchingFieldsHtml(sn, qi) {
+  return `<div class="form-group"><label>Instruction Stem</label><input type="text" id="qstem_${sn}_${qi}" placeholder="Match each place with a feature." /></div>
+    <div class="form-group"><label>Options (one per line, format: A. Description)</label><textarea id="qopts_${sn}_${qi}" rows="4" placeholder="A. Description of A&#10;B. Description of B"></textarea></div>
+    <div class="form-group"><label>Sub-questions (one per line, format: Label | Correct Answer Letter)</label><textarea id="qsubs_${sn}_${qi}" rows="3" placeholder="London | A&#10;Paris | B"></textarea></div>`;
+}
+
+function collectSectionsData() {
+  const count = currentMaterialsTab === 'reading' ? 3 : 4;
+  const isReading = currentMaterialsTab === 'reading';
+  const sections = [];
+
+  for (let sn = 1; sn <= count; sn++) {
+    const section = {
+      section_number: sn,
+      passage_title: isReading ? (document.getElementById(`sec${sn}_title`)?.value || '') : '',
+      passage_text: isReading ? (document.getElementById(`sec${sn}_passage`)?.value || '') : '',
+      audio_url: !isReading ? (document.getElementById(`sec${sn}_audio`)?.value || '') : '',
+      transcript: !isReading ? (document.getElementById(`sec${sn}_transcript`)?.value || '') : '',
+      questions: []
+    };
+
+    // Collect questions for this section
+    const qContainer = document.getElementById(`questions_sec${sn}`);
+    if (!qContainer) { sections.push(section); continue; }
+    const qRows = qContainer.querySelectorAll('.question-builder-row');
+
+    for (const row of qRows) {
+      const rowId = row.id; // qbuilder_SN_QI
+      const parts = rowId.split('_');
+      const qi = parts[parts.length - 1];
+      const sni = parts[parts.length - 2];
+      const qnum = parseInt(document.getElementById(`qnum_${sni}_${qi}`)?.value || '0', 10);
+      const qtype = document.getElementById(`qtype_${sni}_${qi}`)?.value || 'mcq';
+      const stem = document.getElementById(`qstem_${sni}_${qi}`)?.value || '';
+
+      const q = { q_number: qnum, q_type: qtype, stem };
+
+      if (qtype === 'mcq') {
+        q.options = {};
+        for (const k of ['A','B','C','D']) {
+          const v = document.getElementById(`qopt_${sni}_${qi}_${k}`)?.value || '';
+          if (v) q.options[k] = v;
+        }
+        q.correct_answer = document.getElementById(`qcorrect_${sni}_${qi}`)?.value || 'A';
+      } else if (qtype === 'tfng') {
+        q.correct_answer = document.getElementById(`qcorrect_${sni}_${qi}`)?.value || 'TRUE';
+      } else if (qtype === 'fill') {
+        q.correct_answer = document.getElementById(`qcorrect_${sni}_${qi}`)?.value || '';
+        const altsRaw = document.getElementById(`qalts_${sni}_${qi}`)?.value || '';
+        q.accept_alternatives = altsRaw.split(',').map(s => s.trim()).filter(Boolean);
+      } else if (qtype === 'matching') {
+        const optsRaw = document.getElementById(`qopts_${sni}_${qi}`)?.value || '';
+        q.options = {};
+        for (const line of optsRaw.split('\n')) {
+          const m = line.match(/^([A-Z])\.\s*(.+)/);
+          if (m) q.options[m[1]] = m[2].trim();
+        }
+        const subsRaw = document.getElementById(`qsubs_${sni}_${qi}`)?.value || '';
+        q.sub_questions = subsRaw.split('\n').filter(Boolean).map(line => {
+          const [label, ans] = line.split('|').map(s => s.trim());
+          return { label: label || '', correct_answer: ans || '' };
+        });
+      }
+      if (qnum > 0) section.questions.push(q);
+    }
+    sections.push(section);
+  }
+  return sections;
+}
+
+async function submitCreateTest() {
+  const errEl = document.getElementById('create-test-error');
+  errEl.classList.add('hidden');
+  const title = document.getElementById('new-test-title')?.value?.trim();
+  if (!title) { errEl.textContent = 'Please enter a test title.'; errEl.classList.remove('hidden'); return; }
+  const sections = collectSectionsData();
+  const totalQ = sections.reduce((n, s) => n + s.questions.length, 0);
+  if (totalQ === 0) { errEl.textContent = 'Please add at least one question.'; errEl.classList.remove('hidden'); return; }
+  try {
+    await api('/api/admin/tests', {
+      method: 'POST',
+      body: JSON.stringify({ type: currentMaterialsTab, title, sections })
+    });
+    // Refresh
+    _materialsCache = await api('/api/admin/tests');
+    renderMaterialsList();
+    // Reset form
+    document.getElementById('create-test-form').classList.add('hidden');
+    document.getElementById('new-test-title').value = '';
+    questionCounters = {};
+    buildSectionsForm();
+  } catch (err) {
+    errEl.textContent = 'Failed to create test: ' + err.message;
+    errEl.classList.remove('hidden');
+  }
 }

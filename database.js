@@ -9,7 +9,7 @@ function load() {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
   } catch {}
-  return { users: [], submissions: [], feedback: [], usage_logs: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0 } };
+  return { users: [], submissions: [], feedback: [], usage_logs: [], tests: [], test_attempts: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0, tests: 0, test_attempts: 0 } };
 }
 
 function save(data) {
@@ -27,7 +27,9 @@ const db = {
       id: data._ids.users, name, email, password,
       role, verified: false, verification_code: null, verification_expires: null,
       reset_code: null, reset_expires: null,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      target_band: null,
+      current_streak: 0, longest_streak: 0, last_activity_date: null
     };
     data.users.push(user);
     save(data);
@@ -180,6 +182,216 @@ const db = {
     if (u) { u.password = hashedPassword; save(data); }
   },
 
+  updateUserProfile(userId, fields) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) {
+      if ('target_band' in fields) u.target_band = fields.target_band;
+      save(data);
+    }
+  },
+
+  updateStreak(userId) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (!u) return;
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    if (u.last_activity_date === todayStr) {
+      // Already counted today — no change
+      return;
+    }
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    if (u.last_activity_date === yesterdayStr) {
+      // Consecutive day — increment streak
+      u.current_streak = (u.current_streak || 0) + 1;
+    } else {
+      // Streak broken or first activity
+      u.current_streak = 1;
+    }
+    u.longest_streak = Math.max(u.longest_streak || 0, u.current_streak);
+    u.last_activity_date = todayStr;
+    save(data);
+  },
+
+  deleteUser(userId) {
+    const data = load();
+    const idx = data.users.findIndex(u => u.id === userId);
+    if (idx === -1) return false;
+    data.users.splice(idx, 1);
+    // Cascade: remove submissions and their feedback
+    const subIds = (data.submissions || []).filter(s => s.user_id === userId).map(s => s.id);
+    data.submissions = (data.submissions || []).filter(s => s.user_id !== userId);
+    data.feedback = (data.feedback || []).filter(f => !subIds.includes(f.submission_id));
+    // Cascade: remove test attempts (Batch B — safe even before tests exist)
+    if (data.test_attempts) data.test_attempts = data.test_attempts.filter(a => a.user_id !== userId);
+    save(data);
+    return true;
+  },
+
+  // ── Tests ──────────────────────────────────────────────────────────────────
+
+  insertTest(type, title, sections, created_by) {
+    const data = load();
+    if (!data.tests) data.tests = [];
+    if (!data._ids.tests) data._ids.tests = 0;
+    data._ids.tests += 1;
+    const test = {
+      id: data._ids.tests, type, title,
+      sections, created_by,
+      created_at: new Date().toISOString()
+    };
+    data.tests.push(test);
+    save(data);
+    return test.id;
+  },
+
+  // Lightweight list — strips passage text + correct answers, just meta
+  getAllTests(type) {
+    const data = load();
+    let tests = (data.tests || []);
+    if (type) tests = tests.filter(t => t.type === type);
+    return tests.map(t => ({
+      id: t.id, type: t.type, title: t.title,
+      created_by: t.created_by, created_at: t.created_at,
+      section_count: (t.sections || []).length,
+      question_count: (t.sections || []).reduce((n, s) => n + (s.questions || []).length, 0)
+    }));
+  },
+
+  // Full test with correct answers — for admin only
+  getTestById(id) {
+    const data = load();
+    return (data.tests || []).find(t => t.id === id) || null;
+  },
+
+  // Test without correct answers — for students
+  getTestForStudent(id) {
+    const data = load();
+    const t = (data.tests || []).find(t => t.id === id);
+    if (!t) return null;
+    // Deep-clone and strip correct answers
+    const stripped = JSON.parse(JSON.stringify(t));
+    for (const section of (stripped.sections || [])) {
+      for (const q of (section.questions || [])) {
+        delete q.correct_answer;
+        delete q.accept_alternatives;
+        if (q.sub_questions) {
+          for (const sq of q.sub_questions) delete sq.correct_answer;
+        }
+      }
+    }
+    return stripped;
+  },
+
+  deleteTest(id) {
+    const data = load();
+    const idx = (data.tests || []).findIndex(t => t.id === id);
+    if (idx === -1) return false;
+    data.tests.splice(idx, 1);
+    // Cascade test attempts
+    data.test_attempts = (data.test_attempts || []).filter(a => a.test_id !== id);
+    save(data);
+    return true;
+  },
+
+  // ── Test Attempts ───────────────────────────────────────────────────────────
+
+  insertTestAttempt(test_id, user_id, type) {
+    const data = load();
+    if (!data.test_attempts) data.test_attempts = [];
+    if (!data._ids.test_attempts) data._ids.test_attempts = 0;
+    data._ids.test_attempts += 1;
+    const attempt = {
+      id: data._ids.test_attempts, test_id, user_id, type,
+      status: 'in_progress',
+      started_at: new Date().toISOString(),
+      submitted_at: null,
+      time_remaining_secs: type === 'reading' ? 3600 : 1800,
+      answers: {},
+      score: null,
+      ai_explanations: null,
+      tokens_used: null,
+      cost_usd: null
+    };
+    data.test_attempts.push(attempt);
+    save(data);
+    return attempt.id;
+  },
+
+  updateAttemptAnswers(attempt_id, user_id, answers, time_remaining_secs) {
+    const data = load();
+    const a = (data.test_attempts || []).find(a => a.id === attempt_id && a.user_id === user_id);
+    if (!a || a.status !== 'in_progress') return false;
+    a.answers = answers;
+    if (time_remaining_secs !== undefined) a.time_remaining_secs = time_remaining_secs;
+    save(data);
+    return true;
+  },
+
+  completeAttempt(attempt_id, score, ai_explanations, tokens_used, cost_usd) {
+    const data = load();
+    const a = (data.test_attempts || []).find(a => a.id === attempt_id);
+    if (!a) return false;
+    a.status = 'completed';
+    a.submitted_at = new Date().toISOString();
+    a.score = score;
+    a.ai_explanations = ai_explanations || null;
+    a.tokens_used = tokens_used || null;
+    a.cost_usd = cost_usd || null;
+    save(data);
+    return true;
+  },
+
+  setAttemptExplanations(attempt_id, ai_explanations, tokens_used, cost_usd) {
+    const data = load();
+    const a = (data.test_attempts || []).find(a => a.id === attempt_id);
+    if (!a) return false;
+    a.ai_explanations = ai_explanations;
+    a.tokens_used = (a.tokens_used || 0) + (tokens_used || 0);
+    a.cost_usd = (a.cost_usd || 0) + (cost_usd || 0);
+    save(data);
+    return true;
+  },
+
+  // Lightweight list for history view
+  getAttemptsByUser(user_id) {
+    const data = load();
+    return (data.test_attempts || [])
+      .filter(a => a.user_id === user_id)
+      .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))
+      .map(a => {
+        const t = (data.tests || []).find(t => t.id === a.test_id) || {};
+        return {
+          id: a.id, test_id: a.test_id, type: a.type,
+          test_title: t.title || 'Deleted Test',
+          status: a.status,
+          started_at: a.started_at, submitted_at: a.submitted_at,
+          score: a.score
+        };
+      });
+  },
+
+  // Full attempt including ai_explanations
+  getAttemptById(attempt_id, user_id) {
+    const data = load();
+    const a = (data.test_attempts || []).find(
+      a => a.id === attempt_id && a.user_id === user_id
+    );
+    if (!a) return null;
+    const t = (data.tests || []).find(t => t.id === a.test_id) || null;
+    return { ...a, test: t };
+  },
+
+  // For in-progress resume: returns attempt with stripped test (no answers)
+  getInProgressAttempt(test_id, user_id) {
+    const data = load();
+    return (data.test_attempts || []).find(
+      a => a.test_id === test_id && a.user_id === user_id && a.status === 'in_progress'
+    ) || null;
+  },
+
   getAllUsersWithStats() {
     const data = load();
     return data.users.map(u => {
@@ -196,6 +408,17 @@ const db = {
     });
   }
 };
+
+// Migration: ensure new collections exist in existing databases
+(function migrateCollections() {
+  const data = load();
+  let changed = false;
+  if (!data.tests) { data.tests = []; changed = true; }
+  if (!data.test_attempts) { data.test_attempts = []; changed = true; }
+  if (!data._ids.tests) { data._ids.tests = 0; changed = true; }
+  if (!data._ids.test_attempts) { data._ids.test_attempts = 0; changed = true; }
+  if (changed) save(data);
+})();
 
 // Migration: auto-verify legacy users who registered before email verification was enforced.
 // These users have verified=false but no verification_code (it was never sent to them).

@@ -239,7 +239,7 @@ app.post('/api/submissions', authenticate, async (req, res) => {
     const submissionId = result.lastInsertRowid;
 
     // Start grading asynchronously
-    gradeSubmission(submissionId, task_type, prompt, essay, wordCount, minWords).catch(console.error);
+    gradeSubmission(submissionId, req.user.id, task_type, prompt, essay, wordCount, minWords).catch(console.error);
 
     res.json({ id: submissionId, status: 'grading', word_count: wordCount });
   } catch (err) {
@@ -266,7 +266,7 @@ app.delete('/api/submissions/:id', authenticate, (req, res) => {
 });
 
 // ─── AI Grading ───────────────────────────────────────────────────────────────
-async function gradeSubmission(submissionId, taskType, prompt, essay, wordCount, minWords) {
+async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords) {
   db.updateSubmissionStatus(submissionId, 'grading');
 
   const taskLabel = taskType === 'task1' ? 'Task 1' : 'Task 2';
@@ -391,6 +391,8 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
       cost
     );
     db.updateSubmissionStatus(submissionId, 'graded');
+    // Update study streak for the student
+    try { db.updateStreak(userId); } catch (e) { console.error('Streak update error:', e); }
   } catch (err) {
     console.error('Grading error for submission', submissionId, err);
     db.updateSubmissionStatus(submissionId, 'error');
@@ -719,6 +721,398 @@ app.get('/api/admin/users', authenticate, adminOnly, (req, res) => {
   } catch (err) {
     console.error('Admin users error:', err);
     res.status(500).json({ error: 'Failed to load users' });
+  }
+});
+
+app.delete('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
+  const targetId = parseInt(req.params.id, 10);
+  if (targetId === req.user.id) return res.status(400).json({ error: 'You cannot delete your own account.' });
+  const ok = db.deleteUser(targetId);
+  if (!ok) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true });
+});
+
+// ─── User Profile ─────────────────────────────────────────────────────────────
+app.get('/api/user/profile', authenticate, (req, res) => {
+  const user = db.getUserById(req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json({
+    target_band: user.target_band ?? null,
+    current_streak: user.current_streak || 0,
+    longest_streak: user.longest_streak || 0,
+    last_activity_date: user.last_activity_date || null
+  });
+});
+
+app.put('/api/user/profile', authenticate, (req, res) => {
+  const { target_band } = req.body;
+  if (target_band !== null && target_band !== undefined) {
+    const band = parseFloat(target_band);
+    if (isNaN(band) || band < 4 || band > 9) {
+      return res.status(400).json({ error: 'target_band must be a number between 4.0 and 9.0' });
+    }
+    db.updateUserProfile(req.user.id, { target_band: band });
+  }
+  res.json({ success: true });
+});
+
+// ─── Topic Rater ───────────────────────────────────────────────────────────────
+app.post('/api/rate-topic', authenticate, async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) {
+    return res.status(400).json({ error: 'prompt is required' });
+  }
+
+  const systemPrompt = `You are an expert IELTS Task 1 examiner and test designer. Evaluate the given Task 1 prompt and return ONLY valid JSON with no markdown, no code fences, no extra text.`;
+
+  const userPrompt = `Rate this IELTS Academic Writing Task 1 prompt across four criteria.
+
+Prompt:
+"""
+${prompt.trim()}
+"""
+
+Return ONLY this JSON structure:
+{
+  "authenticity": { "score": <0-10>, "comment": "<is it a realistic, exam-style question?>" },
+  "difficulty": { "band": "<e.g. 5.5-6.5>", "comment": "<what band level does this target?>" },
+  "visual_type": "<bar chart | line graph | pie chart | table | process diagram | map | mixed | unclear>",
+  "quality": { "score": <0-10>, "comment": "<clarity, completeness, sufficient data for a good response>" },
+  "overall": "<2-3 sentence summary judgment>",
+  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
+}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 600,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const inputTokens = response.usage ? response.usage.input_tokens : 0;
+    const outputTokens = response.usage ? response.usage.output_tokens : 0;
+    const cost = calculateCost(inputTokens, outputTokens);
+    db.logUsage('topic-rater', cost, inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const result = JSON.parse(raw);
+    res.json(result);
+  } catch (err) {
+    console.error('Topic rater error:', err);
+    res.status(500).json({ error: 'Failed to rate topic. Please try again.' });
+  }
+});
+
+// ─── Band Score Tables ────────────────────────────────────────────────────────
+function rawScoreToBand(raw, type) {
+  if (type === 'reading') {
+    if (raw >= 40) return 9.0;
+    if (raw >= 39) return 8.5;
+    if (raw >= 37) return 8.0;
+    if (raw >= 35) return 7.5;
+    if (raw >= 33) return 7.0;
+    if (raw >= 30) return 6.5;
+    if (raw >= 27) return 6.0;
+    if (raw >= 23) return 5.5;
+    if (raw >= 19) return 5.0;
+    if (raw >= 15) return 4.5;
+    if (raw >= 13) return 4.0;
+    if (raw >= 10) return 3.5;
+    if (raw >= 8)  return 3.0;
+    if (raw >= 6)  return 2.5;
+    return 2.0;
+  } else { // listening
+    if (raw >= 39) return 9.0;
+    if (raw >= 37) return 8.5;
+    if (raw >= 35) return 8.0;
+    if (raw >= 32) return 7.5;
+    if (raw >= 30) return 7.0;
+    if (raw >= 26) return 6.5;
+    if (raw >= 23) return 6.0;
+    if (raw >= 18) return 5.5;
+    if (raw >= 16) return 5.0;
+    if (raw >= 13) return 4.5;
+    if (raw >= 10) return 4.0;
+    if (raw >= 8)  return 3.5;
+    if (raw >= 6)  return 3.0;
+    if (raw >= 4)  return 2.5;
+    return 2.0;
+  }
+}
+
+// Score an attempt — returns { raw, total, band, section_scores, wrong_q_numbers }
+function scoreAttempt(test, answers) {
+  let raw = 0;
+  let total = 0;
+  const section_scores = [];
+  const wrong_q_numbers = [];
+
+  for (const section of (test.sections || [])) {
+    let sec_correct = 0;
+    let sec_total = 0;
+    for (const q of (section.questions || [])) {
+      if (q.q_type === 'matching' && q.sub_questions) {
+        for (const sq of q.sub_questions) {
+          total++; sec_total++;
+          const key = `${q.q_number}_${sq.label}`;
+          const given = (answers[key] || '').trim().toUpperCase();
+          const correct = (sq.correct_answer || '').trim().toUpperCase();
+          if (given === correct) { raw++; sec_correct++; }
+          else wrong_q_numbers.push(key);
+        }
+      } else {
+        total++; sec_total++;
+        const given = (answers[String(q.q_number)] || '').trim().toLowerCase();
+        const correct = (q.correct_answer || '').trim().toLowerCase();
+        const alts = (q.accept_alternatives || []).map(a => a.trim().toLowerCase());
+        const isCorrect = given === correct || alts.includes(given);
+        if (isCorrect) { raw++; sec_correct++; }
+        else wrong_q_numbers.push(String(q.q_number));
+      }
+    }
+    section_scores.push({ section_number: section.section_number, correct: sec_correct, total: sec_total });
+  }
+
+  return {
+    raw, total,
+    band: rawScoreToBand(raw, test.type),
+    section_scores,
+    wrong_q_numbers: wrong_q_numbers.slice(0, 20) // cap AI explanations at 20
+  };
+}
+
+// Async AI explanations for wrong answers (background — does not block submit response)
+async function generateTestExplanations(attemptId, test, answers, wrongQNumbers) {
+  if (!wrongQNumbers.length) return;
+  try {
+    // Build a compact context: only the questions that were wrong
+    const wrongItems = [];
+    for (const section of (test.sections || [])) {
+      const passageOrTranscript = section.passage_text || section.transcript || '';
+      for (const q of (section.questions || [])) {
+        const qKey = String(q.q_number);
+        if (q.q_type === 'matching' && q.sub_questions) {
+          for (const sq of q.sub_questions) {
+            const key = `${q.q_number}_${sq.label}`;
+            if (wrongQNumbers.includes(key)) {
+              wrongItems.push({
+                key, context: passageOrTranscript.slice(0, 600),
+                stem: `${q.stem} — "${sq.label}"`,
+                student_answer: answers[key] || '(blank)',
+                correct_answer: sq.correct_answer,
+                options: q.options
+              });
+            }
+          }
+        } else if (wrongQNumbers.includes(qKey)) {
+          wrongItems.push({
+            key: qKey, context: passageOrTranscript.slice(0, 600),
+            stem: q.stem,
+            student_answer: answers[qKey] || '(blank)',
+            correct_answer: q.correct_answer,
+            options: q.options || null,
+            accept_alternatives: q.accept_alternatives || []
+          });
+        }
+      }
+    }
+
+    const userContent = JSON.stringify(wrongItems, null, 2);
+    const systemPrompt = `You are an IELTS examiner. For each wrong answer, provide a brief explanation (1-2 sentences) of why the correct answer is right and what clue in the passage/audio supports it. Return a JSON object mapping each "key" to an explanation string. Example: {"3": "The passage states X in paragraph 2, confirming the answer is Y.", "5_London": "The audio mentions Z."}`;
+
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Wrong answers:\n${userContent}` }]
+    });
+
+    const inputTokens = response.usage.input_tokens;
+    const outputTokens = response.usage.output_tokens;
+    const cost = calculateCost(inputTokens, outputTokens);
+    db.logUsage('test-explanations', cost, inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const explanations = JSON.parse(raw);
+    db.setAttemptExplanations(attemptId, explanations, inputTokens + outputTokens, cost);
+  } catch (err) {
+    console.error('Test explanation error:', err.message);
+  }
+}
+
+// ─── Admin Test Routes ────────────────────────────────────────────────────────
+
+app.post('/api/admin/tests', authenticate, adminOnly, (req, res) => {
+  try {
+    const { type, title, sections } = req.body;
+    if (!type || !['reading','listening'].includes(type)) return res.status(400).json({ error: 'type must be reading or listening' });
+    if (!title || !title.trim()) return res.status(400).json({ error: 'title is required' });
+    if (!sections || !sections.length) return res.status(400).json({ error: 'sections are required' });
+    const id = db.insertTest(type, title.trim(), sections, req.user.id);
+    res.json({ id });
+  } catch (err) {
+    console.error('Create test error:', err);
+    res.status(500).json({ error: 'Failed to create test' });
+  }
+});
+
+app.get('/api/admin/tests', authenticate, adminOnly, (req, res) => {
+  try {
+    res.json(db.getAllTests(req.query.type));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load tests' });
+  }
+});
+
+app.get('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
+  try {
+    const test = db.getTestById(parseInt(req.params.id, 10));
+    if (!test) return res.status(404).json({ error: 'Test not found' });
+    res.json(test);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load test' });
+  }
+});
+
+app.delete('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
+  try {
+    const ok = db.deleteTest(parseInt(req.params.id, 10));
+    if (!ok) return res.status(404).json({ error: 'Test not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete test' });
+  }
+});
+
+// ─── Student Test Routes ──────────────────────────────────────────────────────
+
+// List tests with user's attempt status
+app.get('/api/tests', authenticate, (req, res) => {
+  try {
+    const tests = db.getAllTests(req.query.type);
+    const attempts = db.getAttemptsByUser(req.user.id);
+    const result = tests.map(t => {
+      const userAttempts = attempts.filter(a => a.test_id === t.id);
+      const inProgress = userAttempts.find(a => a.status === 'in_progress');
+      const completed = userAttempts.filter(a => a.status === 'completed').sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0];
+      return {
+        ...t,
+        user_status: inProgress ? 'in_progress' : completed ? 'completed' : 'not_started',
+        in_progress_attempt_id: inProgress ? inProgress.id : null,
+        latest_attempt_id: completed ? completed.id : null,
+        latest_band: completed ? (completed.score ? completed.score.band : null) : null
+      };
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load tests' });
+  }
+});
+
+// Start a new attempt (or resume in-progress)
+app.post('/api/tests/:id/start', authenticate, (req, res) => {
+  try {
+    const testId = parseInt(req.params.id, 10);
+    const test = db.getTestForStudent(testId);
+    if (!test) return res.status(404).json({ error: 'Test not found' });
+
+    // Resume in-progress if exists
+    const existing = db.getInProgressAttempt(testId, req.user.id);
+    if (existing) {
+      return res.json({ attempt_id: existing.id, test, answers: existing.answers, time_remaining_secs: existing.time_remaining_secs, resumed: true });
+    }
+
+    const attemptId = db.insertTestAttempt(testId, req.user.id, test.type);
+    res.json({ attempt_id: attemptId, test, answers: {}, time_remaining_secs: test.type === 'reading' ? 3600 : 1800, resumed: false });
+  } catch (err) {
+    console.error('Start test error:', err);
+    res.status(500).json({ error: 'Failed to start test' });
+  }
+});
+
+// Autosave answers mid-test
+app.put('/api/tests/:id/attempts/:aid/autosave', authenticate, (req, res) => {
+  try {
+    const attemptId = parseInt(req.params.aid, 10);
+    const { answers, time_remaining_secs } = req.body;
+    const ok = db.updateAttemptAnswers(attemptId, req.user.id, answers || {}, time_remaining_secs);
+    if (!ok) return res.status(400).json({ error: 'Attempt not found or already completed' });
+    res.json({ saved: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save answers' });
+  }
+});
+
+// Submit attempt — score it, kick off AI explanations async
+app.post('/api/tests/:id/attempts/:aid/submit', authenticate, async (req, res) => {
+  try {
+    const testId = parseInt(req.params.id, 10);
+    const attemptId = parseInt(req.params.aid, 10);
+    const { answers, time_remaining_secs } = req.body;
+
+    // Verify ownership and status
+    const attempt = db.getAttemptById(attemptId, req.user.id);
+    if (!attempt) return res.status(404).json({ error: 'Attempt not found' });
+    if (attempt.status === 'completed') return res.status(409).json({ error: 'Attempt already submitted' });
+
+    // Load full test with answers for scoring
+    const test = db.getTestById(testId);
+    if (!test) return res.status(404).json({ error: 'Test not found' });
+
+    // Save final answers
+    db.updateAttemptAnswers(attemptId, req.user.id, answers || {}, time_remaining_secs || 0);
+
+    // Score
+    const score = scoreAttempt(test, answers || {});
+    db.completeAttempt(attemptId, score, null, null, null);
+
+    // Update streak
+    try { db.updateStreak(req.user.id); } catch (e) { console.error('Streak error:', e); }
+
+    // Fire AI explanations in background
+    if (score.wrong_q_numbers.length > 0) {
+      generateTestExplanations(attemptId, test, answers || {}, score.wrong_q_numbers).catch(console.error);
+    }
+
+    res.json({ attempt_id: attemptId, score });
+  } catch (err) {
+    console.error('Submit test error:', err);
+    res.status(500).json({ error: 'Failed to submit test' });
+  }
+});
+
+// Attempt history list
+app.get('/api/tests/attempts', authenticate, (req, res) => {
+  try {
+    res.json(db.getAttemptsByUser(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load attempts' });
+  }
+});
+
+// Single attempt detail (poll for AI explanations)
+app.get('/api/tests/attempts/:aid', authenticate, (req, res) => {
+  try {
+    const attemptId = parseInt(req.params.aid, 10);
+    const attempt = db.getAttemptById(attemptId, req.user.id);
+    if (!attempt) return res.status(404).json({ error: 'Attempt not found' });
+
+    // Strip correct answers from test before sending to student
+    if (attempt.test) {
+      attempt.test = JSON.parse(JSON.stringify(attempt.test));
+      for (const section of (attempt.test.sections || [])) {
+        for (const q of (section.questions || [])) {
+          // Keep correct_answer here so the result view can show it
+          // (the attempt is already completed — student already submitted)
+        }
+      }
+    }
+    res.json(attempt);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load attempt' });
   }
 });
 
