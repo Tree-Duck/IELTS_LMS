@@ -28,7 +28,12 @@ function calculateCost(inputTokens, outputTokens) {
 }
 
 // ─── Email / Admin Helpers ─────────────────────────────────────────────────────
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-init so missing key doesn't crash the server on startup
+let resend = null;
+function getResend() {
+  if (!resend) resend = new Resend(process.env.RESEND_API_KEY || 'placeholder');
+  return resend;
+}
 
 // Wrap any email send so it never hangs the server response
 async function sendEmailSafe(sendFn) {
@@ -50,7 +55,7 @@ function generateCode() {
 }
 
 async function sendVerificationEmail(email, name, code) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: 'IELTS Writing LMS <onboarding@resend.dev>',
     to: email,
     subject: 'Your IELTS LMS verification code',
@@ -68,7 +73,7 @@ async function sendVerificationEmail(email, name, code) {
 }
 
 async function sendPasswordResetEmail(email, name, code) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: 'IELTS Writing LMS <onboarding@resend.dev>',
     to: email,
     subject: 'Reset your IELTS LMS password',
@@ -676,7 +681,7 @@ app.get('/api/test-email', async (req, res) => {
   if (!process.env.RESEND_API_KEY) return res.json({ ok: false, error: 'RESEND_API_KEY not set' });
   if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: 'IELTS Writing LMS <onboarding@resend.dev>',
       to,
       subject: 'IELTS LMS — email test ✅',
