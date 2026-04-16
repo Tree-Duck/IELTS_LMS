@@ -128,14 +128,10 @@ app.post('/api/register', async (req, res) => {
     const role = adminRole(email);
     const result = db.insertUser(name, email.toLowerCase(), hashed, role);
     const userId = result.lastInsertRowid;
-    if (process.env.GMAIL_USER) {
-      const code = generateCode();
-      db.setVerificationCode(userId, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-      await sendEmailSafe(() => sendVerificationEmail(email.toLowerCase(), name, code));
-      return res.json({ needsVerification: true, email: email.toLowerCase() });
-    }
-    const token = jwt.sign({ id: userId, name, email: email.toLowerCase(), role }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: userId, name, email: email.toLowerCase(), role } });
+    const code = generateCode();
+    db.setVerificationCode(userId, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
+    await sendEmailSafe(() => sendVerificationEmail(email.toLowerCase(), name, code));
+    return res.json({ needsVerification: true, email: email.toLowerCase() });
   } catch (err) {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Email already registered' });
@@ -154,7 +150,7 @@ app.post('/api/login', async (req, res) => {
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
-  if (process.env.GMAIL_USER && !user.verified) {
+  if (!user.verified) {
     const code = generateCode();
     db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
     const sent = await sendEmailSafe(() => sendVerificationEmail(user.email, user.name, code));
@@ -626,9 +622,7 @@ app.post('/api/forgot-password', async (req, res) => {
     if (!user) return res.json({ sent: true });
     const code = generateCode();
     db.setResetCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-    if (process.env.GMAIL_USER) {
-      await sendEmailSafe(() => sendPasswordResetEmail(user.email, user.name, code));
-    }
+    await sendEmailSafe(() => sendPasswordResetEmail(user.email, user.name, code));
     res.json({ sent: true, email: user.email });
   } catch (err) {
     console.error('Forgot password error:', err);
@@ -699,12 +693,13 @@ app.get('/api/test-email', async (req, res) => {
 app.post('/api/admin/test-email', authenticate, adminOnly, async (req, res) => {
   const to = req.body.to || req.user.email;
   try {
-    await transporter.sendMail({
-      from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+    const { error: testErr } = await getResend().emails.send({
+      from: 'IELTS Writing LMS <noreply@tintinlab.com>',
       to,
       subject: 'IELTS LMS — email test',
       html: '<p>Email is working correctly! ✅</p>'
     });
+    if (testErr) throw new Error(testErr.message);
     res.json({ ok: true, message: `Test email sent to ${to}` });
   } catch (err) {
     console.error('Test email error:', err);
