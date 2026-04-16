@@ -56,7 +56,7 @@ function generateCode() {
 
 async function sendVerificationEmail(email, name, code) {
   const { error } = await getResend().emails.send({
-    from: 'IELTS Writing LMS <onboarding@resend.dev>',
+    from: 'IELTS Writing LMS <noreply@tintinlab.com>',
     to: email,
     subject: 'Your IELTS LMS verification code',
     html: `
@@ -74,7 +74,7 @@ async function sendVerificationEmail(email, name, code) {
 
 async function sendPasswordResetEmail(email, name, code) {
   const { error } = await getResend().emails.send({
-    from: 'IELTS Writing LMS <onboarding@resend.dev>',
+    from: 'IELTS Writing LMS <noreply@tintinlab.com>',
     to: email,
     subject: 'Reset your IELTS LMS password',
     html: `
@@ -682,7 +682,7 @@ app.get('/api/test-email', async (req, res) => {
   if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
   try {
     const { error } = await getResend().emails.send({
-      from: 'IELTS Writing LMS <onboarding@resend.dev>',
+      from: 'IELTS Writing LMS <noreply@tintinlab.com>',
       to,
       subject: 'IELTS LMS — email test ✅',
       html: '<p>Email is working correctly!</p>'
