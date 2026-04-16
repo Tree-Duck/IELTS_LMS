@@ -207,6 +207,8 @@ body {
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
 .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
 .btn-secondary:hover { background: var(--gray-200); }
+.btn-ghost { background: transparent; color: var(--gray-500); border: none; }
+.btn-ghost:hover { color: var(--gray-700); background: var(--gray-100); }
 .btn-full { width: 100%; }
 .btn-lg { padding: 12px 24px; font-size: 15px; }
 .btn-sm { padding: 6px 12px; font-size: 13px; }

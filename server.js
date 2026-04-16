@@ -155,8 +155,13 @@ app.post('/api/login', async (req, res) => {
   if (process.env.GMAIL_USER && !user.verified) {
     const code = generateCode();
     db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-    await sendEmailSafe(() => sendVerificationEmail(user.email, user.name, code));
-    return res.json({ needsVerification: true, email: user.email });
+    const sent = await sendEmailSafe(() => sendVerificationEmail(user.email, user.name, code));
+    if (sent) {
+      return res.json({ needsVerification: true, email: user.email });
+    }
+    // Email failed to send — since the user already proved their password, let them in
+    // and auto-verify so they aren't locked out
+    db.verifyUser(user.id);
   }
   const role = adminRole(user.email);
   const expiry = remember_me ? '30d' : '7d';
