@@ -17,7 +17,7 @@ function save(data) {
 }
 
 const db = {
-  insertUser(name, email, password) {
+  insertUser(name, email, password, role = 'student') {
     const data = load();
     if (data.users.find(u => u.email === email)) {
       throw Object.assign(new Error('Email already exists'), { message: 'UNIQUE constraint failed' });
@@ -25,7 +25,8 @@ const db = {
     data._ids.users = (data._ids.users || 0) + 1;
     const user = {
       id: data._ids.users, name, email, password,
-      role: 'student', created_at: new Date().toISOString()
+      role, verified: false, verification_code: null, verification_expires: null,
+      created_at: new Date().toISOString()
     };
     data.users.push(user);
     save(data);
@@ -142,6 +143,38 @@ const db = {
     data.feedback = (data.feedback || []).filter(f => f.submission_id !== id);
     save(data);
     return true;
+  },
+
+  setVerificationCode(userId, code, expires) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.verification_code = code; u.verification_expires = expires; save(data); }
+  },
+
+  verifyUser(userId) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.verified = true; u.verification_code = null; u.verification_expires = null; save(data); }
+  },
+
+  getUserById(id) {
+    return load().users.find(u => u.id === id) || null;
+  },
+
+  getAllUsersWithStats() {
+    const data = load();
+    return data.users.map(u => {
+      const subs = data.submissions.filter(s => s.user_id === u.id);
+      const feedback = data.feedback.filter(f => subs.some(s => s.id === f.submission_id));
+      const avgBand = feedback.length > 0
+        ? Math.round(feedback.reduce((sum, f) => sum + f.overall_band, 0) / feedback.length * 10) / 10
+        : null;
+      return {
+        id: u.id, name: u.name, email: u.email, role: u.role,
+        verified: !!u.verified, created_at: u.created_at,
+        submission_count: subs.length, graded_count: feedback.length, avg_band: avgBand,
+      };
+    });
   }
 };
 

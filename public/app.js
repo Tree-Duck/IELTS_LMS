@@ -5,6 +5,7 @@ let pollingInterval = null;
 let selectedTopic = 'random';
 let activeChart = null;       // Chart.js instance
 let promptUserTyped = false;  // tracks manual paste/type in prompt
+let pendingVerifyEmail = null; // email awaiting verification
 
 const TOPIC_OPTIONS = {
   task2: [
@@ -87,8 +88,13 @@ async function handleLogin(e) {
   try {
     const data = await api('/api/login', {
       method: 'POST',
-      body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value })
+      body: JSON.stringify({
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value,
+        remember_me: document.getElementById('remember-me').checked
+      })
     });
+    if (data.needsVerification) { showVerifyForm(data.email); return; }
     saveSession(data);
     showApp();
   } catch (err) {
@@ -110,6 +116,7 @@ async function handleRegister(e) {
       method: 'POST',
       body: JSON.stringify({ name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-password').value })
     });
+    if (data.needsVerification) { showVerifyForm(data.email); return; }
     saveSession(data);
     showApp();
   } catch (err) {
@@ -117,6 +124,59 @@ async function handleRegister(e) {
     errEl.classList.remove('hidden');
   } finally {
     btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+function showVerifyForm(email) {
+  pendingVerifyEmail = email;
+  document.getElementById('verify-email-display').textContent = email;
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('verify-form').classList.remove('hidden');
+  document.querySelector('.tab-bar').classList.add('hidden');
+  document.getElementById('verify-code').value = '';
+  document.getElementById('verify-error').classList.add('hidden');
+  document.getElementById('verify-success').classList.add('hidden');
+  document.getElementById('verify-code').focus();
+}
+
+async function handleVerify() {
+  const errEl = document.getElementById('verify-error');
+  const okEl = document.getElementById('verify-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+  const code = document.getElementById('verify-code').value.trim().replace(/\s/g, '');
+  if (code.length !== 6) {
+    errEl.textContent = 'Please enter the 6-digit code from your email.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  try {
+    const data = await api('/api/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ email: pendingVerifyEmail, code })
+    });
+    saveSession(data);
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function handleResendCode() {
+  const errEl = document.getElementById('verify-error');
+  const okEl = document.getElementById('verify-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+  try {
+    await api('/api/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email: pendingVerifyEmail })
+    });
+    okEl.textContent = 'New code sent! Check your inbox (and spam folder).';
+    okEl.classList.remove('hidden');
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
   }
 }
 
@@ -143,6 +203,10 @@ function showApp() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
   document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
+  // Show admin nav only for admins
+  const adminNav = document.getElementById('nav-admin');
+  if (currentUser.role === 'admin') adminNav.classList.remove('hidden');
+  else adminNav.classList.add('hidden');
   showView('dashboard');
 }
 
@@ -156,6 +220,56 @@ function showView(name) {
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
   else if (name === 'submit') { loadBudget(); updateTopicOptions(); }
+  else if (name === 'admin') loadAdminUsers();
+}
+
+/* ─── Admin Panel ────────────────────────────────────────────────────────── */
+async function loadAdminUsers() {
+  const el = document.getElementById('admin-users-table');
+  el.innerHTML = '<div class="loading">Loading users…</div>';
+  try {
+    const users = await api('/api/admin/users');
+    if (!users.length) {
+      el.innerHTML = '<div class="empty-state">No users registered yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Verified</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th>Essays</th>
+              <th>Avg Band</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map((u, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${u.name}</td>
+                <td>${u.email}</td>
+                <td>${u.verified
+                  ? '<span class="badge badge-green">✓ Verified</span>'
+                  : '<span class="badge badge-red">✗ Pending</span>'}</td>
+                <td><span class="badge ${u.role === 'admin' ? 'badge-purple' : 'badge-gray'}">${u.role}</span></td>
+                <td>${formatDate(u.created_at)}</td>
+                <td>${u.submission_count}</td>
+                <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
 }
 
 /* ─── Dashboard ──────────────────────────────────────────────────────────── */

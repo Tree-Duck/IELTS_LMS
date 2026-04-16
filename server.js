@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Anthropic = require('@anthropic-ai/sdk');
+const nodemailer = require('nodemailer');
 const db = require('./database');
 const path = require('path');
 
@@ -24,6 +25,43 @@ function calculateCost(inputTokens, outputTokens) {
   const inputPrice = parseFloat(process.env.INPUT_PRICE_PER_M || '0.80');
   const outputPrice = parseFloat(process.env.OUTPUT_PRICE_PER_M || '4.00');
   return (inputTokens / 1_000_000) * inputPrice + (outputTokens / 1_000_000) * outputPrice;
+}
+
+// ─── Email / Admin Helpers ─────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+});
+
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function sendVerificationEmail(email, name, code) {
+  await transporter.sendMail({
+    from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: 'Your IELTS LMS verification code',
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
+        <h2 style="color:#4f46e5;margin-bottom:8px">IELTS Writing LMS</h2>
+        <p style="color:#374151">Hi <strong>${name}</strong>, thanks for registering!</p>
+        <p style="color:#374151">Your email verification code is:</p>
+        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
+        <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't register, you can safely ignore this email.</p>
+      </div>
+    `
+  });
+}
+
+function adminRole(email) {
+  const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase();
+  return adminEmail && email.toLowerCase() === adminEmail ? 'admin' : 'student';
+}
+
+function adminOnly(req, res, next) {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin access only' });
+  next();
 }
 
 // ─── Auth Middleware ───────────────────────────────────────────────────────────
@@ -51,19 +89,28 @@ app.post('/api/register', async (req, res) => {
   }
   try {
     const hashed = await bcrypt.hash(password, 10);
-    const result = db.insertUser(name, email.toLowerCase(), hashed);
-    const token = jwt.sign({ id: result.lastInsertRowid, name, email, role: 'student' }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: result.lastInsertRowid, name, email, role: 'student' } });
+    const role = adminRole(email);
+    const result = db.insertUser(name, email.toLowerCase(), hashed, role);
+    const userId = result.lastInsertRowid;
+    if (process.env.GMAIL_USER) {
+      const code = generateCode();
+      db.setVerificationCode(userId, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
+      await sendVerificationEmail(email.toLowerCase(), name, code);
+      return res.json({ needsVerification: true, email: email.toLowerCase() });
+    }
+    const token = jwt.sign({ id: userId, name, email: email.toLowerCase(), role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: userId, name, email: email.toLowerCase(), role } });
   } catch (err) {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Email already registered' });
     }
+    console.error('Register error:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
 
 app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, remember_me } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
@@ -71,8 +118,50 @@ app.post('/api/login', async (req, res) => {
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
-  const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  if (process.env.GMAIL_USER && !user.verified) {
+    const code = generateCode();
+    db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
+    await sendVerificationEmail(user.email, user.name, code);
+    return res.json({ needsVerification: true, email: user.email });
+  }
+  const role = adminRole(user.email);
+  const expiry = remember_me ? '30d' : '7d';
+  const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: expiry });
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
+});
+
+app.post('/api/verify-email', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
+    const user = db.getUserByEmail(email.toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.verification_code !== code) return res.status(400).json({ error: 'Invalid code' });
+    if (new Date(user.verification_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
+    db.verifyUser(user.id);
+    const role = adminRole(user.email);
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
+  } catch (err) {
+    console.error('Verify error:', err);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+app.post('/api/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = db.getUserByEmail((email || '').toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.verified) return res.status(400).json({ error: 'Email already verified' });
+    const code = generateCode();
+    db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
+    await sendVerificationEmail(user.email, user.name, code);
+    res.json({ message: 'Code resent' });
+  } catch (err) {
+    console.error('Resend error:', err);
+    res.status(500).json({ error: 'Failed to resend code' });
+  }
 });
 
 // ─── Balance Route ────────────────────────────────────────────────────────────
@@ -489,6 +578,16 @@ ${submission.essay}`;
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ─── Admin Routes ─────────────────────────────────────────────────────────────
+app.get('/api/admin/users', authenticate, adminOnly, (req, res) => {
+  try {
+    res.json(db.getAllUsersWithStats());
+  } catch (err) {
+    console.error('Admin users error:', err);
+    res.status(500).json({ error: 'Failed to load users' });
+  }
 });
 
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
