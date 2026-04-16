@@ -29,11 +29,13 @@ function calculateCost(inputTokens, outputTokens) {
 
 // ─── Email / Admin Helpers ─────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
-  connectionTimeout: 8000,
-  greetingTimeout: 8000,
-  socketTimeout: 8000,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 // Wrap any email send so it never hangs the server response
@@ -41,11 +43,12 @@ async function sendEmailSafe(sendFn) {
   try {
     await Promise.race([
       sendFn(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout after 10s')), 10000))
     ]);
+    console.log('Email sent successfully');
     return true;
   } catch (err) {
-    console.error('Email send failed (non-fatal):', err.message);
+    console.error('EMAIL SEND FAILED:', err.message, err.code || '', err.responseCode || '');
     return false;
   }
 }
@@ -670,6 +673,23 @@ app.post('/api/change-password', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+// ─── Test Email (admin debug) ─────────────────────────────────────────────────
+app.post('/api/admin/test-email', authenticate, adminOnly, async (req, res) => {
+  const to = req.body.to || req.user.email;
+  try {
+    await transporter.sendMail({
+      from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: 'IELTS LMS — email test',
+      html: '<p>Email is working correctly! ✅</p>'
+    });
+    res.json({ ok: true, message: `Test email sent to ${to}` });
+  } catch (err) {
+    console.error('Test email error:', err);
+    res.status(500).json({ ok: false, error: err.message, code: err.code, responseCode: err.responseCode });
   }
 });
 
