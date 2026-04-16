@@ -222,7 +222,7 @@ app.get('/api/balance', authenticate, (req, res) => {
 // ─── Submission Routes ────────────────────────────────────────────────────────
 app.post('/api/submissions', authenticate, async (req, res) => {
   try {
-    const { task_type, prompt, essay } = req.body;
+    const { task_type, prompt, essay, image_base64, image_media_type } = req.body;
     if (!task_type || !prompt || !essay) {
       return res.status(400).json({ error: 'Task type, prompt, and essay are required' });
     }
@@ -235,11 +235,17 @@ app.post('/api/submissions', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Essay is too short to grade' });
     }
 
+    // Validate image if provided
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const imageData = (task_type === 'task1' && image_base64 && image_media_type && validImageTypes.includes(image_media_type))
+      ? { base64: image_base64, media_type: image_media_type }
+      : null;
+
     const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount);
     const submissionId = result.lastInsertRowid;
 
     // Start grading asynchronously
-    gradeSubmission(submissionId, req.user.id, task_type, prompt, essay, wordCount, minWords).catch(console.error);
+    gradeSubmission(submissionId, req.user.id, task_type, prompt, essay, wordCount, minWords, imageData).catch(console.error);
 
     res.json({ id: submissionId, status: 'grading', word_count: wordCount });
   } catch (err) {
@@ -266,7 +272,7 @@ app.delete('/api/submissions/:id', authenticate, (req, res) => {
 });
 
 // ─── AI Grading ───────────────────────────────────────────────────────────────
-async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords) {
+async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords, imageData) {
   db.updateSubmissionStatus(submissionId, 'grading');
 
   const taskLabel = taskType === 'task1' ? 'Task 1' : 'Task 2';
@@ -339,11 +345,25 @@ Respond ONLY with this exact JSON structure:
 For sentence_analysis: include one entry per sentence in order. Types are: simple, compound, complex, compound-complex, uncertain.`;
 
   try {
+    // Build message content — include image if student uploaded one
+    let messageContent;
+    if (imageData) {
+      messageContent = [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: imageData.media_type, data: imageData.base64 }
+        },
+        { type: 'text', text: userPrompt }
+      ];
+    } else {
+      messageContent = userPrompt;
+    }
+
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 6000,
       system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      messages: [{ role: 'user', content: messageContent }],
     });
 
     let jsonText = '';
@@ -754,55 +774,6 @@ app.put('/api/user/profile', authenticate, (req, res) => {
     db.updateUserProfile(req.user.id, { target_band: band });
   }
   res.json({ success: true });
-});
-
-// ─── Topic Rater ───────────────────────────────────────────────────────────────
-app.post('/api/rate-topic', authenticate, async (req, res) => {
-  const { prompt } = req.body;
-  if (!prompt || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
-
-  const systemPrompt = `You are an expert IELTS Task 1 examiner and test designer. Evaluate the given Task 1 prompt and return ONLY valid JSON with no markdown, no code fences, no extra text.`;
-
-  const userPrompt = `Rate this IELTS Academic Writing Task 1 prompt across four criteria.
-
-Prompt:
-"""
-${prompt.trim()}
-"""
-
-Return ONLY this JSON structure:
-{
-  "authenticity": { "score": <0-10>, "comment": "<is it a realistic, exam-style question?>" },
-  "difficulty": { "band": "<e.g. 5.5-6.5>", "comment": "<what band level does this target?>" },
-  "visual_type": "<bar chart | line graph | pie chart | table | process diagram | map | mixed | unclear>",
-  "quality": { "score": <0-10>, "comment": "<clarity, completeness, sufficient data for a good response>" },
-  "overall": "<2-3 sentence summary judgment>",
-  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
-}`;
-
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 600,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    });
-
-    const inputTokens = response.usage ? response.usage.input_tokens : 0;
-    const outputTokens = response.usage ? response.usage.output_tokens : 0;
-    const cost = calculateCost(inputTokens, outputTokens);
-    db.logUsage('topic-rater', cost, inputTokens + outputTokens);
-
-    let raw = response.content[0].text.trim();
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const result = JSON.parse(raw);
-    res.json(result);
-  } catch (err) {
-    console.error('Topic rater error:', err);
-    res.status(500).json({ error: 'Failed to rate topic. Please try again.' });
-  }
 });
 
 // ─── Band Score Tables ────────────────────────────────────────────────────────

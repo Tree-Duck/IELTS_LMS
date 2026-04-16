@@ -331,12 +331,6 @@ function showView(name) {
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'test-list') loadTestList();
   else if (name === 'test-history') loadTestHistory();
-  else if (name === 'topic-rater') {
-    const resultEl = document.getElementById('rater-result');
-    if (resultEl) resultEl.classList.add('hidden');
-    const errEl = document.getElementById('rater-error');
-    if (errEl) errEl.classList.add('hidden');
-  }
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -1086,11 +1080,59 @@ function updateTaskInfo() {
   const checked = document.querySelector('input[name="task_type"]:checked');
   if (checked) checked.nextElementSibling.classList.add('active');
 
+  // Show/hide image upload for Task 1
+  const imgSection = document.getElementById('task1-image-section');
+  if (imgSection) imgSection.classList.toggle('hidden', taskType !== 'task1');
+
   // Hide chart if switching away from Task 1
-  if (taskType !== 'task1') clearChart();
+  if (taskType !== 'task1') { clearChart(); removeImage(); }
 
   updateWordCount();
   updateTopicOptions();
+}
+
+/* ─── Task 1 Image Upload ─────────────────────────────────────────────────── */
+let task1ImageBase64 = null;
+let task1ImageMediaType = null;
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image must be under 5 MB.');
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    // Extract base64 and media type from data URL
+    const [header, b64] = dataUrl.split(',');
+    task1ImageBase64 = b64;
+    task1ImageMediaType = header.match(/:(.*?);/)[1];
+
+    // Show preview, hide placeholder
+    const preview = document.getElementById('image-preview');
+    const placeholder = document.getElementById('image-upload-placeholder');
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+    document.getElementById('remove-image-btn').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  task1ImageBase64 = null;
+  task1ImageMediaType = null;
+  const input = document.getElementById('task1-image-input');
+  if (input) input.value = '';
+  const preview = document.getElementById('image-preview');
+  if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+  const placeholder = document.getElementById('image-upload-placeholder');
+  if (placeholder) placeholder.classList.remove('hidden');
+  const btn = document.getElementById('remove-image-btn');
+  if (btn) btn.classList.add('hidden');
 }
 
 async function handleSubmit(e) {
@@ -1110,9 +1152,14 @@ async function handleSubmit(e) {
   btn.disabled = true; btn.textContent = 'Submitting…';
 
   try {
+    const body = { task_type, prompt, essay };
+    if (task_type === 'task1' && task1ImageBase64) {
+      body.image_base64 = task1ImageBase64;
+      body.image_media_type = task1ImageMediaType;
+    }
     const result = await api('/api/submissions', {
       method: 'POST',
-      body: JSON.stringify({ task_type, prompt, essay })
+      body: JSON.stringify(body)
     });
 
     successEl.innerHTML = `
@@ -1123,6 +1170,7 @@ async function handleSubmit(e) {
     // Reset form
     document.getElementById('essay-prompt').value = '';
     document.getElementById('essay-text').value = '';
+    removeImage();
     updateWordCount();
 
     // Auto-navigate to history after 2s
@@ -1512,80 +1560,6 @@ function renderRewriteMarkdown(text) {
   }
 
   return html;
-}
-
-/* ─── Topic Rater ─────────────────────────────────────────────────────────── */
-async function rateTopic() {
-  const promptVal = (document.getElementById('rater-prompt').value || '').trim();
-  const errEl = document.getElementById('rater-error');
-  const resultEl = document.getElementById('rater-result');
-  const btn = document.getElementById('rater-btn');
-
-  errEl.classList.add('hidden');
-  resultEl.classList.add('hidden');
-
-  if (!promptVal) {
-    errEl.textContent = 'Please paste a Task 1 prompt before rating.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Analysing…';
-
-  try {
-    const data = await api('/api/rate-topic', {
-      method: 'POST',
-      body: JSON.stringify({ prompt: promptVal })
-    });
-
-    const scoreColor = (n) => n >= 8 ? '#059669' : n >= 6 ? '#d97706' : '#dc2626';
-    const scoreBar = (n) => {
-      const pct = Math.round((n / 10) * 100);
-      const col = scoreColor(n);
-      return `<div class="rater-bar-track"><div class="rater-bar-fill" style="width:${pct}%;background:${col}"></div></div>`;
-    };
-
-    const improvHtml = Array.isArray(data.improvements) && data.improvements.length
-      ? `<ul class="rater-improvements">${data.improvements.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>`
-      : '';
-
-    resultEl.innerHTML = `
-      <div class="rater-results">
-        <div class="rater-score-grid">
-          <div class="rater-score-card">
-            <div class="rater-score-label">Authenticity</div>
-            <div class="rater-score-value" style="color:${scoreColor(data.authenticity.score)}">${data.authenticity.score}/10</div>
-            ${scoreBar(data.authenticity.score)}
-            <div class="rater-score-comment">${escHtml(data.authenticity.comment)}</div>
-          </div>
-          <div class="rater-score-card">
-            <div class="rater-score-label">Quality</div>
-            <div class="rater-score-value" style="color:${scoreColor(data.quality.score)}">${data.quality.score}/10</div>
-            ${scoreBar(data.quality.score)}
-            <div class="rater-score-comment">${escHtml(data.quality.comment)}</div>
-          </div>
-          <div class="rater-score-card">
-            <div class="rater-score-label">Target Difficulty</div>
-            <div class="rater-score-value">${escHtml(data.difficulty.band)}</div>
-            <div class="rater-score-comment">${escHtml(data.difficulty.comment)}</div>
-          </div>
-          <div class="rater-score-card">
-            <div class="rater-score-label">Visual Type</div>
-            <div class="rater-score-value rater-visual-type">${escHtml(data.visual_type)}</div>
-          </div>
-        </div>
-        ${data.overall ? `<div class="rater-overall"><strong>Overall:</strong> ${escHtml(data.overall)}</div>` : ''}
-        ${improvHtml ? `<div class="rater-improvements-section"><h4>💡 Suggested Improvements</h4>${improvHtml}</div>` : ''}
-      </div>`;
-    resultEl.classList.remove('hidden');
-  } catch (err) {
-    errEl.textContent = 'Rating failed: ' + err.message;
-    errEl.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '⭐ Rate This Topic';
-  }
 }
 
 /* ─── Mock Tests — List View ─────────────────────────────────────────────── */

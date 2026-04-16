@@ -153,9 +153,6 @@
         <button class="nav-item hidden" onclick="showView('admin-materials')" id="nav-admin-materials">
           <span class="nav-icon">📚</span> Materials
         </button>
-        <button class="nav-item" onclick="showView('topic-rater')" id="nav-topic-rater">
-          <span class="nav-icon">⭐</span> Rate Topic
-        </button>
         <button class="nav-item" onclick="showView('change-password')" id="nav-change-password">
           <span class="nav-icon">🔑</span> Change Password
         </button>
@@ -322,6 +319,21 @@
                 <div id="table-area" class="hidden"></div>
               </div>
 
+              <!-- Task 1 image upload -->
+              <div id="task1-image-section" class="form-group hidden">
+                <label>Your Visual (Chart / Graph / Table)</label>
+                <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('task1-image-input').click()">
+                  <input type="file" id="task1-image-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+                  <div id="image-upload-placeholder">
+                    <div class="image-upload-icon">🖼️</div>
+                    <div class="image-upload-text">Click to upload your chart or graph image</div>
+                    <div class="image-upload-hint">JPG, PNG, GIF or WebP — max 5 MB</div>
+                  </div>
+                  <img id="image-preview" class="hidden" alt="Chart preview" style="max-width:100%;border-radius:8px;">
+                </div>
+                <button type="button" class="btn-remove-image hidden" id="remove-image-btn" onclick="removeImage()">✕ Remove image</button>
+              </div>
+
               <!-- Paste-hint nudge -->
               <div id="paste-hint-nudge" class="paste-hint-nudge hidden">
                 💡 <strong>Your question detected!</strong> Click <em>Generate Hints</em> in the right panel for AI ideas &amp; vocabulary tailored to your topic.
@@ -429,23 +441,6 @@
           <div class="form-actions">
             <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Update Password</button>
           </div>
-        </div>
-      </div>
-
-      <!-- Topic Rater View -->
-      <div id="view-topic-rater" class="view hidden">
-        <div class="page-header">
-          <h2>Task 1 Topic Rater</h2>
-          <p>Paste a Task 1 prompt to get an AI quality assessment</p>
-        </div>
-        <div class="rater-card">
-          <div class="form-group">
-            <label for="rater-prompt">Task 1 Prompt</label>
-            <textarea id="rater-prompt" rows="6" placeholder="The chart below shows the percentage of households in different income brackets in 2020..."></textarea>
-          </div>
-          <button type="button" class="btn btn-primary" id="rater-btn" onclick="rateTopic()">⭐ Rate This Topic</button>
-          <div id="rater-error" class="error-msg hidden"></div>
-          <div id="rater-result" class="hidden"></div>
         </div>
       </div>
 

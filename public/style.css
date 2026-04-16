@@ -1280,99 +1280,41 @@ input:focus, textarea:focus, select:focus {
   #view-history,
   #view-admin,
   #view-change-password,
-  #view-topic-rater,
   #view-rewrite { display: none !important; }
   .feedback-section { break-inside: avoid; }
   .criterion-card { break-inside: avoid; }
   .overall-band-display { break-inside: avoid; }
 }
 
-/* ─── Topic Rater ─────────────────────────────────────────────────────────── */
-.rater-card {
-  background: #fff;
-  border: 1px solid var(--gray-200);
-  border-radius: 14px;
-  padding: 28px 32px;
-  max-width: 720px;
-}
-.rater-results {
-  margin-top: 24px;
-  border-top: 1px solid var(--gray-200);
-  padding-top: 24px;
-}
-.rater-score-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.rater-score-card {
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
+/* ─── Task 1 Image Upload ─────────────────────────────────────────────────── */
+.image-upload-area {
+  border: 2px dashed var(--gray-300);
   border-radius: 12px;
-  padding: 16px;
-}
-.rater-score-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gray-500);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-.rater-score-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--gray-800);
-  margin-bottom: 8px;
-}
-.rater-visual-type {
-  font-size: 14px;
-  text-transform: capitalize;
-  color: var(--primary);
-}
-.rater-bar-track {
-  height: 6px;
-  background: var(--gray-200);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-.rater-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-}
-.rater-score-comment {
-  font-size: 12px;
-  color: var(--gray-600);
-  line-height: 1.5;
-}
-.rater-overall {
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
   background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: 10px;
-  padding: 14px 16px;
-  font-size: 14px;
-  color: var(--gray-700);
-  line-height: 1.6;
-  margin-bottom: 16px;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
 }
-.rater-improvements-section h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-700);
-  margin-bottom: 8px;
+.image-upload-area:hover {
+  border-color: var(--primary);
+  background: #eef2ff;
 }
-.rater-improvements {
-  padding-left: 18px;
-  margin: 0;
+.image-upload-icon { font-size: 36px; margin-bottom: 8px; }
+.image-upload-text { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+.image-upload-hint { font-size: 12px; color: var(--gray-500); }
+.image-upload-area img { display: block; margin: 0 auto; }
+.btn-remove-image {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 4px 0;
 }
-.rater-improvements li {
-  font-size: 14px;
-  color: var(--gray-600);
-  margin-bottom: 6px;
-  line-height: 1.5;
-}
+.btn-remove-image:hover { color: #dc2626; }
 
 /* ─── Change Password view ────────────────────────────────────────────────── */
 .change-password-card {
