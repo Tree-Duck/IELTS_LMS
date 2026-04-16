@@ -676,7 +676,25 @@ app.post('/api/change-password', authenticate, async (req, res) => {
   }
 });
 
-// ─── Test Email (admin debug) ─────────────────────────────────────────────────
+// ─── Test Email (temporary public debug endpoint) ─────────────────────────────
+app.get('/api/test-email', async (req, res) => {
+  const to = process.env.ADMIN_EMAIL || process.env.GMAIL_USER;
+  if (!process.env.GMAIL_USER) return res.json({ ok: false, error: 'GMAIL_USER not set' });
+  try {
+    await transporter.sendMail({
+      from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: 'IELTS LMS — email test ✅',
+      html: '<p>Email is working correctly!</p>'
+    });
+    res.json({ ok: true, message: `Test email sent to ${to}` });
+  } catch (err) {
+    console.error('Test email error:', err);
+    res.status(500).json({ ok: false, error: err.message, code: err.code, responseCode: err.responseCode });
+  }
+});
+
+// ─── Test Email (admin only) ──────────────────────────────────────────────────
 app.post('/api/admin/test-email', authenticate, adminOnly, async (req, res) => {
   const to = req.body.to || req.user.email;
   try {
