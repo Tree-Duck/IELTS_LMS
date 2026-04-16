@@ -95,26 +95,31 @@ app.get('/api/balance', authenticate, (req, res) => {
 
 // ─── Submission Routes ────────────────────────────────────────────────────────
 app.post('/api/submissions', authenticate, async (req, res) => {
-  const { task_type, prompt, essay } = req.body;
-  if (!task_type || !prompt || !essay) {
-    return res.status(400).json({ error: 'Task type, prompt, and essay are required' });
-  }
-  if (!['task1', 'task2'].includes(task_type)) {
-    return res.status(400).json({ error: 'Task type must be task1 or task2' });
-  }
-  const wordCount = essay.trim().split(/\s+/).length;
-  const minWords = task_type === 'task1' ? 150 : 250;
-  if (wordCount < 50) {
-    return res.status(400).json({ error: 'Essay is too short to grade' });
-  }
+  try {
+    const { task_type, prompt, essay } = req.body;
+    if (!task_type || !prompt || !essay) {
+      return res.status(400).json({ error: 'Task type, prompt, and essay are required' });
+    }
+    if (!['task1', 'task2'].includes(task_type)) {
+      return res.status(400).json({ error: 'Task type must be task1 or task2' });
+    }
+    const wordCount = essay.trim().split(/\s+/).length;
+    const minWords = task_type === 'task1' ? 150 : 250;
+    if (wordCount < 50) {
+      return res.status(400).json({ error: 'Essay is too short to grade' });
+    }
 
-  const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount);
-  const submissionId = result.lastInsertRowid;
+    const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount);
+    const submissionId = result.lastInsertRowid;
 
-  // Start grading asynchronously
-  gradeSubmission(submissionId, task_type, prompt, essay, wordCount, minWords).catch(console.error);
+    // Start grading asynchronously
+    gradeSubmission(submissionId, task_type, prompt, essay, wordCount, minWords).catch(console.error);
 
-  res.json({ id: submissionId, status: 'grading', word_count: wordCount });
+    res.json({ id: submissionId, status: 'grading', word_count: wordCount });
+  } catch (err) {
+    console.error('Submission error:', err);
+    res.status(500).json({ error: 'Failed to submit essay. Please try again.' });
+  }
 });
 
 app.get('/api/submissions', authenticate, (req, res) => {
