@@ -197,4 +197,18 @@ const db = {
   }
 };
 
+// Migration: auto-verify legacy users who registered before email verification was enforced.
+// These users have verified=false but no verification_code (it was never sent to them).
+(function migrateLegacyUsers() {
+  const data = load();
+  let changed = false;
+  data.users.forEach(u => {
+    if (!u.verified && !u.verification_code) {
+      u.verified = true;
+      changed = true;
+    }
+  });
+  if (changed) save(data);
+})();
+
 module.exports = db;
