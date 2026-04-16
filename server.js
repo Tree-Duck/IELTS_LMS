@@ -30,8 +30,25 @@ function calculateCost(inputTokens, outputTokens) {
 // ─── Email / Admin Helpers ─────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+  connectionTimeout: 8000,
+  greetingTimeout: 8000,
+  socketTimeout: 8000,
 });
+
+// Wrap any email send so it never hangs the server response
+async function sendEmailSafe(sendFn) {
+  try {
+    await Promise.race([
+      sendFn(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+    ]);
+    return true;
+  } catch (err) {
+    console.error('Email send failed (non-fatal):', err.message);
+    return false;
+  }
+}
 
 function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -49,6 +66,23 @@ async function sendVerificationEmail(email, name, code) {
         <p style="color:#374151">Your email verification code is:</p>
         <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
         <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't register, you can safely ignore this email.</p>
+      </div>
+    `
+  });
+}
+
+async function sendPasswordResetEmail(email, name, code) {
+  await transporter.sendMail({
+    from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: 'Reset your IELTS LMS password',
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
+        <h2 style="color:#4f46e5;margin-bottom:8px">IELTS Writing LMS</h2>
+        <p style="color:#374151">Hi <strong>${name}</strong>,</p>
+        <p style="color:#374151">We received a request to reset your password. Your reset code is:</p>
+        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
+        <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't request a password reset, you can safely ignore this email.</p>
       </div>
     `
   });
@@ -95,7 +129,7 @@ app.post('/api/register', async (req, res) => {
     if (process.env.GMAIL_USER) {
       const code = generateCode();
       db.setVerificationCode(userId, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-      await sendVerificationEmail(email.toLowerCase(), name, code);
+      await sendEmailSafe(() => sendVerificationEmail(email.toLowerCase(), name, code));
       return res.json({ needsVerification: true, email: email.toLowerCase() });
     }
     const token = jwt.sign({ id: userId, name, email: email.toLowerCase(), role }, JWT_SECRET, { expiresIn: '7d' });
@@ -121,7 +155,7 @@ app.post('/api/login', async (req, res) => {
   if (process.env.GMAIL_USER && !user.verified) {
     const code = generateCode();
     db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-    await sendVerificationEmail(user.email, user.name, code);
+    await sendEmailSafe(() => sendVerificationEmail(user.email, user.name, code));
     return res.json({ needsVerification: true, email: user.email });
   }
   const role = adminRole(user.email);
@@ -156,7 +190,7 @@ app.post('/api/resend-verification', async (req, res) => {
     if (user.verified) return res.status(400).json({ error: 'Email already verified' });
     const code = generateCode();
     db.setVerificationCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-    await sendVerificationEmail(user.email, user.name, code);
+    await sendEmailSafe(() => sendVerificationEmail(user.email, user.name, code));
     res.json({ message: 'Code resent' });
   } catch (err) {
     console.error('Resend error:', err);
@@ -572,6 +606,65 @@ ${submission.essay}`;
     console.error('Rewrite error:', err);
     res.write('data: [DONE]\n\n');
     res.end();
+  }
+});
+
+// ─── Password Reset (unauthenticated) ────────────────────────────────────────
+app.post('/api/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+    const user = db.getUserByEmail(email.toLowerCase());
+    // Always return success to avoid user enumeration
+    if (!user) return res.json({ sent: true });
+    const code = generateCode();
+    db.setResetCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
+    if (process.env.GMAIL_USER) {
+      await sendEmailSafe(() => sendPasswordResetEmail(user.email, user.name, code));
+    }
+    res.json({ sent: true, email: user.email });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { email, code, new_password } = req.body;
+    if (!email || !code || !new_password) return res.status(400).json({ error: 'Email, code, and new password are required' });
+    if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const user = db.getUserByEmail(email.toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.reset_code || user.reset_code !== code) return res.status(400).json({ error: 'Invalid reset code' });
+    if (new Date(user.reset_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
+    const hashed = await bcrypt.hash(new_password, 10);
+    db.resetPassword(user.id, hashed);
+    const role = adminRole(user.email);
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Password reset failed' });
+  }
+});
+
+// ─── Change Password (authenticated) ─────────────────────────────────────────
+app.post('/api/change-password', authenticate, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+    if (!current_password || !new_password) return res.status(400).json({ error: 'Current password and new password are required' });
+    if (new_password.length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    const user = db.getUserById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const match = await bcrypt.compare(current_password, user.password);
+    if (!match) return res.status(400).json({ error: 'Current password is incorrect' });
+    const hashed = await bcrypt.hash(new_password, 10);
+    db.updatePassword(user.id, hashed);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Failed to change password' });
   }
 });
 

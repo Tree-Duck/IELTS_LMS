@@ -1154,3 +1154,25 @@ input:focus, textarea:focus, select:focus {
 .badge-red    { background: #fee2e2; color: #991b1b; }
 .badge-purple { background: #ede9fe; color: #5b21b6; }
 .badge-gray   { background: #f3f4f6; color: #374151; }
+
+/* ─── Forgot Password link ────────────────────────────────────────────────── */
+.forgot-link-row {
+  text-align: right;
+  margin-bottom: 4px;
+  margin-top: -4px;
+}
+.forgot-link {
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+}
+.forgot-link:hover { text-decoration: underline; }
+
+/* ─── Change Password view ────────────────────────────────────────────────── */
+.change-password-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 28px 32px;
+  max-width: 440px;
+}

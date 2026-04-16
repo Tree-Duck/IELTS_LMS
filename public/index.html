@@ -32,6 +32,9 @@
           <input type="password" id="login-password" placeholder="••••••••" required />
         </div>
         <div id="login-error" class="error-msg hidden"></div>
+        <div class="forgot-link-row">
+          <a href="#" onclick="showForgotForm(); return false;" class="forgot-link">Forgot password?</a>
+        </div>
         <div class="form-group remember-me-row">
           <label class="checkbox-label">
             <input type="checkbox" id="remember-me" />
@@ -57,6 +60,47 @@
         <div id="register-error" class="error-msg hidden"></div>
         <button type="submit" class="btn btn-primary btn-full">Create Account</button>
       </form>
+
+      <!-- Forgot Password Form -->
+      <div id="forgot-form" class="auth-form hidden">
+        <div class="verify-info">
+          <div class="verify-icon">🔑</div>
+          <p>Enter your email and we'll send you a reset code.</p>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="forgot-email" placeholder="you@example.com" />
+        </div>
+        <div id="forgot-error" class="error-msg hidden"></div>
+        <div id="forgot-success" class="success-msg hidden"></div>
+        <button type="button" class="btn btn-primary btn-full" onclick="handleForgotPassword()">Send Reset Code</button>
+        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showAuthForm('login')">← Back to Sign In</button>
+      </div>
+
+      <!-- Reset Password Form -->
+      <div id="reset-form" class="auth-form hidden">
+        <div class="verify-info">
+          <div class="verify-icon">🔒</div>
+          <p>Enter the code sent to</p>
+          <strong id="reset-email-display">your email</strong>
+        </div>
+        <div class="form-group">
+          <label>Reset Code</label>
+          <input type="text" id="reset-code" placeholder="123456" maxlength="6"
+            inputmode="numeric" autocomplete="one-time-code" />
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="reset-new-password" placeholder="Min 6 characters" />
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="reset-confirm-password" placeholder="Repeat new password" />
+        </div>
+        <div id="reset-error" class="error-msg hidden"></div>
+        <button type="button" class="btn btn-primary btn-full" onclick="handleResetPassword()">Set New Password</button>
+        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showForgotForm()">← Resend Code</button>
+      </div>
 
       <!-- Email Verification Form -->
       <div id="verify-form" class="auth-form hidden">
@@ -98,6 +142,9 @@
         </button>
         <button class="nav-item hidden" onclick="showView('admin')" id="nav-admin">
           <span class="nav-icon">👥</span> Users
+        </button>
+        <button class="nav-item" onclick="showView('change-password')" id="nav-change-password">
+          <span class="nav-icon">🔑</span> Change Password
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -296,6 +343,33 @@
           <p>All registered accounts on this platform</p>
         </div>
         <div id="admin-users-table"></div>
+      </div>
+
+      <!-- Change Password View -->
+      <div id="view-change-password" class="view hidden">
+        <div class="page-header">
+          <h2>Change Password</h2>
+          <p>Update your account password</p>
+        </div>
+        <div class="change-password-card">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="cp-current" placeholder="Your current password" />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="cp-new" placeholder="Min 6 characters" />
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="cp-confirm" placeholder="Repeat new password" />
+          </div>
+          <div id="cp-error" class="error-msg hidden"></div>
+          <div id="cp-success" class="success-msg hidden"></div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Update Password</button>
+          </div>
+        </div>
       </div>
 
       <!-- Rewrite View -->

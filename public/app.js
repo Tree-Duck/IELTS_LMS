@@ -6,6 +6,7 @@ let selectedTopic = 'random';
 let activeChart = null;       // Chart.js instance
 let promptUserTyped = false;  // tracks manual paste/type in prompt
 let pendingVerifyEmail = null; // email awaiting verification
+let pendingResetEmail = null;  // email awaiting password reset
 
 const TOPIC_OPTIONS = {
   task2: [
@@ -77,6 +78,25 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'login')));
   document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
   document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.querySelector('.tab-bar').classList.remove('hidden');
+  document.getElementById('forgot-form').classList.add('hidden');
+  document.getElementById('reset-form').classList.add('hidden');
+  document.getElementById('verify-form').classList.add('hidden');
+}
+
+// Show any one auth form, hiding all others
+function showAuthForm(which) {
+  const forms = ['login-form', 'register-form', 'forgot-form', 'reset-form', 'verify-form'];
+  forms.forEach(id => document.getElementById(id).classList.add('hidden'));
+  const tabBar = document.querySelector('.tab-bar');
+  if (which === 'login' || which === 'register') {
+    tabBar.classList.remove('hidden');
+    document.getElementById(which + '-form').classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (which === 'login')));
+  } else {
+    tabBar.classList.add('hidden');
+    document.getElementById(which + '-form').classList.remove('hidden');
+  }
 }
 
 async function handleLogin(e) {
@@ -180,6 +200,72 @@ async function handleResendCode() {
   }
 }
 
+/* ─── Forgot / Reset Password ────────────────────────────────────────────── */
+function showForgotForm() {
+  showAuthForm('forgot');
+  document.getElementById('forgot-email').value = '';
+  document.getElementById('forgot-error').classList.add('hidden');
+  document.getElementById('forgot-success').classList.add('hidden');
+  document.getElementById('forgot-email').focus();
+}
+
+function showResetForm(email) {
+  pendingResetEmail = email;
+  document.getElementById('reset-email-display').textContent = email;
+  showAuthForm('reset');
+  document.getElementById('reset-code').value = '';
+  document.getElementById('reset-new-password').value = '';
+  document.getElementById('reset-confirm-password').value = '';
+  document.getElementById('reset-error').classList.add('hidden');
+  document.getElementById('reset-code').focus();
+}
+
+async function handleForgotPassword() {
+  const errEl = document.getElementById('forgot-error');
+  const okEl = document.getElementById('forgot-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { errEl.textContent = 'Please enter your email address.'; errEl.classList.remove('hidden'); return; }
+  try {
+    const data = await api('/api/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+    if (data.email) {
+      showResetForm(data.email);
+    } else {
+      // User not found — still show success message to avoid enumeration
+      okEl.textContent = 'If that email is registered, a reset code has been sent.';
+      okEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function handleResetPassword() {
+  const errEl = document.getElementById('reset-error');
+  errEl.classList.add('hidden');
+  const code = document.getElementById('reset-code').value.trim();
+  const newPw = document.getElementById('reset-new-password').value;
+  const confirmPw = document.getElementById('reset-confirm-password').value;
+  if (code.length !== 6) { errEl.textContent = 'Enter the 6-digit reset code.'; errEl.classList.remove('hidden'); return; }
+  if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Passwords do not match.'; errEl.classList.remove('hidden'); return; }
+  try {
+    const data = await api('/api/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email: pendingResetEmail, code, new_password: newPw })
+    });
+    saveSession(data);
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
 function saveSession({ token: t, user }) {
   token = t;
   currentUser = user;
@@ -221,6 +307,12 @@ function showView(name) {
   else if (name === 'history') loadHistory();
   else if (name === 'submit') { loadBudget(); updateTopicOptions(); }
   else if (name === 'admin') loadAdminUsers();
+  else if (name === 'change-password') {
+    // clear form on open
+    ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('cp-error').classList.add('hidden');
+    document.getElementById('cp-success').classList.add('hidden');
+  }
 }
 
 /* ─── Admin Panel ────────────────────────────────────────────────────────── */
@@ -269,6 +361,33 @@ async function loadAdminUsers() {
     `;
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+/* ─── Change Password ────────────────────────────────────────────────────── */
+async function handleChangePassword() {
+  const errEl = document.getElementById('cp-error');
+  const okEl = document.getElementById('cp-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+  const current = document.getElementById('cp-current').value;
+  const newPw = document.getElementById('cp-new').value;
+  const confirm = document.getElementById('cp-confirm').value;
+  if (!current) { errEl.textContent = 'Please enter your current password.'; errEl.classList.remove('hidden'); return; }
+  if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+  if (newPw !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
+  try {
+    await api('/api/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password: current, new_password: newPw })
+    });
+    okEl.textContent = '✓ Password updated successfully!';
+    okEl.classList.remove('hidden');
+    document.getElementById('cp-current').value = '';
+    document.getElementById('cp-new').value = '';
+    document.getElementById('cp-confirm').value = '';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
   }
 }
 

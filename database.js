@@ -26,6 +26,7 @@ const db = {
     const user = {
       id: data._ids.users, name, email, password,
       role, verified: false, verification_code: null, verification_expires: null,
+      reset_code: null, reset_expires: null,
       created_at: new Date().toISOString()
     };
     data.users.push(user);
@@ -159,6 +160,24 @@ const db = {
 
   getUserById(id) {
     return load().users.find(u => u.id === id) || null;
+  },
+
+  setResetCode(userId, code, expires) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.reset_code = code; u.reset_expires = expires; save(data); }
+  },
+
+  resetPassword(userId, hashedPassword) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.password = hashedPassword; u.reset_code = null; u.reset_expires = null; save(data); }
+  },
+
+  updatePassword(userId, hashedPassword) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.password = hashedPassword; save(data); }
   },
 
   getAllUsersWithStats() {
