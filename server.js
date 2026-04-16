@@ -4,7 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Anthropic = require('@anthropic-ai/sdk');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const db = require('./database');
 const path = require('path');
 
@@ -28,27 +28,19 @@ function calculateCost(inputTokens, outputTokens) {
 }
 
 // ─── Email / Admin Helpers ─────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Wrap any email send so it never hangs the server response
 async function sendEmailSafe(sendFn) {
   try {
     await Promise.race([
       sendFn(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout after 10s')), 10000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout after 15s')), 15000))
     ]);
     console.log('Email sent successfully');
     return true;
   } catch (err) {
-    console.error('EMAIL SEND FAILED:', err.message, err.code || '', err.responseCode || '');
+    console.error('EMAIL SEND FAILED:', err.message, err.code || '', err.statusCode || '');
     return false;
   }
 }
@@ -58,8 +50,8 @@ function generateCode() {
 }
 
 async function sendVerificationEmail(email, name, code) {
-  await transporter.sendMail({
-    from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+  const { error } = await resend.emails.send({
+    from: 'IELTS Writing LMS <onboarding@resend.dev>',
     to: email,
     subject: 'Your IELTS LMS verification code',
     html: `
@@ -72,11 +64,12 @@ async function sendVerificationEmail(email, name, code) {
       </div>
     `
   });
+  if (error) throw new Error(error.message);
 }
 
 async function sendPasswordResetEmail(email, name, code) {
-  await transporter.sendMail({
-    from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+  const { error } = await resend.emails.send({
+    from: 'IELTS Writing LMS <onboarding@resend.dev>',
     to: email,
     subject: 'Reset your IELTS LMS password',
     html: `
@@ -89,6 +82,7 @@ async function sendPasswordResetEmail(email, name, code) {
       </div>
     `
   });
+  if (error) throw new Error(error.message);
 }
 
 function adminRole(email) {
@@ -678,19 +672,21 @@ app.post('/api/change-password', authenticate, async (req, res) => {
 
 // ─── Test Email (temporary public debug endpoint) ─────────────────────────────
 app.get('/api/test-email', async (req, res) => {
-  const to = process.env.ADMIN_EMAIL || process.env.GMAIL_USER;
-  if (!process.env.GMAIL_USER) return res.json({ ok: false, error: 'GMAIL_USER not set' });
+  const to = process.env.ADMIN_EMAIL;
+  if (!process.env.RESEND_API_KEY) return res.json({ ok: false, error: 'RESEND_API_KEY not set' });
+  if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
   try {
-    await transporter.sendMail({
-      from: `"IELTS Writing LMS" <${process.env.GMAIL_USER}>`,
+    const { error } = await resend.emails.send({
+      from: 'IELTS Writing LMS <onboarding@resend.dev>',
       to,
       subject: 'IELTS LMS — email test ✅',
       html: '<p>Email is working correctly!</p>'
     });
+    if (error) throw new Error(error.message);
     res.json({ ok: true, message: `Test email sent to ${to}` });
   } catch (err) {
     console.error('Test email error:', err);
-    res.status(500).json({ ok: false, error: err.message, code: err.code, responseCode: err.responseCode });
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
 
