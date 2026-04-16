@@ -136,7 +136,15 @@ async function handleRegister(e) {
       method: 'POST',
       body: JSON.stringify({ name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-password').value })
     });
-    if (data.needsVerification) { showVerifyForm(data.email); return; }
+    if (data.needsVerification) {
+      showVerifyForm(data.email);
+      if (data.emailSent === false) {
+        const verifyErr = document.getElementById('verify-error');
+        verifyErr.textContent = "⚠️ We couldn't send the verification code. Click \"Resend Code\" to try again.";
+        verifyErr.classList.remove('hidden');
+      }
+      return;
+    }
     saveSession(data);
     showApp();
   } catch (err) {
@@ -305,7 +313,7 @@ function showView(name) {
 
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { loadBudget(); updateTopicOptions(); }
+  else if (name === 'submit') { if (currentUser && currentUser.role === 'admin') loadBudget(); updateTopicOptions(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'change-password') {
     // clear form on open
@@ -821,11 +829,13 @@ async function requestBothHints() {
   btn.disabled = false;
   btn.textContent = '✨ Generate Both Hints';
   hidePasteNudge();
-  loadBudget();
+  if (currentUser && currentUser.role === 'admin') loadBudget();
 }
 
 async function loadBudget() {
   try {
+    const bar = document.getElementById('budget-bar');
+    if (bar) bar.classList.remove('hidden');
     const data = await api('/api/balance');
     document.getElementById('budget-remaining').textContent = `💰 Balance: $${data.remaining_balance}`;
     const essays = data.estimated_essays_remaining;
@@ -1242,7 +1252,7 @@ async function viewRewrite(submissionId) {
       },
       () => {
         contentEl.innerHTML = renderRewriteMarkdown(raw);
-        loadBudget();
+        if (currentUser && currentUser.role === 'admin') loadBudget();
       }
     );
   } catch (err) {

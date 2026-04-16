@@ -130,8 +130,8 @@ app.post('/api/register', async (req, res) => {
     const userId = result.lastInsertRowid;
     const code = generateCode();
     db.setVerificationCode(userId, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
-    await sendEmailSafe(() => sendVerificationEmail(email.toLowerCase(), name, code));
-    return res.json({ needsVerification: true, email: email.toLowerCase() });
+    const emailSent = await sendEmailSafe(() => sendVerificationEmail(email.toLowerCase(), name, code));
+    return res.json({ needsVerification: true, email: email.toLowerCase(), emailSent });
   } catch (err) {
     if (err.message.includes('UNIQUE')) {
       return res.status(409).json({ error: 'Email already registered' });
