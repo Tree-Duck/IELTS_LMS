@@ -1773,9 +1773,18 @@ function renderQuestions(section) {
 function renderQuestion(q) {
   let inputHtml = '';
   if (q.q_type === 'mcq') {
-    inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
-      `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${k}" ${currentAnswers[q.q_number]===k?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
-    ).join('');
+    // Multi-answer if correct_answer contains a comma (e.g. "B,D,G,H")
+    const isMulti = q.correct_answer && String(q.correct_answer).includes(',');
+    const savedAnswers = (currentAnswers[q.q_number] || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (isMulti) {
+      inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
+        `<label class="q-option"><input type="checkbox" name="q_${q.q_number}" value="${k}" ${savedAnswers.includes(k)?'checked':''} onchange="setMcqMulti('${q.q_number}',this)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
+      ).join('');
+    } else {
+      inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
+        `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${k}" ${currentAnswers[q.q_number]===k?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
+      ).join('');
+    }
   } else if (q.q_type === 'tfng') {
     inputHtml = ['TRUE','FALSE','NOT GIVEN'].map(v =>
       `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${v}" ${currentAnswers[q.q_number]===v?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> ${v}</label>`
@@ -1805,6 +1814,12 @@ function setAnswer(key, value) {
   // Update nav button
   const navBtn = document.querySelector(`.q-nav-btn[onclick*="'${key}'"]`);
   if (navBtn) navBtn.classList.toggle('answered', !!value);
+}
+
+function setMcqMulti(qNum, checkbox) {
+  const checked = [...document.querySelectorAll(`input[name="q_${qNum}"]:checked`)]
+    .map(cb => cb.value);
+  setAnswer(String(qNum), checked.join(','));
 }
 
 function scrollToQuestion(key) {
@@ -2231,11 +2246,20 @@ function validateImportJson() {
           errors.push(`${loc}: TFNG correct_answer must be exactly TRUE, FALSE, or NOT GIVEN.`);
         }
         if (q.q_type === 'mcq') {
-          if (!q.options || !['A','B','C','D'].every(k => q.options[k])) {
-            errors.push(`${loc}: MCQ questions need options A, B, C, D.`);
-          }
-          if (!['A','B','C','D'].includes(q.correct_answer)) {
-            errors.push(`${loc}: MCQ correct_answer must be A, B, C, or D.`);
+          if (!q.options || typeof q.options !== 'object' || !Object.keys(q.options).length) {
+            errors.push(`${loc}: MCQ questions need an "options" object (e.g. {"A":"...", "B":"..."}).`);
+          } else {
+            // correct_answer can be a single key ("B") or comma-separated keys ("B,D,G,H")
+            const optionKeys = Object.keys(q.options).map(k => k.trim().toUpperCase());
+            const answerKeys = String(q.correct_answer).split(',').map(k => k.trim().toUpperCase()).filter(Boolean);
+            if (!answerKeys.length) {
+              errors.push(`${loc}: MCQ correct_answer is missing.`);
+            } else {
+              const invalid = answerKeys.filter(k => !optionKeys.includes(k));
+              if (invalid.length) {
+                errors.push(`${loc}: MCQ correct_answer "${invalid.join(',')}" not found in options.`);
+              }
+            }
           }
         }
         if (q.q_type === 'matching' && (!Array.isArray(q.sub_questions) || q.sub_questions.length === 0)) {

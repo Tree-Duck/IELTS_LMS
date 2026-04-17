@@ -835,10 +835,19 @@ function scoreAttempt(test, answers) {
         }
       } else {
         total++; sec_total++;
-        const given = (answers[String(q.q_number)] || '').trim().toLowerCase();
+        const givenRaw = (answers[String(q.q_number)] || '').trim().toLowerCase();
         const correct = (q.correct_answer || '').trim().toLowerCase();
         const alts = (q.accept_alternatives || []).map(a => a.trim().toLowerCase());
-        const isCorrect = given === correct || alts.includes(given);
+        // Support multi-answer MCQ (comma-separated): compare sorted arrays
+        let isCorrect;
+        if (correct.includes(',') || givenRaw.includes(',')) {
+          const givenArr = givenRaw.split(',').map(s => s.trim()).filter(Boolean).sort();
+          const correctArr = correct.split(',').map(s => s.trim()).filter(Boolean).sort();
+          isCorrect = givenArr.length === correctArr.length && givenArr.every((v, i) => v === correctArr[i]);
+        } else {
+          const given = givenRaw;
+          isCorrect = given === correct || alts.includes(given);
+        }
         if (isCorrect) { raw++; sec_correct++; }
         else wrong_q_numbers.push(String(q.q_number));
       }
@@ -994,8 +1003,8 @@ app.post('/api/admin/tests/import', authenticate, adminOnly, (req, res) => {
         if (q.q_type !== 'matching') {
           if (!q.correct_answer && q.correct_answer !== 0)
             return res.status(400).json({ error: `${qLabel}: missing "correct_answer".` });
-          if (q.q_type === 'mcq' && !q.options)
-            return res.status(400).json({ error: `${qLabel}: MCQ questions require "options" object with keys A, B, C, D.` });
+          if (q.q_type === 'mcq' && (!q.options || typeof q.options !== 'object' || !Object.keys(q.options).length))
+            return res.status(400).json({ error: `${qLabel}: MCQ questions require an "options" object (e.g. {"A":"...", "B":"..."}).` });
           if (q.q_type === 'tfng' && !['TRUE','FALSE','NOT GIVEN'].includes(String(q.correct_answer).toUpperCase()))
             return res.status(400).json({ error: `${qLabel}: tfng correct_answer must be TRUE, FALSE, or NOT GIVEN.` });
         } else {
