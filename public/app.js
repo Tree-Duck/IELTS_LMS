@@ -1642,8 +1642,53 @@ async function startTest(testId) {
     renderTestTaking();
     startTestTimer();
     startAutosave(testId);
+    initTestResizer();
   } catch (err) {
     alert('Failed to start test: ' + err.message);
+  }
+}
+
+function initTestResizer() {
+  const resizer  = document.getElementById('test-resizer');
+  const leftPanel  = document.getElementById('test-left-panel');
+  const rightPanel = document.getElementById('test-right-panel');
+  if (!resizer || !leftPanel || !rightPanel) return;
+
+  // Reset any previous inline sizing so flex defaults take over fresh
+  leftPanel.style.flex  = '';
+  leftPanel.style.width = '';
+
+  let startX, startLeftWidth;
+
+  resizer.addEventListener('mousedown', (e) => {
+    startX = e.clientX;
+    startLeftWidth = leftPanel.getBoundingClientRect().width;
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+
+  function onMove(e) {
+    const dx = e.clientX - startX;
+    const newWidth = startLeftWidth + dx;
+    const bodyWidth = resizer.parentElement.getBoundingClientRect().width;
+    const min = 280;
+    const max = bodyWidth - 280 - 6; // 6px = resizer width
+    if (newWidth >= min && newWidth <= max) {
+      leftPanel.style.flex  = 'none';
+      leftPanel.style.width = newWidth + 'px';
+    }
+  }
+
+  function onUp() {
+    resizer.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
   }
 }
 
@@ -1701,16 +1746,22 @@ function renderTestSection() {
 function renderQNav() {
   const navEl = document.getElementById('q-nav-grid');
   const section = currentTestData.sections[currentSectionIndex];
-  const qNums = [];
+  const items = [];
   for (const q of (section.questions || [])) {
     if (q.q_type === 'matching' && q.sub_questions) {
-      for (const sq of q.sub_questions) qNums.push(`${q.q_number}_${sq.label}`);
+      q.sub_questions.forEach((sq, idx) => {
+        const key = `${q.q_number}_${sq.label}`;
+        // Extract leading number from label if present (e.g. "3 Some description" → "3"), else fall back to q_number+idx
+        const numMatch = sq.label.match(/^(\d+)/);
+        const display = numMatch ? numMatch[1] : String(q.q_number + idx);
+        items.push({ key, display });
+      });
     } else {
-      qNums.push(String(q.q_number));
+      items.push({ key: String(q.q_number), display: String(q.q_number) });
     }
   }
-  navEl.innerHTML = qNums.map(k =>
-    `<button class="q-nav-btn ${currentAnswers[k] ? 'answered' : ''}" onclick="scrollToQuestion('${k}')">${k}</button>`
+  navEl.innerHTML = items.map(({ key, display }) =>
+    `<button class="q-nav-btn ${currentAnswers[key] ? 'answered' : ''}" onclick="scrollToQuestion('${key.replace(/'/g, "\\'")}')">${display}</button>`
   ).join('');
 }
 

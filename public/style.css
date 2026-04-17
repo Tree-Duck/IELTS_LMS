@@ -1417,19 +1417,49 @@ input:focus, textarea:focus, select:focus {
 }
 .test-left {
   flex: 1;
+  min-width: 280px;
   padding: 20px 24px;
   overflow-y: auto;
-  border-right: 1px solid var(--gray-200);
   background: var(--gray-50);
+}
+.test-resizer {
+  width: 6px;
+  flex-shrink: 0;
+  background: var(--gray-200);
+  cursor: col-resize;
+  transition: background .15s;
+  position: relative;
+}
+.test-resizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--gray-400);
+  transition: background .15s;
+}
+.test-resizer:hover,
+.test-resizer.dragging {
+  background: #c7d2fe;
+}
+.test-resizer:hover::after,
+.test-resizer.dragging::after {
+  background: var(--primary);
 }
 .test-right {
   width: 400px;
+  min-width: 280px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding: 16px;
   background: #fff;
+  border-left: 1px solid var(--gray-200);
 }
 .passage-title { font-weight: 700; font-size: 16px; margin-bottom: 12px; color: var(--gray-800); }
 .passage-text { font-size: 15px; line-height: 1.85; color: var(--gray-700); font-family: Georgia, serif; }
