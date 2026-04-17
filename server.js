@@ -958,6 +958,65 @@ app.delete('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
   }
 });
 
+// ─── Import Test from JSON ────────────────────────────────────────────────────
+app.post('/api/admin/tests/import', authenticate, adminOnly, (req, res) => {
+  try {
+    const { json_text } = req.body;
+    if (!json_text || !json_text.trim()) return res.status(400).json({ error: 'No JSON provided.' });
+
+    let test;
+    try { test = JSON.parse(json_text); } catch (e) {
+      return res.status(400).json({ error: `Invalid JSON: ${e.message}` });
+    }
+
+    // ── Validate structure ─────────────────────────────────────────────────
+    if (!test.type || !['reading','listening'].includes(test.type))
+      return res.status(400).json({ error: '"type" must be "reading" or "listening".' });
+    if (!test.title || !test.title.trim())
+      return res.status(400).json({ error: '"title" is required.' });
+    if (!Array.isArray(test.sections) || !test.sections.length)
+      return res.status(400).json({ error: '"sections" must be a non-empty array.' });
+
+    const validTypes = ['mcq','tfng','fill','matching'];
+    const seenQNums = new Set();
+
+    for (const [si, sec] of test.sections.entries()) {
+      const sLabel = `Section ${si + 1}`;
+      if (!Array.isArray(sec.questions) || !sec.questions.length)
+        return res.status(400).json({ error: `${sLabel}: "questions" must be a non-empty array.` });
+      for (const [qi, q] of sec.questions.entries()) {
+        const qLabel = `${sLabel} Q${qi + 1}`;
+        if (q.q_number == null) return res.status(400).json({ error: `${qLabel}: missing "q_number".` });
+        if (seenQNums.has(q.q_number)) return res.status(400).json({ error: `Duplicate q_number: ${q.q_number}.` });
+        seenQNums.add(q.q_number);
+        if (!validTypes.includes(q.q_type)) return res.status(400).json({ error: `${qLabel}: invalid q_type "${q.q_type}". Must be one of: ${validTypes.join(', ')}.` });
+        if (!q.stem || !q.stem.trim()) return res.status(400).json({ error: `${qLabel}: missing "stem".` });
+        if (q.q_type !== 'matching') {
+          if (!q.correct_answer && q.correct_answer !== 0)
+            return res.status(400).json({ error: `${qLabel}: missing "correct_answer".` });
+          if (q.q_type === 'mcq' && !q.options)
+            return res.status(400).json({ error: `${qLabel}: MCQ questions require "options" object with keys A, B, C, D.` });
+          if (q.q_type === 'tfng' && !['TRUE','FALSE','NOT GIVEN'].includes(String(q.correct_answer).toUpperCase()))
+            return res.status(400).json({ error: `${qLabel}: tfng correct_answer must be TRUE, FALSE, or NOT GIVEN.` });
+        } else {
+          if (!Array.isArray(q.sub_questions) || !q.sub_questions.length)
+            return res.status(400).json({ error: `${qLabel}: matching questions need a "sub_questions" array.` });
+          if (!q.options) return res.status(400).json({ error: `${qLabel}: matching questions need an "options" object.` });
+        }
+      }
+    }
+
+    // Strip any user-supplied id — let the DB assign it
+    const { id: _ignored, created_at: _ca, created_by: _cb, ...rest } = test;
+    const newId = db.insertTest(rest.type, rest.title.trim(), rest.sections, req.user.id);
+    const count = test.sections.reduce((n, s) => n + s.questions.length, 0);
+    res.json({ id: newId, message: `Test imported successfully — ${count} questions across ${test.sections.length} sections.` });
+  } catch (err) {
+    console.error('Import test error:', err);
+    res.status(500).json({ error: 'Server error during import.' });
+  }
+});
+
 // ─── Student Test Routes ──────────────────────────────────────────────────────
 
 // List tests with user's attempt status

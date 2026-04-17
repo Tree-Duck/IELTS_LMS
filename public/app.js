@@ -2121,6 +2121,160 @@ function matchingFieldsHtml(sn, qi) {
     <div class="form-group"><label>Sub-questions (one per line, format: Label | Correct Answer Letter)</label><textarea id="qsubs_${sn}_${qi}" rows="3" placeholder="London | A&#10;Paris | B"></textarea></div>`;
 }
 
+/* ─── Materials: Action Tab Switcher ─────────────────────────────────────── */
+function switchMaterialsAction(tab) {
+  const isPanelCreate = tab === 'create';
+  document.getElementById('mat-action-tab-create').classList.toggle('active', isPanelCreate);
+  document.getElementById('mat-action-tab-import').classList.toggle('active', !isPanelCreate);
+  document.getElementById('mat-panel-create').classList.toggle('hidden', !isPanelCreate);
+  document.getElementById('mat-panel-import').classList.toggle('hidden', isPanelCreate);
+}
+
+/* ─── Materials: JSON Import ─────────────────────────────────────────────── */
+function validateImportJson() {
+  const raw = document.getElementById('import-json-input').value.trim();
+  const resultEl = document.getElementById('import-validation-result');
+  resultEl.classList.remove('hidden');
+
+  if (!raw) {
+    resultEl.innerHTML = `<div class="import-validation-error">⚠️ Nothing to validate — paste your JSON first.</div>`;
+    return false;
+  }
+
+  let test;
+  try {
+    test = JSON.parse(raw);
+  } catch (e) {
+    resultEl.innerHTML = `<div class="import-validation-error">❌ Invalid JSON syntax: ${escHtml(e.message)}</div>`;
+    return false;
+  }
+
+  const errors = [];
+
+  if (!test.type || !['reading', 'listening'].includes(test.type)) {
+    errors.push('Missing or invalid "type" — must be "reading" or "listening".');
+  }
+  if (!test.title || typeof test.title !== 'string' || !test.title.trim()) {
+    errors.push('Missing or empty "title".');
+  }
+  if (!Array.isArray(test.sections) || test.sections.length === 0) {
+    errors.push('"sections" must be a non-empty array.');
+  } else {
+    const seenNums = new Set();
+    test.sections.forEach((sec, si) => {
+      if (!Array.isArray(sec.questions)) {
+        errors.push(`Section ${si + 1}: "questions" must be an array.`);
+        return;
+      }
+      sec.questions.forEach((q, qi) => {
+        const loc = `Section ${si + 1}, Q${qi + 1}`;
+        if (!q.q_number) errors.push(`${loc}: missing "q_number".`);
+        else if (seenNums.has(q.q_number)) errors.push(`${loc}: duplicate q_number ${q.q_number}.`);
+        else seenNums.add(q.q_number);
+
+        const validTypes = ['mcq', 'tfng', 'fill', 'matching'];
+        if (!validTypes.includes(q.q_type)) {
+          errors.push(`${loc}: invalid q_type "${q.q_type}". Must be one of: ${validTypes.join(', ')}.`);
+        }
+        if (q.q_type === 'tfng' && !['TRUE', 'FALSE', 'NOT GIVEN'].includes(q.correct_answer)) {
+          errors.push(`${loc}: TFNG correct_answer must be exactly TRUE, FALSE, or NOT GIVEN.`);
+        }
+        if (q.q_type === 'mcq') {
+          if (!q.options || !['A','B','C','D'].every(k => q.options[k])) {
+            errors.push(`${loc}: MCQ questions need options A, B, C, D.`);
+          }
+          if (!['A','B','C','D'].includes(q.correct_answer)) {
+            errors.push(`${loc}: MCQ correct_answer must be A, B, C, or D.`);
+          }
+        }
+        if (q.q_type === 'matching' && (!Array.isArray(q.sub_questions) || q.sub_questions.length === 0)) {
+          errors.push(`${loc}: matching questions must have a "sub_questions" array.`);
+        }
+      });
+    });
+  }
+
+  if (errors.length > 0) {
+    resultEl.innerHTML = `<div class="import-validation-error">
+      <strong>❌ Found ${errors.length} issue${errors.length > 1 ? 's' : ''}:</strong>
+      <ul>${errors.map(e => `<li>${escHtml(e)}</li>`).join('')}</ul>
+    </div>`;
+    return false;
+  }
+
+  // Count totals
+  const totalQ = test.sections.reduce((s, sec) => s + (sec.questions || []).length, 0);
+  resultEl.innerHTML = `<div class="import-validation-ok">
+    ✅ Valid! <strong>${escHtml(test.title)}</strong> · ${test.type} · ${test.sections.length} sections · ${totalQ} questions
+  </div>`;
+  return true;
+}
+
+async function submitImportTest() {
+  const raw = document.getElementById('import-json-input').value.trim();
+  const errEl = document.getElementById('import-error');
+  const sucEl = document.getElementById('import-success');
+  const btn = document.getElementById('import-submit-btn');
+
+  errEl.classList.add('hidden');
+  sucEl.classList.add('hidden');
+
+  if (!validateImportJson()) return; // shows its own error in validation result
+
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+  try {
+    const data = await api('/api/admin/tests/import', {
+      method: 'POST',
+      body: JSON.stringify({ json_text: raw }),
+    });
+    sucEl.textContent = `✅ ${data.message}`;
+    sucEl.classList.remove('hidden');
+    document.getElementById('import-json-input').value = '';
+    document.getElementById('import-validation-result').classList.add('hidden');
+    // Refresh materials list
+    _materialsCache = await api('/api/admin/tests');
+    renderMaterialsList();
+  } catch (err) {
+    errEl.textContent = '❌ ' + err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬆ Import Test';
+  }
+}
+
+function downloadImportTemplate() {
+  const isReading = currentMaterialsTab === 'reading';
+  const sectionCount = isReading ? 3 : 4;
+  const sectionTemplate = (num) => ({
+    section_number: num,
+    ...(isReading
+      ? { passage_title: `Passage ${num} Title`, passage_text: 'Paste the full passage text here.' }
+      : { audio_url: 'https://...', transcript: 'Optional transcript text.' }),
+    questions: [
+      { q_number: (num - 1) * 10 + 1, q_type: 'tfng', stem: 'Statement to evaluate.', correct_answer: 'TRUE' },
+      { q_number: (num - 1) * 10 + 2, q_type: 'mcq', stem: 'According to the passage…', options: { A: 'Option A', B: 'Option B', C: 'Option C', D: 'Option D' }, correct_answer: 'A' },
+      { q_number: (num - 1) * 10 + 3, q_type: 'fill', stem: 'The river flows through ___ before reaching the sea.', correct_answer: 'answer', accept_alternatives: ['alt1'] },
+      { q_number: (num - 1) * 10 + 4, q_type: 'matching', stem: 'Match each item to a category.', options: { A: 'Category A', B: 'Category B' }, sub_questions: [{ label: 'Item 1', correct_answer: 'A' }, { label: 'Item 2', correct_answer: 'B' }] },
+    ],
+  });
+
+  const template = {
+    type: isReading ? 'reading' : 'listening',
+    title: isReading ? 'Academic Reading Test 1' : 'Listening Test 1',
+    sections: Array.from({ length: sectionCount }, (_, i) => sectionTemplate(i + 1)),
+  };
+
+  const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${template.type}-test-template.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function collectSectionsData() {
   const count = currentMaterialsTab === 'reading' ? 3 : 4;
   const isReading = currentMaterialsTab === 'reading';

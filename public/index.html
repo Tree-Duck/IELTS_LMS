@@ -507,28 +507,81 @@
           <h2>📚 Materials</h2>
           <p>Create and manage Reading and Listening tests</p>
         </div>
+
+        <!-- Type tabs: Reading / Listening -->
         <div class="test-type-tabs">
           <button class="test-tab-btn active" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
         </div>
+
+        <!-- Existing tests list -->
         <div id="materials-list-content"></div>
-        <div class="materials-create-section">
-          <button class="btn btn-primary" onclick="toggleCreateTestForm()">+ Create New Test</button>
-          <div id="create-test-form" class="hidden">
-            <div class="materials-form-card">
-              <div class="form-group">
-                <label>Test Title</label>
-                <input type="text" id="new-test-title" placeholder="e.g. Academic Reading Test 1" />
-              </div>
-              <div id="sections-container"></div>
-              <div class="form-row-end">
-                <button class="btn btn-secondary" onclick="toggleCreateTestForm()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitCreateTest()">💾 Save Test</button>
-              </div>
-              <div id="create-test-error" class="error-msg hidden"></div>
+
+        <!-- Action tabs: Create / Import -->
+        <div class="materials-action-tabs">
+          <button class="materials-action-tab active" id="mat-action-tab-create" onclick="switchMaterialsAction('create')">+ Create with Form</button>
+          <button class="materials-action-tab" id="mat-action-tab-import" onclick="switchMaterialsAction('import')">⬆ Import JSON</button>
+        </div>
+
+        <!-- CREATE FORM panel -->
+        <div id="mat-panel-create" class="materials-action-panel">
+          <div class="materials-form-card">
+            <div class="form-group">
+              <label>Test Title</label>
+              <input type="text" id="new-test-title" placeholder="e.g. Academic Reading Test 1" />
             </div>
+            <div id="sections-container"></div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitCreateTest()">💾 Save Test</button>
+            </div>
+            <div id="create-test-error" class="error-msg hidden"></div>
           </div>
         </div>
+
+        <!-- IMPORT JSON panel -->
+        <div id="mat-panel-import" class="materials-action-panel hidden">
+          <div class="materials-form-card">
+            <div class="import-header">
+              <div>
+                <h3 class="import-title">Import Test from JSON</h3>
+                <p class="import-subtitle">Paste your test JSON below. <a href="#" onclick="downloadImportTemplate(); return false;" class="import-template-link">⬇ Download blank template</a></p>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="import-json-input">Test JSON</label>
+              <textarea id="import-json-input" class="import-textarea" rows="18"
+                placeholder='Paste your test JSON here, e.g.:
+{
+  "type": "reading",
+  "title": "Academic Reading Test 1",
+  "sections": [
+    {
+      "section_number": 1,
+      "passage_title": "...",
+      "passage_text": "...",
+      "questions": [
+        {
+          "q_number": 1,
+          "q_type": "tfng",
+          "stem": "...",
+          "correct_answer": "TRUE"
+        }
+      ]
+    }
+  ]
+}'
+              ></textarea>
+            </div>
+            <div id="import-validation-result" class="hidden"></div>
+            <div class="form-row-end">
+              <button class="btn btn-secondary" onclick="validateImportJson()">🔍 Validate First</button>
+              <button class="btn btn-primary" id="import-submit-btn" onclick="submitImportTest()">⬆ Import Test</button>
+            </div>
+            <div id="import-error" class="error-msg hidden"></div>
+            <div id="import-success" class="success-msg hidden"></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Rewrite View -->
