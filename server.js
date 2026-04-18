@@ -91,8 +91,11 @@ async function sendPasswordResetEmail(email, name, code) {
 }
 
 function adminRole(email) {
-  const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase();
-  return adminEmail && email.toLowerCase() === adminEmail ? 'admin' : 'student';
+  const adminEmails = (process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
+  return adminEmails.includes(email.toLowerCase()) ? 'admin' : 'student';
 }
 
 function adminOnly(req, res, next) {
