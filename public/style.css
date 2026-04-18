@@ -1456,8 +1456,7 @@ input:focus, textarea:focus, select:focus {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  padding: 16px;
+  overflow: hidden;
   background: #fff;
   border-left: 1px solid var(--gray-200);
 }
@@ -1472,9 +1471,19 @@ input:focus, textarea:focus, select:focus {
 .transcript-text { font-size: 14px; line-height: 1.7; color: var(--gray-600); background: var(--gray-50); border-radius: 8px; padding: 12px; }
 
 /* Question navigator */
-.q-nav-section { margin-bottom: 16px; }
+.q-nav-section {
+  flex-shrink: 0;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--gray-200);
+  background: #fff;
+}
 .q-nav-label { font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
 .q-nav-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+#test-questions-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
 .q-nav-btn {
   width: 36px; height: 36px;
   border-radius: 6px;

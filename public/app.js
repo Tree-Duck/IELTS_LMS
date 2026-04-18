@@ -1774,7 +1774,9 @@ function renderQuestion(q) {
   let inputHtml = '';
   if (q.q_type === 'mcq') {
     // Multi-answer if correct_answer contains a comma (e.g. "B,D,G,H")
-    const isMulti = q.correct_answer && String(q.correct_answer).includes(',');
+    // OR if the stem says "Choose TWO/THREE/FOUR/etc." (correct_answer is stripped for students)
+    const isMulti = (q.correct_answer && String(q.correct_answer).includes(',')) ||
+                    /choose\s+(two|three|four|five|six|\d+)\s+letters/i.test(q.stem || '');
     const savedAnswers = (currentAnswers[q.q_number] || '').split(',').map(s => s.trim()).filter(Boolean);
     if (isMulti) {
       inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
