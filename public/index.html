@@ -14,7 +14,7 @@
       <div class="logo">
         <div class="logo-icon">✍</div>
         <h1>SSP IELTS</h1>
-        <p>AI-Powered Writing Assessment</p>
+        <p>Smart Feedback Writing Assessment</p>
       </div>
 
       <div class="tab-bar">
@@ -128,34 +128,82 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <span class="logo-icon-sm">✍</span>
-        <span>SSP IELTS</span>
+        <span class="logo-sun">☀️</span>
+        <span class="logo-text">SSP IELTS</span>
       </div>
       <nav class="sidebar-nav">
+        <!-- Dashboard (standalone) -->
         <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
           <span class="nav-icon">⬛</span> Dashboard
         </button>
-        <button class="nav-item" onclick="showView('submit')" id="nav-submit">
-          <span class="nav-icon">✏️</span> Submit Essay
-        </button>
-        <button class="nav-item" onclick="showView('history')" id="nav-history">
-          <span class="nav-icon">📋</span> My Submissions
-        </button>
-        <button class="nav-item" onclick="showView('test-list')" id="nav-test-list">
-          <span class="nav-icon">📝</span> Mock Tests
-        </button>
-        <button class="nav-item" onclick="showView('test-history')" id="nav-test-history">
-          <span class="nav-icon">🏆</span> Test Results
-        </button>
-        <button class="nav-item hidden" onclick="showView('admin')" id="nav-admin">
-          <span class="nav-icon">👥</span> Users
-        </button>
-        <button class="nav-item hidden" onclick="showView('admin-materials')" id="nav-admin-materials">
-          <span class="nav-icon">📚</span> Materials
-        </button>
-        <button class="nav-item" onclick="showView('change-password')" id="nav-change-password">
-          <span class="nav-icon">🔑</span> Change Password
-        </button>
+
+        <!-- Mock Tests group -->
+        <div class="nav-group" id="nav-group-tests">
+          <div class="nav-group-header">
+            <span class="nav-icon">📝</span>
+            <span class="nav-group-label">Mock Tests</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('submit')" id="nav-submit">
+              <span class="nav-icon">✏️</span> Writing
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('reading')" id="nav-test-list">
+              <span class="nav-icon">📖</span> Reading
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('listening')" id="nav-test-list-listening">
+              <span class="nav-icon">🎧</span> Listening
+            </button>
+          </div>
+        </div>
+
+        <!-- My Progress group -->
+        <div class="nav-group" id="nav-group-progress">
+          <div class="nav-group-header">
+            <span class="nav-icon">📊</span>
+            <span class="nav-group-label">My Progress</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('history')" id="nav-history">
+              <span class="nav-icon">📋</span> My Submissions
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('test-history')" id="nav-test-history">
+              <span class="nav-icon">🏆</span> Test Results
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin group (hidden until admin login) -->
+        <div class="nav-group hidden" id="nav-group-admin">
+          <div class="nav-group-header">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-group-label">Admin</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-admin">
+              <span class="nav-icon">👥</span> Users
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('admin-materials')" id="nav-admin-materials">
+              <span class="nav-icon">📚</span> Materials
+            </button>
+          </div>
+        </div>
+
+        <!-- Account group -->
+        <div class="nav-group" id="nav-group-account">
+          <div class="nav-group-header">
+            <span class="nav-icon">👤</span>
+            <span class="nav-group-label">Account</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('change-password')" id="nav-change-password">
+              <span class="nav-icon">🔑</span> Change Password
+            </button>
+          </div>
+        </div>
       </nav>
       <div class="sidebar-footer">
         <div class="user-info">
@@ -353,7 +401,7 @@
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-                  Submit for AI Grading
+                  Submit for Grading
                 </button>
               </div>
             </form>
@@ -461,6 +509,7 @@
       <div id="view-test-taking" class="view hidden">
         <div class="test-header">
           <div class="test-header-left">
+            <button class="btn-back-test" id="test-back-btn" onclick="handleTestBack()">← Exit Test</button>
             <span id="test-taking-title" class="test-title-text">Test</span>
             <div class="section-tabs" id="test-section-tabs"></div>
           </div>
@@ -590,13 +639,26 @@
         <div class="page-header rewrite-page-header">
           <div class="rewrite-header-left">
             <button class="btn-back" onclick="showView('feedback')">← Back to Feedback</button>
-            <h2>AI Rewrite — Band 8+</h2>
+            <h2>Smart Rewrite — Band 8+</h2>
           </div>
-          <p>AI rewrites your essay targeting Band 8.0–8.5 with explanations of what changed</p>
+          <p>Smart rewrite of your essay targeting Band 8.0–8.5 with explanations of what changed</p>
         </div>
         <div id="rewrite-content"></div>
       </div>
     </main>
+  </div>
+
+  <!-- Discard / Partial Submit Modal -->
+  <div class="modal-overlay hidden" id="discard-modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title">Exit Test?</h3>
+      <p class="modal-desc">You have unanswered questions. What would you like to do?</p>
+      <div class="modal-actions">
+        <button class="btn btn-modal-submit" onclick="handlePartialSubmit()">Submit Answered</button>
+        <button class="btn btn-modal-discard" onclick="handleDiscardTest()">Discard &amp; Exit</button>
+        <button class="btn btn-modal-cancel" onclick="closeDiscardModal()">Keep Testing</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

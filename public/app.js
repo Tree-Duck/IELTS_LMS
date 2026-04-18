@@ -297,15 +297,12 @@ function showApp() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
   document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
-  // Show admin-only nav items
-  const adminNav = document.getElementById('nav-admin');
-  const materialsNav = document.getElementById('nav-admin-materials');
+  // Show admin-only nav group
+  const adminNavGroup = document.getElementById('nav-group-admin');
   if (currentUser.role === 'admin') {
-    adminNav.classList.remove('hidden');
-    materialsNav.classList.remove('hidden');
+    adminNavGroup.classList.remove('hidden');
   } else {
-    adminNav.classList.add('hidden');
-    materialsNav.classList.add('hidden');
+    adminNavGroup.classList.add('hidden');
   }
   showView('dashboard');
 }
@@ -1179,7 +1176,7 @@ async function handleSubmit(e) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
   } finally {
-    btn.disabled = false; btn.textContent = 'Submit for AI Grading';
+    btn.disabled = false; btn.textContent = 'Submit for Grading';
   }
 }
 
@@ -1240,8 +1237,8 @@ function renderFeedback(s) {
   if (s.status === 'grading' || s.status === 'pending') {
     html += `
       <div class="grading-notice">
-        <strong>⏳ AI Grading in Progress</strong>
-        Your essay is being graded by AI. This usually takes 15–30 seconds. This page will update automatically.
+        <strong>⏳ Grading in Progress</strong>
+        Your essay is being graded. This usually takes 15–30 seconds. This page will update automatically.
       </div>`;
   } else if (s.status === 'error') {
     html += `
@@ -1966,7 +1963,7 @@ function renderTestResult(attempt) {
   }
 
   const explNote = !attempt.ai_explanations && score.wrong_q_numbers && score.wrong_q_numbers.length
-    ? `<div class="expl-loading-note">⏳ AI explanations are being generated… check back in a few seconds.</div>`
+    ? `<div class="expl-loading-note">⏳ Explanations are being generated… check back in a few seconds.</div>`
     : '';
 
   el.innerHTML = `
@@ -2441,4 +2438,40 @@ async function submitCreateTest() {
     errEl.textContent = 'Failed to create test: ' + err.message;
     errEl.classList.remove('hidden');
   }
+}
+
+/* ─── Test Back / Discard / Partial Submit ────────────────────────────────── */
+function handleTestBack() {
+  const answeredCount = Object.values(currentAnswers).filter(v => v !== '' && v !== null && v !== undefined).length;
+  const totalQuestions = currentTestData
+    ? currentTestData.sections.reduce((sum, s) => sum + (s.questions ? s.questions.length : 0), 0)
+    : 0;
+  if (answeredCount > 0) {
+    document.getElementById('discard-modal-overlay').classList.remove('hidden');
+  } else {
+    handleDiscardTest();
+  }
+}
+
+function closeDiscardModal() {
+  document.getElementById('discard-modal-overlay').classList.add('hidden');
+}
+
+function handleDiscardTest() {
+  closeDiscardModal();
+  if (testTimerInterval) {
+    clearInterval(testTimerInterval);
+    testTimerInterval = null;
+  }
+  currentTestData = null;
+  currentAttemptId = null;
+  currentAnswers = {};
+  currentTestType = null;
+  document.getElementById('app-screen').classList.remove('test-mode');
+  showView('test-list');
+}
+
+function handlePartialSubmit() {
+  closeDiscardModal();
+  submitTest();
 }
