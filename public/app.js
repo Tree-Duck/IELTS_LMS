@@ -333,7 +333,7 @@ function showView(name) {
 
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { if (currentUser && currentUser.role === 'admin') loadBudget(); updateTopicOptions(); }
+  else if (name === 'submit') { updateTopicOptions(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
@@ -1644,7 +1644,6 @@ async function viewRewrite(submissionId) {
       },
       () => {
         contentEl.innerHTML = renderRewriteMarkdown(raw);
-        if (currentUser && currentUser.role === 'admin') loadBudget();
       }
     );
   } catch (err) {
