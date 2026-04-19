@@ -224,8 +224,10 @@ const db = {
     const subIds = (data.submissions || []).filter(s => s.user_id === userId).map(s => s.id);
     data.submissions = (data.submissions || []).filter(s => s.user_id !== userId);
     data.feedback = (data.feedback || []).filter(f => !subIds.includes(f.submission_id));
-    // Cascade: remove test attempts (Batch B — safe even before tests exist)
+    // Cascade: remove test attempts
     if (data.test_attempts) data.test_attempts = data.test_attempts.filter(a => a.user_id !== userId);
+    // Cascade: remove assignment completions
+    if (data.assignment_completions) data.assignment_completions = data.assignment_completions.filter(c => c.user_id !== userId);
     save(data);
     return true;
   },
@@ -392,6 +394,87 @@ const db = {
     ) || null;
   },
 
+  // ── Assignments (Homework) ─────────────────────────────────────────────────
+
+  insertAssignment(title, type, description, test_id, deadline, created_by) {
+    const data = load();
+    if (!data.assignments) data.assignments = [];
+    if (!data._ids.assignments) data._ids.assignments = 0;
+    data._ids.assignments += 1;
+    const assignment = {
+      id: data._ids.assignments, title, type,
+      description: description || '',
+      test_id: test_id || null,
+      deadline, created_by,
+      created_at: new Date().toISOString()
+    };
+    data.assignments.push(assignment);
+    save(data);
+    return assignment.id;
+  },
+
+  getAllAssignments() {
+    const data = load();
+    const completions = data.assignment_completions || [];
+    return (data.assignments || [])
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+      .map(a => {
+        const testTitle = a.test_id
+          ? ((data.tests || []).find(t => t.id === a.test_id) || {}).title || null
+          : null;
+        const completedBy = completions.filter(c => c.assignment_id === a.id).map(c => c.user_id);
+        return { ...a, test_title: testTitle, completed_by: completedBy };
+      });
+  },
+
+  getAssignmentsForUser(user_id) {
+    const data = load();
+    const completions = data.assignment_completions || [];
+    return (data.assignments || [])
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+      .map(a => {
+        const testTitle = a.test_id
+          ? ((data.tests || []).find(t => t.id === a.test_id) || {}).title || null
+          : null;
+        const completion = completions.find(c => c.assignment_id === a.id && c.user_id === user_id);
+        return {
+          id: a.id, title: a.title, type: a.type,
+          description: a.description, test_id: a.test_id,
+          test_title: testTitle, deadline: a.deadline,
+          created_at: a.created_at,
+          completed: !!completion,
+          completed_at: completion ? completion.completed_at : null
+        };
+      });
+  },
+
+  deleteAssignment(id) {
+    const data = load();
+    const idx = (data.assignments || []).findIndex(a => a.id === id);
+    if (idx === -1) return false;
+    data.assignments.splice(idx, 1);
+    data.assignment_completions = (data.assignment_completions || []).filter(c => c.assignment_id !== id);
+    save(data);
+    return true;
+  },
+
+  markAssignmentComplete(assignment_id, user_id) {
+    const data = load();
+    if (!data.assignment_completions) data.assignment_completions = [];
+    if (!data._ids.assignment_completions) data._ids.assignment_completions = 0;
+    // Prevent duplicate
+    const already = data.assignment_completions.find(c => c.assignment_id === assignment_id && c.user_id === user_id);
+    if (already) return false;
+    data._ids.assignment_completions += 1;
+    data.assignment_completions.push({
+      id: data._ids.assignment_completions,
+      assignment_id, user_id,
+      completed_at: new Date().toISOString()
+    });
+    save(data);
+    return true;
+  },
+
   getAllUsersWithStats() {
     const data = load();
     return data.users.map(u => {
@@ -417,6 +500,10 @@ const db = {
   if (!data.test_attempts) { data.test_attempts = []; changed = true; }
   if (!data._ids.tests) { data._ids.tests = 0; changed = true; }
   if (!data._ids.test_attempts) { data._ids.test_attempts = 0; changed = true; }
+  if (!data.assignments) { data.assignments = []; changed = true; }
+  if (!data.assignment_completions) { data.assignment_completions = []; changed = true; }
+  if (!data._ids.assignments) { data._ids.assignments = 0; changed = true; }
+  if (!data._ids.assignment_completions) { data._ids.assignment_completions = 0; changed = true; }
   if (changed) save(data);
 })();
 

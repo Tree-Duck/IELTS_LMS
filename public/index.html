@@ -137,6 +137,11 @@
           <span class="nav-icon">⬛</span> Dashboard
         </button>
 
+        <!-- Homework (standalone) -->
+        <button class="nav-item" onclick="showView('homework')" id="nav-homework">
+          <span class="nav-icon">📋</span> Homework
+        </button>
+
         <!-- Mock Tests group -->
         <div class="nav-group" id="nav-group-tests">
           <div class="nav-group-header">
@@ -187,6 +192,12 @@
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin-materials')" id="nav-admin-materials">
               <span class="nav-icon">📚</span> Materials
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-admin-assignments">
+              <span class="nav-icon">📋</span> Assignments
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('topic-rater')" id="nav-topic-rater">
+              <span class="nav-icon">⭐</span> Topic Rater
             </button>
           </div>
         </div>
@@ -632,6 +643,85 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Homework View (Student) -->
+      <div id="view-homework" class="view hidden">
+        <div class="page-header">
+          <h2>📋 Homework</h2>
+          <p>Assignments set by your teacher — complete them before the deadline</p>
+        </div>
+        <div id="homework-content"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Admin Assignments View -->
+      <div id="view-admin-assignments" class="view hidden">
+        <div class="page-header">
+          <h2>📋 Assignments</h2>
+          <p>Set homework for your students with deadlines</p>
+        </div>
+
+        <!-- Create form -->
+        <div class="card mb-4">
+          <h3 style="margin-bottom:16px;font-size:1rem;font-weight:600">Create New Assignment</h3>
+          <div class="form-group">
+            <label for="assign-title">Title</label>
+            <input type="text" id="assign-title" class="form-input" placeholder="e.g. Task 1 – Bar Chart Practice">
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1">
+              <label for="assign-type">Type</label>
+              <select id="assign-type" class="form-input" onchange="updateAssignTestField()">
+                <option value="writing_task1">Writing Task 1</option>
+                <option value="writing_task2">Writing Task 2</option>
+                <option value="reading">Reading Test</option>
+                <option value="listening">Listening Test</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label for="assign-deadline">Deadline</label>
+              <input type="datetime-local" id="assign-deadline" class="form-input">
+            </div>
+          </div>
+          <div class="form-group" id="assign-test-group" style="display:none">
+            <label for="assign-test-id">Link to Test (optional)</label>
+            <select id="assign-test-id" class="form-input">
+              <option value="">— Select a test —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="assign-description">Instructions / Description</label>
+            <textarea id="assign-description" class="form-input" rows="3" placeholder="Describe what students need to do..."></textarea>
+          </div>
+          <div id="assign-error" class="error-msg hidden"></div>
+          <div id="assign-success" class="success-msg hidden"></div>
+          <button class="btn btn-primary" onclick="createAssignment()">+ Create Assignment</button>
+        </div>
+
+        <!-- Existing assignments list -->
+        <div id="admin-assignments-list"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Topic Quality Rater View (Admin) -->
+      <div id="view-topic-rater" class="view hidden">
+        <div class="page-header">
+          <h2>⭐ Topic Quality Rater</h2>
+          <p>Paste a Task 1 prompt to get an AI quality assessment</p>
+        </div>
+        <div class="rater-card">
+          <div class="form-group">
+            <label for="rater-prompt">Task 1 Prompt</label>
+            <textarea id="rater-prompt" class="form-input" rows="6"
+              placeholder="The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011.
+
+Summarise the information by selecting and reporting the main features, and make comparisons where relevant.
+
+Write at least 150 words."></textarea>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="rateTopic()" id="rater-btn">⭐ Rate This Topic</button>
+          <div id="rater-error" class="error-msg hidden" style="margin-top:12px"></div>
+          <div id="rater-result" class="hidden" style="margin-top:24px"></div>
+        </div>
       </div>
 
       <!-- Rewrite View -->

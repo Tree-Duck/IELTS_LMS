@@ -336,6 +336,9 @@ function showView(name) {
   else if (name === 'submit') { if (currentUser && currentUser.role === 'admin') loadBudget(); updateTopicOptions(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
+  else if (name === 'admin-assignments') loadAdminAssignments();
+  else if (name === 'homework') loadHomework();
+  else if (name === 'topic-rater') initTopicRater();
   else if (name === 'test-list') loadTestList();
   else if (name === 'test-history') loadTestHistory();
   else if (name === 'change-password') {
@@ -2555,4 +2558,332 @@ function handleDiscardTest() {
 function handlePartialSubmit() {
   closeDiscardModal();
   submitTest();
+}
+
+/* ─── Homework (Student View) ─────────────────────────────────────────────── */
+
+async function loadHomework() {
+  const el = document.getElementById('homework-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading homework…</div>';
+  try {
+    const assignments = await api('/api/assignments');
+    if (!assignments.length) {
+      el.innerHTML = '<div class="empty-state">No assignments yet. Your teacher will set homework here.</div>';
+      return;
+    }
+    const now = new Date();
+    const upcoming = assignments.filter(a => !a.completed && new Date(a.deadline) > now);
+    const overdue = assignments.filter(a => !a.completed && new Date(a.deadline) <= now);
+    const done = assignments.filter(a => a.completed);
+
+    let html = '';
+    if (overdue.length) {
+      html += `<h3 class="hw-section-title hw-overdue-title">⚠️ Overdue (${overdue.length})</h3>`;
+      html += overdue.map(a => renderHomeworkCard(a, 'overdue')).join('');
+    }
+    if (upcoming.length) {
+      html += `<h3 class="hw-section-title">📅 Upcoming (${upcoming.length})</h3>`;
+      html += upcoming.map(a => renderHomeworkCard(a, 'pending')).join('');
+    }
+    if (done.length) {
+      html += `<h3 class="hw-section-title" style="margin-top:32px">✅ Completed (${done.length})</h3>`;
+      html += done.map(a => renderHomeworkCard(a, 'done')).join('');
+    }
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function renderHomeworkCard(a, status) {
+  const typeLabels = {
+    writing_task1: '✏️ Writing Task 1',
+    writing_task2: '✏️ Writing Task 2',
+    reading: '📖 Reading Test',
+    listening: '🎧 Listening Test'
+  };
+  const typeLabel = typeLabels[a.type] || a.type;
+  const deadline = new Date(a.deadline);
+  const now = new Date();
+  const diffMs = deadline - now;
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  let timeStr = '';
+  if (status === 'done') {
+    timeStr = `Completed ${formatDate(a.completed_at)}`;
+  } else if (status === 'overdue') {
+    timeStr = `Overdue — was due ${formatDate(a.deadline)}`;
+  } else if (diffDays >= 1) {
+    timeStr = `Due in ${diffDays} day${diffDays > 1 ? 's' : ''} (${formatDate(a.deadline)})`;
+  } else if (diffHours >= 1) {
+    timeStr = `Due in ${diffHours} hour${diffHours > 1 ? 's' : ''} — ${formatDate(a.deadline)}`;
+  } else {
+    timeStr = `Due very soon — ${formatDate(a.deadline)}`;
+  }
+
+  const statusBadge = {
+    pending: '<span class="hw-badge hw-badge-pending">Pending</span>',
+    overdue: '<span class="hw-badge hw-badge-overdue">Overdue</span>',
+    done: '<span class="hw-badge hw-badge-done">✓ Done</span>'
+  }[status] || '';
+
+  let actionBtn = '';
+  if (status === 'done') {
+    actionBtn = '<span class="text-muted" style="font-size:0.85rem">Completed</span>';
+  } else if (a.type.startsWith('writing')) {
+    const taskType = a.type === 'writing_task2' ? 'task2' : 'task1';
+    actionBtn = `<button class="btn btn-primary btn-sm" onclick="startHomeworkWriting(${a.id}, '${taskType}')">Start Writing</button>`;
+  } else if (a.test_id) {
+    actionBtn = `<button class="btn btn-primary btn-sm" onclick="startHomeworkTest(${a.id}, ${a.test_id})">Start Test</button>`;
+  } else {
+    actionBtn = `<button class="btn btn-secondary btn-sm" onclick="markHomeworkDone(${a.id})">Mark as Done</button>`;
+  }
+
+  return `
+    <div class="hw-card ${status === 'overdue' ? 'hw-card-overdue' : status === 'done' ? 'hw-card-done' : ''}">
+      <div class="hw-card-header">
+        <div>
+          <span class="hw-type-badge">${typeLabel}</span>
+          ${statusBadge}
+        </div>
+        <div class="hw-deadline">${timeStr}</div>
+      </div>
+      <h4 class="hw-card-title">${a.title}</h4>
+      ${a.description ? `<p class="hw-card-desc">${a.description}</p>` : ''}
+      ${a.test_title ? `<p class="hw-card-test">Linked test: <strong>${a.test_title}</strong></p>` : ''}
+      <div class="hw-card-actions">${actionBtn}</div>
+    </div>
+  `;
+}
+
+function startHomeworkWriting(assignmentId, taskType) {
+  // Switch to writing view and pre-select task type, then mark done after submission
+  showView('submit');
+  // Set task type in the writing form if possible
+  const taskTypeEl = document.getElementById('task-type');
+  if (taskTypeEl) {
+    taskTypeEl.value = taskType;
+    taskTypeEl.dispatchEvent(new Event('change'));
+  }
+  // Store assignment id to mark complete after submission
+  window._pendingHomeworkAssignmentId = assignmentId;
+}
+
+function startHomeworkTest(assignmentId, testId) {
+  window._pendingHomeworkAssignmentId = assignmentId;
+  // Navigate to test list and start the specific test
+  showView('test-list');
+}
+
+async function markHomeworkDone(assignmentId) {
+  if (!confirm('Mark this assignment as completed?')) return;
+  try {
+    await api(`/api/assignments/${assignmentId}/complete`, { method: 'POST' });
+    loadHomework();
+  } catch (err) {
+    alert('Failed to mark as done: ' + err.message);
+  }
+}
+
+/* ─── Admin Assignments ───────────────────────────────────────────────────── */
+
+async function loadAdminAssignments() {
+  const el = document.getElementById('admin-assignments-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading…</div>';
+
+  // Also populate the test selector in the create form
+  try {
+    const [assignments, readingTests, listeningTests] = await Promise.all([
+      api('/api/admin/assignments'),
+      api('/api/admin/tests?type=reading').catch(() => []),
+      api('/api/admin/tests?type=listening').catch(() => [])
+    ]);
+
+    const allTests = [...readingTests, ...listeningTests];
+    const testSel = document.getElementById('assign-test-id');
+    if (testSel) {
+      testSel.innerHTML = '<option value="">— Select a test —</option>' +
+        allTests.map(t => `<option value="${t.id}">[${t.type}] ${t.title}</option>`).join('');
+    }
+
+    if (!assignments.length) {
+      el.innerHTML = '<div class="empty-state">No assignments yet. Create one above.</div>';
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Deadline</th>
+              <th>Completed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${assignments.map(a => {
+              const now = new Date();
+              const dl = new Date(a.deadline);
+              const overdue = dl < now;
+              return `
+                <tr>
+                  <td><strong>${a.title}</strong>${a.description ? `<br><small class="text-muted">${a.description.slice(0,60)}${a.description.length>60?'…':''}</small>` : ''}</td>
+                  <td><span class="badge badge-gray">${a.type.replace('_', ' ')}</span></td>
+                  <td class="${overdue ? 'text-danger' : ''}">${formatDate(a.deadline)}</td>
+                  <td>${a.completed_by ? a.completed_by.length : 0} student${(a.completed_by||[]).length !== 1 ? 's' : ''}</td>
+                  <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteAssignment(${a.id}, '${a.title.replace(/'/g, "\\'")}')">Delete</button></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function updateAssignTestField() {
+  const type = document.getElementById('assign-type').value;
+  const group = document.getElementById('assign-test-group');
+  if (group) group.style.display = (type === 'reading' || type === 'listening') ? 'block' : 'none';
+}
+
+async function createAssignment() {
+  const errEl = document.getElementById('assign-error');
+  const okEl = document.getElementById('assign-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+
+  const title = document.getElementById('assign-title').value.trim();
+  const type = document.getElementById('assign-type').value;
+  const deadline = document.getElementById('assign-deadline').value;
+  const description = document.getElementById('assign-description').value.trim();
+  const testIdEl = document.getElementById('assign-test-id');
+  const test_id = testIdEl && testIdEl.value ? parseInt(testIdEl.value, 10) : null;
+
+  if (!title) { errEl.textContent = 'Title is required'; errEl.classList.remove('hidden'); return; }
+  if (!deadline) { errEl.textContent = 'Deadline is required'; errEl.classList.remove('hidden'); return; }
+
+  const deadlineISO = new Date(deadline).toISOString();
+
+  try {
+    await api('/api/admin/assignments', {
+      method: 'POST',
+      body: JSON.stringify({ title, type, description, test_id, deadline: deadlineISO })
+    });
+    okEl.textContent = 'Assignment created!';
+    okEl.classList.remove('hidden');
+    // Clear form
+    document.getElementById('assign-title').value = '';
+    document.getElementById('assign-description').value = '';
+    document.getElementById('assign-deadline').value = '';
+    // Reload list
+    loadAdminAssignments();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function confirmDeleteAssignment(id, title) {
+  if (!confirm(`Delete assignment "${title}"?\n\nThis will remove all student completion records too.`)) return;
+  try {
+    await api(`/api/admin/assignments/${id}`, { method: 'DELETE' });
+    loadAdminAssignments();
+  } catch (err) {
+    alert('Failed to delete: ' + err.message);
+  }
+}
+
+/* ─── Topic Quality Rater ─────────────────────────────────────────────────── */
+
+function initTopicRater() {
+  // Reset state when entering view
+  const errEl = document.getElementById('rater-error');
+  const resultEl = document.getElementById('rater-result');
+  if (errEl) errEl.classList.add('hidden');
+  if (resultEl) resultEl.classList.add('hidden');
+}
+
+async function rateTopic() {
+  const promptEl = document.getElementById('rater-prompt');
+  const errEl = document.getElementById('rater-error');
+  const resultEl = document.getElementById('rater-result');
+  const btn = document.getElementById('rater-btn');
+
+  errEl.classList.add('hidden');
+  resultEl.classList.add('hidden');
+
+  const prompt = promptEl.value.trim();
+  if (!prompt) {
+    errEl.textContent = 'Please paste a Task 1 prompt first';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Rating…';
+  resultEl.innerHTML = '<div class="loading">AI is evaluating the prompt…</div>';
+  resultEl.classList.remove('hidden');
+
+  try {
+    const data = await api('/api/rate-topic', {
+      method: 'POST',
+      body: JSON.stringify({ prompt })
+    });
+    const r = data.rating;
+
+    const scoreColor = (s) => s >= 8 ? '#16a34a' : s >= 5 ? '#d97706' : '#dc2626';
+    const scoreBar = (s) => `<div class="rater-bar-track"><div class="rater-bar-fill" style="width:${s*10}%;background:${scoreColor(s)}"></div></div>`;
+
+    resultEl.innerHTML = `
+      <div class="rater-result-grid">
+        <div class="rater-result-card">
+          <div class="rater-result-label">Authenticity</div>
+          <div class="rater-score" style="color:${scoreColor(r.authenticity.score)}">${r.authenticity.score}/10</div>
+          ${scoreBar(r.authenticity.score)}
+          <div class="rater-comment">${r.authenticity.comment}</div>
+        </div>
+        <div class="rater-result-card">
+          <div class="rater-result-label">Quality</div>
+          <div class="rater-score" style="color:${scoreColor(r.quality.score)}">${r.quality.score}/10</div>
+          ${scoreBar(r.quality.score)}
+          <div class="rater-comment">${r.quality.comment}</div>
+        </div>
+        <div class="rater-result-card">
+          <div class="rater-result-label">Target Band</div>
+          <div class="rater-score" style="color:#4f46e5">${r.difficulty.band}</div>
+          <div class="rater-comment">${r.difficulty.comment}</div>
+        </div>
+        <div class="rater-result-card">
+          <div class="rater-result-label">Visual Type</div>
+          <div class="rater-score" style="color:#0891b2;font-size:1rem">${r.visual_type}</div>
+        </div>
+      </div>
+      <div class="rater-overall">
+        <strong>Overall:</strong> ${r.overall}
+      </div>
+      ${r.improvements && r.improvements.length ? `
+        <div class="rater-improvements">
+          <strong>Suggested improvements:</strong>
+          <ul>${r.improvements.map(i => `<li>${i}</li>`).join('')}</ul>
+        </div>
+      ` : ''}
+      <div class="rater-cost">AI cost: $${(data.cost_usd || 0).toFixed(4)} · ${data.tokens_used || 0} tokens</div>
+    `;
+  } catch (err) {
+    resultEl.classList.add('hidden');
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⭐ Rate This Topic';
+  }
 }

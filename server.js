@@ -1158,6 +1158,116 @@ app.get('/api/tests/attempts/:aid', authenticate, (req, res) => {
   }
 });
 
+// ─── Topic Quality Rater ──────────────────────────────────────────────────────
+app.post('/api/rate-topic', authenticate, async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) {
+    return res.status(400).json({ error: 'Prompt text is required' });
+  }
+  try {
+    const systemPrompt = `You are an expert IELTS Task 1 examiner and test designer. Rate the following Task 1 prompt on 4 criteria and return ONLY valid JSON with this exact structure:
+{
+  "authenticity": { "score": 0-10, "comment": "..." },
+  "difficulty": { "band": "e.g. 5.5-6.5", "comment": "..." },
+  "visual_type": "bar chart / line graph / pie chart / table / process diagram / map / mixed",
+  "quality": { "score": 0-10, "comment": "..." },
+  "overall": "One sentence overall assessment",
+  "improvements": ["suggestion 1", "suggestion 2", "suggestion 3"]
+}
+
+Scoring guide:
+- authenticity (0-10): Does it look like a real IELTS exam question? 10 = indistinguishable from Cambridge material
+- difficulty (band range): What band level does it challenge? Consider complexity of data, vocabulary required, task demands
+- visual_type: What type of visual does it describe?
+- quality (0-10): Overall clarity, completeness, and professional presentation. 10 = production-ready`;
+
+    const message = await client.messages.create({
+      model: MODEL,
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Rate this IELTS Task 1 prompt:\n\n${prompt.trim()}` }]
+    });
+
+    const rawText = message.content[0].text.trim();
+    // Extract JSON from response (may have surrounding text)
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI did not return valid JSON');
+    const rating = JSON.parse(jsonMatch[0]);
+
+    const inputTokens = message.usage?.input_tokens || 0;
+    const outputTokens = message.usage?.output_tokens || 0;
+    const cost = calculateCost(inputTokens, outputTokens);
+    db.logUsage('topic-rater', cost, inputTokens + outputTokens);
+
+    res.json({ rating, tokens_used: inputTokens + outputTokens, cost_usd: cost });
+  } catch (err) {
+    console.error('Rate topic error:', err);
+    res.status(500).json({ error: 'Failed to rate topic: ' + err.message });
+  }
+});
+
+// ─── Assignments (Homework) ────────────────────────────────────────────────────
+
+// Admin: create assignment
+app.post('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
+  try {
+    const { title, type, description, test_id, deadline } = req.body;
+    if (!title || !type || !deadline) {
+      return res.status(400).json({ error: 'title, type, and deadline are required' });
+    }
+    const validTypes = ['writing_task1', 'writing_task2', 'reading', 'listening'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ error: 'Invalid type. Must be: ' + validTypes.join(', ') });
+    }
+    const id = db.insertAssignment(title, type, description, test_id || null, deadline, req.user.id);
+    res.json({ id, message: 'Assignment created' });
+  } catch (err) {
+    console.error('Create assignment error:', err);
+    res.status(500).json({ error: 'Failed to create assignment' });
+  }
+});
+
+// Admin: list all assignments
+app.get('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
+  try {
+    res.json(db.getAllAssignments());
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load assignments' });
+  }
+});
+
+// Admin: delete assignment
+app.delete('/api/admin/assignments/:id', authenticate, adminOnly, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const ok = db.deleteAssignment(id);
+    if (!ok) return res.status(404).json({ error: 'Assignment not found' });
+    res.json({ message: 'Assignment deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete assignment' });
+  }
+});
+
+// Student: list assignments with completion status
+app.get('/api/assignments', authenticate, (req, res) => {
+  try {
+    res.json(db.getAssignmentsForUser(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load assignments' });
+  }
+});
+
+// Student: mark assignment complete
+app.post('/api/assignments/:id/complete', authenticate, (req, res) => {
+  try {
+    const assignmentId = parseInt(req.params.id, 10);
+    db.markAssignmentComplete(assignmentId, req.user.id);
+    res.json({ message: 'Marked as complete' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to mark complete' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

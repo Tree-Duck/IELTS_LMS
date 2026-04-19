@@ -1846,3 +1846,178 @@ input:focus, textarea:focus, select:focus {
 }
 .import-validation-error ul { margin: 6px 0 0 16px; line-height: 1.8; }
 #import-validation-result { margin-bottom: 4px; }
+
+/* ─── Homework / Assignment Cards ─────────────────────────────────────────── */
+.hw-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 24px 0 12px;
+}
+.hw-section-title:first-child { margin-top: 0; }
+.hw-overdue-title { color: var(--danger); }
+
+.hw-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  transition: box-shadow .15s;
+}
+.hw-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.hw-card-overdue {
+  border-left: 4px solid var(--danger);
+  background: #fff5f5;
+}
+.hw-card-done {
+  opacity: 0.7;
+  background: #f8fffe;
+  border-color: #a7f3d0;
+}
+
+.hw-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.hw-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 6px;
+}
+.hw-card-desc {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+.hw-card-test {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin: 0 0 10px;
+}
+.hw-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+.hw-type-badge {
+  display: inline-block;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-right: 6px;
+}
+.hw-badge {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.hw-badge-pending { background: #fef3c7; color: #92400e; }
+.hw-badge-overdue { background: #fee2e2; color: #991b1b; }
+.hw-badge-done    { background: #d1fae5; color: #065f46; }
+
+.hw-deadline {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+/* Admin assignment table */
+.text-danger { color: var(--danger); }
+
+/* ─── Topic Quality Rater ─────────────────────────────────────────────────── */
+.rater-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 800px;
+}
+.rater-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) { .rater-result-grid { grid-template-columns: 1fr; } }
+
+.rater-result-card {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 16px;
+}
+.rater-result-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-500);
+  margin-bottom: 4px;
+}
+.rater-score {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.rater-bar-track {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.rater-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .4s ease;
+}
+.rater-comment {
+  font-size: 0.83rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+.rater-overall {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+  margin-bottom: 16px;
+}
+.rater-improvements {
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  margin-bottom: 12px;
+}
+.rater-improvements ul { margin: 8px 0 0 18px; line-height: 1.8; }
+.rater-cost {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  text-align: right;
+  margin-top: 8px;
+}
+
+/* ─── Utility ─────────────────────────────────────────────────────────────── */
+.mb-4 { margin-bottom: 24px; }
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 160px; }
+.card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 24px;
+}
+
