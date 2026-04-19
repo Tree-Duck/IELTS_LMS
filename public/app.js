@@ -337,8 +337,8 @@ function showView(name) {
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
+  else if (name === 'admin-student-history') { /* loaded by viewStudentHistory() */ }
   else if (name === 'homework') loadHomework();
-  else if (name === 'topic-rater') initTopicRater();
   else if (name === 'test-list') loadTestList();
   else if (name === 'test-history') loadTestHistory();
   else if (name === 'change-password') {
@@ -350,6 +350,7 @@ function showView(name) {
 
 /* ─── Admin Panel ────────────────────────────────────────────────────────── */
 async function loadAdminUsers() {
+  loadAdminCostBreakdown(); // load cost breakdown in parallel
   const el = document.getElementById('admin-users-table');
   el.innerHTML = '<div class="loading">Loading users…</div>';
   try {
@@ -387,10 +388,13 @@ async function loadAdminUsers() {
                 <td>${formatDate(u.created_at)}</td>
                 <td>${u.submission_count}</td>
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
-                <td>${u.id === currentUser.id || u.role === 'admin'
-                  ? '<span class="text-muted">—</span>'
-                  : `<button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>`
-                }</td>
+                <td style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, '${u.name.replace(/'/g, "\\'")}')">View History</button>
+                  ${u.id === currentUser.id || u.role === 'admin'
+                    ? ''
+                    : `<button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>`
+                  }
+                </td>
               </tr>
             `).join('')}
           </tbody>
@@ -399,6 +403,50 @@ async function loadAdminUsers() {
     `;
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function viewStudentHistory(userId, userName) {
+  // Switch to history view first so elements exist
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  show('view-admin-student-history');
+  document.getElementById('admin-student-history-title').textContent = `${userName} — Submissions`;
+  document.getElementById('admin-student-history-sub').textContent = 'Full essay history for AI/plagiarism review';
+  const contentEl = document.getElementById('admin-student-history-content');
+  contentEl.innerHTML = '<div class="loading">Loading submissions…</div>';
+
+  try {
+    const data = await api(`/api/admin/users/${userId}/submissions`);
+    const subs = data.submissions;
+    if (!subs.length) {
+      contentEl.innerHTML = '<div class="empty-state">No submissions yet.</div>';
+      return;
+    }
+    contentEl.innerHTML = subs.map(s => {
+      const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
+      const bandColor = s.overall_band >= 7 ? '#16a34a' : s.overall_band >= 5.5 ? '#d97706' : s.overall_band ? '#dc2626' : '#6b7280';
+      return `
+        <div class="student-history-card">
+          <div class="student-history-header">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span class="submission-badge ${s.task_type === 'task1' ? 'badge-t1' : 'badge-t2'}" style="width:auto;padding:3px 10px">${taskLabel}</span>
+              <span style="font-size:13px;color:var(--gray-500)">${s.word_count} words · ${formatDate(s.created_at)}</span>
+              ${s.overall_band != null ? `<span style="font-weight:700;color:${bandColor}">Band ${s.overall_band}</span>` : `<span class="badge badge-gray">${s.status}</span>`}
+              ${s.cost_usd ? `<span style="font-size:11px;color:var(--gray-400)">$${s.cost_usd.toFixed(4)}</span>` : ''}
+            </div>
+            <button class="btn btn-secondary btn-xs" onclick="this.closest('.student-history-card').querySelector('.essay-full').classList.toggle('hidden');this.textContent=this.textContent==='Show Essay'?'Hide Essay':'Show Essay'">Show Essay</button>
+          </div>
+          <div class="student-history-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt)}</div>
+          <div class="essay-full hidden">
+            <div class="essay-text-box">${escHtml(s.essay)}</div>
+          </div>
+          ${s.detailed_feedback ? `<div class="student-history-feedback"><strong>Feedback summary:</strong> ${escHtml(s.detailed_feedback.slice(0, 300))}${s.detailed_feedback.length > 300 ? '…' : ''}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    contentEl.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
   }
 }
 
@@ -1047,18 +1095,81 @@ async function requestBothHints() {
   btn.disabled = false;
   btn.textContent = '✨ Generate Both Hints';
   hidePasteNudge();
-  if (currentUser && currentUser.role === 'admin') loadBudget();
 }
 
-async function loadBudget() {
+async function loadAdminCostBreakdown() {
+  const el = document.getElementById('admin-cost-content');
+  if (!el) return;
   try {
-    const bar = document.getElementById('budget-bar');
-    if (bar) bar.classList.remove('hidden');
-    const data = await api('/api/balance');
-    document.getElementById('budget-remaining').textContent = `💰 Balance: $${data.remaining_balance}`;
-    const essays = data.estimated_essays_remaining;
-    document.getElementById('budget-essays').textContent = essays !== '?' ? `~${essays} essays remaining` : '';
-  } catch {}
+    const data = await api('/api/admin/cost-breakdown');
+    const pct = data.remaining_balance > 0 ? Math.round((data.remaining_balance / (data.remaining_balance + data.total_cost)) * 100) : 0;
+
+    // What costs money — reference table
+    const costRef = [
+      { op: 'Essay Grading', who: 'Student submits essay', approx: '~$0.04–0.08' },
+      { op: 'AI Writing Hints', who: 'Student clicks Generate Hints', approx: '~$0.01–0.02' },
+      { op: 'Smart Rewrite', who: 'Student requests rewrite', approx: '~$0.02–0.04' },
+      { op: 'Topic Generation', who: 'Admin generates task prompt', approx: '~$0.005' },
+      { op: 'Chart Description AI', who: 'Task 1 image analysis', approx: '~$0.01' },
+      { op: 'Test AI Explanations', who: 'Student submits Reading/Listening test', approx: '~$0.003' },
+    ];
+
+    el.innerHTML = `
+      <div class="cost-summary-row">
+        <div class="cost-summary-item">
+          <div class="cost-val">$${data.total_cost.toFixed(4)}</div>
+          <div class="cost-lbl">Total Spent</div>
+        </div>
+        <div class="cost-summary-item">
+          <div class="cost-val" style="color:#16a34a">$${data.remaining_balance.toFixed(4)}</div>
+          <div class="cost-lbl">Remaining Balance</div>
+        </div>
+        <div class="cost-summary-item" style="flex:2">
+          <div class="cost-balance-bar">
+            <div class="cost-balance-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="cost-lbl">${pct}% remaining</div>
+        </div>
+      </div>
+
+      ${data.breakdown.length ? `
+        <div class="cost-tables-row">
+          <div class="cost-table-wrap">
+            <div class="cost-table-title">📊 Spending by Feature</div>
+            <table class="cost-table">
+              <thead><tr><th>Feature</th><th>Uses</th><th>Cost</th></tr></thead>
+              <tbody>
+                ${data.breakdown.map(b => `
+                  <tr>
+                    <td>${b.label}</td>
+                    <td>${b.count}</td>
+                    <td>$${b.cost.toFixed(4)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="cost-table-wrap">
+            <div class="cost-table-title">💡 Cost Reference (per operation)</div>
+            <table class="cost-table">
+              <thead><tr><th>Operation</th><th>Triggered by</th><th>Approx. Cost</th></tr></thead>
+              <tbody>
+                ${costRef.map(r => `
+                  <tr>
+                    <td>${r.op}</td>
+                    <td style="color:var(--gray-500);font-size:12px">${r.who}</td>
+                    <td>${r.approx}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : '<div class="cost-lbl" style="padding:8px 0">No AI usage recorded yet.</div>'}
+    `;
+  } catch (err) {
+    el.innerHTML = `<span style="color:var(--danger);font-size:13px">Failed to load: ${err.message}</span>`;
+  }
 }
 
 function renderHintMarkdown(text) {
@@ -2694,12 +2805,13 @@ async function loadAdminAssignments() {
   if (!el) return;
   el.innerHTML = '<div class="loading">Loading…</div>';
 
-  // Also populate the test selector in the create form
+  // Also populate the test selector and student list in the create form
   try {
-    const [assignments, readingTests, listeningTests] = await Promise.all([
+    const [assignments, readingTests, listeningTests, usersData] = await Promise.all([
       api('/api/admin/assignments'),
       api('/api/admin/tests?type=reading').catch(() => []),
-      api('/api/admin/tests?type=listening').catch(() => [])
+      api('/api/admin/tests?type=listening').catch(() => []),
+      api('/api/admin/users').catch(() => ({ users: [] }))
     ]);
 
     const allTests = [...readingTests, ...listeningTests];
@@ -2707,6 +2819,23 @@ async function loadAdminAssignments() {
     if (testSel) {
       testSel.innerHTML = '<option value="">— Select a test —</option>' +
         allTests.map(t => `<option value="${t.id}">[${t.type}] ${t.title}</option>`).join('');
+    }
+
+    // Populate student multi-select
+    const studentListEl = document.getElementById('assign-students-list');
+    if (studentListEl) {
+      const students = (usersData.users || []).filter(u => u.role !== 'admin');
+      if (students.length) {
+        studentListEl.innerHTML = students.map(u => `
+          <label class="assign-student-row">
+            <input type="checkbox" class="assign-student-cb" value="${u.id}">
+            <span>${escHtml(u.name)}</span>
+            <span class="form-hint" style="margin-left:auto">${escHtml(u.email)}</span>
+          </label>
+        `).join('');
+      } else {
+        studentListEl.innerHTML = '<div class="form-hint">No students enrolled yet.</div>';
+      }
     }
 
     if (!assignments.length) {
@@ -2721,6 +2850,7 @@ async function loadAdminAssignments() {
             <tr>
               <th>Title</th>
               <th>Type</th>
+              <th>Assigned To</th>
               <th>Deadline</th>
               <th>Completed</th>
               <th>Actions</th>
@@ -2731,12 +2861,22 @@ async function loadAdminAssignments() {
               const now = new Date();
               const dl = new Date(a.deadline);
               const overdue = dl < now;
+              // Who it's assigned to
+              let assignedLabel;
+              if (!a.assigned_to || a.assigned_to.length === 0) {
+                assignedLabel = '<span class="badge badge-gray">All students</span>';
+              } else if (a.assigned_to_details && a.assigned_to_details.length) {
+                assignedLabel = a.assigned_to_details.map(d => `<span class="badge badge-blue" style="margin-right:2px">${escHtml(d.name)}</span>`).join('');
+              } else {
+                assignedLabel = `<span class="badge badge-blue">${a.assigned_to.length} student${a.assigned_to.length !== 1 ? 's' : ''}</span>`;
+              }
               return `
                 <tr>
                   <td><strong>${a.title}</strong>${a.description ? `<br><small class="text-muted">${a.description.slice(0,60)}${a.description.length>60?'…':''}</small>` : ''}</td>
                   <td><span class="badge badge-gray">${a.type.replace('_', ' ')}</span></td>
+                  <td>${assignedLabel}</td>
                   <td class="${overdue ? 'text-danger' : ''}">${formatDate(a.deadline)}</td>
-                  <td>${a.completed_by ? a.completed_by.length : 0} student${(a.completed_by||[]).length !== 1 ? 's' : ''}</td>
+                  <td>${a.completed_by ? a.completed_by.length : 0} done</td>
                   <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteAssignment(${a.id}, '${a.title.replace(/'/g, "\\'")}')">Delete</button></td>
                 </tr>
               `;
@@ -2768,15 +2908,25 @@ async function createAssignment() {
   const testIdEl = document.getElementById('assign-test-id');
   const test_id = testIdEl && testIdEl.value ? parseInt(testIdEl.value, 10) : null;
 
+  // Collect target students (empty array = all students)
+  const allStudentsChecked = document.getElementById('assign-all-students')?.checked !== false;
+  const assigned_to = allStudentsChecked
+    ? []
+    : [...document.querySelectorAll('.assign-student-cb:checked')].map(cb => parseInt(cb.value, 10));
+
   if (!title) { errEl.textContent = 'Title is required'; errEl.classList.remove('hidden'); return; }
   if (!deadline) { errEl.textContent = 'Deadline is required'; errEl.classList.remove('hidden'); return; }
+  if (!allStudentsChecked && assigned_to.length === 0) {
+    errEl.textContent = 'Please select at least one student, or check "All students"';
+    errEl.classList.remove('hidden'); return;
+  }
 
   const deadlineISO = new Date(deadline).toISOString();
 
   try {
     await api('/api/admin/assignments', {
       method: 'POST',
-      body: JSON.stringify({ title, type, description, test_id, deadline: deadlineISO })
+      body: JSON.stringify({ title, type, description, test_id, deadline: deadlineISO, assigned_to })
     });
     okEl.textContent = 'Assignment created!';
     okEl.classList.remove('hidden');
@@ -2784,6 +2934,10 @@ async function createAssignment() {
     document.getElementById('assign-title').value = '';
     document.getElementById('assign-description').value = '';
     document.getElementById('assign-deadline').value = '';
+    // Reset student selector to "All students"
+    const allCb = document.getElementById('assign-all-students');
+    if (allCb) { allCb.checked = true; toggleStudentSelect(); }
+    document.querySelectorAll('.assign-student-cb').forEach(cb => cb.checked = false);
     // Reload list
     loadAdminAssignments();
   } catch (err) {
@@ -2802,88 +2956,10 @@ async function confirmDeleteAssignment(id, title) {
   }
 }
 
-/* ─── Topic Quality Rater ─────────────────────────────────────────────────── */
+/* ─── Assign Students Toggle ──────────────────────────────────────────────── */
 
-function initTopicRater() {
-  // Reset state when entering view
-  const errEl = document.getElementById('rater-error');
-  const resultEl = document.getElementById('rater-result');
-  if (errEl) errEl.classList.add('hidden');
-  if (resultEl) resultEl.classList.add('hidden');
-}
-
-async function rateTopic() {
-  const promptEl = document.getElementById('rater-prompt');
-  const errEl = document.getElementById('rater-error');
-  const resultEl = document.getElementById('rater-result');
-  const btn = document.getElementById('rater-btn');
-
-  errEl.classList.add('hidden');
-  resultEl.classList.add('hidden');
-
-  const prompt = promptEl.value.trim();
-  if (!prompt) {
-    errEl.textContent = 'Please paste a Task 1 prompt first';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Rating…';
-  resultEl.innerHTML = '<div class="loading">AI is evaluating the prompt…</div>';
-  resultEl.classList.remove('hidden');
-
-  try {
-    const data = await api('/api/rate-topic', {
-      method: 'POST',
-      body: JSON.stringify({ prompt })
-    });
-    const r = data.rating;
-
-    const scoreColor = (s) => s >= 8 ? '#16a34a' : s >= 5 ? '#d97706' : '#dc2626';
-    const scoreBar = (s) => `<div class="rater-bar-track"><div class="rater-bar-fill" style="width:${s*10}%;background:${scoreColor(s)}"></div></div>`;
-
-    resultEl.innerHTML = `
-      <div class="rater-result-grid">
-        <div class="rater-result-card">
-          <div class="rater-result-label">Authenticity</div>
-          <div class="rater-score" style="color:${scoreColor(r.authenticity.score)}">${r.authenticity.score}/10</div>
-          ${scoreBar(r.authenticity.score)}
-          <div class="rater-comment">${r.authenticity.comment}</div>
-        </div>
-        <div class="rater-result-card">
-          <div class="rater-result-label">Quality</div>
-          <div class="rater-score" style="color:${scoreColor(r.quality.score)}">${r.quality.score}/10</div>
-          ${scoreBar(r.quality.score)}
-          <div class="rater-comment">${r.quality.comment}</div>
-        </div>
-        <div class="rater-result-card">
-          <div class="rater-result-label">Target Band</div>
-          <div class="rater-score" style="color:#4f46e5">${r.difficulty.band}</div>
-          <div class="rater-comment">${r.difficulty.comment}</div>
-        </div>
-        <div class="rater-result-card">
-          <div class="rater-result-label">Visual Type</div>
-          <div class="rater-score" style="color:#0891b2;font-size:1rem">${r.visual_type}</div>
-        </div>
-      </div>
-      <div class="rater-overall">
-        <strong>Overall:</strong> ${r.overall}
-      </div>
-      ${r.improvements && r.improvements.length ? `
-        <div class="rater-improvements">
-          <strong>Suggested improvements:</strong>
-          <ul>${r.improvements.map(i => `<li>${i}</li>`).join('')}</ul>
-        </div>
-      ` : ''}
-      <div class="rater-cost">AI cost: $${(data.cost_usd || 0).toFixed(4)} · ${data.tokens_used || 0} tokens</div>
-    `;
-  } catch (err) {
-    resultEl.classList.add('hidden');
-    errEl.textContent = err.message;
-    errEl.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '⭐ Rate This Topic';
-  }
+function toggleStudentSelect() {
+  const allChecked = document.getElementById('assign-all-students').checked;
+  const listEl = document.getElementById('assign-students-list');
+  if (listEl) listEl.classList.toggle('hidden', allChecked);
 }

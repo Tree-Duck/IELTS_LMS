@@ -196,9 +196,6 @@
             <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-admin-assignments">
               <span class="nav-icon">📋</span> Assignments
             </button>
-            <button class="nav-item nav-sub-item" onclick="showView('topic-rater')" id="nav-topic-rater">
-              <span class="nav-icon">⭐</span> Topic Rater
-            </button>
           </div>
         </div>
 
@@ -418,13 +415,8 @@
             </form>
           </div>
 
-          <!-- RIGHT: Budget + AI Hints panel -->
+          <!-- RIGHT: AI Hints panel -->
           <div class="submit-right">
-            <div class="budget-bar hidden" id="budget-bar">
-              <span id="budget-remaining">Loading budget...</span>
-              <span id="budget-essays"></span>
-            </div>
-
             <div class="hints-section">
               <div class="hints-section-header">
                 <span class="hints-section-title">✨ AI Writing Assistance</span>
@@ -473,7 +465,25 @@
           <h2>Users</h2>
           <p>All registered accounts on this platform</p>
         </div>
+        <!-- AI Cost Breakdown (admin only) -->
+        <div class="admin-cost-section" id="admin-cost-section">
+          <div class="admin-cost-header">
+            <span>💰 AI Usage & Costs</span>
+            <button class="btn btn-secondary btn-xs" onclick="loadAdminCostBreakdown()">Refresh</button>
+          </div>
+          <div id="admin-cost-content"><div class="loading" style="font-size:13px">Loading…</div></div>
+        </div>
         <div id="admin-users-table"></div>
+      </div>
+
+      <!-- Admin: Student Submission History -->
+      <div id="view-admin-student-history" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back" onclick="showView('admin')">← Back to Users</button>
+          <h2 id="admin-student-history-title">Student History</h2>
+          <p id="admin-student-history-sub">Essay submissions and AI grading details</p>
+        </div>
+        <div id="admin-student-history-content"><div class="loading">Loading…</div></div>
       </div>
 
       <!-- Change Password View -->
@@ -690,6 +700,18 @@
             </select>
           </div>
           <div class="form-group">
+            <label for="assign-students">Assign To</label>
+            <div class="assign-students-wrap">
+              <label class="assign-all-label">
+                <input type="checkbox" id="assign-all-students" checked onchange="toggleStudentSelect()"> All students
+              </label>
+              <div id="assign-students-list" class="assign-students-list hidden">
+                <div class="loading" style="font-size:13px">Loading students…</div>
+              </div>
+            </div>
+            <div class="form-hint">Uncheck "All students" to select specific individuals</div>
+          </div>
+          <div class="form-group">
             <label for="assign-description">Instructions / Description</label>
             <textarea id="assign-description" class="form-input" rows="3" placeholder="Describe what students need to do..."></textarea>
           </div>
@@ -700,28 +722,6 @@
 
         <!-- Existing assignments list -->
         <div id="admin-assignments-list"><div class="loading">Loading…</div></div>
-      </div>
-
-      <!-- Topic Quality Rater View (Admin) -->
-      <div id="view-topic-rater" class="view hidden">
-        <div class="page-header">
-          <h2>⭐ Topic Quality Rater</h2>
-          <p>Paste a Task 1 prompt to get an AI quality assessment</p>
-        </div>
-        <div class="rater-card">
-          <div class="form-group">
-            <label for="rater-prompt">Task 1 Prompt</label>
-            <textarea id="rater-prompt" class="form-input" rows="6"
-              placeholder="The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011.
-
-Summarise the information by selecting and reporting the main features, and make comparisons where relevant.
-
-Write at least 150 words."></textarea>
-          </div>
-          <button type="button" class="btn btn-primary" onclick="rateTopic()" id="rater-btn">⭐ Rate This Topic</button>
-          <div id="rater-error" class="error-msg hidden" style="margin-top:12px"></div>
-          <div id="rater-result" class="hidden" style="margin-top:24px"></div>
-        </div>
       </div>
 
       <!-- Rewrite View -->

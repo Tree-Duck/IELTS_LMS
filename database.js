@@ -396,7 +396,7 @@ const db = {
 
   // ── Assignments (Homework) ─────────────────────────────────────────────────
 
-  insertAssignment(title, type, description, test_id, deadline, created_by) {
+  insertAssignment(title, type, description, test_id, deadline, created_by, assigned_to) {
     const data = load();
     if (!data.assignments) data.assignments = [];
     if (!data._ids.assignments) data._ids.assignments = 0;
@@ -406,6 +406,7 @@ const db = {
       description: description || '',
       test_id: test_id || null,
       deadline, created_by,
+      assigned_to: Array.isArray(assigned_to) ? assigned_to : [], // empty = all students
       created_at: new Date().toISOString()
     };
     data.assignments.push(assignment);
@@ -416,6 +417,7 @@ const db = {
   getAllAssignments() {
     const data = load();
     const completions = data.assignment_completions || [];
+    const users = data.users || [];
     return (data.assignments || [])
       .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
       .map(a => {
@@ -423,7 +425,13 @@ const db = {
           ? ((data.tests || []).find(t => t.id === a.test_id) || {}).title || null
           : null;
         const completedBy = completions.filter(c => c.assignment_id === a.id).map(c => c.user_id);
-        return { ...a, test_title: testTitle, completed_by: completedBy };
+        const assignedTo = (a.assigned_to || []).length > 0
+          ? (a.assigned_to || []).map(uid => {
+              const u = users.find(u => u.id === uid);
+              return u ? { id: uid, name: u.name } : { id: uid, name: 'Unknown' };
+            })
+          : null; // null = all students
+        return { ...a, test_title: testTitle, completed_by: completedBy, assigned_to_details: assignedTo };
       });
   },
 
@@ -431,6 +439,11 @@ const db = {
     const data = load();
     const completions = data.assignment_completions || [];
     return (data.assignments || [])
+      .filter(a => {
+        // Include if assigned_to is empty (all) or user_id is in the list
+        const list = a.assigned_to || [];
+        return list.length === 0 || list.includes(user_id);
+      })
       .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
       .map(a => {
         const testTitle = a.test_id
@@ -473,6 +486,54 @@ const db = {
     });
     save(data);
     return true;
+  },
+
+  // Full submission list with essay text — for admin inspection
+  getAdminStudentSubmissions(userId) {
+    const data = load();
+    return data.submissions
+      .filter(s => s.user_id === userId)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .map(s => {
+        const f = data.feedback.find(f => f.submission_id === s.id) || {};
+        return {
+          id: s.id, task_type: s.task_type, prompt: s.prompt, essay: s.essay,
+          word_count: s.word_count, status: s.status, created_at: s.created_at,
+          overall_band: f.overall_band ?? null,
+          detailed_feedback: f.detailed_feedback || null,
+          cost_usd: f.cost_usd || null
+        };
+      });
+  },
+
+  // Cost breakdown by operation type for admin panel
+  getCostBreakdown() {
+    const data = load();
+    const breakdown = {};
+    // Writing grading costs come from feedback table
+    let gradingCost = 0, gradingCount = 0;
+    for (const f of (data.feedback || [])) {
+      if (f.cost_usd) { gradingCost += f.cost_usd; gradingCount++; }
+    }
+    if (gradingCount > 0) breakdown['Essay Grading'] = { cost: gradingCost, count: gradingCount };
+    // All other costs from usage_logs
+    for (const u of (data.usage_logs || [])) {
+      const label = {
+        'generate-task': 'Topic Generation',
+        'hint-ideas': 'AI Writing Hints',
+        'hint-vocabulary': 'AI Writing Hints',
+        'generate-chart': 'Chart Description AI',
+        'rewrite': 'Smart Rewrite',
+        'test-explanations': 'Test AI Explanations',
+        'topic-rater': 'Topic Quality Rater',
+      }[u.type] || u.type;
+      if (!breakdown[label]) breakdown[label] = { cost: 0, count: 0 };
+      breakdown[label].cost += (u.cost_usd || 0);
+      breakdown[label].count += 1;
+    }
+    return Object.entries(breakdown)
+      .map(([label, d]) => ({ label, cost: Math.round(d.cost * 100000) / 100000, count: d.count }))
+      .sort((a, b) => b.cost - a.cost);
   },
 
   getAllUsersWithStats() {
