@@ -115,7 +115,7 @@ body {
 .logo-sun { font-size: 24px; line-height: 1; }
 .logo-text { font-size: 17px; font-weight: 800; color: var(--primary); letter-spacing: .5px; }
 
-/* ─── NAV GROUPS (collapsible hover-dropdown) ───────────────────────────── */
+/* ─── NAV GROUPS (collapsible click-toggle) ─────────────────────────────── */
 .nav-group { position: relative; }
 .nav-group-header {
   display: flex;
@@ -137,14 +137,14 @@ body {
   transition: transform .2s;
   display: inline-block;
 }
-.nav-group:hover .nav-group-chevron { transform: rotate(90deg); }
+.nav-group.open .nav-group-chevron { transform: rotate(90deg); }
 .nav-group-items {
   display: none;
   flex-direction: column;
   gap: 2px;
   padding: 2px 0 4px 12px;
 }
-.nav-group:hover .nav-group-items { display: flex; }
+.nav-group.open .nav-group-items { display: flex; }
 .nav-sub-item {
   padding: 8px 12px;
   font-size: 13px;

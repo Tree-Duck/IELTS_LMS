@@ -304,6 +304,16 @@ function showApp() {
   } else {
     adminNavGroup.classList.add('hidden');
   }
+
+  // Click-to-toggle nav groups (attach once; guard with data attribute)
+  document.querySelectorAll('.nav-group-header').forEach(header => {
+    if (header.dataset.toggleBound) return;
+    header.dataset.toggleBound = '1';
+    header.addEventListener('click', () => {
+      header.closest('.nav-group').classList.toggle('open');
+    });
+  });
+
   showView('dashboard');
 }
 
