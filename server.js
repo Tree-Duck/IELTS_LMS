@@ -282,7 +282,8 @@ app.post('/api/resend-verification', async (req, res) => {
 
 // ─── Balance Route ────────────────────────────────────────────────────────────
 app.get('/api/balance', authenticate, (req, res) => {
-  const startingBalance = parseFloat(process.env.STARTING_BALANCE || '4.98');
+  const envDefault = parseFloat(process.env.STARTING_BALANCE || '4.98');
+  const startingBalance = parseFloat(db.getSetting('starting_balance', envDefault));
   const totalCost = db.getTotalCost();
   const remaining = Math.max(0, startingBalance - totalCost);
   const gradedCount = db.getGradedCount();
@@ -1256,13 +1257,33 @@ app.get('/api/tests/attempts/:aid', authenticate, (req, res) => {
 // ─── Admin Cost Breakdown ─────────────────────────────────────────────────────
 app.get('/api/admin/cost-breakdown', authenticate, adminOnly, (req, res) => {
   try {
-    const startingBalance = parseFloat(process.env.STARTING_BALANCE || '4.98');
+    // DB setting takes priority; fall back to env var, then 4.98 default
+    const envDefault = parseFloat(process.env.STARTING_BALANCE || '4.98');
+    const startingBalance = parseFloat(db.getSetting('starting_balance', envDefault));
     const totalCost = db.getTotalCost();
     const remaining = Math.max(0, startingBalance - totalCost);
     const breakdown = db.getCostBreakdown();
-    res.json({ total_cost: Math.round(totalCost * 10000) / 10000, remaining_balance: Math.round(remaining * 10000) / 10000, breakdown });
+    res.json({
+      total_cost: Math.round(totalCost * 10000) / 10000,
+      remaining_balance: Math.round(remaining * 10000) / 10000,
+      starting_balance: Math.round(startingBalance * 10000) / 10000,
+      breakdown
+    });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load cost breakdown' });
+  }
+});
+
+// Admin: update the Anthropic credit balance snapshot
+app.put('/api/admin/settings/balance', authenticate, adminOnly, (req, res) => {
+  try {
+    const { balance } = req.body;
+    const val = parseFloat(balance);
+    if (isNaN(val) || val < 0) return res.status(400).json({ error: 'Invalid balance value' });
+    db.setSetting('starting_balance', val);
+    res.json({ message: 'Balance updated', starting_balance: val });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update balance' });
   }
 });
 

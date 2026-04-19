@@ -2221,3 +2221,43 @@ input:focus, textarea:focus, select:focus {
   margin: 1px 0;
 }
 
+/* ─── BALANCE SYNC ───────────────────────────────────────────────────────── */
+.balance-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  flex-wrap: wrap;
+}
+.balance-sync-label {
+  font-size: 13px;
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+.balance-input {
+  width: 110px;
+  padding: 5px 10px;
+  font-size: 13px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .15s;
+}
+.balance-input:focus { border-color: var(--primary); }
+.btn-xs {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+.balance-link {
+  font-size: 12px;
+  color: var(--primary-dark);
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: .85;
+}
+.balance-link:hover { opacity: 1; text-decoration: underline; }
+

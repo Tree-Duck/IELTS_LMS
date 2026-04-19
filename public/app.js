@@ -1097,12 +1097,29 @@ async function requestBothHints() {
   hidePasteNudge();
 }
 
+async function syncAnthropicBalance() {
+  const input = document.getElementById('balance-input');
+  const val = parseFloat(input?.value);
+  if (isNaN(val) || val < 0) { alert('Please enter a valid balance (e.g. 4.65)'); return; }
+  try {
+    await api('/api/admin/settings/balance', { method: 'PUT', body: JSON.stringify({ balance: val }) });
+    input.value = '';
+    await loadAdminCostBreakdown();
+  } catch (err) {
+    alert('Failed to save balance: ' + err.message);
+  }
+}
+
 async function loadAdminCostBreakdown() {
   const el = document.getElementById('admin-cost-content');
   if (!el) return;
   try {
     const data = await api('/api/admin/cost-breakdown');
-    const pct = data.remaining_balance > 0 ? Math.round((data.remaining_balance / (data.remaining_balance + data.total_cost)) * 100) : 0;
+    const total = data.starting_balance || (data.remaining_balance + data.total_cost);
+    const pct = total > 0 ? Math.round((data.remaining_balance / total) * 100) : 0;
+    // Pre-fill the sync input with current starting balance as placeholder
+    const balInput = document.getElementById('balance-input');
+    if (balInput && !balInput.value) balInput.placeholder = `current: $${(data.starting_balance || 0).toFixed(2)}`;
 
     // What costs money — reference table
     const costRef = [

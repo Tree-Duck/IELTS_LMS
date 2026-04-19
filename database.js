@@ -568,6 +568,21 @@ const db = {
       .sort((a, b) => b.cost - a.cost);
   },
 
+  // ── App Settings ──────────────────────────────────────────────────────────
+
+  getSetting(key, defaultValue = null) {
+    const data = load();
+    if (!data.settings) return defaultValue;
+    return key in data.settings ? data.settings[key] : defaultValue;
+  },
+
+  setSetting(key, value) {
+    const data = load();
+    if (!data.settings) data.settings = {};
+    data.settings[key] = value;
+    save(data);
+  },
+
   getAllUsersWithStats() {
     const data = load();
     return data.users.map(u => {
@@ -597,6 +612,7 @@ const db = {
   if (!data.assignment_completions) { data.assignment_completions = []; changed = true; }
   if (!data._ids.assignments) { data._ids.assignments = 0; changed = true; }
   if (!data._ids.assignment_completions) { data._ids.assignment_completions = 0; changed = true; }
+  if (!data.settings) { data.settings = {}; changed = true; }
   if (changed) save(data);
 })();
 

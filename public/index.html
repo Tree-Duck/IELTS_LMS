@@ -469,7 +469,15 @@
         <div class="admin-cost-section" id="admin-cost-section">
           <div class="admin-cost-header">
             <span>💰 AI Usage & Costs</span>
-            <button class="btn btn-secondary btn-xs" onclick="loadAdminCostBreakdown()">Refresh</button>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div class="balance-sync-row">
+                <span class="balance-sync-label">Sync from Anthropic:</span>
+                <input type="number" id="balance-input" class="balance-input" step="0.01" min="0" placeholder="e.g. 4.65">
+                <button class="btn btn-primary btn-xs" onclick="syncAnthropicBalance()">💾 Save</button>
+                <a href="https://console.anthropic.com/settings/billing" target="_blank" class="balance-link">Open Console ↗</a>
+              </div>
+              <button class="btn btn-secondary btn-xs" onclick="loadAdminCostBreakdown()">Refresh</button>
+            </div>
           </div>
           <div id="admin-cost-content"><div class="loading" style="font-size:13px">Loading…</div></div>
         </div>
