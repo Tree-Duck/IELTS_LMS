@@ -164,6 +164,10 @@ const db = {
     return load().users.find(u => u.id === id) || null;
   },
 
+  getAllUsers() {
+    return load().users || [];
+  },
+
   setResetCode(userId, code, expires) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
@@ -424,7 +428,12 @@ const db = {
         const testTitle = a.test_id
           ? ((data.tests || []).find(t => t.id === a.test_id) || {}).title || null
           : null;
-        const completedBy = completions.filter(c => c.assignment_id === a.id).map(c => c.user_id);
+        const completedBy = completions.filter(c => c.assignment_id === a.id).map(c => ({
+          user_id: c.user_id,
+          completed_at: c.completed_at,
+          is_late: c.is_late || false,
+          name: (users.find(u => u.id === c.user_id) || {}).name || 'Unknown'
+        }));
         const assignedTo = (a.assigned_to || []).length > 0
           ? (a.assigned_to || []).map(uid => {
               const u = users.find(u => u.id === uid);
@@ -471,21 +480,44 @@ const db = {
     return true;
   },
 
+  getAssignmentById(id) {
+    const data = load();
+    return (data.assignments || []).find(a => a.id === id) || null;
+  },
+
   markAssignmentComplete(assignment_id, user_id) {
     const data = load();
     if (!data.assignment_completions) data.assignment_completions = [];
     if (!data._ids.assignment_completions) data._ids.assignment_completions = 0;
     // Prevent duplicate
     const already = data.assignment_completions.find(c => c.assignment_id === assignment_id && c.user_id === user_id);
-    if (already) return false;
+    if (already) return null; // already done
+    const assignment = (data.assignments || []).find(a => a.id === assignment_id);
+    const completed_at = new Date().toISOString();
+    const is_late = assignment ? new Date(completed_at) > new Date(assignment.deadline) : false;
     data._ids.assignment_completions += 1;
     data.assignment_completions.push({
       id: data._ids.assignment_completions,
       assignment_id, user_id,
-      completed_at: new Date().toISOString()
+      completed_at,
+      is_late
     });
     save(data);
-    return true;
+    return { completed_at, is_late, assignment };
+  },
+
+  // Find incomplete assignments for a user that are linked to a specific test
+  getIncompleteAssignmentsForTest(user_id, test_id, type) {
+    const data = load();
+    const completions = data.assignment_completions || [];
+    return (data.assignments || []).filter(a => {
+      if (a.test_id !== test_id) return false;
+      if (a.type !== type) return false;
+      const list = a.assigned_to || [];
+      if (list.length > 0 && !list.includes(user_id)) return false;
+      const done = completions.find(c => c.assignment_id === a.id && c.user_id === user_id);
+      return !done;
+    });
   },
 
   // Full submission list with essay text — for admin inspection

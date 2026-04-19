@@ -2200,4 +2200,24 @@ input:focus, textarea:focus, select:focus {
   border-radius: 99px;
   font-weight: 500;
 }
+.badge-ontime {
+  display: inline-block;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 500;
+  margin: 1px 0;
+}
+.badge-late {
+  display: inline-block;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 500;
+  margin: 1px 0;
+}
 

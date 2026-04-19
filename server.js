@@ -98,6 +98,82 @@ function adminRole(email) {
   return adminEmails.includes(email.toLowerCase()) ? 'admin' : 'student';
 }
 
+// Return list of admin email addresses from env
+function getAdminEmails() {
+  return (process.env.ADMIN_EMAIL || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+// Format a deadline for display in emails
+function fmtDeadline(isoStr) {
+  try {
+    return new Date(isoStr).toLocaleString('en-US', {
+      weekday: 'short', year: 'numeric', month: 'short',
+      day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+    });
+  } catch { return isoStr; }
+}
+
+// Email: student receives when a homework is assigned to them
+async function sendHomeworkAssignedEmail(student, assignment) {
+  const typeLabel = assignment.type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const deadlineStr = fmtDeadline(assignment.deadline);
+  await getResend().emails.send({
+    from: "SSP IELTS <noreply@tintinlab.com>",
+    to: student.email,
+    subject: `📚 New Homework: ${assignment.title}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px">
+        <h2 style="color:#D97706;margin-bottom:4px">SSP IELTS</h2>
+        <h3 style="margin-bottom:16px;color:#111827">You have a new homework assignment</h3>
+        <p style="color:#374151">Hi <strong>${student.name}</strong>,</p>
+        <p style="color:#374151">Your teacher has assigned you new homework:</p>
+        <div style="background:#FEF3C7;border-left:4px solid #F59E0B;border-radius:8px;padding:16px 20px;margin:16px 0">
+          <div style="font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:6px">${assignment.title}</div>
+          <div style="color:#6b7280;font-size:14px;margin-bottom:4px">Type: <strong>${typeLabel}</strong></div>
+          ${assignment.description ? `<div style="color:#374151;font-size:14px;margin-bottom:4px">${assignment.description}</div>` : ''}
+          <div style="color:#dc2626;font-weight:600;font-size:14px;margin-top:8px">⏰ Due: ${deadlineStr}</div>
+        </div>
+        <p style="color:#374151">Log in to <a href="https://tintinlab.com" style="color:#D97706">tintinlab.com</a> and go to <strong>Homework</strong> to complete this assignment.</p>
+        <p style="color:#9ca3af;font-size:13px;margin-top:24px">SSP IELTS — Good luck! 💪</p>
+      </div>
+    `
+  });
+}
+
+// Email: admin receives when a student submits/completes homework
+async function sendHomeworkSubmittedEmail(adminEmail, student, assignment, completedAt, isLate) {
+  const typeLabel = assignment.type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const submittedStr = fmtDeadline(completedAt);
+  const deadlineStr = fmtDeadline(assignment.deadline);
+  const lateColor = isLate ? '#dc2626' : '#16a34a';
+  const lateLabel = isLate ? '⚠️ LATE' : '✅ On Time';
+  await getResend().emails.send({
+    from: "SSP IELTS <noreply@tintinlab.com>",
+    to: adminEmail,
+    subject: `${isLate ? '⚠️ Late' : '✅'} Homework submitted — ${student.name}: ${assignment.title}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px">
+        <h2 style="color:#D97706;margin-bottom:4px">SSP IELTS</h2>
+        <h3 style="margin-bottom:16px;color:#111827">Homework Submission</h3>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin:16px 0">
+          <div style="font-size:1rem;font-weight:700;color:#111827;margin-bottom:10px">${assignment.title}</div>
+          <table style="width:100%;font-size:14px;color:#374151;border-collapse:collapse">
+            <tr><td style="padding:4px 0;width:120px;color:#6b7280">Student</td><td><strong>${student.name}</strong> (${student.email})</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">Type</td><td>${typeLabel}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">Submitted</td><td>${submittedStr}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">Deadline</td><td>${deadlineStr}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">Status</td><td><strong style="color:${lateColor}">${lateLabel}</strong></td></tr>
+          </table>
+        </div>
+        <p style="color:#374151">View the student's work in the <a href="https://tintinlab.com" style="color:#D97706">Admin → Users → View History</a> panel.</p>
+      </div>
+    `
+  });
+}
+
 function adminOnly(req, res, next) {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin access only' });
   next();
@@ -1114,6 +1190,25 @@ app.post('/api/tests/:id/attempts/:aid/submit', authenticate, async (req, res) =
     // Update streak
     try { db.updateStreak(req.user.id); } catch (e) { console.error('Streak error:', e); }
 
+    // Auto-complete any homework assignments linked to this test
+    try {
+      const linkedAssignments = db.getIncompleteAssignmentsForTest(req.user.id, testId, test.type);
+      if (linkedAssignments.length > 0) {
+        const student = db.getUserById(req.user.id);
+        for (const assignment of linkedAssignments) {
+          const result = db.markAssignmentComplete(assignment.id, req.user.id);
+          if (result) {
+            sendEmailSafe(async () => {
+              const adminEmails = getAdminEmails();
+              await Promise.all(adminEmails.map(email =>
+                sendHomeworkSubmittedEmail(email, student, assignment, result.completed_at, result.is_late)
+              ));
+            });
+          }
+        }
+      }
+    } catch (e) { console.error('Auto-complete assignment error:', e); }
+
     // Fire AI explanations in background
     if (score.wrong_q_numbers.length > 0) {
       generateTestExplanations(attemptId, test, answers || {}, score.wrong_q_numbers).catch(console.error);
@@ -1187,7 +1282,7 @@ app.get('/api/admin/users/:id/submissions', authenticate, adminOnly, (req, res) 
 // ─── Assignments (Homework) ────────────────────────────────────────────────────
 
 // Admin: create assignment
-app.post('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
+app.post('/api/admin/assignments', authenticate, adminOnly, async (req, res) => {
   try {
     const { title, type, description, test_id, deadline, assigned_to } = req.body;
     if (!title || !type || !deadline) {
@@ -1199,6 +1294,18 @@ app.post('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
     }
     const assignedTo = Array.isArray(assigned_to) ? assigned_to.map(Number).filter(Boolean) : [];
     const id = db.insertAssignment(title, type, description, test_id || null, deadline, req.user.id, assignedTo);
+    const assignment = db.getAssignmentById(id);
+
+    // Fire email notifications to targeted students (non-blocking)
+    sendEmailSafe(async () => {
+      const allUsers = db.getAllUsers ? db.getAllUsers() : [];
+      const students = allUsers.filter(u => u.role !== 'admin' && u.verified);
+      const targets = assignedTo.length > 0
+        ? students.filter(u => assignedTo.includes(u.id))
+        : students; // all students
+      await Promise.all(targets.map(s => sendHomeworkAssignedEmail(s, assignment)));
+    });
+
     res.json({ id, message: 'Assignment created' });
   } catch (err) {
     console.error('Create assignment error:', err);
@@ -1237,10 +1344,24 @@ app.get('/api/assignments', authenticate, (req, res) => {
 });
 
 // Student: mark assignment complete
-app.post('/api/assignments/:id/complete', authenticate, (req, res) => {
+app.post('/api/assignments/:id/complete', authenticate, async (req, res) => {
   try {
     const assignmentId = parseInt(req.params.id, 10);
-    db.markAssignmentComplete(assignmentId, req.user.id);
+    const result = db.markAssignmentComplete(assignmentId, req.user.id);
+    if (!result) return res.json({ message: 'Already marked as complete' });
+
+    // Email admins (non-blocking)
+    const { completed_at, is_late, assignment } = result;
+    if (assignment) {
+      const student = db.getUserById(req.user.id);
+      sendEmailSafe(async () => {
+        const adminEmails = getAdminEmails();
+        await Promise.all(adminEmails.map(email =>
+          sendHomeworkSubmittedEmail(email, student, assignment, completed_at, is_late)
+        ));
+      });
+    }
+
     res.json({ message: 'Marked as complete' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to mark complete' });

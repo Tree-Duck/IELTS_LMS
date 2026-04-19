@@ -1294,6 +1294,14 @@ async function handleSubmit(e) {
     removeImage();
     updateWordCount();
 
+    // Auto-complete linked homework assignment (if started from Homework view)
+    if (window._pendingHomeworkAssignmentId) {
+      try {
+        await api(`/api/assignments/${window._pendingHomeworkAssignmentId}/complete`, { method: 'POST' });
+      } catch (e) { /* non-fatal */ }
+      window._pendingHomeworkAssignmentId = null;
+    }
+
     // Auto-navigate to history after 2s
     setTimeout(() => showView('history'), 2000);
   } catch (err) {
@@ -2783,8 +2791,11 @@ function startHomeworkWriting(assignmentId, taskType) {
 
 function startHomeworkTest(assignmentId, testId) {
   window._pendingHomeworkAssignmentId = assignmentId;
-  // Navigate to test list and start the specific test
+  // Navigate to the specific test directly
+  // startTest() lives in the test-taking section and handles the full flow
   showView('test-list');
+  // After test list loads, trigger this specific test
+  setTimeout(() => startTest(testId), 400);
 }
 
 async function markHomeworkDone(assignmentId) {
@@ -2875,7 +2886,16 @@ async function loadAdminAssignments() {
                   <td><span class="badge badge-gray">${a.type.replace('_', ' ')}</span></td>
                   <td>${assignedLabel}</td>
                   <td class="${overdue ? 'text-danger' : ''}">${formatDate(a.deadline)}</td>
-                  <td>${a.completed_by ? a.completed_by.length : 0} done</td>
+                  <td>${(() => {
+                    const comps = a.completed_by || [];
+                    if (!comps.length) return '<span class="badge badge-gray">0 submitted</span>';
+                    return comps.map(c => {
+                      const badge = c.is_late
+                        ? `<span class="badge badge-late" title="Submitted ${formatDate(c.completed_at)}">⚠️ ${escHtml(c.name)} — Late</span>`
+                        : `<span class="badge badge-ontime" title="Submitted ${formatDate(c.completed_at)}">✅ ${escHtml(c.name)}</span>`;
+                      return badge;
+                    }).join(' ');
+                  })()}</td>
                   <td><button class="btn btn-danger btn-xs" onclick="confirmDeleteAssignment(${a.id}, '${a.title.replace(/'/g, "\\'")}')">Delete</button></td>
                 </tr>
               `;
