@@ -8,6 +8,18 @@ let promptUserTyped = false;  // tracks manual paste/type in prompt
 let pendingVerifyEmail = null; // email awaiting verification
 let pendingResetEmail = null;  // email awaiting password reset
 
+// Writing Timer state
+let writingTimerSecs = 0;
+let writingTimerInterval = null;
+let writingTimerRunning = false;
+
+// Flashcard state
+let flashcards = [];
+let flashcardIndex = 0;
+
+// Draft auto-save
+const DRAFT_KEY = 'ielts_essay_draft';
+
 const TOPIC_OPTIONS = {
   task2: [
     { value: 'random',        label: '🎲 Random' },
@@ -32,6 +44,13 @@ const TOPIC_OPTIONS = {
 
 /* ─── Init ───────────────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
+  // Restore dark mode preference
+  if (localStorage.getItem('ielts_dark_mode') === '1') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('dark-mode-btn');
+    if (btn) btn.textContent = '☀️';
+  }
+
   if (token && currentUser) {
     showApp();
   } else {
@@ -333,7 +352,7 @@ function showView(name) {
 
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { updateTopicOptions(); }
+  else if (name === 'submit') { updateTopicOptions(); loadDraftIfExists(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
@@ -868,6 +887,8 @@ function onPromptInput() {
   }
   // Hide chart when user manually edits the prompt
   clearChart();
+  // Auto-save draft
+  onDraftInput();
 }
 
 function showPasteNudge() {
@@ -1305,11 +1326,14 @@ async function handleSubmit(e) {
       <small>Results will appear in <a href="#" onclick="showView('history')">My Submissions</a> shortly.</small>`;
     successEl.classList.remove('hidden');
 
-    // Reset form
+    // Reset form and clear saved draft
     document.getElementById('essay-prompt').value = '';
     document.getElementById('essay-text').value = '';
     removeImage();
     updateWordCount();
+    localStorage.removeItem(DRAFT_KEY);
+    const banner = document.getElementById('draft-restore-banner');
+    if (banner) banner.classList.add('hidden');
 
     // Auto-complete linked homework assignment (if started from Homework view)
     if (window._pendingHomeworkAssignmentId) {
@@ -1393,7 +1417,10 @@ function renderFeedback(s) {
     html += `
       <div class="grading-notice" style="background:var(--danger-light);border-color:#fecaca;color:var(--danger);">
         <strong>Grading Error</strong>
-        There was a problem grading this essay. Please try submitting again.
+        There was a problem grading this essay.
+      </div>
+      <div class="retry-grade-bar">
+        <button class="btn btn-primary btn-sm" onclick="retryGrading(${s.id})">🔄 Retry Grading</button>
       </div>`;
   } else if (s.status === 'graded' && s.overall_band != null) {
     // Overall band
@@ -1414,6 +1441,21 @@ function renderFeedback(s) {
           ${bandItem(s.lexical_resource, 'Lexical Resource')}
           ${bandItem(s.grammatical_range, 'Grammatical Range &amp; Accuracy')}
         </div>
+      </div>`;
+
+    // Radar chart
+    html += `
+      <div class="feedback-section radar-chart-section">
+        <h3>📊 Skill Radar</h3>
+        <div class="radar-chart-container">
+          <canvas id="feedback-radar-chart" height="260"></canvas>
+        </div>
+      </div>`;
+
+    // Flashcard button
+    html += `
+      <div class="pdf-export-bar" style="margin-bottom:0">
+        <button class="btn btn-secondary btn-sm" onclick="openFlashcards(${s.id})">📚 Vocabulary Flashcards</button>
       </div>`;
 
     // Criterion details cards
@@ -1613,6 +1655,41 @@ function renderFeedback(s) {
   }
 
   document.getElementById('feedback-content').innerHTML = html;
+
+  // Draw radar chart after DOM update
+  if (s.status === 'graded' && s.overall_band != null) {
+    const radarCtx = document.getElementById('feedback-radar-chart');
+    if (radarCtx && window.Chart) {
+      const taLabel = s.task_type === 'task1' ? 'TA' : 'TR';
+      new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: [taLabel, 'CC', 'LR', 'GRA'],
+          datasets: [{
+            label: 'Band Score',
+            data: [s.task_achievement, s.coherence_cohesion, s.lexical_resource, s.grammatical_range],
+            backgroundColor: 'rgba(245,158,11,0.2)',
+            borderColor: '#F59E0B',
+            pointBackgroundColor: '#F59E0B',
+            borderWidth: 2,
+            pointRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              min: 0, max: 9,
+              ticks: { stepSize: 1, display: false },
+              grid: { color: 'rgba(0,0,0,.1)' },
+              pointLabels: { font: { size: 13, weight: 'bold' } }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+  }
 }
 
 function highlightSentences(essayText, sentenceAnalysis) {
@@ -1655,6 +1732,13 @@ async function viewRewrite(submissionId) {
   // Keep history nav active so back button is intuitive
   document.getElementById('nav-history').classList.add('active');
 
+  // Store original essay for diff view
+  window._rewriteOriginalEssay = '';
+  try {
+    const sub = await api(`/api/submissions/${submissionId}`);
+    window._rewriteOriginalEssay = sub.essay || '';
+  } catch {}
+
   const contentEl = document.getElementById('rewrite-content');
   contentEl.innerHTML = '<div class="loading">✍ AI is rewriting your essay at Band 8+… This may take 15–20 seconds.</div>';
 
@@ -1684,8 +1768,41 @@ function renderRewriteMarkdown(text) {
   if (parts.length >= 2) {
     // Essay part
     const essayText = parts[0].trim();
-    html += `<div class="feedback-section"><h3>Rewritten Essay <span class="band-chip band-8">Target: Band 8+</span></h3>`;
-    html += `<div class="rewrite-essay-box">${escHtml(essayText)}</div></div>`;
+
+    // Show diff toggle bar
+    const originalEssay = (() => {
+      try {
+        const sub = window._rewriteOriginalEssay || '';
+        return sub;
+      } catch { return ''; }
+    })();
+
+    html += `<div class="feedback-section">`;
+    html += `<div class="diff-toggle-bar">`;
+    html += `<h3 style="margin:0">Rewritten Essay <span class="band-chip band-8">Target: Band 8+</span></h3>`;
+    if (originalEssay) {
+      html += `<button class="btn btn-secondary btn-sm" onclick="toggleDiffView(this)" data-mode="plain">⇔ Compare</button>`;
+    }
+    html += `</div>`;
+
+    // Plain view
+    html += `<div class="rewrite-essay-box" id="rewrite-plain-view">${escHtml(essayText)}</div>`;
+
+    // Diff view (hidden initially)
+    if (originalEssay) {
+      const diffHtml = buildWordDiff(originalEssay, essayText);
+      html += `<div class="essay-diff-container hidden" id="rewrite-diff-view">
+        <div class="essay-diff-panel">
+          <h4>Original</h4>
+          <div class="diff-original">${diffHtml.original}</div>
+        </div>
+        <div class="essay-diff-panel">
+          <h4>Rewritten</h4>
+          <div class="diff-rewritten">${diffHtml.rewritten}</div>
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
 
     // What Changed part
     const changesText = parts[1].trim();
@@ -1705,6 +1822,49 @@ function renderRewriteMarkdown(text) {
   }
 
   return html;
+}
+
+function toggleDiffView(btn) {
+  const plain = document.getElementById('rewrite-plain-view');
+  const diff = document.getElementById('rewrite-diff-view');
+  if (!plain || !diff) return;
+  if (btn.dataset.mode === 'plain') {
+    plain.classList.add('hidden');
+    diff.classList.remove('hidden');
+    btn.dataset.mode = 'diff';
+    btn.textContent = '📄 Plain View';
+  } else {
+    diff.classList.add('hidden');
+    plain.classList.remove('hidden');
+    btn.dataset.mode = 'plain';
+    btn.textContent = '⇔ Compare';
+  }
+}
+
+// Simple word-level diff — returns { original: html, rewritten: html }
+function buildWordDiff(original, rewritten) {
+  const origWords = original.split(/(\s+)/);
+  const rewWords = rewritten.split(/(\s+)/);
+
+  // Build a lookup of rewritten words for quick comparison
+  const rewSet = new Set(rewWords.map(w => w.trim().toLowerCase()).filter(Boolean));
+  const origSet = new Set(origWords.map(w => w.trim().toLowerCase()).filter(Boolean));
+
+  const origHtml = origWords.map(w => {
+    if (!w.trim()) return w; // preserve whitespace
+    const lw = w.trim().toLowerCase().replace(/[^a-z]/g, '');
+    if (lw && !rewSet.has(lw)) return `<span class="diff-removed">${escHtml(w)}</span>`;
+    return escHtml(w);
+  }).join('');
+
+  const rewHtml = rewWords.map(w => {
+    if (!w.trim()) return w;
+    const lw = w.trim().toLowerCase().replace(/[^a-z]/g, '');
+    if (lw && !origSet.has(lw)) return `<span class="diff-added">${escHtml(w)}</span>`;
+    return escHtml(w);
+  }).join('');
+
+  return { original: origHtml, rewritten: rewHtml };
 }
 
 /* ─── Mock Tests — List View ─────────────────────────────────────────────── */
@@ -2758,6 +2918,22 @@ function renderHomeworkCard(a, status) {
     timeStr = `Due very soon — ${formatDate(a.deadline)}`;
   }
 
+  // Color-coded countdown badge
+  let countdownBadge = '';
+  if (status === 'done') {
+    countdownBadge = '<span class="hw-countdown hw-countdown-done">✓ Done</span>';
+  } else if (status === 'overdue') {
+    countdownBadge = '<span class="hw-countdown hw-countdown-overdue">⏰ Overdue</span>';
+  } else if (diffDays >= 2) {
+    countdownBadge = `<span class="hw-countdown hw-countdown-safe">⏳ ${diffDays}d left</span>`;
+  } else if (diffDays >= 1) {
+    countdownBadge = `<span class="hw-countdown hw-countdown-warn">⚠️ ${diffDays}d left</span>`;
+  } else if (diffHours >= 1) {
+    countdownBadge = `<span class="hw-countdown hw-countdown-urgent">🔴 ${diffHours}h left</span>`;
+  } else {
+    countdownBadge = '<span class="hw-countdown hw-countdown-urgent">🔴 Due very soon</span>';
+  }
+
   const statusBadge = {
     pending: '<span class="hw-badge hw-badge-pending">Pending</span>',
     overdue: '<span class="hw-badge hw-badge-overdue">Overdue</span>',
@@ -2779,9 +2955,10 @@ function renderHomeworkCard(a, status) {
   return `
     <div class="hw-card ${status === 'overdue' ? 'hw-card-overdue' : status === 'done' ? 'hw-card-done' : ''}">
       <div class="hw-card-header">
-        <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="hw-type-badge">${typeLabel}</span>
           ${statusBadge}
+          ${countdownBadge}
         </div>
         <div class="hw-deadline">${timeStr}</div>
       </div>
@@ -2999,3 +3176,229 @@ function toggleStudentSelect() {
   const listEl = document.getElementById('assign-students-list');
   if (listEl) listEl.classList.toggle('hidden', allChecked);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE TOGGLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+function toggleDarkMode() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ielts_dark_mode', '0');
+    document.getElementById('dark-mode-btn').textContent = '🌙';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('ielts_dark_mode', '1');
+    document.getElementById('dark-mode-btn').textContent = '☀️';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ESSAY DRAFT AUTO-SAVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _draftSaveTimer = null;
+
+function saveDraft() {
+  const prompt = (document.getElementById('essay-prompt') || {}).value || '';
+  const essay = (document.getElementById('essay-text') || {}).value || '';
+  const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
+  if (!prompt && !essay) return; // nothing to save
+  const draft = { prompt, essay, taskType, savedAt: Date.now() };
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+function onDraftInput() {
+  clearTimeout(_draftSaveTimer);
+  _draftSaveTimer = setTimeout(saveDraft, 1200); // debounce 1.2s
+}
+
+function loadDraftIfExists() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) return;
+  try {
+    const draft = JSON.parse(raw);
+    if (!draft.prompt && !draft.essay) return;
+    const ageMin = Math.round((Date.now() - (draft.savedAt || 0)) / 60000);
+    const banner = document.getElementById('draft-restore-banner');
+    if (!banner) return;
+    banner.innerHTML = `
+      📝 You have an unsaved draft from ${ageMin < 1 ? 'just now' : ageMin + ' min ago'}.
+      <button class="btn btn-primary btn-sm" onclick="restoreDraft()">Restore Draft</button>
+      <button class="btn btn-secondary btn-sm" onclick="discardDraft()">Discard</button>`;
+    banner.classList.remove('hidden');
+  } catch {}
+}
+
+function restoreDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) return;
+  try {
+    const draft = JSON.parse(raw);
+    // Set task type
+    const radios = document.querySelectorAll('input[name="task_type"]');
+    radios.forEach(r => { r.checked = r.value === draft.taskType; });
+    if (draft.taskType) {
+      const changeEvt = new Event('change');
+      document.querySelector(`input[name="task_type"][value="${draft.taskType}"]`)?.dispatchEvent(changeEvt);
+    }
+    // Restore text
+    const promptEl = document.getElementById('essay-prompt');
+    const essayEl = document.getElementById('essay-text');
+    if (promptEl) promptEl.value = draft.prompt || '';
+    if (essayEl) { essayEl.value = draft.essay || ''; updateWordCount(); }
+    const banner = document.getElementById('draft-restore-banner');
+    if (banner) banner.classList.add('hidden');
+  } catch {}
+}
+
+function discardDraft() {
+  localStorage.removeItem(DRAFT_KEY);
+  const banner = document.getElementById('draft-restore-banner');
+  if (banner) banner.classList.add('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WRITING TIMER
+   ═══════════════════════════════════════════════════════════════════════════ */
+function setWritingTimer(minutes) {
+  writingTimerSecs = minutes * 60;
+  writingTimerRunning = true;
+  clearInterval(writingTimerInterval);
+  // Show controls
+  document.getElementById('writing-timer-controls').classList.remove('hidden');
+  document.getElementById('writing-timer-toggle').textContent = '⏸ Pause';
+  updateWritingTimerDisplay();
+  writingTimerInterval = setInterval(() => {
+    if (!writingTimerRunning) return;
+    writingTimerSecs--;
+    updateWritingTimerDisplay();
+    if (writingTimerSecs <= 0) {
+      clearInterval(writingTimerInterval);
+      writingTimerRunning = false;
+      const displayEl = document.getElementById('writing-timer-display');
+      if (displayEl) {
+        displayEl.textContent = '00:00';
+        displayEl.classList.add('timer-warning');
+      }
+      alert('⏱ Time is up! Please submit your essay.');
+    }
+  }, 1000);
+}
+
+function updateWritingTimerDisplay() {
+  const displayEl = document.getElementById('writing-timer-display');
+  if (!displayEl) return;
+  const m = Math.floor(writingTimerSecs / 60).toString().padStart(2, '0');
+  const s = (writingTimerSecs % 60).toString().padStart(2, '0');
+  displayEl.textContent = `${m}:${s}`;
+  if (writingTimerSecs <= 300) {
+    displayEl.classList.add('timer-warning');
+  } else {
+    displayEl.classList.remove('timer-warning');
+  }
+}
+
+function toggleWritingTimer() {
+  writingTimerRunning = !writingTimerRunning;
+  const toggleBtn = document.getElementById('writing-timer-toggle');
+  if (toggleBtn) toggleBtn.textContent = writingTimerRunning ? '⏸ Pause' : '▶ Resume';
+}
+
+function resetWritingTimer() {
+  clearInterval(writingTimerInterval);
+  writingTimerRunning = false;
+  writingTimerSecs = 0;
+  document.getElementById('writing-timer-controls').classList.add('hidden');
+  const displayEl = document.getElementById('writing-timer-display');
+  if (displayEl) { displayEl.textContent = '40:00'; displayEl.classList.remove('timer-warning'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RETRY GRADING
+   ═══════════════════════════════════════════════════════════════════════════ */
+async function retryGrading(submissionId) {
+  try {
+    await api(`/api/submissions/${submissionId}/retry`, { method: 'POST' });
+    // Show feedback view (will poll)
+    viewFeedback(submissionId);
+  } catch (err) {
+    alert('Retry failed: ' + err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VOCABULARY FLASHCARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+async function openFlashcards(submissionId) {
+  // Show modal
+  document.getElementById('flashcard-modal-overlay').classList.remove('hidden');
+  document.getElementById('flashcard-loading').classList.remove('hidden');
+  document.getElementById('flashcard-container').classList.add('hidden');
+  document.getElementById('flashcard-error').classList.add('hidden');
+  flashcards = [];
+  flashcardIndex = 0;
+
+  try {
+    const data = await api(`/api/submissions/${submissionId}/flashcards`, { method: 'POST' });
+    flashcards = data.cards || [];
+    if (flashcards.length === 0) throw new Error('No flashcards generated');
+    document.getElementById('flashcard-loading').classList.add('hidden');
+    document.getElementById('flashcard-container').classList.remove('hidden');
+    renderFlashcard();
+  } catch (err) {
+    document.getElementById('flashcard-loading').classList.add('hidden');
+    const errEl = document.getElementById('flashcard-error');
+    errEl.textContent = 'Could not generate flashcards: ' + err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+function renderFlashcard() {
+  if (!flashcards.length) return;
+  const card = flashcards[flashcardIndex];
+  document.getElementById('flashcard-word').textContent = card.word || '';
+  document.getElementById('flashcard-definition').textContent = card.definition || '';
+  document.getElementById('flashcard-example').textContent = card.example || '';
+  document.getElementById('flashcard-counter').textContent = `${flashcardIndex + 1} / ${flashcards.length}`;
+  // Reset flip state
+  const cardEl = document.getElementById('flashcard-card');
+  if (cardEl) cardEl.classList.remove('flipped');
+}
+
+function flipCard() {
+  const cardEl = document.getElementById('flashcard-card');
+  if (cardEl) cardEl.classList.toggle('flipped');
+}
+
+function nextCard() {
+  if (flashcardIndex < flashcards.length - 1) {
+    flashcardIndex++;
+    renderFlashcard();
+  }
+}
+
+function prevCard() {
+  if (flashcardIndex > 0) {
+    flashcardIndex--;
+    renderFlashcard();
+  }
+}
+
+function markCard(result) {
+  // 'got' moves forward, 'hard' stays or moves to end
+  if (result === 'got') {
+    nextCard();
+  } else {
+    // Move card to end for review
+    const card = flashcards.splice(flashcardIndex, 1)[0];
+    flashcards.push(card);
+    if (flashcardIndex >= flashcards.length) flashcardIndex = 0;
+    renderFlashcard();
+  }
+}
+
+function closeFlashcardModal(event) {
+  if (event && event.target !== document.getElementById('flashcard-modal-overlay')) return;
+  document.getElementById('flashcard-modal-overlay').classList.add('hidden');
+}
+

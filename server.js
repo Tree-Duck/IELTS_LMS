@@ -1389,6 +1389,90 @@ app.post('/api/assignments/:id/complete', authenticate, async (req, res) => {
   }
 });
 
+// ─── Retry Grading ────────────────────────────────────────────────────────────
+app.post('/api/submissions/:id/retry', authenticate, async (req, res) => {
+  const submissionId = parseInt(req.params.id);
+  const submission = db.getSubmissionById(submissionId, req.user.id);
+  if (!submission) return res.status(404).json({ error: 'Submission not found' });
+  if (submission.status !== 'error') {
+    return res.status(400).json({ error: 'Only error-status submissions can be retried' });
+  }
+
+  const wordCount = submission.essay ? submission.essay.trim().split(/\s+/).length : 0;
+  const minWords = submission.task_type === 'task1' ? 150 : 250;
+
+  // Kick off grading again (async, same function)
+  gradeSubmission(submissionId, req.user.id, submission.task_type, submission.prompt, submission.essay, wordCount, minWords, null).catch(console.error);
+
+  res.json({ id: submissionId, status: 'grading' });
+});
+
+// ─── Vocabulary Flashcards ─────────────────────────────────────────────────────
+app.post('/api/submissions/:id/flashcards', authenticate, async (req, res) => {
+  const submissionId = parseInt(req.params.id);
+  const submission = db.getSubmissionById(submissionId, req.user.id);
+  if (!submission) return res.status(404).json({ error: 'Submission not found' });
+  if (submission.status !== 'graded') {
+    return res.status(400).json({ error: 'Essay must be graded to generate flashcards' });
+  }
+
+  const essayText = submission.essay || '';
+  const feedbackText = submission.detailed_feedback || '';
+  const improvements = (() => {
+    try {
+      const obj = typeof submission.overall_improvements === 'string'
+        ? JSON.parse(submission.overall_improvements)
+        : (submission.overall_improvements || {});
+      return Object.values(obj).join(' ');
+    } catch { return ''; }
+  })();
+
+  const userPrompt = `You are an IELTS vocabulary coach. Analyze this student essay and its feedback to extract 8–10 high-value vocabulary items the student should learn.
+
+Essay:
+${essayText.slice(0, 1500)}
+
+Feedback summary:
+${(feedbackText + ' ' + improvements).slice(0, 800)}
+
+Return ONLY a valid JSON array (no markdown, no code fences) like this:
+[
+  {
+    "word": "meticulous",
+    "definition": "Showing great attention to detail; very careful and precise",
+    "example": "The report provided a meticulous analysis of urban migration trends."
+  }
+]
+
+Rules:
+- Include academic/IELTS-relevant vocabulary from the essay or feedback
+- Prefer words that appear in feedback as things to improve, or advanced synonyms for simple words the student used
+- Keep definitions concise (under 15 words)
+- Example sentences must be IELTS-appropriate (not from the student's essay)`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 1200,
+      system: 'You are an IELTS vocabulary coach. Return ONLY valid JSON arrays. No markdown.',
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const inputTokens = response.usage ? response.usage.input_tokens : 0;
+    const outputTokens = response.usage ? response.usage.output_tokens : 0;
+    const cost = calculateCost(inputTokens, outputTokens);
+    db.logUsage('flashcards', cost, inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const cards = JSON.parse(raw);
+    res.json({ cards });
+  } catch (err) {
+    console.error('Flashcard error:', err);
+    res.status(500).json({ error: 'Failed to generate flashcards' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

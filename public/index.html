@@ -221,6 +221,7 @@
             <div class="user-role">Student</div>
           </div>
         </div>
+        <button class="btn-dark-mode" id="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
         <button class="btn-logout" onclick="logout()">Sign Out</button>
       </div>
     </aside>
@@ -318,6 +319,24 @@
           <p>Write your IELTS essay and receive instant AI feedback</p>
         </div>
 
+        <!-- Writing Timer -->
+        <div class="writing-timer-bar" id="writing-timer-bar">
+          <div class="writing-timer-presets">
+            <span class="timer-label">⏱ Writing Timer:</span>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(20)">20 min</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(40)">40 min</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(60)">60 min</button>
+          </div>
+          <div class="writing-timer-controls hidden" id="writing-timer-controls">
+            <span class="writing-timer-display" id="writing-timer-display">40:00</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="writing-timer-toggle" onclick="toggleWritingTimer()">⏸ Pause</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetWritingTimer()">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Draft restore banner (inserted by JS if draft found) -->
+        <div id="draft-restore-banner" class="draft-restore-banner hidden"></div>
+
         <div class="submit-layout">
           <!-- LEFT: Form -->
           <div class="submit-left">
@@ -400,7 +419,7 @@
                   Your Essay
                   <span class="word-count-badge" id="word-count-badge">0 words</span>
                 </label>
-                <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount()"></textarea>
+                <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount(); onDraftInput()"></textarea>
                 <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
               </div>
 
@@ -744,6 +763,41 @@
         <div id="rewrite-content"></div>
       </div>
     </main>
+  </div>
+
+  <!-- Flashcard Modal -->
+  <div class="modal-overlay hidden" id="flashcard-modal-overlay" onclick="closeFlashcardModal(event)">
+    <div class="flashcard-modal-box">
+      <div class="flashcard-modal-header">
+        <h3>📚 Vocabulary Flashcards</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeFlashcardModal()">✕ Close</button>
+      </div>
+      <div id="flashcard-loading" class="loading" style="padding:24px 0">Generating flashcards…</div>
+      <div id="flashcard-container" class="hidden">
+        <div class="flashcard-nav">
+          <button class="btn btn-secondary btn-sm" onclick="prevCard()">← Prev</button>
+          <span id="flashcard-counter">1 / 8</span>
+          <button class="btn btn-secondary btn-sm" onclick="nextCard()">Next →</button>
+        </div>
+        <div class="flashcard-scene" onclick="flipCard()">
+          <div class="flashcard-card" id="flashcard-card">
+            <div class="flashcard-face flashcard-front">
+              <div class="flashcard-word" id="flashcard-word">meticulous</div>
+              <div class="flashcard-hint">Tap to reveal definition</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <div class="flashcard-definition" id="flashcard-definition">Very careful and precise</div>
+              <div class="flashcard-example" id="flashcard-example">The report provided a meticulous analysis.</div>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard-actions">
+          <button class="btn btn-secondary btn-sm" onclick="markCard('hard')">😓 Hard</button>
+          <button class="btn btn-primary btn-sm" onclick="markCard('got')">✓ Got it</button>
+        </div>
+      </div>
+      <div id="flashcard-error" class="error-msg hidden"></div>
+    </div>
   </div>
 
   <!-- Discard / Partial Submit Modal -->
