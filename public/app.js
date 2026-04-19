@@ -1774,46 +1774,117 @@ function renderQNav() {
 
 function renderQuestions(section) {
   const container = document.getElementById('test-questions-container');
-  container.innerHTML = (section.questions || []).map(q => renderQuestion(q)).join('');
+  const questions = section.questions || [];
+
+  // Group consecutive questions by type so we can show group headers
+  const groups = [];
+  questions.forEach(q => {
+    const last = groups[groups.length - 1];
+    if (last && last.type === q.q_type) {
+      last.questions.push(q);
+    } else {
+      groups.push({ type: q.q_type, questions: [q] });
+    }
+  });
+
+  container.innerHTML = groups.map(g => {
+    const nums = g.questions.map(q => q.q_number);
+    const min = Math.min(...nums), max = Math.max(...nums);
+    const rangeLabel = min === max ? `Question ${min}` : `Questions ${min}–${max}`;
+
+    let desc = '';
+    if (g.type === 'tfng') {
+      desc = 'Write <strong>TRUE</strong> if the statement agrees with the information, <strong>FALSE</strong> if the statement contradicts the information, or <strong>NOT GIVEN</strong> if there is no information on this.';
+    } else if (g.type === 'mcq') {
+      desc = 'Choose the correct letter, <strong>A</strong>, <strong>B</strong>, <strong>C</strong> or <strong>D</strong>.';
+    } else if (g.type === 'fill') {
+      desc = 'Complete the sentences. Choose <strong>NO MORE THAN TWO WORDS</strong> from the passage for each answer.';
+    } else if (g.type === 'matching') {
+      // Use the stem of the first matching question as the group description
+      desc = escHtml(g.questions[0]?.stem || '');
+    }
+
+    return `<div class="q-group">
+      <div class="q-group-header">
+        <div class="q-group-title">${rangeLabel}:</div>
+        ${desc ? `<div class="q-group-desc">${desc}</div>` : ''}
+      </div>
+      <div class="q-group-body">${g.questions.map(q => renderQuestion(q, g.type)).join('')}</div>
+    </div>`;
+  }).join('');
 }
 
-function renderQuestion(q) {
-  let inputHtml = '';
-  if (q.q_type === 'mcq') {
-    // Multi-answer if correct_answer contains a comma (e.g. "B,D,G,H")
-    // OR if the stem says "Choose TWO/THREE/FOUR/etc." (correct_answer is stripped for students)
-    const isMulti = (q.correct_answer && String(q.correct_answer).includes(',')) ||
-                    /choose\s+(two|three|four|five|six|\d+)\s+letters/i.test(q.stem || '');
-    const savedAnswers = (currentAnswers[q.q_number] || '').split(',').map(s => s.trim()).filter(Boolean);
-    if (isMulti) {
-      inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
-        `<label class="q-option"><input type="checkbox" name="q_${q.q_number}" value="${k}" ${savedAnswers.includes(k)?'checked':''} onchange="setMcqMulti('${q.q_number}',this)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
-      ).join('');
-    } else {
-      inputHtml = Object.entries(q.options || {}).map(([k, v]) =>
-        `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${k}" ${currentAnswers[q.q_number]===k?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
-      ).join('');
-    }
-  } else if (q.q_type === 'tfng') {
-    inputHtml = ['TRUE','FALSE','NOT GIVEN'].map(v =>
-      `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${v}" ${currentAnswers[q.q_number]===v?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> ${v}</label>`
+function renderQuestion(q, groupType) {
+  const saved = currentAnswers[q.q_number] || '';
+  const type  = groupType || q.q_type;
+
+  // ── TFNG: horizontal row [circle] [select] [statement] ─────────────────────
+  if (type === 'tfng') {
+    return `<div class="question-block tfng-block" id="qblock_${q.q_number}">
+      <div class="tfng-row">
+        <span class="q-num-circle">${q.q_number}</span>
+        <select class="tfng-select" onchange="setAnswer('${q.q_number}',this.value)">
+          <option value=""  ${!saved            ? 'selected' : ''}>—</option>
+          <option value="TRUE"      ${saved === 'TRUE'      ? 'selected' : ''}>TRUE</option>
+          <option value="FALSE"     ${saved === 'FALSE'     ? 'selected' : ''}>FALSE</option>
+          <option value="NOT GIVEN" ${saved === 'NOT GIVEN' ? 'selected' : ''}>NOT GIVEN</option>
+        </select>
+        <span class="tfng-statement">${escHtml(q.stem)}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── FILL: inline blank inside sentence ─────────────────────────────────────
+  if (type === 'fill') {
+    const stemWithInput = escHtml(q.stem).replace(
+      /___/g,
+      `<input type="text" class="q-fill-input" placeholder="…" value="${escHtml(saved)}" oninput="setAnswer('${q.q_number}',this.value)">`
+    );
+    return `<div class="question-block" id="qblock_${q.q_number}">
+      <div class="q-stem"><span class="q-num-circle">${q.q_number}</span> ${stemWithInput}</div>
+    </div>`;
+  }
+
+  // ── MATCHING ────────────────────────────────────────────────────────────────
+  if (type === 'matching' && q.sub_questions) {
+    const opts = Object.entries(q.options || {}).map(([k,v]) =>
+      `<option value="${k}">${k}. ${escHtml(v)}</option>`
     ).join('');
-  } else if (q.q_type === 'fill') {
-    inputHtml = `<input type="text" class="q-fill-input" placeholder="Your answer" value="${escHtml(currentAnswers[q.q_number]||'')}" oninput="setAnswer('${q.q_number}',this.value)">`;
-  } else if (q.q_type === 'matching' && q.sub_questions) {
-    const opts = Object.entries(q.options || {}).map(([k,v]) => `<option value="${k}" ${''} >${k}. ${escHtml(v)}</option>`).join('');
-    inputHtml = (q.sub_questions || []).map(sq => {
-      const key = `${q.q_number}_${sq.label}`;
+    const rows = (q.sub_questions || []).map(sq => {
+      const key    = `${q.q_number}_${sq.label}`;
+      const sqSaved = currentAnswers[key] || '';
+      const optsWithSelected = opts.replace(
+        new RegExp(`value="${sqSaved.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}"`),
+        `value="${sqSaved}" selected`
+      );
       return `<div class="matching-row">
         <span class="matching-label">${escHtml(sq.label)}</span>
         <select onchange="setAnswer('${key}',this.value)">
-          <option value="">– Select –</option>${opts.replace(`value="${currentAnswers[key]||'__NONE__'}"`, `value="${currentAnswers[key]||''}" selected`)}
+          <option value="">– Select –</option>${optsWithSelected}
         </select>
       </div>`;
     }).join('');
+    return `<div class="question-block" id="qblock_${q.q_number}">
+      ${rows}
+    </div>`;
+  }
+
+  // ── MCQ (single or multi) ───────────────────────────────────────────────────
+  const isMulti = (q.correct_answer && String(q.correct_answer).includes(',')) ||
+                  /choose\s+(two|three|four|five|six|\d+)\s+letters/i.test(q.stem || '');
+  const savedArr = saved.split(',').map(s => s.trim()).filter(Boolean);
+  let inputHtml;
+  if (isMulti) {
+    inputHtml = Object.entries(q.options || {}).map(([k,v]) =>
+      `<label class="q-option"><input type="checkbox" name="q_${q.q_number}" value="${k}" ${savedArr.includes(k)?'checked':''} onchange="setMcqMulti('${q.q_number}',this)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
+    ).join('');
+  } else {
+    inputHtml = Object.entries(q.options || {}).map(([k,v]) =>
+      `<label class="q-option"><input type="radio" name="q_${q.q_number}" value="${k}" ${saved===k?'checked':''} onchange="setAnswer('${q.q_number}',this.value)"> <strong>${k}.</strong> ${escHtml(v)}</label>`
+    ).join('');
   }
   return `<div class="question-block" id="qblock_${q.q_number}">
-    <div class="q-stem"><span class="q-num">Q${q.q_number}.</span> ${escHtml(q.stem)}</div>
+    <div class="q-stem"><span class="q-num-circle">${q.q_number}</span> ${escHtml(q.stem)}</div>
     <div class="q-inputs">${inputHtml}</div>
   </div>`;
 }
