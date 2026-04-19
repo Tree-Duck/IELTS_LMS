@@ -3,6 +3,12 @@ const path = require('path');
 
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'lms-data.json');
 
+// Ensure the directory exists (important when DB_FILE points to a mounted volume path like /data)
+const DB_DIR = path.dirname(DB_FILE);
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+}
+
 function load() {
   try {
     if (fs.existsSync(DB_FILE)) {
