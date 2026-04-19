@@ -100,7 +100,66 @@ body {
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
+  overflow: hidden;
+  transition: transform .25s ease, width .25s ease;
 }
+
+/* Collapsed state */
+.sidebar.sidebar-collapsed {
+  transform: translateX(-100%);
+}
+.main-content.sidebar-collapsed {
+  margin-left: 0;
+}
+
+/* Scrollable nav area */
+.sidebar nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.15) transparent;
+}
+.sidebar nav::-webkit-scrollbar { width: 4px; }
+.sidebar nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+/* Toggle arrow button inside logo bar */
+.sidebar-toggle-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,.08);
+  border: none;
+  border-radius: 6px;
+  color: var(--gray-400);
+  width: 26px; height: 26px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s, color .15s, transform .25s;
+}
+.sidebar-toggle-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+/* Floating hamburger shown when sidebar is hidden */
+.sidebar-show-btn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  background: var(--sidebar-bg);
+  color: var(--primary);
+  border: none;
+  border-radius: 8px;
+  width: 38px; height: 38px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.sidebar-show-btn:hover { background: #1e293b; }
+.sidebar-show-btn.hidden { display: none !important; }
 
 .sidebar-logo {
   display: flex;
@@ -179,6 +238,7 @@ body {
 .nav-icon { font-size: 16px; }
 
 .sidebar-footer {
+  flex-shrink: 0;
   padding: 16px;
   border-top: 1px solid rgba(255,255,255,.08);
 }
@@ -227,6 +287,7 @@ body {
   padding: 32px;
   max-width: none;
   min-width: 0;
+  transition: margin-left .25s ease;
 }
 
 .view { animation: fadeIn .2s ease; }

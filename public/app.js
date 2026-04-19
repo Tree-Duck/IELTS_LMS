@@ -51,6 +51,18 @@ window.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.textContent = '☀️';
   }
 
+  // Restore sidebar collapsed state
+  if (localStorage.getItem('ielts_sidebar_collapsed') === '1') {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.main-content');
+    const showBtn = document.getElementById('sidebar-show-btn');
+    const toggleBtn = document.getElementById('sidebar-toggle-btn');
+    if (sidebar) sidebar.classList.add('sidebar-collapsed');
+    if (main) main.classList.add('sidebar-collapsed');
+    if (showBtn) showBtn.classList.remove('hidden');
+    if (toggleBtn) toggleBtn.textContent = '›';
+  }
+
   if (token && currentUser) {
     showApp();
   } else {
@@ -3175,6 +3187,21 @@ function toggleStudentSelect() {
   const allChecked = document.getElementById('assign-all-students').checked;
   const listEl = document.getElementById('assign-students-list');
   if (listEl) listEl.classList.toggle('hidden', allChecked);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR TOGGLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const main = document.querySelector('.main-content');
+  const showBtn = document.getElementById('sidebar-show-btn');
+  const toggleBtn = document.getElementById('sidebar-toggle-btn');
+  const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+  main.classList.toggle('sidebar-collapsed', isCollapsed);
+  showBtn.classList.toggle('hidden', !isCollapsed);
+  if (toggleBtn) toggleBtn.textContent = isCollapsed ? '›' : '‹';
+  localStorage.setItem('ielts_sidebar_collapsed', isCollapsed ? '1' : '0');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

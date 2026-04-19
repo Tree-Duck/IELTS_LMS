@@ -126,10 +126,14 @@
   <!-- MAIN APP -->
   <div id="app-screen" class="screen hidden">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <!-- Floating button to re-open sidebar when collapsed -->
+    <button class="sidebar-show-btn hidden" id="sidebar-show-btn" onclick="toggleSidebar()" title="Show sidebar">☰</button>
+
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
         <span class="logo-sun">☀️</span>
         <span class="logo-text">SSP IELTS</span>
+        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide sidebar">‹</button>
       </div>
       <nav class="sidebar-nav">
         <!-- Dashboard (standalone) -->
