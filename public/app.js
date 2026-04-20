@@ -33,11 +33,11 @@ const TOPIC_OPTIONS = {
   ],
   task1: [
     { value: 'random',           label: '🎲 Random' },
-    { value: 'bar chart',        label: '📊 Bar Chart' },
-    { value: 'line graph',       label: '📈 Line Graph' },
-    { value: 'pie chart',        label: '🥧 Pie Chart' },
+    { value: 'bar_chart',        label: '📊 Bar Chart' },
+    { value: 'line_graph',       label: '📈 Line Graph' },
+    { value: 'pie_chart',        label: '🥧 Pie Chart' },
     { value: 'table',            label: '📋 Table' },
-    { value: 'process diagram',  label: '⚙️ Process Diagram' },
+    { value: 'process_diagram',  label: '⚙️ Process Diagram' },
     { value: 'map',              label: '🗺️ Map' },
   ],
 };
@@ -863,6 +863,29 @@ async function generateTask() {
   hidePasteNudge();
   clearChart();
 
+  if (task_type === 'task1') {
+    // Task 1: fetch a random admin-uploaded topic (image + question)
+    try {
+      const chartType = (selectedTopic && selectedTopic !== 'random') ? selectedTopic : 'random';
+      const params = chartType !== 'random' ? `?chart_type=${encodeURIComponent(chartType)}` : '';
+      const topic = await api(`/api/task1-topics/random${params}`);
+      promptEl.value = topic.question;
+      promptUserTyped = false;
+      displayTask1Topic(topic);
+      btn.disabled = false;
+      btnLabel.textContent = 'Generate Task';
+      btnIcon.textContent = '✨';
+      requestBothHints();
+    } catch (err) {
+      btn.disabled = false;
+      btnLabel.textContent = 'Generate Task';
+      btnIcon.textContent = '✨';
+      promptEl.placeholder = err.message || 'No topics available. Ask your teacher to upload some.';
+    }
+    return;
+  }
+
+  // Task 2: AI streaming generation
   try {
     await streamSSE(
       '/api/generate-task',
@@ -872,11 +895,6 @@ async function generateTask() {
         btn.disabled = false;
         btnLabel.textContent = 'Generate Task';
         btnIcon.textContent = '✨';
-        // For Task 1: generate chart
-        if (task_type === 'task1') {
-          generateChart(promptEl.value);
-        }
-        // Auto-generate hints
         requestBothHints();
       }
     );
@@ -886,6 +904,45 @@ async function generateTask() {
     btnIcon.textContent = '✨';
     promptEl.placeholder = 'Generation failed. Please try again.';
   }
+}
+
+/* ─── Display Admin-Uploaded Task 1 Topic ────────────────────────────────── */
+function displayTask1Topic(topic) {
+  const container = document.getElementById('chart-container');
+  const imgEl = document.getElementById('chart-topic-image');
+  const canvas = document.getElementById('task1-chart');
+  const tableArea = document.getElementById('table-area');
+  const titleEl = document.getElementById('chart-title-label');
+
+  if (!container || !imgEl) return;
+
+  // Destroy any existing Chart.js instance
+  if (activeChart) { activeChart.destroy(); activeChart = null; }
+
+  // Hide canvas & table, show image
+  if (canvas) canvas.style.display = 'none';
+  if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
+
+  imgEl.src = `data:${topic.image_media_type};base64,${topic.image_base64}`;
+  imgEl.classList.remove('hidden');
+
+  // Update title label
+  const typeLabel = {
+    bar_chart: '📊 Bar Chart',
+    line_graph: '📈 Line Graph',
+    pie_chart: '🥧 Pie Chart',
+    table: '📋 Table',
+    process_diagram: '⚙️ Process Diagram',
+    map: '🗺️ Map'
+  }[topic.chart_type] || '📊 Chart';
+  if (titleEl) titleEl.textContent = typeLabel + (topic.label ? ` — ${topic.label}` : '');
+
+  // Show container
+  container.classList.remove('hidden');
+
+  // Auto-populate image state so it gets submitted with the essay
+  task1ImageBase64 = topic.image_base64;
+  task1ImageMediaType = topic.image_media_type;
 }
 
 /* ─── Paste / Type Detection ─────────────────────────────────────────────── */
@@ -919,9 +976,14 @@ function clearChart() {
   const container = document.getElementById('chart-container');
   const tableArea = document.getElementById('table-area');
   const canvas = document.getElementById('task1-chart');
+  const imgEl = document.getElementById('chart-topic-image');
   if (container) container.classList.add('hidden');
   if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
   if (canvas) canvas.style.display = '';
+  if (imgEl) { imgEl.classList.add('hidden'); imgEl.src = ''; }
+  // Clear task1 image state
+  task1ImageBase64 = null;
+  task1ImageMediaType = null;
 }
 
 async function generateChart(taskText) {
@@ -2418,13 +2480,50 @@ function switchMaterialsTab(type) {
   currentMaterialsTab = type;
   document.getElementById('materials-tab-reading').classList.toggle('active', type === 'reading');
   document.getElementById('materials-tab-listening').classList.toggle('active', type === 'listening');
-  renderMaterialsList();
-  // Reset create form
-  document.getElementById('create-test-form').classList.add('hidden');
-  buildSectionsForm();
+  const task1TabBtn = document.getElementById('materials-tab-task1');
+  if (task1TabBtn) task1TabBtn.classList.toggle('active', type === 'task1');
+
+  // Show/hide task1 panel vs reading/listening UI
+  const task1Panel = document.getElementById('task1-topics-panel');
+  const listContent = document.getElementById('materials-list-content');
+  const actionTabs = document.querySelector('.materials-action-tabs');
+  const createPanel = document.getElementById('mat-panel-create');
+
+  if (type === 'task1') {
+    if (task1Panel) task1Panel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    loadTask1Topics();
+  } else {
+    if (task1Panel) task1Panel.classList.add('hidden');
+    if (listContent) listContent.classList.remove('hidden');
+    if (actionTabs) actionTabs.classList.remove('hidden');
+    renderMaterialsList();
+    // Reset create form
+    if (createPanel) createPanel.classList.add('hidden');
+    buildSectionsForm();
+  }
 }
 
 async function loadAdminMaterials() {
+  // Default to reading tab on fresh load
+  if (currentMaterialsTab === 'task1') currentMaterialsTab = 'reading';
+  // Ensure task1 panel is hidden on fresh load
+  const task1Panel = document.getElementById('task1-topics-panel');
+  if (task1Panel) task1Panel.classList.add('hidden');
+  const listContent = document.getElementById('materials-list-content');
+  if (listContent) listContent.classList.remove('hidden');
+  const actionTabs = document.querySelector('.materials-action-tabs');
+  if (actionTabs) actionTabs.classList.remove('hidden');
+  // Sync tab buttons
+  const tabR = document.getElementById('materials-tab-reading');
+  const tabL = document.getElementById('materials-tab-listening');
+  const tabT = document.getElementById('materials-tab-task1');
+  if (tabR) tabR.classList.toggle('active', currentMaterialsTab === 'reading');
+  if (tabL) tabL.classList.toggle('active', currentMaterialsTab === 'listening');
+  if (tabT) tabT.classList.remove('active');
+
   const el = document.getElementById('materials-list-content');
   el.innerHTML = '<div class="loading">Loading…</div>';
   try {
@@ -2465,8 +2564,161 @@ async function deleteMaterialsTest(id, title) {
   }
 }
 
+/* ─── Task 1 Topics Admin ────────────────────────────────────────────────── */
+
+// State for admin image upload
+let _t1AdminImageBase64 = null;
+let _t1AdminImageMediaType = null;
+
+function handleT1AdminImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('Please select an image file.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image too large — max 5 MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    // dataUrl = "data:image/jpeg;base64,/9j/..."
+    const [meta, b64] = dataUrl.split(',');
+    _t1AdminImageBase64 = b64;
+    _t1AdminImageMediaType = meta.replace('data:', '').replace(';base64', '');
+    // Show preview
+    const preview = document.getElementById('t1-image-preview');
+    const area = document.getElementById('t1-image-area');
+    const removeBtn = document.getElementById('t1-remove-image-btn');
+    if (preview) { preview.src = dataUrl; preview.classList.remove('hidden'); }
+    if (area) area.style.borderColor = 'var(--primary)';
+    if (removeBtn) removeBtn.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeT1AdminImage() {
+  _t1AdminImageBase64 = null;
+  _t1AdminImageMediaType = null;
+  const preview = document.getElementById('t1-image-preview');
+  const area = document.getElementById('t1-image-area');
+  const removeBtn = document.getElementById('t1-remove-image-btn');
+  const fileInput = document.getElementById('t1-image-input');
+  if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+  if (area) area.style.borderColor = '';
+  if (removeBtn) removeBtn.classList.add('hidden');
+  if (fileInput) fileInput.value = '';
+}
+
+async function uploadTask1Topic() {
+  const chartType = document.getElementById('t1-chart-type')?.value;
+  const label = document.getElementById('t1-label')?.value.trim();
+  const question = document.getElementById('t1-question')?.value.trim();
+  const errEl = document.getElementById('t1-upload-error');
+  const successEl = document.getElementById('t1-upload-success');
+  const btn = document.querySelector('#task1-topics-panel .btn-primary');
+
+  if (errEl) errEl.classList.add('hidden');
+  if (successEl) successEl.classList.add('hidden');
+
+  if (!chartType) { if (errEl) { errEl.textContent = 'Please select a chart type.'; errEl.classList.remove('hidden'); } return; }
+  if (!question) { if (errEl) { errEl.textContent = 'Please paste the IELTS question.'; errEl.classList.remove('hidden'); } return; }
+  if (!_t1AdminImageBase64) { if (errEl) { errEl.textContent = 'Please upload a chart image.'; errEl.classList.remove('hidden'); } return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+  try {
+    await api('/api/admin/task1-topics', {
+      method: 'POST',
+      body: JSON.stringify({
+        chart_type: chartType,
+        label: label || '',
+        question,
+        image_base64: _t1AdminImageBase64,
+        image_media_type: _t1AdminImageMediaType,
+      }),
+    });
+    if (successEl) { successEl.textContent = '✅ Topic uploaded successfully!'; successEl.classList.remove('hidden'); }
+    // Reset form
+    document.getElementById('t1-label').value = '';
+    document.getElementById('t1-question').value = '';
+    removeT1AdminImage();
+    // Reload list
+    loadTask1Topics();
+  } catch (err) {
+    if (errEl) { errEl.textContent = '❌ ' + err.message; errEl.classList.remove('hidden'); }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📤 Upload Topic'; }
+  }
+}
+
+async function loadTask1Topics() {
+  const listEl = document.getElementById('task1-topics-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="loading">Loading topics…</div>';
+  try {
+    const topics = await api('/api/admin/task1-topics');
+    renderTask1TopicsList(topics);
+  } catch (err) {
+    listEl.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function renderTask1TopicsList(topics) {
+  const listEl = document.getElementById('task1-topics-list');
+  if (!listEl) return;
+  if (!topics || !topics.length) {
+    listEl.innerHTML = '<div class="empty-state" style="margin-top:16px">No Task 1 topics uploaded yet.</div>';
+    return;
+  }
+
+  const TYPE_LABELS = {
+    bar_chart: '📊 Bar Chart',
+    line_graph: '📈 Line Graph',
+    pie_chart: '🥧 Pie Chart',
+    table: '📋 Table',
+    process_diagram: '⚙️ Process Diagram',
+    map: '🗺️ Map',
+  };
+
+  // Group by chart_type
+  const grouped = {};
+  topics.forEach(t => {
+    if (!grouped[t.chart_type]) grouped[t.chart_type] = [];
+    grouped[t.chart_type].push(t);
+  });
+
+  listEl.innerHTML = Object.keys(grouped).map(type => `
+    <div class="t1-group">
+      <h4 class="t1-group-header">${TYPE_LABELS[type] || type} <span class="badge badge-gray">${grouped[type].length}</span></h4>
+      <div class="t1-topics-grid">
+        ${grouped[type].map(t => `
+          <div class="t1-topic-card">
+            <div class="t1-topic-meta">
+              <span class="t1-topic-label">${escHtml(t.label || '(no label)')}</span>
+              <span class="t1-topic-date">${formatDate(t.created_at)}</span>
+            </div>
+            <p class="t1-topic-preview">${escHtml(t.question_preview)}</p>
+            <button class="btn btn-danger btn-xs" onclick="deleteTask1TopicAdmin(${t.id})">Delete</button>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+async function deleteTask1TopicAdmin(id) {
+  if (!confirm('Delete this Task 1 topic? Students will no longer see it.')) return;
+  try {
+    await api(`/api/admin/task1-topics/${id}`, { method: 'DELETE' });
+    loadTask1Topics();
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+  }
+}
+
 function toggleCreateTestForm() {
-  const form = document.getElementById('create-test-form');
+  const form = document.getElementById('mat-panel-create');
+  if (!form) return;
   form.classList.toggle('hidden');
   if (!form.classList.contains('hidden')) buildSectionsForm();
 }
@@ -2821,7 +3073,7 @@ async function submitCreateTest() {
     _materialsCache = await api('/api/admin/tests');
     renderMaterialsList();
     // Reset form
-    document.getElementById('create-test-form').classList.add('hidden');
+    document.getElementById('mat-panel-create').classList.add('hidden');
     document.getElementById('new-test-title').value = '';
     questionCounters = {};
     buildSectionsForm();

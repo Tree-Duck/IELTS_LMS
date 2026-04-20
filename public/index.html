@@ -386,14 +386,17 @@
                   oninput="onPromptInput()" required></textarea>
               </div>
 
-              <!-- Chart preview (Task 1 only) -->
+              <!-- Chart preview / Topic image (Task 1 only) -->
               <div id="chart-container" class="chart-container hidden">
                 <div class="chart-header">
                   <span id="chart-title-label">📊 Chart Preview</span>
                   <span id="chart-status" class="chart-status"></span>
                 </div>
                 <div id="chart-area">
-                  <canvas id="task1-chart"></canvas>
+                  <!-- Admin-uploaded topic image (shown when topic is fetched) -->
+                  <img id="chart-topic-image" class="hidden" alt="Task 1 chart" style="max-width:100%;max-height:420px;object-fit:contain;border-radius:8px;display:block;margin:0 auto;">
+                  <!-- Chart.js canvas (legacy fallback) -->
+                  <canvas id="task1-chart" style="display:none"></canvas>
                 </div>
                 <div id="table-area" class="hidden"></div>
               </div>
@@ -610,10 +613,11 @@
           <p>Create and manage Reading and Listening tests</p>
         </div>
 
-        <!-- Type tabs: Reading / Listening -->
+        <!-- Type tabs: Reading / Listening / Task 1 Topics -->
         <div class="test-type-tabs">
           <button class="test-tab-btn active" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Task 1 Topics</button>
         </div>
 
         <!-- Existing tests list -->
@@ -638,6 +642,61 @@
             </div>
             <div id="create-test-error" class="error-msg hidden"></div>
           </div>
+        </div>
+
+        <!-- TASK 1 TOPICS PANEL (shown when Task 1 Topics tab active) -->
+        <div id="task1-topics-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Upload New Task 1 Topic</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Upload a chart image and paste the IELTS question. Students will see these when they click "Generate Task" for Task 1.</p>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="t1-chart-type">Chart Type</label>
+                <select id="t1-chart-type" class="form-input">
+                  <option value="bar_chart">📊 Bar Chart</option>
+                  <option value="line_graph">📈 Line Graph</option>
+                  <option value="pie_chart">🥧 Pie Chart</option>
+                  <option value="table">📋 Table</option>
+                  <option value="process_diagram">⚙️ Process Diagram</option>
+                  <option value="map">🗺️ Map</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="t1-label">Short Label (optional)</label>
+                <input type="text" id="t1-label" class="form-input" placeholder="e.g. UK Energy Sources 2020">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="t1-question">IELTS Task 1 Question</label>
+              <textarea id="t1-question" class="form-input" rows="4"
+                placeholder="The chart below shows... Summarise the information by selecting and reporting the main features, and make comparisons where relevant."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Chart Image</label>
+              <div class="image-upload-area" id="t1-image-area" onclick="document.getElementById('t1-image-input').click()" style="cursor:pointer">
+                <input type="file" id="t1-image-input" accept="image/*" style="display:none" onchange="handleT1AdminImageUpload(event)">
+                <div id="t1-image-placeholder">
+                  <div class="image-upload-icon">🖼️</div>
+                  <div class="image-upload-text">Click to upload chart image</div>
+                  <div class="image-upload-hint">JPG, PNG, GIF or WebP — max 5 MB</div>
+                </div>
+                <img id="t1-image-preview" class="hidden" alt="Chart preview" style="max-width:100%;max-height:300px;border-radius:8px;object-fit:contain;">
+              </div>
+              <button type="button" class="btn-remove-image hidden" id="t1-remove-image-btn" onclick="removeT1AdminImage()">✕ Remove image</button>
+            </div>
+
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="uploadTask1Topic()">📤 Upload Topic</button>
+            </div>
+            <div id="t1-upload-error" class="error-msg hidden"></div>
+            <div id="t1-upload-success" class="success-msg hidden"></div>
+          </div>
+
+          <!-- Topics list grouped by chart type -->
+          <div id="task1-topics-list"></div>
         </div>
 
         <!-- IMPORT JSON panel -->

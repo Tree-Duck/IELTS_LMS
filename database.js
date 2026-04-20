@@ -15,7 +15,7 @@ function load() {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
   } catch {}
-  return { users: [], submissions: [], feedback: [], usage_logs: [], tests: [], test_attempts: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0, tests: 0, test_attempts: 0 } };
+  return { users: [], submissions: [], feedback: [], usage_logs: [], tests: [], test_attempts: [], task1_topics: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0, tests: 0, test_attempts: 0, task1_topics: 0 } };
 }
 
 function save(data) {
@@ -544,6 +544,57 @@ const db = {
       });
   },
 
+  // ── Task 1 Topics ──────────────────────────────────────────────────────────
+
+  insertTask1Topic(chart_type, question, image_base64, image_media_type, label) {
+    const data = load();
+    if (!data.task1_topics) data.task1_topics = [];
+    if (!data._ids.task1_topics) data._ids.task1_topics = 0;
+    data._ids.task1_topics += 1;
+    const topic = {
+      id: data._ids.task1_topics,
+      chart_type,         // 'bar_chart' | 'line_graph' | 'pie_chart' | 'table' | 'process_diagram' | 'map'
+      question,           // IELTS task text
+      label: label || '', // optional short label for admin list
+      image_base64,       // base64-encoded image
+      image_media_type,   // 'image/jpeg' | 'image/png' | ...
+      created_at: new Date().toISOString()
+    };
+    data.task1_topics.push(topic);
+    save(data);
+    return topic.id;
+  },
+
+  // Lightweight list for admin panel (no image data — could be very large)
+  getAllTask1Topics(chart_type) {
+    const data = load();
+    let topics = (data.task1_topics || []);
+    if (chart_type && chart_type !== 'random') topics = topics.filter(t => t.chart_type === chart_type);
+    return topics.map(t => ({
+      id: t.id, chart_type: t.chart_type, label: t.label,
+      question_preview: (t.question || '').slice(0, 120),
+      created_at: t.created_at
+    }));
+  },
+
+  // Returns a single random topic including image data — for student use
+  getRandomTask1Topic(chart_type) {
+    const data = load();
+    let pool = (data.task1_topics || []);
+    if (chart_type && chart_type !== 'random') pool = pool.filter(t => t.chart_type === chart_type);
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  },
+
+  deleteTask1Topic(id) {
+    const data = load();
+    const idx = (data.task1_topics || []).findIndex(t => t.id === id);
+    if (idx === -1) return false;
+    data.task1_topics.splice(idx, 1);
+    save(data);
+    return true;
+  },
+
   // Cost breakdown by operation type for admin panel
   getCostBreakdown() {
     const data = load();
@@ -619,6 +670,8 @@ const db = {
   if (!data._ids.assignments) { data._ids.assignments = 0; changed = true; }
   if (!data._ids.assignment_completions) { data._ids.assignment_completions = 0; changed = true; }
   if (!data.settings) { data.settings = {}; changed = true; }
+  if (!data.task1_topics) { data.task1_topics = []; changed = true; }
+  if (!data._ids.task1_topics) { data._ids.task1_topics = 0; changed = true; }
   if (changed) save(data);
 })();
 

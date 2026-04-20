@@ -499,28 +499,25 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
   }
 }
 
-// ─── Task Generation ──────────────────────────────────────────────────────────
+// ─── Task Generation (Task 2 only — Task 1 uses admin-uploaded topics) ───────
 app.post('/api/generate-task', authenticate, async (req, res) => {
   const { task_type, topic } = req.body;
-  if (!['task1', 'task2'].includes(task_type)) {
-    return res.status(400).json({ error: 'task_type must be task1 or task2' });
+  if (task_type === 'task1') {
+    return res.status(400).json({ error: 'Task 1 uses admin-uploaded topics. Use GET /api/task1-topics/random instead.' });
+  }
+  if (task_type !== 'task2') {
+    return res.status(400).json({ error: 'task_type must be task2' });
   }
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  let userPrompt;
-  if (task_type === 'task1') {
-    const chartClause = (topic && topic !== 'random')
-      ? `The visual must be a ${topic}.`
-      : `Choose one visual type: bar chart, line graph, pie chart, table, process diagram, or map.`;
-    userPrompt = `Write one realistic IELTS Academic Writing Task 1 question. ${chartClause} Include specific approximate data values so the student can write about trends and comparisons. Begin directly with "The chart/graph/table/diagram below shows..." and end with "Summarise the information by selecting and reporting the main features, and make comparisons where relevant." The task should be 60–100 words.`;
-  } else {
+  {
     const topicClause = (topic && topic !== 'random')
       ? `The essay must be specifically about: ${topic}.`
       : `Choose a topic from: technology, environment, education, health, society, work and career, or crime and law.`;
-    userPrompt = `Write one original IELTS Writing Task 2 question. ${topicClause} It must present a statement or issue and ask the student to discuss, argue, or give an opinion. End with "Give reasons for your answer and include any relevant examples from your own knowledge or experience." The task should be 50–80 words.`;
+    var userPrompt = `Write one original IELTS Writing Task 2 question. ${topicClause} It must present a statement or issue and ask the student to discuss, argue, or give an opinion. End with "Give reasons for your answer and include any relevant examples from your own knowledge or experience." The task should be 50–80 words.`;
   }
 
   try {
@@ -598,60 +595,6 @@ app.post('/api/hint', authenticate, async (req, res) => {
     console.error('Hint error:', err);
     res.write('data: [DONE]\n\n');
     res.end();
-  }
-});
-
-// ─── Chart Data Generation ────────────────────────────────────────────────────
-app.post('/api/generate-chart', authenticate, async (req, res) => {
-  const { task_text } = req.body;
-  if (!task_text) return res.status(400).json({ error: 'task_text is required' });
-
-  const systemPrompt = `You are a data extraction assistant for IELTS Task 1 charts. Extract chart data from a task description and return ONLY valid JSON — no markdown, no code blocks, no commentary.`;
-
-  const userPrompt = `Read this IELTS Writing Task 1 question and extract the chart/table data described in it.
-
-Task: ${task_text}
-
-Return ONLY a JSON object using one of these schemas:
-
-For a BAR or LINE chart:
-{"type":"bar","title":"...","xlabel":"...","ylabel":"...","labels":["A","B","C"],"datasets":[{"label":"Series name","data":[10,20,30]},{"label":"Series 2","data":[5,15,25]}]}
-
-For a PIE chart:
-{"type":"pie","title":"...","labels":["A","B","C"],"datasets":[{"data":[30,45,25]}]}
-
-For a TABLE:
-{"type":"table","title":"...","headers":["Column1","Column2","Column3"],"rows":[["val","val","val"],["val","val","val"]]}
-
-Rules:
-- Use "line" as the type for line graphs
-- All numeric data must be actual numbers, not strings
-- Include 1–3 datasets for bar/line charts if the task mentions multiple categories or time periods
-- Keep labels concise (max 4 words each)
-- If the task mentions a map or process diagram, return: {"type":"unsupported","message":"No chart preview for this type"}`;
-
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 700,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    });
-
-    const inputTokens = response.usage ? response.usage.input_tokens : 0;
-    const outputTokens = response.usage ? response.usage.output_tokens : 0;
-    const cost = calculateCost(inputTokens, outputTokens);
-    db.logUsage('generate-chart', cost, inputTokens + outputTokens);
-
-    let raw = response.content[0].text.trim();
-    // Strip markdown code fences if AI ignored instructions
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-
-    const chartData = JSON.parse(raw);
-    res.json(chartData);
-  } catch (err) {
-    console.error('Chart generation error:', err);
-    res.status(500).json({ error: 'Chart generation failed', details: err.message });
   }
 });
 
@@ -1103,6 +1046,69 @@ app.post('/api/admin/tests/import', authenticate, adminOnly, (req, res) => {
   } catch (err) {
     console.error('Import test error:', err);
     res.status(500).json({ error: 'Server error during import.' });
+  }
+});
+
+// ─── Task 1 Topics (Admin Upload) ────────────────────────────────────────────
+
+const VALID_CHART_TYPES = ['bar_chart','line_graph','pie_chart','table','process_diagram','map'];
+
+// Admin: upload a new Task 1 topic (image + question)
+app.post('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
+  try {
+    const { chart_type, question, image_base64, image_media_type, label } = req.body;
+    if (!VALID_CHART_TYPES.includes(chart_type)) {
+      return res.status(400).json({ error: `chart_type must be one of: ${VALID_CHART_TYPES.join(', ')}` });
+    }
+    if (!question || !question.trim()) return res.status(400).json({ error: 'question is required' });
+    if (!image_base64) return res.status(400).json({ error: 'image_base64 is required' });
+    const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
+    if (!validTypes.includes(image_media_type)) {
+      return res.status(400).json({ error: 'image_media_type must be jpeg, png, gif, or webp' });
+    }
+    const id = db.insertTask1Topic(chart_type, question.trim(), image_base64, image_media_type, (label || '').trim());
+    res.json({ id, message: 'Topic uploaded successfully' });
+  } catch (err) {
+    console.error('Upload task1 topic error:', err);
+    res.status(500).json({ error: 'Failed to upload topic' });
+  }
+});
+
+// Admin: list all topics (no image data)
+app.get('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
+  try {
+    res.json(db.getAllTask1Topics(req.query.chart_type));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load topics' });
+  }
+});
+
+// Admin: delete a topic
+app.delete('/api/admin/task1-topics/:id', authenticate, adminOnly, (req, res) => {
+  try {
+    const ok = db.deleteTask1Topic(parseInt(req.params.id, 10));
+    if (!ok) return res.status(404).json({ error: 'Topic not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete topic' });
+  }
+});
+
+// Student: get a random Task 1 topic (with image) — ?chart_type=bar_chart or omit for random
+app.get('/api/task1-topics/random', authenticate, (req, res) => {
+  try {
+    const chart_type = req.query.chart_type || 'random';
+    const topic = db.getRandomTask1Topic(chart_type);
+    if (!topic) {
+      return res.status(404).json({
+        error: chart_type === 'random'
+          ? 'No Task 1 topics have been uploaded yet. Ask your teacher to add some.'
+          : `No topics found for chart type: ${chart_type}. Try a different type or ask your teacher.`
+      });
+    }
+    res.json(topic);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load topic' });
   }
 });
 
