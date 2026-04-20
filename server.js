@@ -809,6 +809,10 @@ app.get('/api/user/profile', authenticate, (req, res) => {
   const user = db.getUserById(req.user.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
     target_band: user.target_band ?? null,
     current_streak: user.current_streak || 0,
     longest_streak: user.longest_streak || 0,

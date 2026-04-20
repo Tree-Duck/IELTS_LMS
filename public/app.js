@@ -323,9 +323,7 @@ function logout() {
 }
 
 /* ─── App Shell ──────────────────────────────────────────────────────────── */
-function showApp() {
-  hide('auth-screen');
-  show('app-screen');
+function applyUserToUI() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
   document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
@@ -355,6 +353,26 @@ function showApp() {
   if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
     api('/api/admin/submissions/pending').then(items => updateQueueBadge(items.length)).catch(() => {});
   }
+}
+
+async function showApp() {
+  hide('auth-screen');
+  show('app-screen');
+
+  // Render immediately with cached data so the screen appears fast
+  applyUserToUI();
+
+  // Then fetch fresh role/name from server — catches role changes made by admin
+  // without requiring the user to log out and back in
+  try {
+    const fresh = await api('/api/user/profile');
+    if (fresh.role && (fresh.role !== currentUser.role || fresh.name !== currentUser.name)) {
+      currentUser.role = fresh.role;
+      currentUser.name = fresh.name || currentUser.name;
+      localStorage.setItem('ielts_user', JSON.stringify(currentUser));
+      applyUserToUI(); // re-render nav with updated role
+    }
+  } catch (e) { /* network error — keep cached role */ }
 
   // Click-to-toggle nav groups (attach once; guard with data attribute)
   document.querySelectorAll('.nav-group-header').forEach(header => {
