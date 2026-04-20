@@ -3572,9 +3572,11 @@ async function loadAdminAssignments() {
     }
 
     // Populate student multi-select
+    // /api/admin/users returns a plain array, not { users: [...] }
     const studentListEl = document.getElementById('assign-students-list');
     if (studentListEl) {
-      const students = (usersData.users || []).filter(u => u.role !== 'admin');
+      const allUsers = Array.isArray(usersData) ? usersData : (usersData.users || []);
+      const students = allUsers.filter(u => u.role === 'student');
       if (students.length) {
         studentListEl.innerHTML = students.map(u => `
           <label class="assign-student-row">
