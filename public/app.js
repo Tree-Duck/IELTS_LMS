@@ -100,8 +100,9 @@ function formatDate(dateStr) {
 }
 
 function statusChip(status) {
-  const map = { graded: 'Graded', grading: 'Grading…', pending: 'Pending', error: 'Error' };
-  return `<span class="status-chip status-${status}">${map[status] || status}</span>`;
+  const map = { graded: 'Graded', grading: 'Grading…', pending: 'Pending', error: 'Error', pending_review: 'Awaiting Review' };
+  const cssClass = status === 'pending_review' ? 'pending-review' : status;
+  return `<span class="status-chip status-${cssClass}">${map[status] || status}</span>`;
 }
 
 /* ─── Auth ───────────────────────────────────────────────────────────────── */
@@ -350,6 +351,11 @@ function showApp() {
     if (teacherNavGroup) teacherNavGroup.classList.add('hidden');
   }
 
+  // Load queue badge count for teacher/admin
+  if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
+    api('/api/admin/submissions/pending').then(items => updateQueueBadge(items.length)).catch(() => {});
+  }
+
   // Click-to-toggle nav groups (attach once; guard with data attribute)
   document.querySelectorAll('.nav-group-header').forEach(header => {
     if (header.dataset.toggleBound) return;
@@ -382,6 +388,7 @@ function showView(name) {
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
+  else if (name === 'grade-queue') loadGradeQueue();
   else if (name === 'admin-student-history') { /* loaded by viewStudentHistory() */ }
   else if (name === 'homework') loadHomework();
   else if (name === 'test-list') loadTestList();
@@ -610,7 +617,7 @@ async function loadDashboard() {
     }
 
     // Poll if any are still grading
-    if (submissions.some(s => s.status === 'grading' || s.status === 'pending')) {
+    if (submissions.some(s => s.status === 'grading' || s.status === 'pending' || s.status === 'pending_review')) {
       clearInterval(pollingInterval);
       pollingInterval = setInterval(() => {
         if (document.getElementById('view-dashboard') && !document.getElementById('view-dashboard').classList.contains('hidden')) {
@@ -780,7 +787,7 @@ async function loadHistory() {
     listEl.innerHTML = submissions.map(renderSubmissionCard).join('');
 
     // Poll if pending
-    if (submissions.some(s => s.status === 'grading' || s.status === 'pending')) {
+    if (submissions.some(s => s.status === 'grading' || s.status === 'pending' || s.status === 'pending_review')) {
       clearInterval(pollingInterval);
       pollingInterval = setInterval(() => {
         if (!document.getElementById('view-history').classList.contains('hidden')) {
@@ -1418,7 +1425,8 @@ async function handleSubmit(e) {
   btn.disabled = true; btn.textContent = 'Submitting…';
 
   try {
-    const body = { task_type, prompt, essay };
+    const gradingMode = document.querySelector('input[name="grading_mode"]:checked')?.value || 'teacher';
+    const body = { task_type, prompt, essay, grading_mode: gradingMode };
     if (task_type === 'task1' && task1ImageBase64) {
       body.image_base64 = task1ImageBase64;
       body.image_media_type = task1ImageMediaType;
@@ -1428,9 +1436,12 @@ async function handleSubmit(e) {
       body: JSON.stringify(body)
     });
 
+    const modeMsg = gradingMode === 'ai'
+      ? 'AI grading is in progress — results will appear shortly.'
+      : 'Your essay is in the teacher review queue. A teacher will grade it soon.';
     successEl.innerHTML = `
-      Essay submitted! (${result.word_count} words) — AI grading is in progress.<br/>
-      <small>Results will appear in <a href="#" onclick="showView('history')">My Submissions</a> shortly.</small>`;
+      Essay submitted! (${result.word_count} words) — ${modeMsg}<br/>
+      <small>Track progress in <a href="#" onclick="showView('history')">My Submissions</a>.</small>`;
     successEl.classList.remove('hidden');
 
     // Reset form and clear saved draft
@@ -1471,7 +1482,7 @@ async function viewFeedback(id) {
     renderFeedback(s);
 
     // Poll if still grading
-    if (s.status === 'grading' || s.status === 'pending') {
+    if (s.status === 'grading' || s.status === 'pending' || s.status === 'pending_review') {
       clearInterval(pollingInterval);
       pollingInterval = setInterval(async () => {
         if (document.getElementById('view-feedback').classList.contains('hidden')) {
@@ -1514,11 +1525,17 @@ function renderFeedback(s) {
       <div style="font-size:14px;color:var(--gray-600);line-height:1.6;">${escHtml(s.prompt)}</div>
     </div>`;
 
-  if (s.status === 'grading' || s.status === 'pending') {
+  if (s.status === 'pending_review') {
+    html += `
+      <div class="grading-notice grading-notice-review">
+        <strong>👩‍🏫 Awaiting Teacher Review</strong>
+        Your essay is in the grading queue. A teacher will review and grade it soon. This page will update automatically when grading is complete.
+      </div>`;
+  } else if (s.status === 'grading' || s.status === 'pending') {
     html += `
       <div class="grading-notice">
-        <strong>⏳ Grading in Progress</strong>
-        Your essay is being graded. This usually takes 15–30 seconds. This page will update automatically.
+        <strong>⏳ AI Grading in Progress</strong>
+        Your essay is being graded by AI. This usually takes 15–30 seconds. This page will update automatically.
       </div>`;
   } else if (s.status === 'error') {
     html += `
@@ -1530,6 +1547,13 @@ function renderFeedback(s) {
         <button class="btn btn-primary btn-sm" onclick="retryGrading(${s.id})">🔄 Retry Grading</button>
       </div>`;
   } else if (s.status === 'graded' && s.overall_band != null) {
+    // Show graded-by badge
+    if (s.graded_by) {
+      html += `<div style="margin-bottom:12px;"><span class="badge-teacher-graded">👨‍🏫 Graded by Teacher</span></div>`;
+    } else {
+      html += `<div style="margin-bottom:12px;"><span class="badge-ai-graded">🤖 AI Graded</span></div>`;
+    }
+
     // Overall band
     html += `
       <div class="overall-band-display">
@@ -3296,6 +3320,213 @@ async function markHomeworkDone(assignmentId) {
     loadHomework();
   } catch (err) {
     alert('Failed to mark as done: ' + err.message);
+  }
+}
+
+/* ─── Grade Queue (Teacher/Admin Manual Grading) ─────────────────────────── */
+
+function updateQueueBadge(count) {
+  ['grade-queue-badge', 'grade-queue-badge-admin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0) {
+      el.textContent = count;
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+}
+
+async function loadGradeQueue() {
+  const listEl = document.getElementById('grade-queue-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="loading">Loading grade queue…</div>';
+  try {
+    const items = await api('/api/admin/submissions/pending');
+    updateQueueBadge(items.length);
+    if (!items.length) {
+      listEl.innerHTML = '<div class="empty-state">🎉 No essays awaiting review. Queue is empty!</div>';
+      return;
+    }
+    listEl.innerHTML = items.map(s => renderQueueItem(s)).join('');
+  } catch (err) {
+    listEl.innerHTML = `<div class="empty-state">Failed to load grade queue: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function renderQueueItem(s) {
+  const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
+  const badgeClass = s.task_type === 'task1' ? 'badge-t1' : 'badge-t2';
+  const essayPreview = s.essay ? escHtml(s.essay.slice(0, 300)) + (s.essay.length > 300 ? '…' : '') : '';
+  return `
+    <div class="queue-item" id="queue-item-${s.id}">
+      <div class="queue-item-header">
+        <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
+        <span class="queue-student">👤 ${escHtml(s.student_name)}</span>
+        <span class="queue-meta">${s.word_count} words · ${formatDate(s.created_at)}</span>
+      </div>
+      <div class="queue-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt)}</div>
+      <div class="queue-essay-preview">${essayPreview}</div>
+      <div class="queue-actions">
+        <button class="btn btn-primary btn-sm" onclick="openGradingPanel(${s.id})">✏️ Grade Manually</button>
+        <button class="btn btn-secondary btn-sm" onclick="gradeWithAI(${s.id}, this)">🤖 Send to AI</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleFullEssay(${s.id}, this)">📖 Full Essay</button>
+      </div>
+      <div class="full-essay hidden" id="full-essay-${s.id}">
+        <div class="essay-text-block">${s.essay ? escHtml(s.essay) : ''}</div>
+      </div>
+      <div class="grading-panel hidden" id="grading-panel-${s.id}"></div>
+    </div>`;
+}
+
+function toggleFullEssay(id, btn) {
+  const el = document.getElementById(`full-essay-${id}`);
+  if (!el) return;
+  el.classList.toggle('hidden');
+  btn.textContent = el.classList.contains('hidden') ? '📖 Full Essay' : '🙈 Hide Essay';
+}
+
+function openGradingPanel(id) {
+  const panel = document.getElementById(`grading-panel-${id}`);
+  if (!panel) return;
+  if (!panel.classList.contains('hidden') && panel.innerHTML) {
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    return;
+  }
+
+  // Build band score options (0 to 9 in 0.5 steps)
+  const bandOptions = [];
+  for (let v = 9; v >= 0; v -= 0.5) {
+    bandOptions.push(`<option value="${v}">${v}</option>`);
+  }
+  const bandSel = bandOptions.join('');
+
+  const taLabel = ''; // will be set dynamically per task type, keep generic for now
+  panel.innerHTML = `
+    <div class="grading-form">
+      <h4>✏️ Manual Grading</h4>
+      <div class="band-input-grid">
+        <div class="band-input-row">
+          <label>Task Achievement / Response</label>
+          <select id="gp-ta-${id}" onchange="updateGradingOverall(${id})">${bandSel}</select>
+        </div>
+        <div class="band-input-row">
+          <label>Coherence &amp; Cohesion</label>
+          <select id="gp-cc-${id}" onchange="updateGradingOverall(${id})">${bandSel}</select>
+        </div>
+        <div class="band-input-row">
+          <label>Lexical Resource</label>
+          <select id="gp-lr-${id}" onchange="updateGradingOverall(${id})">${bandSel}</select>
+        </div>
+        <div class="band-input-row">
+          <label>Grammatical Range &amp; Accuracy</label>
+          <select id="gp-gra-${id}" onchange="updateGradingOverall(${id})">${bandSel}</select>
+        </div>
+      </div>
+      <div class="overall-band-preview">
+        Overall Band: <span class="overall-band-display" id="gp-overall-${id}">—</span>
+      </div>
+      <div class="form-group">
+        <label>Feedback / Comments</label>
+        <textarea id="gp-feedback-${id}" rows="5" placeholder="Write your feedback for the student here…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Strengths (one per line)</label>
+        <textarea id="gp-strengths-${id}" rows="3" placeholder="Good use of linking words&#10;Clear argument structure&#10;…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Improvements (one per line)</label>
+        <textarea id="gp-improvements-${id}" rows="3" placeholder="Vary sentence structures more&#10;Avoid repetition&#10;…"></textarea>
+      </div>
+      <div id="gp-error-${id}" class="error-msg hidden"></div>
+      <div class="queue-actions" style="margin-top:8px">
+        <button class="btn btn-primary" onclick="submitManualGrade(${id})">✅ Submit Grade</button>
+        <button class="btn btn-outline" onclick="closeGradingPanel(${id})">Cancel</button>
+      </div>
+    </div>`;
+  panel.classList.remove('hidden');
+  updateGradingOverall(id);
+}
+
+function closeGradingPanel(id) {
+  const panel = document.getElementById(`grading-panel-${id}`);
+  if (panel) { panel.classList.add('hidden'); panel.innerHTML = ''; }
+}
+
+function updateGradingOverall(id) {
+  const ta  = parseFloat(document.getElementById(`gp-ta-${id}`)?.value  || 0);
+  const cc  = parseFloat(document.getElementById(`gp-cc-${id}`)?.value  || 0);
+  const lr  = parseFloat(document.getElementById(`gp-lr-${id}`)?.value  || 0);
+  const gra = parseFloat(document.getElementById(`gp-gra-${id}`)?.value || 0);
+  const overall = Math.round(((ta + cc + lr + gra) / 4) * 2) / 2;
+  const el = document.getElementById(`gp-overall-${id}`);
+  if (el) el.textContent = overall;
+}
+
+async function submitManualGrade(id) {
+  const errEl = document.getElementById(`gp-error-${id}`);
+  errEl.classList.add('hidden');
+
+  const ta  = parseFloat(document.getElementById(`gp-ta-${id}`)?.value);
+  const cc  = parseFloat(document.getElementById(`gp-cc-${id}`)?.value);
+  const lr  = parseFloat(document.getElementById(`gp-lr-${id}`)?.value);
+  const gra = parseFloat(document.getElementById(`gp-gra-${id}`)?.value);
+  const feedback = document.getElementById(`gp-feedback-${id}`)?.value.trim() || '';
+  const strengthsRaw = document.getElementById(`gp-strengths-${id}`)?.value || '';
+  const improvementsRaw = document.getElementById(`gp-improvements-${id}`)?.value || '';
+
+  if ([ta, cc, lr, gra].some(isNaN)) {
+    errEl.textContent = 'Please fill in all four band scores.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const strengths = strengthsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const improvements = improvementsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  try {
+    await api(`/api/admin/submissions/${id}/grade`, {
+      method: 'POST',
+      body: JSON.stringify({ task_achievement: ta, coherence_cohesion: cc, lexical_resource: lr, grammatical_range: gra, detailed_feedback: feedback, strengths, improvements })
+    });
+    // Remove from queue
+    const item = document.getElementById(`queue-item-${id}`);
+    if (item) item.remove();
+    // Update badge
+    const remaining = document.querySelectorAll('.queue-item').length;
+    updateQueueBadge(remaining);
+    if (!remaining) {
+      const listEl = document.getElementById('grade-queue-list');
+      if (listEl) listEl.innerHTML = '<div class="empty-state">🎉 No essays awaiting review. Queue is empty!</div>';
+    }
+  } catch (err) {
+    errEl.textContent = 'Failed to submit grade: ' + err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function gradeWithAI(id, btn) {
+  if (!confirm('This will use AI credits (~$0.01) to grade this essay. Continue?')) return;
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Sending to AI…';
+  try {
+    await api(`/api/admin/submissions/${id}/grade-ai`, { method: 'POST' });
+    // Remove from pending queue (AI will handle it)
+    const item = document.getElementById(`queue-item-${id}`);
+    if (item) item.remove();
+    const remaining = document.querySelectorAll('.queue-item').length;
+    updateQueueBadge(remaining);
+    if (!remaining) {
+      const listEl = document.getElementById('grade-queue-list');
+      if (listEl) listEl.innerHTML = '<div class="empty-state">🎉 No essays awaiting review. Queue is empty!</div>';
+    }
+  } catch (err) {
+    alert('Failed to start AI grading: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = origText;
   }
 }
 

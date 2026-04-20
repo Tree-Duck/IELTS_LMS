@@ -46,12 +46,14 @@ const db = {
     return load().users.find(u => u.email === email) || null;
   },
 
-  insertSubmission(user_id, task_type, prompt, essay, word_count) {
+  insertSubmission(user_id, task_type, prompt, essay, word_count, grading_mode = 'teacher') {
     const data = load();
     data._ids.submissions = (data._ids.submissions || 0) + 1;
     const submission = {
       id: data._ids.submissions, user_id, task_type, prompt, essay,
-      word_count, status: 'pending', created_at: new Date().toISOString()
+      word_count, grading_mode,
+      status: grading_mode === 'ai' ? 'pending' : 'pending_review',
+      created_at: new Date().toISOString()
     };
     data.submissions.push(submission);
     save(data);
@@ -91,7 +93,27 @@ const db = {
     return { ...s, ...f };
   },
 
-  insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd) {
+  // Admin/teacher version — no user_id filter
+  getSubmissionByIdAdmin(id) {
+    const data = load();
+    const s = data.submissions.find(s => s.id === id);
+    if (!s) return null;
+    const f = data.feedback.find(f => f.submission_id === id) || {};
+    return { ...s, ...f };
+  },
+
+  getAllPendingReviewSubmissions() {
+    const data = load();
+    return data.submissions
+      .filter(s => s.status === 'pending_review')
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .map(s => {
+        const user = data.users.find(u => u.id === s.user_id) || {};
+        return { ...s, student_name: user.name || 'Unknown', student_email: user.email || '' };
+      });
+  },
+
+  insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd, graded_by = null) {
     const data = load();
     data._ids.feedback = (data._ids.feedback || 0) + 1;
     data.feedback.push({
@@ -104,6 +126,7 @@ const db = {
       overall_improvements: overall_improvements || null,
       tokens_used: tokens_used || null,
       cost_usd: cost_usd || null,
+      graded_by: graded_by || null,
       graded_at: new Date().toISOString()
     });
     save(data);
@@ -545,10 +568,12 @@ const db = {
         const f = data.feedback.find(f => f.submission_id === s.id) || {};
         return {
           id: s.id, task_type: s.task_type, prompt: s.prompt, essay: s.essay,
-          word_count: s.word_count, status: s.status, created_at: s.created_at,
+          word_count: s.word_count, status: s.status, grading_mode: s.grading_mode || 'ai',
+          created_at: s.created_at,
           overall_band: f.overall_band ?? null,
           detailed_feedback: f.detailed_feedback || null,
-          cost_usd: f.cost_usd || null
+          cost_usd: f.cost_usd || null,
+          graded_by: f.graded_by ?? null
         };
       });
   },

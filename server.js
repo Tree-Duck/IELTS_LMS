@@ -311,7 +311,7 @@ app.get('/api/balance', authenticate, (req, res) => {
 // ─── Submission Routes ────────────────────────────────────────────────────────
 app.post('/api/submissions', authenticate, async (req, res) => {
   try {
-    const { task_type, prompt, essay, image_base64, image_media_type } = req.body;
+    const { task_type, prompt, essay, image_base64, image_media_type, grading_mode } = req.body;
     if (!task_type || !prompt || !essay) {
       return res.status(400).json({ error: 'Task type, prompt, and essay are required' });
     }
@@ -330,13 +330,18 @@ app.post('/api/submissions', authenticate, async (req, res) => {
       ? { base64: image_base64, media_type: image_media_type }
       : null;
 
-    const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount);
+    const mode = (grading_mode === 'ai') ? 'ai' : 'teacher'; // default = teacher
+    const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount, mode);
     const submissionId = result.lastInsertRowid;
 
-    // Start grading asynchronously
-    gradeSubmission(submissionId, req.user.id, task_type, prompt, essay, wordCount, minWords, imageData).catch(console.error);
-
-    res.json({ id: submissionId, status: 'grading', word_count: wordCount });
+    if (mode === 'ai') {
+      // Start AI grading asynchronously
+      gradeSubmission(submissionId, req.user.id, task_type, prompt, essay, wordCount, minWords, imageData).catch(console.error);
+      res.json({ id: submissionId, status: 'grading', word_count: wordCount, grading_mode: 'ai' });
+    } else {
+      // Teacher review mode — no AI call, sits in queue
+      res.json({ id: submissionId, status: 'pending_review', word_count: wordCount, grading_mode: 'teacher' });
+    }
   } catch (err) {
     console.error('Submission error:', err);
     res.status(500).json({ error: 'Failed to submit essay. Please try again.' });
@@ -1327,6 +1332,82 @@ app.get('/api/admin/users/:id/submissions', authenticate, teacherOrAdmin, (req, 
     res.json({ user: { id: user.id, name: user.name, email: user.email }, submissions });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load submissions' });
+  }
+});
+
+// ─── Grade Queue (Teacher/Admin Manual Grading) ───────────────────────────────
+
+// Get all pending_review submissions (queue)
+app.get('/api/admin/submissions/pending', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    res.json(db.getAllPendingReviewSubmissions());
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load grade queue' });
+  }
+});
+
+// Teacher/admin manually grades a submission
+app.post('/api/admin/submissions/:id/grade', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const { task_achievement, coherence_cohesion, lexical_resource, grammatical_range,
+            detailed_feedback, strengths, improvements } = req.body;
+
+    // Validate band scores
+    const vals = [task_achievement, coherence_cohesion, lexical_resource, grammatical_range];
+    if (vals.some(v => v === undefined || v === null || isNaN(parseFloat(v)))) {
+      return res.status(400).json({ error: 'All four band scores are required' });
+    }
+
+    const sub = db.getSubmissionByIdAdmin(subId);
+    if (!sub) return res.status(404).json({ error: 'Submission not found' });
+    if (!['pending_review', 'error'].includes(sub.status)) {
+      return res.status(409).json({ error: 'Submission is already graded or being graded' });
+    }
+
+    const normalize = v => Math.round(parseFloat(v) * 2) / 2;
+    const ta = normalize(task_achievement);
+    const cc = normalize(coherence_cohesion);
+    const lr = normalize(lexical_resource);
+    const gra = normalize(grammatical_range);
+    const overall = Math.round(((ta + cc + lr + gra) / 4) * 2) / 2;
+
+    const parseList = arr => Array.isArray(arr) ? JSON.stringify(arr) : JSON.stringify([]);
+
+    db.insertFeedback(
+      subId, ta, cc, lr, gra, overall,
+      detailed_feedback || '',
+      parseList(strengths),
+      parseList(improvements),
+      null, null, null,   // sentence_analysis, criterion_details, overall_improvements
+      null, null,         // tokens_used, cost_usd
+      req.user.id         // graded_by (teacher/admin user ID)
+    );
+    db.updateSubmissionStatus(subId, 'graded');
+    try { db.updateStreak(sub.user_id); } catch (e) { console.error('Streak error:', e); }
+
+    res.json({ success: true, overall_band: overall });
+  } catch (err) {
+    console.error('Manual grade error:', err);
+    res.status(500).json({ error: 'Failed to submit grade' });
+  }
+});
+
+// Teacher/admin delegates a pending_review submission to AI grading
+app.post('/api/admin/submissions/:id/grade-ai', authenticate, teacherOrAdmin, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const sub = db.getSubmissionByIdAdmin(subId);
+    if (!sub) return res.status(404).json({ error: 'Submission not found' });
+    if (!['pending_review', 'error'].includes(sub.status)) {
+      return res.status(409).json({ error: 'Submission is already graded or being graded' });
+    }
+    const minWords = sub.task_type === 'task1' ? 150 : 250;
+    gradeSubmission(subId, sub.user_id, sub.task_type, sub.prompt, sub.essay, sub.word_count, minWords, null).catch(console.error);
+    res.json({ status: 'grading' });
+  } catch (err) {
+    console.error('Grade-AI delegation error:', err);
+    res.status(500).json({ error: 'Failed to start AI grading' });
   }
 });
 

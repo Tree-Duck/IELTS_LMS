@@ -191,6 +191,10 @@
             <span class="nav-group-chevron">›</span>
           </div>
           <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('grade-queue')" id="nav-teacher-grade-queue">
+              <span class="nav-icon">📝</span> Grade Queue
+              <span class="queue-badge hidden" id="grade-queue-badge">0</span>
+            </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-teacher-users">
               <span class="nav-icon">👥</span> Users
             </button>
@@ -211,6 +215,10 @@
             <span class="nav-group-chevron">›</span>
           </div>
           <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('grade-queue')" id="nav-admin-grade-queue">
+              <span class="nav-icon">📝</span> Grade Queue
+              <span class="queue-badge hidden" id="grade-queue-badge-admin">0</span>
+            </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-admin">
               <span class="nav-icon">👥</span> Users
             </button>
@@ -448,6 +456,24 @@
                 </label>
                 <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount(); onDraftInput()"></textarea>
                 <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
+              </div>
+
+              <div class="form-group grading-mode-selector">
+                <label>How would you like this graded?</label>
+                <div class="grading-mode-options">
+                  <label class="grading-mode-option" id="mode-teacher-label">
+                    <input type="radio" name="grading_mode" value="teacher" checked>
+                    <span class="mode-icon">👩‍🏫</span>
+                    <span class="mode-title">Teacher Review</span>
+                    <span class="mode-desc">Free · Teacher manually reviews your essay</span>
+                  </label>
+                  <label class="grading-mode-option" id="mode-ai-label">
+                    <input type="radio" name="grading_mode" value="ai">
+                    <span class="mode-icon">🤖</span>
+                    <span class="mode-title">AI Grading</span>
+                    <span class="mode-desc">Instant · Uses AI credits (~$0.01)</span>
+                  </label>
+                </div>
               </div>
 
               <div id="submit-error" class="error-msg hidden"></div>
@@ -772,6 +798,15 @@
           <p>Assignments set by your teacher — complete them before the deadline</p>
         </div>
         <div id="homework-content"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Grade Queue View (Teacher & Admin) -->
+      <div id="view-grade-queue" class="view hidden">
+        <div class="page-header">
+          <h2>📝 Grade Queue</h2>
+          <p>Essays awaiting teacher review — oldest first</p>
+        </div>
+        <div id="grade-queue-list"><div class="loading">Loading…</div></div>
       </div>
 
       <!-- Admin Assignments View -->
