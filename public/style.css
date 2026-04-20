@@ -447,7 +447,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── CHART CONTAINER ────────────────────────────────────────────────────── */
 .chart-container {
-  background: white;
+  background: #fff;
   border: 1.5px solid #e5e7eb;
   border-radius: 14px;
   overflow: hidden;
@@ -574,7 +574,7 @@ input:focus, textarea:focus, select:focus {
 .section-header h3 { font-size: 18px; font-weight: 700; color: var(--gray-900); }
 
 .submission-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius);
   padding: 18px 20px;
@@ -677,7 +677,7 @@ input:focus, textarea:focus, select:focus {
 .overall-label { font-size: 14px; opacity: .85; margin-top: 4px; }
 
 .feedback-section {
-  background: #fff;
+  background: var(--gray-50);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
@@ -825,7 +825,7 @@ input:focus, textarea:focus, select:focus {
 /* ─── HINT PANEL (legacy) ────────────────────────────────────────────────── */
 .hint-panel {
   margin-top: 12px;
-  background: #fff;
+  background: var(--gray-50);
   border: 1.5px solid var(--primary);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
@@ -908,7 +908,7 @@ input:focus, textarea:focus, select:focus {
   padding: 5px 14px;
   border-radius: 20px;
   border: 1.5px solid var(--gray-200);
-  background: white;
+  background: var(--gray-50);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1518,7 +1518,7 @@ input:focus, textarea:focus, select:focus {
   padding: 8px 20px;
   border-radius: 8px;
   border: 1px solid var(--gray-200);
-  background: #fff;
+  background: var(--gray-50);
   color: var(--gray-600);
   font-size: 14px;
   font-weight: 500;
@@ -1534,7 +1534,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── Test Card (list view) ──────────────────────────────────────────────── */
 .test-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 12px;
   padding: 16px 20px;
@@ -1771,7 +1771,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── Test Result View ───────────────────────────────────────────────────── */
 .result-score-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 16px;
   padding: 28px;
@@ -1782,7 +1782,7 @@ input:focus, textarea:focus, select:focus {
 .result-band { font-size: 56px; font-weight: 800; line-height: 1; }
 .result-band-label { font-size: 14px; color: var(--gray-500); margin: 4px 0 8px; }
 .result-raw { font-size: 18px; font-weight: 600; color: var(--gray-700); }
-.result-sections { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.result-sections { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .result-sections h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
 .result-section-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; }
 .result-section-row:last-child { border-bottom: none; }
@@ -1800,7 +1800,7 @@ input:focus, textarea:focus, select:focus {
 /* ─── Admin Materials ────────────────────────────────────────────────────── */
 .materials-list { margin-bottom: 20px; }
 .materials-item {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 10px;
   padding: 14px 16px;
@@ -1831,7 +1831,7 @@ input:focus, textarea:focus, select:focus {
 .section-form-header { margin-bottom: 12px; }
 .section-form-header h4 { font-size: 14px; font-weight: 700; color: var(--gray-700); }
 .question-builder-row {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
   padding: 12px;
@@ -2089,7 +2089,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── Topic Quality Rater ─────────────────────────────────────────────────── */
 .rater-card {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 12px;
   padding: 28px;
@@ -2433,6 +2433,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 [data-theme="dark"] body { background: var(--body-bg); color: var(--gray-800); }
+
+/* Cards & panels */
 [data-theme="dark"] .card,
 [data-theme="dark"] .feedback-section,
 [data-theme="dark"] .stat-card,
@@ -2441,13 +2443,88 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .target-band-section,
 [data-theme="dark"] .materials-form-card,
 [data-theme="dark"] .submit-right,
-[data-theme="dark"] .submit-form { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .submit-form,
+[data-theme="dark"] .submission-card,
+[data-theme="dark"] .hint-panel,
+[data-theme="dark"] .rater-card,
+[data-theme="dark"] .result-score-card,
+[data-theme="dark"] .result-sections,
+[data-theme="dark"] .materials-item,
+[data-theme="dark"] .question-builder-row,
+[data-theme="dark"] .band-item { background: #1e293b; border-color: #334155; }
+
+/* Inputs */
 [data-theme="dark"] input,
 [data-theme="dark"] textarea,
 [data-theme="dark"] select { background: #0f172a; border-color: #475569; color: var(--gray-800); }
+
+/* Layout */
 [data-theme="dark"] .sidebar { background: #020617; }
 [data-theme="dark"] .main-content { background: var(--body-bg); }
-[data-theme="dark"] .page-header h2 { color: var(--gray-900); }
+
+/* Text — headings & labels */
+[data-theme="dark"] .page-header h2,
+[data-theme="dark"] .page-header p,
+[data-theme="dark"] .section-header h3,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .task-option-title,
+[data-theme="dark"] .import-title,
+[data-theme="dark"] .result-sections h3,
+[data-theme="dark"] .result-review h3,
+[data-theme="dark"] .feedback-section h3,
+[data-theme="dark"] .criterion-card h4,
+[data-theme="dark"] .section-form-header h4,
+[data-theme="dark"] .t1-group-header { color: var(--gray-900); }
+
+[data-theme="dark"] .task-option-desc,
+[data-theme="dark"] .feedback-text,
+[data-theme="dark"] .hint-panel-body,
+[data-theme="dark"] .result-raw,
+[data-theme="dark"] .result-section-row,
+[data-theme="dark"] .q-result-header,
+[data-theme="dark"] .q-result-answer,
+[data-theme="dark"] .matching-label,
+[data-theme="dark"] .import-subtitle,
+[data-theme="dark"] .band-item-label,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .materials-meta,
+[data-theme="dark"] .t1-topic-label,
+[data-theme="dark"] .t1-topic-preview,
+[data-theme="dark"] .t1-topic-date { color: var(--gray-700); }
+
+/* Task type selector cards */
+[data-theme="dark"] .task-option-card { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .task-option-card:hover { background: #1e3a5f; border-color: var(--primary); }
+[data-theme="dark"] .task-option input:checked + .task-option-card { background: #1e3a5f; border-color: var(--primary); }
+
+/* Topic chips */
+[data-theme="dark"] .topic-chip { background: #1e293b; border-color: #475569; color: var(--gray-700); }
+[data-theme="dark"] .topic-chip:hover { border-color: var(--primary); color: var(--primary); }
+[data-theme="dark"] .topic-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Tab buttons */
+[data-theme="dark"] .test-tab-btn { background: #1e293b; border-color: #334155; color: var(--gray-700); }
+[data-theme="dark"] .test-tab-btn:hover:not(.active) { background: #334155; }
+[data-theme="dark"] .test-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+[data-theme="dark"] .materials-action-tab { color: var(--gray-600); }
+[data-theme="dark"] .materials-action-tab.active { color: var(--primary); }
+
+/* Chart container */
+[data-theme="dark"] .chart-container { background: #1e293b; border-color: #334155; }
+
+/* Word count badge */
+[data-theme="dark"] .word-count-badge { background: #334155; color: var(--gray-700); }
+
+/* Section form block (materials create) */
+[data-theme="dark"] .section-form-block { background: #0f172a; border-color: #334155; }
+
+/* Test result question blocks */
+[data-theme="dark"] .question-result.correct { background: #052e16; border-color: #4ade80; }
+[data-theme="dark"] .question-result.wrong { background: #2d0a0a; border-color: #f87171; }
+[data-theme="dark"] .ai-explanation-box { background: #0c2340; color: #7dd3fc; }
+[data-theme="dark"] .expl-loading-note { background: #1c1400; border-color: #854d0e; color: #fde68a; }
+
+/* Overall band display */
 [data-theme="dark"] .overall-band-display { background: #1e293b; }
 [data-theme="dark"] .rewrite-essay-box { background: #1e293b; border-color: #334155; color: var(--gray-800); }
 [data-theme="dark"] .grading-notice { background: #1e293b; }
@@ -2458,12 +2535,23 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .q-nav-btn { background: #334155; color: var(--gray-800); }
 [data-theme="dark"] .q-nav-btn.answered { background: #064e3b; }
 [data-theme="dark"] .table-container table th { background: #1e293b; }
+[data-theme="dark"] .table-container table td { color: var(--gray-700); }
 [data-theme="dark"] .auth-box { background: #1e293b; color: var(--gray-800); }
 [data-theme="dark"] .modal-box,
 [data-theme="dark"] .flashcard-modal-box { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .writing-timer-bar { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .draft-restore-banner { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .btn-dark-mode { color: #fbbf24; }
+
+/* Admin panel & misc */
+[data-theme="dark"] .admin-table-wrap table { color: var(--gray-800); }
+[data-theme="dark"] .admin-table thead th { background: #0f172a; color: var(--gray-700); border-color: #334155; }
+[data-theme="dark"] .admin-table tbody td { border-color: #334155; }
+[data-theme="dark"] .admin-table tbody tr:hover td { background: #1e293b; }
+[data-theme="dark"] .target-bar-track { background: #334155; }
+[data-theme="dark"] .rater-result-card { background: #0f172a; border-color: #334155; }
+[data-theme="dark"] .passage-text { color: var(--gray-800); }
+[data-theme="dark"] .hw-section-title { color: var(--gray-900); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    WRITING TIMER
