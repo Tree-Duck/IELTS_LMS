@@ -8,6 +8,9 @@ let promptUserTyped = false;  // tracks manual paste/type in prompt
 let pendingVerifyEmail = null; // email awaiting verification
 let pendingResetEmail = null;  // email awaiting password reset
 
+// Paste detection state — reset each time the submit view is opened
+let pasteStats = { paste_count: 0, total_pasted: 0, total_typed: 0, largest_paste: 0 };
+
 // Writing Timer state
 let writingTimerSecs = 0;
 let writingTimerInterval = null;
@@ -402,7 +405,7 @@ function showView(name) {
 
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { updateTopicOptions(); loadDraftIfExists(); }
+  else if (name === 'submit') { updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
@@ -501,14 +504,43 @@ async function viewStudentHistory(userId, userName) {
     contentEl.innerHTML = subs.map(s => {
       const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
       const bandColor = s.overall_band >= 7 ? '#16a34a' : s.overall_band >= 5.5 ? '#d97706' : s.overall_band ? '#dc2626' : '#6b7280';
+
+      // Paste analysis badge
+      let pasteBadge = '';
+      if (s.paste_stats) {
+        const p = s.paste_stats;
+        const total = p.total_pasted + p.total_typed;
+        const pasteRatio = total > 0 ? p.total_pasted / total : 0;
+        if (p.paste_count === 0) {
+          pasteBadge = `<span class="paste-badge paste-clean" title="No paste events detected">✍️ Typed</span>`;
+        } else if (pasteRatio > 0.7 || p.largest_paste > 300) {
+          pasteBadge = `<span class="paste-badge paste-suspicious" title="${p.paste_count} paste event(s), largest: ${p.largest_paste} chars, ~${Math.round(pasteRatio*100)}% pasted">🚨 Mostly pasted (${p.paste_count} paste${p.paste_count>1?'s':''})</span>`;
+        } else if (p.paste_count > 0) {
+          pasteBadge = `<span class="paste-badge paste-mixed" title="${p.paste_count} paste event(s), largest: ${p.largest_paste} chars, ~${Math.round(pasteRatio*100)}% pasted">⚠️ Some pasting (${p.paste_count} paste${p.paste_count>1?'s':''})</span>`;
+        }
+      }
+
+      // Existing comments
+      const comments = s.comments || [];
+      const commentsHtml = comments.length ? comments.map(c => `
+        <div class="teacher-comment" id="tc-${s.id}-${c.id}">
+          <div class="tc-meta">
+            <span class="tc-author">💬 ${escHtml(c.teacher_name)}</span>
+            <span class="tc-date">${formatDate(c.created_at)}</span>
+            ${c.teacher_id === currentUser.id ? `<button class="btn-link tc-delete" onclick="deleteTeacherComment(${s.id},${c.id},this)">Delete</button>` : ''}
+          </div>
+          <div class="tc-text">${escHtml(c.text)}</div>
+        </div>`).join('') : '';
+
       return `
-        <div class="student-history-card">
+        <div class="student-history-card" id="shc-${s.id}">
           <div class="student-history-header">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
               <span class="submission-badge ${s.task_type === 'task1' ? 'badge-t1' : 'badge-t2'}" style="width:auto;padding:3px 10px">${taskLabel}</span>
               <span style="font-size:13px;color:var(--gray-500)">${s.word_count} words · ${formatDate(s.created_at)}</span>
               ${s.overall_band != null ? `<span style="font-weight:700;color:${bandColor}">Band ${s.overall_band}</span>` : `<span class="badge badge-gray">${s.status}</span>`}
               ${s.cost_usd ? `<span style="font-size:11px;color:var(--gray-400)">$${s.cost_usd.toFixed(4)}</span>` : ''}
+              ${pasteBadge}
             </div>
             <button class="btn btn-secondary btn-xs" onclick="this.closest('.student-history-card').querySelector('.essay-full').classList.toggle('hidden');this.textContent=this.textContent==='Show Essay'?'Hide Essay':'Show Essay'">Show Essay</button>
           </div>
@@ -517,11 +549,60 @@ async function viewStudentHistory(userId, userName) {
             <div class="essay-text-box">${escHtml(s.essay)}</div>
           </div>
           ${s.detailed_feedback ? `<div class="student-history-feedback"><strong>Feedback summary:</strong> ${escHtml(s.detailed_feedback.slice(0, 300))}${s.detailed_feedback.length > 300 ? '…' : ''}</div>` : ''}
+
+          <div class="teacher-comments-section">
+            ${commentsHtml}
+            <div class="add-comment-row">
+              <textarea class="add-comment-input" id="comment-input-${s.id}" rows="2" placeholder="Leave a comment for this student…"></textarea>
+              <button class="btn btn-primary btn-sm" onclick="addTeacherComment(${s.id})">💬 Add Comment</button>
+            </div>
+          </div>
         </div>
       `;
     }).join('');
   } catch (err) {
     contentEl.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function addTeacherComment(submissionId) {
+  const input = document.getElementById(`comment-input-${submissionId}`);
+  const text = input?.value.trim();
+  if (!text) return;
+  input.disabled = true;
+  try {
+    const comment = await api(`/api/admin/submissions/${submissionId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ text })
+    });
+    input.value = '';
+    // Inject the new comment above the input row
+    const addRow = input.closest('.add-comment-row');
+    const commentEl = document.createElement('div');
+    commentEl.className = 'teacher-comment';
+    commentEl.id = `tc-${submissionId}-${comment.id}`;
+    commentEl.innerHTML = `
+      <div class="tc-meta">
+        <span class="tc-author">💬 ${escHtml(comment.teacher_name)}</span>
+        <span class="tc-date">${formatDate(comment.created_at)}</span>
+        <button class="btn-link tc-delete" onclick="deleteTeacherComment(${submissionId},${comment.id},this)">Delete</button>
+      </div>
+      <div class="tc-text">${escHtml(comment.text)}</div>`;
+    addRow.parentNode.insertBefore(commentEl, addRow);
+  } catch (err) {
+    alert('Failed to add comment: ' + err.message);
+  } finally {
+    if (input) input.disabled = false;
+  }
+}
+
+async function deleteTeacherComment(submissionId, commentId, btn) {
+  if (!confirm('Delete this comment?')) return;
+  try {
+    await api(`/api/admin/submissions/${submissionId}/comments/${commentId}`, { method: 'DELETE' });
+    document.getElementById(`tc-${submissionId}-${commentId}`)?.remove();
+  } catch (err) {
+    alert('Failed to delete comment: ' + err.message);
   }
 }
 
@@ -1426,6 +1507,33 @@ function removeImage() {
   if (btn) btn.classList.add('hidden');
 }
 
+/* ─── Paste Detection ────────────────────────────────────────────────────── */
+function initPasteTracking() {
+  const ta = document.getElementById('essay-text');
+  if (!ta || ta.dataset.pasteTracked) return;
+  ta.dataset.pasteTracked = '1';
+
+  // Reset stats whenever the submit view is loaded fresh
+  pasteStats = { paste_count: 0, total_pasted: 0, total_typed: 0, largest_paste: 0 };
+
+  ta.addEventListener('paste', (e) => {
+    const pasted = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+    const len = pasted.length;
+    if (len > 0) {
+      pasteStats.paste_count += 1;
+      pasteStats.total_pasted += len;
+      if (len > pasteStats.largest_paste) pasteStats.largest_paste = len;
+    }
+  });
+
+  ta.addEventListener('input', (e) => {
+    // Count typed characters (input events that aren't paste)
+    if (e.inputType && e.inputType.startsWith('insert') && e.inputType !== 'insertFromPaste') {
+      pasteStats.total_typed += (e.data || '').length;
+    }
+  });
+}
+
 async function handleSubmit(e) {
   e.preventDefault();
   const errEl = document.getElementById('submit-error');
@@ -1444,7 +1552,7 @@ async function handleSubmit(e) {
 
   try {
     const gradingMode = document.querySelector('input[name="grading_mode"]:checked')?.value || 'teacher';
-    const body = { task_type, prompt, essay, grading_mode: gradingMode };
+    const body = { task_type, prompt, essay, grading_mode: gradingMode, paste_stats: pasteStats };
     if (task_type === 'task1' && task1ImageBase64) {
       body.image_base64 = task1ImageBase64;
       body.image_media_type = task1ImageMediaType;
@@ -1790,6 +1898,25 @@ function renderFeedback(s) {
       <h3>Your Essay</h3>
       <div class="essay-box">${escHtml(s.essay)}</div>
     </div>`;
+
+  // Teacher comments (visible to student)
+  const comments = Array.isArray(s.comments) ? s.comments : [];
+  if (comments.length > 0) {
+    html += `
+      <div class="feedback-section teacher-comments-section">
+        <h3>💬 Teacher Comments</h3>
+        <div class="teacher-comments-list">
+          ${comments.map(c => `
+            <div class="teacher-comment">
+              <div class="tc-meta">
+                <span class="tc-author">👨‍🏫 ${escHtml(c.teacher_name || 'Teacher')}</span>
+                <span class="tc-date">${formatDate(c.created_at)}</span>
+              </div>
+              <div class="tc-text">${escHtml(c.text)}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
 
   // Rewrite button (only for graded essays)
   if (s.status === 'graded' && s.overall_band != null) {

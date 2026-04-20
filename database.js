@@ -46,18 +46,50 @@ const db = {
     return load().users.find(u => u.email === email) || null;
   },
 
-  insertSubmission(user_id, task_type, prompt, essay, word_count, grading_mode = 'teacher') {
+  insertSubmission(user_id, task_type, prompt, essay, word_count, grading_mode = 'teacher', paste_stats = null) {
     const data = load();
     data._ids.submissions = (data._ids.submissions || 0) + 1;
     const submission = {
       id: data._ids.submissions, user_id, task_type, prompt, essay,
       word_count, grading_mode,
       status: grading_mode === 'ai' ? 'pending' : 'pending_review',
+      paste_stats: paste_stats || null,
+      comments: [],
       created_at: new Date().toISOString()
     };
     data.submissions.push(submission);
     save(data);
     return { lastInsertRowid: submission.id };
+  },
+
+  addSubmissionComment(submission_id, teacher_id, teacher_name, text) {
+    const data = load();
+    const sub = data.submissions.find(s => s.id === submission_id);
+    if (!sub) return null;
+    if (!sub.comments) sub.comments = [];
+    if (!data._ids.comments) data._ids.comments = 0;
+    data._ids.comments += 1;
+    const comment = {
+      id: data._ids.comments,
+      teacher_id,
+      teacher_name,
+      text,
+      created_at: new Date().toISOString()
+    };
+    sub.comments.push(comment);
+    save(data);
+    return comment;
+  },
+
+  deleteSubmissionComment(submission_id, comment_id, teacher_id) {
+    const data = load();
+    const sub = data.submissions.find(s => s.id === submission_id);
+    if (!sub || !sub.comments) return false;
+    const idx = sub.comments.findIndex(c => c.id === comment_id && c.teacher_id === teacher_id);
+    if (idx === -1) return false;
+    sub.comments.splice(idx, 1);
+    save(data);
+    return true;
   },
 
   updateSubmissionStatus(id, status) {
@@ -570,6 +602,8 @@ const db = {
           id: s.id, task_type: s.task_type, prompt: s.prompt, essay: s.essay,
           word_count: s.word_count, status: s.status, grading_mode: s.grading_mode || 'ai',
           created_at: s.created_at,
+          paste_stats: s.paste_stats || null,
+          comments: s.comments || [],
           overall_band: f.overall_band ?? null,
           detailed_feedback: f.detailed_feedback || null,
           cost_usd: f.cost_usd || null,

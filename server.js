@@ -317,7 +317,7 @@ app.get('/api/balance', authenticate, (req, res) => {
 // ─── Submission Routes ────────────────────────────────────────────────────────
 app.post('/api/submissions', authenticate, async (req, res) => {
   try {
-    const { task_type, prompt, essay, image_base64, image_media_type, grading_mode } = req.body;
+    const { task_type, prompt, essay, image_base64, image_media_type, grading_mode, paste_stats } = req.body;
     if (!task_type || !prompt || !essay) {
       return res.status(400).json({ error: 'Task type, prompt, and essay are required' });
     }
@@ -337,7 +337,12 @@ app.post('/api/submissions', authenticate, async (req, res) => {
       : null;
 
     const mode = (grading_mode === 'ai') ? 'ai' : 'teacher'; // default = teacher
-    const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount, mode);
+    // Sanitise paste_stats — only store if it's a plain object with expected keys
+    const safePasteStats = (paste_stats && typeof paste_stats === 'object' && !Array.isArray(paste_stats))
+      ? { paste_count: paste_stats.paste_count || 0, total_pasted: paste_stats.total_pasted || 0,
+          total_typed: paste_stats.total_typed || 0, largest_paste: paste_stats.largest_paste || 0 }
+      : null;
+    const result = db.insertSubmission(req.user.id, task_type, prompt, essay, wordCount, mode, safePasteStats);
     const submissionId = result.lastInsertRowid;
 
     if (mode === 'ai') {
@@ -1418,6 +1423,36 @@ app.post('/api/admin/submissions/:id/grade-ai', authenticate, teacherOrAdmin, as
   } catch (err) {
     console.error('Grade-AI delegation error:', err);
     res.status(500).json({ error: 'Failed to start AI grading' });
+  }
+});
+
+// ─── Submission Comments ───────────────────────────────────────────────────────
+
+// Teacher/admin adds a comment to a submission
+app.post('/api/admin/submissions/:id/comments', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Comment text is required' });
+    const comment = db.addSubmissionComment(subId, req.user.id, req.user.name, text.trim());
+    if (!comment) return res.status(404).json({ error: 'Submission not found' });
+    res.json(comment);
+  } catch (err) {
+    console.error('Add comment error:', err);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+// Teacher/admin deletes their own comment
+app.delete('/api/admin/submissions/:id/comments/:commentId', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const commentId = parseInt(req.params.commentId, 10);
+    const ok = db.deleteSubmissionComment(subId, commentId, req.user.id);
+    if (!ok) return res.status(404).json({ error: 'Comment not found or not yours' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete comment' });
   }
 });
 
