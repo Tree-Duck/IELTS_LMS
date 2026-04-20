@@ -937,6 +937,7 @@ input:focus, textarea:focus, select:focus {
   color: #0369a1;
 }
 #budget-essays { font-weight: 400; font-size: 12px; color: #0284c7; }
+/* budget-bar dark override lives in [data-theme="dark"] block below */
 
 /* ─── HINTS PANEL (right column) ─────────────────────────────────────────── */
 .hints-section { margin: 0; }
@@ -1300,8 +1301,8 @@ input:focus, textarea:focus, select:focus {
 .admin-table-wrap {
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-50);
 }
 .admin-table {
   width: 100%;
@@ -1309,25 +1310,25 @@ input:focus, textarea:focus, select:focus {
   font-size: 14px;
 }
 .admin-table th {
-  background: #f9fafb;
-  color: #374151;
+  background: var(--gray-100);
+  color: var(--gray-700);
   font-weight: 600;
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
   white-space: nowrap;
 }
 .admin-table td {
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
   vertical-align: middle;
 }
 .admin-table tbody tr:last-child td {
   border-bottom: none;
 }
 .admin-table tbody tr:hover {
-  background: #f9fafb;
+  background: var(--gray-100);
 }
 
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
@@ -2174,7 +2175,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── Admin Cost Breakdown ────────────────────────────────────────────────── */
 .admin-cost-section {
-  background: #fff;
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: 12px;
   padding: 20px 24px;
@@ -2544,10 +2545,14 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .btn-dark-mode { color: #fbbf24; }
 
 /* Admin panel & misc */
-[data-theme="dark"] .admin-table-wrap table { color: var(--gray-800); }
-[data-theme="dark"] .admin-table thead th { background: #0f172a; color: var(--gray-700); border-color: #334155; }
-[data-theme="dark"] .admin-table tbody td { border-color: #334155; }
-[data-theme="dark"] .admin-table tbody tr:hover td { background: #1e293b; }
+[data-theme="dark"] .admin-table-wrap { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .admin-table thead th { background: #0f172a; color: var(--gray-400); border-color: #334155; }
+[data-theme="dark"] .admin-table tbody td { color: var(--gray-300); border-color: #334155; }
+[data-theme="dark"] .admin-table tbody tr:hover { background: #0f172a; }
+[data-theme="dark"] .admin-table tbody tr:hover td { background: transparent; }
+[data-theme="dark"] .admin-cost-section { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .budget-bar { background: linear-gradient(135deg, #0c1a2e 0%, #0d2340 100%); border-color: #1e4a7a; color: #7dd3fc; }
+[data-theme="dark"] #budget-essays { color: #38bdf8; }
 [data-theme="dark"] .target-bar-track { background: #334155; }
 [data-theme="dark"] .rater-result-card { background: #0f172a; border-color: #334155; }
 [data-theme="dark"] .passage-text { color: var(--gray-800); }
