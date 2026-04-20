@@ -767,7 +767,7 @@ app.get('/health', (req, res) => {
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
-app.get('/api/admin/users', authenticate, adminOnly, (req, res) => {
+app.get('/api/admin/users', authenticate, teacherOrAdmin, (req, res) => {
   try {
     res.json(db.getAllUsersWithStats());
   } catch (err) {
@@ -1317,8 +1317,8 @@ app.put('/api/admin/settings/balance', authenticate, adminOnly, (req, res) => {
   }
 });
 
-// Admin: view a student's full submission history (with essay text)
-app.get('/api/admin/users/:id/submissions', authenticate, adminOnly, (req, res) => {
+// Admin/Teacher: view a student's full submission history (with essay text)
+app.get('/api/admin/users/:id/submissions', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);
     const user = db.getUserById(userId);

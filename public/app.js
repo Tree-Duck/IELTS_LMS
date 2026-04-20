@@ -395,7 +395,7 @@ function showView(name) {
 
 /* ─── Admin Panel ────────────────────────────────────────────────────────── */
 async function loadAdminUsers() {
-  loadAdminCostBreakdown(); // load cost breakdown in parallel
+  if (currentUser.role === 'admin') loadAdminCostBreakdown(); // admin-only panel
   const el = document.getElementById('admin-users-table');
   el.innerHTML = '<div class="loading">Loading users…</div>';
   try {
@@ -437,13 +437,13 @@ async function loadAdminUsers() {
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
                 <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                   <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, '${u.name.replace(/'/g, "\\'")}')">View History</button>
-                  ${u.id === currentUser.id || u.role === 'admin' ? '' : `
+                  ${currentUser.role === 'admin' && u.id !== currentUser.id && u.role !== 'admin' ? `
                     <button class="btn btn-xs ${u.role === 'teacher' ? 'btn-secondary' : 'btn-teacher'}"
                       onclick="setUserRole(${u.id}, '${u.role === 'teacher' ? 'student' : 'teacher'}', this)">
                       ${u.role === 'teacher' ? '→ Student' : '→ Teacher'}
                     </button>
                     <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>
-                  `}
+                  ` : ''}
                 </td>
               </tr>
             `).join('')}
