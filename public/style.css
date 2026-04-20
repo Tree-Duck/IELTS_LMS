@@ -974,18 +974,18 @@ input:focus, textarea:focus, select:focus {
 }
 @media (max-width: 768px) { .hints-grid { grid-template-columns: 1fr; } }
 .hint-card {
-  background: #fafafa;
-  border: 1px solid #e5e7eb;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
   border-radius: 12px;
   overflow: hidden;
 }
 .hint-card-header {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e9ecef 100%);
+  background: var(--gray-100);
   padding: 9px 14px;
   font-weight: 700;
   font-size: 12px;
   color: var(--gray-700);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-200);
 }
 .hint-card-body {
   padding: 12px 14px;
@@ -2552,6 +2552,10 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .rater-result-card { background: #0f172a; border-color: #334155; }
 [data-theme="dark"] .passage-text { color: var(--gray-800); }
 [data-theme="dark"] .hw-section-title { color: var(--gray-900); }
+[data-theme="dark"] .hint-card { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .hint-card-header { background: #0f172a; border-color: #334155; color: var(--gray-700); }
+[data-theme="dark"] .hint-card-body { color: var(--gray-800); }
+[data-theme="dark"] .hints-section-title { color: var(--gray-700); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    WRITING TIMER
