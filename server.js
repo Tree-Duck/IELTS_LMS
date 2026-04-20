@@ -179,6 +179,14 @@ function adminOnly(req, res, next) {
   next();
 }
 
+// Teachers and admins can manage materials and assignments
+function teacherOrAdmin(req, res, next) {
+  if (req.user.role !== 'admin' && req.user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Teacher or admin access required' });
+  }
+  next();
+}
+
 // ─── Auth Middleware ───────────────────────────────────────────────────────────
 function authenticate(req, res, next) {
   const auth = req.headers.authorization;
@@ -240,7 +248,8 @@ app.post('/api/login', async (req, res) => {
     // and auto-verify so they aren't locked out
     db.verifyUser(user.id);
   }
-  const role = adminRole(user.email);
+  // Admin email env var always wins; otherwise preserve the DB role (teacher/student)
+  const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
   const expiry = remember_me ? '30d' : '7d';
   const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: expiry });
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
@@ -255,7 +264,7 @@ app.post('/api/verify-email', async (req, res) => {
     if (user.verification_code !== code) return res.status(400).json({ error: 'Invalid code' });
     if (new Date(user.verification_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
     db.verifyUser(user.id);
-    const role = adminRole(user.email);
+    const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
     const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
   } catch (err) {
@@ -686,7 +695,7 @@ app.post('/api/reset-password', async (req, res) => {
     if (new Date(user.reset_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
     const hashed = await bcrypt.hash(new_password, 10);
     db.resetPassword(user.id, hashed);
-    const role = adminRole(user.email);
+    const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
     const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
   } catch (err) {
@@ -773,6 +782,21 @@ app.delete('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
   const ok = db.deleteUser(targetId);
   if (!ok) return res.status(404).json({ error: 'User not found' });
   res.json({ success: true });
+});
+
+// Admin: change a user's role (student ↔ teacher)
+app.put('/api/admin/users/:id/role', authenticate, adminOnly, (req, res) => {
+  const targetId = parseInt(req.params.id, 10);
+  const { role } = req.body;
+  if (!['student', 'teacher'].includes(role)) {
+    return res.status(400).json({ error: 'role must be student or teacher' });
+  }
+  if (targetId === req.user.id) {
+    return res.status(400).json({ error: 'You cannot change your own role.' });
+  }
+  const ok = db.setUserRole(targetId, role);
+  if (!ok) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, role });
 });
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
@@ -948,7 +972,7 @@ async function generateTestExplanations(attemptId, test, answers, wrongQNumbers)
 
 // ─── Admin Test Routes ────────────────────────────────────────────────────────
 
-app.post('/api/admin/tests', authenticate, adminOnly, (req, res) => {
+app.post('/api/admin/tests', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const { type, title, sections } = req.body;
     if (!type || !['reading','listening'].includes(type)) return res.status(400).json({ error: 'type must be reading or listening' });
@@ -962,7 +986,7 @@ app.post('/api/admin/tests', authenticate, adminOnly, (req, res) => {
   }
 });
 
-app.get('/api/admin/tests', authenticate, adminOnly, (req, res) => {
+app.get('/api/admin/tests', authenticate, teacherOrAdmin, (req, res) => {
   try {
     res.json(db.getAllTests(req.query.type));
   } catch (err) {
@@ -970,7 +994,7 @@ app.get('/api/admin/tests', authenticate, adminOnly, (req, res) => {
   }
 });
 
-app.get('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
+app.get('/api/admin/tests/:id', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const test = db.getTestById(parseInt(req.params.id, 10));
     if (!test) return res.status(404).json({ error: 'Test not found' });
@@ -980,7 +1004,7 @@ app.get('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
   }
 });
 
-app.delete('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
+app.delete('/api/admin/tests/:id', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const ok = db.deleteTest(parseInt(req.params.id, 10));
     if (!ok) return res.status(404).json({ error: 'Test not found' });
@@ -991,7 +1015,7 @@ app.delete('/api/admin/tests/:id', authenticate, adminOnly, (req, res) => {
 });
 
 // ─── Import Test from JSON ────────────────────────────────────────────────────
-app.post('/api/admin/tests/import', authenticate, adminOnly, (req, res) => {
+app.post('/api/admin/tests/import', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const { json_text } = req.body;
     if (!json_text || !json_text.trim()) return res.status(400).json({ error: 'No JSON provided.' });
@@ -1054,7 +1078,7 @@ app.post('/api/admin/tests/import', authenticate, adminOnly, (req, res) => {
 const VALID_CHART_TYPES = ['bar_chart','line_graph','pie_chart','table','process_diagram','map'];
 
 // Admin: upload a new Task 1 topic (image + question)
-app.post('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
+app.post('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const { chart_type, question, image_base64, image_media_type, label } = req.body;
     if (!VALID_CHART_TYPES.includes(chart_type)) {
@@ -1075,7 +1099,7 @@ app.post('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
 });
 
 // Admin: list all topics (no image data)
-app.get('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
+app.get('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => {
   try {
     res.json(db.getAllTask1Topics(req.query.chart_type));
   } catch (err) {
@@ -1084,7 +1108,7 @@ app.get('/api/admin/task1-topics', authenticate, adminOnly, (req, res) => {
 });
 
 // Admin: delete a topic
-app.delete('/api/admin/task1-topics/:id', authenticate, adminOnly, (req, res) => {
+app.delete('/api/admin/task1-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const ok = db.deleteTask1Topic(parseInt(req.params.id, 10));
     if (!ok) return res.status(404).json({ error: 'Topic not found' });
@@ -1308,8 +1332,8 @@ app.get('/api/admin/users/:id/submissions', authenticate, adminOnly, (req, res) 
 
 // ─── Assignments (Homework) ────────────────────────────────────────────────────
 
-// Admin: create assignment
-app.post('/api/admin/assignments', authenticate, adminOnly, async (req, res) => {
+// Admin/Teacher: create assignment
+app.post('/api/admin/assignments', authenticate, teacherOrAdmin, async (req, res) => {
   try {
     const { title, type, description, test_id, deadline, assigned_to } = req.body;
     if (!title || !type || !deadline) {
@@ -1326,7 +1350,7 @@ app.post('/api/admin/assignments', authenticate, adminOnly, async (req, res) => 
     // Fire email notifications to targeted students (non-blocking)
     sendEmailSafe(async () => {
       const allUsers = db.getAllUsers ? db.getAllUsers() : [];
-      const students = allUsers.filter(u => u.role !== 'admin' && u.verified);
+      const students = allUsers.filter(u => u.role === 'student' && u.verified);
       const targets = assignedTo.length > 0
         ? students.filter(u => assignedTo.includes(u.id))
         : students; // all students
@@ -1340,8 +1364,8 @@ app.post('/api/admin/assignments', authenticate, adminOnly, async (req, res) => 
   }
 });
 
-// Admin: list all assignments
-app.get('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
+// Admin/Teacher: list all assignments
+app.get('/api/admin/assignments', authenticate, teacherOrAdmin, (req, res) => {
   try {
     res.json(db.getAllAssignments());
   } catch (err) {
@@ -1349,8 +1373,8 @@ app.get('/api/admin/assignments', authenticate, adminOnly, (req, res) => {
   }
 });
 
-// Admin: delete assignment
-app.delete('/api/admin/assignments/:id', authenticate, adminOnly, (req, res) => {
+// Admin/Teacher: delete assignment
+app.delete('/api/admin/assignments/:id', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const ok = db.deleteAssignment(id);

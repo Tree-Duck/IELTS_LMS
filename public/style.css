@@ -329,6 +329,8 @@ body {
 .btn-xs { padding: 3px 8px; font-size: 12px; border-radius: 6px; }
 .btn-danger { background: var(--danger); color: #fff; border: none; }
 .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+.btn-teacher { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.btn-teacher:hover:not(:disabled) { background: #a7f3d0; }
 .text-muted { color: var(--gray-400); font-size: 13px; }
 .btn-back {
   background: none;
@@ -1340,10 +1342,11 @@ input:focus, textarea:focus, select:focus {
   border-radius: 20px;
   white-space: nowrap;
 }
-.badge-green  { background: #d1fae5; color: #065f46; }
-.badge-red    { background: #fee2e2; color: #991b1b; }
-.badge-purple { background: #ede9fe; color: #5b21b6; }
-.badge-gray   { background: #f3f4f6; color: #374151; }
+.badge-green   { background: #d1fae5; color: #065f46; }
+.badge-red     { background: #fee2e2; color: #991b1b; }
+.badge-purple  { background: #ede9fe; color: #5b21b6; }
+.badge-gray    { background: #f3f4f6; color: #374151; }
+.badge-teacher { background: #d1fae5; color: #065f46; }
 
 /* ─── Forgot Password link ────────────────────────────────────────────────── */
 .forgot-link-row {
@@ -2545,6 +2548,9 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .btn-dark-mode { color: #fbbf24; }
 
 /* Admin panel & misc */
+[data-theme="dark"] .badge-teacher { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .btn-teacher { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
+[data-theme="dark"] .btn-teacher:hover { background: #065f46; }
 [data-theme="dark"] .admin-table-wrap { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .admin-table thead th { background: #0f172a; color: var(--gray-400); border-color: #334155; }
 [data-theme="dark"] .admin-table tbody td { color: var(--gray-300); border-color: #334155; }

@@ -328,12 +328,26 @@ function showApp() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
   document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
-  // Show admin-only nav group
+
+  // Role label in sidebar footer
+  const roleLabelEl = document.getElementById('user-role-label');
+  if (roleLabelEl) {
+    const roleMap = { admin: '⚙️ Admin', teacher: '🎓 Teacher', student: '🎓 Student' };
+    roleLabelEl.textContent = roleMap[currentUser.role] || currentUser.role;
+  }
+
+  // Show role-specific nav groups
   const adminNavGroup = document.getElementById('nav-group-admin');
+  const teacherNavGroup = document.getElementById('nav-group-teacher');
   if (currentUser.role === 'admin') {
     adminNavGroup.classList.remove('hidden');
+    if (teacherNavGroup) teacherNavGroup.classList.add('hidden');
+  } else if (currentUser.role === 'teacher') {
+    if (teacherNavGroup) teacherNavGroup.classList.remove('hidden');
+    adminNavGroup.classList.add('hidden');
   } else {
     adminNavGroup.classList.add('hidden');
+    if (teacherNavGroup) teacherNavGroup.classList.add('hidden');
   }
 
   // Click-to-toggle nav groups (attach once; guard with data attribute)
@@ -415,16 +429,21 @@ async function loadAdminUsers() {
                 <td>${u.verified
                   ? '<span class="badge badge-green">✓ Verified</span>'
                   : '<span class="badge badge-red">✗ Pending</span>'}</td>
-                <td><span class="badge ${u.role === 'admin' ? 'badge-purple' : 'badge-gray'}">${u.role}</span></td>
+                <td>
+                  <span class="badge ${u.role === 'admin' ? 'badge-purple' : u.role === 'teacher' ? 'badge-teacher' : 'badge-gray'}">${u.role}</span>
+                </td>
                 <td>${formatDate(u.created_at)}</td>
                 <td>${u.submission_count}</td>
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
-                <td style="display:flex;gap:6px;flex-wrap:wrap">
+                <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                   <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, '${u.name.replace(/'/g, "\\'")}')">View History</button>
-                  ${u.id === currentUser.id || u.role === 'admin'
-                    ? ''
-                    : `<button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>`
-                  }
+                  ${u.id === currentUser.id || u.role === 'admin' ? '' : `
+                    <button class="btn btn-xs ${u.role === 'teacher' ? 'btn-secondary' : 'btn-teacher'}"
+                      onclick="setUserRole(${u.id}, '${u.role === 'teacher' ? 'student' : 'teacher'}', this)">
+                      ${u.role === 'teacher' ? '→ Student' : '→ Teacher'}
+                    </button>
+                    <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>
+                  `}
                 </td>
               </tr>
             `).join('')}
@@ -488,6 +507,20 @@ async function confirmDeleteUser(userId, userName) {
     loadAdminUsers(); // refresh table
   } catch (err) {
     alert('Failed to delete user: ' + err.message);
+  }
+}
+
+async function setUserRole(userId, newRole, btn) {
+  if (!confirm(`Change this user's role to "${newRole}"?`)) return;
+  try {
+    btn.disabled = true;
+    btn.textContent = '…';
+    await api(`/api/admin/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role: newRole }) });
+    loadAdminUsers(); // refresh table
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = newRole === 'teacher' ? '→ Teacher' : '→ Student';
+    alert('Failed to change role: ' + err.message);
   }
 }
 

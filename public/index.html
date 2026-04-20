@@ -183,6 +183,23 @@
           </div>
         </div>
 
+        <!-- Teacher group (hidden until teacher/admin login) -->
+        <div class="nav-group hidden" id="nav-group-teacher">
+          <div class="nav-group-header">
+            <span class="nav-icon">🎓</span>
+            <span class="nav-group-label">Teacher</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('admin-materials')" id="nav-teacher-materials">
+              <span class="nav-icon">📚</span> Materials
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-teacher-assignments">
+              <span class="nav-icon">📋</span> Assignments
+            </button>
+          </div>
+        </div>
+
         <!-- Admin group (hidden until admin login) -->
         <div class="nav-group hidden" id="nav-group-admin">
           <div class="nav-group-header">
@@ -222,7 +239,7 @@
           <div class="user-avatar" id="user-avatar">S</div>
           <div>
             <div class="user-name" id="user-name">Student</div>
-            <div class="user-role">Student</div>
+            <div class="user-role" id="user-role-label">Student</div>
           </div>
         </div>
         <button class="btn-dark-mode" id="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>

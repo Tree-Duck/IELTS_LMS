@@ -192,6 +192,15 @@ const db = {
     if (u) { u.password = hashedPassword; save(data); }
   },
 
+  setUserRole(userId, role) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (!u) return false;
+    u.role = role;
+    save(data);
+    return true;
+  },
+
   updateUserProfile(userId, fields) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
