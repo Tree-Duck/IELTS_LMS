@@ -194,7 +194,13 @@ function authenticate(req, res, next) {
     return res.status(401).json({ error: 'No token provided' });
   }
   try {
-    req.user = jwt.verify(auth.slice(7), JWT_SECRET);
+    const decoded = jwt.verify(auth.slice(7), JWT_SECRET);
+    // Always fetch the live role from DB — the role in the JWT may be stale
+    // if an admin changed the user's role after the token was issued.
+    const dbUser = db.getUserById(decoded.id);
+    if (!dbUser) return res.status(401).json({ error: 'User not found' });
+    const liveRole = adminRole(dbUser.email) === 'admin' ? 'admin' : (dbUser.role || 'student');
+    req.user = { ...decoded, role: liveRole, name: dbUser.name };
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
