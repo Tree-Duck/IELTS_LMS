@@ -470,7 +470,7 @@ const db = {
 
   // ── Assignments (Homework) ─────────────────────────────────────────────────
 
-  insertAssignment(title, type, description, test_id, deadline, created_by, assigned_to) {
+  insertAssignment(title, type, description, test_id, deadline, created_by, assigned_to, custom_prompt = null, custom_image_url = null) {
     const data = load();
     if (!data.assignments) data.assignments = [];
     if (!data._ids.assignments) data._ids.assignments = 0;
@@ -481,6 +481,8 @@ const db = {
       test_id: test_id || null,
       deadline, created_by,
       assigned_to: Array.isArray(assigned_to) ? assigned_to : [], // empty = all students
+      custom_prompt: custom_prompt || null,
+      custom_image_url: custom_image_url || null,
       created_at: new Date().toISOString()
     };
     data.assignments.push(assignment);

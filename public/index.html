@@ -422,7 +422,9 @@
                 </div>
                 <div id="chart-area">
                   <!-- Admin-uploaded topic image (shown when topic is fetched) -->
-                  <img id="chart-topic-image" class="hidden" alt="Task 1 chart" style="max-width:100%;max-height:420px;object-fit:contain;border-radius:8px;display:block;margin:0 auto;">
+                  <div class="chart-image-frame hidden" id="chart-image-frame">
+                    <img id="chart-topic-image" alt="Task 1 chart" style="max-width:100%;max-height:420px;object-fit:contain;border-radius:8px;display:block;margin:0 auto;">
+                  </div>
                   <!-- Chart.js canvas (legacy fallback) -->
                   <canvas id="task1-chart" style="display:none"></canvas>
                 </div>
@@ -432,6 +434,7 @@
               <!-- Task 1 image upload -->
               <div id="task1-image-section" class="form-group hidden">
                 <label>Your Visual (Chart / Graph / Table)</label>
+                <button type="button" id="img-section-toggle" class="btn-link img-toggle-btn" style="display:none" onclick="toggleImgSection()">📎 Attach / change image</button>
                 <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('task1-image-input').click()">
                   <input type="file" id="task1-image-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
                   <div id="image-upload-placeholder">
@@ -465,13 +468,13 @@
                     <input type="radio" name="grading_mode" value="teacher" checked>
                     <span class="mode-icon">👩‍🏫</span>
                     <span class="mode-title">Teacher Review</span>
-                    <span class="mode-desc">Free · Teacher manually reviews your essay</span>
+                    <span class="mode-desc">Teacher manually reviews and grades your essay</span>
                   </label>
                   <label class="grading-mode-option" id="mode-ai-label">
                     <input type="radio" name="grading_mode" value="ai">
                     <span class="mode-icon">🤖</span>
                     <span class="mode-title">AI Grading</span>
-                    <span class="mode-desc">Instant · Uses AI credits (~$0.01)</span>
+                    <span class="mode-desc">Instant · AI evaluates your essay</span>
                   </label>
                 </div>
               </div>
@@ -504,6 +507,10 @@
                 <div class="hint-card" id="vocab-card">
                   <div class="hint-card-header">📚 Vocabulary &amp; Collocations</div>
                   <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate Hints" to get vocabulary suggestions.</span></div>
+                </div>
+                <div class="hint-card" id="phrases-card">
+                  <div class="hint-card-header">💬 Useful Phrases</div>
+                  <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Click "Generate Hints" to get useful phrases.</span></div>
                 </div>
               </div>
             </div>
@@ -860,6 +867,14 @@
             <label for="assign-description">Instructions / Description</label>
             <textarea id="assign-description" class="form-input" rows="3" placeholder="Describe what students need to do..."></textarea>
           </div>
+          <div class="form-group" id="assign-custom-prompt-group" style="display:none">
+            <label>Custom Writing Prompt <small class="text-muted">(optional — pre-fills the student's essay form)</small></label>
+            <textarea id="assign-custom-prompt" class="form-input" rows="4" placeholder="The chart below shows… / Some people believe…"></textarea>
+            <div class="form-group" style="margin-top:8px" id="assign-image-url-group">
+              <label>Chart Image URL <small class="text-muted">(Task 1 only)</small></label>
+              <input type="url" id="assign-custom-image-url" class="form-input" placeholder="https://…">
+            </div>
+          </div>
           <div id="assign-error" class="error-msg hidden"></div>
           <div id="assign-success" class="success-msg hidden"></div>
           <button class="btn btn-primary" onclick="createAssignment()">+ Create Assignment</button>
@@ -900,6 +915,7 @@
         <div class="flashcard-scene" onclick="flipCard()">
           <div class="flashcard-card" id="flashcard-card">
             <div class="flashcard-face flashcard-front">
+              <div id="flashcard-type-badge" style="margin-bottom:4px"></div>
               <div class="flashcard-word" id="flashcard-word">meticulous</div>
               <div class="flashcard-hint">Tap to reveal definition</div>
             </div>

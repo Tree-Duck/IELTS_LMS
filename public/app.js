@@ -1053,17 +1053,19 @@ function displayTask1Topic(topic) {
   const tableArea = document.getElementById('table-area');
   const titleEl = document.getElementById('chart-title-label');
 
+  const frameEl = document.getElementById('chart-image-frame');
   if (!container || !imgEl) return;
 
   // Destroy any existing Chart.js instance
   if (activeChart) { activeChart.destroy(); activeChart = null; }
 
-  // Hide canvas & table, show image
+  // Hide canvas & table, show image frame
   if (canvas) canvas.style.display = 'none';
   if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
 
   imgEl.src = `data:${topic.image_media_type};base64,${topic.image_base64}`;
-  imgEl.classList.remove('hidden');
+  if (frameEl) frameEl.classList.remove('hidden');
+  else imgEl.classList.remove('hidden');
 
   // Update title label
   const typeLabel = {
@@ -1116,10 +1118,12 @@ function clearChart() {
   const tableArea = document.getElementById('table-area');
   const canvas = document.getElementById('task1-chart');
   const imgEl = document.getElementById('chart-topic-image');
+  const frameEl2 = document.getElementById('chart-image-frame');
   if (container) container.classList.add('hidden');
   if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
   if (canvas) canvas.style.display = '';
-  if (imgEl) { imgEl.classList.add('hidden'); imgEl.src = ''; }
+  if (frameEl2) { frameEl2.classList.add('hidden'); }
+  if (imgEl) { imgEl.src = ''; }
   // Clear task1 image state
   task1ImageBase64 = null;
   task1ImageMediaType = null;
@@ -1301,15 +1305,18 @@ async function requestBothHints() {
 
   const ideasBody = document.getElementById('ideas-body');
   const vocabBody = document.getElementById('vocab-body');
+  const phrasesBody = document.getElementById('phrases-body');
   const btn = document.getElementById('refresh-hints-btn');
 
   ideasBody.innerHTML = '<span class="hint-thinking">Generating ideas…</span>';
   vocabBody.innerHTML = '<span class="hint-thinking">Generating vocabulary…</span>';
+  if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
   btn.disabled = true;
   btn.textContent = '⏳ Generating...';
 
   let ideasRaw = '';
   let vocabRaw = '';
+  let phrasesRaw = '';
 
   const ideasPromise = streamSSE(
     '/api/hint',
@@ -1325,9 +1332,16 @@ async function requestBothHints() {
     () => { vocabBody.innerHTML = renderHintMarkdown(vocabRaw); }
   ).catch(err => { vocabBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; });
 
-  await Promise.all([ideasPromise, vocabPromise]);
+  const phrasesPromise = phrasesBody ? streamSSE(
+    '/api/hint',
+    { task_type, prompt, essay, hint_type: 'phrases' },
+    (chunk) => { phrasesRaw += chunk; phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); },
+    () => { phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); }
+  ).catch(err => { phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }) : Promise.resolve();
+
+  await Promise.all([ideasPromise, vocabPromise, phrasesPromise]);
   btn.disabled = false;
-  btn.textContent = '✨ Generate Both Hints';
+  btn.textContent = '✨ Generate Hints';
   hidePasteNudge();
 }
 
@@ -1532,6 +1546,29 @@ function initPasteTracking() {
       pasteStats.total_typed += (e.data || '').length;
     }
   });
+
+  // Auto-collapse upload area when student starts writing (Task 1, no image yet)
+  let uploadCollapsed = false;
+  ta.addEventListener('input', function collapseUpload() {
+    if (uploadCollapsed) return;
+    const uploadArea = document.getElementById('image-upload-area');
+    const toggleBtn = document.getElementById('img-section-toggle');
+    const section = document.getElementById('task1-image-section');
+    if (!section || section.classList.contains('hidden')) return;
+    if (ta.value.length > 20 && !task1ImageBase64) {
+      if (uploadArea) uploadArea.style.display = 'none';
+      if (toggleBtn) toggleBtn.style.display = '';
+      uploadCollapsed = true;
+    }
+  });
+}
+
+function toggleImgSection() {
+  const area = document.getElementById('image-upload-area');
+  const toggle = document.getElementById('img-section-toggle');
+  const isHidden = area && area.style.display === 'none';
+  if (area) area.style.display = isHidden ? '' : 'none';
+  if (toggle) toggle.textContent = isHidden ? '🙈 Hide upload area' : '📎 Attach / change image';
 }
 
 async function handleSubmit(e) {
@@ -3430,23 +3467,55 @@ function renderHomeworkCard(a, status) {
       </div>
       <h4 class="hw-card-title">${a.title}</h4>
       ${a.description ? `<p class="hw-card-desc">${a.description}</p>` : ''}
+      ${a.custom_prompt ? `<p class="hw-card-prompt">"${escHtml(a.custom_prompt.slice(0, 120))}${a.custom_prompt.length > 120 ? '…' : ''}"</p>` : ''}
       ${a.test_title ? `<p class="hw-card-test">Linked test: <strong>${a.test_title}</strong></p>` : ''}
       <div class="hw-card-actions">${actionBtn}</div>
     </div>
   `;
 }
 
-function startHomeworkWriting(assignmentId, taskType) {
+async function startHomeworkWriting(assignmentId, taskType) {
   // Switch to writing view and pre-select task type, then mark done after submission
   showView('submit');
-  // Set task type in the writing form if possible
-  const taskTypeEl = document.getElementById('task-type');
-  if (taskTypeEl) {
-    taskTypeEl.value = taskType;
-    taskTypeEl.dispatchEvent(new Event('change'));
-  }
+
+  // Select the correct task type radio
+  const radios = document.querySelectorAll('input[name="task_type"]');
+  radios.forEach(r => {
+    r.checked = (r.value === taskType);
+  });
+  // Trigger UI update for task type
+  if (typeof updateTaskInfo === 'function') updateTaskInfo();
+
   // Store assignment id to mark complete after submission
   window._pendingHomeworkAssignmentId = assignmentId;
+
+  // Try to fetch assignment details to get custom_prompt
+  try {
+    const assignments = await api('/api/assignments');
+    const a = (assignments || []).find(x => x.id === assignmentId);
+    if (a && a.custom_prompt) {
+      const promptEl = document.getElementById('essay-prompt');
+      if (promptEl) {
+        promptEl.value = a.custom_prompt;
+        promptEl.readOnly = true;
+        promptEl.style.background = 'var(--gray-100)';
+        promptEl.dispatchEvent(new Event('input'));
+      }
+    } else {
+      // Ensure prompt is editable when no custom prompt
+      const promptEl = document.getElementById('essay-prompt');
+      if (promptEl) { promptEl.readOnly = false; promptEl.style.background = ''; }
+    }
+    // Handle custom image URL for Task 1
+    if (a && a.custom_image_url && taskType === 'task1') {
+      const imgEl = document.getElementById('chart-topic-image');
+      const frameEl = document.getElementById('chart-image-frame');
+      if (imgEl) imgEl.src = a.custom_image_url;
+      if (frameEl) frameEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    // Non-critical — just proceed without pre-fill
+  }
 }
 
 function startHomeworkTest(assignmentId, testId) {
@@ -3585,6 +3654,10 @@ function openGradingPanel(id) {
         <label>Improvements (one per line)</label>
         <textarea id="gp-improvements-${id}" rows="3" placeholder="Vary sentence structures more&#10;Avoid repetition&#10;…"></textarea>
       </div>
+      <div class="queue-actions" style="margin-top:4px;margin-bottom:4px">
+        <button class="btn btn-outline btn-sm" id="gp-ai-btn-${id}" onclick="getAISuggest(${id})">🤖 AI Suggest Scores</button>
+      </div>
+      <div id="gp-ai-rationale-${id}" class="grading-ai-rationale hidden"></div>
       <div id="gp-error-${id}" class="error-msg hidden"></div>
       <div class="queue-actions" style="margin-top:8px">
         <button class="btn btn-primary" onclick="submitManualGrade(${id})">✅ Submit Grade</button>
@@ -3593,6 +3666,42 @@ function openGradingPanel(id) {
     </div>`;
   panel.classList.remove('hidden');
   updateGradingOverall(id);
+}
+
+async function getAISuggest(id) {
+  const btn = document.getElementById(`gp-ai-btn-${id}`);
+  const rationaleEl = document.getElementById(`gp-ai-rationale-${id}`);
+  if (!btn || !rationaleEl) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing…';
+  rationaleEl.classList.add('hidden');
+  try {
+    const result = await api(`/api/admin/submissions/${id}/ai-suggest`, { method: 'POST' });
+    // Auto-fill the 4 band selects
+    const setVal = (selId, val) => {
+      const el = document.getElementById(selId);
+      if (!el) return;
+      // Find nearest available option
+      const norm = Math.round(parseFloat(val) * 2) / 2;
+      el.value = norm;
+      if (!el.value) el.value = 6; // fallback
+    };
+    setVal(`gp-ta-${id}`,  result.task_achievement);
+    setVal(`gp-cc-${id}`,  result.coherence_cohesion);
+    setVal(`gp-lr-${id}`,  result.lexical_resource);
+    setVal(`gp-gra-${id}`, result.grammatical_range);
+    updateGradingOverall(id);
+    if (result.rationale) {
+      rationaleEl.textContent = '🤖 ' + result.rationale;
+      rationaleEl.classList.remove('hidden');
+    }
+    btn.textContent = '🔄 Re-suggest';
+  } catch (err) {
+    rationaleEl.textContent = 'AI suggestion failed: ' + err.message;
+    rationaleEl.classList.remove('hidden');
+    btn.textContent = '🤖 AI Suggest Scores';
+  }
+  btn.disabled = false;
 }
 
 function closeGradingPanel(id) {
@@ -3782,6 +3891,15 @@ function updateAssignTestField() {
   const type = document.getElementById('assign-type').value;
   const group = document.getElementById('assign-test-group');
   if (group) group.style.display = (type === 'reading' || type === 'listening') ? 'block' : 'none';
+
+  // Show custom prompt group for writing assignments
+  const promptGroup = document.getElementById('assign-custom-prompt-group');
+  const imageUrlGroup = document.getElementById('assign-image-url-group');
+  if (promptGroup) {
+    const isWriting = type === 'writing_task1' || type === 'writing_task2';
+    promptGroup.style.display = isWriting ? 'block' : 'none';
+    if (imageUrlGroup) imageUrlGroup.style.display = (type === 'writing_task1') ? 'block' : 'none';
+  }
 }
 
 async function createAssignment() {
@@ -3795,6 +3913,8 @@ async function createAssignment() {
   const description = document.getElementById('assign-description').value.trim();
   const testIdEl = document.getElementById('assign-test-id');
   const test_id = testIdEl && testIdEl.value ? parseInt(testIdEl.value, 10) : null;
+  const custom_prompt = document.getElementById('assign-custom-prompt')?.value.trim() || null;
+  const custom_image_url = document.getElementById('assign-custom-image-url')?.value.trim() || null;
 
   // Collect target students (empty array = all students)
   const allStudentsChecked = document.getElementById('assign-all-students')?.checked !== false;
@@ -3814,7 +3934,9 @@ async function createAssignment() {
   try {
     await api('/api/admin/assignments', {
       method: 'POST',
-      body: JSON.stringify({ title, type, description, test_id, deadline: deadlineISO, assigned_to })
+      body: JSON.stringify({ title, type, description, test_id, deadline: deadlineISO, assigned_to,
+        custom_prompt: custom_prompt || null,
+        custom_image_url: (type === 'writing_task1' && custom_image_url) ? custom_image_url : null })
     });
     okEl.textContent = 'Assignment created!';
     okEl.classList.remove('hidden');
@@ -3822,6 +3944,10 @@ async function createAssignment() {
     document.getElementById('assign-title').value = '';
     document.getElementById('assign-description').value = '';
     document.getElementById('assign-deadline').value = '';
+    const cpEl = document.getElementById('assign-custom-prompt');
+    const ciuEl = document.getElementById('assign-custom-image-url');
+    if (cpEl) cpEl.value = '';
+    if (ciuEl) ciuEl.value = '';
     // Reset student selector to "All students"
     const allCb = document.getElementById('assign-all-students');
     if (allCb) { allCb.checked = true; toggleStudentSelect(); }
@@ -4050,9 +4176,31 @@ function renderFlashcard() {
   document.getElementById('flashcard-definition').textContent = card.definition || '';
   document.getElementById('flashcard-example').textContent = card.example || '';
   document.getElementById('flashcard-counter').textContent = `${flashcardIndex + 1} / ${flashcards.length}`;
+  // Type badge
+  const badgeEl = document.getElementById('flashcard-type-badge');
+  if (badgeEl) {
+    const typeMap = {
+      vocabulary: { label: 'Vocabulary', cls: 'ftb-vocabulary' },
+      phrase:     { label: 'Phrase',     cls: 'ftb-phrase' },
+      collocation:{ label: 'Collocation',cls: 'ftb-collocation' },
+    };
+    const t = typeMap[card.type] || typeMap['vocabulary'];
+    badgeEl.innerHTML = `<span class="flashcard-type-badge ${t.cls}">${t.label}</span>`;
+  }
   // Reset flip state
   const cardEl = document.getElementById('flashcard-card');
   if (cardEl) cardEl.classList.remove('flipped');
+}
+
+function animateCard(dir) {
+  const scene = document.querySelector('.flashcard-scene');
+  if (!scene) { renderFlashcard(); return; }
+  const cls = dir === 'right' ? 'slide-right' : 'slide-left';
+  scene.classList.remove('slide-right', 'slide-left');
+  // Force reflow to restart animation
+  void scene.offsetWidth;
+  scene.classList.add(cls);
+  renderFlashcard();
 }
 
 function flipCard() {
@@ -4063,14 +4211,14 @@ function flipCard() {
 function nextCard() {
   if (flashcardIndex < flashcards.length - 1) {
     flashcardIndex++;
-    renderFlashcard();
+    animateCard('right');
   }
 }
 
 function prevCard() {
   if (flashcardIndex > 0) {
     flashcardIndex--;
-    renderFlashcard();
+    animateCard('left');
   }
 }
 

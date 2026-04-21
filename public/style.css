@@ -2738,7 +2738,7 @@ input:focus, textarea:focus, select:focus {
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform .5s;
+  transition: transform .55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .flashcard-card.flipped { transform: rotateY(180deg); }
 .flashcard-face {
@@ -3073,4 +3073,97 @@ input:focus, textarea:focus, select:focus {
   color: var(--gray-100);
 }
 .add-comment-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLASHCARD SLIDE ANIMATIONS + TYPE BADGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes cardSlideIn     { from { opacity:0; transform:translateX(30px); }  to { opacity:1; transform:none; } }
+@keyframes cardSlideInLeft { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:none; } }
+.flashcard-scene.slide-right { animation: cardSlideIn     .22s ease both; }
+.flashcard-scene.slide-left  { animation: cardSlideInLeft .22s ease both; }
+
+.flashcard-type-badge {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-radius: 10px;
+  padding: 2px 9px;
+  display: inline-block;
+}
+.ftb-vocabulary  { background: #fef3c7; color: #92400e; }
+.ftb-phrase      { background: #dbeafe; color: #1e40af; }
+.ftb-collocation { background: #d1fae5; color: #065f46; }
+[data-theme="dark"] .ftb-vocabulary  { background: #451a03; color: #fcd34d; }
+[data-theme="dark"] .ftb-phrase      { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .ftb-collocation { background: #064e3b; color: #6ee7b7; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHART IMAGE FRAME (Task 1)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.chart-image-frame {
+  border: 2px solid var(--gray-300);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--gray-50);
+  margin-bottom: 10px;
+}
+[data-theme="dark"] .chart-image-frame {
+  border-color: var(--gray-600);
+  background: var(--gray-800);
+}
+
+/* Upload area improved border */
+.image-upload-area {
+  border: 2px dashed var(--gray-300) !important;
+  min-height: 130px;
+  border-radius: 10px;
+}
+.image-upload-area:hover { border-color: var(--primary) !important; }
+
+/* Attach / change image toggle link */
+.img-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: .85rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+  text-decoration: underline;
+  display: block;
+}
+.img-toggle-btn:hover { color: var(--primary-dark, var(--primary)); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRADING AI RATIONALE (teacher grading panel)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.grading-ai-rationale {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .82rem;
+  color: #1e40af;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+[data-theme="dark"] .grading-ai-rationale {
+  background: #1e3a5f;
+  border-color: #1e40af;
+  color: #93c5fd;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOMEWORK CARD PROMPT PREVIEW
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hw-card-prompt {
+  font-style: italic;
+  color: var(--gray-600);
+  font-size: .85rem;
+  border-left: 3px solid var(--primary);
+  padding-left: 8px;
+  margin: 4px 0 8px;
+}
+[data-theme="dark"] .hw-card-prompt { color: var(--gray-400); }
 

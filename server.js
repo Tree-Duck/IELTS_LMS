@@ -577,8 +577,8 @@ app.post('/api/hint', authenticate, async (req, res) => {
   if (!['task1', 'task2'].includes(task_type)) {
     return res.status(400).json({ error: 'Invalid task_type' });
   }
-  if (!['ideas', 'vocabulary'].includes(hint_type)) {
-    return res.status(400).json({ error: 'hint_type must be ideas or vocabulary' });
+  if (!['ideas', 'vocabulary', 'phrases'].includes(hint_type)) {
+    return res.status(400).json({ error: 'hint_type must be ideas, vocabulary, or phrases' });
   }
   if (!prompt) {
     return res.status(400).json({ error: 'prompt is required' });
@@ -595,7 +595,9 @@ app.post('/api/hint', authenticate, async (req, res) => {
 
   const userPrompt = hint_type === 'ideas'
     ? `IELTS Writing ${taskLabel} prompt:\n${prompt}${draftSection}\n\nSuggest 4–5 specific ideas, arguments, or examples the student could use or develop in their response. For Task 1, focus on what data trends or comparisons to highlight. For Task 2, focus on arguments, counterarguments, or real-world examples. Keep each point to 1–2 sentences. Number each point.`
-    : `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nList 12–15 precise vocabulary items and collocations that would demonstrate strong Lexical Resource for this topic. Format each item as:\n**word or phrase** — example sentence showing natural, academic use.\n\nInclude a mix of: topic-specific terms, academic collocations, linking expressions, and precise verbs/adjectives.`;
+    : hint_type === 'vocabulary'
+    ? `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nList 12–15 precise vocabulary items and collocations that would demonstrate strong Lexical Resource for this topic. Format each item as:\n**word or phrase** — example sentence showing natural, academic use.\n\nInclude a mix of: topic-specific terms, academic collocations, linking expressions, and precise verbs/adjectives.`
+    : `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nProvide 10–12 useful phrases and sentence starters a student can adapt for this topic. Include:\n- 3 topic sentence starters (e.g. "It is widely argued that…")\n- 3 linking / transition phrases (e.g. "Furthermore, this suggests that…")\n- 2 concession phrases (e.g. "While it is true that…, it should be noted that…")\n- 2 concluding starters (e.g. "In conclusion, it can be argued that…")\n- 2 topic-specific phrases relevant to this particular topic\n\nFormat each as: **phrase** — how/when to use it.`;
 
   try {
     const stream = client.messages.stream({
@@ -1426,6 +1428,54 @@ app.post('/api/admin/submissions/:id/grade-ai', authenticate, teacherOrAdmin, as
   }
 });
 
+// Teacher/admin gets AI-suggested band scores for a submission
+app.post('/api/admin/submissions/:id/ai-suggest', authenticate, teacherOrAdmin, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const sub = db.getSubmissionByIdAdmin(subId);
+    if (!sub) return res.status(404).json({ error: 'Submission not found' });
+
+    const taskLabel = sub.task_type === 'task1' ? 'Task 1' : 'Task 2';
+    const systemPrompt = `You are an expert IELTS examiner. Evaluate essays and return ONLY valid JSON. No markdown.`;
+    const userPrompt = `Evaluate this IELTS Writing ${taskLabel} essay and return ONLY a JSON object with band scores and rationale.
+
+Topic/Prompt:
+${(sub.prompt || '').slice(0, 500)}
+
+Essay:
+${(sub.essay || '').slice(0, 2000)}
+
+Return this exact JSON structure (band scores must be 0–9 in 0.5 steps):
+{
+  "task_achievement": 6.5,
+  "coherence_cohesion": 6.0,
+  "lexical_resource": 6.5,
+  "grammatical_range": 6.0,
+  "rationale": "Brief 2–3 sentence explanation of the scores, noting key strengths and weaknesses."
+}`;
+
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 400,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const inputTokens = response.usage ? response.usage.input_tokens : 0;
+    const outputTokens = response.usage ? response.usage.output_tokens : 0;
+    const cost = calculateCost(inputTokens, outputTokens);
+    db.logUsage('teacher-ai-assist', cost, inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const result = JSON.parse(raw);
+    res.json(result);
+  } catch (err) {
+    console.error('AI suggest error:', err);
+    res.status(500).json({ error: 'Failed to get AI suggestion' });
+  }
+});
+
 // ─── Submission Comments ───────────────────────────────────────────────────────
 
 // Teacher/admin adds a comment to a submission
@@ -1461,7 +1511,7 @@ app.delete('/api/admin/submissions/:id/comments/:commentId', authenticate, teach
 // Admin/Teacher: create assignment
 app.post('/api/admin/assignments', authenticate, teacherOrAdmin, async (req, res) => {
   try {
-    const { title, type, description, test_id, deadline, assigned_to } = req.body;
+    const { title, type, description, test_id, deadline, assigned_to, custom_prompt, custom_image_url } = req.body;
     if (!title || !type || !deadline) {
       return res.status(400).json({ error: 'title, type, and deadline are required' });
     }
@@ -1470,7 +1520,7 @@ app.post('/api/admin/assignments', authenticate, teacherOrAdmin, async (req, res
       return res.status(400).json({ error: 'Invalid type. Must be: ' + validTypes.join(', ') });
     }
     const assignedTo = Array.isArray(assigned_to) ? assigned_to.map(Number).filter(Boolean) : [];
-    const id = db.insertAssignment(title, type, description, test_id || null, deadline, req.user.id, assignedTo);
+    const id = db.insertAssignment(title, type, description, test_id || null, deadline, req.user.id, assignedTo, custom_prompt || null, custom_image_url || null);
     const assignment = db.getAssignmentById(id);
 
     // Fire email notifications to targeted students (non-blocking)
@@ -1583,7 +1633,7 @@ app.post('/api/submissions/:id/flashcards', authenticate, async (req, res) => {
     } catch { return ''; }
   })();
 
-  const userPrompt = `You are an IELTS vocabulary coach. Analyze this student essay and its feedback to extract 8–10 high-value vocabulary items the student should learn.
+  const userPrompt = `You are an IELTS vocabulary coach. Analyze this student essay and its feedback to create a rich set of study flashcards including vocabulary, useful phrases, and collocations.
 
 Essay:
 ${essayText.slice(0, 1500)}
@@ -1591,25 +1641,44 @@ ${essayText.slice(0, 1500)}
 Feedback summary:
 ${(feedbackText + ' ' + improvements).slice(0, 800)}
 
-Return ONLY a valid JSON array (no markdown, no code fences) like this:
+Return ONLY a valid JSON array (no markdown, no code fences) with exactly 13 items:
+- 5 vocabulary words (type: "vocabulary")
+- 4 useful phrases / sentence starters (type: "phrase")
+- 4 collocations / word pairs (type: "collocation")
+
+Format:
 [
   {
+    "type": "vocabulary",
     "word": "meticulous",
     "definition": "Showing great attention to detail; very careful and precise",
     "example": "The report provided a meticulous analysis of urban migration trends."
+  },
+  {
+    "type": "phrase",
+    "word": "It is widely acknowledged that",
+    "definition": "Used to introduce a broadly accepted fact or opinion",
+    "example": "It is widely acknowledged that climate change poses a significant threat."
+  },
+  {
+    "type": "collocation",
+    "word": "pose a threat",
+    "definition": "To present or represent a danger or risk",
+    "example": "Rising sea levels pose a significant threat to coastal communities."
   }
 ]
 
 Rules:
-- Include academic/IELTS-relevant vocabulary from the essay or feedback
-- Prefer words that appear in feedback as things to improve, or advanced synonyms for simple words the student used
+- vocabulary: single advanced words relevant to the essay topic or feedback
+- phrase: sentence starters, transitions, or discourse markers useful for IELTS writing
+- collocation: natural verb+noun or adjective+noun pairs common in academic English
 - Keep definitions concise (under 15 words)
-- Example sentences must be IELTS-appropriate (not from the student's essay)`;
+- Example sentences must be IELTS-appropriate (not copied from the student's essay)`;
 
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1200,
+      max_tokens: 1800,
       system: 'You are an IELTS vocabulary coach. Return ONLY valid JSON arrays. No markdown.',
       messages: [{ role: 'user', content: userPrompt }],
     });
