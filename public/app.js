@@ -3887,6 +3887,33 @@ async function loadAdminAssignments() {
   }
 }
 
+// ── Assignment image upload helpers ──────────────────────────────────────────
+let assignImageDataUrl = null;
+
+function switchAssignImgTab(tab) {
+  const urlDiv    = document.getElementById('assign-img-tab-url');
+  const uploadDiv = document.getElementById('assign-img-tab-upload');
+  document.querySelectorAll('.assign-img-tab').forEach(t => t.classList.remove('active'));
+  const activeBtn = document.querySelector(`.assign-img-tab[onclick="switchAssignImgTab('${tab}')"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+  if (urlDiv)    urlDiv.style.display    = (tab === 'url')    ? '' : 'none';
+  if (uploadDiv) uploadDiv.style.display = (tab === 'upload') ? '' : 'none';
+}
+
+function handleAssignImageFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    assignImageDataUrl = e.target.result;
+    const preview = document.getElementById('assign-img-preview');
+    const label   = document.getElementById('assign-img-upload-text');
+    if (preview) { preview.src = assignImageDataUrl; preview.style.display = 'block'; }
+    if (label)   label.textContent = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
 function updateAssignTestField() {
   const type = document.getElementById('assign-type').value;
   const group = document.getElementById('assign-test-group');
@@ -3914,7 +3941,10 @@ async function createAssignment() {
   const testIdEl = document.getElementById('assign-test-id');
   const test_id = testIdEl && testIdEl.value ? parseInt(testIdEl.value, 10) : null;
   const custom_prompt = document.getElementById('assign-custom-prompt')?.value.trim() || null;
-  const custom_image_url = document.getElementById('assign-custom-image-url')?.value.trim() || null;
+  // Image: uploaded file takes priority over pasted URL
+  const custom_image_url = assignImageDataUrl
+    || document.getElementById('assign-custom-image-url')?.value.trim()
+    || null;
 
   // Collect target students (empty array = all students)
   const allStudentsChecked = document.getElementById('assign-all-students')?.checked !== false;
@@ -3948,6 +3978,15 @@ async function createAssignment() {
     const ciuEl = document.getElementById('assign-custom-image-url');
     if (cpEl) cpEl.value = '';
     if (ciuEl) ciuEl.value = '';
+    // Reset image upload
+    assignImageDataUrl = null;
+    const fileInput = document.getElementById('assign-image-file');
+    if (fileInput) fileInput.value = '';
+    const preview = document.getElementById('assign-img-preview');
+    if (preview) { preview.src = ''; preview.style.display = 'none'; }
+    const label = document.getElementById('assign-img-upload-text');
+    if (label) label.textContent = 'Click to choose an image file';
+    switchAssignImgTab('url');
     // Reset student selector to "All students"
     const allCb = document.getElementById('assign-all-students');
     if (allCb) { allCb.checked = true; toggleStudentSelect(); }

@@ -594,7 +594,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
     : '\n\n(Student has not written anything yet.)';
 
   const userPrompt = hint_type === 'ideas'
-    ? `IELTS Writing ${taskLabel} prompt:\n${prompt}${draftSection}\n\nSuggest 4–5 specific ideas, arguments, or examples the student could use or develop in their response. For Task 1, focus on what data trends or comparisons to highlight. For Task 2, focus on arguments, counterarguments, or real-world examples. Keep each point to 1–2 sentences. Number each point.`
+    ? `IELTS Writing ${taskLabel} prompt:\n${prompt}${draftSection}\n\nGenerate a structured paragraph-by-paragraph idea plan for this topic. Use this exact format:\n\n${task_type === 'task1' ? `**Key Trend 1 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 2 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 3 / Overall**\n- Overall pattern or comparison: ...\n- Suggested overview sentence: ...` : `**Introduction**\n- Thesis / position: one clear sentence stating your stance\n\n**Body Paragraph 1 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Body Paragraph 2 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Conclusion**\n- Restate position + key takeaway in one sentence`}\n\nKeep each bullet to 1–2 sentences. Be specific to this exact topic.`
     : hint_type === 'vocabulary'
     ? `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nList 12–15 precise vocabulary items and collocations that would demonstrate strong Lexical Resource for this topic. Format each item as:\n**word or phrase** — example sentence showing natural, academic use.\n\nInclude a mix of: topic-specific terms, academic collocations, linking expressions, and precise verbs/adjectives.`
     : `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nProvide 10–12 useful phrases and sentence starters for this specific topic. Include:\n- 3 topic sentence starters\n- 3 linking / transition phrases\n- 2 concession phrases\n- 2 concluding starters\n- 2 topic-specific phrases\n\nFor EACH phrase, write ONLY the phrase in bold followed by a dash and a single, detailed, complete example sentence that is directly about this exact topic — no explanations, no labels, no meta-commentary. The example sentence must be specific, thesis-quality, and ready to use.\n\nFormat each as: **phrase** — Full example sentence about this topic.`;
@@ -602,7 +602,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
   try {
     const stream = client.messages.stream({
       model: MODEL,
-      max_tokens: 800,
+      max_tokens: 1000,
       system: 'You are an expert IELTS writing coach. Be practical, specific, and concise. Do not repeat the prompt back.',
       messages: [{ role: 'user', content: userPrompt }],
     });

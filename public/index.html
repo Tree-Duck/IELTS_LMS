@@ -871,8 +871,22 @@
             <label>Custom Writing Prompt <small class="text-muted">(optional — pre-fills the student's essay form)</small></label>
             <textarea id="assign-custom-prompt" class="form-input" rows="4" placeholder="The chart below shows… / Some people believe…"></textarea>
             <div class="form-group" style="margin-top:8px" id="assign-image-url-group">
-              <label>Chart Image URL <small class="text-muted">(Task 1 only)</small></label>
-              <input type="url" id="assign-custom-image-url" class="form-input" placeholder="https://…">
+              <label>Chart Image <small class="text-muted">(Task 1 only)</small></label>
+              <div class="assign-img-tabs">
+                <button type="button" class="assign-img-tab active" onclick="switchAssignImgTab('url')">🔗 Paste URL</button>
+                <button type="button" class="assign-img-tab" onclick="switchAssignImgTab('upload')">📁 Upload File</button>
+              </div>
+              <div id="assign-img-tab-url">
+                <input type="url" id="assign-custom-image-url" class="form-input" placeholder="https://…">
+              </div>
+              <div id="assign-img-tab-upload" style="display:none">
+                <label class="assign-img-upload-area" for="assign-image-file">
+                  <span class="assign-img-upload-icon">🖼️</span>
+                  <span id="assign-img-upload-text">Click to choose an image file</span>
+                  <input type="file" id="assign-image-file" accept="image/*" style="display:none" onchange="handleAssignImageFile(this)">
+                </label>
+                <img id="assign-img-preview" style="display:none;max-width:100%;border-radius:8px;margin-top:10px;border:1px solid var(--border)">
+              </div>
             </div>
           </div>
           <div id="assign-error" class="error-msg hidden"></div>
