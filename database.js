@@ -537,7 +537,9 @@ const db = {
           test_title: testTitle, deadline: a.deadline,
           created_at: a.created_at,
           completed: !!completion,
-          completed_at: completion ? completion.completed_at : null
+          completed_at: completion ? completion.completed_at : null,
+          custom_prompt: a.custom_prompt || null,
+          custom_image_url: a.custom_image_url || null
         };
       });
   },

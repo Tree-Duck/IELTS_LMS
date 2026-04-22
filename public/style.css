@@ -991,7 +991,24 @@ input:focus, textarea:focus, select:focus {
   font-size: 12px;
   color: var(--gray-700);
   border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+.hint-generate-btn {
+  font-size: .72rem;
+  padding: 2px 10px;
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.hint-generate-btn:hover { background: var(--primary); color: white; }
+.hint-generate-btn:disabled { opacity: .5; cursor: not-allowed; }
 .hint-card-body {
   padding: 12px 14px;
   font-size: 13px;

@@ -495,22 +495,20 @@
             <div class="hints-section">
               <div class="hints-section-header">
                 <span class="hints-section-title">✨ AI Writing Assistance</span>
-                <button type="button" class="btn-refresh-hints" id="refresh-hints-btn" onclick="requestBothHints()">
-                  Generate Hints
-                </button>
+                <button type="button" class="btn-refresh-hints" id="refresh-hints-btn" onclick="requestBothHints()" style="font-size:.75rem;color:var(--gray-400);background:transparent;border:none;cursor:pointer;padding:2px 6px;">Generate All</button>
               </div>
               <div class="hints-grid-vertical">
                 <div class="hint-card" id="ideas-card">
-                  <div class="hint-card-header">💡 Ideas &amp; Arguments</div>
-                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Click "Generate Hints" to get ideas for your essay.</span></div>
+                  <div class="hint-card-header">💡 Ideas &amp; Arguments<button type="button" class="hint-generate-btn" id="ideas-btn" onclick="requestSingleHint('ideas')">Generate ✨</button></div>
+                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Click "Generate ✨" to get ideas for your essay.</span></div>
                 </div>
                 <div class="hint-card" id="vocab-card">
-                  <div class="hint-card-header">📚 Vocabulary &amp; Collocations</div>
-                  <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate Hints" to get vocabulary suggestions.</span></div>
+                  <div class="hint-card-header">📚 Vocabulary &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Generate ✨</button></div>
+                  <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate ✨" to get vocabulary suggestions.</span></div>
                 </div>
                 <div class="hint-card" id="phrases-card">
-                  <div class="hint-card-header">💬 Useful Phrases</div>
-                  <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Click "Generate Hints" to get useful phrases.</span></div>
+                  <div class="hint-card-header">💬 Useful Phrases<button type="button" class="hint-generate-btn" id="phrases-btn" onclick="requestSingleHint('phrases')">Generate ✨</button></div>
+                  <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Click "Generate ✨" to get useful phrases.</span></div>
                 </div>
               </div>
             </div>
@@ -962,5 +960,6 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>

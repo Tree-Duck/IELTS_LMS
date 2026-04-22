@@ -1298,6 +1298,35 @@ async function requestHint(hint_type) {
   }
 }
 
+async function requestSingleHint(hint_type) {
+  const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
+  const prompt = document.getElementById('essay-prompt').value.trim();
+  const essay = document.getElementById('essay-text').value.trim();
+  if (!prompt) { alert('Please enter a writing prompt first.'); return; }
+
+  const bodyMap = { ideas: 'ideas-body', vocabulary: 'vocab-body', phrases: 'phrases-body' };
+  const btnMap  = { ideas: 'ideas-btn',  vocabulary: 'vocab-btn',  phrases: 'phrases-btn'  };
+  const body = document.getElementById(bodyMap[hint_type]);
+  const btn  = document.getElementById(btnMap[hint_type]);
+  if (!body) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  body.innerHTML = '<span class="hint-thinking">Generating…</span>';
+  let raw = '';
+  try {
+    await streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type },
+      (chunk) => { raw += chunk; body.innerHTML = renderHintMarkdown(raw); },
+      () => { body.innerHTML = renderHintMarkdown(raw); }
+    );
+  } catch (err) {
+    body.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate ✨'; }
+  }
+}
+
 async function requestBothHints() {
   const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
   const prompt = document.getElementById('essay-prompt').value.trim();
@@ -1307,12 +1336,17 @@ async function requestBothHints() {
   const vocabBody = document.getElementById('vocab-body');
   const phrasesBody = document.getElementById('phrases-body');
   const btn = document.getElementById('refresh-hints-btn');
+  const ideasBtn = document.getElementById('ideas-btn');
+  const vocabBtn = document.getElementById('vocab-btn');
+  const phrasesBtn = document.getElementById('phrases-btn');
 
   ideasBody.innerHTML = '<span class="hint-thinking">Generating ideas…</span>';
   vocabBody.innerHTML = '<span class="hint-thinking">Generating vocabulary…</span>';
   if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
-  btn.disabled = true;
-  btn.textContent = '⏳ Generating...';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  if (ideasBtn) { ideasBtn.disabled = true; ideasBtn.textContent = '⏳'; }
+  if (vocabBtn) { vocabBtn.disabled = true; vocabBtn.textContent = '⏳'; }
+  if (phrasesBtn) { phrasesBtn.disabled = true; phrasesBtn.textContent = '⏳'; }
 
   let ideasRaw = '';
   let vocabRaw = '';
@@ -1340,8 +1374,10 @@ async function requestBothHints() {
   ).catch(err => { phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }) : Promise.resolve();
 
   await Promise.all([ideasPromise, vocabPromise, phrasesPromise]);
-  btn.disabled = false;
-  btn.textContent = '✨ Generate Hints';
+  if (btn) { btn.disabled = false; btn.textContent = 'Generate All'; }
+  if (ideasBtn) { ideasBtn.disabled = false; ideasBtn.textContent = 'Generate ✨'; }
+  if (vocabBtn) { vocabBtn.disabled = false; vocabBtn.textContent = 'Generate ✨'; }
+  if (phrasesBtn) { phrasesBtn.disabled = false; phrasesBtn.textContent = 'Generate ✨'; }
   hidePasteNudge();
 }
 
@@ -1664,7 +1700,16 @@ async function viewFeedback(id) {
 }
 
 function exportFeedbackPDF() {
-  window.print();
+  const el = document.getElementById('feedback-content');
+  if (!el) return;
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: `IELTS-Feedback-${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(el).save();
 }
 
 function renderFeedback(s) {
@@ -1955,8 +2000,8 @@ function renderFeedback(s) {
       </div>`;
   }
 
-  // Rewrite button (only for graded essays)
-  if (s.status === 'graded' && s.overall_band != null) {
+  // Rewrite button — available as soon as the essay exists (don't require grading first)
+  if (s.essay && s.status !== 'error') {
     html += `
       <div class="rewrite-cta">
         <div class="rewrite-cta-text">
@@ -3882,6 +3927,8 @@ async function loadAdminAssignments() {
         </table>
       </div>
     `;
+    // Show/hide custom prompt field based on currently-selected type
+    updateAssignTestField();
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
   }

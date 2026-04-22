@@ -412,6 +412,8 @@ Evaluate on these four criteria (score each from 0–9 in 0.5 increments):
 
 The overall band is the average of the four criteria, rounded to the nearest 0.5.
 
+CRITICAL RULE FOR IMPROVEMENTS: Every improvement point MUST reference a specific sentence, phrase, or pattern FROM THE STUDENT'S ESSAY. Quote or paraphrase the exact text, then explain why it loses marks and how to fix it. Do NOT write generic advice like "use more varied vocabulary" — instead write something like: 'In your opening sentence you wrote "many people think technology is good" — this is vague; replace with a precise claim such as "Technological advancement has fundamentally reshaped human communication."' Each improvement must point to something concrete in the submitted essay.
+
 Respond ONLY with this exact JSON structure:
 {
   "task_achievement": <0-9 in 0.5 steps>,
@@ -423,28 +425,28 @@ Respond ONLY with this exact JSON structure:
     "task_achievement": {
       "band": <n>,
       "descriptor": "<explain which IELTS band descriptor applies and WHY this specific score — reference actual descriptor language>",
-      "strengths": ["<specific strength from essay>", "<specific strength>"],
-      "improvements": ["<specific actionable improvement>", "<specific improvement>"]
+      "strengths": ["<specific strength quoting or referencing actual essay text>", "<specific strength>"],
+      "improvements": ["<improvement that QUOTES a specific phrase from the essay and explains how to fix it>", "<second improvement quoting specific essay text>"]
     },
-    "coherence_cohesion": { "band": <n>, "descriptor": "...", "strengths": [...], "improvements": [...] },
-    "lexical_resource": { "band": <n>, "descriptor": "...", "strengths": [...], "improvements": [...] },
-    "grammatical_range": { "band": <n>, "descriptor": "...", "strengths": [...], "improvements": [...] }
+    "coherence_cohesion": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] },
+    "lexical_resource": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] },
+    "grammatical_range": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] }
   },
-  "detailed_feedback": "<200-300 word comprehensive analysis>",
+  "detailed_feedback": "<200-300 word comprehensive analysis that quotes specific sentences from the essay>",
   "sentence_analysis": [
     {"i": 1, "t": "simple"},
     {"i": 2, "t": "complex"}
   ],
   "overall_improvements": {
-    "content": "<specific actionable advice tied to this essay>",
-    "organization": "<specific advice>",
-    "vocabulary": "<specific advice>",
-    "grammar": "<specific advice>",
-    "sentence_variety": "<specific advice>",
-    "coherence": "<specific advice>"
+    "content": "<actionable advice quoting a specific part of this essay>",
+    "organization": "<actionable advice referencing this essay's paragraph structure>",
+    "vocabulary": "<actionable advice quoting specific repeated or weak words from this essay>",
+    "grammar": "<actionable advice quoting a specific grammatical error from this essay>",
+    "sentence_variety": "<actionable advice referencing sentence patterns observed in this essay>",
+    "coherence": "<actionable advice referencing a specific transition or linking issue in this essay>"
   },
-  "strengths": ["<s1>", "<s2>", "<s3>"],
-  "improvements": ["<i1>", "<i2>", "<i3>"]
+  "strengths": ["<strength quoting specific essay text>", "<strength quoting specific essay text>", "<strength quoting specific essay text>"],
+  "improvements": ["<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>"]
 }
 
 For sentence_analysis: include one entry per sentence in order. Types are: simple, compound, complex, compound-complex, uncertain.`;
@@ -632,8 +634,8 @@ app.post('/api/rewrite', authenticate, async (req, res) => {
 
   const submission = db.getSubmissionById(parseInt(submission_id), req.user.id);
   if (!submission) return res.status(404).json({ error: 'Submission not found' });
-  if (submission.status !== 'graded') {
-    return res.status(400).json({ error: 'Essay must be graded before rewriting' });
+  if (!submission.essay) {
+    return res.status(400).json({ error: 'No essay found to rewrite' });
   }
 
   res.setHeader('Content-Type', 'text/event-stream');
@@ -641,7 +643,10 @@ app.post('/api/rewrite', authenticate, async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
 
   const taskLabel = submission.task_type === 'task1' ? 'Task 1' : 'Task 2';
-  const userPrompt = `You are an expert IELTS examiner and writing coach. The student's ${taskLabel} essay scored Band ${submission.overall_band}.
+  const bandNote = submission.overall_band != null
+    ? `The student's essay scored Band ${submission.overall_band}.`
+    : `The student's essay has not yet been scored.`;
+  const userPrompt = `You are an expert IELTS examiner and writing coach. ${bandNote}
 
 Rewrite it targeting Band 8.0–8.5. Keep the same core argument and structure but improve:
 - Task achievement/response (fully address all parts of the task)
@@ -656,7 +661,7 @@ Then list 5–6 bullet points (starting with -) explaining the key improvements 
 
 Original prompt: ${submission.prompt}
 
-Original essay (Band ${submission.overall_band}):
+Original essay${submission.overall_band != null ? ` (Band ${submission.overall_band})` : ''}:
 ${submission.essay}`;
 
   try {
