@@ -3871,6 +3871,9 @@ async function loadAdminAssignments() {
       }
     }
 
+    // Show/hide custom prompt field based on currently-selected type (must run even when list is empty)
+    updateAssignTestField();
+
     if (!assignments.length) {
       el.innerHTML = '<div class="empty-state">No assignments yet. Create one above.</div>';
       return;
@@ -3927,8 +3930,6 @@ async function loadAdminAssignments() {
         </table>
       </div>
     `;
-    // Show/hide custom prompt field based on currently-selected type
-    updateAssignTestField();
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
   }
