@@ -1014,7 +1014,6 @@ async function generateTask() {
       btn.disabled = false;
       btnLabel.textContent = 'Generate Task';
       btnIcon.textContent = '✨';
-      requestBothHints();
     } catch (err) {
       btn.disabled = false;
       btnLabel.textContent = 'Generate Task';
@@ -1034,7 +1033,6 @@ async function generateTask() {
         btn.disabled = false;
         btnLabel.textContent = 'Generate Task';
         btnIcon.textContent = '✨';
-        requestBothHints();
       }
     );
   } catch (err) {
