@@ -74,6 +74,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Warn on tab close / refresh when essay has content
+window.addEventListener('beforeunload', (e) => {
+  if (isOnSubmitWithContent()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function show(id) { document.getElementById(id).classList.remove('hidden'); }
 function hide(id) { document.getElementById(id).classList.add('hidden'); }
@@ -389,7 +397,18 @@ async function showApp() {
   showView('dashboard');
 }
 
+function isOnSubmitWithContent() {
+  const submitView = document.getElementById('view-submit');
+  if (!submitView || submitView.classList.contains('hidden')) return false;
+  const essay = (document.getElementById('essay-text') || {}).value || '';
+  return essay.trim().length > 0;
+}
+
 function showView(name) {
+  // Warn if navigating away from submit view with unsaved essay content
+  if (name !== 'submit' && isOnSubmitWithContent()) {
+    if (!confirm('You have an essay in progress. Leave without saving your draft?')) return;
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   show(`view-${name}`);
@@ -1302,8 +1321,8 @@ async function requestSingleHint(hint_type) {
   const essay = document.getElementById('essay-text').value.trim();
   if (!prompt) { alert('Please enter a writing prompt first.'); return; }
 
-  const bodyMap = { ideas: 'ideas-body', vocabulary: 'vocab-body', phrases: 'phrases-body' };
-  const btnMap  = { ideas: 'ideas-btn',  vocabulary: 'vocab-btn',  phrases: 'phrases-btn'  };
+  const bodyMap = { ideas: 'ideas-body', vocabulary: 'vocab-body', phrases: 'phrases-body', structure: 'structure-body' };
+  const btnMap  = { ideas: 'ideas-btn',  vocabulary: 'vocab-btn',  phrases: 'phrases-btn',  structure: 'structure-btn'  };
   const body = document.getElementById(bodyMap[hint_type]);
   const btn  = document.getElementById(btnMap[hint_type]);
   if (!body) return;
@@ -1329,53 +1348,87 @@ async function requestBothHints() {
   const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
   const prompt = document.getElementById('essay-prompt').value.trim();
   const essay = document.getElementById('essay-text').value.trim();
+  if (!prompt) { alert('Please enter a writing prompt first.'); return; }
 
-  const ideasBody = document.getElementById('ideas-body');
-  const vocabBody = document.getElementById('vocab-body');
-  const phrasesBody = document.getElementById('phrases-body');
-  const btn = document.getElementById('refresh-hints-btn');
-  const ideasBtn = document.getElementById('ideas-btn');
-  const vocabBtn = document.getElementById('vocab-btn');
-  const phrasesBtn = document.getElementById('phrases-btn');
+  const isTask1 = task_type === 'task1';
 
-  ideasBody.innerHTML = '<span class="hint-thinking">Generating ideas…</span>';
-  vocabBody.innerHTML = '<span class="hint-thinking">Generating vocabulary…</span>';
-  if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
+  const ideasBody    = document.getElementById('ideas-body');
+  const vocabBody    = document.getElementById('vocab-body');
+  const phrasesBody  = document.getElementById('phrases-body');
+  const structBody   = document.getElementById('structure-body');
+  const btn          = document.getElementById('refresh-hints-btn');
+  const ideasBtn     = document.getElementById('ideas-btn');
+  const vocabBtn     = document.getElementById('vocab-btn');
+  const phrasesBtn   = document.getElementById('phrases-btn');
+  const structBtn    = document.getElementById('structure-btn');
+
+  const disable = (el, label) => { if (el) { el.disabled = true; el.textContent = label; } };
+  const enable  = (el, label) => { if (el) { el.disabled = false; el.textContent = label; } };
+
   if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
-  if (ideasBtn) { ideasBtn.disabled = true; ideasBtn.textContent = '⏳'; }
-  if (vocabBtn) { vocabBtn.disabled = true; vocabBtn.textContent = '⏳'; }
-  if (phrasesBtn) { phrasesBtn.disabled = true; phrasesBtn.textContent = '⏳'; }
 
-  let ideasRaw = '';
-  let vocabRaw = '';
-  let phrasesRaw = '';
+  const promises = [];
 
-  const ideasPromise = streamSSE(
-    '/api/hint',
-    { task_type, prompt, essay, hint_type: 'ideas' },
-    (chunk) => { ideasRaw += chunk; ideasBody.innerHTML = renderHintMarkdown(ideasRaw); },
-    () => { ideasBody.innerHTML = renderHintMarkdown(ideasRaw); }
-  ).catch(err => { ideasBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; });
+  if (isTask1) {
+    // Task 1: Structure Guide + Phrases only
+    if (structBody) structBody.innerHTML = '<span class="hint-thinking">Generating structure guide…</span>';
+    if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
+    disable(structBtn, '⏳'); disable(phrasesBtn, '⏳');
 
-  const vocabPromise = streamSSE(
-    '/api/hint',
-    { task_type, prompt, essay, hint_type: 'vocabulary' },
-    (chunk) => { vocabRaw += chunk; vocabBody.innerHTML = renderHintMarkdown(vocabRaw); },
-    () => { vocabBody.innerHTML = renderHintMarkdown(vocabRaw); }
-  ).catch(err => { vocabBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; });
+    let structRaw = '';
+    promises.push(streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'structure' },
+      (chunk) => { structRaw += chunk; if (structBody) structBody.innerHTML = renderHintMarkdown(structRaw); },
+      () => { if (structBody) structBody.innerHTML = renderHintMarkdown(structRaw); }
+    ).catch(err => { if (structBody) structBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
 
-  const phrasesPromise = phrasesBody ? streamSSE(
-    '/api/hint',
-    { task_type, prompt, essay, hint_type: 'phrases' },
-    (chunk) => { phrasesRaw += chunk; phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); },
-    () => { phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); }
-  ).catch(err => { phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }) : Promise.resolve();
+    let phrasesRaw = '';
+    promises.push(streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'phrases' },
+      (chunk) => { phrasesRaw += chunk; if (phrasesBody) phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); },
+      () => { if (phrasesBody) phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); }
+    ).catch(err => { if (phrasesBody) phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
 
-  await Promise.all([ideasPromise, vocabPromise, phrasesPromise]);
+    await Promise.all(promises);
+    enable(structBtn, 'Generate ✨'); enable(phrasesBtn, 'Generate ✨');
+  } else {
+    // Task 2: Ideas + Vocabulary + Phrases
+    if (ideasBody) ideasBody.innerHTML = '<span class="hint-thinking">Generating ideas…</span>';
+    if (vocabBody) vocabBody.innerHTML = '<span class="hint-thinking">Generating vocabulary…</span>';
+    if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
+    disable(ideasBtn, '⏳'); disable(vocabBtn, '⏳'); disable(phrasesBtn, '⏳');
+
+    let ideasRaw = '';
+    promises.push(streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'ideas' },
+      (chunk) => { ideasRaw += chunk; if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); },
+      () => { if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); }
+    ).catch(err => { if (ideasBody) ideasBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
+
+    let vocabRaw = '';
+    promises.push(streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'vocabulary' },
+      (chunk) => { vocabRaw += chunk; if (vocabBody) vocabBody.innerHTML = renderHintMarkdown(vocabRaw); },
+      () => { if (vocabBody) vocabBody.innerHTML = renderHintMarkdown(vocabRaw); }
+    ).catch(err => { if (vocabBody) vocabBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
+
+    let phrasesRaw = '';
+    promises.push(streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'phrases' },
+      (chunk) => { phrasesRaw += chunk; if (phrasesBody) phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); },
+      () => { if (phrasesBody) phrasesBody.innerHTML = renderHintMarkdown(phrasesRaw); }
+    ).catch(err => { if (phrasesBody) phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
+
+    await Promise.all(promises);
+    enable(ideasBtn, 'Generate ✨'); enable(vocabBtn, 'Generate ✨'); enable(phrasesBtn, 'Generate ✨');
+  }
+
   if (btn) { btn.disabled = false; btn.textContent = 'Generate All'; }
-  if (ideasBtn) { ideasBtn.disabled = false; ideasBtn.textContent = 'Generate ✨'; }
-  if (vocabBtn) { vocabBtn.disabled = false; vocabBtn.textContent = 'Generate ✨'; }
-  if (phrasesBtn) { phrasesBtn.disabled = false; phrasesBtn.textContent = 'Generate ✨'; }
   hidePasteNudge();
 }
 
@@ -1509,6 +1562,15 @@ function updateTaskInfo() {
 
   updateWordCount();
   updateTopicOptions();
+
+  // Switch hint panel layout based on task type
+  const isTask1 = taskType === 'task1';
+  ['ideas-card', 'vocab-card'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isTask1 ? 'none' : '';
+  });
+  const structCard = document.getElementById('structure-card');
+  if (structCard) structCard.style.display = isTask1 ? '' : 'none';
 }
 
 /* ─── Task 1 Image Upload ─────────────────────────────────────────────────── */
@@ -4106,6 +4168,23 @@ function saveDraft() {
   if (!prompt && !essay) return; // nothing to save
   const draft = { prompt, essay, taskType, savedAt: Date.now() };
   localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+function showToast(msg, duration) {
+  duration = duration || 2500;
+  const el = document.getElementById('draft-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function manualSaveDraft() {
+  const prompt = (document.getElementById('essay-prompt') || {}).value || '';
+  const essay  = (document.getElementById('essay-text')   || {}).value || '';
+  if (!prompt && !essay) { showToast('Nothing to save yet.'); return; }
+  saveDraft();
+  showToast('✅ Draft saved');
 }
 
 function onDraftInput() {

@@ -459,6 +459,9 @@
                 </label>
                 <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount(); onDraftInput()"></textarea>
                 <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                  <button type="button" class="btn-save-draft" onclick="manualSaveDraft()">💾 Save Draft</button>
+                </div>
               </div>
 
               <div class="form-group grading-mode-selector">
@@ -506,6 +509,10 @@
                   <div class="hint-card-header">📚 Vocabulary &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Generate ✨</button></div>
                   <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate ✨" to get vocabulary suggestions.</span></div>
                 </div>
+                <div class="hint-card" id="structure-card" style="display:none">
+                  <div class="hint-card-header">📋 Essay Structure Guide<button type="button" class="hint-generate-btn" id="structure-btn" onclick="requestSingleHint('structure')">Generate ✨</button></div>
+                  <div class="hint-card-body" id="structure-body"><span class="hint-empty">Click "Generate ✨" to get a section-by-section writing plan for this chart.</span></div>
+                </div>
                 <div class="hint-card" id="phrases-card">
                   <div class="hint-card-header">💬 Useful Phrases<button type="button" class="hint-generate-btn" id="phrases-btn" onclick="requestSingleHint('phrases')">Generate ✨</button></div>
                   <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Click "Generate ✨" to get useful phrases.</span></div>
@@ -515,6 +522,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Toast notification -->
+      <div id="draft-toast">✅ Draft saved</div>
 
       <!-- History View -->
       <div id="view-history" class="view hidden">
