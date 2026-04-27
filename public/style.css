@@ -3162,7 +3162,7 @@ input:focus, textarea:focus, select:focus {
 }
 .chart-image-frame img {
   max-width: 100%;
-  max-height: 600px;
+  max-height: 900px;
   width: auto;
   height: auto;
   object-fit: contain;
