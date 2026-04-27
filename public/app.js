@@ -3096,8 +3096,8 @@ async function openEditTopicForm(id) {
         </div>
         <div class="form-group">
           <label class="form-label">Replace Image <small>(leave blank to keep current)</small></label>
-          <input type="file" id="t1e-img-${id}" accept="image/*" class="form-input">
-          ${t.image_base64 ? `<img src="data:${t.image_media_type};base64,${t.image_base64}" style="max-width:100%;max-height:200px;margin-top:8px;border-radius:8px;object-fit:contain">` : ''}
+          <input type="file" id="t1e-img-${id}" accept="image/*" class="form-input" onchange="previewEditTopicImage(${id}, this)">
+          <img id="t1e-preview-${id}" src="${t.image_base64 ? `data:${t.image_media_type};base64,${t.image_base64}` : ''}" ${t.image_base64 ? '' : 'class="hidden"'} alt="Preview" style="max-width:100%;margin-top:8px;border-radius:8px;display:block;">
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn btn-primary btn-sm" onclick="saveEditTopic(${id})">💾 Save</button>
@@ -3145,6 +3145,18 @@ function showFieldError(el, msg) {
   if (!el) return;
   el.textContent = msg;
   el.classList.remove('hidden');
+}
+
+function previewEditTopicImage(id, input) {
+  const file = input.files && input.files[0];
+  const prev = document.getElementById(`t1e-preview-${id}`);
+  if (!file || !prev) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    prev.src = e.target.result;
+    prev.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
 }
 
 function toggleCreateTestForm() {
