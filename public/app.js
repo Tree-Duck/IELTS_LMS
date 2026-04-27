@@ -1317,6 +1317,8 @@ async function requestHint(hint_type) {
 
 async function requestSingleHint(hint_type) {
   const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
+  // vocabulary merged into phrases card for Task 2
+  if (hint_type === 'vocabulary' && task_type !== 'task1') hint_type = 'phrases';
   const prompt = document.getElementById('essay-prompt').value.trim();
   const essay = document.getElementById('essay-text').value.trim();
   if (!prompt) { alert('Please enter a writing prompt first.'); return; }
@@ -1394,11 +1396,10 @@ async function requestBothHints() {
     await Promise.all(promises);
     enable(structBtn, 'Generate ✨'); enable(phrasesBtn, 'Generate ✨');
   } else {
-    // Task 2: Ideas + Vocabulary + Phrases
-    if (ideasBody) ideasBody.innerHTML = '<span class="hint-thinking">Generating ideas…</span>';
-    if (vocabBody) vocabBody.innerHTML = '<span class="hint-thinking">Generating vocabulary…</span>';
-    if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating phrases…</span>';
-    disable(ideasBtn, '⏳'); disable(vocabBtn, '⏳'); disable(phrasesBtn, '⏳');
+    // Task 2: Body Arguments + Language Toolkit (phrases+vocab merged)
+    if (ideasBody) ideasBody.innerHTML = '<span class="hint-thinking">Generating body arguments…</span>';
+    if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating language toolkit…</span>';
+    disable(ideasBtn, '⏳'); disable(phrasesBtn, '⏳');
 
     let ideasRaw = '';
     promises.push(streamSSE(
@@ -1407,14 +1408,6 @@ async function requestBothHints() {
       (chunk) => { ideasRaw += chunk; if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); },
       () => { if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); }
     ).catch(err => { if (ideasBody) ideasBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
-
-    let vocabRaw = '';
-    promises.push(streamSSE(
-      '/api/hint',
-      { task_type, prompt, essay, hint_type: 'vocabulary' },
-      (chunk) => { vocabRaw += chunk; if (vocabBody) vocabBody.innerHTML = renderHintMarkdown(vocabRaw); },
-      () => { if (vocabBody) vocabBody.innerHTML = renderHintMarkdown(vocabRaw); }
-    ).catch(err => { if (vocabBody) vocabBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
 
     let phrasesRaw = '';
     promises.push(streamSSE(
@@ -1425,7 +1418,7 @@ async function requestBothHints() {
     ).catch(err => { if (phrasesBody) phrasesBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
 
     await Promise.all(promises);
-    enable(ideasBtn, 'Generate ✨'); enable(vocabBtn, 'Generate ✨'); enable(phrasesBtn, 'Generate ✨');
+    enable(ideasBtn, 'Generate ✨'); enable(phrasesBtn, 'Generate ✨');
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Generate All'; }
@@ -1565,10 +1558,13 @@ function updateTaskInfo() {
 
   // Switch hint panel layout based on task type
   const isTask1 = taskType === 'task1';
-  ['ideas-card', 'vocab-card'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = isTask1 ? 'none' : '';
-  });
+  // ideas-card: visible for task2 only
+  const ideasCard = document.getElementById('ideas-card');
+  if (ideasCard) ideasCard.style.display = isTask1 ? 'none' : '';
+  // vocab-card: always hidden (content merged into phrases/language-toolkit card)
+  const vocabCard = document.getElementById('vocab-card');
+  if (vocabCard) vocabCard.style.display = 'none';
+  // structure-card: visible for task1 only
   const structCard = document.getElementById('structure-card');
   if (structCard) structCard.style.display = isTask1 ? '' : 'none';
 }
