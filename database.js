@@ -649,6 +649,28 @@ const db = {
     }));
   },
 
+  // Returns full topic by id (admin use — includes image data)
+  getTask1TopicById(id) {
+    const data = load();
+    return (data.task1_topics || []).find(t => t.id === id) || null;
+  },
+
+  // Update editable fields on a topic
+  updateTask1Topic(id, { chart_type, question, label, image_base64, image_media_type }) {
+    const data = load();
+    const topic = (data.task1_topics || []).find(t => t.id === id);
+    if (!topic) return false;
+    if (chart_type !== undefined) topic.chart_type = chart_type;
+    if (question  !== undefined) topic.question   = question;
+    if (label     !== undefined) topic.label      = label;
+    if (image_base64 !== undefined && image_base64) {
+      topic.image_base64      = image_base64;
+      topic.image_media_type  = image_media_type || topic.image_media_type;
+    }
+    save(data);
+    return true;
+  },
+
   // Returns a single random topic including image data — for student use
   getRandomTask1Topic(chart_type) {
     const data = load();

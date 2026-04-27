@@ -1138,6 +1138,47 @@ app.get('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => {
   }
 });
 
+// Admin: get single topic (full, with image)
+app.get('/api/admin/task1-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const topic = db.getTask1TopicById(parseInt(req.params.id, 10));
+    if (!topic) return res.status(404).json({ error: 'Topic not found' });
+    res.json(topic);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load topic' });
+  }
+});
+
+// Admin: update a topic
+app.put('/api/admin/task1-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { chart_type, question, label, image_base64, image_media_type } = req.body;
+    if (chart_type && !VALID_CHART_TYPES.includes(chart_type)) {
+      return res.status(400).json({ error: `chart_type must be one of: ${VALID_CHART_TYPES.join(', ')}` });
+    }
+    if (question !== undefined && !question.trim()) {
+      return res.status(400).json({ error: 'question cannot be empty' });
+    }
+    if (image_base64 && image_media_type) {
+      const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
+      if (!validTypes.includes(image_media_type)) {
+        return res.status(400).json({ error: 'image_media_type must be jpeg, png, gif, or webp' });
+      }
+    }
+    const ok = db.updateTask1Topic(id, {
+      chart_type, question: question ? question.trim() : undefined,
+      label: label !== undefined ? label.trim() : undefined,
+      image_base64, image_media_type
+    });
+    if (!ok) return res.status(404).json({ error: 'Topic not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Update task1 topic error:', err);
+    res.status(500).json({ error: 'Failed to update topic' });
+  }
+});
+
 // Admin: delete a topic
 app.delete('/api/admin/task1-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
   try {

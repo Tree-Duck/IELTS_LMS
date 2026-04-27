@@ -3044,7 +3044,11 @@ function renderTask1TopicsList(topics) {
               <span class="t1-topic-date">${formatDate(t.created_at)}</span>
             </div>
             <p class="t1-topic-preview">${escHtml(t.question_preview)}</p>
-            <button class="btn btn-danger btn-xs" onclick="deleteTask1TopicAdmin(${t.id})">Delete</button>
+            <div class="t1-topic-actions">
+              <button class="btn btn-outline btn-xs" onclick="openEditTopicForm(${t.id})">✏️ Edit</button>
+              <button class="btn btn-danger btn-xs" onclick="deleteTask1TopicAdmin(${t.id})">Delete</button>
+            </div>
+            <div class="t1-edit-panel hidden" id="t1-edit-${t.id}"></div>
           </div>`).join('')}
       </div>
     </div>`).join('');
@@ -3058,6 +3062,89 @@ async function deleteTask1TopicAdmin(id) {
   } catch (err) {
     alert('Delete failed: ' + err.message);
   }
+}
+
+const CHART_TYPE_OPTIONS = [
+  ['bar_chart','📊 Bar Chart'],['line_graph','📈 Line Graph'],['pie_chart','🥧 Pie Chart'],
+  ['table','📋 Table'],['process_diagram','⚙️ Process Diagram'],['map','🗺️ Map']
+];
+
+async function openEditTopicForm(id) {
+  const panel = document.getElementById(`t1-edit-${id}`);
+  if (!panel) return;
+  // Toggle off if already open
+  if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); return; }
+  panel.innerHTML = '<span class="hint-thinking">Loading…</span>';
+  panel.classList.remove('hidden');
+  try {
+    const t = await api(`/api/admin/task1-topics/${id}`);
+    const typeOpts = CHART_TYPE_OPTIONS.map(([v, l]) =>
+      `<option value="${v}"${t.chart_type === v ? ' selected' : ''}>${l}</option>`).join('');
+    panel.innerHTML = `
+      <div class="t1-edit-form">
+        <div class="form-group">
+          <label class="form-label">Chart Type</label>
+          <select id="t1e-type-${id}" class="form-input">${typeOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Label <small>(short admin label)</small></label>
+          <input id="t1e-label-${id}" class="form-input" value="${escHtml(t.label || '')}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea id="t1e-question-${id}" class="form-input" rows="4">${escHtml(t.question || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Replace Image <small>(leave blank to keep current)</small></label>
+          <input type="file" id="t1e-img-${id}" accept="image/*" class="form-input">
+          ${t.image_base64 ? `<img src="data:${t.image_media_type};base64,${t.image_base64}" style="max-width:100%;max-height:200px;margin-top:8px;border-radius:8px;object-fit:contain">` : ''}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary btn-sm" onclick="saveEditTopic(${id})">💾 Save</button>
+          <button class="btn btn-outline btn-sm" onclick="openEditTopicForm(${id})">Cancel</button>
+        </div>
+        <div id="t1e-err-${id}" class="error-msg hidden" style="margin-top:6px"></div>
+      </div>`;
+  } catch (err) {
+    panel.innerHTML = `<span style="color:var(--danger)">Failed to load: ${escHtml(err.message)}</span>`;
+  }
+}
+
+async function saveEditTopic(id) {
+  const errEl = document.getElementById(`t1e-err-${id}`);
+  const chart_type = document.getElementById(`t1e-type-${id}`)?.value;
+  const label      = document.getElementById(`t1e-label-${id}`)?.value || '';
+  const question   = document.getElementById(`t1e-question-${id}`)?.value || '';
+  const imgInput   = document.getElementById(`t1e-img-${id}`);
+
+  if (!question.trim()) { showFieldError(errEl, 'Question text cannot be empty.'); return; }
+
+  const body = { chart_type, question, label };
+
+  // If new image selected, read it as base64
+  if (imgInput && imgInput.files && imgInput.files[0]) {
+    const file = imgInput.files[0];
+    body.image_media_type = file.type;
+    body.image_base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  try {
+    await api(`/api/admin/task1-topics/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    loadTask1Topics(); // refresh list
+  } catch (err) {
+    showFieldError(errEl, err.message);
+  }
+}
+
+function showFieldError(el, msg) {
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
 }
 
 function toggleCreateTestForm() {

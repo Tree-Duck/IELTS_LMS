@@ -1975,6 +1975,10 @@ input:focus, textarea:focus, select:focus {
 }
 [data-theme="dark"] .t1-topic-card { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .t1-image-upload-area { background: #1e293b; border-color: #475569; }
+.t1-topic-actions { display: flex; gap: 6px; margin-top: 4px; }
+.t1-edit-panel { margin-top: 10px; border-top: 1px solid var(--gray-200); padding-top: 12px; }
+.t1-edit-form { display: flex; flex-direction: column; gap: 10px; }
+[data-theme="dark"] .t1-edit-panel { border-color: #334155; }
 
 /* ─── Import JSON Panel ──────────────────────────────────────────────────── */
 .import-header {
