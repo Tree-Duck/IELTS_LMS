@@ -458,6 +458,10 @@
                   <span class="word-count-badge" id="word-count-badge">0 words</span>
                 </label>
                 <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount(); onDraftInput()"></textarea>
+                <div class="word-count-bar-wrap">
+                  <div class="word-count-bar-track"><div class="word-count-bar-fill" id="word-count-bar-fill"></div></div>
+                  <span class="word-count-bar-text" id="word-count-bar-text">0 / 250 words</span>
+                </div>
                 <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
                 <div style="display:flex;justify-content:flex-end;margin-top:6px">
                   <button type="button" class="btn-save-draft" onclick="manualSaveDraft()">💾 Save Draft</button>

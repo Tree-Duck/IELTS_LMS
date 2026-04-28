@@ -1532,8 +1532,19 @@ function updateWordCount() {
   const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
   const min = taskType === 'task1' ? 150 : 250;
   const badge = document.getElementById('word-count-badge');
-  badge.textContent = `${count} words`;
-  badge.className = 'word-count-badge' + (count >= min ? ' ok' : count > 0 ? ' warn' : '');
+  if (badge) {
+    badge.textContent = `${count} words`;
+    badge.className = 'word-count-badge' + (count >= min ? ' ok' : count > 0 ? ' warn' : '');
+  }
+  // Progress bar
+  const fill = document.getElementById('word-count-bar-fill');
+  const barText = document.getElementById('word-count-bar-text');
+  if (fill) {
+    const pct = Math.min(100, Math.round((count / min) * 100));
+    fill.style.width = pct + '%';
+    fill.className = 'word-count-bar-fill' + (count >= min ? ' bar-ok' : count >= Math.round(min * 0.6) ? ' bar-warn' : ' bar-low');
+  }
+  if (barText) barText.textContent = `${count} / ${min} words`;
 }
 
 function updateTaskInfo() {
@@ -1838,6 +1849,44 @@ function renderFeedback(s) {
         </div>
       </div>`;
 
+    // "What to fix" summary — top 3 improvements from weakest criteria
+    if (criterionData) {
+      const criterionLabelsLocal = {
+        task_achievement: s.task_type === 'task1' ? 'Task Achievement' : 'Task Response',
+        coherence_cohesion: 'Coherence & Cohesion',
+        lexical_resource: 'Lexical Resource',
+        grammatical_range: 'Grammatical Range & Accuracy'
+      };
+      const sorted = ['task_achievement','coherence_cohesion','lexical_resource','grammatical_range']
+        .filter(k => criterionData[k])
+        .sort((a, b) => (criterionData[a].band || 9) - (criterionData[b].band || 9));
+      const topFixes = [];
+      for (const k of sorted) {
+        const improvs = Array.isArray(criterionData[k].improvements) ? criterionData[k].improvements : [];
+        for (const imp of improvs) {
+          if (topFixes.length < 3) topFixes.push({ label: criterionLabelsLocal[k], text: imp });
+          if (topFixes.length >= 3) break;
+        }
+        if (topFixes.length >= 3) break;
+      }
+      if (topFixes.length > 0) {
+        html += `
+          <div class="feedback-section fix-summary-card">
+            <h3>🎯 Focus for Your Next Essay</h3>
+            <div class="fix-items">
+              ${topFixes.map((f, i) => `
+                <div class="fix-item">
+                  <div class="fix-number">${i + 1}</div>
+                  <div class="fix-content">
+                    <div class="fix-criterion">${escHtml(f.label)}</div>
+                    <div class="fix-text">${escHtml(f.text)}</div>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+    }
+
     // Radar chart
     html += `
       <div class="feedback-section radar-chart-section">
@@ -1878,14 +1927,19 @@ function renderFeedback(s) {
         const strengthsList = Array.isArray(cd.strengths) ? cd.strengths.map(i => `<li>${escHtml(i)}</li>`).join('') : '';
         const improvList = Array.isArray(cd.improvements) ? cd.improvements.map(i => `<li>${escHtml(i)}</li>`).join('') : '';
         html += `
-          <div class="criterion-card">
-            <div class="criterion-card-header">
+          <div class="criterion-card collapsed" id="crit-${key}">
+            <div class="criterion-card-header" onclick="toggleCriterion('${key}')">
               <span class="criterion-name">${escHtml(criterionLabels[key])}</span>
-              <span class="criterion-band ${bandColor(band)}">${band != null ? band : '–'}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="criterion-band ${bandColor(band)}">${band != null ? band : '–'}</span>
+                <span class="criterion-chevron">▾</span>
+              </div>
             </div>
-            ${cd.descriptor ? `<div class="criterion-descriptor">${escHtml(cd.descriptor)}</div>` : ''}
-            ${strengthsList ? `<div class="criterion-strengths"><h5>Strengths</h5><ul>${strengthsList}</ul></div>` : ''}
-            ${improvList ? `<div class="criterion-improvements"><h5>Improvements</h5><ul>${improvList}</ul></div>` : ''}
+            <div class="criterion-body">
+              ${cd.descriptor ? `<div class="criterion-descriptor">${escHtml(cd.descriptor)}</div>` : ''}
+              ${strengthsList ? `<div class="criterion-strengths"><h5>Strengths</h5><ul>${strengthsList}</ul></div>` : ''}
+              ${improvList ? `<div class="criterion-improvements"><h5>Improvements</h5><ul>${improvList}</ul></div>` : ''}
+            </div>
           </div>`;
       }
 
@@ -2117,6 +2171,11 @@ function highlightSentences(essayText, sentenceAnalysis) {
     const type = analysis ? analysis.t : 'uncertain';
     return `<span class="sent-${type}" title="${type}">${escHtml(sentence)}</span>`;
   }).join('');
+}
+
+function toggleCriterion(key) {
+  const card = document.getElementById(`crit-${key}`);
+  if (card) card.classList.toggle('collapsed');
 }
 
 function bandItem(score, label) {

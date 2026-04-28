@@ -548,6 +548,40 @@ input:focus, textarea:focus, select:focus {
 .word-count-badge.warn { background: var(--warning-light); color: var(--warning); }
 .word-count-info { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
 
+/* ─── WORD COUNT BAR ─────────────────────────────────────────────────────── */
+.word-count-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+.word-count-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.word-count-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  transition: width .25s ease, background-color .25s ease;
+  background: var(--gray-400);
+}
+.word-count-bar-fill.bar-low  { background: #ef4444; }
+.word-count-bar-fill.bar-warn { background: #f59e0b; }
+.word-count-bar-fill.bar-ok   { background: #10b981; }
+.word-count-bar-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-500);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
 /* ─── STATS GRID ────────────────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
@@ -1074,6 +1108,74 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.6;
   color: var(--gray-700);
 }
+
+/* ─── CRITERION ACCORDION ────────────────────────────────────────────────── */
+.criterion-card-header {
+  cursor: pointer;
+  user-select: none;
+}
+.criterion-card-header:hover { opacity: .85; }
+.criterion-chevron {
+  font-size: 14px;
+  color: var(--gray-400);
+  transition: transform .2s ease;
+  display: inline-block;
+}
+.criterion-card.collapsed .criterion-chevron { transform: rotate(-90deg); }
+.criterion-card.collapsed .criterion-body   { display: none; }
+.criterion-card .criterion-card-header { margin-bottom: 0; }
+.criterion-card:not(.collapsed) .criterion-card-header { margin-bottom: 12px; }
+
+/* ─── FIX SUMMARY CARD ───────────────────────────────────────────────────── */
+.fix-summary-card {
+  background: #fefce8;
+  border: 1.5px solid #fbbf24;
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+[data-theme="dark"] .fix-summary-card {
+  background: #2d2507;
+  border-color: #b45309;
+}
+.fix-summary-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0 0 14px;
+}
+[data-theme="dark"] .fix-summary-card h4 { color: #fcd34d; }
+.fix-items { display: flex; flex-direction: column; gap: 10px; }
+.fix-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.fix-number {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.fix-content { flex: 1; }
+.fix-criterion {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #92400e;
+  margin-bottom: 2px;
+}
+[data-theme="dark"] .fix-criterion { color: #fcd34d; }
+.fix-text {
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.55;
+}
+[data-theme="dark"] .fix-text { color: var(--gray-300); }
 
 /* ─── SENTENCE ANALYSIS ──────────────────────────────────────────────────── */
 .sentence-analysis-section { margin: 20px 0; }
