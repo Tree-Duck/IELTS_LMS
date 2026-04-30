@@ -1455,6 +1455,26 @@ input:focus, textarea:focus, select:focus {
   background: var(--gray-100);
 }
 
+/* ─── Assign Batch Toolbar ───────────────────────────────────────────────── */
+.assign-batch-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+}
+.assign-batch-toolbar.hidden { display: none; }
+[data-theme="dark"] .assign-batch-toolbar { background: #1e3a5f; border-color: #1e40af; color: #93c5fd; }
+.admin-table .assign-row-cb { cursor: pointer; accent-color: var(--primary); width: 15px; height: 15px; }
+.admin-table tr:has(.assign-row-cb:checked) { background: #eff6ff !important; }
+[data-theme="dark"] .admin-table tr:has(.assign-row-cb:checked) { background: #1e3a5f !important; }
+
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
 .badge {
   display: inline-block;

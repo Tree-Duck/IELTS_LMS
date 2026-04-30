@@ -4094,10 +4094,16 @@ async function loadAdminAssignments() {
     }
 
     el.innerHTML = `
+      <div id="assign-batch-toolbar" class="assign-batch-toolbar hidden">
+        <span id="assign-batch-count">0 selected</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteSelectedAssignments()">🗑 Delete Selected</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAssignSelection()">✕ Clear</button>
+      </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
             <tr>
+              <th style="width:36px"><input type="checkbox" id="assign-select-all" onchange="toggleAssignSelectAll(this)" title="Select all"></th>
               <th>Title</th>
               <th>Type</th>
               <th>Assigned To</th>
@@ -4111,7 +4117,6 @@ async function loadAdminAssignments() {
               const now = new Date();
               const dl = new Date(a.deadline);
               const overdue = dl < now;
-              // Who it's assigned to
               let assignedLabel;
               if (!a.assigned_to || a.assigned_to.length === 0) {
                 assignedLabel = '<span class="badge badge-gray">All students</span>';
@@ -4122,6 +4127,7 @@ async function loadAdminAssignments() {
               }
               return `
                 <tr>
+                  <td><input type="checkbox" class="assign-row-cb" value="${a.id}" onchange="updateBatchToolbar()"></td>
                   <td><strong>${a.title}</strong>${a.description ? `<br><small class="text-muted">${a.description.slice(0,60)}${a.description.length>60?'…':''}</small>` : ''}</td>
                   <td><span class="badge badge-gray">${a.type.replace('_', ' ')}</span></td>
                   <td>${assignedLabel}</td>
@@ -4269,6 +4275,49 @@ async function confirmDeleteAssignment(id, title) {
   } catch (err) {
     alert('Failed to delete: ' + err.message);
   }
+}
+
+/* ─── Batch Assignment Actions ────────────────────────────────────────────── */
+
+function updateBatchToolbar() {
+  const cbs = document.querySelectorAll('.assign-row-cb:checked');
+  const toolbar = document.getElementById('assign-batch-toolbar');
+  const countEl = document.getElementById('assign-batch-count');
+  const selectAll = document.getElementById('assign-select-all');
+  const all = document.querySelectorAll('.assign-row-cb');
+  if (toolbar) toolbar.classList.toggle('hidden', cbs.length === 0);
+  if (countEl) countEl.textContent = `${cbs.length} selected`;
+  if (selectAll) selectAll.indeterminate = cbs.length > 0 && cbs.length < all.length;
+  if (selectAll && cbs.length === all.length && all.length > 0) selectAll.checked = true;
+}
+
+function toggleAssignSelectAll(masterCb) {
+  document.querySelectorAll('.assign-row-cb').forEach(cb => { cb.checked = masterCb.checked; });
+  updateBatchToolbar();
+}
+
+function clearAssignSelection() {
+  document.querySelectorAll('.assign-row-cb').forEach(cb => { cb.checked = false; });
+  const masterCb = document.getElementById('assign-select-all');
+  if (masterCb) { masterCb.checked = false; masterCb.indeterminate = false; }
+  updateBatchToolbar();
+}
+
+async function deleteSelectedAssignments() {
+  const checked = [...document.querySelectorAll('.assign-row-cb:checked')];
+  if (!checked.length) return;
+  const n = checked.length;
+
+  if (!confirm(`Delete ${n} assignment${n > 1 ? 's' : ''}?\n\nThis removes all student completion records too. Cannot be undone.`)) return;
+
+  const ids = checked.map(cb => parseInt(cb.value, 10));
+  let failed = 0;
+  for (const id of ids) {
+    try { await api(`/api/admin/assignments/${id}`, { method: 'DELETE' }); }
+    catch { failed++; }
+  }
+  if (failed) alert(`${failed} deletion${failed > 1 ? 's' : ''} failed.`);
+  loadAdminAssignments();
 }
 
 /* ─── Assign Students Toggle ──────────────────────────────────────────────── */
