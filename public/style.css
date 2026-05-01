@@ -2872,6 +2872,11 @@ input:focus, textarea:focus, select:focus {
 }
 .diff-added { background: #bbf7d0; border-radius: 2px; }
 .diff-removed { background: #fecaca; border-radius: 2px; text-decoration: line-through; }
+/* LCS diff: ins = rewritten additions, del = original deletions */
+.rewrite-diff-view ins { background: #d1fae5; color: #065f46; text-decoration: none; border-radius: 2px; padding: 0 2px; }
+.rewrite-diff-view del { background: #fee2e2; color: #991b1b; text-decoration: line-through; border-radius: 2px; padding: 0 2px; }
+[data-theme="dark"] .rewrite-diff-view ins { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .rewrite-diff-view del { background: #450a0a; color: #fca5a5; }
 @media (max-width: 700px) {
   .essay-diff-container { grid-template-columns: 1fr; }
 }
@@ -3397,4 +3402,85 @@ input:focus, textarea:focus, select:focus {
   margin: 4px 0 8px;
 }
 [data-theme="dark"] .hw-card-prompt { color: var(--gray-400); }
+
+/* ─── Teacher Inline Essay Annotations ─────────────────────────────────── */
+.annotation-section { margin-bottom: 16px; }
+.annotation-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.annotation-legend { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+.ann-type { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.ann-type.grammar    { background: #fee2e2; color: #991b1b; }
+.ann-type.vocabulary { background: #fef3c7; color: #92400e; }
+.ann-type.argument   { background: #dbeafe; color: #1e40af; }
+.ann-type.structure  { background: #ede9fe; color: #5b21b6; }
+.ann-type.strength   { background: #d1fae5; color: #065f46; }
+[data-theme="dark"] .ann-type.grammar    { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .ann-type.vocabulary { background: #451a03; color: #fcd34d; }
+[data-theme="dark"] .ann-type.argument   { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .ann-type.structure  { background: #2e1065; color: #c4b5fd; }
+[data-theme="dark"] .ann-type.strength   { background: #064e3b; color: #6ee7b7; }
+
+.annotatable-essay {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  font-size: .9rem;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  max-height: 380px;
+  overflow-y: auto;
+  cursor: text;
+  user-select: text;
+}
+.annotated-essay-view { cursor: default; user-select: text; }
+
+.ann-mark { cursor: pointer; border-radius: 2px; padding: 0 1px; }
+.ann-mark.ann-grammar    { background: #fee2e2; border-bottom: 2px solid #ef4444; }
+.ann-mark.ann-vocabulary { background: #fef3c7; border-bottom: 2px solid #f59e0b; }
+.ann-mark.ann-argument   { background: #dbeafe; border-bottom: 2px solid #3b82f6; }
+.ann-mark.ann-structure  { background: #ede9fe; border-bottom: 2px solid #8b5cf6; }
+.ann-mark.ann-strength   { background: #d1fae5; border-bottom: 2px solid #10b981; }
+[data-theme="dark"] .ann-mark.ann-grammar    { background: #450a0a44; border-color: #f87171; }
+[data-theme="dark"] .ann-mark.ann-vocabulary { background: #451a0344; border-color: #fbbf24; }
+[data-theme="dark"] .ann-mark.ann-argument   { background: #1e3a5f44; border-color: #60a5fa; }
+[data-theme="dark"] .ann-mark.ann-structure  { background: #2e106544; border-color: #a78bfa; }
+[data-theme="dark"] .ann-mark.ann-strength   { background: #064e3b44; border-color: #34d399; }
+
+.ann-popup {
+  position: fixed;
+  z-index: 9999;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  min-width: 260px;
+}
+.ann-type-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.ann-type-btn {
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: .72rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--gray-600);
+  transition: all .15s;
+}
+.ann-type-btn.selected,
+.ann-type-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+.ann-tooltip {
+  position: fixed;
+  z-index: 10000;
+  background: #1f2937;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: .8rem;
+  max-width: 220px;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
 

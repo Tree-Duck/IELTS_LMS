@@ -145,7 +145,7 @@ const db = {
       });
   },
 
-  insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd, graded_by = null) {
+  insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd, graded_by = null, annotations = null) {
     const data = load();
     data._ids.feedback = (data._ids.feedback || 0) + 1;
     data.feedback.push({
@@ -159,9 +159,19 @@ const db = {
       tokens_used: tokens_used || null,
       cost_usd: cost_usd || null,
       graded_by: graded_by || null,
+      annotations: annotations ? (typeof annotations === 'string' ? JSON.parse(annotations) : annotations) : [],
       graded_at: new Date().toISOString()
     });
     save(data);
+  },
+
+  updateAnnotations(submission_id, annotations) {
+    const data = load();
+    const fb = data.feedback.find(f => f.submission_id === submission_id);
+    if (fb) {
+      fb.annotations = Array.isArray(annotations) ? annotations : [];
+      save(data);
+    }
   },
 
   logUsage(type, cost_usd, tokens) {

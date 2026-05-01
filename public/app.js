@@ -2084,12 +2084,29 @@ function renderFeedback(s) {
     }
   }
 
-  // Original essay
-  html += `
-    <div class="feedback-section">
-      <h3>Your Essay</h3>
-      <div class="essay-box">${escHtml(s.essay)}</div>
-    </div>`;
+  // Original essay (with inline annotations if any)
+  const feedbackAnnotations = s.annotations && Array.isArray(s.annotations) && s.annotations.length > 0 ? s.annotations : null;
+  if (feedbackAnnotations) {
+    // Render annotated essay with colored marks (read-only)
+    html += `
+      <div class="feedback-section">
+        <h3>Your Essay <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">(teacher annotations shown)</span></h3>
+        <div class="annotation-legend">
+          <span class="ann-type grammar">Grammar</span>
+          <span class="ann-type vocabulary">Vocabulary</span>
+          <span class="ann-type argument">Argument</span>
+          <span class="ann-type structure">Structure</span>
+          <span class="ann-type strength">Strength</span>
+        </div>
+        <div class="essay-box annotated-essay-view" id="annotated-essay-view"></div>
+      </div>`;
+  } else {
+    html += `
+      <div class="feedback-section">
+        <h3>Your Essay</h3>
+        <div class="essay-box">${escHtml(s.essay)}</div>
+      </div>`;
+  }
 
   // Teacher comments (visible to student)
   const comments = Array.isArray(s.comments) ? s.comments : [];
@@ -2123,6 +2140,12 @@ function renderFeedback(s) {
   }
 
   document.getElementById('feedback-content').innerHTML = html;
+
+  // Render annotated essay read-only view (must be after DOM update)
+  if (feedbackAnnotations) {
+    const annViewEl = document.getElementById('annotated-essay-view');
+    if (annViewEl) renderAnnotatedEssay(annViewEl, s.essay, feedbackAnnotations, true);
+  }
 
   // Draw radar chart after DOM update
   if (s.status === 'graded' && s.overall_band != null) {
@@ -2254,17 +2277,14 @@ function renderRewriteMarkdown(text) {
     html += `<div class="diff-toggle-bar">`;
     html += `<h3 style="margin:0">Rewritten Essay <span class="band-chip band-8">Target: Band 8+</span></h3>`;
     if (originalEssay) {
-      html += `<button class="btn btn-secondary btn-sm" onclick="toggleDiffView(this)" data-mode="plain">⇔ Compare</button>`;
+      html += `<button class="btn btn-secondary btn-sm" onclick="toggleDiffView(this)" data-mode="diff">📄 Plain View</button>`;
     }
     html += `</div>`;
 
-    // Plain view
-    html += `<div class="rewrite-essay-box" id="rewrite-plain-view">${escHtml(essayText)}</div>`;
-
-    // Diff view (hidden initially)
+    // Diff view (shown by default when original available)
     if (originalEssay) {
       const diffHtml = buildWordDiff(originalEssay, essayText);
-      html += `<div class="essay-diff-container hidden" id="rewrite-diff-view">
+      html += `<div class="essay-diff-container rewrite-diff-view" id="rewrite-diff-view">
         <div class="essay-diff-panel">
           <h4>Original</h4>
           <div class="diff-original">${diffHtml.original}</div>
@@ -2275,6 +2295,10 @@ function renderRewriteMarkdown(text) {
         </div>
       </div>`;
     }
+
+    // Plain view (hidden initially when diff available)
+    html += `<div class="rewrite-essay-box${originalEssay ? ' hidden' : ''}" id="rewrite-plain-view">${escHtml(essayText)}</div>`;
+
     html += `</div>`;
 
     // What Changed part
@@ -2301,43 +2325,61 @@ function toggleDiffView(btn) {
   const plain = document.getElementById('rewrite-plain-view');
   const diff = document.getElementById('rewrite-diff-view');
   if (!plain || !diff) return;
-  if (btn.dataset.mode === 'plain') {
-    plain.classList.add('hidden');
-    diff.classList.remove('hidden');
-    btn.dataset.mode = 'diff';
-    btn.textContent = '📄 Plain View';
-  } else {
+  if (btn.dataset.mode === 'diff') {
+    // currently showing diff → switch to plain
     diff.classList.add('hidden');
     plain.classList.remove('hidden');
     btn.dataset.mode = 'plain';
     btn.textContent = '⇔ Compare';
+  } else {
+    // currently showing plain → switch to diff
+    plain.classList.add('hidden');
+    diff.classList.remove('hidden');
+    btn.dataset.mode = 'diff';
+    btn.textContent = '📄 Plain View';
   }
 }
 
-// Simple word-level diff — returns { original: html, rewritten: html }
+// LCS-based word-level diff — returns { original: html, rewritten: html }
 function buildWordDiff(original, rewritten) {
-  const origWords = original.split(/(\s+)/);
-  const rewWords = rewritten.split(/(\s+)/);
+  // Tokenize preserving whitespace tokens
+  const tokA = original.split(/(\s+)/);
+  const tokB = rewritten.split(/(\s+)/);
+  const m = tokA.length, n = tokB.length;
 
-  // Build a lookup of rewritten words for quick comparison
-  const rewSet = new Set(rewWords.map(w => w.trim().toLowerCase()).filter(Boolean));
-  const origSet = new Set(origWords.map(w => w.trim().toLowerCase()).filter(Boolean));
+  // Build LCS DP table (space-optimised: only two rows needed but full table for traceback)
+  const dp = Array.from({ length: m + 1 }, () => new Uint16Array(n + 1));
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      if (tokA[i] === tokB[j]) {
+        dp[i][j] = dp[i + 1][j + 1] + 1;
+      } else {
+        dp[i][j] = dp[i + 1][j] > dp[i][j + 1] ? dp[i + 1][j] : dp[i][j + 1];
+      }
+    }
+  }
 
-  const origHtml = origWords.map(w => {
-    if (!w.trim()) return w; // preserve whitespace
-    const lw = w.trim().toLowerCase().replace(/[^a-z]/g, '');
-    if (lw && !rewSet.has(lw)) return `<span class="diff-removed">${escHtml(w)}</span>`;
-    return escHtml(w);
-  }).join('');
+  // Traceback to build annotated output
+  let i = 0, j = 0, outA = '', outB = '';
+  while (i < m || j < n) {
+    if (i < m && j < n && tokA[i] === tokB[j]) {
+      outA += escHtml(tokA[i]);
+      outB += escHtml(tokB[j]);
+      i++; j++;
+    } else if (j < n && (i >= m || dp[i][j + 1] >= dp[i + 1][j])) {
+      // Token only in rewritten — insertion
+      if (!tokB[j].trim()) { outB += escHtml(tokB[j]); }
+      else { outB += `<ins>${escHtml(tokB[j])}</ins>`; }
+      j++;
+    } else {
+      // Token only in original — deletion
+      if (!tokA[i].trim()) { outA += escHtml(tokA[i]); }
+      else { outA += `<del>${escHtml(tokA[i])}</del>`; }
+      i++;
+    }
+  }
 
-  const rewHtml = rewWords.map(w => {
-    if (!w.trim()) return w;
-    const lw = w.trim().toLowerCase().replace(/[^a-z]/g, '');
-    if (lw && !origSet.has(lw)) return `<span class="diff-added">${escHtml(w)}</span>`;
-    return escHtml(w);
-  }).join('');
-
-  return { original: origHtml, rewritten: rewHtml };
+  return { original: outA, rewritten: outB };
 }
 
 /* ─── Mock Tests — List View ─────────────────────────────────────────────── */
@@ -3822,6 +3864,8 @@ async function loadGradeQueue() {
       listEl.innerHTML = '<div class="empty-state">🎉 No essays awaiting review. Queue is empty!</div>';
       return;
     }
+    window._queueData = {};
+    items.forEach(s => { window._queueData[s.id] = s; });
     listEl.innerHTML = items.map(s => renderQueueItem(s)).join('');
   } catch (err) {
     listEl.innerHTML = `<div class="empty-state">Failed to load grade queue: ${escHtml(err.message)}</div>`;
@@ -3876,10 +3920,31 @@ function openGradingPanel(id) {
   }
   const bandSel = bandOptions.join('');
 
-  const taLabel = ''; // will be set dynamically per task type, keep generic for now
+  // Get essay text for annotation
+  const queueItem = window._queueData && window._queueData[id];
+  const essayText = queueItem ? (queueItem.essay || '') : '';
+  const existingAnnotations = (queueItem && queueItem.annotations) ? queueItem.annotations : [];
+
+  const annotationSection = essayText ? `
+    <div class="annotation-section">
+      <div class="annotation-section-header">
+        <span style="font-weight:600;font-size:.9rem">📝 Inline Annotations</span>
+        <span style="font-size:.78rem;color:var(--gray-500)">Select text in essay to annotate</span>
+      </div>
+      <div class="annotation-legend">
+        <span class="ann-type grammar">Grammar</span>
+        <span class="ann-type vocabulary">Vocabulary</span>
+        <span class="ann-type argument">Argument</span>
+        <span class="ann-type structure">Structure</span>
+        <span class="ann-type strength">Strength</span>
+      </div>
+      <div class="annotatable-essay" id="annotatable-essay-${id}"></div>
+    </div>` : '';
+
   panel.innerHTML = `
     <div class="grading-form">
       <h4>✏️ Manual Grading</h4>
+      ${annotationSection}
       <div class="band-input-grid">
         <div class="band-input-row">
           <label>Task Achievement / Response</label>
@@ -3925,6 +3990,13 @@ function openGradingPanel(id) {
     </div>`;
   panel.classList.remove('hidden');
   updateGradingOverall(id);
+
+  // Initialize annotation panel if essay available
+  if (essayText) {
+    if (!window._annotations) window._annotations = {};
+    window._annotations[id] = existingAnnotations.slice();
+    initAnnotationPanel(id, essayText, window._annotations[id]);
+  }
 }
 
 async function getAISuggest(id) {
@@ -3978,6 +4050,166 @@ function updateGradingOverall(id) {
   if (el) el.textContent = overall;
 }
 
+/* ─── Teacher Inline Essay Annotations ──────────────────────────────────── */
+
+function initAnnotationPanel(subId, essayText, existingAnnotations) {
+  const container = document.getElementById(`annotatable-essay-${subId}`);
+  if (!container) return;
+  renderAnnotatedEssay(container, essayText, existingAnnotations);
+  container.addEventListener('mouseup', (e) => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+    // Compute offsets relative to plain-text essay
+    const range = sel.getRangeAt(0);
+    const preRange = document.createRange();
+    preRange.selectNodeContents(container);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const start = preRange.toString().length;
+    const selectedText = sel.toString();
+    const end = start + selectedText.length;
+    sel.removeAllRanges();
+    showAnnotationPopup(subId, start, end, selectedText, e.clientX, e.clientY);
+  });
+}
+
+function renderAnnotatedEssay(container, essayText, annotations, readOnly = false) {
+  if (!annotations || !annotations.length) {
+    container.textContent = essayText;
+    return;
+  }
+  // Sort by start offset
+  const sorted = [...annotations].sort((a, b) => a.start_offset - b.start_offset);
+  let html = '';
+  let pos = 0;
+  for (const ann of sorted) {
+    if (ann.start_offset > pos) {
+      html += escHtml(essayText.slice(pos, ann.start_offset));
+    }
+    const safeComment = escHtml(ann.comment || '');
+    html += `<mark class="ann-mark ann-${ann.type}" data-ann-id="${ann.id}" data-comment="${safeComment}" data-type="${ann.type}">${escHtml(essayText.slice(ann.start_offset, ann.end_offset))}</mark>`;
+    pos = ann.end_offset;
+  }
+  if (pos < essayText.length) {
+    html += escHtml(essayText.slice(pos));
+  }
+  container.innerHTML = html;
+
+  // Attach tooltip events
+  container.querySelectorAll('.ann-mark').forEach(mark => {
+    if (!readOnly) {
+      mark.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const annId = mark.dataset.annId;
+        showAnnotationDeleteMenu(mark, annId);
+      });
+    }
+    mark.addEventListener('mouseenter', (e) => showAnnTooltip(e, mark));
+    mark.addEventListener('mouseleave', hideAnnTooltip);
+  });
+}
+
+function showAnnotationPopup(subId, start, end, selectedText, clientX, clientY) {
+  // Remove existing popup
+  document.querySelectorAll('.ann-popup').forEach(p => p.remove());
+
+  const types = ['grammar', 'vocabulary', 'argument', 'structure', 'strength'];
+  let selectedType = 'grammar';
+
+  const popup = document.createElement('div');
+  popup.className = 'ann-popup';
+  popup.style.cssText = `left:${Math.min(clientX, window.innerWidth - 280)}px;top:${Math.min(clientY + 8, window.innerHeight - 200)}px`;
+  popup.innerHTML = `
+    <div style="font-size:.8rem;font-weight:600;margin-bottom:6px">Annotate: "<em>${escHtml(selectedText.slice(0, 40))}${selectedText.length > 40 ? '…' : ''}</em>"</div>
+    <div class="ann-type-row" id="ann-type-row">
+      ${types.map(t => `<button class="ann-type-btn ann-type-btn-${t}${t === selectedType ? ' selected' : ''}" onclick="selectAnnType(this,'${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('')}
+    </div>
+    <textarea id="ann-comment-input" class="form-input" rows="2" placeholder="Comment (optional)" style="margin-bottom:6px;font-size:.82rem"></textarea>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-primary btn-sm" onclick="saveAnnotation(${subId},${start},${end})">Save</button>
+      <button class="btn btn-outline btn-sm" onclick="this.closest('.ann-popup').remove()">Cancel</button>
+    </div>`;
+
+  document.body.appendChild(popup);
+  popup.querySelector('#ann-comment-input').focus();
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('click', handler); }
+    });
+  }, 10);
+}
+
+window._annSelectedType = 'grammar';
+function selectAnnType(btn, type) {
+  window._annSelectedType = type;
+  btn.closest('.ann-type-row').querySelectorAll('.ann-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function saveAnnotation(subId, start, end) {
+  const popup = document.querySelector('.ann-popup');
+  const comment = popup ? (popup.querySelector('#ann-comment-input')?.value.trim() || '') : '';
+  const type = window._annSelectedType || 'grammar';
+  if (popup) popup.remove();
+
+  if (!window._annotations) window._annotations = {};
+  if (!window._annotations[subId]) window._annotations[subId] = [];
+
+  const ann = { id: Date.now().toString(), start_offset: start, end_offset: end, comment, type };
+  window._annotations[subId].push(ann);
+
+  const qd = window._queueData && window._queueData[subId];
+  const essayText = qd ? (qd.essay || '') : '';
+  const container = document.getElementById(`annotatable-essay-${subId}`);
+  if (container && essayText) renderAnnotatedEssay(container, essayText, window._annotations[subId]);
+}
+
+function showAnnotationDeleteMenu(mark, annId) {
+  document.querySelectorAll('.ann-delete-menu').forEach(m => m.remove());
+  const rect = mark.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'ann-popup ann-delete-menu';
+  menu.style.cssText = `left:${rect.left}px;top:${rect.bottom + 4}px;min-width:120px`;
+  menu.innerHTML = `<button class="btn btn-danger btn-sm" style="width:100%" onclick="deleteAnnotation(this,'${annId}')">🗑 Remove annotation</button>`;
+  document.body.appendChild(menu);
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', handler); }
+    });
+  }, 10);
+}
+
+function deleteAnnotation(btn, annId) {
+  btn.closest('.ann-delete-menu').remove();
+  // Find subId from annotatable-essay container
+  const container = document.querySelector('.annotatable-essay');
+  if (!container) return;
+  const subId = container.id.replace('annotatable-essay-', '');
+  if (!window._annotations || !window._annotations[subId]) return;
+  window._annotations[subId] = window._annotations[subId].filter(a => a.id !== annId);
+  const qd = window._queueData && window._queueData[subId];
+  const essayText = qd ? (qd.essay || '') : '';
+  if (essayText) renderAnnotatedEssay(container, essayText, window._annotations[subId]);
+}
+
+let _annTooltipEl = null;
+function showAnnTooltip(e, mark) {
+  hideAnnTooltip();
+  const comment = mark.dataset.comment;
+  const type = mark.dataset.type;
+  if (!comment && !type) return;
+  const tip = document.createElement('div');
+  tip.className = 'ann-tooltip';
+  tip.innerHTML = `<strong>${type ? type.charAt(0).toUpperCase()+type.slice(1) : ''}</strong>${comment ? ': ' + escHtml(comment) : ''}`;
+  tip.style.cssText = `left:${e.clientX + 12}px;top:${e.clientY - 8}px`;
+  document.body.appendChild(tip);
+  _annTooltipEl = tip;
+}
+function hideAnnTooltip() {
+  if (_annTooltipEl) { _annTooltipEl.remove(); _annTooltipEl = null; }
+}
+
 async function submitManualGrade(id) {
   const errEl = document.getElementById(`gp-error-${id}`);
   errEl.classList.add('hidden');
@@ -3999,10 +4231,12 @@ async function submitManualGrade(id) {
   const strengths = strengthsRaw.split('\n').map(s => s.trim()).filter(Boolean);
   const improvements = improvementsRaw.split('\n').map(s => s.trim()).filter(Boolean);
 
+  const annotations = (window._annotations && window._annotations[id]) || [];
+
   try {
     await api(`/api/admin/submissions/${id}/grade`, {
       method: 'POST',
-      body: JSON.stringify({ task_achievement: ta, coherence_cohesion: cc, lexical_resource: lr, grammatical_range: gra, detailed_feedback: feedback, strengths, improvements })
+      body: JSON.stringify({ task_achievement: ta, coherence_cohesion: cc, lexical_resource: lr, grammatical_range: gra, detailed_feedback: feedback, strengths, improvements, annotations })
     });
     // Remove from queue
     const item = document.getElementById(`queue-item-${id}`);

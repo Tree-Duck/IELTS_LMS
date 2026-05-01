@@ -1418,7 +1418,7 @@ app.post('/api/admin/submissions/:id/grade', authenticate, teacherOrAdmin, (req,
   try {
     const subId = parseInt(req.params.id, 10);
     const { task_achievement, coherence_cohesion, lexical_resource, grammatical_range,
-            detailed_feedback, strengths, improvements } = req.body;
+            detailed_feedback, strengths, improvements, annotations } = req.body;
 
     // Validate band scores
     const vals = [task_achievement, coherence_cohesion, lexical_resource, grammatical_range];
@@ -1448,7 +1448,8 @@ app.post('/api/admin/submissions/:id/grade', authenticate, teacherOrAdmin, (req,
       parseList(improvements),
       null, null, null,   // sentence_analysis, criterion_details, overall_improvements
       null, null,         // tokens_used, cost_usd
-      req.user.id         // graded_by (teacher/admin user ID)
+      req.user.id,        // graded_by (teacher/admin user ID)
+      annotations || null // inline essay annotations
     );
     db.updateSubmissionStatus(subId, 'graded');
     try { db.updateStreak(sub.user_id); } catch (e) { console.error('Streak error:', e); }
@@ -1457,6 +1458,22 @@ app.post('/api/admin/submissions/:id/grade', authenticate, teacherOrAdmin, (req,
   } catch (err) {
     console.error('Manual grade error:', err);
     res.status(500).json({ error: 'Failed to submit grade' });
+  }
+});
+
+// Teacher/admin saves inline essay annotations (can be called independently)
+app.put('/api/admin/submissions/:id/annotations', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const { annotations } = req.body;
+    if (!Array.isArray(annotations)) return res.status(400).json({ error: 'annotations must be array' });
+    const sub = db.getSubmissionByIdAdmin(subId);
+    if (!sub) return res.status(404).json({ error: 'Submission not found' });
+    db.updateAnnotations(subId, annotations);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Annotations update error:', err);
+    res.status(500).json({ error: 'Failed to save annotations' });
   }
 });
 
