@@ -3484,3 +3484,106 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 4px 12px rgba(0,0,0,.25);
 }
 
+/* ─── Attendance / Classes ───────────────────────────────────────────────── */
+.class-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  gap: 16px;
+}
+.class-card-name {
+  font-weight: 600;
+  font-size: .95rem;
+  color: var(--text-primary);
+}
+.class-card-desc {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.class-card-meta {
+  font-size: .78rem;
+  color: var(--gray-400);
+  margin-top: 4px;
+}
+.class-card-actions {
+  flex-shrink: 0;
+}
+.class-detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Attendance modal */
+.attendance-modal-box {
+  max-width: 680px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.modal-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.attendance-sheet {
+  overflow-x: auto;
+}
+
+/* Status badges for attendance */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: .78rem;
+  font-weight: 600;
+}
+.att-present { background: #dcfce7; color: #166534; }
+.att-late    { background: #fef9c3; color: #854d0e; }
+.att-absent  { background: #fee2e2; color: #991b1b; }
+.att-excused { background: #ede9fe; color: #4c1d95; }
+[data-theme="dark"] .att-present { background: #14532d; color: #86efac; }
+[data-theme="dark"] .att-late    { background: #422006; color: #fde68a; }
+[data-theme="dark"] .att-absent  { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .att-excused { background: #2e1065; color: #c4b5fd; }
+
+.attendance-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+
+/* FullCalendar dark mode tweaks */
+[data-theme="dark"] .fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--bg-card);
+  --fc-neutral-bg-color: var(--bg-secondary);
+  --fc-today-bg-color: rgba(99,102,241,.15);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .fc .fc-col-header-cell-cushion,
+[data-theme="dark"] .fc .fc-daygrid-day-number { color: var(--text-primary); }
+
+/* mb-4 utility */
+.mb-4 { margin-bottom: 1rem; }
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+.btn-danger:hover { background: #dc2626; }
+

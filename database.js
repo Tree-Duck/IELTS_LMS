@@ -312,6 +312,9 @@ const db = {
     if (data.test_attempts) data.test_attempts = data.test_attempts.filter(a => a.user_id !== userId);
     // Cascade: remove assignment completions
     if (data.assignment_completions) data.assignment_completions = data.assignment_completions.filter(c => c.user_id !== userId);
+    // Cascade: remove class enrollments and attendance records
+    if (data.class_enrollments) data.class_enrollments = data.class_enrollments.filter(e => e.user_id !== userId);
+    if (data.attendance_records) data.attendance_records = data.attendance_records.filter(r => r.user_id !== userId);
     save(data);
     return true;
   },
@@ -699,7 +702,187 @@ const db = {
     return true;
   },
 
-  // Cost breakdown by operation type for admin panel
+  // ── Classes ────────────────────────────────────────────────────────────────
+
+  insertClass(name, description, teacher_id) {
+    const data = load();
+    if (!data.classes) data.classes = [];
+    if (!data._ids.classes) data._ids.classes = 0;
+    data._ids.classes += 1;
+    const cls = { id: data._ids.classes, name, description: description || '', teacher_id, created_at: new Date().toISOString() };
+    data.classes.push(cls);
+    save(data);
+    return cls.id;
+  },
+
+  getClassById(id) {
+    return (load().classes || []).find(c => c.id === id) || null;
+  },
+
+  getClassesByTeacher(teacher_id) {
+    return (load().classes || []).filter(c => c.teacher_id === teacher_id);
+  },
+
+  getAllClasses() {
+    return load().classes || [];
+  },
+
+  updateClass(id, { name, description }) {
+    const data = load();
+    const cls = (data.classes || []).find(c => c.id === id);
+    if (!cls) return false;
+    if (name !== undefined) cls.name = name;
+    if (description !== undefined) cls.description = description;
+    save(data);
+    return true;
+  },
+
+  deleteClass(id) {
+    const data = load();
+    const idx = (data.classes || []).findIndex(c => c.id === id);
+    if (idx === -1) return false;
+    data.classes.splice(idx, 1);
+    // Cascade
+    data.class_enrollments = (data.class_enrollments || []).filter(e => e.class_id !== id);
+    const sessionIds = (data.attendance_sessions || []).filter(s => s.class_id === id).map(s => s.id);
+    data.attendance_sessions = (data.attendance_sessions || []).filter(s => s.class_id !== id);
+    data.attendance_records = (data.attendance_records || []).filter(r => !sessionIds.includes(r.session_id));
+    save(data);
+    return true;
+  },
+
+  // ── Class Enrollments ──────────────────────────────────────────────────────
+
+  enrollStudent(class_id, user_id) {
+    const data = load();
+    if (!data.class_enrollments) data.class_enrollments = [];
+    if (!data._ids.class_enrollments) data._ids.class_enrollments = 0;
+    if (data.class_enrollments.find(e => e.class_id === class_id && e.user_id === user_id)) return null; // already enrolled
+    data._ids.class_enrollments += 1;
+    const enrollment = { id: data._ids.class_enrollments, class_id, user_id, enrolled_at: new Date().toISOString() };
+    data.class_enrollments.push(enrollment);
+    save(data);
+    return enrollment.id;
+  },
+
+  unenrollStudent(class_id, user_id) {
+    const data = load();
+    const idx = (data.class_enrollments || []).findIndex(e => e.class_id === class_id && e.user_id === user_id);
+    if (idx === -1) return false;
+    data.class_enrollments.splice(idx, 1);
+    save(data);
+    return true;
+  },
+
+  getClassStudents(class_id) {
+    const data = load();
+    const enrollments = (data.class_enrollments || []).filter(e => e.class_id === class_id);
+    return enrollments.map(e => {
+      const u = (data.users || []).find(u => u.id === e.user_id) || {};
+      return { user_id: e.user_id, name: u.name || 'Unknown', email: u.email || '', enrolled_at: e.enrolled_at };
+    });
+  },
+
+  getStudentClasses(user_id) {
+    const data = load();
+    const enrollments = (data.class_enrollments || []).filter(e => e.user_id === user_id);
+    return enrollments.map(e => {
+      const cls = (data.classes || []).find(c => c.id === e.class_id) || {};
+      const teacher = (data.users || []).find(u => u.id === cls.teacher_id) || {};
+      return { class_id: e.class_id, name: cls.name || 'Unknown', description: cls.description || '', teacher_name: teacher.name || 'Unknown', enrolled_at: e.enrolled_at };
+    });
+  },
+
+  // ── Attendance Sessions ────────────────────────────────────────────────────
+
+  insertSession(class_id, session_date, created_by) {
+    const data = load();
+    if (!data.attendance_sessions) data.attendance_sessions = [];
+    if (!data._ids.attendance_sessions) data._ids.attendance_sessions = 0;
+    // Prevent duplicate sessions on the same date for same class
+    const existing = data.attendance_sessions.find(s => s.class_id === class_id && s.session_date === session_date);
+    if (existing) return existing.id;
+    data._ids.attendance_sessions += 1;
+    const session = { id: data._ids.attendance_sessions, class_id, session_date, created_by, created_at: new Date().toISOString() };
+    data.attendance_sessions.push(session);
+    save(data);
+    return session.id;
+  },
+
+  getSessionsByClass(class_id) {
+    return (load().attendance_sessions || []).filter(s => s.class_id === class_id).sort((a, b) => a.session_date.localeCompare(b.session_date));
+  },
+
+  getSessionById(id) {
+    return (load().attendance_sessions || []).find(s => s.id === id) || null;
+  },
+
+  deleteSession(id) {
+    const data = load();
+    const idx = (data.attendance_sessions || []).findIndex(s => s.id === id);
+    if (idx === -1) return false;
+    data.attendance_sessions.splice(idx, 1);
+    data.attendance_records = (data.attendance_records || []).filter(r => r.session_id !== id);
+    save(data);
+    return true;
+  },
+
+  // ── Attendance Records ─────────────────────────────────────────────────────
+
+  upsertAttendanceRecord(session_id, class_id, user_id, status, notes, marked_by) {
+    const data = load();
+    if (!data.attendance_records) data.attendance_records = [];
+    if (!data._ids.attendance_records) data._ids.attendance_records = 0;
+    const existing = data.attendance_records.find(r => r.session_id === session_id && r.user_id === user_id);
+    if (existing) {
+      existing.status = status;
+      existing.notes = notes || null;
+      existing.marked_by = marked_by;
+      existing.marked_at = new Date().toISOString();
+      save(data);
+      return existing.id;
+    }
+    data._ids.attendance_records += 1;
+    const record = { id: data._ids.attendance_records, session_id, class_id, user_id, status, notes: notes || null, marked_by, marked_at: new Date().toISOString() };
+    data.attendance_records.push(record);
+    save(data);
+    return record.id;
+  },
+
+  getAttendanceBySession(session_id) {
+    const data = load();
+    const records = (data.attendance_records || []).filter(r => r.session_id === session_id);
+    return records.map(r => {
+      const u = (data.users || []).find(u => u.id === r.user_id) || {};
+      return { ...r, student_name: u.name || 'Unknown', student_email: u.email || '' };
+    });
+  },
+
+  getAttendanceByStudent(user_id, class_id) {
+    const data = load();
+    const sessionIds = (data.attendance_sessions || []).filter(s => s.class_id === class_id).map(s => s.id);
+    return (data.attendance_records || []).filter(r => r.user_id === user_id && sessionIds.includes(r.session_id));
+  },
+
+  getAttendanceStats(class_id) {
+    const data = load();
+    const sessions = (data.attendance_sessions || []).filter(s => s.class_id === class_id);
+    const sessionIds = sessions.map(s => s.id);
+    const enrollments = (data.class_enrollments || []).filter(e => e.class_id === class_id);
+    return enrollments.map(e => {
+      const u = (data.users || []).find(u => u.id === e.user_id) || {};
+      const records = (data.attendance_records || []).filter(r => r.user_id === e.user_id && sessionIds.includes(r.session_id));
+      const present = records.filter(r => r.status === 'present').length;
+      const late = records.filter(r => r.status === 'late').length;
+      const absent = records.filter(r => r.status === 'absent').length;
+      const excused = records.filter(r => r.status === 'excused').length;
+      const total = sessions.length;
+      const rate = total > 0 ? Math.round(((present + late) / total) * 100) : null;
+      return { user_id: e.user_id, name: u.name || 'Unknown', email: u.email || '', present, late, absent, excused, total_sessions: total, attendance_rate: rate };
+    });
+  },
+
+  // ── Cost breakdown by operation type for admin panel
   getCostBreakdown() {
     const data = load();
     const breakdown = {};
@@ -776,6 +959,14 @@ const db = {
   if (!data.settings) { data.settings = {}; changed = true; }
   if (!data.task1_topics) { data.task1_topics = []; changed = true; }
   if (!data._ids.task1_topics) { data._ids.task1_topics = 0; changed = true; }
+  if (!data.classes) { data.classes = []; changed = true; }
+  if (!data.class_enrollments) { data.class_enrollments = []; changed = true; }
+  if (!data.attendance_sessions) { data.attendance_sessions = []; changed = true; }
+  if (!data.attendance_records) { data.attendance_records = []; changed = true; }
+  if (!data._ids.classes) { data._ids.classes = 0; changed = true; }
+  if (!data._ids.class_enrollments) { data._ids.class_enrollments = 0; changed = true; }
+  if (!data._ids.attendance_sessions) { data._ids.attendance_sessions = 0; changed = true; }
+  if (!data._ids.attendance_records) { data._ids.attendance_records = 0; changed = true; }
   if (changed) save(data);
 })();
 

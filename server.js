@@ -1765,6 +1765,185 @@ Rules:
   }
 });
 
+// ─── Classes & Attendance ─────────────────────────────────────────────────────
+
+// Create class
+app.post('/api/classes', authenticate, teacherOrAdmin, (req, res) => {
+  const { name, description } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'Class name required' });
+  const id = db.insertClass(name.trim(), description || '', req.user.id);
+  res.json({ id });
+});
+
+// List classes — teacher sees own, admin sees all, student sees enrolled
+app.get('/api/classes', authenticate, (req, res) => {
+  const { role, id: userId } = req.user;
+  if (role === 'admin') {
+    const classes = db.getAllClasses();
+    return res.json(classes.map(c => {
+      const students = db.getClassStudents(c.id);
+      const teacher = db.getUserById(c.teacher_id);
+      return { ...c, student_count: students.length, teacher_name: teacher ? teacher.name : 'Unknown' };
+    }));
+  }
+  if (role === 'teacher') {
+    const classes = db.getClassesByTeacher(userId);
+    return res.json(classes.map(c => {
+      const students = db.getClassStudents(c.id);
+      const teacher = db.getUserById(c.teacher_id);
+      return { ...c, student_count: students.length, teacher_name: teacher ? teacher.name : 'Unknown' };
+    }));
+  }
+  // student
+  return res.json(db.getStudentClasses(userId));
+});
+
+// Get class detail + roster
+app.get('/api/classes/:id', authenticate, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  // Students can only view classes they're enrolled in
+  if (req.user.role === 'student') {
+    const enrolled = db.getStudentClasses(req.user.id);
+    if (!enrolled.find(c => c.class_id === classId)) return res.status(403).json({ error: 'Not enrolled' });
+  }
+  const students = db.getClassStudents(classId);
+  const sessions = db.getSessionsByClass(classId);
+  res.json({ ...cls, students, sessions });
+});
+
+// Update class
+app.put('/api/classes/:id', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  db.updateClass(classId, req.body);
+  res.json({ ok: true });
+});
+
+// Delete class
+app.delete('/api/classes/:id', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  db.deleteClass(classId);
+  res.json({ ok: true });
+});
+
+// Enroll student
+app.post('/api/classes/:id/enroll', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  const { user_id } = req.body;
+  if (!user_id) return res.status(400).json({ error: 'user_id required' });
+  const result = db.enrollStudent(classId, parseInt(user_id));
+  if (result === null) return res.status(409).json({ error: 'Already enrolled' });
+  res.json({ ok: true });
+});
+
+// Unenroll student
+app.delete('/api/classes/:id/enroll/:userId', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  db.unenrollStudent(classId, parseInt(req.params.userId));
+  res.json({ ok: true });
+});
+
+// Create or get session for a date (idempotent)
+app.post('/api/classes/:id/sessions', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  const { session_date } = req.body;
+  if (!session_date || !/^\d{4}-\d{2}-\d{2}$/.test(session_date)) return res.status(400).json({ error: 'session_date required (YYYY-MM-DD)' });
+  const id = db.insertSession(classId, session_date, req.user.id);
+  res.json({ id, session_date });
+});
+
+// List sessions for a class
+app.get('/api/classes/:id/sessions', authenticate, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  res.json(db.getSessionsByClass(classId));
+});
+
+// Delete a session
+app.delete('/api/sessions/:sessionId', authenticate, teacherOrAdmin, (req, res) => {
+  const session = db.getSessionById(parseInt(req.params.sessionId));
+  if (!session) return res.status(404).json({ error: 'Session not found' });
+  const cls = db.getClassById(session.class_id);
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  db.deleteSession(session.id);
+  res.json({ ok: true });
+});
+
+// Bulk mark attendance for a session
+app.post('/api/sessions/:sessionId/attendance', authenticate, teacherOrAdmin, (req, res) => {
+  const sessionId = parseInt(req.params.sessionId);
+  const session = db.getSessionById(sessionId);
+  if (!session) return res.status(404).json({ error: 'Session not found' });
+  const cls = db.getClassById(session.class_id);
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  const records = req.body.records; // [{user_id, status, notes}]
+  if (!Array.isArray(records)) return res.status(400).json({ error: 'records array required' });
+  const validStatuses = ['present', 'absent', 'late', 'excused'];
+  for (const r of records) {
+    if (!r.user_id || !validStatuses.includes(r.status)) continue;
+    db.upsertAttendanceRecord(sessionId, session.class_id, parseInt(r.user_id), r.status, r.notes || null, req.user.id);
+  }
+  res.json({ ok: true });
+});
+
+// Get attendance sheet for a session
+app.get('/api/sessions/:sessionId/attendance', authenticate, (req, res) => {
+  const sessionId = parseInt(req.params.sessionId);
+  const session = db.getSessionById(sessionId);
+  if (!session) return res.status(404).json({ error: 'Session not found' });
+  // Students can only see their own record
+  if (req.user.role === 'student') {
+    const all = db.getAttendanceBySession(sessionId);
+    const mine = all.find(r => r.user_id === req.user.id);
+    return res.json(mine ? [mine] : []);
+  }
+  res.json(db.getAttendanceBySession(sessionId));
+});
+
+// Student: own attendance for a class
+app.get('/api/classes/:id/attendance/me', authenticate, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const records = db.getAttendanceByStudent(req.user.id, classId);
+  const sessions = db.getSessionsByClass(classId);
+  const result = records.map(r => {
+    const s = sessions.find(s => s.id === r.session_id) || {};
+    return { ...r, session_date: s.session_date };
+  });
+  res.json(result);
+});
+
+// Attendance stats per student for a class
+app.get('/api/classes/:id/stats', authenticate, teacherOrAdmin, (req, res) => {
+  const classId = parseInt(req.params.id);
+  const cls = db.getClassById(classId);
+  if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+  res.json(db.getAttendanceStats(classId));
+});
+
+// Get all students (for teacher to add to class roster)
+app.get('/api/students', authenticate, teacherOrAdmin, (req, res) => {
+  const users = db.getAllUsers().filter(u => u.role === 'student');
+  res.json(users.map(u => ({ id: u.id, name: u.name, email: u.email })));
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

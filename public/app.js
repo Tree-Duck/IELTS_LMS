@@ -23,6 +23,12 @@ let flashcardIndex = 0;
 // Draft auto-save
 const DRAFT_KEY = 'ielts_essay_draft';
 
+// Attendance state
+let currentClassId = null;
+let classCalendar = null;
+let myAttendanceCalendar = null;
+let currentAttendanceSessionId = null;
+
 const TOPIC_OPTIONS = {
   task2: [
     { value: 'random',        label: '🎲 Random' },
@@ -433,6 +439,9 @@ function showView(name) {
   else if (name === 'homework') loadHomework();
   else if (name === 'test-list') loadTestList();
   else if (name === 'test-history') loadTestHistory();
+  else if (name === 'classes') loadClassList();
+  else if (name === 'class-detail') { /* loaded by openClassDetail() */ }
+  else if (name === 'my-attendance') loadMyAttendance();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -4839,5 +4848,487 @@ function markCard(result) {
 function closeFlashcardModal(event) {
   if (event && event.target !== document.getElementById('flashcard-modal-overlay')) return;
   document.getElementById('flashcard-modal-overlay').classList.add('hidden');
+}
+
+/* ─── Attendance / Classes ───────────────────────────────────────────────── */
+
+async function loadClassList() {
+  const container = document.getElementById('classes-list-container');
+  const controls = document.getElementById('classes-teacher-controls');
+  container.innerHTML = '<div class="loading">Loading classes…</div>';
+
+  // Create Class form (teacher/admin only)
+  if (currentUser.role === 'teacher' || currentUser.role === 'admin') {
+    controls.innerHTML = `
+      <div class="card mb-4" id="create-class-card">
+        <h3 style="margin-bottom:12px;font-size:1rem;font-weight:600">Create New Class</h3>
+        <div class="form-group">
+          <label>Class Name</label>
+          <input type="text" id="new-class-name" class="form-input" placeholder="e.g. IELTS Band 6 Morning Group">
+        </div>
+        <div class="form-group">
+          <label>Description <small class="text-muted">(optional)</small></label>
+          <input type="text" id="new-class-desc" class="form-input" placeholder="Short description">
+        </div>
+        <div id="create-class-error" class="error-msg hidden"></div>
+        <button class="btn btn-primary" onclick="createClass()">+ Create Class</button>
+      </div>`;
+  } else {
+    controls.innerHTML = '';
+  }
+
+  try {
+    const classes = await api('/api/classes');
+    if (!classes.length) {
+      container.innerHTML = '<div class="empty-state">No classes yet.</div>';
+      return;
+    }
+    container.innerHTML = classes.map(c => `
+      <div class="class-card">
+        <div class="class-card-info">
+          <div class="class-card-name">${c.name}</div>
+          ${c.description ? `<div class="class-card-desc">${c.description}</div>` : ''}
+          <div class="class-card-meta">Teacher: ${c.teacher_name || 'Unknown'} · ${c.student_count || 0} students</div>
+        </div>
+        <div class="class-card-actions">
+          <button class="btn btn-primary btn-sm" onclick="openClassDetail(${c.id})">Open →</button>
+        </div>
+      </div>`).join('');
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function createClass() {
+  const name = document.getElementById('new-class-name').value.trim();
+  const description = document.getElementById('new-class-desc').value.trim();
+  const errEl = document.getElementById('create-class-error');
+  errEl.classList.add('hidden');
+  if (!name) { errEl.textContent = 'Class name is required.'; errEl.classList.remove('hidden'); return; }
+  try {
+    await api('/api/classes', { method: 'POST', body: JSON.stringify({ name, description }) });
+    document.getElementById('new-class-name').value = '';
+    document.getElementById('new-class-desc').value = '';
+    loadClassList();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function openClassDetail(classId) {
+  currentClassId = classId;
+  showView('class-detail');
+
+  // Fetch class info
+  try {
+    const cls = await api(`/api/classes/${classId}`);
+    document.getElementById('class-detail-title').textContent = cls.name;
+    document.getElementById('class-detail-desc').textContent = cls.description || '';
+
+    // Edit/delete controls for owner or admin
+    const actions = document.getElementById('class-detail-actions');
+    if (currentUser.role === 'admin' || cls.teacher_id === currentUser.id) {
+      actions.innerHTML = `
+        <button class="btn btn-secondary btn-sm" onclick="promptEditClass(${cls.id}, '${cls.name.replace(/'/g,"\\'")}', '${(cls.description||'').replace(/'/g,"\\'")}')">✏️ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteClass(${cls.id})">🗑 Delete</button>`;
+    } else {
+      actions.innerHTML = '';
+    }
+  } catch (err) {
+    document.getElementById('class-detail-title').textContent = 'Class';
+  }
+
+  // Default to calendar tab
+  switchClassTab('calendar');
+}
+
+function switchClassTab(tab) {
+  ['calendar','roster','stats'].forEach(t => {
+    document.getElementById(`class-panel-${t}`).classList.toggle('hidden', t !== tab);
+    document.getElementById(`class-tab-${t}`).classList.toggle('active', t === tab);
+  });
+  if (tab === 'calendar') renderClassCalendar();
+  else if (tab === 'roster') loadClassRoster();
+  else if (tab === 'stats') loadClassStats();
+}
+
+async function renderClassCalendar() {
+  if (classCalendar) { classCalendar.destroy(); classCalendar = null; }
+  const el = document.getElementById('class-calendar');
+  el.innerHTML = '';
+
+  let sessions = [];
+  let attendanceMap = {};
+  try {
+    sessions = await api(`/api/classes/${currentClassId}/sessions`);
+    // Build events from sessions
+    // For each session fetch attendance summary
+    await Promise.all(sessions.map(async s => {
+      try {
+        const records = await api(`/api/sessions/${s.id}/attendance`);
+        const total = records.length;
+        const present = records.filter(r => r.status === 'present' || r.status === 'late').length;
+        attendanceMap[s.session_date] = { sessionId: s.id, total, present };
+      } catch (_) {
+        attendanceMap[s.session_date] = { sessionId: s.id, total: 0, present: 0 };
+      }
+    }));
+  } catch (_) {}
+
+  const canMark = currentUser.role === 'teacher' || currentUser.role === 'admin';
+
+  const events = sessions.map(s => {
+    const info = attendanceMap[s.session_date] || { total: 0, present: 0 };
+    let color = '#6b7280'; // gray — no records
+    if (info.total > 0) {
+      const rate = info.present / info.total;
+      color = rate >= 0.8 ? '#16a34a' : rate >= 0.5 ? '#ca8a04' : '#dc2626';
+    }
+    return { title: info.total > 0 ? `${info.present}/${info.total}` : '📋', date: s.session_date, backgroundColor: color, borderColor: color, extendedProps: { sessionId: s.id } };
+  });
+
+  classCalendar = new FullCalendar.Calendar(el, {
+    initialView: 'dayGridMonth',
+    height: 'auto',
+    events,
+    dateClick: canMark ? info => openAttendanceSheet(currentClassId, info.dateStr) : null,
+    eventClick: info => openAttendanceSheet(currentClassId, info.event.startStr),
+    headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+  });
+  classCalendar.render();
+
+  if (canMark) {
+    el.insertAdjacentHTML('afterend', '<p style="color:var(--text-muted);font-size:.82rem;margin-top:8px">Click a date to mark attendance</p>');
+  }
+}
+
+async function openAttendanceSheet(classId, dateStr) {
+  const overlay = document.getElementById('attendance-modal-overlay');
+  const title = document.getElementById('attendance-modal-title');
+  const body = document.getElementById('attendance-modal-body');
+  const actionsEl = document.getElementById('attendance-modal-actions');
+  title.textContent = `Attendance — ${dateStr}`;
+  body.innerHTML = '<div class="loading">Loading…</div>';
+  actionsEl.style.display = 'none';
+  overlay.classList.remove('hidden');
+
+  try {
+    // Create/get session for this date
+    const sessionRes = await api(`/api/classes/${classId}/sessions`, {
+      method: 'POST',
+      body: JSON.stringify({ session_date: dateStr })
+    });
+    currentAttendanceSessionId = sessionRes.id;
+
+    // Get enrolled students + existing records
+    const [clsData, records] = await Promise.all([
+      api(`/api/classes/${classId}`),
+      api(`/api/sessions/${sessionRes.id}/attendance`)
+    ]);
+
+    const students = clsData.students || [];
+    const canMark = currentUser.role === 'teacher' || currentUser.role === 'admin';
+
+    if (!students.length) {
+      body.innerHTML = '<div class="empty-state">No students enrolled in this class.</div>';
+      return;
+    }
+
+    const recordMap = {};
+    records.forEach(r => { recordMap[r.user_id] = r; });
+
+    const statuses = ['present','absent','late','excused'];
+
+    body.innerHTML = `
+      <div class="attendance-sheet">
+        <table class="admin-table">
+          <thead><tr><th>Student</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            ${students.map(s => {
+              const rec = recordMap[s.user_id] || {};
+              const currentStatus = rec.status || 'absent';
+              if (canMark) {
+                return `<tr>
+                  <td>${s.name}</td>
+                  <td>
+                    <select class="form-input att-status-select" data-uid="${s.user_id}" style="padding:4px 8px;font-size:.85rem">
+                      ${statuses.map(st => `<option value="${st}" ${currentStatus===st?'selected':''}>${st.charAt(0).toUpperCase()+st.slice(1)}</option>`).join('')}
+                    </select>
+                  </td>
+                  <td><input type="text" class="form-input att-notes-input" data-uid="${s.user_id}" value="${rec.notes||''}" placeholder="Optional note" style="font-size:.85rem;padding:4px 8px"></td>
+                </tr>`;
+              } else {
+                return `<tr>
+                  <td>${s.name}</td>
+                  <td><span class="status-badge att-${currentStatus}">${currentStatus}</span></td>
+                  <td>${rec.notes||'—'}</td>
+                </tr>`;
+              }
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+    if (canMark) actionsEl.style.display = '';
+  } catch (err) {
+    body.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function saveAttendance() {
+  if (!currentAttendanceSessionId) return;
+  const selects = document.querySelectorAll('.att-status-select');
+  const notes = document.querySelectorAll('.att-notes-input');
+  const records = Array.from(selects).map((sel, i) => ({
+    user_id: parseInt(sel.dataset.uid),
+    status: sel.value,
+    notes: notes[i] ? notes[i].value.trim() : ''
+  }));
+
+  try {
+    await api(`/api/sessions/${currentAttendanceSessionId}/attendance`, {
+      method: 'POST',
+      body: JSON.stringify({ records })
+    });
+    closeAttendanceModal();
+    renderClassCalendar(); // refresh calendar colors
+  } catch (err) {
+    alert('Failed to save: ' + err.message);
+  }
+}
+
+function closeAttendanceModal(event) {
+  if (event && event.target !== document.getElementById('attendance-modal-overlay')) return;
+  document.getElementById('attendance-modal-overlay').classList.add('hidden');
+}
+
+async function loadClassRoster() {
+  const el = document.getElementById('class-roster-content');
+  el.innerHTML = '<div class="loading">Loading roster…</div>';
+  try {
+    const cls = await api(`/api/classes/${currentClassId}`);
+    const students = cls.students || [];
+    const canManage = currentUser.role === 'admin' || cls.teacher_id === currentUser.id;
+
+    let html = '';
+    if (canManage) {
+      // Enroll student control
+      html += `
+        <div class="card mb-4" style="padding:16px">
+          <h4 style="margin-bottom:12px;font-size:.9rem;font-weight:600">Enroll Student</h4>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div class="form-group" style="flex:1;margin:0">
+              <select id="enroll-student-select" class="form-input">
+                <option value="">— Select student —</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="enrollStudentInClass()">+ Enroll</button>
+          </div>
+          <div id="enroll-error" class="error-msg hidden" style="margin-top:8px"></div>
+        </div>`;
+      // Populate student select
+      try {
+        const allStudents = await api('/api/students');
+        const enrolledIds = new Set(students.map(s => s.user_id));
+        const selectEl = document.getElementById('enroll-student-select');
+        if (selectEl) {
+          allStudents.filter(s => !enrolledIds.has(s.id)).forEach(s => {
+            selectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.email})</option>`;
+          });
+        }
+      } catch (_) {}
+    }
+
+    if (!students.length) {
+      html += '<div class="empty-state">No students enrolled yet.</div>';
+    } else {
+      html += `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>Name</th><th>Email</th>${canManage ? '<th>Actions</th>' : ''}</tr></thead>
+            <tbody>
+              ${students.map((s, i) => `
+                <tr>
+                  <td>${i+1}</td>
+                  <td>${s.name}</td>
+                  <td>${s.email}</td>
+                  ${canManage ? `<td><button class="btn btn-xs btn-danger" onclick="unenrollStudent(${s.user_id})">Remove</button></td>` : ''}
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function enrollStudentInClass() {
+  const sel = document.getElementById('enroll-student-select');
+  const errEl = document.getElementById('enroll-error');
+  errEl.classList.add('hidden');
+  if (!sel.value) { errEl.textContent = 'Select a student first.'; errEl.classList.remove('hidden'); return; }
+  try {
+    await api(`/api/classes/${currentClassId}/enroll`, { method: 'POST', body: JSON.stringify({ user_id: parseInt(sel.value) }) });
+    loadClassRoster();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function unenrollStudent(userId) {
+  if (!confirm('Remove this student from the class?')) return;
+  try {
+    await api(`/api/classes/${currentClassId}/enroll/${userId}`, { method: 'DELETE' });
+    loadClassRoster();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function loadClassStats() {
+  const el = document.getElementById('class-stats-content');
+  el.innerHTML = '<div class="loading">Loading stats…</div>';
+  try {
+    const stats = await api(`/api/classes/${currentClassId}/stats`);
+    if (!stats.length) {
+      el.innerHTML = '<div class="empty-state">No attendance records yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Present</th>
+              <th>Late</th>
+              <th>Absent</th>
+              <th>Excused</th>
+              <th>Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stats.map(s => {
+              const rate = parseFloat(s.attendance_rate||0).toFixed(0);
+              const rateColor = rate >= 80 ? '#16a34a' : rate >= 50 ? '#ca8a04' : '#dc2626';
+              return `<tr>
+                <td>${s.name}</td>
+                <td><span class="status-badge att-present">${s.present||0}</span></td>
+                <td><span class="status-badge att-late">${s.late||0}</span></td>
+                <td><span class="status-badge att-absent">${s.absent||0}</span></td>
+                <td><span class="status-badge att-excused">${s.excused||0}</span></td>
+                <td><strong style="color:${rateColor}">${rate}%</strong></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function promptEditClass(classId, currentName, currentDesc) {
+  const newName = prompt('Class name:', currentName);
+  if (newName === null) return;
+  const newDesc = prompt('Description (optional):', currentDesc);
+  if (newDesc === null) return;
+  try {
+    await api(`/api/classes/${classId}`, { method: 'PUT', body: JSON.stringify({ name: newName.trim(), description: newDesc.trim() }) });
+    openClassDetail(classId);
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+async function deleteClass(classId) {
+  if (!confirm('Delete this class and all its attendance records? This cannot be undone.')) return;
+  try {
+    await api(`/api/classes/${classId}`, { method: 'DELETE' });
+    showView('classes');
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+/* My Attendance (student view) */
+async function loadMyAttendance() {
+  const selectorEl = document.getElementById('my-attendance-class-selector');
+  const calEl = document.getElementById('my-attendance-calendar');
+  const summaryEl = document.getElementById('my-attendance-summary');
+  selectorEl.innerHTML = '<div class="loading">Loading classes…</div>';
+  if (myAttendanceCalendar) { myAttendanceCalendar.destroy(); myAttendanceCalendar = null; }
+  calEl.innerHTML = '';
+  summaryEl.innerHTML = '';
+
+  try {
+    const classes = await api('/api/classes');
+    if (!classes.length) {
+      selectorEl.innerHTML = '<div class="empty-state">You are not enrolled in any classes.</div>';
+      return;
+    }
+
+    selectorEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label style="font-weight:600">Class:</label>
+        <select id="my-att-class-select" class="form-input" style="width:auto" onchange="renderMyAttendanceCalendar(this.value)">
+          ${classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+        </select>
+      </div>`;
+
+    // Auto-load first class
+    renderMyAttendanceCalendar(classes[0].id);
+  } catch (err) {
+    selectorEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function renderMyAttendanceCalendar(classId) {
+  const calEl = document.getElementById('my-attendance-calendar');
+  const summaryEl = document.getElementById('my-attendance-summary');
+  if (myAttendanceCalendar) { myAttendanceCalendar.destroy(); myAttendanceCalendar = null; }
+  calEl.innerHTML = '<div class="loading">Loading…</div>';
+  summaryEl.innerHTML = '';
+
+  try {
+    const records = await api(`/api/classes/${classId}/attendance/me`);
+    calEl.innerHTML = '';
+
+    const statusColors = { present: '#16a34a', late: '#ca8a04', absent: '#dc2626', excused: '#6366f1' };
+    const events = records.map(r => ({
+      title: r.status,
+      date: r.session_date,
+      backgroundColor: statusColors[r.status] || '#6b7280',
+      borderColor: statusColors[r.status] || '#6b7280',
+    }));
+
+    myAttendanceCalendar = new FullCalendar.Calendar(calEl, {
+      initialView: 'dayGridMonth',
+      height: 'auto',
+      events,
+      headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+    });
+    myAttendanceCalendar.render();
+
+    // Summary counts
+    const counts = { present:0, late:0, absent:0, excused:0 };
+    records.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+    const total = records.length;
+    const rate = total ? Math.round((counts.present + counts.late) / total * 100) : 0;
+    summaryEl.innerHTML = `
+      <div class="attendance-summary-row">
+        <span class="status-badge att-present">Present: ${counts.present}</span>
+        <span class="status-badge att-late">Late: ${counts.late}</span>
+        <span class="status-badge att-absent">Absent: ${counts.absent}</span>
+        <span class="status-badge att-excused">Excused: ${counts.excused}</span>
+        <strong>Attendance rate: ${rate}%</strong>
+      </div>`;
+  } catch (err) {
+    calEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
 }
 

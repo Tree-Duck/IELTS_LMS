@@ -6,6 +6,8 @@
   <title>SSP IELTS</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 </head>
 <body>
   <!-- AUTH SCREEN -->
@@ -180,6 +182,9 @@
             <button class="nav-item nav-sub-item" onclick="showView('test-history')" id="nav-test-history">
               <span class="nav-icon">🏆</span> Test Results
             </button>
+            <button class="nav-item nav-sub-item" onclick="showView('my-attendance')" id="nav-my-attendance">
+              <span class="nav-icon">📅</span> Attendance
+            </button>
           </div>
         </div>
 
@@ -204,6 +209,9 @@
             <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-teacher-assignments">
               <span class="nav-icon">📋</span> Assignments
             </button>
+            <button class="nav-item nav-sub-item" onclick="showView('classes')" id="nav-teacher-classes">
+              <span class="nav-icon">🏫</span> Classes
+            </button>
           </div>
         </div>
 
@@ -227,6 +235,9 @@
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-admin-assignments">
               <span class="nav-icon">📋</span> Assignments
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('classes')" id="nav-admin-classes">
+              <span class="nav-icon">🏫</span> Classes
             </button>
           </div>
         </div>
@@ -920,6 +931,77 @@
           <p>Smart rewrite of your essay targeting Band 8.0–8.5 with explanations of what changed</p>
         </div>
         <div id="rewrite-content"></div>
+      </div>
+
+      <!-- Classes List View (Teacher / Admin) -->
+      <div id="view-classes" class="view hidden">
+        <div class="page-header">
+          <h2>🏫 Classes</h2>
+          <p>Manage your classes and track student attendance</p>
+        </div>
+        <div id="classes-teacher-controls"></div>
+        <div id="classes-list-container"><div class="loading">Loading classes…</div></div>
+      </div>
+
+      <!-- Class Detail View -->
+      <div id="view-class-detail" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back" onclick="showView('classes')" id="class-detail-back">← Back to Classes</button>
+          <div id="class-detail-header-text">
+            <h2 id="class-detail-title">Class</h2>
+            <p id="class-detail-desc"></p>
+          </div>
+          <div id="class-detail-actions" class="class-detail-actions"></div>
+        </div>
+
+        <!-- Tabs: Roster / Calendar / Stats -->
+        <div class="test-type-tabs" id="class-detail-tabs">
+          <button class="test-tab-btn active" onclick="switchClassTab('calendar')" id="class-tab-calendar">📅 Calendar</button>
+          <button class="test-tab-btn" onclick="switchClassTab('roster')" id="class-tab-roster">👥 Roster</button>
+          <button class="test-tab-btn" onclick="switchClassTab('stats')" id="class-tab-stats">📊 Stats</button>
+        </div>
+
+        <!-- Calendar panel -->
+        <div id="class-panel-calendar">
+          <div id="class-calendar" style="margin-top:16px"></div>
+        </div>
+
+        <!-- Roster panel -->
+        <div id="class-panel-roster" class="hidden">
+          <div id="class-roster-content"></div>
+        </div>
+
+        <!-- Stats panel -->
+        <div id="class-panel-stats" class="hidden">
+          <div id="class-stats-content"></div>
+        </div>
+      </div>
+
+      <!-- Attendance Sheet Modal (overlay) -->
+      <div class="modal-overlay hidden" id="attendance-modal-overlay" onclick="closeAttendanceModal(event)">
+        <div class="modal-box attendance-modal-box">
+          <div class="modal-header">
+            <h3 id="attendance-modal-title">Attendance — 2025-01-01</h3>
+            <button class="btn btn-secondary btn-sm" onclick="closeAttendanceModal()">✕ Close</button>
+          </div>
+          <div id="attendance-modal-body">
+            <div class="loading">Loading…</div>
+          </div>
+          <div class="modal-actions" id="attendance-modal-actions" style="display:none">
+            <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Attendance View (Student) -->
+      <div id="view-my-attendance" class="view hidden">
+        <div class="page-header">
+          <h2>📅 My Attendance</h2>
+          <p>View your attendance record across all classes</p>
+        </div>
+        <div id="my-attendance-class-selector" style="margin-bottom:16px"></div>
+        <div id="my-attendance-calendar"></div>
+        <div id="my-attendance-summary" style="margin-top:16px"></div>
       </div>
     </main>
   </div>
