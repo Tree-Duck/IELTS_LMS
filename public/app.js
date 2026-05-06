@@ -97,6 +97,15 @@ async function api(path, options = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(path, { ...options, headers: { ...headers, ...options.headers } });
   const data = await res.json();
+  if (res.status === 401) {
+    // Token expired or invalid — clear session and redirect to login
+    token = null; currentUser = null;
+    localStorage.removeItem('ielts_token');
+    localStorage.removeItem('ielts_user');
+    hide('app-screen');
+    show('auth-screen');
+    throw new Error('Session expired. Please sign in again.');
+  }
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
