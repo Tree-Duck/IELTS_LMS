@@ -127,8 +127,15 @@
 
   <!-- MAIN APP -->
   <div id="app-screen" class="screen hidden">
+    <!-- Mobile hamburger (visible on phones only) -->
+    <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <!-- Backdrop overlay (tapping closes sidebar on mobile) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
     <!-- Sidebar -->
-    <!-- Floating button to re-open sidebar when collapsed -->
+    <!-- Floating button to re-open sidebar when collapsed (desktop only) -->
     <button class="sidebar-show-btn hidden" id="sidebar-show-btn" onclick="toggleSidebar()" title="Show sidebar">☰</button>
 
     <aside class="sidebar" id="sidebar">

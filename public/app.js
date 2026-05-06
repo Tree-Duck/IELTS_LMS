@@ -419,7 +419,24 @@ function isOnSubmitWithContent() {
   return essay.trim().length > 0;
 }
 
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar || !backdrop) return;
+  const isOpen = sidebar.classList.contains('sidebar-open');
+  sidebar.classList.toggle('sidebar-open', !isOpen);
+  backdrop.classList.toggle('active', !isOpen);
+}
+
 function showView(name) {
+  // Auto-close sidebar on mobile after nav click
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar) sidebar.classList.remove('sidebar-open');
+    if (backdrop) backdrop.classList.remove('active');
+  }
+
   // Warn if navigating away from submit view with unsaved essay content
   if (name !== 'submit' && isOnSubmitWithContent()) {
     if (!confirm('You have an essay in progress. Leave without saving your draft?')) return;

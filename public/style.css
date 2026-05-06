@@ -1253,15 +1253,138 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.6;
 }
 
+/* ─── MOBILE HAMBURGER BUTTON ────────────────────────────────────────────── */
+.mobile-menu-btn {
+  display: none; /* shown via media query */
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 1001;
+  flex-direction: column;
+  gap: 5px;
+  background: var(--sidebar-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+.mobile-menu-btn span {
+  display: block;
+  width: 20px; height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* ─── SIDEBAR OVERLAY BACKDROP ──────────────────────────────────────────── */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+.sidebar-backdrop.active { display: block; }
+
+/* ─── MOBILE LAYOUT (≤768px) ────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .sidebar { width: 60px; }
-  .sidebar-logo span:last-child,
-  .nav-item span:not(.nav-icon),
-  .user-info > div,
-  .btn-logout { display: none; }
-  .main-content { margin-left: 60px; padding: 16px; }
+  /* Sidebar becomes overlay */
+  .sidebar {
+    width: 260px !important;
+    z-index: 1000;
+    transform: translateX(-100%);
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+  /* sidebar-collapsed has no effect on mobile — overlay handles it */
+  .sidebar.sidebar-collapsed {
+    transform: translateX(-100%);
+  }
+
+  /* Hamburger visible */
+  .mobile-menu-btn { display: flex; }
+
+  /* Desktop "show sidebar" float btn — hide on mobile */
+  .sidebar-show-btn { display: none !important; }
+
+  /* Main fills full width, top pad clears hamburger */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 56px 12px 20px;
+  }
+
+  /* Stats: 2 columns on tablet */
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Task selector: single column */
   .task-selector { grid-template-columns: 1fr; }
+
+  /* Page header font size */
+  .page-header h2 { font-size: 18px; }
+
+  /* Test header: wrap */
+  .test-header { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .test-header .test-timer { font-size: 18px; }
+
+  /* Test body: stack panels */
+  .test-body { flex-direction: column; height: auto; overflow: visible; }
+  .test-left {
+    min-width: unset !important;
+    width: 100% !important;
+    max-height: 40vh;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+  }
+  .test-right { width: 100% !important; overflow-y: auto; }
+  .test-resizer { display: none; }
+
+  /* Tables: horizontal scroll */
+  .admin-table-wrap, .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { min-width: 560px; }
+
+  /* Class cards: full width */
+  .classes-grid { grid-template-columns: 1fr; }
+  .class-card { flex-direction: column; align-items: flex-start; }
+  .class-card-actions { align-self: flex-end; }
+
+  /* Attendance modal: full screen */
+  .attendance-modal-overlay { padding: 0; align-items: flex-start; }
+  .attendance-modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0;
+  }
+
+  /* Class detail header: stack */
+  .class-detail-actions { flex-wrap: wrap; }
+}
+
+/* Desktop: hamburger hidden, backdrop never shown */
+@media (min-width: 769px) {
+  .mobile-menu-btn { display: none !important; }
+  .sidebar-backdrop { display: none !important; }
+}
+
+/* ─── SMALL PHONES (≤480px) ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .page-header h2 { font-size: 16px; }
+  .card { padding: 12px; }
+  .test-left { max-height: 35vh; }
+
+  /* Question navigator: tighter */
+  .q-nav-grid { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .q-nav-grid button { font-size: 11px; padding: 4px 2px; }
+
+  /* Test submit button area */
+  .test-header-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+
+  /* Attendance summary: stack */
+  .attendance-summary-row { flex-direction: column; align-items: flex-start; }
+
+  /* Grading modes: already stacks at 480px — verify OK */
 }
 
 /* ─── DELETE BUTTON (submission cards) ───────────────────────────────────── */
