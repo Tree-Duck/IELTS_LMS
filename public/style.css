@@ -3701,6 +3701,34 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .fc .fc-col-header-cell-cushion,
 [data-theme="dark"] .fc .fc-daygrid-day-number { color: var(--text-primary); }
 
+/* ─── BATCH ACTION TOOLBAR ──────────────────────────────────────────────── */
+.batch-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--gray-900);
+  color: #fff;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+.batch-toolbar.batch-toolbar-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.batch-count {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--primary);
+  min-width: 80px;
+}
+.batch-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+[data-theme="dark"] .batch-toolbar { background: var(--gray-800); }
+
 /* mb-4 utility */
 .mb-4 { margin-bottom: 1rem; }
 .btn-danger {

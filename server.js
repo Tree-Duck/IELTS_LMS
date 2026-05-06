@@ -826,6 +826,29 @@ app.put('/api/admin/users/:id/role', authenticate, adminOnly, (req, res) => {
   res.json({ success: true, role });
 });
 
+// Admin: batch delete / set role
+app.post('/api/admin/users/batch', authenticate, adminOnly, (req, res) => {
+  const { action, ids, role } = req.body;
+  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'ids required' });
+  if (!['delete', 'set_role'].includes(action)) return res.status(400).json({ error: 'invalid action' });
+  if (action === 'set_role' && !['student', 'teacher'].includes(role)) {
+    return res.status(400).json({ error: 'role must be student or teacher' });
+  }
+  const results = { ok: 0, skipped: 0 };
+  for (const rawId of ids) {
+    const id = parseInt(rawId, 10);
+    if (id === req.user.id) { results.skipped++; continue; } // never touch own account
+    const user = db.getUserById(id);
+    if (!user || user.role === 'admin') { results.skipped++; continue; } // skip admins
+    if (action === 'delete') {
+      db.deleteUser(id) ? results.ok++ : results.skipped++;
+    } else {
+      db.setUserRole(id, role) ? results.ok++ : results.skipped++;
+    }
+  }
+  res.json(results);
+});
+
 // ─── User Profile ─────────────────────────────────────────────────────────────
 app.get('/api/user/profile', authenticate, (req, res) => {
   const user = db.getUserById(req.user.id);

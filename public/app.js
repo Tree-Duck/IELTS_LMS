@@ -486,11 +486,23 @@ async function loadAdminUsers() {
       el.innerHTML = '<div class="empty-state">No users registered yet.</div>';
       return;
     }
+    const isAdmin = currentUser.role === 'admin';
     el.innerHTML = `
+      ${isAdmin ? `
+      <div class="batch-toolbar" id="batch-toolbar">
+        <span class="batch-count" id="batch-count">0 selected</span>
+        <div class="batch-actions">
+          <button class="btn btn-xs btn-teacher" onclick="batchAction('set_role','teacher')">→ Teacher</button>
+          <button class="btn btn-xs btn-secondary" onclick="batchAction('set_role','student')">→ Student</button>
+          <button class="btn btn-xs btn-danger" onclick="batchAction('delete')">🗑 Delete</button>
+        </div>
+        <button class="btn btn-xs btn-secondary" onclick="clearBatchSelection()">✕ Clear</button>
+      </div>` : ''}
       <div class="admin-table-wrap">
-        <table class="admin-table">
+        <table class="admin-table" id="admin-users-tbl">
           <thead>
             <tr>
+              ${isAdmin ? `<th><input type="checkbox" id="select-all-users" onchange="toggleSelectAllUsers(this)" title="Select all"></th>` : '<th>#</th>'}
               <th>#</th>
               <th>Name</th>
               <th>Email</th>
@@ -503,8 +515,11 @@ async function loadAdminUsers() {
             </tr>
           </thead>
           <tbody>
-            ${users.map((u, i) => `
-              <tr>
+            ${users.map((u, i) => {
+              const canAct = isAdmin && u.id !== currentUser.id && u.role !== 'admin';
+              return `
+              <tr data-uid="${u.id}">
+                ${isAdmin ? `<td>${canAct ? `<input type="checkbox" class="user-select-cb" data-uid="${u.id}" onchange="onUserCheckChange()">` : ''}</td>` : `<td>${i + 1}</td>`}
                 <td>${i + 1}</td>
                 <td>${u.name}</td>
                 <td>${u.email}</td>
@@ -519,7 +534,7 @@ async function loadAdminUsers() {
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
                 <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                   <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, '${u.name.replace(/'/g, "\\'")}')">View History</button>
-                  ${currentUser.role === 'admin' && u.id !== currentUser.id && u.role !== 'admin' ? `
+                  ${canAct ? `
                     <button class="btn btn-xs ${u.role === 'teacher' ? 'btn-secondary' : 'btn-teacher'}"
                       onclick="setUserRole(${u.id}, '${u.role === 'teacher' ? 'student' : 'teacher'}', this)">
                       ${u.role === 'teacher' ? '→ Student' : '→ Teacher'}
@@ -527,14 +542,59 @@ async function loadAdminUsers() {
                     <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>
                   ` : ''}
                 </td>
-              </tr>
-            `).join('')}
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>
     `;
   } catch (err) {
     el.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+function getSelectedUserIds() {
+  return [...document.querySelectorAll('.user-select-cb:checked')].map(cb => parseInt(cb.dataset.uid, 10));
+}
+
+function onUserCheckChange() {
+  const ids = getSelectedUserIds();
+  const toolbar = document.getElementById('batch-toolbar');
+  const countEl = document.getElementById('batch-count');
+  if (!toolbar || !countEl) return;
+  countEl.textContent = `${ids.length} selected`;
+  toolbar.classList.toggle('batch-toolbar-active', ids.length > 0);
+}
+
+function toggleSelectAllUsers(masterCb) {
+  document.querySelectorAll('.user-select-cb').forEach(cb => cb.checked = masterCb.checked);
+  onUserCheckChange();
+}
+
+function clearBatchSelection() {
+  document.querySelectorAll('.user-select-cb').forEach(cb => cb.checked = false);
+  const masterCb = document.getElementById('select-all-users');
+  if (masterCb) masterCb.checked = false;
+  onUserCheckChange();
+}
+
+async function batchAction(action, role) {
+  const ids = getSelectedUserIds();
+  if (!ids.length) return;
+  const label = action === 'delete'
+    ? `permanently delete ${ids.length} user(s)`
+    : `set ${ids.length} user(s) to ${role}`;
+  if (!confirm(`This will ${label}. Continue?`)) return;
+  try {
+    const result = await api('/api/admin/users/batch', {
+      method: 'POST',
+      body: JSON.stringify({ action, ids, role })
+    });
+    const msg = `Done: ${result.ok} updated${result.skipped ? `, ${result.skipped} skipped (admins/self)` : ''}.`;
+    alert(msg);
+    loadAdminUsers();
+  } catch (err) {
+    alert('Batch action failed: ' + err.message);
   }
 }
 
