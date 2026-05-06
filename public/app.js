@@ -5153,17 +5153,6 @@ async function loadClassRoster() {
           </div>
           <div id="enroll-error" class="error-msg hidden" style="margin-top:8px"></div>
         </div>`;
-      // Populate student select
-      try {
-        const allStudents = await api('/api/students');
-        const enrolledIds = new Set(students.map(s => s.user_id));
-        const selectEl = document.getElementById('enroll-student-select');
-        if (selectEl) {
-          allStudents.filter(s => !enrolledIds.has(s.id)).forEach(s => {
-            selectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.email})</option>`;
-          });
-        }
-      } catch (_) {}
     }
 
     if (!students.length) {
@@ -5185,7 +5174,22 @@ async function loadClassRoster() {
           </table>
         </div>`;
     }
+    // Insert HTML into DOM FIRST so enroll-student-select exists
     el.innerHTML = html;
+
+    // Now populate the student dropdown (element is in DOM)
+    if (canManage) {
+      try {
+        const allStudents = await api('/api/students');
+        const enrolledIds = new Set(students.map(s => s.user_id));
+        const selectEl = document.getElementById('enroll-student-select');
+        if (selectEl) {
+          allStudents.filter(s => !enrolledIds.has(s.id)).forEach(s => {
+            selectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.email})</option>`;
+          });
+        }
+      } catch (_) {}
+    }
   } catch (err) {
     el.innerHTML = `<div class="error-msg">${err.message}</div>`;
   }
