@@ -575,7 +575,7 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
 
 // ─── Hints ────────────────────────────────────────────────────────────────────
 app.post('/api/hint', authenticate, async (req, res) => {
-  const { task_type, prompt, essay, hint_type } = req.body;
+  const { task_type, prompt, essay, hint_type, student_ideas } = req.body;
   if (!['task1', 'task2'].includes(task_type)) {
     return res.status(400).json({ error: 'Invalid task_type' });
   }
@@ -595,8 +595,21 @@ app.post('/api/hint', authenticate, async (req, res) => {
     ? `\n\nStudent's current draft:\n${essay.trim()}`
     : '\n\n(Student has not written anything yet.)';
 
+  // Build the ideas prompt — either scaffold-guided (student's own ideas) or AI-generated
+  const ideasPrompt = (() => {
+    if (hint_type !== 'ideas') return null;
+    if (task_type === 'task1') {
+      return `IELTS Writing Task 1 prompt:\n${prompt}${draftSection}\n\nGenerate a structured body-paragraph idea plan for this topic. Use this exact format:\n\n**Key Trend 1 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 2 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 3 / Overall**\n- Overall pattern or comparison: ...\n- Suggested overview sentence: ...\n\nKeep each bullet to 1–2 sentences. Be specific to this exact topic.`;
+    }
+    // Task 2
+    if (student_ideas && student_ideas.trim()) {
+      return `IELTS Writing Task 2 prompt:\n${prompt}${draftSection}\n\nThe student has provided their own pre-scaffolded main ideas:\n${student_ideas.trim()}\n\nYour job is to DEVELOP these specific ideas — do NOT suggest alternative arguments. For each idea the student provided, help them expand it into a full body paragraph plan using this format:\n\n**[Restate the student's idea as a paragraph heading]**\n- Developed argument: (expand their idea into a clear, specific claim)\n- Supporting evidence or reasoning: (provide 1–2 concrete pieces of evidence or logical support)\n- Concrete example: (a specific, real-world example directly relevant to this topic)\n- Linking to thesis: (one sentence connecting this paragraph back to their stated position)\n\nIf they provided a counterargument, develop it too:\n**Counterargument & Rebuttal**\n- Opposing view: (restate and sharpen their counterargument)\n- Rebuttal: (a strong one-sentence refutation)\n\nKeep each bullet to 1–2 sentences. Be specific to this exact topic and the student's stated ideas.`;
+    }
+    return `IELTS Writing Task 2 prompt:\n${prompt}${draftSection}\n\nGenerate a structured body-paragraph idea plan for this topic. Use this exact format:\n\n**Body Paragraph 1 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Body Paragraph 2 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Counterargument (optional)**\n- Opposing view in one sentence: ...\n- Your rebuttal in one sentence: ...\n\nKeep each bullet to 1–2 sentences. Be specific to this exact topic.`;
+  })();
+
   const userPrompt = hint_type === 'ideas'
-    ? `IELTS Writing ${taskLabel} prompt:\n${prompt}${draftSection}\n\nGenerate a structured body-paragraph idea plan for this topic. Use this exact format:\n\n${task_type === 'task1' ? `**Key Trend 1 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 2 — [label]**\n- What to describe: ...\n- Key data point to mention: ...\n\n**Key Trend 3 / Overall**\n- Overall pattern or comparison: ...\n- Suggested overview sentence: ...` : `**Body Paragraph 1 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Body Paragraph 2 — [topic label]**\n- Main argument: ...\n- Supporting detail or evidence: ...\n- Concrete example: ...\n\n**Counterargument (optional)**\n- Opposing view in one sentence: ...\n- Your rebuttal in one sentence: ...`}\n\nKeep each bullet to 1–2 sentences. Be specific to this exact topic.`
+    ? ideasPrompt
     : hint_type === 'vocabulary'
     ? `IELTS Writing ${taskLabel} topic:\n${prompt}\n\nList 12–15 precise vocabulary items and collocations that would demonstrate strong Lexical Resource for this topic. Format each item as:\n**word or phrase** — example sentence showing natural, academic use.\n\nInclude a mix of: topic-specific terms, academic collocations, linking expressions, and precise verbs/adjectives.`
     : hint_type === 'structure'
@@ -1965,6 +1978,53 @@ app.get('/api/classes/:id/stats', authenticate, teacherOrAdmin, (req, res) => {
 app.get('/api/students', authenticate, teacherOrAdmin, (req, res) => {
   const users = db.getAllUsers().filter(u => u.role === 'student');
   res.json(users.map(u => ({ id: u.id, name: u.name, email: u.email })));
+});
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+app.get('/api/user/notifications', authenticate, (req, res) => {
+  try {
+    res.json(db.getNotificationCount(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get notifications' });
+  }
+});
+
+app.post('/api/user/notifications/read', authenticate, (req, res) => {
+  try {
+    db.markNotificationsRead(req.user.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to mark notifications read' });
+  }
+});
+
+// ─── Saved Words ──────────────────────────────────────────────────────────────
+app.get('/api/saved-words', authenticate, (req, res) => {
+  try {
+    res.json(db.getSavedWords(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get saved words' });
+  }
+});
+
+app.post('/api/saved-words', authenticate, (req, res) => {
+  try {
+    const { word, definition, example, source } = req.body;
+    if (!word) return res.status(400).json({ error: 'word is required' });
+    const entry = db.addSavedWord(req.user.id, { word, definition, example, source });
+    res.json({ ok: true, entry });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save word' });
+  }
+});
+
+app.delete('/api/saved-words/:id', authenticate, (req, res) => {
+  try {
+    db.deleteSavedWord(req.user.id, req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete saved word' });
+  }
 });
 
 // ─── Serve SPA ────────────────────────────────────────────────────────────────

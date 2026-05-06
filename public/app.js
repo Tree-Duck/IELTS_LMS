@@ -51,6 +51,64 @@ const TOPIC_OPTIONS = {
   ],
 };
 
+/* ─── IELTS Prompt Bank ──────────────────────────────────────────────────── */
+const PROMPT_BANK = {
+  task1: [
+    'The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The graph below shows the number of university graduates in Canada from 1992 to 2007. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The diagram below shows the process of producing electricity from coal. Summarise the information by selecting and reporting the main features.',
+    'The map below shows the changes that have taken place in the town of Eltington between 2000 and the present day. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The table below shows the sales of various products in an electronics store during four quarters of 2022. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The pie charts below show the main sources of energy in a European country in 1985 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The bar chart below shows the average number of hours per week that people in five different countries spend on leisure activities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The line graph below shows the changing birth and death rates in New Zealand between 1901 and 2001. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The diagram illustrates the process by which cement is made and how it is then used to produce concrete for building purposes. Summarise the information by selecting and reporting the main features.',
+    'The maps below show the development of a small fishing village called Oakton in 1985 and today. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The bar chart below shows the percentage of students at three different types of schools who said they enjoyed reading in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The line graph below shows the average monthly temperatures in three cities over a twelve-month period. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The diagram below shows the water cycle, which is the continuous movement of water on, above and below the surface of the Earth. Summarise the information by selecting and reporting the main features.',
+    'The table below gives information about the underground railway systems in six cities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The charts below show the percentage of food budget spent on different types of food in four countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The graph below shows the proportion of the population aged 65 and over between 1940 and 2040 in three different countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The diagram below shows how a solar panel works to provide hot water for domestic use. Summarise the information by selecting and reporting the main features.',
+    'The two maps below show an island before and after the construction of some tourist facilities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The bar chart below shows the number of visitors to three London museums between 2004 and 2008. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The line graph below shows the number of books borrowed from four different libraries between 2014 and 2016. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The diagram below illustrates the stages in the life cycle of a silkworm. Summarise the information by selecting and reporting the main features.',
+    'The chart below gives information about global spending on different categories from 1990 to 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The maps below show how the town of Bradfield has changed since the 1950s. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The two pie charts below show the proportion of carbon emissions produced by different sectors in a developed country in 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    'The bar chart below compares the percentages of people in three countries who reported using the internet daily in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+  ],
+  task2: [
+    'Some people believe that universities should only offer courses that are useful for employment. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'In many countries, the proportion of older people is steadily increasing. Do you think this is a positive or negative development? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'Some people think that a sense of competition in children should be encouraged. Others believe that children who are taught to cooperate rather than compete become more useful adults. Discuss both these views and give your own opinion.',
+    'The increasing use of technology in the classroom is helping students learn more effectively. To what extent do you agree or disagree with this statement? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'Many people believe that social networking sites such as Facebook have had a huge negative impact on both individuals and society. To what extent do you agree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'Some people say that advertising encourages us to buy things we do not really need. Others say that advertisements tell us about new products that may improve our lives. Discuss both views and give your own opinion.',
+    'In some countries, the government pays for university education. In other countries, students must pay for themselves. Discuss the advantages and disadvantages of government-funded university education.',
+    'Traffic congestion is becoming a huge problem in many cities around the world. What are the causes of this problem, and what measures could be taken to reduce it? Give reasons for your answer and include any relevant examples.',
+    'Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion.',
+    'Many governments think that economic progress is their most important goal. Some people, however, think that other types of progress are equally important for a country. Discuss both these views and give your own opinion.',
+    'The best way to reduce crime is to give longer prison sentences. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'In some parts of the world, traditional festivals and celebrations are disappearing. Why is this happening, and is it a positive or negative development? Give reasons for your answer and include any relevant examples.',
+    'Some countries spend large amounts of money on space exploration programmes. Do you think this money could be better spent? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'Many people prefer to watch foreign films rather than locally produced films. Why could this be? Should governments give more financial support to local film industries? Give reasons for your answer.',
+    'The best way to solve the world\'s environmental problems is to increase the price of fuel. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
+    'More and more people are choosing to live and work abroad. What are the reasons for this, and do the advantages outweigh the disadvantages? Give reasons for your answer and include any relevant examples.',
+    'Some people feel that manufacturers and supermarkets have the responsibility to reduce the amount of packaging of goods. Others argue that it is the responsibility of consumers. Discuss both views and give your own opinion.',
+    'It is argued that getting a university education is the best way to guarantee a successful career. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
+    'Governments should spend money on railways rather than building new roads. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?',
+    'Many people are afraid that artificial intelligence will replace human workers in the near future. Do the advantages of AI outweigh the disadvantages? Give reasons for your answer and include any relevant examples.',
+    'Children today spend less time playing outdoors and more time on screens. What are the reasons for this, and what are the consequences? Give reasons for your answer and include any relevant examples.',
+    'Some people believe that it is better to accept a bad situation than to try to change it. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
+    'Nowadays, people are living longer than ever before. What problems does this create and what solutions can you suggest? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    'The world is consuming far more natural resources than it did in the past. What are the reasons for this, and what can be done to stop it? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+  ]
+};
+
 /* ─── Init ───────────────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
   // Restore dark mode preference
@@ -379,6 +437,16 @@ function applyUserToUI() {
   if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
     api('/api/admin/submissions/pending').then(items => updateQueueBadge(items.length)).catch(() => {});
   }
+
+  // Show notification bell for students; start polling
+  const bellBtn = document.getElementById('notif-bell-btn');
+  if (currentUser.role === 'student') {
+    if (bellBtn) bellBtn.classList.remove('hidden');
+    pollNotifications();
+  } else {
+    if (bellBtn) bellBtn.classList.add('hidden');
+    if (notifPollInterval) { clearInterval(notifPollInterval); notifPollInterval = null; }
+  }
 }
 
 async function showApp() {
@@ -468,6 +536,7 @@ function showView(name) {
   else if (name === 'classes') loadClassList();
   else if (name === 'class-detail') { /* loaded by openClassDetail() */ }
   else if (name === 'my-attendance') loadMyAttendance();
+  else if (name === 'vocab') loadVocabNotebook();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -818,6 +887,19 @@ async function loadDashboard() {
       sel.value = String(profile.target_band);
     }
 
+    // Weakest criterion callout
+    const weakestCard = document.getElementById('weakest-criterion-card');
+    if (weakestCard) {
+      const wc = getWeakestCriterion(graded);
+      if (wc) {
+        document.getElementById('weakest-criterion-name').textContent = wc.label;
+        document.getElementById('weakest-criterion-band').textContent = `avg band ${wc.avg}`;
+        weakestCard.classList.remove('hidden');
+      } else {
+        weakestCard.classList.add('hidden');
+      }
+    }
+
     // Progress chart
     renderProgressChart(graded, completedAttempts);
 
@@ -1092,12 +1174,50 @@ function updateTopicOptions() {
       ${opt.label}
     </button>
   `).join('');
+
+  // Show/hide Task 2 idea scaffold fields inside ideas-card
+  const scaffoldFields = document.getElementById('scaffold-fields');
+  if (scaffoldFields) {
+    if (taskType === 'task2') scaffoldFields.classList.remove('hidden');
+    else { scaffoldFields.classList.add('hidden'); clearScaffold(); }
+  }
+  // Update empty-state hint text for ideas card
+  const ideasEmpty = document.querySelector('#ideas-body .hint-empty');
+  if (ideasEmpty) {
+    ideasEmpty.textContent = taskType === 'task2'
+      ? 'Enter your ideas above or click "Generate ✨" for AI suggestions.'
+      : 'Click "Generate ✨" to get body paragraph ideas.';
+  }
 }
 
 function selectTopic(el, value) {
   selectedTopic = value;
   document.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+}
+
+/* ─── Idea Scaffold ──────────────────────────────────────────────────────── */
+function clearScaffold() {
+  ['scaffold-thesis','scaffold-bp1','scaffold-bp2','scaffold-counter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+function getScaffoldIdeas() {
+  const taskType = document.querySelector('input[name="task_type"]:checked')?.value;
+  if (taskType !== 'task2') return null;
+  const thesis  = (document.getElementById('scaffold-thesis')?.value  || '').trim();
+  const bp1     = (document.getElementById('scaffold-bp1')?.value     || '').trim();
+  const bp2     = (document.getElementById('scaffold-bp2')?.value     || '').trim();
+  const counter = (document.getElementById('scaffold-counter')?.value || '').trim();
+  if (!thesis && !bp1 && !bp2) return null; // all empty — no scaffold
+  const parts = [];
+  if (thesis)  parts.push(`Position/Thesis: ${thesis}`);
+  if (bp1)     parts.push(`Body Paragraph 1 idea: ${bp1}`);
+  if (bp2)     parts.push(`Body Paragraph 2 idea: ${bp2}`);
+  if (counter) parts.push(`Counterargument: ${counter}`);
+  return parts.join('\n');
 }
 
 /* ─── Task Generation ────────────────────────────────────────────────────── */
@@ -1424,13 +1544,15 @@ async function requestSingleHint(hint_type) {
   const btn  = document.getElementById(btnMap[hint_type]);
   if (!body) return;
 
+  const student_ideas = hint_type === 'ideas' ? getScaffoldIdeas() : null;
+
   if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
   body.innerHTML = '<span class="hint-thinking">Generating…</span>';
   let raw = '';
   try {
     await streamSSE(
       '/api/hint',
-      { task_type, prompt, essay, hint_type },
+      { task_type, prompt, essay, hint_type, student_ideas },
       (chunk) => { raw += chunk; body.innerHTML = renderHintMarkdown(raw); },
       () => { body.innerHTML = renderHintMarkdown(raw); }
     );
@@ -1496,10 +1618,11 @@ async function requestBothHints() {
     if (phrasesBody) phrasesBody.innerHTML = '<span class="hint-thinking">Generating language toolkit…</span>';
     disable(ideasBtn, '⏳'); disable(phrasesBtn, '⏳');
 
+    const student_ideas = getScaffoldIdeas();
     let ideasRaw = '';
     promises.push(streamSSE(
       '/api/hint',
-      { task_type, prompt, essay, hint_type: 'ideas' },
+      { task_type, prompt, essay, hint_type: 'ideas', student_ideas },
       (chunk) => { ideasRaw += chunk; if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); },
       () => { if (ideasBody) ideasBody.innerHTML = renderHintMarkdown(ideasRaw); }
     ).catch(err => { if (ideasBody) ideasBody.innerHTML = `<span style="color:var(--danger)">Failed: ${escHtml(err.message)}</span>`; }));
@@ -5419,6 +5542,147 @@ async function renderMyAttendanceCalendar(classId) {
       </div>`;
   } catch (err) {
     calEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+/* ─── Utility ────────────────────────────────────────────────────────────── */
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ─── Random IELTS Prompt ────────────────────────────────────────────────── */
+function insertRandomPrompt() {
+  const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
+  const bank = PROMPT_BANK[taskType] || PROMPT_BANK.task2;
+  const prompt = bank[Math.floor(Math.random() * bank.length)];
+  const ta = document.getElementById('essay-prompt');
+  if (ta) ta.value = prompt;
+}
+
+/* ─── Weakest Criterion ──────────────────────────────────────────────────── */
+function getWeakestCriterion(gradedSubmissions) {
+  const withScores = gradedSubmissions.filter(s =>
+    s.task_achievement != null || s.coherence_cohesion != null ||
+    s.lexical_resource != null || s.grammatical_range != null
+  );
+  if (!withScores.length) return null;
+  const keys = ['task_achievement', 'coherence_cohesion', 'lexical_resource', 'grammatical_range'];
+  const totals = {}; const counts = {};
+  keys.forEach(k => { totals[k] = 0; counts[k] = 0; });
+  withScores.forEach(s => {
+    keys.forEach(k => { if (s[k] != null) { totals[k] += s[k]; counts[k]++; } });
+  });
+  const avgs = {};
+  keys.forEach(k => { avgs[k] = counts[k] ? totals[k] / counts[k] : 9; });
+  const [key] = Object.entries(avgs).sort((a, b) => a[1] - b[1])[0];
+  const labels = {
+    task_achievement:   'Task Achievement',
+    coherence_cohesion: 'Coherence & Cohesion',
+    lexical_resource:   'Lexical Resource',
+    grammatical_range:  'Grammatical Range & Accuracy'
+  };
+  return { key, label: labels[key], avg: avgs[key].toFixed(1) };
+}
+
+/* ─── Vocabulary Notebook ────────────────────────────────────────────────── */
+async function loadVocabNotebook() {
+  const container = document.getElementById('vocab-list-container');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading your vocabulary…</div>';
+  try {
+    const words = await api('/api/saved-words');
+    if (!words.length) {
+      container.innerHTML = '<div class="empty-state">No saved words yet. Open any essay\'s flashcards and click 💾 Save Word.</div>';
+      return;
+    }
+    container.innerHTML = `<div class="vocab-list">${words.map(w => `
+      <div class="vocab-card-item" id="vocab-item-${w.id}">
+        <div class="vocab-card-main">
+          <div class="vocab-word">${escapeHtml(w.word)}</div>
+          ${w.definition ? `<div class="vocab-def">${escapeHtml(w.definition)}</div>` : ''}
+          ${w.example ? `<div class="vocab-example">"${escapeHtml(w.example)}"</div>` : ''}
+        </div>
+        <button class="btn btn-danger btn-sm vocab-delete-btn" onclick="deleteVocabWord(${w.id})">🗑</button>
+      </div>`).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">Failed to load vocabulary: ${err.message}</div>`;
+  }
+}
+
+async function deleteVocabWord(id) {
+  try {
+    await api(`/api/saved-words/${id}`, { method: 'DELETE' });
+    const el = document.getElementById(`vocab-item-${id}`);
+    if (el) el.remove();
+    // If list is empty now, show empty state
+    const list = document.querySelector('.vocab-list');
+    if (list && !list.children.length) {
+      document.getElementById('vocab-list-container').innerHTML =
+        '<div class="empty-state">No saved words yet. Open any essay\'s flashcards and click 💾 Save Word.</div>';
+    }
+  } catch (err) {
+    alert('Could not delete word: ' + err.message);
+  }
+}
+
+async function saveFlashcardWord() {
+  if (!flashcards.length) return;
+  const card = flashcards[flashcardIndex];
+  const btn = document.getElementById('flashcard-save-btn');
+  const msg = document.getElementById('flashcard-saved-msg');
+  if (btn) btn.disabled = true;
+  try {
+    await api('/api/saved-words', {
+      method: 'POST',
+      body: JSON.stringify({
+        word: card.word || '',
+        definition: card.definition || '',
+        example: card.example || '',
+        source: 'flashcard'
+      })
+    });
+    if (msg) { msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2500); }
+  } catch (err) {
+    alert('Could not save word: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ─── Notification Bell ──────────────────────────────────────────────────── */
+let notifPollInterval = null;
+
+function pollNotifications() {
+  if (notifPollInterval) clearInterval(notifPollInterval);
+  const doFetch = () => {
+    api('/api/user/notifications').then(data => {
+      const badge = document.getElementById('notif-badge');
+      if (!badge) return;
+      if (data.count > 0) {
+        badge.textContent = data.count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }).catch(() => {});
+  };
+  doFetch();
+  notifPollInterval = setInterval(doFetch, 60000);
+}
+
+async function openNotifPanel() {
+  try {
+    const data = await api('/api/user/notifications');
+    await api('/api/user/notifications/read', { method: 'POST' });
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.classList.add('hidden');
+    const lines = [];
+    if (data.gradedCount > 0) lines.push(`📝 ${data.gradedCount} essay${data.gradedCount > 1 ? 's' : ''} graded`);
+    if (data.newAssignments > 0) lines.push(`📋 ${data.newAssignments} new assignment${data.newAssignments > 1 ? 's' : ''}`);
+    const msg = lines.length ? lines.join('\n') : 'No new notifications.';
+    alert(msg);
+  } catch (err) {
+    alert('Could not load notifications.');
   }
 }
 

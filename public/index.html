@@ -145,6 +145,12 @@
         <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide sidebar">‹</button>
       </div>
       <nav class="sidebar-nav">
+        <!-- Notification Bell (student only, managed by applyUserToUI) -->
+        <button class="nav-item notif-bell-nav-item hidden" id="notif-bell-btn" onclick="openNotifPanel()">
+          <span class="nav-icon">🔔</span> Notifications
+          <span class="notif-badge hidden" id="notif-badge">0</span>
+        </button>
+
         <!-- Dashboard (standalone) -->
         <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
           <span class="nav-icon">⬛</span> Dashboard
@@ -191,6 +197,9 @@
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('my-attendance')" id="nav-my-attendance">
               <span class="nav-icon">📅</span> Attendance
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('vocab')" id="nav-vocab">
+              <span class="nav-icon">📓</span> My Vocabulary
             </button>
           </div>
         </div>
@@ -316,6 +325,18 @@
           </div>
         </div>
 
+        <!-- Weakest Criterion Callout -->
+        <div class="card weakest-criterion-card hidden" id="weakest-criterion-card">
+          <div class="weakest-criterion-inner">
+            <span class="weakest-criterion-icon">🎯</span>
+            <div class="weakest-criterion-text">
+              <strong>Focus Area: <span id="weakest-criterion-name"></span></strong>
+              <span class="weakest-criterion-band" id="weakest-criterion-band"></span>
+              <div class="weakest-criterion-hint">Improving this criterion will raise your overall band score the most.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Target Band Tracker -->
         <div class="target-band-section" id="target-band-section">
           <div class="section-header">
@@ -426,6 +447,9 @@
                   <button type="button" class="generate-btn" id="generate-btn" onclick="generateTask()">
                     <span id="generate-btn-icon">✨</span> <span id="generate-btn-label">Generate Task</span>
                   </button>
+                  <button type="button" class="generate-btn" id="random-prompt-btn" onclick="insertRandomPrompt()" title="Fill with a real IELTS question">
+                    🎲 Random IELTS
+                  </button>
                 </label>
                 <textarea id="essay-prompt" rows="4"
                   placeholder="Paste your own IELTS question here, or click ✨ Generate Task to create one automatically..."
@@ -525,7 +549,32 @@
               <div class="hints-grid-vertical">
                 <div class="hint-card" id="ideas-card">
                   <div class="hint-card-header">💡 Body Arguments<button type="button" class="hint-generate-btn" id="ideas-btn" onclick="requestSingleHint('ideas')">Generate ✨</button></div>
-                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Click "Generate ✨" to get body paragraph ideas.</span></div>
+                  <!-- Scaffold inputs — Task 2 only, shown by updateTopicOptions() -->
+                  <div id="scaffold-fields" class="scaffold-fields hidden">
+                    <p class="scaffold-hint">Enter your own ideas and the AI will develop them — leave blank for AI suggestions.</p>
+                    <div class="scaffold-row">
+                      <label class="scaffold-label">My position / thesis</label>
+                      <input type="text" id="scaffold-thesis" class="form-input scaffold-input"
+                        placeholder="e.g. Governments should prioritise public transport over new roads.">
+                    </div>
+                    <div class="scaffold-row">
+                      <label class="scaffold-label">Body paragraph 1 idea</label>
+                      <input type="text" id="scaffold-bp1" class="form-input scaffold-input"
+                        placeholder="e.g. Public transport reduces congestion and pollution.">
+                    </div>
+                    <div class="scaffold-row">
+                      <label class="scaffold-label">Body paragraph 2 idea</label>
+                      <input type="text" id="scaffold-bp2" class="form-input scaffold-input"
+                        placeholder="e.g. New roads encourage more car use, worsening the problem.">
+                    </div>
+                    <div class="scaffold-row">
+                      <label class="scaffold-label">Counterargument <span class="scaffold-optional">(optional)</span></label>
+                      <input type="text" id="scaffold-counter" class="form-input scaffold-input"
+                        placeholder="e.g. Some argue roads are essential for rural areas.">
+                    </div>
+                    <button type="button" class="scaffold-clear-btn" onclick="clearScaffold()">✕ Clear</button>
+                  </div>
+                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Enter your ideas above or click "Generate ✨" for AI suggestions.</span></div>
                 </div>
                 <div class="hint-card" id="vocab-card" style="display:none">
                   <div class="hint-card-header">📚 Vocabulary &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Generate ✨</button></div>
@@ -1010,6 +1059,18 @@
         <div id="my-attendance-calendar"></div>
         <div id="my-attendance-summary" style="margin-top:16px"></div>
       </div>
+
+      <!-- Vocabulary Notebook View -->
+      <div id="view-vocab" class="view hidden">
+        <div class="page-header">
+          <h2>📓 My Vocabulary</h2>
+          <p>Words saved from your flashcards</p>
+        </div>
+        <div id="vocab-list-container">
+          <div class="empty-state">No saved words yet. Open any essay's flashcards and click 💾 Save Word.</div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -1043,6 +1104,10 @@
         <div class="flashcard-actions">
           <button class="btn btn-secondary btn-sm" onclick="markCard('hard')">😓 Hard</button>
           <button class="btn btn-primary btn-sm" onclick="markCard('got')">✓ Got it</button>
+        </div>
+        <div class="flashcard-save-row">
+          <button class="btn btn-secondary btn-sm" id="flashcard-save-btn" onclick="saveFlashcardWord()">💾 Save Word</button>
+          <span class="flashcard-saved-msg hidden" id="flashcard-saved-msg">✓ Saved to notebook!</span>
         </div>
       </div>
       <div id="flashcard-error" class="error-msg hidden"></div>

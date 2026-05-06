@@ -927,6 +927,61 @@ const db = {
     save(data);
   },
 
+  getSavedWords(userId) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    return u ? (u.saved_words || []) : [];
+  },
+
+  addSavedWord(userId, wordData) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (!u) return null;
+    if (!u.saved_words) u.saved_words = [];
+    const entry = { id: Date.now(), ...wordData, saved_at: new Date().toISOString() };
+    u.saved_words.push(entry);
+    save(data);
+    return entry;
+  },
+
+  deleteSavedWord(userId, wordId) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (!u || !u.saved_words) return false;
+    const before = u.saved_words.length;
+    u.saved_words = u.saved_words.filter(w => String(w.id) !== String(wordId));
+    if (u.saved_words.length < before) { save(data); return true; }
+    return false;
+  },
+
+  getNotificationCount(userId) {
+    const data = load();
+    const gradedCount = (data.submissions || [])
+      .filter(s => s.user_id === userId && s.status === 'graded' && !s.notification_read)
+      .length;
+    const u = data.users.find(u => u.id === userId);
+    const lastCheck = u ? (u.last_notif_check || 0) : 0;
+    const newAssignments = (data.assignments || [])
+      .filter(a => {
+        const list = a.assigned_to || [];
+        const forUser = list.length === 0 || list.includes(userId);
+        return forUser && new Date(a.created_at) > new Date(lastCheck);
+      })
+      .length;
+    return { gradedCount, newAssignments, count: gradedCount + newAssignments };
+  },
+
+  markNotificationsRead(userId) {
+    const data = load();
+    let changed = false;
+    (data.submissions || [])
+      .filter(s => s.user_id === userId && s.status === 'graded' && !s.notification_read)
+      .forEach(s => { s.notification_read = true; changed = true; });
+    const u = data.users.find(u => u.id === userId);
+    if (u) { u.last_notif_check = new Date().toISOString(); changed = true; }
+    if (changed) save(data);
+  },
+
   getAllUsersWithStats() {
     const data = load();
     return data.users.map(u => {

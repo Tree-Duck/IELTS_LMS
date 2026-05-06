@@ -3738,3 +3738,71 @@ input:focus, textarea:focus, select:focus {
 }
 .btn-danger:hover { background: #dc2626; }
 
+
+/* ─── Notification Bell ─────────────────────────────────────────────────── */
+.notif-bell-nav-item { position: relative; }
+.notif-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: #ef4444; color: #fff;
+  border-radius: 999px;
+  font-size: 10px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* ─── Weakest Criterion Card ────────────────────────────────────────────── */
+.weakest-criterion-card { border-left: 4px solid #f59e0b; }
+.weakest-criterion-inner { display: flex; align-items: flex-start; gap: 12px; }
+.weakest-criterion-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.weakest-criterion-text { display: flex; flex-direction: column; gap: 2px; }
+.weakest-criterion-band { font-size: 13px; color: var(--text-secondary); }
+.weakest-criterion-hint { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ─── Deadline Labels ───────────────────────────────────────────────────── */
+.deadline-label { font-size: 12px; font-weight: 600; border-radius: 4px; padding: 2px 7px; display: inline-block; margin-top: 4px; }
+.deadline-label.overdue   { background: #fee2e2; color: #b91c1c; }
+.deadline-label.due-today { background: #fef3c7; color: #92400e; }
+.deadline-label.due-soon  { background: #ffedd5; color: #c2410c; }
+.deadline-label.due-week  { background: #ede9fe; color: #6d28d9; }
+
+/* ─── Vocab Notebook ────────────────────────────────────────────────────── */
+.vocab-list { display: flex; flex-direction: column; gap: 8px; }
+.vocab-card-item {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card-bg);
+}
+.vocab-card-main { flex: 1; min-width: 0; }
+.vocab-word { font-weight: 700; font-size: 16px; }
+.vocab-def  { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
+.vocab-example { color: var(--text-secondary); font-size: 13px; font-style: italic; margin-top: 2px; }
+.vocab-delete-btn { flex-shrink: 0; margin-left: 10px; }
+
+/* ─── Flashcard Save Row ────────────────────────────────────────────────── */
+.flashcard-save-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.flashcard-saved-msg { font-size: 13px; color: #16a34a; font-weight: 600; }
+
+/* ─── Task 2 Idea Scaffold (inside ideas-card) ──────────────────────────── */
+.scaffold-fields {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 12px;
+  background: #fefce8;
+  border-bottom: 1px solid #fde68a;
+}
+[data-theme="dark"] .scaffold-fields { background: #2a2000; border-bottom-color: #5a4500; }
+.scaffold-hint { font-size: 11px; color: #92400e; margin: 0 0 2px; line-height: 1.4; }
+[data-theme="dark"] .scaffold-hint { color: #fbbf24; }
+.scaffold-row { display: flex; flex-direction: column; gap: 3px; }
+.scaffold-label { font-size: 11px; font-weight: 600; color: #b45309; }
+[data-theme="dark"] .scaffold-label { color: #fcd34d; }
+.scaffold-optional { font-weight: 400; opacity: .8; }
+.scaffold-input { font-size: 12px; padding: 5px 8px; }
+.scaffold-clear-btn {
+  align-self: flex-end; font-size: 11px; padding: 2px 8px;
+  background: transparent; border: 1px solid #d97706; color: #b45309;
+  border-radius: 4px; cursor: pointer; line-height: 1.6;
+}
+.scaffold-clear-btn:hover { background: #fef3c7; }
