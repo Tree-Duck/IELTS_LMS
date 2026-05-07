@@ -178,6 +178,9 @@
             <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('listening')" id="nav-test-list-listening">
               <span class="nav-icon">🎧</span> Listening
             </button>
+            <button class="nav-item nav-sub-item" onclick="showView('speaking')" id="nav-speaking">
+              <span class="nav-icon">🎙️</span> Speaking
+            </button>
           </div>
         </div>
 
@@ -1068,6 +1071,110 @@
         </div>
         <div id="vocab-list-container">
           <div class="empty-state">No saved words yet. Open any essay's flashcards and click 💾 Save Word.</div>
+        </div>
+      </div>
+
+      <!-- Speaking Practice View -->
+      <div id="view-speaking" class="view hidden">
+        <div class="page-header">
+          <h2>🎙️ Speaking Practice</h2>
+          <p>Random IELTS Speaking topics with frameworks and a built-in timer</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="speaking-filters">
+          <div class="speaking-part-tabs">
+            <button class="speaking-part-btn active" onclick="setSpeakingPart(1)" id="speaking-part-btn-1">Part 1</button>
+            <button class="speaking-part-btn" onclick="setSpeakingPart(2)" id="speaking-part-btn-2">Part 2</button>
+            <button class="speaking-part-btn" onclick="setSpeakingPart(3)" id="speaking-part-btn-3">Part 3</button>
+          </div>
+          <select id="speaking-category" class="form-input speaking-select" onchange="spinSpeakingTopic()">
+            <option value="all">🎲 All Categories</option>
+          </select>
+          <select id="speaking-difficulty" class="form-input speaking-select">
+            <option value="all">Any Difficulty</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <!-- Topic card -->
+        <div class="speaking-topic-card" id="speaking-topic-card">
+          <div class="speaking-topic-meta">
+            <span class="speaking-topic-part-badge" id="speaking-topic-part-badge">Part 1</span>
+            <span class="speaking-topic-category-tag" id="speaking-topic-category">Work &amp; Study</span>
+            <span class="speaking-topic-diff-tag" id="speaking-topic-diff">Easy</span>
+          </div>
+          <div class="speaking-topic-question" id="speaking-topic-question">
+            Click <strong>🎲 Spin!</strong> to get a random topic
+          </div>
+          <ul class="speaking-cue-bullets hidden" id="speaking-cue-bullets"></ul>
+        </div>
+
+        <!-- Controls -->
+        <div class="speaking-main-controls">
+          <button class="btn btn-primary btn-lg speaking-spin-btn" onclick="spinSpeakingTopic()">🎲 Spin!</button>
+        </div>
+
+        <!-- Timer -->
+        <div class="speaking-timer-section" id="speaking-timer-section">
+          <div class="speaking-timer-phases" id="speaking-timer-phases">
+            <button class="speaking-phase-btn active" onclick="setSpeakingPhase('prep')" id="phase-btn-prep">⏳ Prep (1 min)</button>
+            <button class="speaking-phase-btn" onclick="setSpeakingPhase('speak')" id="phase-btn-speak">🗣️ Speak (2 min)</button>
+          </div>
+          <div class="speaking-timer-display" id="speaking-timer-display">1:00</div>
+          <div class="speaking-timer-label" id="speaking-timer-label">Preparation time</div>
+          <div class="speaking-timer-btns">
+            <button class="btn btn-primary" onclick="startSpeakingTimer()" id="speaking-timer-start-btn">▶ Start</button>
+            <button class="btn btn-secondary" onclick="resetSpeakingTimer()">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Frameworks -->
+        <div class="speaking-frameworks">
+          <h3 class="frameworks-title">💡 Speaking Frameworks</h3>
+          <div class="frameworks-grid">
+            <div class="framework-card">
+              <div class="framework-name">PREP</div>
+              <div class="framework-body">
+                <div><span class="fw-letter">P</span>oint — State your main answer</div>
+                <div><span class="fw-letter">R</span>eason — Give a reason why</div>
+                <div><span class="fw-letter">E</span>xample — Add a specific example</div>
+                <div><span class="fw-letter">P</span>oint — Restate/conclude</div>
+              </div>
+              <div class="framework-use">Best for: Part 1 &amp; Part 3 opinions</div>
+            </div>
+            <div class="framework-card">
+              <div class="framework-name">STAR</div>
+              <div class="framework-body">
+                <div><span class="fw-letter">S</span>ituation — Set the scene</div>
+                <div><span class="fw-letter">T</span>ask — The challenge or goal</div>
+                <div><span class="fw-letter">A</span>ction — What you did</div>
+                <div><span class="fw-letter">R</span>esult — The outcome</div>
+              </div>
+              <div class="framework-use">Best for: Part 2 narrative stories</div>
+            </div>
+            <div class="framework-card">
+              <div class="framework-name">PPF</div>
+              <div class="framework-body">
+                <div><span class="fw-letter">P</span>ast — Historical context</div>
+                <div><span class="fw-letter">P</span>resent — Current situation</div>
+                <div><span class="fw-letter">F</span>uture — What may happen</div>
+              </div>
+              <div class="framework-use">Best for: Part 3 trend questions</div>
+            </div>
+            <div class="framework-card">
+              <div class="framework-name">TIP PHRASES</div>
+              <div class="framework-body tip-phrases">
+                <div>Buying time: <em>"That's an interesting question…"</em></div>
+                <div>Agreeing: <em>"I'd have to say…" / "To my mind…"</em></div>
+                <div>Disagreeing: <em>"I'm not entirely sure, but…"</em></div>
+                <div>Elaborating: <em>"What I mean is…" / "For instance…"</em></div>
+              </div>
+              <div class="framework-use">Use naturally to sound fluent</div>
+            </div>
+          </div>
         </div>
       </div>
 

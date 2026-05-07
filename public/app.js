@@ -109,6 +109,142 @@ const PROMPT_BANK = {
   ]
 };
 
+/* ─── IELTS Speaking Bank ────────────────────────────────────────────────── */
+const SPEAKING_BANK = {
+  part1: [
+    { cat: 'Work & Study', difficulty: 'easy', q: 'Do you work or are you a student?' },
+    { cat: 'Work & Study', difficulty: 'easy', q: 'What subject do you enjoy most in your studies, and why?' },
+    { cat: 'Work & Study', difficulty: 'medium', q: 'What are the most challenging aspects of your work or studies?' },
+    { cat: 'Work & Study', difficulty: 'medium', q: 'Would you like to change your job or field of study in the future?' },
+    { cat: 'Work & Study', difficulty: 'hard', q: 'How do you think your career will change over the next ten years?' },
+    { cat: 'Hometown', difficulty: 'easy', q: 'Where are you from, and what is it like there?' },
+    { cat: 'Hometown', difficulty: 'easy', q: 'What do you like most about your hometown?' },
+    { cat: 'Hometown', difficulty: 'medium', q: 'Has your hometown changed much in recent years? How?' },
+    { cat: 'Hometown', difficulty: 'medium', q: 'What changes would you like to see in your hometown?' },
+    { cat: 'Hobbies', difficulty: 'easy', q: 'What do you like to do in your free time?' },
+    { cat: 'Hobbies', difficulty: 'easy', q: 'Do you have any hobbies you have had since childhood?' },
+    { cat: 'Hobbies', difficulty: 'medium', q: 'Is it important for people to have hobbies? Why or why not?' },
+    { cat: 'Hobbies', difficulty: 'medium', q: 'Do you prefer indoor or outdoor activities? Why?' },
+    { cat: 'Food & Cooking', difficulty: 'easy', q: 'What is your favourite food? Why do you like it?' },
+    { cat: 'Food & Cooking', difficulty: 'easy', q: 'Do you prefer eating at home or at a restaurant?' },
+    { cat: 'Food & Cooking', difficulty: 'medium', q: 'Has the food people eat in your country changed in recent years? How?' },
+    { cat: 'Food & Cooking', difficulty: 'medium', q: 'Do you enjoy cooking? What do you like to cook?' },
+    { cat: 'Technology', difficulty: 'easy', q: 'How often do you use the internet? What do you use it for?' },
+    { cat: 'Technology', difficulty: 'medium', q: 'Do you think technology has made life easier or more complicated? Why?' },
+    { cat: 'Technology', difficulty: 'medium', q: 'What was the most useful piece of technology you used today?' },
+    { cat: 'Technology', difficulty: 'hard', q: 'Do you worry about how much personal information technology companies collect?' },
+    { cat: 'Sport & Exercise', difficulty: 'easy', q: 'Do you do any sports or regular exercise?' },
+    { cat: 'Sport & Exercise', difficulty: 'medium', q: 'Do you think young people today get enough exercise? Why?' },
+    { cat: 'Sport & Exercise', difficulty: 'medium', q: 'Is watching sport as enjoyable as playing sport, in your opinion?' },
+    { cat: 'Music & Arts', difficulty: 'easy', q: 'What type of music do you enjoy listening to?' },
+    { cat: 'Music & Arts', difficulty: 'medium', q: 'Do you think learning to play a musical instrument is important for children?' },
+    { cat: 'Music & Arts', difficulty: 'medium', q: 'Do you prefer to watch films at home or at the cinema?' },
+    { cat: 'Travel', difficulty: 'easy', q: 'Do you enjoy travelling? Where have you been?' },
+    { cat: 'Travel', difficulty: 'medium', q: 'What kind of places do you enjoy visiting the most, and why?' },
+    { cat: 'Travel', difficulty: 'medium', q: 'Would you prefer to travel alone or with a group? Why?' },
+    { cat: 'Friends & Family', difficulty: 'easy', q: 'How important is family to you?' },
+    { cat: 'Friends & Family', difficulty: 'medium', q: 'Do you think it is harder to make friends as an adult than as a child?' },
+    { cat: 'Friends & Family', difficulty: 'medium', q: 'How do you usually stay in touch with friends who live far away?' },
+    { cat: 'Reading', difficulty: 'easy', q: 'Do you enjoy reading? What kinds of things do you read?' },
+    { cat: 'Reading', difficulty: 'medium', q: 'Do you prefer reading physical books or using digital devices? Why?' },
+    { cat: 'Shopping', difficulty: 'easy', q: 'Do you enjoy shopping? What kind of shopping do you like?' },
+    { cat: 'Shopping', difficulty: 'medium', q: 'Do you think people buy things they do not really need? Why?' },
+    { cat: 'Daily Routine', difficulty: 'easy', q: 'Can you describe your typical daily routine?' },
+    { cat: 'Daily Routine', difficulty: 'medium', q: 'Would you like to change anything about your daily routine? Why?' },
+    { cat: 'Weather', difficulty: 'easy', q: 'What kind of weather do you prefer, and why?' },
+    { cat: 'Weather', difficulty: 'medium', q: 'How does the weather affect your mood or daily activities?' },
+  ],
+  part2: [
+    { cat: 'People', difficulty: 'medium',
+      card: 'Describe a person who has had a significant influence on your life.',
+      bullets: ['Who this person is', 'How you know or knew this person', 'What they did that influenced you', 'And explain why you consider them an important influence'] },
+    { cat: 'People', difficulty: 'medium',
+      card: 'Describe someone you know who is very good at their job.',
+      bullets: ['Who this person is', 'What their job is', 'Why you think they are good at it', 'And explain how you feel about this person'] },
+    { cat: 'People', difficulty: 'hard',
+      card: 'Describe a public figure you admire.',
+      bullets: ['Who this person is', 'What they are famous for', 'What qualities you admire in them', 'And explain how this person has influenced society'] },
+    { cat: 'Places', difficulty: 'easy',
+      card: 'Describe a place you enjoy visiting in your free time.',
+      bullets: ['Where the place is', 'How often you go there', 'What you do there', 'And explain why you enjoy visiting this place'] },
+    { cat: 'Places', difficulty: 'medium',
+      card: 'Describe a foreign country you would like to visit.',
+      bullets: ['Which country you would like to visit', 'When you would like to go', 'What you would like to do there', 'And explain why you want to visit this country'] },
+    { cat: 'Places', difficulty: 'medium',
+      card: 'Describe a historical place you have visited or would like to visit.',
+      bullets: ['Where this place is', 'What makes it historically significant', 'What you know about its history', 'And explain why you find it interesting'] },
+    { cat: 'Places', difficulty: 'easy',
+      card: 'Describe your ideal home.',
+      bullets: ['Where it would be located', 'What it would look like', 'Who you would live there with', 'And explain why this would be your ideal home'] },
+    { cat: 'Objects', difficulty: 'easy',
+      card: 'Describe an object that is very important to you.',
+      bullets: ['What the object is', 'How long you have had it', 'What you use it for', 'And explain why it is important to you'] },
+    { cat: 'Objects', difficulty: 'medium',
+      card: 'Describe a gift you recently gave or received.',
+      bullets: ['What the gift was', 'Who gave or received it and why', 'How you felt about it', 'And explain why this gift was memorable'] },
+    { cat: 'Objects', difficulty: 'hard',
+      card: 'Describe a piece of technology that you find particularly useful.',
+      bullets: ['What the technology is', 'How long you have been using it', 'How it has changed your daily life', 'And explain why you think it is valuable'] },
+    { cat: 'Events', difficulty: 'medium',
+      card: 'Describe a memorable event from your childhood.',
+      bullets: ['What the event was', 'When it happened', 'Who was involved', 'And explain why this event has stayed in your memory'] },
+    { cat: 'Events', difficulty: 'easy',
+      card: 'Describe a celebration or festival that is important in your culture.',
+      bullets: ['What the celebration or festival is', 'When it takes place', 'How people celebrate it', 'And explain why it is important to you or your culture'] },
+    { cat: 'Events', difficulty: 'hard',
+      card: 'Describe a time when you had to make a difficult decision.',
+      bullets: ['What the decision was', 'When you had to make it', 'What factors you considered', 'And explain whether you feel the decision was the right one'] },
+    { cat: 'Experiences', difficulty: 'easy',
+      card: 'Describe a journey or trip that you really enjoyed.',
+      bullets: ['Where you went', 'When the trip took place', 'Who you went with', 'And explain what made the journey enjoyable'] },
+    { cat: 'Experiences', difficulty: 'medium',
+      card: 'Describe a time you successfully learned something new.',
+      bullets: ['What you learned', 'When and where you learned it', 'How you learned it', 'And explain how this new knowledge or skill has been useful to you'] },
+    { cat: 'Experiences', difficulty: 'medium',
+      card: 'Describe a skill that took you a long time to learn.',
+      bullets: ['What the skill is', 'How long it took to learn', 'Who or what helped you', 'And explain how you feel about having this skill now'] },
+    { cat: 'Experiences', difficulty: 'hard',
+      card: 'Describe a challenge you faced and how you overcame it.',
+      bullets: ['What the challenge was', 'When you faced it', 'What you did to deal with it', 'And explain what you learned from this experience'] },
+    { cat: 'Media & Culture', difficulty: 'medium',
+      card: 'Describe a book, film, or TV show that you enjoyed.',
+      bullets: ['What it is and what it is about', 'When and how you came across it', 'Who you would recommend it to', 'And explain why you enjoyed it'] },
+    { cat: 'Media & Culture', difficulty: 'medium',
+      card: 'Describe a piece of news that you found particularly interesting.',
+      bullets: ['What the news story was about', 'When you heard or read it', 'Where you got the information from', 'And explain why you found it interesting'] },
+    { cat: 'Media & Culture', difficulty: 'easy',
+      card: 'Describe a song that has special meaning to you.',
+      bullets: ['What the song is', 'When you first heard it', 'Why it is meaningful to you', 'And explain what memories or feelings it brings back'] },
+  ],
+  part3: [
+    { cat: 'Education', difficulty: 'medium', q: 'Do you think schools focus too much on academic results and not enough on personal development?' },
+    { cat: 'Education', difficulty: 'hard', q: 'What are the advantages and disadvantages of online learning compared to traditional classroom education?' },
+    { cat: 'Education', difficulty: 'hard', q: 'Should university education be free for everyone? Give reasons for your view.' },
+    { cat: 'Education', difficulty: 'medium', q: 'Should children be taught about financial management in school? Why or why not?' },
+    { cat: 'Technology', difficulty: 'easy', q: 'Do you think children spend too much time on electronic devices? What problems can this cause?' },
+    { cat: 'Technology', difficulty: 'medium', q: 'How has social media changed the way people communicate with each other?' },
+    { cat: 'Technology', difficulty: 'hard', q: 'Do you think artificial intelligence will create more jobs or lead to more unemployment? Why?' },
+    { cat: 'Technology', difficulty: 'medium', q: 'Should governments regulate the internet more strictly? Why or why not?' },
+    { cat: 'Environment', difficulty: 'easy', q: 'Do you think enough is being done to address climate change? Why or why not?' },
+    { cat: 'Environment', difficulty: 'medium', q: 'What do you think are the most effective ways for individuals to help the environment?' },
+    { cat: 'Environment', difficulty: 'hard', q: 'Do you believe economic development and environmental protection can go hand in hand? Why or why not?' },
+    { cat: 'Society & Culture', difficulty: 'easy', q: 'How important is it for young people to preserve traditional culture?' },
+    { cat: 'Society & Culture', difficulty: 'medium', q: 'How has the role of women in society changed over the past few decades?' },
+    { cat: 'Society & Culture', difficulty: 'hard', q: 'Some people believe globalisation has had a negative impact on cultural diversity. Do you agree?' },
+    { cat: 'Work & Economy', difficulty: 'medium', q: 'What qualities do you think are most important for success in the modern workplace?' },
+    { cat: 'Work & Economy', difficulty: 'hard', q: 'Do you think the gap between rich and poor is getting wider? What can governments do about it?' },
+    { cat: 'Work & Economy', difficulty: 'hard', q: 'Should people be encouraged to work from home permanently, or is office work better? Why?' },
+    { cat: 'Health', difficulty: 'medium', q: 'Do you think governments should spend more on preventing illness or treating it? Why?' },
+    { cat: 'Health', difficulty: 'hard', q: 'Some people believe mental health is just as important as physical health. Do you agree? Why?' },
+    { cat: 'Health', difficulty: 'medium', q: 'How can society encourage people to lead healthier lifestyles?' },
+    { cat: 'Society & Culture', difficulty: 'medium', q: 'Do you think people in your country have enough leisure time? Why or why not?' },
+    { cat: 'Education', difficulty: 'medium', q: 'How important is it for students to learn languages other than their mother tongue? Why?' },
+    { cat: 'Technology', difficulty: 'hard', q: 'How might technology change the way people work over the next 20 years?' },
+    { cat: 'Environment', difficulty: 'medium', q: 'Do you think cities or rural areas are better places to live? Why?' },
+    { cat: 'Work & Economy', difficulty: 'medium', q: 'Is it better for young people to gain work experience or continue studying after high school? Why?' },
+  ]
+};
+
 /* ─── Init ───────────────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
   // Restore dark mode preference
@@ -537,6 +673,7 @@ function showView(name) {
   else if (name === 'class-detail') { /* loaded by openClassDetail() */ }
   else if (name === 'my-attendance') loadMyAttendance();
   else if (name === 'vocab') loadVocabNotebook();
+  else if (name === 'speaking') loadSpeakingTopicGen();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -5684,5 +5821,188 @@ async function openNotifPanel() {
   } catch (err) {
     alert('Could not load notifications.');
   }
+}
+
+/* ─── Speaking Topic Generator ───────────────────────────────────────────── */
+let speakingPart = 1;
+let speakingTimerInterval = null;
+let speakingTimerSecs = 60;
+let speakingTimerRunning = false;
+let speakingPhase = 'prep'; // 'prep' | 'speak'
+
+function loadSpeakingTopicGen() {
+  speakingPart = 1;
+  speakingPhase = 'prep';
+  resetSpeakingTimer(false);
+  _updateSpeakingPartUI();
+  _populateSpeakingCategories();
+  spinSpeakingTopic();
+}
+
+function setSpeakingPart(part) {
+  speakingPart = part;
+  speakingPhase = 'prep';
+  clearInterval(speakingTimerInterval);
+  speakingTimerRunning = false;
+  _updateSpeakingPartUI();
+  _populateSpeakingCategories();
+  spinSpeakingTopic();
+}
+
+function _updateSpeakingPartUI() {
+  [1, 2, 3].forEach(p => {
+    const btn = document.getElementById(`speaking-part-btn-${p}`);
+    if (btn) btn.classList.toggle('active', p === speakingPart);
+  });
+  // Timer phases only shown for Part 2
+  const phases = document.getElementById('speaking-timer-phases');
+  if (phases) phases.classList.toggle('hidden', speakingPart !== 2);
+  // Set timer label & seconds based on part
+  if (speakingPart === 1) {
+    speakingTimerSecs = 30;
+    _setSpeakingTimerDisplay(30);
+    const lbl = document.getElementById('speaking-timer-label');
+    if (lbl) lbl.textContent = 'Answer time';
+  } else if (speakingPart === 2) {
+    _setSpeakingPhaseDisplay('prep');
+  } else {
+    speakingTimerSecs = 60;
+    _setSpeakingTimerDisplay(60);
+    const lbl = document.getElementById('speaking-timer-label');
+    if (lbl) lbl.textContent = 'Answer time';
+  }
+}
+
+function _populateSpeakingCategories() {
+  const sel = document.getElementById('speaking-category');
+  if (!sel) return;
+  const key = `part${speakingPart}`;
+  const bank = SPEAKING_BANK[key] || [];
+  const cats = ['all', ...new Set(bank.map(t => t.cat))];
+  sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${c === 'all' ? '🎲 All Categories' : c}</option>`).join('');
+}
+
+function spinSpeakingTopic() {
+  const key = `part${speakingPart}`;
+  const bank = SPEAKING_BANK[key] || [];
+  const catSel = document.getElementById('speaking-category');
+  const diffSel = document.getElementById('speaking-difficulty');
+  const cat = catSel ? catSel.value : 'all';
+  const diff = diffSel ? diffSel.value : 'all';
+
+  let pool = bank;
+  if (cat !== 'all') pool = pool.filter(t => t.cat === cat);
+  if (diff !== 'all') pool = pool.filter(t => t.difficulty === diff);
+  if (!pool.length) pool = bank; // fallback to full bank
+
+  const item = pool[Math.floor(Math.random() * pool.length)];
+  if (!item) return;
+
+  // Animate card
+  const card = document.getElementById('speaking-topic-card');
+  if (card) { card.classList.add('spinning'); setTimeout(() => card.classList.remove('spinning'), 350); }
+
+  // Update badge + category tag + difficulty tag
+  const partBadge = document.getElementById('speaking-topic-part-badge');
+  if (partBadge) partBadge.textContent = `Part ${speakingPart}`;
+  const catTag = document.getElementById('speaking-topic-category');
+  if (catTag) catTag.textContent = item.cat;
+  const diffTag = document.getElementById('speaking-topic-diff');
+  if (diffTag) {
+    diffTag.textContent = item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1);
+    diffTag.className = `speaking-topic-diff-tag diff-${item.difficulty}`;
+  }
+
+  // Question or cue card
+  const questionEl = document.getElementById('speaking-topic-question');
+  const bulletsEl = document.getElementById('speaking-cue-bullets');
+  if (speakingPart === 2 && item.card) {
+    if (questionEl) questionEl.textContent = item.card;
+    if (bulletsEl) {
+      bulletsEl.innerHTML = item.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
+      bulletsEl.classList.remove('hidden');
+    }
+  } else {
+    if (questionEl) questionEl.textContent = item.q || '';
+    if (bulletsEl) bulletsEl.classList.add('hidden');
+  }
+
+  // Reset timer on each spin
+  resetSpeakingTimer(false);
+}
+
+function setSpeakingPhase(phase) {
+  speakingPhase = phase;
+  clearInterval(speakingTimerInterval);
+  speakingTimerRunning = false;
+  _setSpeakingPhaseDisplay(phase);
+  const startBtn = document.getElementById('speaking-timer-start-btn');
+  if (startBtn) startBtn.textContent = '▶ Start';
+}
+
+function _setSpeakingPhaseDisplay(phase) {
+  const secs = phase === 'prep' ? 60 : 120;
+  speakingTimerSecs = secs;
+  _setSpeakingTimerDisplay(secs);
+  const lbl = document.getElementById('speaking-timer-label');
+  if (lbl) lbl.textContent = phase === 'prep' ? 'Preparation time' : 'Speaking time';
+  ['prep', 'speak'].forEach(p => {
+    const btn = document.getElementById(`phase-btn-${p}`);
+    if (btn) btn.classList.toggle('active', p === phase);
+  });
+}
+
+function _setSpeakingTimerDisplay(secs) {
+  const el = document.getElementById('speaking-timer-display');
+  if (!el) return;
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.classList.toggle('speaking-timer-warning', secs <= 10 && secs > 0);
+  el.classList.toggle('speaking-timer-expired', secs === 0);
+}
+
+function startSpeakingTimer() {
+  const startBtn = document.getElementById('speaking-timer-start-btn');
+  if (speakingTimerRunning) {
+    // Pause
+    clearInterval(speakingTimerInterval);
+    speakingTimerRunning = false;
+    if (startBtn) startBtn.textContent = '▶ Resume';
+    return;
+  }
+  if (speakingTimerSecs <= 0) { resetSpeakingTimer(false); return; }
+  speakingTimerRunning = true;
+  if (startBtn) startBtn.textContent = '⏸ Pause';
+  speakingTimerInterval = setInterval(() => {
+    speakingTimerSecs--;
+    _setSpeakingTimerDisplay(speakingTimerSecs);
+    if (speakingTimerSecs <= 0) {
+      clearInterval(speakingTimerInterval);
+      speakingTimerRunning = false;
+      if (startBtn) startBtn.textContent = '▶ Start';
+      // Auto-switch Part 2 from prep → speak
+      if (speakingPart === 2 && speakingPhase === 'prep') {
+        setTimeout(() => setSpeakingPhase('speak'), 400);
+      }
+    }
+  }, 1000);
+}
+
+function resetSpeakingTimer(restart = false) {
+  clearInterval(speakingTimerInterval);
+  speakingTimerRunning = false;
+  const startBtn = document.getElementById('speaking-timer-start-btn');
+  if (startBtn) startBtn.textContent = '▶ Start';
+  if (speakingPart === 2) {
+    _setSpeakingPhaseDisplay(speakingPhase);
+  } else if (speakingPart === 1) {
+    speakingTimerSecs = 30;
+    _setSpeakingTimerDisplay(30);
+  } else {
+    speakingTimerSecs = 60;
+    _setSpeakingTimerDisplay(60);
+  }
+  if (restart) startSpeakingTimer();
 }
 

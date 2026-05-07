@@ -3806,3 +3806,252 @@ input:focus, textarea:focus, select:focus {
   border-radius: 4px; cursor: pointer; line-height: 1.6;
 }
 .scaffold-clear-btn:hover { background: #fef3c7; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPEAKING TOPIC GENERATOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Filters row */
+.speaking-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.speaking-part-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--gray-100);
+  border-radius: 8px;
+  padding: 3px;
+}
+.speaking-part-btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  transition: background .15s, color .15s;
+}
+.speaking-part-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+.speaking-select {
+  min-width: 160px;
+  padding: 7px 10px;
+  font-size: 14px;
+  flex: 1;
+  max-width: 220px;
+}
+
+/* Main topic card */
+.speaking-topic-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-md);
+  transition: transform .35s ease, opacity .35s ease;
+}
+.speaking-topic-card.spinning {
+  transform: scale(.97);
+  opacity: .6;
+}
+.speaking-topic-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.speaking-topic-part-badge {
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.speaking-topic-category-tag {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.speaking-topic-diff-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.speaking-topic-diff-tag.diff-easy   { background: #dcfce7; color: #15803d; }
+.speaking-topic-diff-tag.diff-medium { background: #fef9c3; color: #a16207; }
+.speaking-topic-diff-tag.diff-hard   { background: #fee2e2; color: #b91c1c; }
+.speaking-topic-question {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--gray-800);
+}
+.speaking-cue-bullets {
+  list-style: disc;
+  padding-left: 20px;
+  color: var(--gray-600);
+  font-size: 15px;
+  line-height: 1.9;
+  margin: 0;
+}
+
+/* Spin button row */
+.speaking-main-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.speaking-spin-btn {
+  font-size: 18px;
+  padding: 14px 40px;
+  border-radius: 12px;
+  letter-spacing: .02em;
+}
+
+/* Timer section */
+.speaking-timer-section {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.speaking-timer-phases {
+  display: flex;
+  gap: 6px;
+}
+.speaking-phase-btn {
+  padding: 6px 18px;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  transition: all .15s;
+}
+.speaking-phase-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.speaking-timer-display {
+  font-size: 52px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--gray-800);
+  letter-spacing: -.02em;
+  line-height: 1;
+  transition: color .2s;
+}
+.speaking-timer-display.speaking-timer-warning { color: #d97706; }
+.speaking-timer-display.speaking-timer-expired  { color: #dc2626; }
+.speaking-timer-label {
+  font-size: 13px;
+  color: var(--gray-500);
+  font-weight: 500;
+  margin-top: -4px;
+}
+.speaking-timer-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Frameworks section */
+.speaking-frameworks {
+  margin-top: 4px;
+}
+.frameworks-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--gray-700);
+}
+.frameworks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.framework-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.framework-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+}
+.framework-body {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--gray-700);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.framework-body.tip-phrases { gap: 4px; font-size: 12px; }
+.framework-body em { color: var(--gray-600); }
+.fw-letter {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 14px;
+}
+.framework-use {
+  font-size: 11px;
+  color: var(--gray-400);
+  border-top: 1px solid var(--gray-100);
+  padding-top: 8px;
+  font-style: italic;
+}
+
+/* Dark mode */
+[data-theme="dark"] .speaking-topic-card { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .speaking-topic-question { color: var(--gray-800); }
+[data-theme="dark"] .speaking-topic-category-tag { background: #334155; color: var(--gray-600); }
+[data-theme="dark"] .speaking-part-tabs { background: #0f172a; }
+[data-theme="dark"] .speaking-timer-section { background: #0f172a; border-color: #334155; }
+[data-theme="dark"] .speaking-timer-display { color: var(--gray-800); }
+[data-theme="dark"] .framework-card { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .framework-body { color: var(--gray-700); }
+[data-theme="dark"] .speaking-phase-btn { background: #1e293b; border-color: #334155; color: var(--gray-600); }
+[data-theme="dark"] .speaking-cue-bullets { color: var(--gray-600); }
+
+@media (max-width: 600px) {
+  .speaking-topic-question { font-size: 18px; }
+  .speaking-timer-display { font-size: 40px; }
+  .frameworks-grid { grid-template-columns: 1fr 1fr; }
+  .speaking-select { max-width: 100%; }
+}
