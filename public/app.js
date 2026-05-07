@@ -245,6 +245,71 @@ const SPEAKING_BANK = {
   ]
 };
 
+/* ─── Impromptu Bank ─────────────────────────────────────────────────────── */
+const IMPROMPTU_BANK = [
+  // 💬 General
+  { cat: 'General', difficulty: 'easy',   q: 'What is a hill you will absolutely die on?' },
+  { cat: 'General', difficulty: 'easy',   q: 'What is an unwritten rule everyone should know?' },
+  { cat: 'General', difficulty: 'easy',   q: 'What is the most overrated life advice people keep repeating?' },
+  { cat: 'General', difficulty: 'medium', q: 'Is it better to be respected or liked? Pick one.' },
+  { cat: 'General', difficulty: 'medium', q: 'What is something you believed at 16 that you now think is completely wrong?' },
+  { cat: 'General', difficulty: 'medium', q: 'Would you rather be the smartest person in every room, or the most fun?' },
+  { cat: 'General', difficulty: 'hard',   q: 'Is ambition actually just anxiety with good PR?' },
+  { cat: 'General', difficulty: 'hard',   q: 'What is the most honest thing you could say about yourself right now?' },
+  // 💻 Tech
+  { cat: 'Tech', difficulty: 'easy',   q: 'What app do you hate but cannot delete?' },
+  { cat: 'Tech', difficulty: 'easy',   q: 'If the internet went down for a week, what would you do first?' },
+  { cat: 'Tech', difficulty: 'medium', q: 'Is the smartphone the best or worst invention of the past 50 years?' },
+  { cat: 'Tech', difficulty: 'medium', q: 'What is the most overhyped piece of technology right now?' },
+  { cat: 'Tech', difficulty: 'medium', q: 'If you had to delete all social media except one, which survives and why?' },
+  { cat: 'Tech', difficulty: 'hard',   q: 'We outsource our memory to Google. Is that evolution or laziness?' },
+  { cat: 'Tech', difficulty: 'hard',   q: 'Should there be an age limit for using the internet unsupervised?' },
+  // 💰 Finance
+  { cat: 'Finance', difficulty: 'easy',   q: 'What is the dumbest thing people spend money on?' },
+  { cat: 'Finance', difficulty: 'easy',   q: 'Should kids be paid for doing chores?' },
+  { cat: 'Finance', difficulty: 'medium', q: 'Is "follow your passion" actually terrible financial advice?' },
+  { cat: 'Finance', difficulty: 'medium', q: 'At what point does someone have too much money?' },
+  { cat: 'Finance', difficulty: 'hard',   q: 'Is the stock market just a legal casino? Defend your answer.' },
+  { cat: 'Finance', difficulty: 'hard',   q: 'Should billionaires exist? 60 seconds, go.' },
+  // 🔥 Roast It
+  { cat: 'Roast It', difficulty: 'easy',   q: 'Roast open-plan offices like your life depends on it.' },
+  { cat: 'Roast It', difficulty: 'easy',   q: 'Roast group projects. You know why.' },
+  { cat: 'Roast It', difficulty: 'easy',   q: 'Roast LinkedIn. Be brutally honest.' },
+  { cat: 'Roast It', difficulty: 'medium', q: 'Roast hustle culture and everyone who posts about it at 5 AM.' },
+  { cat: 'Roast It', difficulty: 'medium', q: 'Roast motivational posters. Every single one.' },
+  { cat: 'Roast It', difficulty: 'hard',   q: 'Roast the concept of "networking" — why is it just begging with a business card?' },
+  // 💡 One-Minute Pitch
+  { cat: 'One-Minute Pitch', difficulty: 'easy',   q: 'Pitch a new national holiday. Sell it hard.' },
+  { cat: 'One-Minute Pitch', difficulty: 'easy',   q: 'Pitch an app idea that does not exist yet but should.' },
+  { cat: 'One-Minute Pitch', difficulty: 'medium', q: 'Pitch why your city should host the next World Cup.' },
+  { cat: 'One-Minute Pitch', difficulty: 'medium', q: 'Pitch replacing one school subject with something more useful.' },
+  { cat: 'One-Minute Pitch', difficulty: 'hard',   q: 'Pitch the four-day work week to a room of sceptical CEOs in 60 seconds.' },
+  { cat: 'One-Minute Pitch', difficulty: 'hard',   q: "Pitch yourself as the world's greatest expert in something ridiculous." },
+  // 🤡 Defend It
+  { cat: 'Defend It', difficulty: 'easy',   q: 'Defend pineapple on pizza. No irony. Full commitment.' },
+  { cat: 'Defend It', difficulty: 'easy',   q: 'Defend napping at work as official company policy.' },
+  { cat: 'Defend It', difficulty: 'easy',   q: 'Defend the mullet as the superior hairstyle.' },
+  { cat: 'Defend It', difficulty: 'medium', q: 'Defend procrastination as a legitimate productivity strategy.' },
+  { cat: 'Defend It', difficulty: 'medium', q: 'Defend always being late as a sign of creativity.' },
+  { cat: 'Defend It', difficulty: 'hard',   q: 'Defend reality TV as genuinely important cultural content.' },
+  { cat: 'Defend It', difficulty: 'hard',   q: 'Defend the idea that failure is more valuable than success.' },
+  // 👶 Explain It Like You're 5
+  { cat: "Explain It Like You're 5", difficulty: 'easy',   q: 'Explain taxes to a 6-year-old who just got pocket money.' },
+  { cat: "Explain It Like You're 5", difficulty: 'easy',   q: 'Explain why adults go to work every day, to a kid who thinks it sounds awful.' },
+  { cat: "Explain It Like You're 5", difficulty: 'medium', q: 'Explain inflation without using the words "money", "price", or "economy".' },
+  { cat: "Explain It Like You're 5", difficulty: 'medium', q: 'Explain how the internet works using only food.' },
+  { cat: "Explain It Like You're 5", difficulty: 'hard',   q: 'Explain why humans go to war — to a child who thinks fighting is always silly.' },
+  { cat: "Explain It Like You're 5", difficulty: 'hard',   q: 'Explain death to a 5-year-old without being sad or lying.' },
+  // 🌶️ Hot Takes
+  { cat: 'Hot Takes', difficulty: 'easy',   q: 'Homework is just busywork and everyone knows it.' },
+  { cat: 'Hot Takes', difficulty: 'easy',   q: 'Most meetings could have been a two-line text message.' },
+  { cat: 'Hot Takes', difficulty: 'medium', q: 'Cereal is not breakfast. It is a dessert with a PR problem.' },
+  { cat: 'Hot Takes', difficulty: 'medium', q: 'Adulthood was massively oversold to us as children.' },
+  { cat: 'Hot Takes', difficulty: 'medium', q: 'Travelling does not make you more interesting. Being interesting makes you interesting.' },
+  { cat: 'Hot Takes', difficulty: 'hard',   q: 'The most dangerous thing you can teach a child is blind respect for authority.' },
+  { cat: 'Hot Takes', difficulty: 'hard',   q: 'Small talk is a social tax paid by introverts to make extroverts comfortable.' },
+];
+
 /* ─── Init ───────────────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
   // Restore dark mode preference
@@ -5825,16 +5890,50 @@ async function openNotifPanel() {
 
 /* ─── Speaking Topic Generator ───────────────────────────────────────────── */
 let speakingPart = 1;
+let speakingMode = 'ielts'; // 'ielts' | 'impromptu'
 let speakingTimerInterval = null;
 let speakingTimerSecs = 60;
 let speakingTimerRunning = false;
-let speakingPhase = 'prep'; // 'prep' | 'speak'
+let speakingPhase = 'prep'; // 'prep' | 'speak' | 'think'
 
 function loadSpeakingTopicGen() {
+  speakingMode = 'ielts';
   speakingPart = 1;
   speakingPhase = 'prep';
+  // Sync mode tab UI
+  const mIelts = document.getElementById('speaking-mode-ielts');
+  const mImp = document.getElementById('speaking-mode-impromptu');
+  if (mIelts) mIelts.classList.add('active');
+  if (mImp) mImp.classList.remove('active');
+  // Show part tabs
+  const partTabs = document.querySelector('.speaking-part-tabs');
+  if (partTabs) partTabs.style.display = '';
   resetSpeakingTimer(false);
   _updateSpeakingPartUI();
+  _populateSpeakingCategories();
+  spinSpeakingTopic();
+}
+
+function setSpeakingMode(mode) {
+  speakingMode = mode;
+  const mIelts = document.getElementById('speaking-mode-ielts');
+  const mImp = document.getElementById('speaking-mode-impromptu');
+  if (mIelts) mIelts.classList.toggle('active', mode === 'ielts');
+  if (mImp) mImp.classList.toggle('active', mode === 'impromptu');
+  // Part tabs: show in ielts mode only
+  const partTabs = document.querySelector('.speaking-part-tabs');
+  if (partTabs) partTabs.style.display = mode === 'ielts' ? '' : 'none';
+  // Phase buttons: hide in impromptu, reset
+  const phases = document.getElementById('speaking-timer-phases');
+  if (mode === 'impromptu') {
+    if (phases) phases.classList.add('hidden');
+    speakingPhase = 'think';
+  } else {
+    speakingPhase = 'prep';
+    _updateSpeakingPartUI(); // restores phase btn visibility
+  }
+  clearInterval(speakingTimerInterval);
+  speakingTimerRunning = false;
   _populateSpeakingCategories();
   spinSpeakingTopic();
 }
@@ -5854,9 +5953,9 @@ function _updateSpeakingPartUI() {
     const btn = document.getElementById(`speaking-part-btn-${p}`);
     if (btn) btn.classList.toggle('active', p === speakingPart);
   });
-  // Timer phases only shown for Part 2
+  // Timer phases only shown for IELTS Part 2
   const phases = document.getElementById('speaking-timer-phases');
-  if (phases) phases.classList.toggle('hidden', speakingPart !== 2);
+  if (phases) phases.classList.toggle('hidden', speakingMode !== 'ielts' || speakingPart !== 2);
   // Set timer label & seconds based on part
   if (speakingPart === 1) {
     speakingTimerSecs = 30;
@@ -5876,15 +5975,26 @@ function _updateSpeakingPartUI() {
 function _populateSpeakingCategories() {
   const sel = document.getElementById('speaking-category');
   if (!sel) return;
-  const key = `part${speakingPart}`;
-  const bank = SPEAKING_BANK[key] || [];
+  let bank;
+  if (speakingMode === 'impromptu') {
+    bank = IMPROMPTU_BANK;
+  } else {
+    const key = `part${speakingPart}`;
+    bank = SPEAKING_BANK[key] || [];
+  }
   const cats = ['all', ...new Set(bank.map(t => t.cat))];
   sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${c === 'all' ? '🎲 All Categories' : c}</option>`).join('');
 }
 
 function spinSpeakingTopic() {
-  const key = `part${speakingPart}`;
-  const bank = SPEAKING_BANK[key] || [];
+  let bank;
+  if (speakingMode === 'impromptu') {
+    bank = IMPROMPTU_BANK;
+  } else {
+    const key = `part${speakingPart}`;
+    bank = SPEAKING_BANK[key] || [];
+  }
+
   const catSel = document.getElementById('speaking-category');
   const diffSel = document.getElementById('speaking-difficulty');
   const cat = catSel ? catSel.value : 'all';
@@ -5893,7 +6003,7 @@ function spinSpeakingTopic() {
   let pool = bank;
   if (cat !== 'all') pool = pool.filter(t => t.cat === cat);
   if (diff !== 'all') pool = pool.filter(t => t.difficulty === diff);
-  if (!pool.length) pool = bank; // fallback to full bank
+  if (!pool.length) pool = bank; // fallback
 
   const item = pool[Math.floor(Math.random() * pool.length)];
   if (!item) return;
@@ -5904,7 +6014,7 @@ function spinSpeakingTopic() {
 
   // Update badge + category tag + difficulty tag
   const partBadge = document.getElementById('speaking-topic-part-badge');
-  if (partBadge) partBadge.textContent = `Part ${speakingPart}`;
+  if (partBadge) partBadge.textContent = speakingMode === 'impromptu' ? '🎲 Impromptu' : `Part ${speakingPart}`;
   const catTag = document.getElementById('speaking-topic-category');
   if (catTag) catTag.textContent = item.cat;
   const diffTag = document.getElementById('speaking-topic-diff');
@@ -5916,7 +6026,7 @@ function spinSpeakingTopic() {
   // Question or cue card
   const questionEl = document.getElementById('speaking-topic-question');
   const bulletsEl = document.getElementById('speaking-cue-bullets');
-  if (speakingPart === 2 && item.card) {
+  if (speakingMode === 'ielts' && speakingPart === 2 && item.card) {
     if (questionEl) questionEl.textContent = item.card;
     if (bulletsEl) {
       bulletsEl.innerHTML = item.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
@@ -5941,11 +6051,19 @@ function setSpeakingPhase(phase) {
 }
 
 function _setSpeakingPhaseDisplay(phase) {
-  const secs = phase === 'prep' ? 60 : 120;
+  let secs;
+  if (phase === 'think') secs = 30;
+  else if (phase === 'prep') secs = 60;
+  else secs = 120; // 'speak'
   speakingTimerSecs = secs;
   _setSpeakingTimerDisplay(secs);
   const lbl = document.getElementById('speaking-timer-label');
-  if (lbl) lbl.textContent = phase === 'prep' ? 'Preparation time' : 'Speaking time';
+  if (lbl) {
+    if (phase === 'think') lbl.textContent = 'Think time';
+    else if (phase === 'prep') lbl.textContent = 'Preparation time';
+    else lbl.textContent = 'Speaking time';
+  }
+  // Phase buttons (IELTS Part 2 only)
   ['prep', 'speak'].forEach(p => {
     const btn = document.getElementById(`phase-btn-${p}`);
     if (btn) btn.classList.toggle('active', p === phase);
@@ -5981,8 +6099,10 @@ function startSpeakingTimer() {
       clearInterval(speakingTimerInterval);
       speakingTimerRunning = false;
       if (startBtn) startBtn.textContent = '▶ Start';
-      // Auto-switch Part 2 from prep → speak
-      if (speakingPart === 2 && speakingPhase === 'prep') {
+      // Auto-switch: Part 2 prep → speak, Impromptu think → speak
+      if (speakingMode === 'ielts' && speakingPart === 2 && speakingPhase === 'prep') {
+        setTimeout(() => setSpeakingPhase('speak'), 400);
+      } else if (speakingMode === 'impromptu' && speakingPhase === 'think') {
         setTimeout(() => setSpeakingPhase('speak'), 400);
       }
     }
@@ -5994,7 +6114,10 @@ function resetSpeakingTimer(restart = false) {
   speakingTimerRunning = false;
   const startBtn = document.getElementById('speaking-timer-start-btn');
   if (startBtn) startBtn.textContent = '▶ Start';
-  if (speakingPart === 2) {
+  if (speakingMode === 'impromptu') {
+    speakingPhase = 'think';
+    _setSpeakingPhaseDisplay('think');
+  } else if (speakingPart === 2) {
     _setSpeakingPhaseDisplay(speakingPhase);
   } else if (speakingPart === 1) {
     speakingTimerSecs = 30;
