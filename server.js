@@ -2043,6 +2043,109 @@ app.delete('/api/saved-words/:id', authenticate, (req, res) => {
   }
 });
 
+// ─── Custom Speaking Bank (admin CRUD + public read) ─────────────────────────
+app.get('/api/speaking-bank-custom', (req, res) => {
+  try { res.json(db.getSpeakingBankCustom()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load speaking bank' }); }
+});
+
+app.get('/api/admin/speaking-topics', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getSpeakingBankCustom()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load speaking topics' }); }
+});
+
+app.post('/api/admin/speaking-topics', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { bank, part, cat, difficulty, q } = req.body;
+    if (!q || !q.trim()) return res.status(400).json({ error: 'Question text is required' });
+    const item = db.addSpeakingTopic({ bank: bank || 'ielts', part: part || '1', cat: cat || 'General', difficulty: difficulty || 'medium', q: q.trim() });
+    res.json({ ok: true, item });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add speaking topic' });
+  }
+});
+
+app.delete('/api/admin/speaking-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    db.deleteSpeakingTopic(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete speaking topic' });
+  }
+});
+
+// ─── Custom Task 2 Prompts (admin CRUD + public read) ────────────────────────
+app.get('/api/task2-prompts-custom', (req, res) => {
+  try { res.json(db.getTask2PromptsCustom()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
+});
+
+app.get('/api/admin/task2-prompts', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getTask2PromptsCustom()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
+});
+
+app.post('/api/admin/task2-prompts', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { difficulty, q } = req.body;
+    if (!q || !q.trim()) return res.status(400).json({ error: 'Prompt text is required' });
+    const item = db.addTask2Prompt({ difficulty: difficulty || 'medium', q: q.trim() });
+    res.json({ ok: true, item });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add Task 2 prompt' });
+  }
+});
+
+app.delete('/api/admin/task2-prompts/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    db.deleteTask2Prompt(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete Task 2 prompt' });
+  }
+});
+
+// ─── Essay Drafts ─────────────────────────────────────────────────────────────
+app.get('/api/drafts', authenticate, (req, res) => {
+  try {
+    const drafts = db.getDrafts(req.user.id);
+    res.json(drafts);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load drafts' });
+  }
+});
+
+app.post('/api/drafts', authenticate, (req, res) => {
+  try {
+    const { title, prompt, essay, taskType, wordCount } = req.body;
+    const draft = db.createDraft(req.user.id, { title, prompt, essay, taskType, wordCount });
+    res.json(draft);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create draft' });
+  }
+});
+
+app.put('/api/drafts/:id', authenticate, (req, res) => {
+  try {
+    const { title, prompt, essay, taskType, wordCount } = req.body;
+    const draft = db.updateDraft(req.params.id, req.user.id, { title, prompt, essay, taskType, wordCount });
+    if (!draft) return res.status(404).json({ error: 'Draft not found' });
+    res.json(draft);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update draft' });
+  }
+});
+
+app.delete('/api/drafts/:id', authenticate, (req, res) => {
+  try {
+    const ok = db.deleteDraft(req.params.id, req.user.id);
+    if (!ok) return res.status(404).json({ error: 'Draft not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete draft' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

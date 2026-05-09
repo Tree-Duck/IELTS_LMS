@@ -201,6 +201,9 @@
             <button class="nav-item nav-sub-item" onclick="showView('my-attendance')" id="nav-my-attendance">
               <span class="nav-icon">📅</span> Attendance
             </button>
+            <button class="nav-item nav-sub-item" onclick="showView('vocab-learn')" id="nav-vocab-learn">
+              <span class="nav-icon">📚</span> Vocabulary Learning
+            </button>
             <button class="nav-item nav-sub-item" onclick="showView('vocab')" id="nav-vocab">
               <span class="nav-icon">📓</span> My Vocabulary
             </button>
@@ -456,6 +459,12 @@
                   <button type="button" class="generate-btn" id="generate-btn" onclick="generateTask()">
                     <span id="generate-btn-icon">✨</span> <span id="generate-btn-label">Generate Task</span>
                   </button>
+                  <select id="prompt-difficulty-filter" class="filter-select" style="width:auto;font-size:12px;padding:3px 6px;margin-right:2px" title="Filter prompt difficulty">
+                    <option value="all">All levels</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
                   <button type="button" class="generate-btn" id="random-prompt-btn" onclick="insertRandomPrompt()" title="Fill with a real IELTS question">
                     🎲 Random IELTS
                   </button>
@@ -514,7 +523,8 @@
                   <span class="word-count-bar-text" id="word-count-bar-text">0 / 250 words</span>
                 </div>
                 <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
-                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openDraftsModal()">📂 My Drafts</button>
                   <button type="button" class="btn-save-draft" onclick="manualSaveDraft()">💾 Save Draft</button>
                 </div>
               </div>
@@ -754,11 +764,13 @@
           <p>Create and manage Reading and Listening tests</p>
         </div>
 
-        <!-- Type tabs: Reading / Listening / Task 1 Topics -->
-        <div class="test-type-tabs">
+        <!-- Type tabs: Reading / Listening / Task 1 Topics / Speaking / Task 2 -->
+        <div class="test-type-tabs" style="flex-wrap:wrap">
           <button class="test-tab-btn active" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Task 1 Topics</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Speaking Topics</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Task 2 Prompts</button>
         </div>
 
         <!-- Existing tests list -->
@@ -838,6 +850,92 @@
 
           <!-- Topics list grouped by chart type -->
           <div id="task1-topics-list"></div>
+        </div>
+
+        <!-- SPEAKING TOPICS PANEL -->
+        <div id="speaking-topics-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Add Speaking Topic</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Add custom topics to the IELTS Parts bank or the Impromptu bank. Students will see these when they spin in Speaking Practice.</p>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="st-bank">Bank</label>
+                <select id="st-bank" class="form-input" onchange="toggleSpeakingTopicFields()">
+                  <option value="ielts">IELTS Parts (Part 1/2/3)</option>
+                  <option value="impromptu">Impromptu</option>
+                </select>
+              </div>
+              <div class="form-group" id="st-part-group" style="flex:1">
+                <label for="st-part">Part</label>
+                <select id="st-part" class="form-input">
+                  <option value="1">Part 1</option>
+                  <option value="2">Part 2 (Cue Card)</option>
+                  <option value="3">Part 3</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="st-cat">Category</label>
+                <input type="text" id="st-cat" class="form-input" placeholder="e.g. Technology, Travel, Health">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="st-diff">Difficulty</label>
+                <select id="st-diff" class="form-input">
+                  <option value="easy">Easy</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="st-q">Question / Cue Card Topic</label>
+              <textarea id="st-q" class="form-input" rows="3" placeholder="Enter the speaking topic or question..."></textarea>
+            </div>
+
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitAddSpeakingTopic()">➕ Add Topic</button>
+            </div>
+            <div id="st-error" class="error-msg hidden"></div>
+            <div id="st-success" class="success-msg hidden"></div>
+          </div>
+
+          <!-- Existing custom topics list -->
+          <div id="admin-speaking-topics-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- TASK 2 PROMPTS PANEL -->
+        <div id="task2-prompts-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Add Task 2 Prompt</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Add custom IELTS Writing Task 2 questions. Students will see these when they click "Random IELTS" on the writing page.</p>
+
+            <div class="form-group" style="max-width:200px">
+              <label for="t2p-diff">Difficulty</label>
+              <select id="t2p-diff" class="form-input">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="t2p-q">Task 2 Question</label>
+              <textarea id="t2p-q" class="form-input" rows="4" placeholder="Some people believe that... To what extent do you agree or disagree?"></textarea>
+            </div>
+
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitAddTask2Prompt()">➕ Add Prompt</button>
+            </div>
+            <div id="t2p-error" class="error-msg hidden"></div>
+            <div id="t2p-success" class="success-msg hidden"></div>
+          </div>
+
+          <!-- Existing custom prompts list -->
+          <div id="admin-task2-prompts-list" style="margin-top:16px"></div>
         </div>
 
         <!-- IMPORT JSON panel -->
@@ -1113,6 +1211,49 @@
         <div id="my-attendance-summary" style="margin-top:16px"></div>
       </div>
 
+      <!-- Vocabulary Learning View -->
+      <div id="view-vocab-learn" class="view hidden">
+        <div class="page-header">
+          <h2>📚 Vocabulary Learning</h2>
+          <p>Master IELTS vocabulary with games</p>
+        </div>
+
+        <!-- Picker (shown when not in game) -->
+        <div id="vl-picker">
+          <div class="vl-picker-row">
+            <label>Topic</label>
+            <div class="vl-topic-chips" id="vl-topic-chips"><!-- rendered by JS --></div>
+          </div>
+          <div class="vl-picker-row">
+            <label>CEFR Level</label>
+            <div class="vl-level-chips">
+              <button class="vl-chip vl-level-chip" data-level="B1" onclick="selectVocabLevel('B1')">B1</button>
+              <button class="vl-chip vl-level-chip" data-level="B2" onclick="selectVocabLevel('B2')">B2</button>
+              <button class="vl-chip vl-level-chip" data-level="C1" onclick="selectVocabLevel('C1')">C1</button>
+              <button class="vl-chip vl-level-chip" data-level="C2" onclick="selectVocabLevel('C2')">C2</button>
+            </div>
+          </div>
+          <div id="vl-word-preview" class="vl-word-preview"></div>
+          <div class="vl-game-buttons">
+            <button class="btn btn-outline" onclick="startVocabFlip()">🃏 Flip Cards</button>
+            <button class="btn btn-outline" onclick="startVocabQuiz()">🎯 Quiz</button>
+            <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Typing Test</button>
+            <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Matching</button>
+          </div>
+        </div>
+
+        <!-- Game container (shown during game) -->
+        <div id="vl-game" class="hidden">
+          <div class="vl-game-header">
+            <button class="btn btn-secondary btn-sm" onclick="exitVocabGame()">← Back</button>
+            <span id="vl-game-title"></span>
+            <span id="vl-game-progress"></span>
+          </div>
+          <div id="vl-game-body"></div>
+          <div id="vl-game-result" class="hidden"></div>
+        </div>
+      </div>
+
       <!-- Vocabulary Notebook View -->
       <div id="view-vocab" class="view hidden">
         <div class="page-header">
@@ -1171,6 +1312,12 @@
         <!-- Controls -->
         <div class="speaking-main-controls">
           <button class="btn btn-primary btn-lg speaking-spin-btn" onclick="spinSpeakingTopic()">🎲 Spin!</button>
+          <button class="btn btn-outline btn-sm hidden" id="impromptu-add-reminder-btn" onclick="showImpromptAddReminder()" title="How to add more topics">➕ Add more topics</button>
+        </div>
+        <!-- Impromptu reminder banner -->
+        <div id="impromptu-reminder-banner" class="impromptu-reminder-banner hidden">
+          <span>💡 To add more Impromptu topics, open <strong>Claude Code</strong> and say: <em>"Add more entries to IMPROMPTU_BANK in public/app.js"</em></span>
+          <button onclick="this.parentElement.classList.add('hidden')" class="btn-close-banner">✕</button>
         </div>
 
         <!-- Timer -->
@@ -1286,6 +1433,19 @@
         <button class="btn btn-modal-submit" onclick="handlePartialSubmit()">Submit Answered</button>
         <button class="btn btn-modal-discard" onclick="handleDiscardTest()">Discard &amp; Exit</button>
         <button class="btn btn-modal-cancel" onclick="closeDiscardModal()">Keep Testing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Drafts Modal -->
+  <div class="modal-overlay hidden" id="drafts-modal" onclick="if(event.target===this)closeDraftsModal()">
+    <div class="modal-box drafts-modal-box">
+      <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 style="margin:0">📂 My Saved Drafts</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeDraftsModal()">✕ Close</button>
+      </div>
+      <div id="drafts-modal-list">
+        <p style="color:var(--text-secondary)">Loading…</p>
       </div>
     </div>
   </div>

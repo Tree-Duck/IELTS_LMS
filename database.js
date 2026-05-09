@@ -143,7 +143,8 @@ const db = {
         const user = data.users.find(u => u.id === s.user_id) || {};
         const f = data.feedback.find(f => f.submission_id === s.id) || {};
         return {
-          ...s, ...f,
+          ...f, ...s,                          // submission fields win over feedback fields
+          id: s.id,                            // always submission id
           student_name: user.name || 'Unknown',
           student_email: user.email || ''
         };
@@ -970,6 +971,110 @@ const db = {
     return false;
   },
 
+  // ── Custom speaking bank ──────────────────────────────────────────────────
+  getSpeakingBankCustom() {
+    const data = load();
+    return data.speaking_bank_custom || [];
+  },
+
+  addSpeakingTopic(entry) {
+    const data = load();
+    if (!data.speaking_bank_custom) data.speaking_bank_custom = [];
+    if (!data._ids.speaking_bank_custom) data._ids.speaking_bank_custom = 0;
+    data._ids.speaking_bank_custom++;
+    const item = { id: data._ids.speaking_bank_custom, ...entry, created_at: new Date().toISOString() };
+    data.speaking_bank_custom.push(item);
+    save(data);
+    return item;
+  },
+
+  deleteSpeakingTopic(id) {
+    const data = load();
+    if (!data.speaking_bank_custom) return false;
+    const before = data.speaking_bank_custom.length;
+    data.speaking_bank_custom = data.speaking_bank_custom.filter(t => String(t.id) !== String(id));
+    if (data.speaking_bank_custom.length < before) { save(data); return true; }
+    return false;
+  },
+
+  // ── Custom Task 2 prompts ─────────────────────────────────────────────────
+  getTask2PromptsCustom() {
+    const data = load();
+    return data.task2_prompts_custom || [];
+  },
+
+  addTask2Prompt(entry) {
+    const data = load();
+    if (!data.task2_prompts_custom) data.task2_prompts_custom = [];
+    if (!data._ids.task2_prompts_custom) data._ids.task2_prompts_custom = 0;
+    data._ids.task2_prompts_custom++;
+    const item = { id: data._ids.task2_prompts_custom, ...entry, created_at: new Date().toISOString() };
+    data.task2_prompts_custom.push(item);
+    save(data);
+    return item;
+  },
+
+  deleteTask2Prompt(id) {
+    const data = load();
+    if (!data.task2_prompts_custom) return false;
+    const before = data.task2_prompts_custom.length;
+    data.task2_prompts_custom = data.task2_prompts_custom.filter(p => String(p.id) !== String(id));
+    if (data.task2_prompts_custom.length < before) { save(data); return true; }
+    return false;
+  },
+
+  // ── Essay Drafts ────────────────────────────────────────────────────────────
+  getDrafts(userId) {
+    const data = load();
+    return (data.drafts || [])
+      .filter(d => d.user_id === userId)
+      .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+  },
+
+  createDraft(userId, { title, prompt, essay, taskType, wordCount }) {
+    const data = load();
+    if (!data.drafts) data.drafts = [];
+    if (!data._ids.drafts) data._ids.drafts = 0;
+    data._ids.drafts++;
+    const draft = {
+      id: data._ids.drafts,
+      user_id: userId,
+      title: title || '',
+      prompt: prompt || '',
+      essay: essay || '',
+      task_type: taskType || 'task2',
+      word_count: wordCount || 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    data.drafts.push(draft);
+    save(data);
+    return draft;
+  },
+
+  updateDraft(id, userId, { title, prompt, essay, taskType, wordCount }) {
+    const data = load();
+    const draft = (data.drafts || []).find(d => d.id === parseInt(id) && d.user_id === userId);
+    if (!draft) return null;
+    if (title !== undefined) draft.title = title;
+    if (prompt !== undefined) draft.prompt = prompt;
+    if (essay !== undefined) draft.essay = essay;
+    if (taskType !== undefined) draft.task_type = taskType;
+    if (wordCount !== undefined) draft.word_count = wordCount;
+    draft.updated_at = new Date().toISOString();
+    save(data);
+    return draft;
+  },
+
+  deleteDraft(id, userId) {
+    const data = load();
+    if (!data.drafts) return false;
+    const before = data.drafts.length;
+    data.drafts = data.drafts.filter(d => !(d.id === parseInt(id) && d.user_id === userId));
+    if (data.drafts.length < before) { save(data); return true; }
+    return false;
+  },
+
   getNotificationCount(userId) {
     const data = load();
     const gradedCount = (data.submissions || [])
@@ -1038,6 +1143,12 @@ const db = {
   if (!data._ids.class_enrollments) { data._ids.class_enrollments = 0; changed = true; }
   if (!data._ids.attendance_sessions) { data._ids.attendance_sessions = 0; changed = true; }
   if (!data._ids.attendance_records) { data._ids.attendance_records = 0; changed = true; }
+  if (!data.speaking_bank_custom) { data.speaking_bank_custom = []; changed = true; }
+  if (!data._ids.speaking_bank_custom) { data._ids.speaking_bank_custom = 0; changed = true; }
+  if (!data.task2_prompts_custom) { data.task2_prompts_custom = []; changed = true; }
+  if (!data._ids.task2_prompts_custom) { data._ids.task2_prompts_custom = 0; changed = true; }
+  if (!data.drafts) { data.drafts = []; changed = true; }
+  if (!data._ids.drafts) { data._ids.drafts = 0; changed = true; }
   if (changed) save(data);
 })();
 

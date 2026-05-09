@@ -54,58 +54,64 @@ const TOPIC_OPTIONS = {
 /* ─── IELTS Prompt Bank ──────────────────────────────────────────────────── */
 const PROMPT_BANK = {
   task1: [
-    'The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The graph below shows the number of university graduates in Canada from 1992 to 2007. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The diagram below shows the process of producing electricity from coal. Summarise the information by selecting and reporting the main features.',
-    'The map below shows the changes that have taken place in the town of Eltington between 2000 and the present day. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The table below shows the sales of various products in an electronics store during four quarters of 2022. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The pie charts below show the main sources of energy in a European country in 1985 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The bar chart below shows the average number of hours per week that people in five different countries spend on leisure activities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The line graph below shows the changing birth and death rates in New Zealand between 1901 and 2001. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The diagram illustrates the process by which cement is made and how it is then used to produce concrete for building purposes. Summarise the information by selecting and reporting the main features.',
-    'The maps below show the development of a small fishing village called Oakton in 1985 and today. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The bar chart below shows the percentage of students at three different types of schools who said they enjoyed reading in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The line graph below shows the average monthly temperatures in three cities over a twelve-month period. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The diagram below shows the water cycle, which is the continuous movement of water on, above and below the surface of the Earth. Summarise the information by selecting and reporting the main features.',
-    'The table below gives information about the underground railway systems in six cities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The charts below show the percentage of food budget spent on different types of food in four countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The graph below shows the proportion of the population aged 65 and over between 1940 and 2040 in three different countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The diagram below shows how a solar panel works to provide hot water for domestic use. Summarise the information by selecting and reporting the main features.',
-    'The two maps below show an island before and after the construction of some tourist facilities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The bar chart below shows the number of visitors to three London museums between 2004 and 2008. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The line graph below shows the number of books borrowed from four different libraries between 2014 and 2016. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The diagram below illustrates the stages in the life cycle of a silkworm. Summarise the information by selecting and reporting the main features.',
-    'The chart below gives information about global spending on different categories from 1990 to 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The maps below show how the town of Bradfield has changed since the 1950s. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The two pie charts below show the proportion of carbon emissions produced by different sectors in a developed country in 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
-    'The bar chart below compares the percentages of people in three countries who reported using the internet daily in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    // Easy — standard bar/pie/line charts with straightforward data
+    { difficulty: 'easy', q: 'The chart below shows the percentage of households in owned and rented accommodation in England and Wales between 1918 and 2011. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The graph below shows the number of university graduates in Canada from 1992 to 2007. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The pie charts below show the main sources of energy in a European country in 1985 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The bar chart below shows the average number of hours per week that people in five different countries spend on leisure activities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The line graph below shows the changing birth and death rates in New Zealand between 1901 and 2001. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The bar chart below shows the percentage of students at three different types of schools who said they enjoyed reading in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The line graph below shows the average monthly temperatures in three cities over a twelve-month period. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The charts below show the percentage of food budget spent on different types of food in four countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The bar chart below shows the number of visitors to three London museums between 2004 and 2008. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The line graph below shows the number of books borrowed from four different libraries between 2014 and 2016. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'easy', q: 'The bar chart below compares the percentages of people in three countries who reported using the internet daily in 2005 and 2015. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    // Medium — maps, tables, multi-chart comparisons
+    { difficulty: 'medium', q: 'The map below shows the changes that have taken place in the town of Eltington between 2000 and the present day. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The table below shows the sales of various products in an electronics store during four quarters of 2022. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The maps below show the development of a small fishing village called Oakton in 1985 and today. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The table below gives information about the underground railway systems in six cities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The graph below shows the proportion of the population aged 65 and over between 1940 and 2040 in three different countries. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The two maps below show an island before and after the construction of some tourist facilities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The chart below gives information about global spending on different categories from 1990 to 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The maps below show how the town of Bradfield has changed since the 1950s. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    { difficulty: 'medium', q: 'The two pie charts below show the proportion of carbon emissions produced by different sectors in a developed country in 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.' },
+    // Hard — process/flow diagrams and complex life-cycle descriptions
+    { difficulty: 'hard', q: 'The diagram below shows the process of producing electricity from coal. Summarise the information by selecting and reporting the main features.' },
+    { difficulty: 'hard', q: 'The diagram illustrates the process by which cement is made and how it is then used to produce concrete for building purposes. Summarise the information by selecting and reporting the main features.' },
+    { difficulty: 'hard', q: 'The diagram below shows the water cycle, which is the continuous movement of water on, above and below the surface of the Earth. Summarise the information by selecting and reporting the main features.' },
+    { difficulty: 'hard', q: 'The diagram below shows how a solar panel works to provide hot water for domestic use. Summarise the information by selecting and reporting the main features.' },
+    { difficulty: 'hard', q: 'The diagram below illustrates the stages in the life cycle of a silkworm. Summarise the information by selecting and reporting the main features.' },
   ],
   task2: [
-    'Some people believe that universities should only offer courses that are useful for employment. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'In many countries, the proportion of older people is steadily increasing. Do you think this is a positive or negative development? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'Some people think that a sense of competition in children should be encouraged. Others believe that children who are taught to cooperate rather than compete become more useful adults. Discuss both these views and give your own opinion.',
-    'The increasing use of technology in the classroom is helping students learn more effectively. To what extent do you agree or disagree with this statement? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'Many people believe that social networking sites such as Facebook have had a huge negative impact on both individuals and society. To what extent do you agree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'Some people say that advertising encourages us to buy things we do not really need. Others say that advertisements tell us about new products that may improve our lives. Discuss both views and give your own opinion.',
-    'In some countries, the government pays for university education. In other countries, students must pay for themselves. Discuss the advantages and disadvantages of government-funded university education.',
-    'Traffic congestion is becoming a huge problem in many cities around the world. What are the causes of this problem, and what measures could be taken to reduce it? Give reasons for your answer and include any relevant examples.',
-    'Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion.',
-    'Many governments think that economic progress is their most important goal. Some people, however, think that other types of progress are equally important for a country. Discuss both these views and give your own opinion.',
-    'The best way to reduce crime is to give longer prison sentences. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'In some parts of the world, traditional festivals and celebrations are disappearing. Why is this happening, and is it a positive or negative development? Give reasons for your answer and include any relevant examples.',
-    'Some countries spend large amounts of money on space exploration programmes. Do you think this money could be better spent? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'Many people prefer to watch foreign films rather than locally produced films. Why could this be? Should governments give more financial support to local film industries? Give reasons for your answer.',
-    'The best way to solve the world\'s environmental problems is to increase the price of fuel. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
-    'More and more people are choosing to live and work abroad. What are the reasons for this, and do the advantages outweigh the disadvantages? Give reasons for your answer and include any relevant examples.',
-    'Some people feel that manufacturers and supermarkets have the responsibility to reduce the amount of packaging of goods. Others argue that it is the responsibility of consumers. Discuss both views and give your own opinion.',
-    'It is argued that getting a university education is the best way to guarantee a successful career. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
-    'Governments should spend money on railways rather than building new roads. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?',
-    'Many people are afraid that artificial intelligence will replace human workers in the near future. Do the advantages of AI outweigh the disadvantages? Give reasons for your answer and include any relevant examples.',
-    'Children today spend less time playing outdoors and more time on screens. What are the reasons for this, and what are the consequences? Give reasons for your answer and include any relevant examples.',
-    'Some people believe that it is better to accept a bad situation than to try to change it. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.',
-    'Nowadays, people are living longer than ever before. What problems does this create and what solutions can you suggest? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
-    'The world is consuming far more natural resources than it did in the past. What are the reasons for this, and what can be done to stop it? Give reasons for your answer and include any relevant examples from your own knowledge or experience.',
+    // Easy — direct opinion/agree-disagree on familiar topics
+    { difficulty: 'easy', q: 'Some people believe that universities should only offer courses that are useful for employment. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'In many countries, the proportion of older people is steadily increasing. Do you think this is a positive or negative development? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'The increasing use of technology in the classroom is helping students learn more effectively. To what extent do you agree or disagree with this statement? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'Many people believe that social networking sites such as Facebook have had a huge negative impact on both individuals and society. To what extent do you agree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'The best way to reduce crime is to give longer prison sentences. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'Some countries spend large amounts of money on space exploration programmes. Do you think this money could be better spent? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', q: 'It is argued that getting a university education is the best way to guarantee a successful career. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'easy', q: 'Governments should spend money on railways rather than building new roads. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    // Medium — discuss both sides, causes/solutions, or advantages/disadvantages
+    { difficulty: 'medium', q: 'Some people think that a sense of competition in children should be encouraged. Others believe that children who are taught to cooperate rather than compete become more useful adults. Discuss both these views and give your own opinion.' },
+    { difficulty: 'medium', q: 'Some people say that advertising encourages us to buy things we do not really need. Others say that advertisements tell us about new products that may improve our lives. Discuss both views and give your own opinion.' },
+    { difficulty: 'medium', q: 'In some countries, the government pays for university education. In other countries, students must pay for themselves. Discuss the advantages and disadvantages of government-funded university education.' },
+    { difficulty: 'medium', q: 'Traffic congestion is becoming a huge problem in many cities around the world. What are the causes of this problem, and what measures could be taken to reduce it? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', q: 'Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion.' },
+    { difficulty: 'medium', q: 'In some parts of the world, traditional festivals and celebrations are disappearing. Why is this happening, and is it a positive or negative development? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', q: 'Many people prefer to watch foreign films rather than locally produced films. Why could this be? Should governments give more financial support to local film industries? Give reasons for your answer.' },
+    { difficulty: 'medium', q: 'More and more people are choosing to live and work abroad. What are the reasons for this, and do the advantages outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', q: 'Some people feel that manufacturers and supermarkets have the responsibility to reduce the amount of packaging of goods. Others argue that it is the responsibility of consumers. Discuss both views and give your own opinion.' },
+    { difficulty: 'medium', q: 'Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?' },
+    { difficulty: 'medium', q: 'Many people are afraid that artificial intelligence will replace human workers in the near future. Do the advantages of AI outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', q: 'Children today spend less time playing outdoors and more time on screens. What are the reasons for this, and what are the consequences? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', q: 'Nowadays, people are living longer than ever before. What problems does this create and what solutions can you suggest? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'medium', q: 'The world is consuming far more natural resources than it did in the past. What are the reasons for this, and what can be done to stop it? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    // Hard — abstract, multi-layered, or nuanced arguments
+    { difficulty: 'hard', q: 'Many governments think that economic progress is their most important goal. Some people, however, think that other types of progress are equally important for a country. Discuss both these views and give your own opinion.' },
+    { difficulty: 'hard', q: 'The best way to solve the world\'s environmental problems is to increase the price of fuel. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'hard', q: 'Some people believe that it is better to accept a bad situation than to try to change it. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
   ]
 };
 
@@ -309,6 +315,369 @@ const IMPROMPTU_BANK = [
   { cat: 'Hot Takes', difficulty: 'hard',   q: 'The most dangerous thing you can teach a child is blind respect for authority.' },
   { cat: 'Hot Takes', difficulty: 'hard',   q: 'Small talk is a social tax paid by introverts to make extroverts comfortable.' },
 ];
+
+/* ─── Vocabulary Bank ────────────────────────────────────────────────────── */
+const VOCAB_BANK = {
+  'General English': {
+    B1: [
+      { word: 'curious',      definition: 'Eager to know or learn something',                        vietnamese: 'tò mò',           collocations: ['curious about', 'naturally curious'],            example: 'She was curious about how the machine worked.' },
+      { word: 'grateful',     definition: 'Feeling thankful for something received',                  vietnamese: 'biết ơn',         collocations: ['deeply grateful', 'grateful for'],               example: 'I am grateful for all the help you gave me.' },
+      { word: 'confident',    definition: 'Feeling sure about your own abilities',                    vietnamese: 'tự tin',          collocations: ['feel confident', 'confident in'],                example: 'She felt confident before her presentation.' },
+      { word: 'patient',      definition: 'Able to wait calmly without getting upset',               vietnamese: 'kiên nhẫn',       collocations: ['be patient', 'patient with'],                    example: 'You need to be patient while the system loads.' },
+      { word: 'generous',     definition: 'Willing to give money, time, or help freely',             vietnamese: 'hào phóng',       collocations: ['generous donation', 'very generous'],            example: 'He was generous with his time and advice.' },
+      { word: 'honest',       definition: 'Telling the truth and not cheating',                      vietnamese: 'trung thực',      collocations: ['be honest', 'brutally honest'],                  example: 'She was always honest with her friends.' },
+      { word: 'creative',     definition: 'Able to produce new and imaginative ideas',               vietnamese: 'sáng tạo',        collocations: ['creative solution', 'highly creative'],          example: 'The designer came up with a very creative idea.' },
+      { word: 'ambitious',    definition: 'Having a strong desire to succeed',                        vietnamese: 'tham vọng',       collocations: ['highly ambitious', 'ambitious goal'],            example: 'He is ambitious and works very hard.' },
+      { word: 'flexible',     definition: 'Able to change or adapt easily',                           vietnamese: 'linh hoạt',       collocations: ['flexible schedule', 'remain flexible'],         example: 'We need to be flexible when plans change.' },
+      { word: 'reliable',     definition: 'Consistently trustworthy and dependable',                  vietnamese: 'đáng tin cậy',   collocations: ['reliable source', 'completely reliable'],        example: 'A reliable car is essential for long trips.' },
+      { word: 'sociable',     definition: 'Enjoying the company of others; friendly',                 vietnamese: 'hòa đồng',       collocations: ['very sociable', 'sociable person'],              example: 'My sister is very sociable and loves parties.' },
+      { word: 'nervous',      definition: 'Anxious or worried about something',                       vietnamese: 'lo lắng',        collocations: ['feel nervous', 'nervous about'],                 example: 'He was nervous before the big exam.' },
+      { word: 'responsible',  definition: 'Having the duty to deal with or take care of something',  vietnamese: 'có trách nhiệm', collocations: ['responsible for', 'highly responsible'],         example: 'Parents are responsible for their children.' },
+      { word: 'independent',  definition: 'Not needing others for support; self-reliant',            vietnamese: 'độc lập',        collocations: ['become independent', 'financially independent'], example: 'She became more independent after moving abroad.' },
+      { word: 'cheerful',     definition: 'Noticeably happy and optimistic',                          vietnamese: 'vui vẻ',         collocations: ['cheerful mood', 'always cheerful'],              example: 'He has a cheerful personality that lifts the room.' },
+    ],
+    B2: [
+      { word: 'diligent',      definition: 'Careful and hard-working',                               vietnamese: 'chăm chỉ',         collocations: ['diligent student', 'diligent worker'],          example: 'She is a diligent student who never misses class.' },
+      { word: 'resilient',     definition: 'Able to recover quickly from difficulties',              vietnamese: 'kiên cường',       collocations: ['resilient spirit', 'emotionally resilient'],    example: 'Children are often more resilient than adults think.' },
+      { word: 'compassionate', definition: 'Feeling sympathy and concern for others\' suffering',   vietnamese: 'đầy lòng trắc ẩn', collocations: ['compassionate care', 'deeply compassionate'],   example: 'The nurse was compassionate towards all patients.' },
+      { word: 'articulate',    definition: 'Having or showing the ability to speak clearly',         vietnamese: 'lưu loát',         collocations: ['articulate speaker', 'clearly articulate'],     example: 'She is articulate and expresses herself very well.' },
+      { word: 'pragmatic',     definition: 'Dealing with things sensibly and realistically',         vietnamese: 'thực tế',          collocations: ['pragmatic approach', 'pragmatic solution'],     example: 'We need a pragmatic approach to solve this.' },
+      { word: 'versatile',     definition: 'Able to adapt to many different functions',              vietnamese: 'đa năng',          collocations: ['versatile player', 'highly versatile'],         example: 'He is a versatile employee who handles many tasks.' },
+      { word: 'meticulous',    definition: 'Very careful and precise about details',                 vietnamese: 'tỉ mỉ',            collocations: ['meticulous attention', 'meticulous planning'],  example: 'She is meticulous in her research.' },
+      { word: 'persistent',    definition: 'Continuing firmly despite obstacles',                    vietnamese: 'kiên trì',         collocations: ['persistent effort', 'be persistent'],           example: 'Success requires persistent effort.' },
+      { word: 'eloquent',      definition: 'Fluent and persuasive in speaking or writing',           vietnamese: 'hùng hồn',         collocations: ['eloquent speech', 'eloquent writer'],           example: 'The leader gave an eloquent speech.' },
+      { word: 'impulsive',     definition: 'Acting quickly without thinking first',                  vietnamese: 'bốc đồng',         collocations: ['impulsive decision', 'act impulsively'],        example: 'He made an impulsive decision to quit his job.' },
+      { word: 'empathetic',    definition: 'Showing empathy; understanding others\' feelings',       vietnamese: 'đồng cảm',         collocations: ['empathetic listener', 'be empathetic'],         example: 'Good teachers are empathetic to their students.' },
+      { word: 'introspective', definition: 'Tending to examine your own thoughts and feelings',      vietnamese: 'hướng nội',        collocations: ['introspective person', 'deeply introspective'], example: 'She became introspective after the difficult year.' },
+      { word: 'cynical',       definition: 'Believing people are motivated by self-interest',        vietnamese: 'hoài nghi',        collocations: ['cynical view', 'grow cynical'],                 example: 'Years of disappointment made him cynical.' },
+      { word: 'arrogant',      definition: 'Having an exaggerated sense of one\'s own importance',  vietnamese: 'kiêu ngạo',        collocations: ['arrogant attitude', 'come across as arrogant'], example: 'His arrogant behaviour upset his colleagues.' },
+      { word: 'tenacious',     definition: 'Holding firmly to something; very determined',           vietnamese: 'bền bỉ',           collocations: ['tenacious effort', 'tenacious spirit'],         example: 'She was tenacious in pursuing her goals.' },
+    ],
+    C1: [
+      { word: 'magnanimous',   definition: 'Very generous and forgiving, especially towards rivals', vietnamese: 'khoan dung',       collocations: ['magnanimous gesture', 'be magnanimous'],        example: 'The champion was magnanimous in victory.' },
+      { word: 'reticent',      definition: 'Not revealing your thoughts or feelings readily',        vietnamese: 'kín đáo',          collocations: ['reticent nature', 'be reticent about'],         example: 'He was reticent about his past experiences.' },
+      { word: 'sanguine',      definition: 'Optimistic, especially in a difficult situation',        vietnamese: 'lạc quan',         collocations: ['remain sanguine', 'sanguine outlook'],          example: 'She remained sanguine despite the setbacks.' },
+      { word: 'vehement',      definition: 'Showing strong feeling; forceful and passionate',        vietnamese: 'quyết liệt',       collocations: ['vehement opposition', 'vehement denial'],       example: 'He was vehement in his opposition to the plan.' },
+      { word: 'impartial',     definition: 'Treating all rivals or parties equally; fair',           vietnamese: 'vô tư, công bằng', collocations: ['impartial judge', 'remain impartial'],          example: 'The judge must remain impartial during the trial.' },
+      { word: 'gregarious',    definition: 'Enjoying the company of others; sociable',               vietnamese: 'ưa giao tiếp',     collocations: ['gregarious personality', 'very gregarious'],    example: 'She is gregarious and loves meeting new people.' },
+      { word: 'languid',       definition: 'Weak or slow in a relaxed, pleasant way',                vietnamese: 'uể oải',           collocations: ['languid pace', 'languid gesture'],              example: 'He moved with languid grace through the room.' },
+      { word: 'judicious',     definition: 'Having or showing sound judgement',                      vietnamese: 'sáng suốt',        collocations: ['judicious decision', 'judicious use'],          example: 'A judicious choice of words avoided conflict.' },
+      { word: 'obstinate',     definition: 'Stubbornly refusing to change one\'s opinion',           vietnamese: 'cứng đầu',         collocations: ['obstinate refusal', 'remain obstinate'],        example: 'He was obstinate and refused to listen to advice.' },
+      { word: 'fervent',       definition: 'Having or displaying passionate intensity',              vietnamese: 'nhiệt thành',      collocations: ['fervent supporter', 'fervent belief'],          example: 'She was a fervent advocate for human rights.' },
+      { word: 'contemplative', definition: 'Expressing or involving prolonged thought',              vietnamese: 'trầm tư',          collocations: ['contemplative mood', 'contemplative silence'],  example: 'He sat in contemplative silence after the news.' },
+      { word: 'benevolent',    definition: 'Well-meaning and kindly; charitable',                    vietnamese: 'nhân từ',          collocations: ['benevolent leader', 'benevolent smile'],        example: 'The benevolent donor funded the school library.' },
+      { word: 'discerning',    definition: 'Having or showing good judgement; perceptive',           vietnamese: 'tinh tế, sắc bén', collocations: ['discerning eye', 'discerning taste'],           example: 'A discerning reader will notice the subtle errors.' },
+      { word: 'placid',        definition: 'Calm and peaceful; not easily upset',                    vietnamese: 'điềm tĩnh',        collocations: ['placid temperament', 'remain placid'],          example: 'The lake was placid in the early morning.' },
+      { word: 'nonchalant',    definition: 'Feeling or appearing calm and relaxed; unconcerned',     vietnamese: 'thờ ơ, bình thản', collocations: ['nonchalant attitude', 'appear nonchalant'],      example: 'He was nonchalant about the challenging exam.' },
+    ],
+    C2: [
+      { word: 'acrimonious',   definition: 'Typically of speech or manner: angry and bitter',        vietnamese: 'gay gắt, chua cay',  collocations: ['acrimonious dispute', 'acrimonious divorce'],    example: 'The debate became increasingly acrimonious.' },
+      { word: 'diffident',     definition: 'Modest or shy due to a lack of self-confidence',         vietnamese: 'nhút nhát, e dè',    collocations: ['diffident manner', 'appear diffident'],          example: 'She was diffident in voicing her opinions.' },
+      { word: 'garrulous',     definition: 'Excessively talkative, especially on trivial matters',   vietnamese: 'ba hoa, lắm lời',    collocations: ['garrulous neighbour', 'garrulous nature'],       example: 'The garrulous guest dominated the conversation.' },
+      { word: 'laconic',       definition: 'Using very few words',                                    vietnamese: 'kiệm lời',           collocations: ['laconic reply', 'laconic style'],                example: 'His laconic reply ended the discussion.' },
+      { word: 'mendacious',    definition: 'Not telling the truth; lying',                            vietnamese: 'dối trá',            collocations: ['mendacious claim', 'thoroughly mendacious'],     example: 'The mendacious report misled the public.' },
+      { word: 'obsequious',    definition: 'Overly obedient and eager to please',                     vietnamese: 'nịnh hót, xu nịnh',  collocations: ['obsequious manner', 'obsequious assistant'],     example: 'His obsequious behaviour irritated his boss.' },
+      { word: 'pugnacious',    definition: 'Eager or quick to argue, quarrel, or fight',              vietnamese: 'hiếu chiến',         collocations: ['pugnacious style', 'pugnacious attitude'],       example: 'The pugnacious politician loved a debate.' },
+      { word: 'querulous',     definition: 'Complaining in a petulant or whining manner',             vietnamese: 'hay ca thán',        collocations: ['querulous tone', 'querulous complaint'],         example: 'The querulous customer complained constantly.' },
+      { word: 'fastidious',    definition: 'Very attentive to accuracy and detail; difficult to please', vietnamese: 'cầu kỳ, khó tính', collocations: ['fastidious attention', 'fastidious taste'],      example: 'She is fastidious about the quality of her work.' },
+      { word: 'bellicose',     definition: 'Demonstrating aggression; eager to fight',                vietnamese: 'hiếu chiến, hung hăng', collocations: ['bellicose rhetoric', 'bellicose nation'],     example: 'His bellicose speech alarmed the diplomats.' },
+      { word: 'circumspect',   definition: 'Unwilling to take risks; wary and cautious',              vietnamese: 'thận trọng',         collocations: ['circumspect approach', 'remain circumspect'],    example: 'She was circumspect in her financial decisions.' },
+      { word: 'equanimous',    definition: 'Having mental calmness, especially in difficult situations', vietnamese: 'bình tĩnh, điềm đạm', collocations: ['equanimous response', 'remain equanimous'],   example: 'He faced adversity with an equanimous spirit.' },
+      { word: 'hegemonic',     definition: 'Relating to dominance or authority over others',          vietnamese: 'bá quyền',           collocations: ['hegemonic power', 'hegemonic control'],          example: 'The country sought to maintain hegemonic influence.' },
+      { word: 'inimical',      definition: 'Tending to obstruct or harm; hostile',                    vietnamese: 'thù địch, có hại',   collocations: ['inimical to progress', 'inimical force'],        example: 'His attitude was inimical to teamwork.' },
+      { word: 'jocular',       definition: 'Fond of or characterised by joking; playful',             vietnamese: 'hay đùa, hài hước',  collocations: ['jocular tone', 'jocular remark'],                example: 'He made a jocular comment to lighten the mood.' },
+    ],
+  },
+  'Business': {
+    B1: [
+      { word: 'profit',      definition: 'Financial gain after expenses are deducted',                 vietnamese: 'lợi nhuận',      collocations: ['make a profit', 'profit margin'],             example: 'The company made a large profit last year.' },
+      { word: 'budget',      definition: 'An estimate of income and expenditure for a period',         vietnamese: 'ngân sách',      collocations: ['annual budget', 'budget cut'],                example: 'We need to work within a tight budget.' },
+      { word: 'client',      definition: 'A person who uses the services of a professional',           vietnamese: 'khách hàng',     collocations: ['key client', 'attract clients'],              example: 'The firm has several major clients overseas.' },
+      { word: 'market',      definition: 'An area or arena in which commercial dealings are done',     vietnamese: 'thị trường',     collocations: ['market share', 'enter the market'],          example: 'They plan to enter the Asian market next year.' },
+      { word: 'invest',      definition: 'To put money into a project expecting a return',             vietnamese: 'đầu tư',         collocations: ['invest in', 'invest heavily'],                example: 'She decided to invest in renewable energy.' },
+      { word: 'salary',      definition: 'A fixed regular payment for employment',                     vietnamese: 'lương',          collocations: ['monthly salary', 'raise a salary'],          example: 'He received a salary raise after two years.' },
+      { word: 'product',     definition: 'An article or substance manufactured for sale',              vietnamese: 'sản phẩm',       collocations: ['new product', 'product launch'],              example: 'The company is launching a new product next month.' },
+      { word: 'compete',     definition: 'To strive to gain something by defeating others',            vietnamese: 'cạnh tranh',     collocations: ['compete for', 'compete with'],               example: 'Small firms struggle to compete with large ones.' },
+      { word: 'manage',      definition: 'To be in charge of; to administer',                          vietnamese: 'quản lý',        collocations: ['manage a team', 'manage resources'],         example: 'She manages a team of fifteen people.' },
+      { word: 'demand',      definition: 'The desire of consumers to purchase goods',                  vietnamese: 'nhu cầu',        collocations: ['high demand', 'meet demand'],                example: 'There is high demand for electric vehicles.' },
+      { word: 'supply',      definition: 'The amount of a commodity available for purchase',           vietnamese: 'nguồn cung',     collocations: ['supply chain', 'supply and demand'],         example: 'The supply of raw materials was disrupted.' },
+      { word: 'growth',      definition: 'An increase in the size or importance of something',         vietnamese: 'tăng trưởng',    collocations: ['economic growth', 'business growth'],        example: 'The company reported strong growth this quarter.' },
+      { word: 'target',      definition: 'An objective or result to achieve',                          vietnamese: 'mục tiêu',       collocations: ['sales target', 'meet a target'],             example: 'The team exceeded its sales target this month.' },
+      { word: 'offer',       definition: 'To present something for acceptance',                        vietnamese: 'đề nghị, ưu đãi', collocations: ['job offer', 'offer a discount'],            example: 'She accepted the job offer on Friday.' },
+      { word: 'service',     definition: 'The action of helping or doing work for someone',            vietnamese: 'dịch vụ',        collocations: ['customer service', 'service quality'],       example: 'The restaurant offers excellent customer service.' },
+    ],
+    B2: [
+      { word: 'entrepreneur', definition: 'A person who sets up a business to make a profit',         vietnamese: 'doanh nhân',        collocations: ['successful entrepreneur', 'young entrepreneur'], example: 'She became a successful entrepreneur at 25.' },
+      { word: 'revenue',      definition: 'Income generated from business activities',                 vietnamese: 'doanh thu',         collocations: ['annual revenue', 'revenue growth'],              example: 'The company\'s revenue doubled this year.' },
+      { word: 'stakeholder',  definition: 'A person with an interest in a business\'s success',       vietnamese: 'bên liên quan',     collocations: ['key stakeholder', 'stakeholder meeting'],        example: 'Stakeholders were briefed on the new strategy.' },
+      { word: 'negotiate',    definition: 'To reach an agreement through discussion',                  vietnamese: 'đàm phán',          collocations: ['negotiate a deal', 'negotiate terms'],           example: 'They negotiated a better contract with the supplier.' },
+      { word: 'merger',       definition: 'The combination of two companies into one',                 vietnamese: 'sáp nhập',          collocations: ['company merger', 'merger deal'],                 example: 'The merger created the world\'s largest bank.' },
+      { word: 'outsource',    definition: 'To obtain goods or services from an outside supplier',      vietnamese: 'thuê ngoài',        collocations: ['outsource production', 'outsource IT'],          example: 'Many firms outsource their customer support.' },
+      { word: 'benchmark',    definition: 'A standard to measure something against',                   vietnamese: 'tiêu chuẩn đánh giá', collocations: ['industry benchmark', 'set a benchmark'],      example: 'This report sets a benchmark for the industry.' },
+      { word: 'dividend',     definition: 'A payment made to shareholders from company profits',       vietnamese: 'cổ tức',            collocations: ['pay a dividend', 'dividend yield'],              example: 'The company paid a generous dividend to investors.' },
+      { word: 'franchise',    definition: 'A license to sell a company\'s products using its brand',  vietnamese: 'nhượng quyền',      collocations: ['franchise agreement', 'buy a franchise'],        example: 'He bought a fast-food franchise last year.' },
+      { word: 'liability',    definition: 'A thing for which someone is responsible, esp. a debt',    vietnamese: 'nghĩa vụ, nợ',     collocations: ['legal liability', 'limit liability'],            example: 'The company has limited liability for damages.' },
+      { word: 'asset',        definition: 'An item of property owned by a person or company',         vietnamese: 'tài sản',           collocations: ['valuable asset', 'fixed asset'],                 example: 'Property is the company\'s most valuable asset.' },
+      { word: 'turnover',     definition: 'The amount of money a business makes in a period',         vietnamese: 'doanh số',          collocations: ['annual turnover', 'high turnover'],              example: 'The shop has a turnover of £1 million a year.' },
+      { word: 'acquisition',  definition: 'Buying another company or assets',                          vietnamese: 'mua lại',           collocations: ['major acquisition', 'acquisition deal'],         example: 'The acquisition of the startup cost $50 million.' },
+      { word: 'rebrand',      definition: 'To change the image of a company or product',               vietnamese: 'đổi thương hiệu',   collocations: ['rebrand strategy', 'fully rebrand'],             example: 'The company decided to rebrand after the scandal.' },
+      { word: 'recession',    definition: 'A temporary period of economic decline',                    vietnamese: 'suy thoái kinh tế', collocations: ['economic recession', 'hit by recession'],        example: 'The recession caused many businesses to close.' },
+    ],
+    C1: [
+      { word: 'liquidity',    definition: 'The availability of liquid assets to a company',            vietnamese: 'tính thanh khoản',  collocations: ['liquidity crisis', 'improve liquidity'],         example: 'The bank maintained high liquidity during the crisis.' },
+      { word: 'leverage',     definition: 'Using borrowed capital to increase potential return',       vietnamese: 'đòn bẩy tài chính', collocations: ['financial leverage', 'leverage capital'],        example: 'The firm used leverage to expand its investments.' },
+      { word: 'subsidiary',   definition: 'A company controlled by a holding company',                 vietnamese: 'công ty con',       collocations: ['wholly-owned subsidiary', 'set up a subsidiary'], example: 'The subsidiary operates in five Asian countries.' },
+      { word: 'monetize',     definition: 'To earn money from something, especially online content',   vietnamese: 'kiếm tiền từ',      collocations: ['monetize content', 'monetize data'],             example: 'The app was redesigned to better monetize user data.' },
+      { word: 'diversify',    definition: 'To spread investment across different areas',               vietnamese: 'đa dạng hóa',       collocations: ['diversify portfolio', 'diversify risk'],         example: 'The investor diversified into real estate.' },
+      { word: 'procurement',  definition: 'The act of obtaining goods or services for an organization', vietnamese: 'mua sắm, tổ chức mua hàng', collocations: ['procurement process', 'procurement officer'], example: 'The procurement process was delayed by paperwork.' },
+      { word: 'depreciation', definition: 'Reduction in value of an asset over time',                  vietnamese: 'khấu hao',          collocations: ['asset depreciation', 'accelerated depreciation'], example: 'The car\'s depreciation reduces its resale value.' },
+      { word: 'consortium',   definition: 'An association of companies with shared interests',         vietnamese: 'tập đoàn liên kết',  collocations: ['form a consortium', 'banking consortium'],       example: 'A consortium of investors funded the project.' },
+      { word: 'insolvency',   definition: 'The state of being unable to pay one\'s debts',            vietnamese: 'tình trạng mất khả năng thanh toán', collocations: ['declare insolvency', 'insolvency risk'], example: 'The firm filed for insolvency after losing clients.' },
+      { word: 'equity',       definition: 'The value of shares in a company; fair ownership',         vietnamese: 'vốn chủ sở hữu',    collocations: ['private equity', 'equity stake'],               example: 'She has a 30% equity stake in the startup.' },
+      { word: 'hedge',        definition: 'To make investments to offset potential losses',            vietnamese: 'bảo hiểm rủi ro',   collocations: ['hedge against risk', 'hedge fund'],              example: 'Companies often hedge against currency fluctuations.' },
+      { word: 'fiduciary',    definition: 'Involving trust, especially with financial management',     vietnamese: 'ủy thác, ủy quyền', collocations: ['fiduciary duty', 'fiduciary responsibility'],    example: 'Directors have a fiduciary duty to shareholders.' },
+      { word: 'remunerate',   definition: 'To pay someone for services or work',                       vietnamese: 'trả thù lao',       collocations: ['adequately remunerate', 'remunerate staff'],     example: 'The contract failed to adequately remunerate workers.' },
+      { word: 'arbitrage',    definition: 'Buying and selling to profit from price differences',       vietnamese: 'kinh doanh chênh lệch giá', collocations: ['arbitrage opportunity', 'arbitrage strategy'], example: 'Traders exploited arbitrage between two markets.' },
+      { word: 'syndicate',    definition: 'A group of individuals or firms combined to promote a common interest', vietnamese: 'tổ hợp, tập đoàn', collocations: ['media syndicate', 'loan syndicate'],   example: 'A bank syndicate financed the construction project.' },
+    ],
+    C2: [
+      { word: 'oligopoly',     definition: 'A market dominated by a small number of large sellers',   vietnamese: 'thị trường độc quyền nhóm', collocations: ['oligopoly market', 'natural oligopoly'],  example: 'The tech industry is often described as an oligopoly.' },
+      { word: 'divestiture',   definition: 'The action of selling off subsidiary business interests', vietnamese: 'thoái vốn',          collocations: ['forced divestiture', 'divestiture plan'],        example: 'The regulator ordered the divestiture of assets.' },
+      { word: 'amortization',  definition: 'Gradual repayment of a debt over time',                   vietnamese: 'khấu hao khoản nợ', collocations: ['loan amortization', 'amortization schedule'],    example: 'The mortgage is paid off through amortization.' },
+      { word: 'collateral',    definition: 'Property pledged as security for repayment of a loan',    vietnamese: 'tài sản thế chấp',  collocations: ['use as collateral', 'collateral damage'],        example: 'His house was used as collateral for the loan.' },
+      { word: 'securitization',definition: 'Converting assets into marketable securities',             vietnamese: 'chứng khoán hóa tài sản', collocations: ['mortgage securitization', 'securitization deal'], example: 'Securitization played a role in the 2008 crash.' },
+      { word: 'monopsony',     definition: 'A market with only one buyer, who controls prices',       vietnamese: 'độc quyền mua',     collocations: ['monopsony power', 'labour monopsony'],           example: 'A single employer with monopsony power can lower wages.' },
+      { word: 'underwrite',    definition: 'To accept financial responsibility for; to guarantee',    vietnamese: 'bảo lãnh phát hành', collocations: ['underwrite a loan', 'underwrite risk'],         example: 'The bank agreed to underwrite the bond issue.' },
+      { word: 'receivership',  definition: 'Process where a receiver manages a company\'s assets',   vietnamese: 'kiểm soát tài chính', collocations: ['go into receivership', 'placed in receivership'], example: 'The failing company was placed in receivership.' },
+      { word: 'promissory',    definition: 'Conveying a promise, especially of payment',              vietnamese: 'hứa trả, hứa hẹn', collocations: ['promissory note', 'promissory agreement'],        example: 'He signed a promissory note for the debt.' },
+      { word: 'perpetuity',    definition: 'A bond or other security with no fixed maturity date',    vietnamese: 'vĩnh viễn, vô thời hạn', collocations: ['in perpetuity', 'perpetuity bond'],         example: 'The land was granted to the family in perpetuity.' },
+      { word: 'macroeconomic', definition: 'Relating to large-scale economic factors',                 vietnamese: 'kinh tế vĩ mô',    collocations: ['macroeconomic policy', 'macroeconomic trend'],   example: 'Inflation is a key macroeconomic concern.' },
+      { word: 'expropriation', definition: 'Government taking of private property for public use',    vietnamese: 'trưng thu tài sản', collocations: ['government expropriation', 'risk of expropriation'], example: 'Investors feared expropriation under the new law.' },
+      { word: 'encumbrance',   definition: 'A burden or claim attached to a property',                vietnamese: 'gánh nặng, tài sản thế chấp', collocations: ['legal encumbrance', 'free from encumbrance'], example: 'The property was sold free of any encumbrance.' },
+      { word: 'subrogation',   definition: 'Substitution of one party for another in a legal claim', vietnamese: 'thế quyền (bảo hiểm)', collocations: ['right of subrogation', 'subrogation clause'],  example: 'The insurer exercised its right of subrogation.' },
+      { word: 'microeconomic', definition: 'Relating to individual firms, households, and markets',   vietnamese: 'kinh tế vi mô',    collocations: ['microeconomic analysis', 'microeconomic model'],  example: 'Consumer choice is a microeconomic concept.' },
+    ],
+  },
+  'Academic': {
+    B1: [
+      { word: 'analyse',    definition: 'To examine in detail in order to explain',                    vietnamese: 'phân tích',        collocations: ['analyse data', 'critically analyse'],          example: 'We need to analyse the results carefully.' },
+      { word: 'research',   definition: 'Systematic investigation to establish facts',                  vietnamese: 'nghiên cứu',       collocations: ['conduct research', 'research paper'],          example: 'He conducted research on climate change.' },
+      { word: 'argument',   definition: 'A reason given in support of an idea',                        vietnamese: 'lập luận',         collocations: ['strong argument', 'present an argument'],      example: 'She made a strong argument for the policy.' },
+      { word: 'evidence',   definition: 'Information indicating that something is true',               vietnamese: 'bằng chứng',       collocations: ['provide evidence', 'strong evidence'],         example: 'The study provided clear evidence of the link.' },
+      { word: 'theory',     definition: 'A system of ideas to explain something',                       vietnamese: 'lý thuyết',        collocations: ['develop a theory', 'in theory'],               example: 'Darwin developed a theory of natural selection.' },
+      { word: 'method',     definition: 'A particular procedure for accomplishing something',           vietnamese: 'phương pháp',      collocations: ['research method', 'teaching method'],          example: 'The survey method was used to collect data.' },
+      { word: 'data',       definition: 'Facts and statistics collected for reference',                 vietnamese: 'dữ liệu',          collocations: ['collect data', 'data analysis'],               example: 'The data shows a clear upward trend.' },
+      { word: 'source',     definition: 'A place from which information is obtained',                   vietnamese: 'nguồn tài liệu',   collocations: ['reliable source', 'cite a source'],            example: 'Always cite your sources in academic writing.' },
+      { word: 'thesis',     definition: 'A statement put forward to be supported or proved',            vietnamese: 'luận điểm',        collocations: ['thesis statement', 'support the thesis'],      example: 'Your essay needs a clear thesis statement.' },
+      { word: 'compare',    definition: 'To examine the similarity between two things',                 vietnamese: 'so sánh',          collocations: ['compare and contrast', 'compare results'],     example: 'Compare the two studies and identify differences.' },
+      { word: 'evaluate',   definition: 'To assess the value or quality of something',                  vietnamese: 'đánh giá',         collocations: ['critically evaluate', 'evaluate evidence'],    example: 'You should evaluate each source carefully.' },
+      { word: 'summary',    definition: 'A brief statement of the main points',                         vietnamese: 'tóm tắt',          collocations: ['executive summary', 'write a summary'],        example: 'Write a summary of the article in 100 words.' },
+      { word: 'conclude',   definition: 'To arrive at a judgement after reasoning',                     vietnamese: 'kết luận',         collocations: ['conclude that', 'reasonably conclude'],        example: 'The study concludes that exercise improves mood.' },
+      { word: 'define',     definition: 'To state the exact meaning of a word',                         vietnamese: 'định nghĩa',       collocations: ['define a term', 'clearly defined'],            example: 'Please define the key terms in your introduction.' },
+      { word: 'topic',      definition: 'A subject under discussion or study',                          vietnamese: 'chủ đề',           collocations: ['main topic', 'off-topic'],                      example: 'Choose a topic that interests you for your essay.' },
+    ],
+    B2: [
+      { word: 'hypothesis',   definition: 'A proposed explanation to be tested',                       vietnamese: 'giả thuyết',       collocations: ['test a hypothesis', 'support a hypothesis'],   example: 'The researchers tested their hypothesis with surveys.' },
+      { word: 'methodology',  definition: 'A system of methods used in a field',                       vietnamese: 'phương pháp luận', collocations: ['research methodology', 'clear methodology'],    example: 'The paper outlines its methodology in detail.' },
+      { word: 'empirical',    definition: 'Based on observation and experiment, not theory',            vietnamese: 'thực nghiệm',      collocations: ['empirical evidence', 'empirical study'],        example: 'Empirical evidence supports the new treatment.' },
+      { word: 'citation',     definition: 'A reference to a published work',                           vietnamese: 'trích dẫn',        collocations: ['in-text citation', 'citation style'],           example: 'Ensure every claim has an accurate citation.' },
+      { word: 'correlation',  definition: 'A mutual relationship or connection between things',         vietnamese: 'tương quan',       collocations: ['positive correlation', 'show correlation'],     example: 'There is a correlation between stress and illness.' },
+      { word: 'framework',    definition: 'A basic structure underlying a system',                     vietnamese: 'khung lý thuyết',  collocations: ['theoretical framework', 'analytical framework'], example: 'The study uses a sociological framework.' },
+      { word: 'paradigm',     definition: 'A typical example or a model of something',                 vietnamese: 'mô hình tư duy',   collocations: ['paradigm shift', 'dominant paradigm'],          example: 'The discovery led to a major paradigm shift.' },
+      { word: 'implication',  definition: 'A conclusion drawn from evidence; a likely consequence',    vietnamese: 'hàm ý, tác động', collocations: ['broader implication', 'policy implication'],     example: 'The findings have important policy implications.' },
+      { word: 'discourse',    definition: 'Written or spoken communication on a topic',                vietnamese: 'diễn ngôn',        collocations: ['academic discourse', 'public discourse'],        example: 'This shapes academic discourse on climate.' },
+      { word: 'premise',      definition: 'A statement on which an argument is based',                 vietnamese: 'tiền đề',          collocations: ['false premise', 'underlying premise'],          example: 'The argument rests on a faulty premise.' },
+      { word: 'rationale',    definition: 'The reasons behind a course of action',                     vietnamese: 'lý do, căn cứ',   collocations: ['clear rationale', 'provide rationale'],          example: 'The paper explains the rationale for the study.' },
+      { word: 'synthesis',    definition: 'Combining information from different sources',               vietnamese: 'tổng hợp',         collocations: ['literature synthesis', 'critical synthesis'],   example: 'A good essay synthesises multiple perspectives.' },
+      { word: 'variable',     definition: 'An element that may change in an experiment',               vietnamese: 'biến số',          collocations: ['independent variable', 'control variable'],     example: 'The experiment controlled for several variables.' },
+      { word: 'validate',     definition: 'To check the accuracy of something',                        vietnamese: 'kiểm chứng',       collocations: ['validate findings', 'validate a model'],        example: 'The results were validated by a second study.' },
+      { word: 'scrutinize',   definition: 'To examine or inspect closely',                             vietnamese: 'xem xét kỹ lưỡng', collocations: ['scrutinize data', 'scrutinize claims'],        example: 'We need to scrutinize the methodology carefully.' },
+    ],
+    C1: [
+      { word: 'epistemology',  definition: 'The branch of philosophy concerning knowledge',            vietnamese: 'nhận thức luận',   collocations: ['epistemological question', 'epistemology of science'], example: 'The course covers epistemology and logic.' },
+      { word: 'heuristic',     definition: 'A practical approach to problem-solving without guarantees', vietnamese: 'phương pháp thử nghiệm', collocations: ['heuristic method', 'use heuristics'],     example: 'Heuristic methods speed up the search process.' },
+      { word: 'postulate',     definition: 'To suggest or assume as fact; a basic principle',          vietnamese: 'giả định, tiên đề', collocations: ['postulate a theory', 'basic postulate'],        example: 'Einstein postulated that energy equals mass times c².' },
+      { word: 'reflexivity',   definition: 'The researcher\'s awareness of their own influence',       vietnamese: 'tính phản thân',   collocations: ['researcher reflexivity', 'critical reflexivity'], example: 'Reflexivity is important in qualitative research.' },
+      { word: 'seminal',       definition: 'Strongly influencing later developments',                  vietnamese: 'có tính khai phá', collocations: ['seminal work', 'seminal paper'],                 example: 'Darwin\'s Origin of Species is a seminal work.' },
+      { word: 'triangulation', definition: 'Using multiple methods to study the same phenomenon',      vietnamese: 'tam giác hóa',     collocations: ['methodological triangulation', 'data triangulation'], example: 'Triangulation strengthens the validity of findings.' },
+      { word: 'deductive',     definition: 'Reaching a specific conclusion from general principles',   vietnamese: 'suy diễn',         collocations: ['deductive reasoning', 'deductive approach'],    example: 'Deductive reasoning moves from theory to data.' },
+      { word: 'inductive',     definition: 'Drawing general conclusions from specific observations',   vietnamese: 'quy nạp',          collocations: ['inductive reasoning', 'inductive logic'],       example: 'Inductive reasoning builds theory from observation.' },
+      { word: 'longitudinal',  definition: 'Involving data collected over a long period',              vietnamese: 'nghiên cứu dọc',   collocations: ['longitudinal study', 'longitudinal data'],      example: 'The longitudinal study followed participants for 20 years.' },
+      { word: 'normative',     definition: 'Relating to or establishing a standard or norm',           vietnamese: 'quy chuẩn',        collocations: ['normative statement', 'normative theory'],      example: 'The paper makes a normative claim about justice.' },
+      { word: 'qualitative',   definition: 'Relating to quality and non-numerical data',               vietnamese: 'định tính',        collocations: ['qualitative research', 'qualitative data'],     example: 'Qualitative research captures lived experiences.' },
+      { word: 'quantitative',  definition: 'Relating to quantity and measurable data',                 vietnamese: 'định lượng',       collocations: ['quantitative analysis', 'quantitative data'],   example: 'Quantitative studies use statistical methods.' },
+      { word: 'abstraction',   definition: 'The process of forming a general concept from specific cases', vietnamese: 'trừu tượng hóa', collocations: ['level of abstraction', 'theoretical abstraction'], example: 'Philosophy requires a high degree of abstraction.' },
+      { word: 'annotation',    definition: 'A note of explanation added to a text',                   vietnamese: 'chú thích',        collocations: ['add annotation', 'annotated bibliography'],     example: 'The professor asked students to write annotations.' },
+      { word: 'ontological',   definition: 'Relating to the nature of being or existence',             vietnamese: 'bản thể luận',     collocations: ['ontological question', 'ontological assumption'], example: 'The debate raised ontological questions about identity.' },
+    ],
+    C2: [
+      { word: 'axiom',           definition: 'A statement accepted as true without proof',            vietnamese: 'tiên đề',            collocations: ['mathematical axiom', 'logical axiom'],           example: 'Self-evident truths are treated as axioms in logic.' },
+      { word: 'dialectic',       definition: 'The investigation of truth through reasoned argument',  vietnamese: 'phép biện chứng',    collocations: ['Hegelian dialectic', 'dialectical method'],      example: 'The dialectic between thesis and antithesis produces synthesis.' },
+      { word: 'hermeneutic',     definition: 'Relating to interpretation, especially of texts',       vietnamese: 'phép diễn giải',     collocations: ['hermeneutic circle', 'hermeneutic approach'],    example: 'Hermeneutic analysis focuses on meaning in context.' },
+      { word: 'juxtapose',       definition: 'To place side by side for comparison',                  vietnamese: 'đặt cạnh nhau để so sánh', collocations: ['juxtapose ideas', 'juxtapose images'],      example: 'The author juxtaposes poverty and wealth in the novel.' },
+      { word: 'positivism',      definition: 'The belief that knowledge comes from observable facts', vietnamese: 'chủ nghĩa thực chứng', collocations: ['logical positivism', 'positivist approach'],   example: 'Positivism underpins many scientific research traditions.' },
+      { word: 'reductionism',    definition: 'Analysing complex things by breaking them into parts',  vietnamese: 'chủ nghĩa quy giản', collocations: ['scientific reductionism', 'methodological reductionism'], example: 'Critics argue that reductionism oversimplifies behaviour.' },
+      { word: 'tautology',       definition: 'Saying the same thing twice in different words',        vietnamese: 'đồng nghĩa luận',    collocations: ['circular tautology', 'avoid tautology'],         example: 'The argument is a tautology and proves nothing.' },
+      { word: 'teleological',    definition: 'Relating to purpose or design in nature or events',     vietnamese: 'mục đích luận',      collocations: ['teleological argument', 'teleological view'],    example: 'Aristotle\'s teleological ethics links virtue to happiness.' },
+      { word: 'verisimilitude',  definition: 'The appearance of being true or real',                  vietnamese: 'vẻ xác thực',        collocations: ['narrative verisimilitude', 'sense of verisimilitude'], example: 'The novel achieves great verisimilitude in its detail.' },
+      { word: 'aphorism',        definition: 'A concise observation expressing a general truth',      vietnamese: 'câu châm ngôn',      collocations: ['philosophical aphorism', 'memorable aphorism'],  example: '"Know thyself" is a famous Socratic aphorism.' },
+      { word: 'didactic',        definition: 'Intended to teach, esp. with a moral message',          vietnamese: 'có tính giáo huấn',  collocations: ['didactic literature', 'overly didactic'],        example: 'The poem has a didactic purpose, teaching moral lessons.' },
+      { word: 'exegesis',        definition: 'Critical explanation or interpretation of a text',      vietnamese: 'giải thích văn bản', collocations: ['biblical exegesis', 'critical exegesis'],        example: 'The scholar provided a detailed exegesis of the passage.' },
+      { word: 'solipsism',       definition: 'The view that only one\'s own mind can be known to exist', vietnamese: 'chủ nghĩa duy ngã', collocations: ['philosophical solipsism', 'extreme solipsism'],  example: 'Solipsism raises questions about the reality of others.' },
+      { word: 'phenomenological',definition: 'Relating to conscious experience and perception',       vietnamese: 'hiện tượng luận',    collocations: ['phenomenological approach', 'phenomenological study'], example: 'Phenomenological research explores lived experience.' },
+      { word: 'apologia',        definition: 'A formal written defence of one\'s beliefs or actions', vietnamese: 'bài biện hộ',        collocations: ['write an apologia', 'personal apologia'],        example: 'The essay reads as an apologia for his controversial views.' },
+    ],
+  },
+  'Technology': {
+    B1: [
+      { word: 'device',     definition: 'A piece of equipment made for a specific purpose',            vietnamese: 'thiết bị',         collocations: ['mobile device', 'smart device'],               example: 'She uses several devices to stay connected.' },
+      { word: 'software',   definition: 'Programs and operating information used by a computer',       vietnamese: 'phần mềm',         collocations: ['software update', 'install software'],         example: 'Make sure your software is up to date.' },
+      { word: 'download',   definition: 'To transfer data from the internet to your computer',         vietnamese: 'tải xuống',        collocations: ['download a file', 'free download'],            example: 'He downloaded the app from the official store.' },
+      { word: 'upload',     definition: 'To transfer data from your device to the internet',           vietnamese: 'tải lên',          collocations: ['upload a photo', 'upload speed'],              example: 'She uploaded her assignment to the portal.' },
+      { word: 'digital',    definition: 'Relating to electronic technology using binary code',         vietnamese: 'kỹ thuật số',      collocations: ['digital media', 'go digital'],                 example: 'Most newspapers have gone digital.' },
+      { word: 'program',    definition: 'A set of instructions for a computer to execute',             vietnamese: 'chương trình',     collocations: ['computer program', 'run a program'],           example: 'He wrote a program to automate the task.' },
+      { word: 'data',       definition: 'Facts and information stored or processed by a computer',     vietnamese: 'dữ liệu',          collocations: ['store data', 'data breach'],                   example: 'The app collects user data to improve performance.' },
+      { word: 'connect',    definition: 'To link together electronically',                              vietnamese: 'kết nối',          collocations: ['connect to Wi-Fi', 'connect devices'],         example: 'Please connect your laptop to the projector.' },
+      { word: 'search',     definition: 'To look for information using a search engine',               vietnamese: 'tìm kiếm',         collocations: ['search engine', 'search online'],              example: 'I searched for the answer on Google.' },
+      { word: 'keyboard',   definition: 'An input device with keys for typing',                        vietnamese: 'bàn phím',         collocations: ['keyboard shortcut', 'wireless keyboard'],      example: 'She typed the report using a wireless keyboard.' },
+      { word: 'screen',     definition: 'The display surface of a computer or phone',                  vietnamese: 'màn hình',         collocations: ['touch screen', 'screen time'],                  example: 'The phone has a large high-resolution screen.' },
+      { word: 'battery',    definition: 'A device that stores electrical energy',                      vietnamese: 'pin',              collocations: ['battery life', 'charge the battery'],           example: 'The battery life on this laptop is impressive.' },
+      { word: 'wireless',   definition: 'Using radio waves rather than physical cables',               vietnamese: 'không dây',        collocations: ['wireless network', 'wireless charger'],         example: 'The office uses a wireless network for connectivity.' },
+      { word: 'internet',   definition: 'The global network connecting computers worldwide',            vietnamese: 'internet',         collocations: ['internet connection', 'internet access'],       example: 'Fast internet access is now essential for work.' },
+      { word: 'update',     definition: 'A new version of software fixing issues or adding features',  vietnamese: 'cập nhật',         collocations: ['software update', 'security update'],           example: 'Install the update to protect against security threats.' },
+    ],
+    B2: [
+      { word: 'algorithm',    definition: 'A set of rules for solving a problem, esp. by computer',   vietnamese: 'thuật toán',          collocations: ['search algorithm', 'machine learning algorithm'], example: 'The algorithm recommends content based on your history.' },
+      { word: 'bandwidth',    definition: 'The maximum rate of data transfer across a network',        vietnamese: 'băng thông',          collocations: ['high bandwidth', 'bandwidth limit'],             example: 'Video streaming requires high bandwidth.' },
+      { word: 'cybersecurity',definition: 'Protection of computer systems from digital attacks',       vietnamese: 'an ninh mạng',        collocations: ['cybersecurity threat', 'cybersecurity expert'],  example: 'Cybersecurity is a growing concern for businesses.' },
+      { word: 'database',     definition: 'A structured set of data held in a computer',               vietnamese: 'cơ sở dữ liệu',      collocations: ['database management', 'access the database'],    example: 'The hospital uses a database to store patient records.' },
+      { word: 'encryption',   definition: 'Converting data into a code to prevent unauthorised access', vietnamese: 'mã hóa',             collocations: ['data encryption', 'end-to-end encryption'],      example: 'Messages are protected by end-to-end encryption.' },
+      { word: 'infrastructure',definition: 'The basic systems supporting a network or organisation',  vietnamese: 'cơ sở hạ tầng',      collocations: ['IT infrastructure', 'digital infrastructure'],    example: 'Upgrading the IT infrastructure is a priority.' },
+      { word: 'interface',    definition: 'A point where two systems or users interact',               vietnamese: 'giao diện',           collocations: ['user interface', 'graphical interface'],         example: 'The new user interface is much more intuitive.' },
+      { word: 'malware',      definition: 'Software designed to disrupt or damage a computer system',  vietnamese: 'phần mềm độc hại',    collocations: ['install malware', 'malware attack'],             example: 'The malware infected thousands of computers.' },
+      { word: 'network',      definition: 'A system of interconnected computers or devices',           vietnamese: 'mạng lưới',           collocations: ['computer network', 'social network'],            example: 'The company operates a global network of servers.' },
+      { word: 'prototype',    definition: 'A first model of a device from which others are developed', vietnamese: 'nguyên mẫu',          collocations: ['build a prototype', 'test a prototype'],         example: 'Engineers built a prototype of the new robot.' },
+      { word: 'simulate',     definition: 'To imitate a process using a computer model',               vietnamese: 'mô phỏng',            collocations: ['simulate conditions', 'computer simulation'],    example: 'The program simulates real-world driving conditions.' },
+      { word: 'automate',     definition: 'To use technology to perform tasks without human effort',   vietnamese: 'tự động hóa',         collocations: ['automate a process', 'fully automated'],         example: 'The factory automated most of its production line.' },
+      { word: 'deploy',       definition: 'To bring into effective action; to release software',       vietnamese: 'triển khai',           collocations: ['deploy an app', 'deploy to production'],         example: 'The team deployed the new version on Friday.' },
+      { word: 'integrate',    definition: 'To combine different systems into a unified whole',          vietnamese: 'tích hợp',            collocations: ['integrate systems', 'seamlessly integrate'],     example: 'The new tool integrates with existing platforms.' },
+      { word: 'streamline',   definition: 'To make a process simpler and more efficient',              vietnamese: 'hợp lý hóa',          collocations: ['streamline operations', 'streamline workflow'],  example: 'The software streamlines administrative tasks.' },
+    ],
+    C1: [
+      { word: 'blockchain',        definition: 'A decentralised digital ledger of transactions',      vietnamese: 'chuỗi khối',           collocations: ['blockchain technology', 'public blockchain'],    example: 'Blockchain ensures transparent transaction records.' },
+      { word: 'scalability',       definition: 'The ability of a system to handle growing demand',    vietnamese: 'khả năng mở rộng',     collocations: ['system scalability', 'horizontal scalability'],  example: 'Scalability is key for cloud-based applications.' },
+      { word: 'virtualization',    definition: 'Creating a virtual version of a device or resource',  vietnamese: 'ảo hóa',               collocations: ['server virtualization', 'storage virtualization'], example: 'Virtualization reduces the need for physical servers.' },
+      { word: 'machine learning',  definition: 'AI that enables computers to learn from data',        vietnamese: 'học máy',              collocations: ['machine learning model', 'apply machine learning'], example: 'Machine learning powers recommendation systems.' },
+      { word: 'latency',           definition: 'The delay before data transfer begins',               vietnamese: 'độ trễ',               collocations: ['low latency', 'network latency'],                example: 'Gaming requires low latency connections.' },
+      { word: 'throughput',        definition: 'The rate at which data is processed or transferred',  vietnamese: 'thông lượng',          collocations: ['high throughput', 'network throughput'],         example: 'The server\'s throughput increased after optimisation.' },
+      { word: 'authentication',    definition: 'The process of verifying a user\'s identity',         vietnamese: 'xác thực',             collocations: ['two-factor authentication', 'user authentication'], example: 'Two-factor authentication adds an extra security layer.' },
+      { word: 'agile',             definition: 'A flexible approach to software development',         vietnamese: 'phát triển linh hoạt', collocations: ['agile methodology', 'agile team'],               example: 'The team uses agile sprints to deliver features quickly.' },
+      { word: 'microservices',     definition: 'An architecture of small, independent services',      vietnamese: 'vi dịch vụ',           collocations: ['microservices architecture', 'build microservices'], example: 'Microservices allow teams to deploy independently.' },
+      { word: 'redundancy',        definition: 'Duplication of components to increase reliability',   vietnamese: 'dự phòng',             collocations: ['data redundancy', 'build in redundancy'],        example: 'Redundancy ensures the system stays online during failures.' },
+      { word: 'tokenize',          definition: 'To convert sensitive data into a non-sensitive token', vietnamese: 'mã hóa thành token',  collocations: ['tokenize data', 'payment tokenization'],         example: 'Credit card numbers are tokenized for security.' },
+      { word: 'payload',           definition: 'The data carried in a network transmission',          vietnamese: 'dữ liệu truyền tải',  collocations: ['request payload', 'JSON payload'],               example: 'The API accepts a JSON payload for each request.' },
+      { word: 'API',               definition: 'A set of protocols for building software applications', vietnamese: 'giao diện lập trình ứng dụng', collocations: ['REST API', 'call an API'],           example: 'The developer used an API to fetch weather data.' },
+      { word: 'containerization',  definition: 'Packaging software in isolated, portable containers', vietnamese: 'đóng gói container',  collocations: ['Docker containerization', 'container deployment'], example: 'Containerization makes apps portable across environments.' },
+      { word: 'cloud computing',   definition: 'Storing and processing data on remote internet servers', vietnamese: 'điện toán đám mây', collocations: ['cloud computing service', 'move to the cloud'],  example: 'Many businesses rely on cloud computing for storage.' },
+    ],
+    C2: [
+      { word: 'cryptography',      definition: 'The art of writing and solving codes',                vietnamese: 'mật mã học',           collocations: ['public-key cryptography', 'cryptographic protocol'], example: 'Modern cryptography secures online communications.' },
+      { word: 'neural network',    definition: 'A computing system modelled on the brain',            vietnamese: 'mạng thần kinh nhân tạo', collocations: ['deep neural network', 'train a neural network'], example: 'The neural network learned to recognise speech.' },
+      { word: 'quantum computing', definition: 'Computing using quantum-mechanical phenomena',         vietnamese: 'máy tính lượng tử',    collocations: ['quantum computing breakthrough', 'quantum algorithm'], example: 'Quantum computing could break current encryption.' },
+      { word: 'zero-day exploit',  definition: 'An attack using an unknown software vulnerability',   vietnamese: 'khai thác lỗ hổng ngày không', collocations: ['zero-day vulnerability', 'patch a zero-day'], example: 'Hackers used a zero-day exploit to breach the system.' },
+      { word: 'obfuscation',       definition: 'Making something unclear or hard to understand',      vietnamese: 'làm rối mã nguồn',     collocations: ['code obfuscation', 'data obfuscation'],          example: 'Obfuscation hides the logic of the source code.' },
+      { word: 'polymorphic',       definition: 'Able to take many forms, esp. malware that changes',  vietnamese: 'đa hình thái',         collocations: ['polymorphic malware', 'polymorphic code'],       example: 'Polymorphic viruses evade detection by changing form.' },
+      { word: 'hypervisor',        definition: 'Software that creates and runs virtual machines',     vietnamese: 'phần mềm ảo hóa hệ thống', collocations: ['hypervisor software', 'Type 1 hypervisor'],  example: 'The hypervisor manages multiple virtual machines.' },
+      { word: 'immutable',         definition: 'Unchangeable once created (data or infrastructure)',  vietnamese: 'bất biến',             collocations: ['immutable data', 'immutable infrastructure'],    example: 'Blockchain records are immutable and tamper-proof.' },
+      { word: 'sharding',          definition: 'Splitting a database into smaller distributed parts', vietnamese: 'phân mảnh cơ sở dữ liệu', collocations: ['database sharding', 'horizontal sharding'],   example: 'Sharding improves performance on large databases.' },
+      { word: 'orchestration',     definition: 'Automated configuration and management of systems',   vietnamese: 'điều phối hệ thống',   collocations: ['container orchestration', 'Kubernetes orchestration'], example: 'Kubernetes handles container orchestration at scale.' },
+      { word: 'idempotent',        definition: 'Producing the same result regardless of how often applied', vietnamese: 'bất biến lặp lại', collocations: ['idempotent operation', 'idempotent API'],      example: 'A DELETE request should be idempotent.' },
+      { word: 'Byzantine fault',   definition: 'A failure where components give conflicting information', vietnamese: 'lỗi Byzantine',      collocations: ['Byzantine fault tolerance', 'Byzantine failure'],  example: 'Distributed systems must handle Byzantine faults.' },
+      { word: 'deterministic',     definition: 'Producing a predictable output for a given input',    vietnamese: 'tất định',             collocations: ['deterministic algorithm', 'deterministic system'], example: 'Cryptographic hash functions are deterministic.' },
+      { word: 'adversarial AI',    definition: 'Techniques to fool AI models with manipulated inputs', vietnamese: 'AI đối nghịch',       collocations: ['adversarial attack', 'adversarial example'],     example: 'Adversarial AI can trick image classifiers.' },
+      { word: 'distributed ledger',definition: 'A database spread across multiple sites or institutions', vietnamese: 'sổ cái phân tán',   collocations: ['distributed ledger technology', 'public ledger'],  example: 'Blockchain is the most well-known distributed ledger.' },
+    ],
+  },
+  'Environment': {
+    B1: [
+      { word: 'recycle',    definition: 'To convert waste into reusable material',                     vietnamese: 'tái chế',         collocations: ['recycle plastic', 'recycle waste'],            example: 'We should recycle glass, paper, and plastic.' },
+      { word: 'pollute',    definition: 'To contaminate the environment with harmful substances',       vietnamese: 'ô nhiễm',         collocations: ['pollute the air', 'pollute rivers'],           example: 'Factories pollute the air with toxic gases.' },
+      { word: 'climate',    definition: 'The long-term weather conditions in an area',                  vietnamese: 'khí hậu',         collocations: ['climate change', 'climate crisis'],            example: 'Climate change is one of the biggest global threats.' },
+      { word: 'waste',      definition: 'Material that is no longer wanted and must be disposed of',   vietnamese: 'rác thải',        collocations: ['reduce waste', 'toxic waste'],                  example: 'We need to reduce the amount of waste we produce.' },
+      { word: 'energy',     definition: 'Power obtained from physical or chemical resources',          vietnamese: 'năng lượng',      collocations: ['renewable energy', 'save energy'],             example: 'Solar panels generate clean, renewable energy.' },
+      { word: 'solar',      definition: 'Relating to or derived from the sun',                          vietnamese: 'mặt trời',        collocations: ['solar panel', 'solar energy'],                  example: 'Solar panels reduce dependence on fossil fuels.' },
+      { word: 'forest',     definition: 'A large area covered with trees and undergrowth',              vietnamese: 'rừng',            collocations: ['tropical forest', 'protect forests'],           example: 'Forests absorb large amounts of carbon dioxide.' },
+      { word: 'protect',    definition: 'To keep something safe from harm',                             vietnamese: 'bảo vệ',          collocations: ['protect the environment', 'protect wildlife'],  example: 'We must protect endangered species from extinction.' },
+      { word: 'wildlife',   definition: 'Wild animals and plants in their natural habitat',             vietnamese: 'động thực vật hoang dã', collocations: ['protect wildlife', 'wildlife habitat'],    example: 'Deforestation destroys important wildlife habitats.' },
+      { word: 'ocean',      definition: 'A very large body of salt water on Earth',                     vietnamese: 'đại dương',       collocations: ['ocean pollution', 'ocean temperature'],         example: 'Ocean temperatures are rising due to climate change.' },
+      { word: 'emission',   definition: 'The release of gases into the atmosphere',                     vietnamese: 'khí thải',        collocations: ['carbon emission', 'reduce emissions'],          example: 'Cars are a major source of harmful emissions.' },
+      { word: 'habitat',    definition: 'The natural home of a plant or animal species',                vietnamese: 'môi trường sống', collocations: ['natural habitat', 'destroy habitats'],          example: 'Wetlands are an important habitat for birds.' },
+      { word: 'renewable',  definition: 'From a source that is naturally replenished',                  vietnamese: 'tái tạo',         collocations: ['renewable energy', 'renewable resource'],       example: 'Wind is a clean, renewable source of energy.' },
+      { word: 'clean',      definition: 'Free from pollution or harmful substances',                    vietnamese: 'sạch',            collocations: ['clean energy', 'clean water'],                  example: 'Access to clean water is a basic human right.' },
+      { word: 'nature',     definition: 'The physical world including plants, animals, and landscapes', vietnamese: 'thiên nhiên',    collocations: ['protect nature', 'in nature'],                   example: 'Spending time in nature reduces stress levels.' },
+    ],
+    B2: [
+      { word: 'biodiversity', definition: 'Variety of plant and animal life in a habitat',             vietnamese: 'đa dạng sinh học',   collocations: ['protect biodiversity', 'loss of biodiversity'],  example: 'Rainforests have extraordinary biodiversity.' },
+      { word: 'deforestation',definition: 'Clearing large areas of forest',                             vietnamese: 'phá rừng',           collocations: ['rapid deforestation', 'combat deforestation'],   example: 'Deforestation contributes significantly to climate change.' },
+      { word: 'greenhouse gas',definition: 'A gas that traps heat in the atmosphere',                  vietnamese: 'khí nhà kính',       collocations: ['reduce greenhouse gases', 'greenhouse effect'],  example: 'Carbon dioxide is the main greenhouse gas.' },
+      { word: 'sustainability',definition: 'Meeting present needs without compromising the future',     vietnamese: 'bền vững',           collocations: ['environmental sustainability', 'sustainable development'], example: 'Sustainability is central to modern business strategy.' },
+      { word: 'contaminate',  definition: 'To make something impure or harmful',                       vietnamese: 'làm ô nhiễm',        collocations: ['contaminate water', 'contaminate soil'],         example: 'Industrial waste contaminated the nearby river.' },
+      { word: 'ecosystem',    definition: 'A community of organisms interacting in an environment',    vietnamese: 'hệ sinh thái',       collocations: ['fragile ecosystem', 'damage the ecosystem'],     example: 'Coral reefs are complex and fragile ecosystems.' },
+      { word: 'fossil fuel',  definition: 'Fuel formed from ancient organisms (coal, oil, gas)',       vietnamese: 'nhiên liệu hóa thạch', collocations: ['burn fossil fuels', 'fossil fuel dependency'],  example: 'Burning fossil fuels is the main cause of global warming.' },
+      { word: 'carbon footprint', definition: 'Total greenhouse gases produced by an individual',      vietnamese: 'dấu chân carbon',    collocations: ['reduce carbon footprint', 'calculate footprint'], example: 'Flying regularly increases your carbon footprint.' },
+      { word: 'conservation', definition: 'Preservation and protection of natural environments',        vietnamese: 'bảo tồn',            collocations: ['wildlife conservation', 'conservation effort'],  example: 'Conservation efforts have helped save some species.' },
+      { word: 'drought',      definition: 'A prolonged period of abnormally low rainfall',              vietnamese: 'hạn hán',            collocations: ['severe drought', 'drought conditions'],          example: 'The drought devastated crops across the region.' },
+      { word: 'flood',        definition: 'An overflow of water onto land that is usually dry',         vietnamese: 'lũ lụt',             collocations: ['flash flood', 'flood damage'],                   example: 'Heavy floods displaced thousands of families.' },
+      { word: 'landfill',     definition: 'A site for the disposal of waste materials by burial',       vietnamese: 'bãi rác',            collocations: ['landfill site', 'send to landfill'],             example: 'Reducing landfill waste is a key environmental goal.' },
+      { word: 'pesticide',    definition: 'A chemical used to kill insects or other organisms',         vietnamese: 'thuốc trừ sâu',      collocations: ['use pesticides', 'pesticide-free farming'],      example: 'Excessive pesticide use harms local bee populations.' },
+      { word: 'erosion',      definition: 'Gradual destruction of soil or land by wind or water',       vietnamese: 'xói mòn',            collocations: ['soil erosion', 'coastal erosion'],               example: 'Soil erosion reduces agricultural productivity.' },
+      { word: 'ozone',        definition: 'A gas in the atmosphere protecting Earth from UV radiation', vietnamese: 'ôzôn',               collocations: ['ozone layer', 'ozone depletion'],                example: 'Ozone depletion increases skin cancer risk.' },
+    ],
+    C1: [
+      { word: 'anthropogenic', definition: 'Caused or produced by human activity',                     vietnamese: 'do con người gây ra', collocations: ['anthropogenic climate change', 'anthropogenic factors'], example: 'Most scientists agree that warming is anthropogenic.' },
+      { word: 'desertification',definition: 'The process by which fertile land becomes desert',        vietnamese: 'sa mạc hóa',          collocations: ['prevent desertification', 'risk of desertification'], example: 'Overgrazing accelerates desertification in arid regions.' },
+      { word: 'eutrophication', definition: 'Excess nutrients causing dense plant growth and oxygen loss', vietnamese: 'phú dưỡng hóa',    collocations: ['lake eutrophication', 'coastal eutrophication'],  example: 'Agricultural runoff leads to eutrophication of lakes.' },
+      { word: 'mitigation',    definition: 'Actions to reduce the severity of climate change',         vietnamese: 'giảm thiểu',          collocations: ['climate mitigation', 'mitigation strategy'],     example: 'Planting trees is one mitigation strategy.' },
+      { word: 'sequestration', definition: 'Capturing and storing carbon dioxide from the atmosphere', vietnamese: 'cô lập carbon',       collocations: ['carbon sequestration', 'forest sequestration'],  example: 'Forests are vital for carbon sequestration.' },
+      { word: 'reforestation', definition: 'Replanting trees in deforested areas',                     vietnamese: 'tái trồng rừng',      collocations: ['reforestation project', 'large-scale reforestation'], example: 'Reforestation programmes help restore biodiversity.' },
+      { word: 'geothermal',    definition: 'Relating to heat generated within the Earth',              vietnamese: 'địa nhiệt',           collocations: ['geothermal energy', 'geothermal power plant'],   example: 'Iceland relies heavily on geothermal energy.' },
+      { word: 'photovoltaic',  definition: 'Relating to the conversion of light into electricity',     vietnamese: 'quang điện',          collocations: ['photovoltaic cell', 'photovoltaic panel'],       example: 'Photovoltaic panels convert sunlight directly to power.' },
+      { word: 'biomass',       definition: 'Organic matter used as fuel',                              vietnamese: 'sinh khối',           collocations: ['biomass energy', 'biomass fuel'],                example: 'Biomass can be converted into biofuel.' },
+      { word: 'symbiosis',     definition: 'A mutually beneficial relationship between two species',   vietnamese: 'cộng sinh',           collocations: ['ecological symbiosis', 'mutualistic symbiosis'],  example: 'Bees and flowers share a symbiotic relationship.' },
+      { word: 'watershed',     definition: 'An area of land draining into a river; a turning point',  vietnamese: 'lưu vực sông',        collocations: ['watershed management', 'watershed area'],        example: 'Protecting the watershed prevents flooding downstream.' },
+      { word: 'resilience',    definition: 'The ability of an ecosystem to recover from disturbance',  vietnamese: 'khả năng phục hồi',   collocations: ['ecological resilience', 'build resilience'],     example: 'Diverse ecosystems have greater resilience.' },
+      { word: 'tectonic',      definition: 'Relating to the structure of the Earth\'s crust',         vietnamese: 'kiến tạo địa chất',   collocations: ['tectonic plate', 'tectonic activity'],           example: 'Tectonic activity causes earthquakes and volcanoes.' },
+      { word: 'thermodynamics',definition: 'The science of heat and energy conversion',                vietnamese: 'nhiệt động lực học',  collocations: ['laws of thermodynamics', 'thermodynamic process'], example: 'Thermodynamics explains energy transfer in ecosystems.' },
+      { word: 'biosphere',     definition: 'The part of Earth where living organisms exist',           vietnamese: 'sinh quyển',          collocations: ['global biosphere', 'biosphere reserve'],         example: 'Human activity is altering the biosphere rapidly.' },
+    ],
+    C2: [
+      { word: 'acidification',  definition: 'Decrease in pH of oceans due to absorbed CO2',           vietnamese: 'axit hóa',            collocations: ['ocean acidification', 'soil acidification'],     example: 'Ocean acidification is destroying coral reef structures.' },
+      { word: 'anthropocene',   definition: 'The current geological age defined by human influence',  vietnamese: 'kỷ Nhân Sinh',        collocations: ['Anthropocene era', 'living in the Anthropocene'], example: 'The Anthropocene marks humanity\'s planetary impact.' },
+      { word: 'bioaccumulation',definition: 'Build-up of toxic substances in an organism over time',  vietnamese: 'tích lũy sinh học',   collocations: ['bioaccumulation of toxins', 'bioaccumulation in fish'], example: 'Mercury bioaccumulation endangers top predators.' },
+      { word: 'cryosphere',     definition: 'Parts of Earth\'s surface where water is frozen',        vietnamese: 'băng quyển',          collocations: ['cryosphere melting', 'Arctic cryosphere'],       example: 'Cryosphere melting raises global sea levels.' },
+      { word: 'geoengineering', definition: 'Large-scale technological intervention in Earth\'s systems', vietnamese: 'kỹ thuật địa cầu', collocations: ['solar geoengineering', 'climate geoengineering'], example: 'Geoengineering proposals remain controversial.' },
+      { word: 'ecotoxicology',  definition: 'The study of toxic effects on ecosystems',               vietnamese: 'độc học sinh thái',   collocations: ['ecotoxicology study', 'field of ecotoxicology'], example: 'Ecotoxicology examines how pollutants affect wildlife.' },
+      { word: 'pedosphere',     definition: 'The outermost layer of Earth that supports soil',        vietnamese: 'thổ nhưỡng quyển',    collocations: ['pedosphere health', 'pedosphere carbon'],        example: 'Soil degradation threatens the entire pedosphere.' },
+      { word: 'phytoplankton',  definition: 'Microscopic marine plants that produce much of Earth\'s oxygen', vietnamese: 'thực vật phù du', collocations: ['phytoplankton bloom', 'phytoplankton decline'],  example: 'Phytoplankton produce about half of Earth\'s oxygen.' },
+      { word: 'lithosphere',    definition: 'The rigid outer part of the Earth including the crust',  vietnamese: 'thạch quyển',         collocations: ['lithosphere plate', 'lithosphere movement'],     example: 'The lithosphere is divided into tectonic plates.' },
+      { word: 'mesosphere',     definition: 'The layer of Earth\'s atmosphere above the stratosphere', vietnamese: 'trung quyển',        collocations: ['mesosphere temperature', 'upper mesosphere'],    example: 'Meteors burn up when they enter the mesosphere.' },
+      { word: 'radiative forcing', definition: 'The change in energy flux caused by a climate driver', vietnamese: 'cưỡng bức bức xạ', collocations: ['positive radiative forcing', 'radiative forcing value'], example: 'CO2 has a strong positive radiative forcing effect.' },
+      { word: 'thermocline',    definition: 'A layer of water where temperature drops sharply',       vietnamese: 'lớp nhiệt nhảy vọt', collocations: ['ocean thermocline', 'thermocline depth'],         example: 'Nutrients rise to the surface through the thermocline.' },
+      { word: 'xerophyte',      definition: 'A plant adapted to survive in dry conditions',            vietnamese: 'thực vật chịu hạn',  collocations: ['desert xerophyte', 'xerophyte adaptation'],      example: 'Cacti are classic examples of xerophytes.' },
+      { word: 'halogen',        definition: 'A group of elements forming salts with metals',           vietnamese: 'halogen',             collocations: ['halogen compound', 'halogen gas'],               example: 'CFCs are halogen compounds that destroy the ozone layer.' },
+      { word: 'heterotroph',    definition: 'An organism that cannot produce its own food',            vietnamese: 'sinh vật dị dưỡng', collocations: ['heterotroph consumer', 'heterotrophic organism'],  example: 'All animals are heterotrophs that consume other organisms.' },
+    ],
+  },
+};
+
+/* ─── Vocabulary Learning State ─────────────────────────────────────────── */
+let vocabTopic = 'General English';
+let vocabLevel = 'B1';
+let _vocabGameWords = [];
+let _vocabGameIndex = 0;
+let _vocabScore = 0;
+let _vocabMatchSelected = null; // for matching game: { col, idx }
+let _vocabMatchPaired = new Set();
 
 /* ─── Init ───────────────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
@@ -730,7 +1099,7 @@ function showView(name) {
 
   if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); }
+  else if (name === 'submit') { _currentDraftId = null; updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
@@ -744,6 +1113,7 @@ function showView(name) {
   else if (name === 'class-detail') { /* loaded by openClassDetail() */ }
   else if (name === 'my-attendance') loadMyAttendance();
   else if (name === 'vocab') loadVocabNotebook();
+  else if (name === 'vocab-learn') loadVocabLearn();
   else if (name === 'speaking') loadSpeakingTopicGen();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -3346,32 +3716,172 @@ let _materialsCache = null;
 
 function switchMaterialsTab(type) {
   currentMaterialsTab = type;
-  document.getElementById('materials-tab-reading').classList.toggle('active', type === 'reading');
-  document.getElementById('materials-tab-listening').classList.toggle('active', type === 'listening');
-  const task1TabBtn = document.getElementById('materials-tab-task1');
-  if (task1TabBtn) task1TabBtn.classList.toggle('active', type === 'task1');
+  ['reading','listening','task1','speaking','task2'].forEach(t => {
+    const btn = document.getElementById(`materials-tab-${t}`);
+    if (btn) btn.classList.toggle('active', t === type);
+  });
 
-  // Show/hide task1 panel vs reading/listening UI
-  const task1Panel = document.getElementById('task1-topics-panel');
-  const listContent = document.getElementById('materials-list-content');
-  const actionTabs = document.querySelector('.materials-action-tabs');
-  const createPanel = document.getElementById('mat-panel-create');
+  const task1Panel        = document.getElementById('task1-topics-panel');
+  const speakingPanel     = document.getElementById('speaking-topics-panel');
+  const task2Panel        = document.getElementById('task2-prompts-panel');
+  const listContent       = document.getElementById('materials-list-content');
+  const actionTabs        = document.querySelector('.materials-action-tabs');
+  const createPanel       = document.getElementById('mat-panel-create');
+  const importPanel       = document.getElementById('mat-panel-import');
+
+  // Hide all special panels first
+  [task1Panel, speakingPanel, task2Panel].forEach(p => p && p.classList.add('hidden'));
 
   if (type === 'task1') {
     if (task1Panel) task1Panel.classList.remove('hidden');
     if (listContent) listContent.classList.add('hidden');
     if (actionTabs) actionTabs.classList.add('hidden');
     if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
     loadTask1Topics();
+  } else if (type === 'speaking') {
+    if (speakingPanel) speakingPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminSpeakingTopics();
+  } else if (type === 'task2') {
+    if (task2Panel) task2Panel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminTask2Prompts();
   } else {
-    if (task1Panel) task1Panel.classList.add('hidden');
     if (listContent) listContent.classList.remove('hidden');
     if (actionTabs) actionTabs.classList.remove('hidden');
     renderMaterialsList();
-    // Reset create form
     if (createPanel) createPanel.classList.add('hidden');
     buildSectionsForm();
   }
+}
+
+/* ─── Admin Speaking Topics ──────────────────────────────────────────────── */
+function toggleSpeakingTopicFields() {
+  const bank = document.getElementById('st-bank')?.value;
+  const partGroup = document.getElementById('st-part-group');
+  if (partGroup) partGroup.style.display = bank === 'ielts' ? '' : 'none';
+}
+
+async function loadAdminSpeakingTopics() {
+  const list = document.getElementById('admin-speaking-topics-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const topics = await api('/api/admin/speaking-topics');
+    if (!topics.length) { list.innerHTML = '<div class="empty-state">No custom speaking topics yet.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Custom Topics (${topics.length})</h4>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Bank</th><th>Part/Cat</th><th>Difficulty</th><th>Question</th><th></th></tr></thead>
+          <tbody>${topics.map(t => `
+            <tr>
+              <td><span class="badge ${t.bank==='impromptu'?'badge-orange':'badge-blue'}">${t.bank}</span></td>
+              <td>${t.bank==='ielts'?`Part ${t.part} · `:''}<em>${escHtml(t.cat||'')}</em></td>
+              <td><span class="badge badge-gray">${t.difficulty}</span></td>
+              <td style="max-width:320px;white-space:normal">${escHtml(t.q)}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteAdminSpeakingTopic(${t.id})">Delete</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function submitAddSpeakingTopic() {
+  const bank = document.getElementById('st-bank')?.value || 'ielts';
+  const part = document.getElementById('st-part')?.value || '1';
+  const cat  = document.getElementById('st-cat')?.value?.trim() || 'General';
+  const diff = document.getElementById('st-diff')?.value || 'medium';
+  const q    = document.getElementById('st-q')?.value?.trim();
+  const errEl = document.getElementById('st-error');
+  const okEl  = document.getElementById('st-success');
+  if (errEl) errEl.classList.add('hidden');
+  if (okEl)  okEl.classList.add('hidden');
+  if (!q) { if (errEl) { errEl.textContent = 'Question text is required.'; errEl.classList.remove('hidden'); } return; }
+  try {
+    await api('/api/admin/speaking-topics', { method: 'POST', body: JSON.stringify({ bank, part, cat, difficulty: diff, q }) });
+    if (okEl) { okEl.textContent = '✓ Topic added!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    document.getElementById('st-q').value = '';
+    document.getElementById('st-cat').value = '';
+    window._customSpeakingTopics = null; // invalidate cache
+    loadAdminSpeakingTopics();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+  }
+}
+
+async function deleteAdminSpeakingTopic(id) {
+  if (!confirm('Delete this speaking topic?')) return;
+  try {
+    await api(`/api/admin/speaking-topics/${id}`, { method: 'DELETE' });
+    window._customSpeakingTopics = null;
+    loadAdminSpeakingTopics();
+  } catch (err) { alert('Failed to delete: ' + err.message); }
+}
+
+/* ─── Admin Task 2 Prompts ───────────────────────────────────────────────── */
+async function loadAdminTask2Prompts() {
+  const list = document.getElementById('admin-task2-prompts-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const prompts = await api('/api/admin/task2-prompts');
+    if (!prompts.length) { list.innerHTML = '<div class="empty-state">No custom Task 2 prompts yet.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Custom Prompts (${prompts.length})</h4>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Difficulty</th><th>Prompt</th><th></th></tr></thead>
+          <tbody>${prompts.map(p => `
+            <tr>
+              <td><span class="badge badge-gray">${p.difficulty}</span></td>
+              <td style="max-width:400px;white-space:normal">${escHtml(p.q)}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteAdminTask2Prompt(${p.id})">Delete</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function submitAddTask2Prompt() {
+  const diff = document.getElementById('t2p-diff')?.value || 'medium';
+  const q    = document.getElementById('t2p-q')?.value?.trim();
+  const errEl = document.getElementById('t2p-error');
+  const okEl  = document.getElementById('t2p-success');
+  if (errEl) errEl.classList.add('hidden');
+  if (okEl)  okEl.classList.add('hidden');
+  if (!q) { if (errEl) { errEl.textContent = 'Prompt text is required.'; errEl.classList.remove('hidden'); } return; }
+  try {
+    await api('/api/admin/task2-prompts', { method: 'POST', body: JSON.stringify({ difficulty: diff, q }) });
+    if (okEl) { okEl.textContent = '✓ Prompt added!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    document.getElementById('t2p-q').value = '';
+    window._customTask2Prompts = null;
+    loadAdminTask2Prompts();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+  }
+}
+
+async function deleteAdminTask2Prompt(id) {
+  if (!confirm('Delete this Task 2 prompt?')) return;
+  try {
+    await api(`/api/admin/task2-prompts/${id}`, { method: 'DELETE' });
+    window._customTask2Prompts = null;
+    loadAdminTask2Prompts();
+  } catch (err) { alert('Failed to delete: ' + err.message); }
 }
 
 async function loadAdminMaterials() {
@@ -5134,6 +5644,7 @@ function toggleDarkMode() {
    ESSAY DRAFT AUTO-SAVE
    ═══════════════════════════════════════════════════════════════════════════ */
 let _draftSaveTimer = null;
+let _currentDraftId = null; // server-side draft currently loaded
 
 function saveDraft() {
   const prompt = (document.getElementById('essay-prompt') || {}).value || '';
@@ -5157,8 +5668,48 @@ function manualSaveDraft() {
   const prompt = (document.getElementById('essay-prompt') || {}).value || '';
   const essay  = (document.getElementById('essay-text')   || {}).value || '';
   if (!prompt && !essay) { showToast('Nothing to save yet.'); return; }
-  saveDraft();
-  showToast('✅ Draft saved');
+  saveDraft(); // always keep localStorage copy
+  if (currentUser) {
+    saveServerDraft();
+  } else {
+    showToast('✅ Draft saved');
+  }
+}
+
+async function saveServerDraft() {
+  const prompt   = (document.getElementById('essay-prompt') || {}).value || '';
+  const essay    = (document.getElementById('essay-text')   || {}).value || '';
+  const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
+  const wordCount = parseInt((document.getElementById('word-count-badge') || {}).textContent) || 0;
+  // Build a title from first ~50 chars of prompt, or fallback
+  const rawTitle = prompt.slice(0, 50).trim() || essay.slice(0, 50).trim() || 'Untitled draft';
+  const title = rawTitle.length < prompt.slice(0, 50).trim().length ? rawTitle + '…' : rawTitle;
+  const body = { title, prompt, essay, taskType, wordCount };
+  try {
+    let res;
+    if (_currentDraftId) {
+      res = await fetch(`/api/drafts/${_currentDraftId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        body: JSON.stringify(body)
+      });
+    } else {
+      res = await fetch('/api/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        body: JSON.stringify(body)
+      });
+    }
+    if (res.ok) {
+      const draft = await res.json();
+      _currentDraftId = draft.id;
+      showToast('✅ Draft saved to server');
+    } else {
+      showToast('✅ Draft saved locally');
+    }
+  } catch {
+    showToast('✅ Draft saved locally');
+  }
 }
 
 function onDraftInput() {
@@ -5209,6 +5760,111 @@ function discardDraft() {
   localStorage.removeItem(DRAFT_KEY);
   const banner = document.getElementById('draft-restore-banner');
   if (banner) banner.classList.add('hidden');
+}
+
+/* ── My Drafts Modal ──────────────────────────────────────────────────── */
+async function openDraftsModal() {
+  const modal = document.getElementById('drafts-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  document.getElementById('drafts-modal-list').innerHTML = '<p style="color:var(--text-secondary)">Loading…</p>';
+  await loadServerDrafts();
+}
+
+function closeDraftsModal() {
+  const modal = document.getElementById('drafts-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function loadServerDrafts() {
+  const list = document.getElementById('drafts-modal-list');
+  if (!list) return;
+  if (!currentUser) {
+    list.innerHTML = '<p style="color:var(--text-secondary)">Sign in to view saved drafts.</p>';
+    return;
+  }
+  try {
+    const res = await fetch('/api/drafts', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    if (!res.ok) { list.innerHTML = '<p style="color:var(--danger)">Failed to load drafts.</p>'; return; }
+    const drafts = await res.json();
+    if (!drafts.length) {
+      list.innerHTML = '<p style="color:var(--text-secondary)">No saved drafts yet. Use "Save Draft" while writing to save your work here.</p>';
+      return;
+    }
+    list.innerHTML = drafts.map(d => {
+      const dt = new Date(d.updated_at);
+      const dateStr = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) +
+                      ' ' + dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      const badge = d.task_type === 'task1' ? '<span class="badge badge-t1">Task 1</span>' : '<span class="badge badge-t2">Task 2</span>';
+      const words = d.word_count ? `<span style="color:var(--text-secondary);font-size:12px">${d.word_count} words</span>` : '';
+      const preview = d.essay ? d.essay.slice(0, 100).replace(/</g,'&lt;') + (d.essay.length > 100 ? '…' : '') : '<em style="color:var(--text-secondary)">No essay text yet</em>';
+      return `<div class="draft-item" id="draft-item-${d.id}">
+        <div class="draft-item-header">
+          <span class="draft-item-title">${d.title || 'Untitled'}</span>
+          ${badge} ${words}
+        </div>
+        <div class="draft-item-preview">${preview}</div>
+        <div class="draft-item-footer">
+          <span style="color:var(--text-secondary);font-size:12px">Saved ${dateStr}</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="loadDraftFromServer(${d.id})">📂 Load</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteServerDraft(${d.id})">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    list.innerHTML = '<p style="color:var(--danger)">Error loading drafts.</p>';
+  }
+}
+
+function loadDraftFromServer(id) {
+  if (!currentUser) return;
+  fetch('/api/drafts', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  }).then(r => r.json()).then(drafts => {
+    const draft = drafts.find(d => d.id === id);
+    if (!draft) { showToast('Draft not found.'); return; }
+    // Switch task type
+    const radios = document.querySelectorAll('input[name="task_type"]');
+    radios.forEach(r => { r.checked = r.value === draft.task_type; });
+    document.querySelector(`input[name="task_type"][value="${draft.task_type}"]`)?.dispatchEvent(new Event('change'));
+    // Restore text
+    const promptEl = document.getElementById('essay-prompt');
+    const essayEl  = document.getElementById('essay-text');
+    if (promptEl) promptEl.value = draft.prompt || '';
+    if (essayEl)  { essayEl.value = draft.essay || ''; updateWordCount(); }
+    _currentDraftId = draft.id;
+    closeDraftsModal();
+    showView('submit');
+    showToast(`📂 Draft "${draft.title || 'Untitled'}" loaded`);
+  }).catch(() => showToast('Failed to load draft.'));
+}
+
+async function deleteServerDraft(id) {
+  if (!currentUser) return;
+  if (!confirm('Delete this draft? This cannot be undone.')) return;
+  try {
+    const res = await fetch(`/api/drafts/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    if (res.ok) {
+      if (_currentDraftId === id) _currentDraftId = null;
+      document.getElementById(`draft-item-${id}`)?.remove();
+      const list = document.getElementById('drafts-modal-list');
+      if (list && !list.querySelector('.draft-item')) {
+        list.innerHTML = '<p style="color:var(--text-secondary)">No saved drafts yet.</p>';
+      }
+      showToast('🗑 Draft deleted');
+    } else {
+      showToast('Failed to delete draft.');
+    }
+  } catch {
+    showToast('Failed to delete draft.');
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -5870,12 +6526,33 @@ function escapeHtml(str) {
 }
 
 /* ─── Random IELTS Prompt ────────────────────────────────────────────────── */
-function insertRandomPrompt() {
+async function _fetchCustomTask2Prompts() {
+  if (Array.isArray(window._customTask2Prompts)) return; // cached
+  try {
+    const res = await fetch('/api/task2-prompts-custom');
+    if (res.ok) window._customTask2Prompts = await res.json();
+    else window._customTask2Prompts = [];
+  } catch { window._customTask2Prompts = []; }
+}
+
+async function insertRandomPrompt() {
   const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
-  const bank = PROMPT_BANK[taskType] || PROMPT_BANK.task2;
-  const prompt = bank[Math.floor(Math.random() * bank.length)];
+  const diff = document.getElementById('prompt-difficulty-filter')?.value || 'all';
+  let bank = PROMPT_BANK[taskType] || PROMPT_BANK.task2;
+  // Merge any admin-added custom prompts (task2 only)
+  if (taskType === 'task2') {
+    await _fetchCustomTask2Prompts();
+    if (Array.isArray(window._customTask2Prompts) && window._customTask2Prompts.length) {
+      bank = bank.concat(window._customTask2Prompts.map(p => ({ difficulty: p.difficulty || 'medium', q: p.q })));
+    }
+  }
+  if (diff !== 'all') {
+    const filtered = bank.filter(p => p.difficulty === diff);
+    if (filtered.length) bank = filtered;
+  }
+  const item = bank[Math.floor(Math.random() * bank.length)];
   const ta = document.getElementById('essay-prompt');
-  if (ta) ta.value = prompt;
+  if (ta) ta.value = item.q || item;
 }
 
 /* ─── Weakest Criterion ──────────────────────────────────────────────────── */
@@ -6051,8 +6728,18 @@ function setSpeakingMode(mode) {
   }
   clearInterval(speakingTimerInterval);
   speakingTimerRunning = false;
+  // Show/hide "add more topics" reminder button (impromptu only)
+  const reminderBtn = document.getElementById('impromptu-add-reminder-btn');
+  const reminderBanner = document.getElementById('impromptu-reminder-banner');
+  if (reminderBtn) reminderBtn.classList.toggle('hidden', mode !== 'impromptu');
+  if (reminderBanner) reminderBanner.classList.add('hidden');
   _populateSpeakingCategories();
   spinSpeakingTopic();
+}
+
+function showImpromptAddReminder() {
+  const banner = document.getElementById('impromptu-reminder-banner');
+  if (banner) banner.classList.remove('hidden');
 }
 
 function setSpeakingPart(part) {
@@ -6103,13 +6790,34 @@ function _populateSpeakingCategories() {
   sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${c === 'all' ? '🎲 All Categories' : c}</option>`).join('');
 }
 
-function spinSpeakingTopic() {
+async function _fetchCustomSpeakingTopics() {
+  if (Array.isArray(window._customSpeakingTopics)) return; // cached
+  try {
+    const res = await fetch('/api/speaking-bank-custom');
+    if (res.ok) window._customSpeakingTopics = await res.json();
+    else window._customSpeakingTopics = [];
+  } catch { window._customSpeakingTopics = []; }
+}
+
+async function spinSpeakingTopic() {
+  await _fetchCustomSpeakingTopics();
+  const custom = Array.isArray(window._customSpeakingTopics) ? window._customSpeakingTopics : [];
+
   let bank;
   if (speakingMode === 'impromptu') {
-    bank = IMPROMPTU_BANK;
+    bank = IMPROMPTU_BANK.concat(
+      custom.filter(t => t.bank === 'impromptu').map(t => ({
+        cat: t.cat, difficulty: t.difficulty, q: t.q
+      }))
+    );
   } else {
     const key = `part${speakingPart}`;
-    bank = SPEAKING_BANK[key] || [];
+    bank = (SPEAKING_BANK[key] || []).concat(
+      custom.filter(t => t.bank === 'ielts' && String(t.part) === String(speakingPart)).map(t => ({
+        cat: t.cat, difficulty: t.difficulty, q: t.q,
+        ...(t.bullets ? { card: t.q, bullets: t.bullets } : {})
+      }))
+    );
   }
 
   const catSel = document.getElementById('speaking-category');
@@ -6244,5 +6952,401 @@ function resetSpeakingTimer(restart = false) {
     _setSpeakingTimerDisplay(60);
   }
   if (restart) startSpeakingTimer();
+}
+
+/* ─── Vocabulary Learning Module ─────────────────────────────────────────── */
+function loadVocabLearn() {
+  // Render topic chips
+  const topicChips = document.getElementById('vl-topic-chips');
+  if (topicChips) {
+    topicChips.innerHTML = Object.keys(VOCAB_BANK).map(t =>
+      `<button class="vl-chip${t === vocabTopic ? ' active' : ''}" onclick="selectVocabTopic('${escapeHtml(t)}')">${t}</button>`
+    ).join('');
+  }
+  // Set active level chip
+  document.querySelectorAll('.vl-level-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.level === vocabLevel);
+  });
+  renderVocabWordPreview();
+  // Show picker, hide game
+  document.getElementById('vl-picker')?.classList.remove('hidden');
+  document.getElementById('vl-game')?.classList.add('hidden');
+}
+
+function selectVocabTopic(t) {
+  vocabTopic = t;
+  document.querySelectorAll('#vl-topic-chips .vl-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === t);
+  });
+  renderVocabWordPreview();
+}
+
+function selectVocabLevel(l) {
+  vocabLevel = l;
+  document.querySelectorAll('.vl-level-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.level === l);
+  });
+  renderVocabWordPreview();
+}
+
+function renderVocabWordPreview() {
+  const preview = document.getElementById('vl-word-preview');
+  if (!preview) return;
+  const words = _getVocabWords();
+  if (!words.length) { preview.innerHTML = '<span style="color:var(--text-secondary);font-size:13px">No words for this selection</span>'; return; }
+  preview.innerHTML = words.slice(0, 8).map(w =>
+    `<span class="vl-preview-chip">${escapeHtml(w.word)}</span>`
+  ).join('') + (words.length > 8 ? `<span class="vl-preview-chip" style="opacity:0.5">+${words.length - 8} more</span>` : '');
+}
+
+function _getVocabWords() {
+  return (VOCAB_BANK[vocabTopic] || {})[vocabLevel] || [];
+}
+
+function _shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function _showVocabGame(title) {
+  document.getElementById('vl-picker')?.classList.add('hidden');
+  const gameDiv = document.getElementById('vl-game');
+  if (gameDiv) gameDiv.classList.remove('hidden');
+  const titleEl = document.getElementById('vl-game-title');
+  if (titleEl) titleEl.textContent = title;
+  const resultDiv = document.getElementById('vl-game-result');
+  if (resultDiv) resultDiv.classList.add('hidden');
+}
+
+function exitVocabGame() {
+  document.getElementById('vl-picker')?.classList.remove('hidden');
+  document.getElementById('vl-game')?.classList.add('hidden');
+  _vocabGameWords = [];
+  _vocabGameIndex = 0;
+  _vocabScore = 0;
+}
+
+function _updateVocabProgress(current, total) {
+  const el = document.getElementById('vl-game-progress');
+  if (el) el.textContent = `${current} / ${total}`;
+}
+
+// ── Flip Cards ────────────────────────────────────────────────────────────
+function startVocabFlip() {
+  const words = _getVocabWords();
+  if (!words.length) { alert('No words available for this topic & level.'); return; }
+  _vocabGameWords = _shuffleArray(words);
+  _vocabGameIndex = 0;
+  _showVocabGame('🃏 Flip Cards');
+  renderFlipCard(0);
+}
+
+function renderFlipCard(idx) {
+  const words = _vocabGameWords;
+  _updateVocabProgress(idx + 1, words.length);
+  const w = words[idx];
+  const body = document.getElementById('vl-game-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="flashcard-scene" id="vl-flip-scene" onclick="flipVocabCard()" style="cursor:pointer;margin:0 auto 16px;display:block">
+      <div class="flashcard-card" id="vl-flip-card">
+        <div class="flashcard-front" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px">
+          <div style="font-size:32px;font-weight:800;color:var(--primary)">${escapeHtml(w.word)}</div>
+          <div style="margin-top:8px;font-size:13px;color:var(--text-secondary)">Click to reveal</div>
+        </div>
+        <div class="flashcard-back" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;text-align:center">
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">${escapeHtml(w.definition)}</div>
+          <div class="flashcard-vn">${escapeHtml(w.vietnamese)}</div>
+          <div class="flashcard-colloc">${w.collocations.map(c => escapeHtml(c)).join(' · ')}</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;font-style:italic">"${escapeHtml(w.example)}"</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <button class="btn btn-secondary btn-sm" onclick="renderFlipCard(Math.max(0,${idx}-1))" ${idx===0?'disabled':''}>← Prev</button>
+      <button class="btn btn-outline btn-sm" onclick="flipVocabCard()">🔄 Flip</button>
+      <button class="btn btn-primary btn-sm" onclick="${idx < words.length-1 ? `renderFlipCard(${idx+1})` : 'showVocabFlipResult()'}">
+        ${idx < words.length-1 ? 'Next →' : '🏁 Finish'}
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="saveVocabWordToNotebook(${idx})">💾 Save</button>
+    </div>`;
+}
+
+function flipVocabCard() {
+  document.getElementById('vl-flip-card')?.classList.toggle('flipped');
+}
+
+function showVocabFlipResult() {
+  _showVocabResult('Flip Cards complete!', _vocabGameWords.length, _vocabGameWords.length, 'You reviewed all cards. Try a quiz to test yourself!');
+}
+
+async function saveVocabWordToNotebook(idx) {
+  if (!token) { alert('Please log in to save words.'); return; }
+  const w = _vocabGameWords[idx];
+  try {
+    await api('/api/saved-words', {
+      method: 'POST',
+      body: JSON.stringify({
+        word: w.word,
+        definition: `${w.definition} 🇻🇳 ${w.vietnamese}`,
+        example: w.example,
+        source: `Vocab Learning (${vocabTopic} · ${vocabLevel})`
+      })
+    });
+    showToast('Word saved to My Vocabulary!');
+  } catch (err) { alert('Save failed: ' + err.message); }
+}
+
+// ── Multiple Choice Quiz ──────────────────────────────────────────────────
+function startVocabQuiz() {
+  const words = _getVocabWords();
+  if (words.length < 4) { alert('Need at least 4 words for a quiz.'); return; }
+  _vocabGameWords = _shuffleArray(words);
+  _vocabGameIndex = 0;
+  _vocabScore = 0;
+  _showVocabGame('🎯 Quiz');
+  renderQuizQuestion(0);
+}
+
+function renderQuizQuestion(idx) {
+  const words = _vocabGameWords;
+  _updateVocabProgress(idx + 1, words.length);
+  const correct = words[idx];
+  // Pick 3 wrong distractors from same topic+level pool
+  const allWords = _getVocabWords();
+  const distractors = _shuffleArray(allWords.filter(w => w.word !== correct.word)).slice(0, 3);
+  const options = _shuffleArray([correct, ...distractors]);
+  const body = document.getElementById('vl-game-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="vl-quiz-question">${escapeHtml(correct.word)}</div>
+    <div style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:16px">🇻🇳 ${escapeHtml(correct.vietnamese)}</div>
+    <div class="vl-quiz-options" id="vl-quiz-opts">
+      ${options.map((opt, i) => `
+        <button class="vl-quiz-opt" id="vl-opt-${i}" onclick="checkQuizAnswer(${i}, ${options.findIndex(o=>o===correct)}, ${idx})">
+          ${escapeHtml(opt.definition)}
+        </button>
+      `).join('')}
+    </div>
+    <div id="vl-quiz-feedback" style="text-align:center;margin-top:12px;font-weight:600;min-height:24px"></div>`;
+}
+
+function checkQuizAnswer(chosen, correct, idx) {
+  // Disable all buttons
+  document.querySelectorAll('.vl-quiz-opt').forEach(btn => btn.disabled = true);
+  const chosenBtn = document.getElementById(`vl-opt-${chosen}`);
+  const correctBtn = document.getElementById(`vl-opt-${correct}`);
+  const feedback = document.getElementById('vl-quiz-feedback');
+  const isCorrect = chosen === correct;
+  if (isCorrect) {
+    chosenBtn?.classList.add('correct');
+    _vocabScore++;
+    if (feedback) feedback.textContent = '✅ Correct!';
+  } else {
+    chosenBtn?.classList.add('wrong');
+    correctBtn?.classList.add('correct');
+    if (feedback) feedback.textContent = `❌ Correct answer highlighted`;
+  }
+  const nextIdx = idx + 1;
+  const body = document.getElementById('vl-game-body');
+  if (body) {
+    const nextBtn = document.createElement('div');
+    nextBtn.style.cssText = 'text-align:center;margin-top:16px';
+    nextBtn.innerHTML = nextIdx < _vocabGameWords.length
+      ? `<button class="btn btn-primary btn-sm" onclick="renderQuizQuestion(${nextIdx})">Next →</button>`
+      : `<button class="btn btn-primary btn-sm" onclick="showVocabQuizResult()">See Results 🏁</button>`;
+    body.appendChild(nextBtn);
+  }
+}
+
+function showVocabQuizResult() {
+  _showVocabResult('Quiz Complete!', _vocabScore, _vocabGameWords.length);
+}
+
+// ── Typing Test ───────────────────────────────────────────────────────────
+function startVocabTyping() {
+  const words = _getVocabWords();
+  if (!words.length) { alert('No words available.'); return; }
+  _vocabGameWords = _shuffleArray(words);
+  _vocabGameIndex = 0;
+  _vocabScore = 0;
+  _showVocabGame('⌨️ Typing Test');
+  renderTypingQuestion(0);
+}
+
+function renderTypingQuestion(idx) {
+  const words = _vocabGameWords;
+  _updateVocabProgress(idx + 1, words.length);
+  const w = words[idx];
+  const body = document.getElementById('vl-game-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="vl-typing-def">${escapeHtml(w.definition)}</div>
+    <div class="vl-typing-vn">🇻🇳 ${escapeHtml(w.vietnamese)}</div>
+    <input type="text" id="vl-typing-input" class="vl-typing-input" placeholder="Type the word…"
+      onkeydown="if(event.key==='Enter') checkTypingAnswer(${idx})" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+      <button class="btn btn-primary btn-sm" onclick="checkTypingAnswer(${idx})">Check ✓</button>
+      <button class="btn btn-outline btn-sm" onclick="skipTypingAnswer(${idx})">Skip →</button>
+    </div>
+    <div id="vl-typing-feedback" style="text-align:center;margin-top:10px;font-weight:600;min-height:22px"></div>`;
+  setTimeout(() => document.getElementById('vl-typing-input')?.focus(), 50);
+}
+
+function checkTypingAnswer(idx) {
+  const input = document.getElementById('vl-typing-input');
+  const feedback = document.getElementById('vl-typing-feedback');
+  if (!input) return;
+  const answer = input.value.trim().toLowerCase();
+  const correct = _vocabGameWords[idx].word.toLowerCase();
+  input.disabled = true;
+  if (answer === correct) {
+    input.classList.add('correct');
+    if (feedback) feedback.textContent = '✅ Correct!';
+    _vocabScore++;
+    _advanceTyping(idx);
+  } else {
+    input.classList.add('wrong');
+    if (feedback) feedback.innerHTML = `❌ Answer: <strong>${escapeHtml(_vocabGameWords[idx].word)}</strong>`;
+    _advanceTyping(idx);
+  }
+}
+
+function skipTypingAnswer(idx) {
+  const feedback = document.getElementById('vl-typing-feedback');
+  if (feedback) feedback.innerHTML = `⏭ Skipped — answer: <strong>${escapeHtml(_vocabGameWords[idx].word)}</strong>`;
+  const input = document.getElementById('vl-typing-input');
+  if (input) { input.disabled = true; input.classList.add('wrong'); }
+  _advanceTyping(idx);
+}
+
+function _advanceTyping(idx) {
+  const nextIdx = idx + 1;
+  const body = document.getElementById('vl-game-body');
+  if (!body) return;
+  const nextBtn = document.createElement('div');
+  nextBtn.style.cssText = 'text-align:center;margin-top:12px';
+  nextBtn.innerHTML = nextIdx < _vocabGameWords.length
+    ? `<button class="btn btn-primary btn-sm" onclick="renderTypingQuestion(${nextIdx})">Next →</button>`
+    : `<button class="btn btn-primary btn-sm" onclick="showVocabTypingResult()">See Results 🏁</button>`;
+  body.appendChild(nextBtn);
+}
+
+function showVocabTypingResult() {
+  _showVocabResult('Typing Test Complete!', _vocabScore, _vocabGameWords.length);
+}
+
+// ── Matching Pairs ────────────────────────────────────────────────────────
+function startVocabMatching() {
+  const words = _getVocabWords();
+  if (words.length < 4) { alert('Need at least 4 words for matching.'); return; }
+  const picked = _shuffleArray(words).slice(0, 6);
+  _vocabGameWords = picked;
+  _vocabScore = 0;
+  _vocabMatchSelected = null;
+  _vocabMatchPaired = new Set();
+  _showVocabGame('🔗 Matching');
+  renderMatchingGame();
+}
+
+function renderMatchingGame() {
+  const words = _vocabGameWords;
+  _updateVocabProgress(_vocabMatchPaired.size / 2, words.length);
+  const shuffledDefs = _shuffleArray(words.map((w, i) => ({ def: w.definition, idx: i })));
+  const body = document.getElementById('vl-game-body');
+  if (!body) return;
+  body.innerHTML = `
+    <p style="text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:12px">Match each word with its definition</p>
+    <div class="vl-match-grid" id="vl-match-grid">
+      <div id="vl-words-col">
+        ${words.map((w, i) => `
+          <div class="vl-match-item" id="vl-word-${i}" data-col="word" data-idx="${i}" onclick="selectMatchItem('word',${i})">
+            ${escapeHtml(w.word)}
+          </div>`).join('')}
+      </div>
+      <div id="vl-defs-col">
+        ${shuffledDefs.map((d, i) => `
+          <div class="vl-match-item" id="vl-def-${d.idx}" data-col="def" data-idx="${d.idx}" onclick="selectMatchItem('def',${d.idx})">
+            ${escapeHtml(d.def)}
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function selectMatchItem(col, idx) {
+  const el = document.getElementById(`vl-${col === 'word' ? 'word' : 'def'}-${idx}`);
+  if (!el || _vocabMatchPaired.has(idx + '-' + col)) return; // already matched
+
+  if (!_vocabMatchSelected) {
+    // First selection
+    _vocabMatchSelected = { col, idx };
+    el.classList.add('selected');
+    return;
+  }
+
+  const prev = _vocabMatchSelected;
+
+  // Same column: switch selection
+  if (prev.col === col) {
+    document.getElementById(`vl-${prev.col === 'word' ? 'word' : 'def'}-${prev.idx}`)?.classList.remove('selected');
+    _vocabMatchSelected = { col, idx };
+    el.classList.add('selected');
+    return;
+  }
+
+  // Cross-column: check match
+  const wordIdx = col === 'word' ? idx : prev.idx;
+  const defIdx  = col === 'def'  ? idx : prev.idx;
+
+  document.getElementById(`vl-word-${prev.col === 'word' ? prev.idx : idx}`)?.classList.remove('selected');
+  document.getElementById(`vl-def-${prev.col === 'def' ? prev.idx : idx}`)?.classList.remove('selected');
+
+  if (wordIdx === defIdx) {
+    // Correct pair
+    document.getElementById(`vl-word-${wordIdx}`)?.classList.add('matched');
+    document.getElementById(`vl-def-${wordIdx}`)?.classList.add('matched');
+    _vocabMatchPaired.add(wordIdx + '-word');
+    _vocabMatchPaired.add(wordIdx + '-def');
+    _vocabScore++;
+    _updateVocabProgress(_vocabScore, _vocabGameWords.length);
+    if (_vocabScore === _vocabGameWords.length) {
+      setTimeout(() => _showVocabResult('Matching Complete!', _vocabScore, _vocabGameWords.length), 400);
+    }
+  } else {
+    // Wrong pair — flash red
+    const wordEl = document.getElementById(`vl-word-${wordIdx}`);
+    const defEl  = document.getElementById(`vl-def-${defIdx}`);
+    wordEl?.classList.add('wrong');
+    defEl?.classList.add('wrong');
+    setTimeout(() => { wordEl?.classList.remove('wrong'); defEl?.classList.remove('wrong'); }, 600);
+  }
+  _vocabMatchSelected = null;
+}
+
+// ── Result Screen ─────────────────────────────────────────────────────────
+function _showVocabResult(title, score, total, message) {
+  const resultDiv = document.getElementById('vl-game-result');
+  if (!resultDiv) return;
+  document.getElementById('vl-game-body').innerHTML = '';
+  const pct = Math.round((score / total) * 100);
+  const msg = message || (pct === 100 ? '🎉 Perfect score!' : pct >= 70 ? '👍 Great work!' : '💪 Keep practising!');
+  resultDiv.innerHTML = `
+    <div class="vl-result">
+      <div class="vl-result-score">${score}/${total}</div>
+      <div class="vl-result-label">${msg}</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="exitVocabGame();loadVocabLearn()">← Pick Another</button>
+        <button class="btn btn-outline btn-sm" onclick="startVocabFlip()">🃏 Flip Cards</button>
+        <button class="btn btn-outline btn-sm" onclick="startVocabQuiz()">🎯 Quiz Again</button>
+        <button class="btn btn-outline btn-sm" onclick="startVocabMatching()">🔗 Matching</button>
+      </div>
+    </div>`;
+  resultDiv.classList.remove('hidden');
+  const titleEl = document.getElementById('vl-game-title');
+  if (titleEl) titleEl.textContent = title;
 }
 
