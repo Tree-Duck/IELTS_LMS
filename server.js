@@ -872,7 +872,14 @@ app.get('/api/user/profile', authenticate, (req, res) => {
     email: user.email,
     role: user.role,
     target_band: user.target_band ?? null,
-    current_streak: user.current_streak || 0,
+    current_streak: (() => {
+      if (!user.last_activity_date || !(user.current_streak > 0)) return 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      return (user.last_activity_date === today || user.last_activity_date === yesterday)
+        ? user.current_streak
+        : 0;
+    })(),
     longest_streak: user.longest_streak || 0,
     last_activity_date: user.last_activity_date || null
   });
