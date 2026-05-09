@@ -134,6 +134,22 @@ const db = {
     return { ...s, ...f };
   },
 
+  getAllGradedSubmissions() {
+    const data = load();
+    return data.submissions
+      .filter(s => s.status === 'graded')
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .map(s => {
+        const user = data.users.find(u => u.id === s.user_id) || {};
+        const f = data.feedback.find(f => f.submission_id === s.id) || {};
+        return {
+          ...s, ...f,
+          student_name: user.name || 'Unknown',
+          student_email: user.email || ''
+        };
+      });
+  },
+
   getAllPendingReviewSubmissions() {
     const data = load();
     return data.submissions

@@ -219,6 +219,9 @@
               <span class="nav-icon">📝</span> Grade Queue
               <span class="queue-badge hidden" id="grade-queue-badge">0</span>
             </button>
+            <button class="nav-item nav-sub-item" onclick="showView('submissions-archive')" id="nav-teacher-archive">
+              <span class="nav-icon">🗂️</span> Submissions
+            </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-teacher-users">
               <span class="nav-icon">👥</span> Users
             </button>
@@ -245,6 +248,9 @@
             <button class="nav-item nav-sub-item" onclick="showView('grade-queue')" id="nav-admin-grade-queue">
               <span class="nav-icon">📝</span> Grade Queue
               <span class="queue-badge hidden" id="grade-queue-badge-admin">0</span>
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('submissions-archive')" id="nav-admin-archive">
+              <span class="nav-icon">🗂️</span> Submissions
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-admin">
               <span class="nav-icon">👥</span> Users
@@ -896,6 +902,50 @@
           <p>Essays awaiting teacher review — oldest first</p>
         </div>
         <div id="grade-queue-list"><div class="loading">Loading…</div></div>
+      </div>
+
+      <!-- Submissions Archive View (Teacher & Admin) -->
+      <div id="view-submissions-archive" class="view hidden">
+        <div class="page-header">
+          <h2>🗂️ Submissions Archive</h2>
+          <p>All graded student submissions</p>
+        </div>
+        <!-- Filters -->
+        <div class="card mb-4" style="padding:16px">
+          <div class="form-row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="flex:1;min-width:160px;margin:0">
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Student name</label>
+              <input type="text" id="archive-filter-name" class="form-input" placeholder="Search…" oninput="filterArchive()" style="margin-top:4px">
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;margin:0">
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Task type</label>
+              <select id="archive-filter-type" class="form-input" onchange="filterArchive()" style="margin-top:4px">
+                <option value="">All types</option>
+                <option value="task1">Task 1</option>
+                <option value="task2">Task 2</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;margin:0">
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Band score</label>
+              <select id="archive-filter-band" class="form-input" onchange="filterArchive()" style="margin-top:4px">
+                <option value="">All bands</option>
+                <option value="9">9</option>
+                <option value="8.5">8.5</option>
+                <option value="8">8</option>
+                <option value="7.5">7.5</option>
+                <option value="7">7</option>
+                <option value="6.5">6.5</option>
+                <option value="6">6</option>
+                <option value="5.5">5.5</option>
+                <option value="5">5</option>
+                <option value="4.5">4.5</option>
+                <option value="4">≤ 4</option>
+              </select>
+            </div>
+            <button class="btn btn-outline" onclick="loadSubmissionsArchive()" style="margin:0;height:38px">↺ Refresh</button>
+          </div>
+        </div>
+        <div id="archive-list"><div class="loading">Loading…</div></div>
       </div>
 
       <!-- Admin Assignments View -->

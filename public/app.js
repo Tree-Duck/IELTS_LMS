@@ -730,6 +730,7 @@ function showView(name) {
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
   else if (name === 'grade-queue') loadGradeQueue();
+  else if (name === 'submissions-archive') loadSubmissionsArchive();
   else if (name === 'admin-student-history') { /* loaded by viewStudentHistory() */ }
   else if (name === 'homework') loadHomework();
   else if (name === 'test-list') loadTestList();
@@ -2269,6 +2270,14 @@ function renderFeedback(s) {
         </div>
       </div>`;
 
+    // Parse criterion details once — must come before any use of criterionData
+    let criterionData = null;
+    if (s.criterion_details) {
+      try {
+        criterionData = typeof s.criterion_details === 'string' ? JSON.parse(s.criterion_details) : s.criterion_details;
+      } catch {}
+    }
+
     // "What to fix" summary — top 3 improvements from weakest criteria
     if (criterionData) {
       const criterionLabelsLocal = {
@@ -2323,13 +2332,6 @@ function renderFeedback(s) {
       </div>`;
 
     // Criterion details cards
-    let criterionData = null;
-    if (s.criterion_details) {
-      try {
-        criterionData = typeof s.criterion_details === 'string' ? JSON.parse(s.criterion_details) : s.criterion_details;
-      } catch {}
-    }
-
     if (criterionData) {
       const criterionLabels = {
         task_achievement: s.task_type === 'task1' ? 'Task Achievement' : 'Task Response',
@@ -4323,6 +4325,100 @@ function toggleFullEssay(id, btn) {
   el.classList.toggle('hidden');
   btn.textContent = el.classList.contains('hidden') ? '📖 Full Essay' : '🙈 Hide Essay';
 }
+
+// ─── Submissions Archive ──────────────────────────────────────────────────────
+let _archiveData = [];
+
+async function loadSubmissionsArchive() {
+  const listEl = document.getElementById('archive-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="loading">Loading submissions…</div>';
+  try {
+    _archiveData = await api('/api/admin/submissions/archive');
+    filterArchive();
+  } catch (err) {
+    listEl.innerHTML = `<div class="empty-state">Failed to load archive: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function filterArchive() {
+  const listEl = document.getElementById('archive-list');
+  if (!listEl) return;
+  const nameQ  = (document.getElementById('archive-filter-name')?.value || '').toLowerCase();
+  const typeQ  = document.getElementById('archive-filter-type')?.value || '';
+  const bandQ  = document.getElementById('archive-filter-band')?.value || '';
+
+  let filtered = _archiveData;
+  if (nameQ) filtered = filtered.filter(s => (s.student_name || '').toLowerCase().includes(nameQ) || (s.student_email || '').toLowerCase().includes(nameQ));
+  if (typeQ) filtered = filtered.filter(s => s.task_type === typeQ);
+  if (bandQ) {
+    const bNum = parseFloat(bandQ);
+    filtered = filtered.filter(s => {
+      const b = parseFloat(s.band_score ?? s.overall_band);
+      if (isNaN(b)) return false;
+      return bandQ === '4' ? b <= 4 : b === bNum;
+    });
+  }
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="empty-state">No submissions match the filters.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(s => renderArchiveItem(s)).join('');
+}
+
+function renderArchiveItem(s) {
+  const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
+  const badgeClass = s.task_type === 'task1' ? 'badge-t1' : 'badge-t2';
+  const band = s.band_score ?? s.overall_band;
+  const bandStr = band != null ? `Band ${band}` : 'No score';
+  const gradedBy = s.graded_by === 'ai' ? '🤖 AI' : '👩‍🏫 Teacher';
+  const preview = s.essay ? escHtml(s.essay.slice(0, 280)) + (s.essay.length > 280 ? '…' : '') : '';
+  return `
+    <div class="archive-item">
+      <div class="archive-item-header">
+        <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
+        <span class="archive-band-badge">${bandStr}</span>
+        <span class="archive-student">👤 ${escHtml(s.student_name)}</span>
+        <span class="archive-meta">${gradedBy} · ${s.word_count || '?'} words · ${formatDate(s.created_at)}</span>
+      </div>
+      <div class="archive-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt || '')}</div>
+      <div class="archive-essay-preview">${preview}</div>
+      <div class="archive-actions">
+        <button class="btn btn-outline btn-sm" onclick="toggleArchiveEssay(${s.id}, this)">📖 Full Essay</button>
+        <button class="btn btn-outline btn-sm" onclick="viewArchiveFeedback(${s.id})">📊 Feedback</button>
+      </div>
+      <div class="archive-full-essay hidden" id="archive-essay-${s.id}">
+        <div class="essay-text-block">${s.essay ? escHtml(s.essay) : ''}</div>
+      </div>
+    </div>`;
+}
+
+function toggleArchiveEssay(id, btn) {
+  const el = document.getElementById(`archive-essay-${id}`);
+  if (!el) return;
+  el.classList.toggle('hidden');
+  btn.textContent = el.classList.contains('hidden') ? '📖 Full Essay' : '🙈 Hide Essay';
+}
+
+function viewArchiveFeedback(id) {
+  const s = _archiveData.find(x => x.id === id);
+  if (!s) return;
+  // Reuse existing feedback modal — same renderFeedback used for student view
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:740px;max-height:90vh;overflow-y:auto">
+      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Feedback — ${escHtml(s.student_name)}</h3>
+        <button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">✕ Close</button>
+      </div>
+      <div style="margin-top:16px">${renderFeedback(s)}</div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function openGradingPanel(id) {
   const panel = document.getElementById(`grading-panel-${id}`);

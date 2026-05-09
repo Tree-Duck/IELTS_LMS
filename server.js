@@ -1440,6 +1440,15 @@ app.get('/api/admin/users/:id/submissions', authenticate, teacherOrAdmin, (req, 
 
 // ─── Grade Queue (Teacher/Admin Manual Grading) ───────────────────────────────
 
+// Get all graded submissions archive
+app.get('/api/admin/submissions/archive', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    res.json(db.getAllGradedSubmissions());
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load submissions archive' });
+  }
+});
+
 // Get all pending_review submissions (queue)
 app.get('/api/admin/submissions/pending', authenticate, teacherOrAdmin, (req, res) => {
   try {

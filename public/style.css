@@ -3193,6 +3193,56 @@ input:focus, textarea:focus, select:focus {
 }
 [data-theme="dark"] .essay-text-block { background: var(--gray-900, #111827); border-color: var(--gray-700); color: var(--gray-200); }
 
+/* ─── Submissions Archive ─────────────────────────────────────────────────── */
+.archive-item {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  transition: box-shadow .15s;
+}
+.archive-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+[data-theme="dark"] .archive-item { background: var(--gray-800, #1f2937); border-color: var(--gray-700); }
+
+.archive-item-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.archive-student { font-weight: 700; font-size: .95rem; }
+.archive-meta { color: var(--gray-500); font-size: .82rem; margin-left: auto; }
+
+.archive-band-badge {
+  background: var(--primary); color: #fff; border-radius: 6px;
+  padding: 2px 10px; font-size: .82rem; font-weight: 700;
+}
+
+.archive-prompt {
+  color: var(--gray-600); font-style: italic; font-size: .88rem;
+  margin-bottom: 10px; border-left: 3px solid var(--gray-300); padding-left: 10px;
+}
+[data-theme="dark"] .archive-prompt { color: var(--gray-400); border-color: var(--gray-600); }
+
+.archive-essay-preview {
+  background: var(--gray-50); border-radius: 8px; padding: 12px 14px;
+  font-size: .84rem; line-height: 1.6; margin-bottom: 14px; color: var(--gray-700);
+}
+[data-theme="dark"] .archive-essay-preview { background: var(--gray-900, #111827); color: var(--gray-300); }
+
+.archive-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+
+/* Modal overlay for archive feedback */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center; z-index: 9000;
+}
+.modal-box {
+  background: var(--card-bg, #fff); border-radius: 16px;
+  padding: 28px 32px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+[data-theme="dark"] .modal-box { background: var(--gray-800, #1f2937); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+/* ──────────────────────────────────────────────────────────────────────────── */
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MANUAL GRADING PANEL
    ═══════════════════════════════════════════════════════════════════════════ */
