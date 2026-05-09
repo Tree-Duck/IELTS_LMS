@@ -1218,11 +1218,11 @@ input:focus, textarea:focus, select:focus {
   color: var(--gray-800);
 }
 /* Sentence type highlights */
-.sent-simple { background: rgba(59,130,246,0.15); border-radius: 3px; padding: 1px 0; }
-.sent-compound { background: rgba(16,185,129,0.15); border-radius: 3px; padding: 1px 0; }
-.sent-complex { background: rgba(245,158,11,0.15); border-radius: 3px; padding: 1px 0; }
-.sent-compound-complex { background: rgba(139,92,246,0.15); border-radius: 3px; padding: 1px 0; }
-.sent-uncertain { background: rgba(156,163,175,0.2); border-radius: 3px; padding: 1px 0; }
+.sent-simple { background: rgba(59,130,246,0.22); border-bottom: 2px solid rgba(59,130,246,0.6); border-radius: 3px; padding: 1px 0; }
+.sent-compound { background: rgba(16,185,129,0.22); border-bottom: 2px solid rgba(16,185,129,0.6); border-radius: 3px; padding: 1px 0; }
+.sent-complex { background: rgba(245,158,11,0.22); border-bottom: 2px solid rgba(245,158,11,0.6); border-radius: 3px; padding: 1px 0; }
+.sent-compound-complex { background: rgba(139,92,246,0.22); border-bottom: 2px solid rgba(139,92,246,0.6); border-radius: 3px; padding: 1px 0; }
+.sent-uncertain { background: rgba(156,163,175,0.25); border-bottom: 2px solid rgba(156,163,175,0.5); border-radius: 3px; padding: 1px 0; }
 
 /* ─── OVERALL IMPROVEMENTS GRID ──────────────────────────────────────────── */
 .overall-improvements-section { margin: 20px 0; }
@@ -3613,21 +3613,27 @@ input:focus, textarea:focus, select:focus {
 .ann-mark.ann-argument   { background: #dbeafe; border-bottom: 2px solid #3b82f6; }
 .ann-mark.ann-structure  { background: #ede9fe; border-bottom: 2px solid #8b5cf6; }
 .ann-mark.ann-strength   { background: #d1fae5; border-bottom: 2px solid #10b981; }
-[data-theme="dark"] .ann-mark.ann-grammar    { background: #450a0a44; border-color: #f87171; }
-[data-theme="dark"] .ann-mark.ann-vocabulary { background: #451a0344; border-color: #fbbf24; }
-[data-theme="dark"] .ann-mark.ann-argument   { background: #1e3a5f44; border-color: #60a5fa; }
-[data-theme="dark"] .ann-mark.ann-structure  { background: #2e106544; border-color: #a78bfa; }
-[data-theme="dark"] .ann-mark.ann-strength   { background: #064e3b44; border-color: #34d399; }
+[data-theme="dark"] .ann-mark.ann-grammar    { background: rgba(239,68,68,0.25); border-color: #f87171; }
+[data-theme="dark"] .ann-mark.ann-vocabulary { background: rgba(245,158,11,0.25); border-color: #fbbf24; }
+[data-theme="dark"] .ann-mark.ann-argument   { background: rgba(59,130,246,0.25); border-color: #60a5fa; }
+[data-theme="dark"] .ann-mark.ann-structure  { background: rgba(139,92,246,0.25); border-color: #a78bfa; }
+[data-theme="dark"] .ann-mark.ann-strength   { background: rgba(16,185,129,0.25); border-color: #34d399; }
 
 .ann-popup {
   position: fixed;
   z-index: 9999;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  min-width: 260px;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.22), 0 2px 8px rgba(0,0,0,.10);
+  min-width: 280px;
+  max-width: 360px;
+}
+[data-theme="dark"] .ann-popup {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 12px 36px rgba(0,0,0,.5);
 }
 .ann-type-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
 .ann-type-btn {

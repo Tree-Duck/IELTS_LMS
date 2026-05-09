@@ -712,6 +712,11 @@ function showView(name) {
   }
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  // Reset feedback back button to default when not coming from archive
+  if (name !== 'feedback') {
+    const backBtn = document.querySelector('#view-feedback .btn-back');
+    if (backBtn) { backBtn.onclick = () => showView('history'); backBtn.textContent = '← Back'; }
+  }
   show(`view-${name}`);
   const navEl = document.getElementById(`nav-${name}`);
   if (navEl) navEl.classList.add('active');
@@ -4374,12 +4379,29 @@ function renderArchiveItem(s) {
   const bandStr = band != null ? `Band ${band}` : 'No score';
   const gradedBy = s.graded_by === 'ai' ? '🤖 AI' : '👩‍🏫 Teacher';
   const preview = s.essay ? escHtml(s.essay.slice(0, 280)) + (s.essay.length > 280 ? '…' : '') : '';
+
+  // Paste integrity badge
+  let pasteBadge = '';
+  const p = s.paste_stats;
+  if (p && typeof p === 'object') {
+    const totalInput = (p.total_pasted || 0) + (p.total_typed || 0);
+    const pasteRatio = totalInput > 0 ? p.total_pasted / totalInput : 0;
+    if (p.paste_count === 0) {
+      pasteBadge = `<span class="paste-badge paste-clean" title="No pasting detected">✅ Typed</span>`;
+    } else if (pasteRatio > 0.5) {
+      pasteBadge = `<span class="paste-badge paste-suspicious" title="${p.paste_count} paste(s), largest ${p.largest_paste} chars, ~${Math.round(pasteRatio*100)}% pasted">🚨 Mostly pasted (${p.paste_count}×)</span>`;
+    } else {
+      pasteBadge = `<span class="paste-badge paste-mixed" title="${p.paste_count} paste(s), largest ${p.largest_paste} chars, ~${Math.round(pasteRatio*100)}% pasted">⚠️ Some pasting (${p.paste_count}×)</span>`;
+    }
+  }
+
   return `
     <div class="archive-item">
       <div class="archive-item-header">
         <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
         <span class="archive-band-badge">${bandStr}</span>
         <span class="archive-student">👤 ${escHtml(s.student_name)}</span>
+        ${pasteBadge}
         <span class="archive-meta">${gradedBy} · ${s.word_count || '?'} words · ${formatDate(s.created_at)}</span>
       </div>
       <div class="archive-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt || '')}</div>
@@ -4404,19 +4426,18 @@ function toggleArchiveEssay(id, btn) {
 function viewArchiveFeedback(id) {
   const s = _archiveData.find(x => x.id === id);
   if (!s) return;
-  // Reuse existing feedback modal — same renderFeedback used for student view
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal-box" style="max-width:740px;max-height:90vh;overflow-y:auto">
-      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center">
-        <h3>Feedback — ${escHtml(s.student_name)}</h3>
-        <button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove()">✕ Close</button>
-      </div>
-      <div style="margin-top:16px">${renderFeedback(s)}</div>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  // Navigate to feedback view — renderFeedback writes directly to #feedback-content
+  showView('feedback');
+  // Patch back button to return to archive instead of student history
+  const backBtn = document.querySelector('#view-feedback .btn-back');
+  if (backBtn) {
+    backBtn.onclick = () => showView('submissions-archive');
+    backBtn.textContent = '← Archive';
+  }
+  const contentEl = document.getElementById('feedback-content');
+  if (contentEl) contentEl.innerHTML = '<div class="loading">Loading…</div>';
+  // renderFeedback is synchronous — writes to #feedback-content
+  renderFeedback(s);
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
