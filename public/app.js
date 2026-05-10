@@ -5612,16 +5612,6 @@ function toggleStudentSelect() {
 /* ═══════════════════════════════════════════════════════════════════════════
    SIDEBAR TOGGLE
    ═══════════════════════════════════════════════════════════════════════════ */
-function toggleNavGroup(id) {
-  const group = document.getElementById(`nav-group-${id}`);
-  if (!group) return;
-  const items = group.querySelector('.nav-group-items');
-  const chevron = group.querySelector('.nav-group-chevron');
-  if (!items) return;
-  const isOpen = !items.classList.contains('hidden');
-  items.classList.toggle('hidden', isOpen);
-  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
-}
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
