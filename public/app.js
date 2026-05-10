@@ -6241,13 +6241,13 @@ async function openAttendanceSheet(classId, dateStr) {
                       ${statuses.map(st => `<option value="${st}" ${currentStatus===st?'selected':''}>${st.charAt(0).toUpperCase()+st.slice(1)}</option>`).join('')}
                     </select>
                   </td>
-                  <td><input type="text" class="form-input att-notes-input" data-uid="${s.user_id}" value="${rec.notes||''}" placeholder="Optional note" style="font-size:.85rem;padding:4px 8px"></td>
+                  <td><textarea class="form-input att-notes-input" data-uid="${s.user_id}" placeholder="Notes / feedback…" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" style="font-size:.85rem;padding:6px 10px;min-height:42px;resize:none;overflow:hidden;width:100%;line-height:1.5">${escHtml(rec.notes||'')}</textarea></td>
                 </tr>`;
               } else {
                 return `<tr>
                   <td>${s.name}</td>
                   <td><span class="status-badge att-${currentStatus}">${currentStatus}</span></td>
-                  <td>${rec.notes||'—'}</td>
+                  <td style="white-space:pre-wrap;font-size:.85rem;line-height:1.5">${escHtml(rec.notes||'—')}</td>
                 </tr>`;
               }
             }).join('')}
@@ -6256,6 +6256,11 @@ async function openAttendanceSheet(classId, dateStr) {
       </div>`;
 
     if (canMark) actionsEl.style.display = '';
+    // Auto-size textareas that already have content
+    body.querySelectorAll('.att-notes-input').forEach(ta => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    });
   } catch (err) {
     body.innerHTML = `<div class="error-msg">${err.message}</div>`;
   }
