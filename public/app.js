@@ -4817,7 +4817,7 @@ function renderQueueItem(s) {
     <div class="queue-item" id="queue-item-${s.id}">
       <div class="queue-item-header">
         <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
-        <span class="queue-student">👤 ${escHtml(s.student_name)}</span>
+        <span class="queue-student">👤 ${escHtml(s.student_name)}${s.student_email ? `<span class="archive-student-email">&nbsp;·&nbsp;${escHtml(s.student_email)}</span>` : ''}</span>
         <span class="queue-meta">${s.word_count} words · ${formatDate(s.created_at)}</span>
       </div>
       <div class="queue-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt)}</div>
@@ -4910,7 +4910,7 @@ function renderArchiveItem(s) {
       <div class="archive-item-header">
         <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
         <span class="archive-band-badge">${bandStr}</span>
-        <span class="archive-student">👤 ${escHtml(s.student_name)}</span>
+        <span class="archive-student">👤 ${escHtml(s.student_name)}${s.student_email ? `<span class="archive-student-email">&nbsp;·&nbsp;${escHtml(s.student_email)}</span>` : ''}</span>
         ${pasteBadge}
         <span class="archive-meta">${gradedBy} · ${s.word_count || '?'} words · ${formatDate(s.created_at)}</span>
       </div>

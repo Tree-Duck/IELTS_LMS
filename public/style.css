@@ -3208,7 +3208,8 @@ input:focus, textarea:focus, select:focus {
 .archive-item-header {
   display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
 }
-.archive-student { font-weight: 700; font-size: .95rem; }
+.archive-student { font-weight: 700; font-size: .95rem; color: var(--text-primary); }
+.archive-student-email { font-weight: 400; font-size: .82rem; color: var(--text-secondary); }
 .archive-meta { color: var(--gray-500); font-size: .82rem; margin-left: auto; }
 
 .archive-band-badge {

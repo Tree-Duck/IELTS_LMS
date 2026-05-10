@@ -140,7 +140,8 @@ const db = {
       .filter(s => s.status === 'graded')
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       .map(s => {
-        const user = data.users.find(u => u.id === s.user_id) || {};
+        // eslint-disable-next-line eqeqeq
+        const user = data.users.find(u => u.id == s.user_id) || {};
         const f = data.feedback.find(f => f.submission_id === s.id) || {};
         return {
           ...f, ...s,                          // submission fields win over feedback fields
@@ -157,7 +158,8 @@ const db = {
       .filter(s => s.status === 'pending_review')
       .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
       .map(s => {
-        const user = data.users.find(u => u.id === s.user_id) || {};
+        // eslint-disable-next-line eqeqeq
+        const user = data.users.find(u => u.id == s.user_id) || {};
         return { ...s, student_name: user.name || 'Unknown', student_email: user.email || '' };
       });
   },
