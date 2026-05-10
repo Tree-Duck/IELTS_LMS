@@ -1229,39 +1229,68 @@
           <p>Master IELTS vocabulary with games</p>
         </div>
 
-        <!-- Picker (shown when not in game) -->
-        <div id="vl-picker">
-          <div class="vl-picker-row">
-            <label>Topic</label>
-            <div class="vl-topic-chips" id="vl-topic-chips"><!-- rendered by JS --></div>
-          </div>
-          <div class="vl-picker-row">
-            <label>CEFR Level</label>
-            <div class="vl-level-chips">
-              <button class="vl-chip vl-level-chip" data-level="B1" onclick="selectVocabLevel('B1')">B1</button>
-              <button class="vl-chip vl-level-chip" data-level="B2" onclick="selectVocabLevel('B2')">B2</button>
-              <button class="vl-chip vl-level-chip" data-level="C1" onclick="selectVocabLevel('C1')">C1</button>
-              <button class="vl-chip vl-level-chip" data-level="C2" onclick="selectVocabLevel('C2')">C2</button>
+        <!-- Section tabs -->
+        <div class="vl-section-tabs">
+          <button class="vl-section-tab active" onclick="switchVocabSection('words')" id="vl-tab-words">📚 Words</button>
+          <button class="vl-section-tab" onclick="switchVocabSection('collocations')" id="vl-tab-collocations">📎 Collocations</button>
+          <button class="vl-section-tab" onclick="switchVocabSection('baby-words')" id="vl-tab-baby-words">🚀 Upgrade Words</button>
+        </div>
+
+        <!-- Words section -->
+        <div id="vl-section-words">
+          <!-- Picker (shown when not in game) -->
+          <div id="vl-picker">
+            <div class="vl-picker-row">
+              <label>Topic</label>
+              <div class="vl-topic-chips" id="vl-topic-chips"><!-- rendered by JS --></div>
             </div>
+            <div class="vl-picker-row">
+              <label>CEFR Level</label>
+              <div class="vl-level-chips">
+                <button class="vl-chip vl-level-chip" data-level="B1" onclick="selectVocabLevel('B1')">B1</button>
+                <button class="vl-chip vl-level-chip" data-level="B2" onclick="selectVocabLevel('B2')">B2</button>
+                <button class="vl-chip vl-level-chip" data-level="C1" onclick="selectVocabLevel('C1')">C1</button>
+                <button class="vl-chip vl-level-chip" data-level="C2" onclick="selectVocabLevel('C2')">C2</button>
+              </div>
+            </div>
+            <div id="vl-word-preview" class="vl-word-preview"></div>
+            <div class="vl-game-buttons">
+              <button class="btn btn-outline" onclick="startVocabFlip()">🃏 Flip Cards</button>
+              <button class="btn btn-outline" onclick="startVocabQuiz()">🎯 Quiz</button>
+              <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Typing Test</button>
+              <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Matching</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="showVocabUpdateReminder()" style="margin-top:8px;font-size:12px;color:var(--text-secondary)">➕ Update vocabulary bank</button>
           </div>
-          <div id="vl-word-preview" class="vl-word-preview"></div>
-          <div class="vl-game-buttons">
-            <button class="btn btn-outline" onclick="startVocabFlip()">🃏 Flip Cards</button>
-            <button class="btn btn-outline" onclick="startVocabQuiz()">🎯 Quiz</button>
-            <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Typing Test</button>
-            <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Matching</button>
+
+          <!-- Game container (shown during game) -->
+          <div id="vl-game" class="hidden">
+            <div class="vl-game-header">
+              <button class="btn btn-secondary btn-sm" onclick="exitVocabGame()">← Back</button>
+              <span id="vl-game-title"></span>
+              <span id="vl-game-progress"></span>
+            </div>
+            <div id="vl-game-body"></div>
+            <div id="vl-game-result" class="hidden"></div>
           </div>
         </div>
 
-        <!-- Game container (shown during game) -->
-        <div id="vl-game" class="hidden">
-          <div class="vl-game-header">
-            <button class="btn btn-secondary btn-sm" onclick="exitVocabGame()">← Back</button>
-            <span id="vl-game-title"></span>
-            <span id="vl-game-progress"></span>
+        <!-- Collocations section -->
+        <div id="vl-section-collocations" class="hidden">
+          <div class="vl-picker-row">
+            <label>Topic</label>
+            <div id="vl-colloc-topic-chips" class="vl-topic-chips"><!-- JS rendered --></div>
           </div>
-          <div id="vl-game-body"></div>
-          <div id="vl-game-result" class="hidden"></div>
+          <div id="vl-colloc-list"></div>
+        </div>
+
+        <!-- Baby Words section -->
+        <div id="vl-section-baby-words" class="hidden">
+          <div class="vl-picker-row">
+            <label>Topic</label>
+            <div id="vl-baby-topic-chips" class="vl-topic-chips"><!-- JS rendered --></div>
+          </div>
+          <div id="vl-baby-list"></div>
         </div>
       </div>
 
