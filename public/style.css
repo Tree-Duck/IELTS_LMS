@@ -4063,7 +4063,32 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   gap: 8px;
   margin-top: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
 }
+.speaking-adjust-btn {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 12px;
+  min-width: 54px;
+}
+.btn-impromptu-speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 12px 0 4px;
+  transition: background .15s, transform .1s;
+}
+.btn-impromptu-speak:hover { background: #15803d; transform: scale(1.03); }
 
 /* Frameworks section */
 .speaking-frameworks {
@@ -4288,3 +4313,22 @@ input:focus, textarea:focus, select:focus {
   border: none;
 }
 .btn-danger:hover { background: #b91c1c; }
+
+/* ── Vocab Word List Table ────────────────────────────────────────────────── */
+.vl-word-table-header { font-size:12px; color:var(--text-secondary); margin-bottom:6px; }
+.vl-word-table { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+.vl-word-row { border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
+.vl-word-row:last-child { border-bottom:none; }
+.vl-word-row:hover { background:var(--bg-secondary); }
+.vl-word-row-main { display:grid; grid-template-columns:110px 90px 1fr 20px; align-items:center; gap:8px; padding:10px 14px; }
+.vl-wt-word  { font-weight:700; font-size:14px; }
+.vl-wt-vn   { color:var(--primary); font-size:13px; font-weight:600; }
+.vl-wt-def  { font-size:13px; color:var(--text-secondary); }
+.vl-wt-chevron { color:var(--text-secondary); font-size:16px; transition:transform .15s; justify-self:end; }
+.vl-row-open .vl-wt-chevron { transform:rotate(90deg); }
+.vl-word-row-detail { padding:6px 14px 12px; background:var(--bg-secondary); }
+.vl-wt-colloc { font-size:12px; color:var(--text-secondary); margin-bottom:4px; }
+.vl-wt-example { font-size:13px; font-style:italic; }
+@media (max-width:600px) {
+  .vl-word-row-main { grid-template-columns:80px 65px 1fr 16px; }
+}

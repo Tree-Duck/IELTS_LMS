@@ -169,14 +169,14 @@
             <span class="nav-group-chevron">›</span>
           </div>
           <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('submit')" id="nav-submit">
-              <span class="nav-icon">✏️</span> Writing
+            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('listening')" id="nav-test-list-listening">
+              <span class="nav-icon">🎧</span> Listening
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('reading')" id="nav-test-list">
               <span class="nav-icon">📖</span> Reading
             </button>
-            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('listening')" id="nav-test-list-listening">
-              <span class="nav-icon">🎧</span> Listening
+            <button class="nav-item nav-sub-item" onclick="showView('submit')" id="nav-submit">
+              <span class="nav-icon">✏️</span> Writing
             </button>
             <button class="nav-item nav-sub-item" onclick="showView('speaking')" id="nav-speaking">
               <span class="nav-icon">🎙️</span> Speaking
@@ -201,6 +201,17 @@
             <button class="nav-item nav-sub-item" onclick="showView('my-attendance')" id="nav-my-attendance">
               <span class="nav-icon">📅</span> Attendance
             </button>
+          </div>
+        </div>
+
+        <!-- Vocabulary group -->
+        <div class="nav-group" id="nav-group-vocab">
+          <div class="nav-group-header" onclick="toggleNavGroup('vocab')">
+            <span class="nav-icon">📚</span>
+            <span class="nav-group-label">Vocabulary</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
             <button class="nav-item nav-sub-item" onclick="showView('vocab-learn')" id="nav-vocab-learn">
               <span class="nav-icon">📚</span> Vocabulary Learning
             </button>
@@ -766,11 +777,11 @@
 
         <!-- Type tabs: Reading / Listening / Task 1 Topics / Speaking / Task 2 -->
         <div class="test-type-tabs" style="flex-wrap:wrap">
-          <button class="test-tab-btn active" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
+          <button class="test-tab-btn active" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Task 1 Topics</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Speaking Topics</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Task 2 Prompts</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Speaking Topics</button>
         </div>
 
         <!-- Existing tests list -->
@@ -1328,9 +1339,13 @@
           </div>
           <div class="speaking-timer-display" id="speaking-timer-display">1:00</div>
           <div class="speaking-timer-label" id="speaking-timer-label">Preparation time</div>
+          <!-- Impromptu-only: Speak button (think phase) -->
+          <button class="btn btn-impromptu-speak hidden" id="impromptu-speak-btn" onclick="startImpromtuSpeak()">🎙️ Speak</button>
           <div class="speaking-timer-btns">
+            <button class="btn btn-secondary speaking-adjust-btn hidden" id="speaking-adjust-minus" onclick="adjustSpeakingTimer(-30)">−30s</button>
             <button class="btn btn-primary" onclick="startSpeakingTimer()" id="speaking-timer-start-btn">▶ Start</button>
             <button class="btn btn-secondary" onclick="resetSpeakingTimer()">↺ Reset</button>
+            <button class="btn btn-secondary speaking-adjust-btn hidden" id="speaking-adjust-plus" onclick="adjustSpeakingTimer(30)">+30s</button>
           </div>
         </div>
 

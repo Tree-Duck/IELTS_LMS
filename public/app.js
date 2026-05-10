@@ -3885,8 +3885,8 @@ async function deleteAdminTask2Prompt(id) {
 }
 
 async function loadAdminMaterials() {
-  // Default to reading tab on fresh load
-  if (currentMaterialsTab === 'task1') currentMaterialsTab = 'reading';
+  // Default to listening tab on fresh load
+  if (currentMaterialsTab === 'task1') currentMaterialsTab = 'listening';
   // Ensure task1 panel is hidden on fresh load
   const task1Panel = document.getElementById('task1-topics-panel');
   if (task1Panel) task1Panel.classList.add('hidden');
@@ -5612,6 +5612,17 @@ function toggleStudentSelect() {
 /* ═══════════════════════════════════════════════════════════════════════════
    SIDEBAR TOGGLE
    ═══════════════════════════════════════════════════════════════════════════ */
+function toggleNavGroup(id) {
+  const group = document.getElementById(`nav-group-${id}`);
+  if (!group) return;
+  const items = group.querySelector('.nav-group-items');
+  const chevron = group.querySelector('.nav-group-chevron');
+  if (!items) return;
+  const isOpen = !items.classList.contains('hidden');
+  items.classList.toggle('hidden', isOpen);
+  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const main = document.querySelector('.main-content');
@@ -6725,6 +6736,13 @@ function setSpeakingMode(mode) {
   } else {
     speakingPhase = 'prep';
     _updateSpeakingPartUI(); // restores phase btn visibility
+    // Ensure impromptu-specific buttons are hidden
+    const speakBtn = document.getElementById('impromptu-speak-btn');
+    const adjMinus = document.getElementById('speaking-adjust-minus');
+    const adjPlus  = document.getElementById('speaking-adjust-plus');
+    if (speakBtn) speakBtn.classList.add('hidden');
+    if (adjMinus) adjMinus.classList.add('hidden');
+    if (adjPlus)  adjPlus.classList.add('hidden');
   }
   clearInterval(speakingTimerInterval);
   speakingTimerRunning = false;
@@ -6879,7 +6897,8 @@ function _setSpeakingPhaseDisplay(phase) {
   let secs;
   if (phase === 'think') secs = 30;
   else if (phase === 'prep') secs = 60;
-  else secs = 120; // 'speak'
+  else if (phase === 'speak' && speakingMode === 'impromptu') secs = 60; // impromptu speak = 1 min
+  else secs = 120; // IELTS Part 2 speak = 2 min
   speakingTimerSecs = secs;
   _setSpeakingTimerDisplay(secs);
   const lbl = document.getElementById('speaking-timer-label');
@@ -6893,6 +6912,19 @@ function _setSpeakingPhaseDisplay(phase) {
     const btn = document.getElementById(`phase-btn-${p}`);
     if (btn) btn.classList.toggle('active', p === phase);
   });
+  // Impromptu UI: show "Speak" button only during think phase; show adjust buttons during speak phase
+  const speakBtn = document.getElementById('impromptu-speak-btn');
+  const adjMinus = document.getElementById('speaking-adjust-minus');
+  const adjPlus  = document.getElementById('speaking-adjust-plus');
+  if (speakingMode === 'impromptu') {
+    if (speakBtn) speakBtn.classList.toggle('hidden', phase !== 'think');
+    if (adjMinus) adjMinus.classList.toggle('hidden', phase !== 'speak');
+    if (adjPlus)  adjPlus.classList.toggle('hidden',  phase !== 'speak');
+  } else {
+    if (speakBtn) speakBtn.classList.add('hidden');
+    if (adjMinus) adjMinus.classList.add('hidden');
+    if (adjPlus)  adjPlus.classList.add('hidden');
+  }
 }
 
 function _setSpeakingTimerDisplay(secs) {
@@ -6954,6 +6986,17 @@ function resetSpeakingTimer(restart = false) {
   if (restart) startSpeakingTimer();
 }
 
+function startImpromtuSpeak() {
+  // Switch to speak phase and immediately start the 1-minute timer
+  setSpeakingPhase('speak');
+  startSpeakingTimer();
+}
+
+function adjustSpeakingTimer(delta) {
+  speakingTimerSecs = Math.max(10, speakingTimerSecs + delta);
+  _setSpeakingTimerDisplay(speakingTimerSecs);
+}
+
 /* ─── Vocabulary Learning Module ─────────────────────────────────────────── */
 function loadVocabLearn() {
   // Render topic chips
@@ -6993,10 +7036,36 @@ function renderVocabWordPreview() {
   const preview = document.getElementById('vl-word-preview');
   if (!preview) return;
   const words = _getVocabWords();
-  if (!words.length) { preview.innerHTML = '<span style="color:var(--text-secondary);font-size:13px">No words for this selection</span>'; return; }
-  preview.innerHTML = words.slice(0, 8).map(w =>
-    `<span class="vl-preview-chip">${escapeHtml(w.word)}</span>`
-  ).join('') + (words.length > 8 ? `<span class="vl-preview-chip" style="opacity:0.5">+${words.length - 8} more</span>` : '');
+  if (!words.length) {
+    preview.innerHTML = '<p style="color:var(--text-secondary);font-size:13px">No words for this selection.</p>';
+    return;
+  }
+  preview.innerHTML = `
+    <div class="vl-word-table-header">${words.length} words · click row to expand</div>
+    <div class="vl-word-table">
+      ${words.map((w, i) => `
+        <div class="vl-word-row" onclick="toggleVlRow(${i})">
+          <div class="vl-word-row-main">
+            <span class="vl-wt-word">${escapeHtml(w.word)}</span>
+            <span class="vl-wt-vn">${escapeHtml(w.vietnamese)}</span>
+            <span class="vl-wt-def">${escapeHtml(w.definition)}</span>
+            <span class="vl-wt-chevron">›</span>
+          </div>
+          <div class="vl-word-row-detail hidden" id="vl-row-detail-${i}">
+            <div class="vl-wt-colloc">📎 ${w.collocations.map(c => escapeHtml(c)).join(' · ')}</div>
+            <div class="vl-wt-example">"${escapeHtml(w.example)}"</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function toggleVlRow(i) {
+  const detail = document.getElementById(`vl-row-detail-${i}`);
+  const row = detail?.closest('.vl-word-row');
+  if (!detail) return;
+  const isOpen = !detail.classList.contains('hidden');
+  detail.classList.toggle('hidden', isOpen);
+  row?.classList.toggle('vl-row-open', !isOpen);
 }
 
 function _getVocabWords() {
