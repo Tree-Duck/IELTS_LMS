@@ -4356,3 +4356,12 @@ input:focus, textarea:focus, select:focus {
 .vl-baby-weak { color:#dc2626; font-weight:600; }
 .vl-baby-upgrade { color:#16a34a; font-weight:600; }
 .vl-baby-example { color:var(--text-secondary); font-size:13px; }
+
+/* Save-to-vocab button on word rows */
+.vl-save-btn {
+  margin-left:auto; padding:2px 8px; border:none; background:none;
+  cursor:pointer; font-size:15px; border-radius:4px; flex-shrink:0;
+  opacity:0.4; transition:opacity .15s;
+}
+.vl-word-row:hover .vl-save-btn { opacity:1; }
+.vl-save-btn:disabled { opacity:1; cursor:default; }

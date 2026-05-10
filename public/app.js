@@ -7320,6 +7320,7 @@ function renderVocabWordPreview() {
             <span class="vl-wt-word">${escapeHtml(w.word)}</span>
             <span class="vl-wt-vn">${escapeHtml(w.vietnamese)}</span>
             <span class="vl-wt-def">${escapeHtml(w.definition)}</span>
+            <button class="vl-save-btn" id="vl-save-${i}" onclick="saveVocabWordFromPreview(${i},event)" title="Save to My Vocabulary">💾</button>
             <span class="vl-wt-chevron">›</span>
           </div>
           <div class="vl-word-row-detail hidden" id="vl-row-detail-${i}">
@@ -7337,6 +7338,29 @@ function toggleVlRow(i) {
   const isOpen = !detail.classList.contains('hidden');
   detail.classList.toggle('hidden', isOpen);
   row?.classList.toggle('vl-row-open', !isOpen);
+}
+
+async function saveVocabWordFromPreview(idx, event) {
+  event.stopPropagation();
+  if (!token) { alert('Please log in to save words.'); return; }
+  const w = _getVocabWords()[idx];
+  if (!w) return;
+  const btn = document.getElementById(`vl-save-${idx}`);
+  try {
+    await api('/api/saved-words', {
+      method: 'POST',
+      body: JSON.stringify({
+        word: w.word,
+        definition: `${w.definition} 🇻🇳 ${w.vietnamese}`,
+        example: w.example,
+        source: `Vocab Learning (${vocabTopic} · ${vocabLevel})`
+      })
+    });
+    if (btn) { btn.textContent = '✅'; btn.disabled = true; }
+    showToast(`"${w.word}" saved to My Vocabulary!`);
+  } catch (err) {
+    alert('Save failed: ' + err.message);
+  }
 }
 
 function _getVocabWords() {
