@@ -85,33 +85,33 @@ const PROMPT_BANK = {
   ],
   task2: [
     // Easy — direct opinion/agree-disagree on familiar topics
-    { difficulty: 'easy', q: 'Some people believe that universities should only offer courses that are useful for employment. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'In many countries, the proportion of older people is steadily increasing. Do you think this is a positive or negative development? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'The increasing use of technology in the classroom is helping students learn more effectively. To what extent do you agree or disagree with this statement? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'Many people believe that social networking sites such as Facebook have had a huge negative impact on both individuals and society. To what extent do you agree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'The best way to reduce crime is to give longer prison sentences. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'Some countries spend large amounts of money on space exploration programmes. Do you think this money could be better spent? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'easy', q: 'It is argued that getting a university education is the best way to guarantee a successful career. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'easy', q: 'Governments should spend money on railways rather than building new roads. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Education', q: 'Some people believe that universities should only offer courses that are useful for employment. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Society', q: 'In many countries, the proportion of older people is steadily increasing. Do you think this is a positive or negative development? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Technology', q: 'The increasing use of technology in the classroom is helping students learn more effectively. To what extent do you agree or disagree with this statement? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Technology', q: 'Many people believe that social networking sites such as Facebook have had a huge negative impact on both individuals and society. To what extent do you agree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Crime & Law', q: 'The best way to reduce crime is to give longer prison sentences. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Technology', q: 'Some countries spend large amounts of money on space exploration programmes. Do you think this money could be better spent? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'easy', topic: 'Education', q: 'It is argued that getting a university education is the best way to guarantee a successful career. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'easy', topic: 'Environment', q: 'Governments should spend money on railways rather than building new roads. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
     // Medium — discuss both sides, causes/solutions, or advantages/disadvantages
-    { difficulty: 'medium', q: 'Some people think that a sense of competition in children should be encouraged. Others believe that children who are taught to cooperate rather than compete become more useful adults. Discuss both these views and give your own opinion.' },
-    { difficulty: 'medium', q: 'Some people say that advertising encourages us to buy things we do not really need. Others say that advertisements tell us about new products that may improve our lives. Discuss both views and give your own opinion.' },
-    { difficulty: 'medium', q: 'In some countries, the government pays for university education. In other countries, students must pay for themselves. Discuss the advantages and disadvantages of government-funded university education.' },
-    { difficulty: 'medium', q: 'Traffic congestion is becoming a huge problem in many cities around the world. What are the causes of this problem, and what measures could be taken to reduce it? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'medium', q: 'Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion.' },
-    { difficulty: 'medium', q: 'In some parts of the world, traditional festivals and celebrations are disappearing. Why is this happening, and is it a positive or negative development? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'medium', q: 'Many people prefer to watch foreign films rather than locally produced films. Why could this be? Should governments give more financial support to local film industries? Give reasons for your answer.' },
-    { difficulty: 'medium', q: 'More and more people are choosing to live and work abroad. What are the reasons for this, and do the advantages outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'medium', q: 'Some people feel that manufacturers and supermarkets have the responsibility to reduce the amount of packaging of goods. Others argue that it is the responsibility of consumers. Discuss both views and give your own opinion.' },
-    { difficulty: 'medium', q: 'Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?' },
-    { difficulty: 'medium', q: 'Many people are afraid that artificial intelligence will replace human workers in the near future. Do the advantages of AI outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'medium', q: 'Children today spend less time playing outdoors and more time on screens. What are the reasons for this, and what are the consequences? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'medium', q: 'Nowadays, people are living longer than ever before. What problems does this create and what solutions can you suggest? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
-    { difficulty: 'medium', q: 'The world is consuming far more natural resources than it did in the past. What are the reasons for this, and what can be done to stop it? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'medium', topic: 'Education', q: 'Some people think that a sense of competition in children should be encouraged. Others believe that children who are taught to cooperate rather than compete become more useful adults. Discuss both these views and give your own opinion.' },
+    { difficulty: 'medium', topic: 'Society', q: 'Some people say that advertising encourages us to buy things we do not really need. Others say that advertisements tell us about new products that may improve our lives. Discuss both views and give your own opinion.' },
+    { difficulty: 'medium', topic: 'Education', q: 'In some countries, the government pays for university education. In other countries, students must pay for themselves. Discuss the advantages and disadvantages of government-funded university education.' },
+    { difficulty: 'medium', topic: 'Environment', q: 'Traffic congestion is becoming a huge problem in many cities around the world. What are the causes of this problem, and what measures could be taken to reduce it? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', topic: 'Education', q: 'Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion.' },
+    { difficulty: 'medium', topic: 'Society', q: 'In some parts of the world, traditional festivals and celebrations are disappearing. Why is this happening, and is it a positive or negative development? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', topic: 'Society', q: 'Many people prefer to watch foreign films rather than locally produced films. Why could this be? Should governments give more financial support to local film industries? Give reasons for your answer.' },
+    { difficulty: 'medium', topic: 'Society', q: 'More and more people are choosing to live and work abroad. What are the reasons for this, and do the advantages outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', topic: 'Environment', q: 'Some people feel that manufacturers and supermarkets have the responsibility to reduce the amount of packaging of goods. Others argue that it is the responsibility of consumers. Discuss both views and give your own opinion.' },
+    { difficulty: 'medium', topic: 'Education', q: 'Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?' },
+    { difficulty: 'medium', topic: 'Technology', q: 'Many people are afraid that artificial intelligence will replace human workers in the near future. Do the advantages of AI outweigh the disadvantages? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', topic: 'Health', q: 'Children today spend less time playing outdoors and more time on screens. What are the reasons for this, and what are the consequences? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'medium', topic: 'Health', q: 'Nowadays, people are living longer than ever before. What problems does this create and what solutions can you suggest? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
+    { difficulty: 'medium', topic: 'Environment', q: 'The world is consuming far more natural resources than it did in the past. What are the reasons for this, and what can be done to stop it? Give reasons for your answer and include any relevant examples from your own knowledge or experience.' },
     // Hard — abstract, multi-layered, or nuanced arguments
-    { difficulty: 'hard', q: 'Many governments think that economic progress is their most important goal. Some people, however, think that other types of progress are equally important for a country. Discuss both these views and give your own opinion.' },
-    { difficulty: 'hard', q: 'The best way to solve the world\'s environmental problems is to increase the price of fuel. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
-    { difficulty: 'hard', q: 'Some people believe that it is better to accept a bad situation than to try to change it. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'hard', topic: 'Work & Career', q: 'Many governments think that economic progress is their most important goal. Some people, however, think that other types of progress are equally important for a country. Discuss both these views and give your own opinion.' },
+    { difficulty: 'hard', topic: 'Environment', q: 'The best way to solve the world\'s environmental problems is to increase the price of fuel. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
+    { difficulty: 'hard', topic: 'Society', q: 'Some people believe that it is better to accept a bad situation than to try to change it. To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples.' },
   ]
 };
 
@@ -1963,11 +1963,17 @@ function updateTopicOptions() {
     </button>
   `).join('');
 
-  // Show/hide Task 2 idea scaffold fields inside ideas-card
+  // Show/hide Task 2 idea scaffold toggle row (fields stay collapsed until user opens)
+  const scaffoldToggleRow = document.getElementById('scaffold-toggle-row');
   const scaffoldFields = document.getElementById('scaffold-fields');
-  if (scaffoldFields) {
-    if (taskType === 'task2') scaffoldFields.classList.remove('hidden');
-    else { scaffoldFields.classList.add('hidden'); clearScaffold(); }
+  if (taskType === 'task2') {
+    if (scaffoldToggleRow) scaffoldToggleRow.classList.remove('hidden');
+    // Fields stay collapsed — user opens manually
+  } else {
+    if (scaffoldToggleRow) scaffoldToggleRow.classList.add('hidden');
+    if (scaffoldFields) { scaffoldFields.classList.add('hidden'); clearScaffold(); }
+    const icon = document.getElementById('scaffold-toggle-icon');
+    if (icon) icon.textContent = '▸';
   }
   // Update empty-state hint text for ideas card
   const ideasEmpty = document.querySelector('#ideas-body .hint-empty');
@@ -1985,6 +1991,15 @@ function selectTopic(el, value) {
 }
 
 /* ─── Idea Scaffold ──────────────────────────────────────────────────────── */
+function toggleScaffoldFields() {
+  const fields = document.getElementById('scaffold-fields');
+  const icon = document.getElementById('scaffold-toggle-icon');
+  if (!fields) return;
+  const open = !fields.classList.contains('hidden');
+  fields.classList.toggle('hidden', open);
+  if (icon) icon.textContent = open ? '▸' : '▾';
+}
+
 function clearScaffold() {
   ['scaffold-thesis','scaffold-bp1','scaffold-bp2','scaffold-counter'].forEach(id => {
     const el = document.getElementById(id);
@@ -6765,6 +6780,11 @@ async function insertRandomPrompt() {
   if (diff !== 'all') {
     const filtered = bank.filter(p => p.difficulty === diff);
     if (filtered.length) bank = filtered;
+  }
+  // Filter by selected topic chip (task2 only; topic field present on built-in prompts)
+  if (taskType === 'task2' && selectedTopic && selectedTopic !== 'random') {
+    const topicFiltered = bank.filter(p => p.topic === selectedTopic);
+    if (topicFiltered.length) bank = topicFiltered;
   }
   const item = bank[Math.floor(Math.random() * bank.length)];
   const ta = document.getElementById('essay-prompt');

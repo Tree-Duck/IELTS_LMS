@@ -580,6 +580,11 @@
                 <div class="hint-card" id="ideas-card">
                   <div class="hint-card-header">💡 Body Arguments<button type="button" class="hint-generate-btn" id="ideas-btn" onclick="requestSingleHint('ideas')">Generate ✨</button></div>
                   <!-- Scaffold inputs — Task 2 only, shown by updateTopicOptions() -->
+                  <div id="scaffold-toggle-row" class="scaffold-toggle-row hidden">
+                    <button type="button" class="scaffold-toggle-btn" id="scaffold-toggle-btn" onclick="toggleScaffoldFields()">
+                      ✏️ Enter your own ideas <span id="scaffold-toggle-icon">▸</span>
+                    </button>
+                  </div>
                   <div id="scaffold-fields" class="scaffold-fields hidden">
                     <p class="scaffold-hint">Enter your own ideas and the AI will develop them — leave blank for AI suggestions.</p>
                     <div class="scaffold-row">
