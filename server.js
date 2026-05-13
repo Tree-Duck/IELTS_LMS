@@ -2146,6 +2146,46 @@ app.delete('/api/drafts/:id', authenticate, (req, res) => {
   }
 });
 
+// ─── Practice: Paragraph Feedback ────────────────────────────────────────────
+app.post('/api/practice/paragraph-feedback', authenticate, async (req, res) => {
+  try {
+    const { paragraph, topic, starter } = req.body;
+    if (!paragraph || paragraph.trim().length < 20) {
+      return res.status(400).json({ error: 'Paragraph too short.' });
+    }
+    const prompt = `You are an IELTS writing coach. A student wrote this paragraph on the topic: "${topic || 'general'}".
+${starter ? `The paragraph starter was: "${starter}"\n` : ''}
+Student's paragraph:
+"""
+${paragraph.trim().slice(0, 800)}
+"""
+
+Give brief, specific, encouraging feedback. Return ONLY this JSON:
+{
+  "vocabulary": "1-2 sentences on word choice — highlight 1 strong word they used or suggest a better word for a weak one",
+  "sentences": "1 sentence on sentence variety and structure",
+  "coherence": "1 sentence on how logically the ideas flow",
+  "tip": "1 actionable tip to improve this paragraph for IELTS Band 6+"
+}`;
+
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
+    db.logUsage('practice-paragraph', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    res.json(JSON.parse(raw));
+  } catch (err) {
+    console.error('Paragraph feedback error:', err);
+    res.status(500).json({ error: 'Failed to get feedback' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

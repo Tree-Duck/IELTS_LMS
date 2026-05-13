@@ -222,6 +222,26 @@
           </div>
         </div>
 
+        <!-- Practice group -->
+        <div class="nav-group open" id="nav-group-practice">
+          <div class="nav-group-header">
+            <span class="nav-icon">🏋️</span>
+            <span class="nav-group-label">Practice</span>
+            <span class="nav-group-chevron">›</span>
+          </div>
+          <div class="nav-group-items">
+            <button class="nav-item nav-sub-item" onclick="showView('practice-sentences')" id="nav-practice-sentences">
+              <span class="nav-icon">✏️</span> Sentence Exercises
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('practice-paragraphs')" id="nav-practice-paragraphs">
+              <span class="nav-icon">📝</span> Paragraph Writing
+            </button>
+            <button class="nav-item nav-sub-item" onclick="showView('practice-grammar')" id="nav-practice-grammar">
+              <span class="nav-icon">📖</span> Grammar Guide
+            </button>
+          </div>
+        </div>
+
         <!-- Teacher group (hidden until teacher/admin login) -->
         <div class="nav-group hidden" id="nav-group-teacher">
           <div class="nav-group-header">
@@ -1301,6 +1321,72 @@
           </div>
           <div id="vl-baby-list"></div>
         </div>
+      </div>
+
+      <!-- ═══════════════════ PRACTICE VIEWS ═══════════════════ -->
+
+      <!-- Sentence Exercises View -->
+      <div id="view-practice-sentences" class="view hidden">
+        <div class="page-header">
+          <h2>✏️ Sentence Exercises</h2>
+          <p>Practice using IELTS vocabulary in context</p>
+        </div>
+        <div class="practice-controls">
+          <div class="vl-picker-row">
+            <label>Topic</label>
+            <div id="pse-topic-chips" class="vl-topic-chips"></div>
+          </div>
+          <div class="vl-picker-row">
+            <label>Level</label>
+            <div class="vl-level-chips">
+              <button class="vl-chip vl-level-chip" data-level="B1" onclick="psSelectLevel('B1')">B1</button>
+              <button class="vl-chip vl-level-chip" data-level="B2" onclick="psSelectLevel('B2')">B2</button>
+              <button class="vl-chip vl-level-chip" data-level="C1" onclick="psSelectLevel('C1')">C1</button>
+              <button class="vl-chip vl-level-chip" data-level="C2" onclick="psSelectLevel('C2')">C2</button>
+            </div>
+          </div>
+          <div class="practice-mode-tabs">
+            <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Fill in Blank</button>
+            <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Write a Sentence</button>
+            <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Unscramble</button>
+          </div>
+        </div>
+        <div id="pse-exercise-area"></div>
+      </div>
+
+      <!-- Paragraph Writing View -->
+      <div id="view-practice-paragraphs" class="view hidden">
+        <div class="page-header">
+          <h2>📝 Paragraph Writing</h2>
+          <p>Write a paragraph and get AI feedback instantly</p>
+        </div>
+        <div class="practice-controls">
+          <div class="vl-picker-row">
+            <label>Topic</label>
+            <div id="pp-topic-chips" class="vl-topic-chips"></div>
+          </div>
+        </div>
+        <div id="pp-prompt-box" class="pp-prompt-box hidden">
+          <div class="pp-starter-label">Start your paragraph with:</div>
+          <div id="pp-starter-text" class="pp-starter-text"></div>
+          <button class="btn btn-ghost btn-sm" onclick="ppNewStarter()">🔀 New starter</button>
+        </div>
+        <div id="pp-write-area" class="hidden">
+          <textarea id="pp-textarea" class="pp-textarea" placeholder="Continue writing your paragraph here... (aim for 80–120 words)"></textarea>
+          <div id="pp-word-count" class="pp-word-count">0 words</div>
+          <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Get AI Feedback ✨</button>
+        </div>
+        <div id="pp-feedback-area" class="hidden"></div>
+        <button class="btn btn-outline btn-sm" id="pp-try-again-btn" onclick="ppReset()" style="margin-top:16px;display:none">Try another paragraph →</button>
+      </div>
+
+      <!-- Grammar Guide View -->
+      <div id="view-practice-grammar" class="view hidden">
+        <div class="page-header">
+          <h2>📖 Grammar Guide</h2>
+          <p>Key grammar structures for IELTS Band 6+</p>
+        </div>
+        <div id="grammar-guide-content"></div>
       </div>
 
       <!-- Vocabulary Notebook View -->

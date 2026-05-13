@@ -1325,6 +1325,9 @@ function showView(name) {
   else if (name === 'vocab') loadVocabNotebook();
   else if (name === 'vocab-learn') loadVocabLearn();
   else if (name === 'speaking') loadSpeakingTopicGen();
+  else if (name === 'practice-sentences') loadPracticeSentences();
+  else if (name === 'practice-paragraphs') loadPracticeParagraphs();
+  else if (name === 'practice-grammar') loadPracticeGrammar();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -7343,6 +7346,528 @@ function exportVocabToExcel() {
 
   XLSX.writeFile(wb, 'IELTS_Vocab_Bank.xlsx');
   showToast('Vocab exported! Check your Downloads folder.');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRACTICE MODULE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Sentence Exercises ─────────────────────────────────────────────────── */
+let _psTopic = Object.keys(VOCAB_BANK)[0];
+let _psLevel = 'B2';
+let _psMode  = 'fib';
+let _psWords = [];
+let _psIdx   = 0;
+let _psScore = 0;
+
+function loadPracticeSentences() {
+  // Topic chips
+  const chips = document.getElementById('pse-topic-chips');
+  if (chips) {
+    chips.innerHTML = Object.keys(VOCAB_BANK).map(t =>
+      `<button class="vl-chip${t === _psTopic ? ' active' : ''}" onclick="psSelectTopic('${t}')">${t}</button>`
+    ).join('');
+  }
+  // Level chips
+  document.querySelectorAll('#view-practice-sentences .vl-level-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.level === _psLevel);
+  });
+  psLoadExercise();
+}
+
+function psSelectTopic(t) {
+  _psTopic = t;
+  document.querySelectorAll('#pse-topic-chips .vl-chip').forEach(b =>
+    b.classList.toggle('active', b.textContent.trim() === t));
+  psLoadExercise();
+}
+
+function psSelectLevel(l) {
+  _psLevel = l;
+  document.querySelectorAll('#view-practice-sentences .vl-level-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.level === l));
+  psLoadExercise();
+}
+
+function psSwitchMode(mode) {
+  _psMode = mode;
+  ['fib', 'write', 'unscramble'].forEach(m => {
+    document.getElementById(`pse-tab-${m}`)?.classList.toggle('active', m === mode);
+  });
+  psLoadExercise();
+}
+
+function psLoadExercise() {
+  _psWords = (VOCAB_BANK[_psTopic]?.[_psLevel] || []).filter(w => w.example && w.word);
+  _psIdx = 0; _psScore = 0;
+  psRenderExercise();
+}
+
+function psRenderExercise() {
+  const area = document.getElementById('pse-exercise-area');
+  if (!area) return;
+  if (!_psWords.length) {
+    area.innerHTML = '<p class="practice-empty">No words with examples for this topic/level. Try another combination.</p>';
+    return;
+  }
+  const w = _psWords[_psIdx];
+  const total = _psWords.length;
+
+  if (_psMode === 'fib') {
+    const blank = w.example.replace(new RegExp(`\\b${w.word}\\b`, 'gi'), '___');
+    area.innerHTML = `
+      <div class="practice-card">
+        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
+        <div class="practice-word-def">
+          <strong>Definition:</strong> ${escapeHtml(w.definition)}
+          <span class="practice-vn">${escapeHtml(w.vietnamese)}</span>
+        </div>
+        <div class="practice-sentence">${escapeHtml(blank)}</div>
+        <input type="text" id="pse-input" class="practice-input" placeholder="Type the missing word…" onkeydown="if(event.key==='Enter')psCheckFib()">
+        <div class="practice-actions">
+          <button class="btn btn-primary" onclick="psCheckFib()">Check</button>
+          <button class="btn btn-ghost btn-sm" onclick="psReveal()">Show answer</button>
+        </div>
+        <div id="pse-feedback" class="practice-feedback"></div>
+        <div class="practice-score">Score: ${_psScore} / ${_psIdx}</div>
+      </div>`;
+    document.getElementById('pse-input')?.focus();
+
+  } else if (_psMode === 'write') {
+    area.innerHTML = `
+      <div class="practice-card">
+        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
+        <div class="practice-word-big">${escapeHtml(w.word)}</div>
+        <div class="practice-word-def">${escapeHtml(w.definition)} — <em>${escapeHtml(w.vietnamese)}</em></div>
+        <div class="practice-collocs">Collocations: ${(Array.isArray(w.collocations) ? w.collocations : []).map(c => `<span class="colloc-chip">${escapeHtml(c)}</span>`).join(' ')}</div>
+        <textarea id="pse-write-input" class="practice-textarea" placeholder="Write your own sentence using '${w.word}'…" rows="3"></textarea>
+        <div class="practice-actions">
+          <button class="btn btn-primary" onclick="psCheckWrite()">Done — show model</button>
+        </div>
+        <div id="pse-feedback" class="practice-feedback"></div>
+      </div>`;
+
+  } else if (_psMode === 'unscramble') {
+    const words = w.example.split(/\s+/);
+    const shuffled = [...words].sort(() => Math.random() - 0.5);
+    // Store correct order in data
+    area.innerHTML = `
+      <div class="practice-card">
+        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
+        <div class="practice-word-def"><strong>${escapeHtml(w.word)}</strong> — ${escapeHtml(w.definition)}</div>
+        <p class="practice-hint">Tap words in the correct order:</p>
+        <div id="pse-selected-words" class="unscramble-selected" onclick="psUnselectWord(event)"></div>
+        <div id="pse-word-bank" class="unscramble-bank">
+          ${shuffled.map((wd, i) => `<button class="unscramble-word" data-word="${escapeHtml(wd)}" data-idx="${i}" onclick="psSelectWord(this)">${escapeHtml(wd)}</button>`).join('')}
+        </div>
+        <div class="practice-actions">
+          <button class="btn btn-primary" onclick="psCheckUnscramble('${escapeHtml(w.example)}')">Check</button>
+          <button class="btn btn-ghost btn-sm" onclick="psClearUnscramble()">Clear</button>
+        </div>
+        <div id="pse-feedback" class="practice-feedback"></div>
+      </div>`;
+  }
+}
+
+function psCheckFib() {
+  const input = document.getElementById('pse-input');
+  const fb = document.getElementById('pse-feedback');
+  if (!input || !fb) return;
+  const answer = input.value.trim().toLowerCase();
+  const correct = (_psWords[_psIdx].word || '').toLowerCase();
+  const isRight = answer === correct;
+  if (isRight) _psScore++;
+  fb.className = 'practice-feedback ' + (isRight ? 'correct' : 'incorrect');
+  fb.innerHTML = isRight
+    ? `✅ Correct! <em>${escapeHtml(_psWords[_psIdx].example)}</em>`
+    : `❌ The word was <strong>${escapeHtml(_psWords[_psIdx].word)}</strong>. <em>${escapeHtml(_psWords[_psIdx].example)}</em>`;
+  setTimeout(() => psNext(), 2000);
+}
+
+function psReveal() {
+  const fb = document.getElementById('pse-feedback');
+  if (fb) {
+    fb.className = 'practice-feedback neutral';
+    fb.innerHTML = `Word: <strong>${escapeHtml(_psWords[_psIdx].word)}</strong> — <em>${escapeHtml(_psWords[_psIdx].example)}</em>`;
+  }
+  setTimeout(() => psNext(), 2500);
+}
+
+function psCheckWrite() {
+  const input = document.getElementById('pse-write-input');
+  const fb = document.getElementById('pse-feedback');
+  if (!input || !fb) return;
+  const student = input.value.trim();
+  const w = _psWords[_psIdx];
+  const hasWord = student.toLowerCase().includes(w.word.toLowerCase());
+  fb.className = 'practice-feedback ' + (hasWord ? 'correct' : 'neutral');
+  fb.innerHTML = hasWord
+    ? `✅ Good — you used the word! Model sentence: <em>${escapeHtml(w.example)}</em>`
+    : `💡 Try to include <strong>${escapeHtml(w.word)}</strong>. Model: <em>${escapeHtml(w.example)}</em>`;
+  setTimeout(() => psNext(), 3000);
+}
+
+function psSelectWord(btn) {
+  const selected = document.getElementById('pse-selected-words');
+  if (!selected) return;
+  btn.classList.add('used');
+  btn.disabled = true;
+  const span = document.createElement('span');
+  span.className = 'unscramble-selected-word';
+  span.textContent = btn.dataset.word;
+  span.dataset.sourceIdx = btn.dataset.idx;
+  selected.appendChild(span);
+}
+
+function psUnselectWord(e) {
+  if (!e.target.classList.contains('unscramble-selected-word')) return;
+  const idx = e.target.dataset.sourceIdx;
+  const bank = document.querySelector(`#pse-word-bank [data-idx="${idx}"]`);
+  if (bank) { bank.classList.remove('used'); bank.disabled = false; }
+  e.target.remove();
+}
+
+function psClearUnscramble() {
+  const selected = document.getElementById('pse-selected-words');
+  if (selected) {
+    [...selected.querySelectorAll('.unscramble-selected-word')].forEach(s => {
+      const bank = document.querySelector(`#pse-word-bank [data-idx="${s.dataset.sourceIdx}"]`);
+      if (bank) { bank.classList.remove('used'); bank.disabled = false; }
+      s.remove();
+    });
+  }
+}
+
+function psCheckUnscramble(correct) {
+  const selected = document.getElementById('pse-selected-words');
+  const fb = document.getElementById('pse-feedback');
+  if (!selected || !fb) return;
+  const answer = [...selected.querySelectorAll('.unscramble-selected-word')].map(s => s.textContent).join(' ');
+  const isRight = answer.trim() === correct.trim();
+  if (isRight) _psScore++;
+  fb.className = 'practice-feedback ' + (isRight ? 'correct' : 'incorrect');
+  fb.innerHTML = isRight
+    ? `✅ Correct!`
+    : `❌ Correct order: <em>${escapeHtml(correct)}</em>`;
+  setTimeout(() => psNext(), 2500);
+}
+
+function psNext() {
+  _psIdx++;
+  if (_psIdx >= _psWords.length) {
+    const area = document.getElementById('pse-exercise-area');
+    if (area) area.innerHTML = `
+      <div class="practice-card practice-complete">
+        <div class="practice-complete-icon">🎉</div>
+        <h3>All done!</h3>
+        <p>Score: <strong>${_psScore} / ${_psWords.length}</strong></p>
+        <button class="btn btn-primary" onclick="psLoadExercise()">Practice again</button>
+      </div>`;
+  } else {
+    psRenderExercise();
+  }
+}
+
+/* ─── Paragraph Writing ──────────────────────────────────────────────────── */
+const PARAGRAPH_STARTERS = {
+  'Technology': [
+    'One significant impact of technology on modern society is',
+    'While technology has undoubtedly improved our lives, it has also',
+    'The rapid development of artificial intelligence means that',
+    'Many experts argue that our dependence on digital devices has',
+  ],
+  'Environment': [
+    'One of the most pressing environmental challenges today is',
+    'Although governments have introduced policies to reduce pollution,',
+    'The consequences of climate change are already evident in',
+    'It is widely accepted that human activity has significantly contributed to',
+  ],
+  'Education': [
+    'A well-rounded education system should not only focus on academic skills but also',
+    'Critics of standardised testing argue that it fails to',
+    'The growing availability of online learning has fundamentally changed the way',
+    'One key challenge facing modern education systems is',
+  ],
+  'Health': [
+    'A sedentary lifestyle has been directly linked to',
+    'Despite advances in medicine, many preventable diseases continue to',
+    'Governments have a responsibility to promote public health by',
+    'The rising rates of obesity in developed nations suggest that',
+  ],
+  'Society': [
+    'Social inequality remains one of the most persistent problems in',
+    'The rapid pace of urbanisation has led to',
+    'While migration brings numerous benefits, it can also',
+    'An ageing population poses significant challenges for',
+  ],
+  'Work & Career': [
+    'The rise of remote working has transformed the way many people',
+    'Automation threatens to displace millions of workers, particularly in',
+    'A healthy work-life balance is essential because',
+    'The gig economy offers flexibility, but it also',
+  ],
+  'Crime & Law': [
+    'Rehabilitation, rather than punishment, should be the primary goal of',
+    'Stricter legislation alone is unlikely to deter criminal behaviour because',
+    'Surveillance technology has become increasingly common, yet',
+    'Poverty and lack of education are often cited as root causes of',
+  ],
+};
+
+let _ppTopic = Object.keys(PARAGRAPH_STARTERS)[0];
+let _ppStarterIdx = 0;
+
+function loadPracticeParagraphs() {
+  const chips = document.getElementById('pp-topic-chips');
+  if (chips) {
+    chips.innerHTML = Object.keys(PARAGRAPH_STARTERS).map(t =>
+      `<button class="vl-chip${t === _ppTopic ? ' active' : ''}" onclick="ppSelectTopic('${t}')">${t}</button>`
+    ).join('');
+  }
+  ppShowPrompt();
+}
+
+function ppSelectTopic(t) {
+  _ppTopic = t;
+  _ppStarterIdx = 0;
+  document.querySelectorAll('#pp-topic-chips .vl-chip').forEach(b =>
+    b.classList.toggle('active', b.textContent.trim() === t));
+  ppShowPrompt();
+  ppReset();
+}
+
+function ppShowPrompt() {
+  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
+  const starter = starters[_ppStarterIdx % starters.length];
+  const box = document.getElementById('pp-prompt-box');
+  const txt = document.getElementById('pp-starter-text');
+  const writeArea = document.getElementById('pp-write-area');
+  if (box) box.classList.remove('hidden');
+  if (txt) txt.textContent = starter + '…';
+  if (writeArea) writeArea.classList.remove('hidden');
+  const ta = document.getElementById('pp-textarea');
+  if (ta) {
+    ta.value = '';
+    ta.oninput = () => {
+      const wc = ta.value.trim().split(/\s+/).filter(Boolean).length;
+      const wcel = document.getElementById('pp-word-count');
+      if (wcel) wcel.textContent = `${wc} words`;
+    };
+  }
+}
+
+function ppNewStarter() {
+  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
+  _ppStarterIdx = (_ppStarterIdx + 1) % starters.length;
+  ppShowPrompt();
+  document.getElementById('pp-feedback-area')?.classList.add('hidden');
+  document.getElementById('pp-try-again-btn').style.display = 'none';
+}
+
+async function ppSubmitFeedback() {
+  const ta = document.getElementById('pp-textarea');
+  const btn = document.getElementById('pp-submit-btn');
+  if (!ta || !ta.value.trim()) { showToast('Write something first!'); return; }
+  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
+  const starter = starters[_ppStarterIdx % starters.length];
+  const full = starter + ' ' + ta.value.trim();
+
+  btn.disabled = true;
+  btn.textContent = 'Getting feedback…';
+  try {
+    const result = await api('/api/practice/paragraph-feedback', {
+      method: 'POST',
+      body: JSON.stringify({ paragraph: full, topic: _ppTopic, starter })
+    });
+    const fb = document.getElementById('pp-feedback-area');
+    if (fb) {
+      fb.classList.remove('hidden');
+      fb.innerHTML = `
+        <div class="pp-feedback-card">
+          <h4>AI Feedback</h4>
+          <div class="pp-feedback-row"><span class="pp-fb-label">📝 Vocabulary</span><p>${escapeHtml(result.vocabulary || '')}</p></div>
+          <div class="pp-feedback-row"><span class="pp-fb-label">🔗 Sentences</span><p>${escapeHtml(result.sentences || '')}</p></div>
+          <div class="pp-feedback-row"><span class="pp-fb-label">💡 Coherence</span><p>${escapeHtml(result.coherence || '')}</p></div>
+          <div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Top Tip</span><p>${escapeHtml(result.tip || '')}</p></div>
+          <div class="pp-your-para"><strong>Your paragraph:</strong><p>${escapeHtml(full)}</p></div>
+        </div>`;
+    }
+    const tryBtn = document.getElementById('pp-try-again-btn');
+    if (tryBtn) tryBtn.style.display = 'inline-block';
+  } catch (err) {
+    showToast('Feedback failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Get AI Feedback ✨';
+  }
+}
+
+function ppReset() {
+  const ta = document.getElementById('pp-textarea');
+  if (ta) ta.value = '';
+  const wc = document.getElementById('pp-word-count');
+  if (wc) wc.textContent = '0 words';
+  document.getElementById('pp-feedback-area')?.classList.add('hidden');
+  const tryBtn = document.getElementById('pp-try-again-btn');
+  if (tryBtn) tryBtn.style.display = 'none';
+  ppNewStarter();
+}
+
+/* ─── Grammar Guide ──────────────────────────────────────────────────────── */
+const GRAMMAR_LESSONS = [
+  {
+    title: 'Complex Sentences',
+    icon: '🔗',
+    band_tip: 'Band 6+ requires a mix of simple and complex sentences with subordinate clauses.',
+    sections: [
+      {
+        label: 'Relative clauses',
+        rule: 'Use <em>who/which/that/where</em> to add detail about a noun without starting a new sentence.',
+        examples: [
+          'Students <strong>who lack critical thinking skills</strong> may struggle in higher education.',
+          'Online learning platforms, <strong>which have grown rapidly</strong>, offer flexible study options.',
+        ]
+      },
+      {
+        label: 'Adverbial clauses',
+        rule: 'Use <em>although, while, since, because, unless, even though</em> to show contrast, cause, or condition.',
+        examples: [
+          '<strong>Although governments invest heavily in public transport,</strong> many people still prefer private vehicles.',
+          '<strong>Since the industrial revolution,</strong> carbon emissions have increased dramatically.',
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Passive Voice',
+    icon: '🔄',
+    band_tip: 'Passive voice adds academic tone and variety. Aim for 1–2 passive structures per paragraph.',
+    sections: [
+      {
+        label: 'When to use it',
+        rule: 'Use passive when the doer is unknown, unimportant, or when you want to emphasise the action/result.',
+        examples: [
+          '<strong>Millions of jobs could be replaced</strong> by artificial intelligence in the next decade.',
+          'Environmental legislation <strong>has been strengthened</strong> in many developed nations.',
+        ]
+      },
+      {
+        label: 'Structure',
+        rule: '<em>Subject + be (conjugated) + past participle (+ by + agent)</em>',
+        examples: [
+          'The report <strong>was published</strong> by the World Health Organisation.',
+          'Young people <strong>are being influenced</strong> by social media advertising.',
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Conditionals',
+    icon: '⚖️',
+    band_tip: 'Mixed conditionals and third conditionals signal sophisticated grammar control at Band 7+.',
+    sections: [
+      {
+        label: 'First conditional (real / likely)',
+        rule: '<em>If + present simple, will + infinitive</em>',
+        examples: [
+          '<strong>If governments fail to act</strong> on climate change, global temperatures will continue to rise.',
+        ]
+      },
+      {
+        label: 'Second conditional (hypothetical)',
+        rule: '<em>If + past simple, would + infinitive</em>',
+        examples: [
+          '<strong>If education were free,</strong> more people would have access to higher-paying careers.',
+        ]
+      },
+      {
+        label: 'Third conditional (unreal past)',
+        rule: '<em>If + past perfect, would have + past participle</em>',
+        examples: [
+          '<strong>If stricter policies had been implemented earlier,</strong> the environmental damage would have been far less severe.',
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Linking Words',
+    icon: '🔀',
+    band_tip: 'Overusing "however" and "furthermore" hurts Coherence & Cohesion. Vary your connectors.',
+    sections: [
+      {
+        label: 'Adding ideas',
+        rule: 'furthermore · moreover · in addition · not only … but also',
+        examples: [
+          '<strong>Furthermore,</strong> remote work has reduced commuting time for millions of employees.',
+          'Automation <strong>not only</strong> reduces costs <strong>but also</strong> improves precision.',
+        ]
+      },
+      {
+        label: 'Contrasting',
+        rule: 'however · nevertheless · despite this · on the other hand · whereas · while',
+        examples: [
+          '<strong>Despite the benefits of social media,</strong> its impact on mental health cannot be ignored.',
+          'Urban areas offer better job prospects; <strong>however,</strong> they often suffer from overcrowding.',
+        ]
+      },
+      {
+        label: 'Cause & result',
+        rule: 'therefore · consequently · as a result · this leads to · due to',
+        examples: [
+          '<strong>As a result of</strong> rising living costs, many young people cannot afford to buy homes.',
+          'Poor nutrition in childhood <strong>can lead to</strong> long-term health complications.',
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Paraphrasing the Question',
+    icon: '✍️',
+    band_tip: 'Never copy the question word-for-word. Paraphrase in your introduction using synonyms and restructuring.',
+    sections: [
+      {
+        label: 'Techniques',
+        rule: '(1) Replace key nouns/verbs with synonyms. (2) Change word class (noun → verb). (3) Reorder the sentence structure.',
+        examples: [
+          'Q: <em>"Many people believe social media has had a negative impact on society."</em><br>→ <em>It is widely argued that platforms such as Facebook and Instagram have been detrimental to social cohesion.</em>',
+          'Q: <em>"Governments should spend more on public health."</em><br>→ <em>There is a compelling case for increasing state investment in healthcare systems.</em>',
+        ]
+      }
+    ]
+  }
+];
+
+function loadPracticeGrammar() {
+  const container = document.getElementById('grammar-guide-content');
+  if (!container) return;
+  container.innerHTML = GRAMMAR_LESSONS.map((lesson, li) => `
+    <div class="grammar-card" id="grammar-card-${li}">
+      <div class="grammar-card-header" onclick="toggleGrammarCard(${li})">
+        <span class="grammar-icon">${lesson.icon}</span>
+        <h3 class="grammar-title">${lesson.title}</h3>
+        <span class="grammar-chevron" id="grammar-chevron-${li}">▾</span>
+      </div>
+      <div class="grammar-card-body" id="grammar-body-${li}">
+        <div class="grammar-band-tip">🎯 <strong>Band tip:</strong> ${lesson.band_tip}</div>
+        ${lesson.sections.map(s => `
+          <div class="grammar-section">
+            <div class="grammar-section-label">${s.label}</div>
+            <div class="grammar-rule">${s.rule}</div>
+            <div class="grammar-examples">
+              ${s.examples.map(ex => `<div class="grammar-example">${ex}</div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleGrammarCard(idx) {
+  const body = document.getElementById(`grammar-body-${idx}`);
+  const chevron = document.getElementById(`grammar-chevron-${idx}`);
+  if (!body) return;
+  const isOpen = !body.classList.contains('hidden');
+  body.classList.toggle('hidden', isOpen);
+  if (chevron) chevron.textContent = isOpen ? '›' : '▾';
 }
 
 /* ─── Vocab Learn Load ───────────────────────────────────────────────────── */
