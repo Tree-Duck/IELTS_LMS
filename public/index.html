@@ -6,6 +6,7 @@
   <title>SSP IELTS</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 </head>
@@ -1265,7 +1266,10 @@
               <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Typing Test</button>
               <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Matching</button>
             </div>
-            <button class="btn btn-outline btn-sm" onclick="showVocabUpdateReminder()" style="margin-top:8px">➕ Update vocabulary bank</button>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm" onclick="exportVocabToExcel()">📥 Download vocab (Excel)</button>
+              <button class="btn btn-outline btn-sm" onclick="showVocabUpdateReminder()">➕ Update vocabulary bank</button>
+            </div>
           </div>
 
           <!-- Game container (shown during game) -->

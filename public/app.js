@@ -7287,6 +7287,64 @@ function showVocabUpdateReminder() {
   showToast('To update vocab: open Claude Code and say "Update VOCAB_BANK, ESSENTIAL_COLLOCATIONS, or BABY_WORDS in public/app.js"', 8000);
 }
 
+/* ─── Export Vocab to Excel ──────────────────────────────────────────────── */
+function exportVocabToExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('Excel library not loaded yet. Refresh and try again.');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const levels = ['B1', 'B2', 'C1', 'C2'];
+  const topics = Object.keys(VOCAB_BANK);
+
+  // One sheet per topic
+  topics.forEach(topic => {
+    const rows = [['Level', 'Word', 'Definition (EN)', 'Vietnamese', 'Collocations', 'Example']];
+    levels.forEach(level => {
+      const words = VOCAB_BANK[topic]?.[level] || [];
+      words.forEach(w => {
+        rows.push([
+          level,
+          w.word || '',
+          w.definition || '',
+          w.vietnamese || '',
+          Array.isArray(w.collocations) ? w.collocations.join(' | ') : (w.collocations || ''),
+          w.example || ''
+        ]);
+      });
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    // Column widths
+    ws['!cols'] = [
+      { wch: 6 }, { wch: 22 }, { wch: 40 }, { wch: 22 }, { wch: 45 }, { wch: 55 }
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, topic.substring(0, 31)); // sheet name max 31 chars
+  });
+
+  // Summary sheet: all topics + levels flat
+  const allRows = [['Topic', 'Level', 'Word', 'Definition (EN)', 'Vietnamese', 'Collocations', 'Example']];
+  topics.forEach(topic => {
+    levels.forEach(level => {
+      (VOCAB_BANK[topic]?.[level] || []).forEach(w => {
+        allRows.push([
+          topic, level,
+          w.word || '', w.definition || '', w.vietnamese || '',
+          Array.isArray(w.collocations) ? w.collocations.join(' | ') : (w.collocations || ''),
+          w.example || ''
+        ]);
+      });
+    });
+  });
+  const wsSummary = XLSX.utils.aoa_to_sheet(allRows);
+  wsSummary['!cols'] = [
+    { wch: 14 }, { wch: 6 }, { wch: 22 }, { wch: 40 }, { wch: 22 }, { wch: 45 }, { wch: 55 }
+  ];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'All Words');
+
+  XLSX.writeFile(wb, 'IELTS_Vocab_Bank.xlsx');
+  showToast('Vocab exported! Check your Downloads folder.');
+}
+
 /* ─── Vocab Learn Load ───────────────────────────────────────────────────── */
 function loadVocabLearn() {
   switchVocabSection('words');
