@@ -4496,3 +4496,34 @@ input:focus, textarea:focus, select:focus {
 }
 .vl-word-row:hover .vl-save-btn { opacity:1; }
 .vl-save-btn:disabled { opacity:1; cursor:default; }
+
+/* ─── Speaking: Model Answer + Linked Part 3 ──────────────────────────────── */
+.btn-model-answer-toggle {
+  display: block; margin-top: 14px; background: none;
+  border: 1px solid var(--primary); color: var(--primary);
+  border-radius: 6px; padding: 6px 14px; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.btn-model-answer-toggle:hover { background: rgba(99,102,241,.08); }
+
+.speaking-model-answer {
+  margin-top: 10px; padding: 14px 16px;
+  background: var(--bg-secondary); border-left: 3px solid var(--primary);
+  border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.75;
+  color: var(--text-primary);
+}
+
+.linked-part3-heading {
+  margin-top: 16px; font-size: 11px; font-weight: 700;
+  color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em;
+}
+.linked-part3-item {
+  margin-top: 8px; padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-primary);
+}
+.linked-part3-cat {
+  display: inline-block; font-size: 11px; font-weight: 700; color: var(--primary);
+  background: rgba(99,102,241,.08); border-radius: 4px;
+  padding: 1px 7px; margin-bottom: 5px;
+}
+.linked-part3-item p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-primary); }

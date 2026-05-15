@@ -1442,6 +1442,18 @@
             Click <strong>🎲 Spin!</strong> to get a random topic
           </div>
           <ul class="speaking-cue-bullets hidden" id="speaking-cue-bullets"></ul>
+
+          <!-- Model answer (Part 3 only) -->
+          <div id="speaking-model-answer-wrap" class="hidden">
+            <button class="btn-model-answer-toggle" onclick="toggleModelAnswer()" id="model-answer-toggle-btn">💡 Show model answer ▸</button>
+            <div id="speaking-model-answer" class="speaking-model-answer hidden"></div>
+          </div>
+
+          <!-- Linked Part 3 questions (Part 2 only) -->
+          <div id="speaking-linked-part3" class="hidden">
+            <div class="linked-part3-heading">🔗 Practice Part 3 next</div>
+            <div id="speaking-linked-part3-list"></div>
+          </div>
         </div>
 
         <!-- Controls -->

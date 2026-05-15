@@ -161,93 +161,143 @@ const SPEAKING_BANK = {
     { cat: 'Weather', difficulty: 'medium', q: 'How does the weather affect your mood or daily activities?' },
   ],
   part2: [
-    { cat: 'People', difficulty: 'medium',
+    { cat: 'People', difficulty: 'medium', linked_cats: ['Society & Culture', 'Work & Economy'],
       card: 'Describe a person who has had a significant influence on your life.',
       bullets: ['Who this person is', 'How you know or knew this person', 'What they did that influenced you', 'And explain why you consider them an important influence'] },
-    { cat: 'People', difficulty: 'medium',
+    { cat: 'People', difficulty: 'medium', linked_cats: ['Society & Culture', 'Work & Economy'],
       card: 'Describe someone you know who is very good at their job.',
       bullets: ['Who this person is', 'What their job is', 'Why you think they are good at it', 'And explain how you feel about this person'] },
-    { cat: 'People', difficulty: 'hard',
+    { cat: 'People', difficulty: 'hard', linked_cats: ['Society & Culture', 'Work & Economy'],
       card: 'Describe a public figure you admire.',
       bullets: ['Who this person is', 'What they are famous for', 'What qualities you admire in them', 'And explain how this person has influenced society'] },
-    { cat: 'Places', difficulty: 'easy',
+    { cat: 'Places', difficulty: 'easy', linked_cats: ['Environment', 'Society & Culture'],
       card: 'Describe a place you enjoy visiting in your free time.',
       bullets: ['Where the place is', 'How often you go there', 'What you do there', 'And explain why you enjoy visiting this place'] },
-    { cat: 'Places', difficulty: 'medium',
+    { cat: 'Places', difficulty: 'medium', linked_cats: ['Environment', 'Society & Culture'],
       card: 'Describe a foreign country you would like to visit.',
       bullets: ['Which country you would like to visit', 'When you would like to go', 'What you would like to do there', 'And explain why you want to visit this country'] },
-    { cat: 'Places', difficulty: 'medium',
+    { cat: 'Places', difficulty: 'medium', linked_cats: ['Environment', 'Society & Culture'],
       card: 'Describe a historical place you have visited or would like to visit.',
       bullets: ['Where this place is', 'What makes it historically significant', 'What you know about its history', 'And explain why you find it interesting'] },
-    { cat: 'Places', difficulty: 'easy',
+    { cat: 'Places', difficulty: 'easy', linked_cats: ['Environment', 'Society & Culture'],
       card: 'Describe your ideal home.',
       bullets: ['Where it would be located', 'What it would look like', 'Who you would live there with', 'And explain why this would be your ideal home'] },
-    { cat: 'Objects', difficulty: 'easy',
+    { cat: 'Objects', difficulty: 'easy', linked_cats: ['Technology', 'Work & Economy'],
       card: 'Describe an object that is very important to you.',
       bullets: ['What the object is', 'How long you have had it', 'What you use it for', 'And explain why it is important to you'] },
-    { cat: 'Objects', difficulty: 'medium',
+    { cat: 'Objects', difficulty: 'medium', linked_cats: ['Technology', 'Work & Economy'],
       card: 'Describe a gift you recently gave or received.',
       bullets: ['What the gift was', 'Who gave or received it and why', 'How you felt about it', 'And explain why this gift was memorable'] },
-    { cat: 'Objects', difficulty: 'hard',
+    { cat: 'Objects', difficulty: 'hard', linked_cats: ['Technology', 'Work & Economy'],
       card: 'Describe a piece of technology that you find particularly useful.',
       bullets: ['What the technology is', 'How long you have been using it', 'How it has changed your daily life', 'And explain why you think it is valuable'] },
-    { cat: 'Events', difficulty: 'medium',
+    { cat: 'Events', difficulty: 'medium', linked_cats: ['Society & Culture', 'Education'],
       card: 'Describe a memorable event from your childhood.',
       bullets: ['What the event was', 'When it happened', 'Who was involved', 'And explain why this event has stayed in your memory'] },
-    { cat: 'Events', difficulty: 'easy',
+    { cat: 'Events', difficulty: 'easy', linked_cats: ['Society & Culture', 'Education'],
       card: 'Describe a celebration or festival that is important in your culture.',
       bullets: ['What the celebration or festival is', 'When it takes place', 'How people celebrate it', 'And explain why it is important to you or your culture'] },
-    { cat: 'Events', difficulty: 'hard',
+    { cat: 'Events', difficulty: 'hard', linked_cats: ['Society & Culture', 'Education'],
       card: 'Describe a time when you had to make a difficult decision.',
       bullets: ['What the decision was', 'When you had to make it', 'What factors you considered', 'And explain whether you feel the decision was the right one'] },
-    { cat: 'Experiences', difficulty: 'easy',
+    { cat: 'Experiences', difficulty: 'easy', linked_cats: ['Education', 'Work & Economy'],
       card: 'Describe a journey or trip that you really enjoyed.',
       bullets: ['Where you went', 'When the trip took place', 'Who you went with', 'And explain what made the journey enjoyable'] },
-    { cat: 'Experiences', difficulty: 'medium',
+    { cat: 'Experiences', difficulty: 'medium', linked_cats: ['Education', 'Work & Economy'],
       card: 'Describe a time you successfully learned something new.',
       bullets: ['What you learned', 'When and where you learned it', 'How you learned it', 'And explain how this new knowledge or skill has been useful to you'] },
-    { cat: 'Experiences', difficulty: 'medium',
+    { cat: 'Experiences', difficulty: 'medium', linked_cats: ['Education', 'Work & Economy'],
       card: 'Describe a skill that took you a long time to learn.',
       bullets: ['What the skill is', 'How long it took to learn', 'Who or what helped you', 'And explain how you feel about having this skill now'] },
-    { cat: 'Experiences', difficulty: 'hard',
+    { cat: 'Experiences', difficulty: 'hard', linked_cats: ['Education', 'Work & Economy'],
       card: 'Describe a challenge you faced and how you overcame it.',
       bullets: ['What the challenge was', 'When you faced it', 'What you did to deal with it', 'And explain what you learned from this experience'] },
-    { cat: 'Media & Culture', difficulty: 'medium',
+    { cat: 'Media & Culture', difficulty: 'medium', linked_cats: ['Technology', 'Society & Culture'],
       card: 'Describe a book, film, or TV show that you enjoyed.',
       bullets: ['What it is and what it is about', 'When and how you came across it', 'Who you would recommend it to', 'And explain why you enjoyed it'] },
-    { cat: 'Media & Culture', difficulty: 'medium',
+    { cat: 'Media & Culture', difficulty: 'medium', linked_cats: ['Technology', 'Society & Culture'],
       card: 'Describe a piece of news that you found particularly interesting.',
       bullets: ['What the news story was about', 'When you heard or read it', 'Where you got the information from', 'And explain why you found it interesting'] },
-    { cat: 'Media & Culture', difficulty: 'easy',
+    { cat: 'Media & Culture', difficulty: 'easy', linked_cats: ['Technology', 'Society & Culture'],
       card: 'Describe a song that has special meaning to you.',
       bullets: ['What the song is', 'When you first heard it', 'Why it is meaningful to you', 'And explain what memories or feelings it brings back'] },
   ],
   part3: [
-    { cat: 'Education', difficulty: 'medium', q: 'Do you think schools focus too much on academic results and not enough on personal development?' },
-    { cat: 'Education', difficulty: 'hard', q: 'What are the advantages and disadvantages of online learning compared to traditional classroom education?' },
-    { cat: 'Education', difficulty: 'hard', q: 'Should university education be free for everyone? Give reasons for your view.' },
-    { cat: 'Education', difficulty: 'medium', q: 'Should children be taught about financial management in school? Why or why not?' },
-    { cat: 'Technology', difficulty: 'easy', q: 'Do you think children spend too much time on electronic devices? What problems can this cause?' },
-    { cat: 'Technology', difficulty: 'medium', q: 'How has social media changed the way people communicate with each other?' },
-    { cat: 'Technology', difficulty: 'hard', q: 'Do you think artificial intelligence will create more jobs or lead to more unemployment? Why?' },
-    { cat: 'Technology', difficulty: 'medium', q: 'Should governments regulate the internet more strictly? Why or why not?' },
-    { cat: 'Environment', difficulty: 'easy', q: 'Do you think enough is being done to address climate change? Why or why not?' },
-    { cat: 'Environment', difficulty: 'medium', q: 'What do you think are the most effective ways for individuals to help the environment?' },
-    { cat: 'Environment', difficulty: 'hard', q: 'Do you believe economic development and environmental protection can go hand in hand? Why or why not?' },
-    { cat: 'Society & Culture', difficulty: 'easy', q: 'How important is it for young people to preserve traditional culture?' },
-    { cat: 'Society & Culture', difficulty: 'medium', q: 'How has the role of women in society changed over the past few decades?' },
-    { cat: 'Society & Culture', difficulty: 'hard', q: 'Some people believe globalisation has had a negative impact on cultural diversity. Do you agree?' },
-    { cat: 'Work & Economy', difficulty: 'medium', q: 'What qualities do you think are most important for success in the modern workplace?' },
-    { cat: 'Work & Economy', difficulty: 'hard', q: 'Do you think the gap between rich and poor is getting wider? What can governments do about it?' },
-    { cat: 'Work & Economy', difficulty: 'hard', q: 'Should people be encouraged to work from home permanently, or is office work better? Why?' },
-    { cat: 'Health', difficulty: 'medium', q: 'Do you think governments should spend more on preventing illness or treating it? Why?' },
-    { cat: 'Health', difficulty: 'hard', q: 'Some people believe mental health is just as important as physical health. Do you agree? Why?' },
-    { cat: 'Health', difficulty: 'medium', q: 'How can society encourage people to lead healthier lifestyles?' },
-    { cat: 'Society & Culture', difficulty: 'medium', q: 'Do you think people in your country have enough leisure time? Why or why not?' },
-    { cat: 'Education', difficulty: 'medium', q: 'How important is it for students to learn languages other than their mother tongue? Why?' },
-    { cat: 'Technology', difficulty: 'hard', q: 'How might technology change the way people work over the next 20 years?' },
-    { cat: 'Environment', difficulty: 'medium', q: 'Do you think cities or rural areas are better places to live? Why?' },
-    { cat: 'Work & Economy', difficulty: 'medium', q: 'Is it better for young people to gain work experience or continue studying after high school? Why?' },
+    { cat: 'Education', difficulty: 'medium',
+      q: 'Do you think schools focus too much on academic results and not enough on personal development?',
+      model_answer: `I think there's definitely some truth to that. In many countries, schools are under enormous pressure to produce high exam scores, which means softer skills like communication, emotional intelligence, and creativity often get pushed aside. From my own experience, we spent most of our time preparing for standardised tests rather than developing as individuals. That said, I believe things are slowly changing, with more schools recognising that academic success alone doesn't prepare students for the challenges of adult life.` },
+    { cat: 'Education', difficulty: 'hard',
+      q: 'What are the advantages and disadvantages of online learning compared to traditional classroom education?',
+      model_answer: `Online learning offers some obvious benefits — flexibility being the biggest one. Students can study at their own pace and access materials from anywhere in the world, which is particularly useful for people with jobs or family commitments. However, I think it falls short when it comes to social interaction. Learning alongside peers, having face-to-face discussions with teachers, and that sense of shared experience are things that online platforms still struggle to replicate effectively. So ideally, a combination of both approaches would probably work best.` },
+    { cat: 'Education', difficulty: 'hard',
+      q: 'Should university education be free for everyone? Give reasons for your view.',
+      model_answer: `It's a complex issue, but personally I lean towards supporting free higher education, at least to some extent. When university costs are prohibitive, talented students from lower-income families are effectively shut out, which perpetuates inequality. Countries like Germany and Norway have shown it's achievable. That said, free education requires significant government funding, and there are legitimate questions about quality and sustainability. A means-tested approach — where those who genuinely cannot afford it get support — might be a more practical compromise.` },
+    { cat: 'Education', difficulty: 'medium',
+      q: 'Should children be taught about financial management in school? Why or why not?',
+      model_answer: `Absolutely, I think it's one of the most practical skills schools could teach. So many young adults leave school without a basic understanding of budgeting, saving, or debt — and that can have serious consequences later in life. We learn about historical events and algebra, which is fine, but understanding how to manage a monthly budget or avoid credit card debt is something most people will actually need. Introducing financial literacy from an early age would really help prepare young people for independent life.` },
+    { cat: 'Technology', difficulty: 'easy',
+      q: 'Do you think children spend too much time on electronic devices? What problems can this cause?',
+      model_answer: `Yes, I think excessive screen time is a growing concern, particularly for younger children. When kids spend hours on tablets or smartphones, it can interfere with their sleep, reduce the time they spend being physically active, and limit face-to-face social interaction — all of which are essential for healthy development. There's also growing evidence linking heavy social media use to anxiety and low self-esteem in teenagers. I'm not saying technology is bad, but it needs to be balanced with other activities, and parents and schools both have a role to play.` },
+    { cat: 'Technology', difficulty: 'medium',
+      q: 'How has social media changed the way people communicate with each other?',
+      model_answer: `Social media has transformed communication in both positive and negative ways. On one hand, it has made it incredibly easy to stay in touch with friends and family across the world, and it has given ordinary people a platform to share their views and connect with like-minded communities. On the other hand, I think it has also made interactions more superficial. People tend to present curated versions of their lives rather than having genuine conversations. And the anonymity the internet provides can sometimes lead to very unkind behaviour that people wouldn't display in real life.` },
+    { cat: 'Technology', difficulty: 'hard',
+      q: 'Do you think artificial intelligence will create more jobs or lead to more unemployment? Why?',
+      model_answer: `I think the honest answer is both, but not equally distributed. AI will almost certainly displace many routine jobs — data entry, basic customer service, certain aspects of manufacturing — and that's already happening. However, it's also likely to create entirely new categories of work that we can't fully anticipate yet, just as the internet did. My concern is about the transition period. Workers in vulnerable industries may not have the resources or opportunities to retrain quickly enough, which could lead to significant social disruption, even if the long-term economic picture looks more optimistic.` },
+    { cat: 'Technology', difficulty: 'medium',
+      q: 'Should governments regulate the internet more strictly? Why or why not?',
+      model_answer: `It's a difficult balance. On the one hand, stricter regulation could help address real problems like the spread of misinformation, online harassment, and the exploitation of children. These are serious issues that tech companies have shown they're unwilling or unable to fully address on their own. But at the same time, heavy-handed regulation risks censorship and the suppression of legitimate free speech, especially in countries where governments might use such powers for political purposes. I think some level of thoughtful, independent oversight is necessary, but it needs to be carefully designed with strong democratic safeguards.` },
+    { cat: 'Environment', difficulty: 'easy',
+      q: 'Do you think enough is being done to address climate change? Why or why not?',
+      model_answer: `Honestly, no — I don't think we're moving nearly fast enough. While there have been positive developments, like the growth of renewable energy and international agreements such as the Paris Accord, the gap between what scientists say is necessary and what governments are actually doing remains huge. A lot of the pledges made at international summits sound impressive but lack binding targets or enforcement mechanisms. Meanwhile, carbon emissions are still rising globally. I think the political will just isn't there yet, partly because the costs of action are immediate while the worst consequences still feel distant to many people.` },
+    { cat: 'Environment', difficulty: 'medium',
+      q: 'What do you think are the most effective ways for individuals to help the environment?',
+      model_answer: `I think the most impactful individual changes tend to be the ones that people are least willing to talk about — reducing meat consumption, flying less, and having fewer children, if that's a consideration. These have a much greater effect than switching to reusable bags or turning off lights, though those habits matter too. That said, I'm somewhat wary of placing too much emphasis on individual responsibility, because it can distract from the systemic changes that are really needed. Large corporations and governments need to make structural changes — individual action alone won't be sufficient.` },
+    { cat: 'Environment', difficulty: 'hard',
+      q: 'Do you believe economic development and environmental protection can go hand in hand? Why or why not?',
+      model_answer: `I think they can, but it requires a fundamental rethink of how we measure economic success. Traditional GDP growth often comes at the expense of natural resources and ecosystem health. However, there's a growing body of evidence showing that investing in clean energy, sustainable agriculture, and green infrastructure can actually generate significant economic returns and create jobs. Countries like Denmark and Costa Rica have demonstrated that strong environmental policies don't necessarily harm economic performance. The challenge is convincing short-term-minded politicians and businesses to make that longer-term investment.` },
+    { cat: 'Society & Culture', difficulty: 'easy',
+      q: 'How important is it for young people to preserve traditional culture?',
+      model_answer: `I think it's valuable, though perhaps not in a rigid or forced way. Traditional culture gives people a sense of identity and belonging, and many traditional practices — festivals, crafts, music — are genuinely worth preserving as part of our shared human heritage. That said, culture has always evolved naturally over time, and I think it's unrealistic and even counterproductive to expect young people to preserve traditions simply out of obligation. The traditions that survive tend to be the ones that still feel meaningful and relevant. Forcing preservation often backfires.` },
+    { cat: 'Society & Culture', difficulty: 'medium',
+      q: 'How has the role of women in society changed over the past few decades?',
+      model_answer: `There have been really significant changes, at least in many parts of the world. Women now have far greater access to education and professional opportunities than their grandmothers did, and attitudes towards gender roles in the home and workplace have shifted considerably. That said, I don't think equality has been fully achieved anywhere. Women are still underrepresented in senior leadership positions, often earn less than their male counterparts, and continue to shoulder a disproportionate share of domestic and caregiving responsibilities. Progress has been real but uneven, and there's still a considerable way to go.` },
+    { cat: 'Society & Culture', difficulty: 'hard',
+      q: 'Some people believe globalisation has had a negative impact on cultural diversity. Do you agree?',
+      model_answer: `I partially agree. Globalisation has undeniably led to a kind of cultural homogenisation in some areas — you see the same fast food chains, the same fashion brands, and increasingly the same music and films almost everywhere. Smaller languages and local traditions have come under pressure. However, I think globalisation has also enabled cultural exchange in ways that were previously impossible. People can now access music, food, films, and ideas from every corner of the world. So while some local cultures have been diluted, there's also been a genuine enrichment of the global cultural landscape. It's complicated.` },
+    { cat: 'Work & Economy', difficulty: 'medium',
+      q: 'What qualities do you think are most important for success in the modern workplace?',
+      model_answer: `I'd say adaptability is probably the single most important quality right now, given how rapidly industries and job roles are changing. Beyond that, strong communication skills — both written and verbal — are essential in almost every field. The ability to collaborate effectively with diverse teams, manage your time well under pressure, and keep learning throughout your career are also increasingly valued. Technical expertise matters, of course, but employers consistently say they struggle more to find people with strong interpersonal and critical thinking skills than with specific technical knowledge.` },
+    { cat: 'Work & Economy', difficulty: 'hard',
+      q: 'Do you think the gap between rich and poor is getting wider? What can governments do about it?',
+      model_answer: `Yes, the data is pretty clear that inequality has increased in most developed economies over the past few decades. Wealth has become increasingly concentrated at the top, driven by factors like globalisation, automation, and tax policies that favour capital over labour. Governments have several tools available — progressive taxation, investment in public services like healthcare and education, stronger minimum wage laws, and greater support for workers in precarious employment. The challenge is largely political: the wealthy have significant influence over policy, so meaningful redistributive measures often face strong resistance.` },
+    { cat: 'Work & Economy', difficulty: 'hard',
+      q: 'Should people be encouraged to work from home permanently, or is office work better? Why?',
+      model_answer: `I think the ideal solution for most people is probably somewhere in between. Fully remote work offers real benefits — no commute, greater flexibility, and often higher productivity for focused individual tasks. But offices serve important functions too. Collaboration, mentorship, spontaneous idea-sharing, and the social dimension of work are all harder to replicate remotely. For younger employees especially, working alongside more experienced colleagues in person is often how they develop their skills fastest. A hybrid model that preserves flexibility while maintaining some in-person connection seems like the most balanced approach for most industries.` },
+    { cat: 'Health', difficulty: 'medium',
+      q: 'Do you think governments should spend more on preventing illness or treating it? Why?',
+      model_answer: `Prevention, without question. The evidence strongly suggests that investing in preventive healthcare — public health campaigns, early screening, vaccination programmes, improving nutrition and exercise habits — is far more cost-effective than treating illness once it develops. Chronic conditions like diabetes and heart disease place enormous strain on healthcare systems, and many of these cases could be avoided with earlier intervention. The problem is that prevention doesn't produce the same immediate, visible results as treatment, so it tends to be underfunded. Governments need to take a longer-term view of public health investment.` },
+    { cat: 'Health', difficulty: 'hard',
+      q: 'Some people believe mental health is just as important as physical health. Do you agree? Why?',
+      model_answer: `I completely agree, and I think this view is finally gaining the wider acceptance it deserves. Mental health conditions like depression and anxiety are among the leading causes of disability worldwide, affecting people's ability to work, maintain relationships, and live fulfilling lives. Yet historically they've been stigmatised and underfunded compared to physical illness. The mind and body are interconnected — chronic stress can cause physical illness, and physical health problems frequently trigger mental health issues. Treating them as equally important isn't just morally right; it makes practical economic sense for society as a whole.` },
+    { cat: 'Health', difficulty: 'medium',
+      q: 'How can society encourage people to lead healthier lifestyles?',
+      model_answer: `I think it requires action at multiple levels. At the individual level, education and awareness campaigns can help, but I think we overestimate how much simply knowing something changes behaviour. Environmental design matters more — if people live in walkable neighbourhoods with access to affordable healthy food and safe spaces to exercise, they're far more likely to be healthy. Government policies like sugar taxes, restrictions on junk food advertising to children, and subsidies for fruit and vegetables have also shown real results. Ultimately, making the healthy choice the easy choice requires systemic change, not just individual willpower.` },
+    { cat: 'Society & Culture', difficulty: 'medium',
+      q: 'Do you think people in your country have enough leisure time? Why or why not?',
+      model_answer: `In my country, I'd say it's very mixed. Some people — particularly those in professional or corporate jobs — work extremely long hours and feel constant pressure to be productive, often at the expense of their personal lives and wellbeing. At the same time, others may have more free time but lack the financial resources to enjoy it meaningfully. I think there's a broader cultural issue at play too; many people feel guilty about resting or feel that their worth is tied to how busy they are. A healthier attitude towards leisure, and better workplace protections, would benefit everyone.` },
+    { cat: 'Education', difficulty: 'medium',
+      q: 'How important is it for students to learn languages other than their mother tongue? Why?',
+      model_answer: `Very important, I think — though perhaps not just for the practical reasons people usually give. Yes, knowing another language opens up career opportunities and makes travel easier. But more than that, learning a language gives you a window into another culture's way of thinking, which builds empathy and broadens your perspective in ways that are hard to achieve otherwise. There's also solid research suggesting that bilingualism has cognitive benefits, including improved memory and problem-solving skills. In an increasingly connected world, monolingualism is becoming more of a limitation.` },
+    { cat: 'Technology', difficulty: 'hard',
+      q: 'How might technology change the way people work over the next 20 years?',
+      model_answer: `I think the changes will be profound and wide-ranging. Automation and AI will likely take over a much larger share of routine cognitive tasks — not just manufacturing jobs, but also aspects of law, medicine, finance, and journalism. This will push humans towards roles that require creativity, complex judgment, and emotional intelligence. The physical workplace will probably continue to evolve too, with remote and hybrid working becoming the norm rather than the exception. New industries and job categories will emerge that we can't fully anticipate. The biggest challenge will be ensuring these transitions happen equitably, without leaving vulnerable workers behind.` },
+    { cat: 'Environment', difficulty: 'medium',
+      q: 'Do you think cities or rural areas are better places to live? Why?',
+      model_answer: `I think it really depends on what you value most. Cities offer employment opportunities, cultural diversity, world-class healthcare and education, and the social energy that comes from being around lots of people. But they're also expensive, crowded, and often quite stressful. Rural areas tend to offer more space, a closer connection to nature, and a slower pace of life that many people find genuinely restorative. Personally, I think I'd find it hard to choose — though I suspect as remote working becomes more common, more people will be able to enjoy the best of both worlds.` },
+    { cat: 'Work & Economy', difficulty: 'medium',
+      q: 'Is it better for young people to gain work experience or continue studying after high school? Why?',
+      model_answer: `I don't think there's a single right answer — it really depends on the individual and what they want to achieve. For careers that genuinely require specialist knowledge, like medicine or engineering, further study is essentially non-negotiable. But for many other paths, practical work experience can be just as valuable, if not more so. Working teaches things that classrooms simply can't — how to collaborate, handle setbacks, manage competing priorities, and navigate professional relationships. Increasingly, employers are looking at portfolios and track records rather than just qualifications, which suggests the traditional assumption that more education is always better is being challenged.` },
   ]
 };
 
@@ -7108,8 +7158,47 @@ async function spinSpeakingTopic() {
     if (bulletsEl) bulletsEl.classList.add('hidden');
   }
 
+  // Model answer / linked Part 3
+  const modelWrap = document.getElementById('speaking-model-answer-wrap');
+  const modelPanel = document.getElementById('speaking-model-answer');
+  const linkedPart3El = document.getElementById('speaking-linked-part3');
+
+  if (speakingMode === 'ielts' && speakingPart === 3 && item.model_answer) {
+    if (modelPanel) { modelPanel.textContent = item.model_answer; modelPanel.classList.add('hidden'); }
+    if (modelWrap) modelWrap.classList.remove('hidden');
+    const btn = document.getElementById('model-answer-toggle-btn');
+    if (btn) btn.textContent = '💡 Show model answer ▸';
+    if (linkedPart3El) linkedPart3El.classList.add('hidden');
+  } else if (speakingMode === 'ielts' && speakingPart === 2 && item.linked_cats) {
+    if (modelWrap) modelWrap.classList.add('hidden');
+    const cats = item.linked_cats;
+    const related = SPEAKING_BANK.part3.filter(p => cats.includes(p.cat));
+    const picks = related.sort(() => Math.random() - 0.5).slice(0, 2);
+    const listEl = document.getElementById('speaking-linked-part3-list');
+    if (listEl) {
+      listEl.innerHTML = picks.map(p => `
+        <div class="linked-part3-item">
+          <span class="linked-part3-cat">${escapeHtml(p.cat)}</span>
+          <p>${escapeHtml(p.q)}</p>
+        </div>`).join('');
+    }
+    if (linkedPart3El) linkedPart3El.classList.remove('hidden');
+  } else {
+    if (modelWrap) modelWrap.classList.add('hidden');
+    if (linkedPart3El) linkedPart3El.classList.add('hidden');
+  }
+
   // Reset timer on each spin
   resetSpeakingTimer(false);
+}
+
+function toggleModelAnswer() {
+  const panel = document.getElementById('speaking-model-answer');
+  const btn = document.getElementById('model-answer-toggle-btn');
+  if (!panel || !btn) return;
+  const open = !panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', open);
+  btn.textContent = open ? '💡 Show model answer ▸' : '💡 Hide model answer ▾';
 }
 
 function setSpeakingPhase(phase) {
