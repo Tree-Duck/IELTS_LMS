@@ -1,4 +1,6 @@
 require('dotenv').config();
+const http = require('http');
+const { Server: SocketIOServer } = require('socket.io');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -2191,7 +2193,37 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+const io = new SocketIOServer(httpServer, {
+  cors: { origin: '*', methods: ['GET', 'POST'] }
+});
+
+io.on('connection', (socket) => {
+  let currentRoom = null;
+
+  socket.on('join-room', ({ room }) => {
+    if (currentRoom) socket.leave(currentRoom);
+    currentRoom = room;
+    socket.join(room);
+    const size = io.sockets.adapter.rooms.get(room)?.size || 1;
+    io.to(room).emit('peer-count', { count: size });
+  });
+
+  socket.on('canvas-update', ({ room, objects, tabId }) => {
+    socket.to(room).emit('canvas-update', { objects, tabId });
+  });
+
+  socket.on('disconnect', () => {
+    if (currentRoom) {
+      setTimeout(() => {
+        const size = io.sockets.adapter.rooms.get(currentRoom)?.size || 0;
+        io.to(currentRoom).emit('peer-count', { count: size });
+      }, 100);
+    }
+  });
+});
+
+httpServer.listen(PORT, () => {
   console.log(`IELTS LMS running at http://localhost:${PORT}`);
   if (!ANTHROPIC_API_KEY) {
     console.warn('WARNING: ANTHROPIC_API_KEY is not set. AI features will fail.');

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Whiteboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
   html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background:#1a1a1a; color:#eee; }
@@ -146,6 +147,62 @@
 </style>
 </head>
 <body>
+
+<!-- Help Modal -->
+<div id="help-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;overflow-y:auto">
+  <div style="max-width:560px;margin:40px auto;background:#2d2d2d;border-radius:12px;padding:28px;color:#eee;font-size:13px;line-height:1.6">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="margin:0;font-size:17px">Whiteboard Guide</h2>
+      <button onclick="document.getElementById('help-modal').style.display='none'" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px">Tools</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:4px 8px">🖱️ <b>Select (V)</b></td><td style="color:#aaa">Click/drag to move &amp; resize objects</td></tr>
+      <tr><td style="padding:4px 8px">✏️ <b>Pen (P)</b></td><td style="color:#aaa">Freehand drawing</td></tr>
+      <tr><td style="padding:4px 8px">🟡 <b>Highlighter</b></td><td style="color:#aaa">Semi-transparent freehand highlight</td></tr>
+      <tr><td style="padding:4px 8px">🧹 <b>Eraser (E)</b></td><td style="color:#aaa">Erase strokes and objects</td></tr>
+      <tr><td style="padding:4px 8px">▭ <b>Rectangle</b></td><td style="color:#aaa">Draw rectangles</td></tr>
+      <tr><td style="padding:4px 8px">⭕ <b>Ellipse</b></td><td style="color:#aaa">Draw ellipses</td></tr>
+      <tr><td style="padding:4px 8px">➖ <b>Line</b></td><td style="color:#aaa">Straight lines</td></tr>
+      <tr><td style="padding:4px 8px">➡️ <b>Arrow</b></td><td style="color:#aaa">Arrows with arrowhead</td></tr>
+      <tr><td style="padding:4px 8px">T <b>Text (T)</b></td><td style="color:#aaa">Click to add editable text</td></tr>
+      <tr><td style="padding:4px 8px">📌 <b>Sticky Note</b></td><td style="color:#aaa">Draggable coloured sticky notes</td></tr>
+      <tr><td style="padding:4px 8px">🧠 <b>Mind Map</b></td><td style="color:#aaa">Central node + branches</td></tr>
+      <tr><td style="padding:4px 8px">🔷 <b>Flowchart</b></td><td style="color:#aaa">Labelled flow shapes</td></tr>
+      <tr><td style="padding:4px 8px">🔗 <b>Connector</b></td><td style="color:#aaa">Connect two objects with a line</td></tr>
+    </table>
+    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Keyboard Shortcuts</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:4px 8px"><b>Space + drag</b></td><td style="color:#aaa">Pan canvas</td></tr>
+      <tr><td style="padding:4px 8px"><b>+ / −</b></td><td style="color:#aaa">Zoom in / out</td></tr>
+      <tr><td style="padding:4px 8px"><b>Z</b></td><td style="color:#aaa">Reset zoom to 100%</td></tr>
+      <tr><td style="padding:4px 8px"><b>Ctrl+Z</b></td><td style="color:#aaa">Undo</td></tr>
+      <tr><td style="padding:4px 8px"><b>Ctrl+Y</b></td><td style="color:#aaa">Redo</td></tr>
+      <tr><td style="padding:4px 8px"><b>Del / Backspace</b></td><td style="color:#aaa">Delete selected object</td></tr>
+      <tr><td style="padding:4px 8px"><b>B</b></td><td style="color:#aaa">Ring bell</td></tr>
+      <tr><td style="padding:4px 8px"><b>V P E T</b></td><td style="color:#aaa">Switch tools</td></tr>
+    </table>
+    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Live Session</h3>
+    <p style="color:#aaa;margin:0">Click <b>📡 Share</b> in the toolbar → copy the link → send to students. Anyone who opens the link joins the same live session and sees the canvas update in real time.</p>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#2d2d2d;border-radius:12px;padding:28px;min-width:340px;color:#eee;font-size:13px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="margin:0;font-size:16px">📡 Live Session</h2>
+      <button onclick="document.getElementById('share-modal').style.display='none'" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <p style="color:#aaa;margin:0 0 14px">Share this link with students. They join and see your whiteboard live.</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input id="share-link-input" readonly style="flex:1;background:#1a1a1a;border:1px solid #444;color:#eee;padding:8px 10px;border-radius:6px;font-size:12px;font-family:monospace" />
+      <button onclick="copyShareLink()" style="background:#4a7cff;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px">Copy</button>
+    </div>
+    <div id="share-peer-info" style="color:#aaa;font-size:12px"></div>
+  </div>
+</div>
+
 <div id="app">
   <div id="topbar">
     <div id="tabs"></div>
@@ -162,6 +219,9 @@
     <button class="top-btn" id="import-pdf-btn" title="Import PDF">📄 PDF</button>
     <button class="top-btn" id="save-btn" title="Export current tab">💾 Save</button>
     <button class="top-btn" id="load-btn" title="Import a saved whiteboard">📂 Load</button>
+    <button class="top-btn" onclick="document.getElementById('help-modal').style.display='block'" title="Help">❓ Help</button>
+    <button class="top-btn" id="share-btn" onclick="openShareModal()" title="Share live session">📡 Share</button>
+    <span id="room-indicator" style="display:none;font-size:12px;padding:4px 10px;border-radius:6px;background:#1a472a;color:#6fcf97;font-weight:600"></span>
     <button class="top-btn" id="clear-btn" title="Clear canvas">🗑</button>
   </div>
   <div id="workspace">
@@ -351,6 +411,9 @@
 <input type="file" id="file-load" accept="application/json" style="display:none">
 <input type="file" id="file-image" accept="image/*" style="display:none">
 <script>
+// ─── Collab state ───────────────────────────────────────────────────────────
+let socket = null, roomId = null;
+
 // ========== STATE ==========
 const state = {
   tabs: [],
@@ -1665,6 +1728,10 @@ document.getElementById('help-btn').onclick = () => document.getElementById('hel
 const STORAGE_KEY = 'whiteboard.sessions.v1';
 let autosaveTimer = null;
 function scheduleAutosave() {
+  if (socket && roomId) {
+    const tab = activeTab();
+    if (tab) socket.emit('canvas-update', { room: roomId, objects: tab.objects, tabId: tab.id });
+  }
   clearTimeout(autosaveTimer);
   autosaveTimer = setTimeout(autosave, 600);
 }
@@ -1938,6 +2005,63 @@ if (loadFromAutosave()) {
 syncPropsPanel();
 resizeCanvases();
 window.addEventListener('beforeunload', autosave);
+
+// ─── Real-time Collab ───────────────────────────────────────────────────────
+function genRoomId() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function initSocket() {
+  if (socket) return;
+  socket = io();
+  socket.on('canvas-update', ({ objects, tabId }) => {
+    const tab = state.tabs.find(t => t.id === tabId) || activeTab();
+    if (tab) { tab.objects = objects; redraw(); }
+  });
+  socket.on('peer-count', ({ count }) => {
+    const el = document.getElementById('room-indicator');
+    if (el && roomId) {
+      el.textContent = '🟢 Live · ' + count + ' connected';
+      el.style.display = 'inline-block';
+    }
+    const info = document.getElementById('share-peer-info');
+    if (info) info.textContent = count + ' device(s) connected';
+  });
+}
+
+function openShareModal() {
+  if (!roomId) {
+    roomId = genRoomId();
+    initSocket();
+    socket.emit('join-room', { room: roomId });
+    const url = new URL(location.href);
+    url.searchParams.set('room', roomId);
+    history.replaceState({}, '', url);
+  }
+  document.getElementById('share-link-input').value = location.href;
+  document.getElementById('share-modal').style.display = 'flex';
+}
+
+function copyShareLink() {
+  const input = document.getElementById('share-link-input');
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = input.nextElementSibling;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+}
+
+// Auto-join from URL param
+(function () {
+  const r = new URLSearchParams(location.search).get('room');
+  if (r) {
+    roomId = r;
+    initSocket();
+    socket.emit('join-room', { room: roomId });
+    const el = document.getElementById('room-indicator');
+    if (el) { el.textContent = '🟡 Joining…'; el.style.display = 'inline-block'; }
+  }
+})();
 </script>
 </body>
 </html>
