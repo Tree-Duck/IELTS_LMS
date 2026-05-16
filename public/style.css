@@ -4527,3 +4527,18 @@ input:focus, textarea:focus, select:focus {
   padding: 1px 7px; margin-bottom: 5px;
 }
 .linked-part3-item p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-primary); }
+
+/* Speaking: Key Vocabulary chips */
+.speaking-vocab-heading {
+  margin-top: 16px; font-size: 11px; font-weight: 700;
+  color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em;
+}
+#speaking-vocab-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+}
+.speaking-vocab-chip {
+  display: inline-block; padding: 4px 10px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 20px; font-size: 12px; color: var(--text-primary);
+  font-style: italic; cursor: default;
+}
