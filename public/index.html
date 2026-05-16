@@ -128,212 +128,116 @@
 
   <!-- MAIN APP -->
   <div id="app-screen" class="screen hidden">
-    <!-- Mobile hamburger (visible on phones only) -->
-    <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
-    <!-- Backdrop overlay (tapping closes sidebar on mobile) -->
-    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
 
-    <!-- Sidebar -->
-    <!-- Floating button to re-open sidebar when collapsed (desktop only) -->
-    <button class="sidebar-show-btn hidden" id="sidebar-show-btn" onclick="toggleSidebar()" title="Show sidebar">☰</button>
-
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo">
-        <span class="logo-sun">☀️</span>
-        <span class="logo-text">SSP IELTS</span>
-        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide sidebar">‹</button>
+    <!-- Top Navigation Bar -->
+    <header class="topnav" id="topnav">
+      <div class="topnav-left">
+        <button class="topnav-hamburger" id="topnav-hamburger" aria-label="Menu">☰</button>
+        <span class="topnav-brand">☀️ SSP IELTS</span>
       </div>
-      <nav class="sidebar-nav">
-        <!-- Notification Bell (student only, managed by applyUserToUI) -->
-        <button class="nav-item notif-bell-nav-item hidden" id="notif-bell-btn" onclick="openNotifPanel()">
-          <span class="nav-icon">🔔</span> Notifications
-          <span class="notif-badge hidden" id="notif-badge">0</span>
-        </button>
 
+      <nav class="topnav-links" id="topnav-links">
         <!-- Dashboard (standalone) -->
-        <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard">
-          <span class="nav-icon">⬛</span> Dashboard
-        </button>
-
+        <button class="tnav-group-trigger" onclick="showView('dashboard')">⬛ Dashboard</button>
         <!-- Homework (standalone) -->
-        <button class="nav-item" onclick="showView('homework')" id="nav-homework">
-          <span class="nav-icon">📋</span> Homework
-        </button>
+        <button class="tnav-group-trigger" onclick="showView('homework')">📋 Homework</button>
 
         <!-- Mock Tests group -->
-        <div class="nav-group open" id="nav-group-tests">
-          <div class="nav-group-header">
-            <span class="nav-icon">📝</span>
-            <span class="nav-group-label">Mock Tests</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('listening')" id="nav-test-list-listening">
-              <span class="nav-icon">🎧</span> Listening
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('test-list'); switchTestTab('reading')" id="nav-test-list">
-              <span class="nav-icon">📖</span> Reading
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('submit')" id="nav-submit">
-              <span class="nav-icon">✏️</span> Writing
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('speaking')" id="nav-speaking">
-              <span class="nav-icon">🎙️</span> Speaking
-            </button>
+        <div class="tnav-group" id="tnav-group-tests">
+          <button class="tnav-group-trigger">📝 Tests ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('listening')">🎧 Listening</button>
+            <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('reading')">📖 Reading</button>
+            <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Writing</button>
+            <button class="tnav-nav-link" data-view="speaking" onclick="showView('speaking')">🎙️ Speaking</button>
           </div>
         </div>
 
         <!-- My Progress group -->
-        <div class="nav-group open" id="nav-group-progress">
-          <div class="nav-group-header">
-            <span class="nav-icon">📊</span>
-            <span class="nav-group-label">My Progress</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('history')" id="nav-history">
-              <span class="nav-icon">📋</span> My Submissions
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('test-history')" id="nav-test-history">
-              <span class="nav-icon">🏆</span> Test Results
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('my-attendance')" id="nav-my-attendance">
-              <span class="nav-icon">📅</span> Attendance
-            </button>
+        <div class="tnav-group" id="tnav-group-progress">
+          <button class="tnav-group-trigger">📊 Progress ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="history" onclick="showView('history')">📋 My Submissions</button>
+            <button class="tnav-nav-link" data-view="test-history" onclick="showView('test-history')">🏆 Test Results</button>
+            <button class="tnav-nav-link" data-view="my-attendance" onclick="showView('my-attendance')">📅 Attendance</button>
           </div>
         </div>
 
         <!-- Vocabulary group -->
-        <div class="nav-group open" id="nav-group-vocab">
-          <div class="nav-group-header">
-            <span class="nav-icon">📚</span>
-            <span class="nav-group-label">Vocabulary</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('vocab-learn')" id="nav-vocab-learn">
-              <span class="nav-icon">📚</span> Vocabulary Learning
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('vocab')" id="nav-vocab">
-              <span class="nav-icon">📓</span> My Vocabulary
-            </button>
+        <div class="tnav-group" id="tnav-group-vocab">
+          <button class="tnav-group-trigger">📖 Vocab ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcards</button>
+            <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 My Vocabulary</button>
           </div>
         </div>
 
         <!-- Practice group -->
-        <div class="nav-group open" id="nav-group-practice">
-          <div class="nav-group-header">
-            <span class="nav-icon">🏋️</span>
-            <span class="nav-group-label">Practice</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('practice-sentences')" id="nav-practice-sentences">
-              <span class="nav-icon">✏️</span> Sentence Exercises
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('practice-paragraphs')" id="nav-practice-paragraphs">
-              <span class="nav-icon">📝</span> Paragraph Writing
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('practice-grammar')" id="nav-practice-grammar">
-              <span class="nav-icon">📖</span> Grammar Guide
-            </button>
+        <div class="tnav-group" id="tnav-group-practice">
+          <button class="tnav-group-trigger">🏋️ Practice ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Sentence Exercises</button>
+            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Paragraph Writing</button>
+            <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Grammar Guide</button>
           </div>
         </div>
 
-        <!-- Teacher group (hidden until teacher/admin login) -->
-        <div class="nav-group hidden" id="nav-group-teacher">
-          <div class="nav-group-header">
-            <span class="nav-icon">🎓</span>
-            <span class="nav-group-label">Teacher</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('grade-queue')" id="nav-teacher-grade-queue">
-              <span class="nav-icon">📝</span> Grade Queue
-              <span class="queue-badge hidden" id="grade-queue-badge">0</span>
+        <!-- Teacher/Admin group (hidden for students) -->
+        <div class="tnav-group hidden" id="tnav-group-teacher">
+          <button class="tnav-group-trigger">🎓 Teacher ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="grade-queue" onclick="showView('grade-queue')">
+              📝 Grade Queue <span class="queue-badge hidden" id="grade-queue-badge">0</span>
             </button>
-            <button class="nav-item nav-sub-item" onclick="showView('submissions-archive')" id="nav-teacher-archive">
-              <span class="nav-icon">🗂️</span> Submissions
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-teacher-users">
-              <span class="nav-icon">👥</span> Users
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin-materials')" id="nav-teacher-materials">
-              <span class="nav-icon">📚</span> Materials
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-teacher-assignments">
-              <span class="nav-icon">📋</span> Assignments
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('classes')" id="nav-teacher-classes">
-              <span class="nav-icon">🏫</span> Classes
-            </button>
-            <button class="nav-item nav-sub-item" onclick="window.open('/whiteboard.html','_blank')" id="nav-teacher-whiteboard">
-              <span class="nav-icon">🖊️</span> Whiteboard
-            </button>
-          </div>
-        </div>
-
-        <!-- Admin group (hidden until admin login) -->
-        <div class="nav-group hidden" id="nav-group-admin">
-          <div class="nav-group-header">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-group-label">Admin</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('grade-queue')" id="nav-admin-grade-queue">
-              <span class="nav-icon">📝</span> Grade Queue
-              <span class="queue-badge hidden" id="grade-queue-badge-admin">0</span>
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('submissions-archive')" id="nav-admin-archive">
-              <span class="nav-icon">🗂️</span> Submissions
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin')" id="nav-admin">
-              <span class="nav-icon">👥</span> Users
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin-materials')" id="nav-admin-materials">
-              <span class="nav-icon">📚</span> Materials
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('admin-assignments')" id="nav-admin-assignments">
-              <span class="nav-icon">📋</span> Assignments
-            </button>
-            <button class="nav-item nav-sub-item" onclick="showView('classes')" id="nav-admin-classes">
-              <span class="nav-icon">🏫</span> Classes
-            </button>
-            <button class="nav-item nav-sub-item" onclick="window.open('/whiteboard.html','_blank')" id="nav-admin-whiteboard">
-              <span class="nav-icon">🖊️</span> Whiteboard
-            </button>
-          </div>
-        </div>
-
-        <!-- Account group -->
-        <div class="nav-group" id="nav-group-account">
-          <div class="nav-group-header">
-            <span class="nav-icon">👤</span>
-            <span class="nav-group-label">Account</span>
-            <span class="nav-group-chevron">›</span>
-          </div>
-          <div class="nav-group-items">
-            <button class="nav-item nav-sub-item" onclick="showView('change-password')" id="nav-change-password">
-              <span class="nav-icon">🔑</span> Change Password
-            </button>
+            <button class="tnav-nav-link" data-view="submissions-archive" onclick="showView('submissions-archive')">🗂️ Submissions</button>
+            <button class="tnav-nav-link" data-view="admin" onclick="showView('admin')">👥 Users</button>
+            <button class="tnav-nav-link" data-view="admin-materials" onclick="showView('admin-materials')">📚 Materials</button>
+            <button class="tnav-nav-link" data-view="admin-assignments" onclick="showView('admin-assignments')">📋 Assignments</button>
+            <button class="tnav-nav-link" data-view="classes" onclick="showView('classes')">🏫 Classes</button>
+            <button class="tnav-nav-link" onclick="window.open('/whiteboard.html','_blank')">🖊️ Whiteboard</button>
           </div>
         </div>
       </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar" id="user-avatar">S</div>
-          <div>
-            <div class="user-name" id="user-name">Student</div>
-            <div class="user-role" id="user-role-label">Student</div>
+
+      <div class="topnav-right">
+        <!-- Notification bell (student only) -->
+        <div class="tnav-notif-wrap hidden" id="tnav-notif-wrap">
+          <button class="tnav-notif-btn" id="notif-bell-btn" onclick="openNotifPanel()" title="Notifications">
+            🔔
+            <span class="tnav-notif-badge hidden" id="notif-badge">0</span>
+          </button>
+        </div>
+
+        <!-- Dark mode toggle -->
+        <button class="topnav-darkmode-btn" id="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
+
+        <!-- User avatar + dropdown -->
+        <div class="tnav-group" id="tnav-group-account">
+          <button class="tnav-group-trigger topnav-avatar-btn" id="topnav-avatar-btn" title="Account">
+            <span id="user-avatar">S</span>
+          </button>
+          <div class="tnav-dropdown tnav-dropdown-right">
+            <div class="tnav-user-info">
+              <span class="tnav-user-display-name" id="user-name">Student</span>
+              <span class="tnav-role-badge" id="user-role-label">Student</span>
+            </div>
+            <hr class="tnav-divider">
+            <button class="tnav-nav-link" data-view="change-password" onclick="showView('change-password')">🔑 Change Password</button>
+            <button class="tnav-nav-link tnav-logout-btn" onclick="closeAllDropdowns(); logout()">🚪 Sign Out</button>
           </div>
         </div>
-        <button class="btn-dark-mode" id="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
-        <button class="btn-logout" onclick="logout()">Sign Out</button>
       </div>
-    </aside>
+    </header>
+
+    <!-- Mobile drawer overlay -->
+    <div class="topnav-drawer-overlay" id="topnav-drawer-overlay"></div>
+    <nav class="topnav-drawer" id="topnav-drawer">
+      <div class="topnav-drawer-header">
+        <span class="topnav-brand">☀️ SSP IELTS</span>
+        <button class="topnav-drawer-close" id="topnav-drawer-close">✕</button>
+      </div>
+      <div id="topnav-drawer-links"></div>
+    </nav>
 
     <!-- Main Content -->
     <main class="main-content">

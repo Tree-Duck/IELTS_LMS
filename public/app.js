@@ -1116,17 +1116,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.textContent = '☀️';
   }
 
-  // Restore sidebar collapsed state
-  if (localStorage.getItem('ielts_sidebar_collapsed') === '1') {
-    const sidebar = document.getElementById('sidebar');
-    const main = document.querySelector('.main-content');
-    const showBtn = document.getElementById('sidebar-show-btn');
-    const toggleBtn = document.getElementById('sidebar-toggle-btn');
-    if (sidebar) sidebar.classList.add('sidebar-collapsed');
-    if (main) main.classList.add('sidebar-collapsed');
-    if (showBtn) showBtn.classList.remove('hidden');
-    if (toggleBtn) toggleBtn.textContent = '›';
-  }
+  initTopnav();
 
   if (token && currentUser) {
     showApp();
@@ -1417,17 +1407,11 @@ function applyUserToUI() {
     roleLabelEl.textContent = roleMap[currentUser.role] || currentUser.role;
   }
 
-  // Show role-specific nav groups
-  const adminNavGroup = document.getElementById('nav-group-admin');
-  const teacherNavGroup = document.getElementById('nav-group-teacher');
-  if (currentUser.role === 'admin') {
-    adminNavGroup.classList.remove('hidden');
-    if (teacherNavGroup) teacherNavGroup.classList.add('hidden');
-  } else if (currentUser.role === 'teacher') {
+  // Show role-specific nav groups (topnav)
+  const teacherNavGroup = document.getElementById('tnav-group-teacher');
+  if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
     if (teacherNavGroup) teacherNavGroup.classList.remove('hidden');
-    adminNavGroup.classList.add('hidden');
   } else {
-    adminNavGroup.classList.add('hidden');
     if (teacherNavGroup) teacherNavGroup.classList.add('hidden');
   }
 
@@ -1437,12 +1421,12 @@ function applyUserToUI() {
   }
 
   // Show notification bell for students; start polling
-  const bellBtn = document.getElementById('notif-bell-btn');
+  const notifWrap = document.getElementById('tnav-notif-wrap');
   if (currentUser.role === 'student') {
-    if (bellBtn) bellBtn.classList.remove('hidden');
+    if (notifWrap) notifWrap.classList.remove('hidden');
     pollNotifications();
   } else {
-    if (bellBtn) bellBtn.classList.add('hidden');
+    if (notifWrap) notifWrap.classList.add('hidden');
     if (notifPollInterval) { clearInterval(notifPollInterval); notifPollInterval = null; }
   }
 }
@@ -1466,15 +1450,7 @@ async function showApp() {
     }
   } catch (e) { /* network error — keep cached role */ }
 
-  // Click-to-toggle nav groups (attach once; guard with data attribute)
-  document.querySelectorAll('.nav-group-header').forEach(header => {
-    if (header.dataset.toggleBound) return;
-    header.dataset.toggleBound = '1';
-    header.addEventListener('click', () => {
-      header.closest('.nav-group').classList.toggle('open');
-    });
-  });
-
+  _buildMobileDrawer();
   showView('dashboard');
 }
 
@@ -1495,30 +1471,28 @@ function toggleMobileSidebar() {
 }
 
 function showView(name) {
-  // Auto-close sidebar on mobile after nav click
-  if (window.innerWidth <= 768) {
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (sidebar) sidebar.classList.remove('sidebar-open');
-    if (backdrop) backdrop.classList.remove('active');
-  }
+  // Close mobile drawer if open
+  closeMobileDrawer();
 
   // Warn if navigating away from submit view with unsaved essay content
   if (name !== 'submit' && isOnSubmitWithContent()) {
     if (!confirm('You have an essay in progress. Leave without saving your draft?')) return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   // Reset feedback back button to default when not coming from archive
   if (name !== 'feedback') {
     const backBtn = document.querySelector('#view-feedback .btn-back');
     if (backBtn) { backBtn.onclick = () => showView('history'); backBtn.textContent = '← Back'; }
   }
   show(`view-${name}`);
-  const navEl = document.getElementById(`nav-${name}`);
-  if (navEl) navEl.classList.add('active');
 
-  // Test-taking view hides sidebar
+  // Highlight active link in topnav + drawer; close all dropdowns
+  document.querySelectorAll('.tnav-nav-link[data-view]').forEach(a => {
+    a.classList.toggle('active', a.dataset.view === name);
+  });
+  closeAllDropdowns();
+
+  // Test-taking view hides topnav
   if (name === 'test-taking') {
     document.getElementById('app-screen').classList.add('test-mode');
   } else {
@@ -6056,19 +6030,67 @@ function toggleStudentSelect() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SIDEBAR TOGGLE
+   TOPNAV
    ═══════════════════════════════════════════════════════════════════════════ */
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const main = document.querySelector('.main-content');
-  const showBtn = document.getElementById('sidebar-show-btn');
-  const toggleBtn = document.getElementById('sidebar-toggle-btn');
-  const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
-  main.classList.toggle('sidebar-collapsed', isCollapsed);
-  showBtn.classList.toggle('hidden', !isCollapsed);
-  if (toggleBtn) toggleBtn.textContent = isCollapsed ? '›' : '‹';
-  localStorage.setItem('ielts_sidebar_collapsed', isCollapsed ? '1' : '0');
+function closeAllDropdowns() {
+  document.querySelectorAll('.tnav-group.open').forEach(g => g.classList.remove('open'));
+}
+
+function toggleTopnavGroup(groupEl) {
+  const isOpen = groupEl.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) groupEl.classList.add('open');
+}
+
+function openMobileDrawer() {
+  document.getElementById('topnav-drawer')?.classList.add('open');
+  document.getElementById('topnav-drawer-overlay')?.classList.add('open');
+}
+
+function closeMobileDrawer() {
+  document.getElementById('topnav-drawer')?.classList.remove('open');
+  document.getElementById('topnav-drawer-overlay')?.classList.remove('open');
+}
+
+function _buildMobileDrawer() {
+  const groups = document.querySelectorAll('.tnav-group[id^="tnav-group-"]:not(#tnav-group-account)');
+  const container = document.getElementById('topnav-drawer-links');
+  if (!container) return;
+  container.innerHTML = '';
+  groups.forEach(group => {
+    if (group.classList.contains('hidden')) return;
+    const label = group.querySelector('.tnav-group-trigger')?.textContent?.replace('▾', '').trim() || '';
+    const labelEl = document.createElement('div');
+    labelEl.className = 'drawer-group-label';
+    labelEl.textContent = label;
+    container.appendChild(labelEl);
+    group.querySelectorAll('.tnav-nav-link').forEach(link => {
+      const clone = link.cloneNode(true);
+      clone.addEventListener('click', () => closeMobileDrawer());
+      container.appendChild(clone);
+    });
+  });
+}
+
+function initTopnav() {
+  // Group trigger clicks
+  document.querySelectorAll('.tnav-group-trigger').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleTopnavGroup(btn.closest('.tnav-group'));
+    });
+  });
+
+  // Outside click closes all dropdowns (capture phase)
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.tnav-group')) closeAllDropdowns();
+  }, true);
+
+  // Mobile hamburger + drawer close
+  document.getElementById('topnav-hamburger')?.addEventListener('click', openMobileDrawer);
+  document.getElementById('topnav-drawer-close')?.addEventListener('click', closeMobileDrawer);
+  document.getElementById('topnav-drawer-overlay')?.addEventListener('click', closeMobileDrawer);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
