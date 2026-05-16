@@ -217,6 +217,7 @@
     <button class="top-btn bell" id="bell-btn" title="Ring bell (B)">🔔 Bell</button>
     <button class="top-btn" id="random-btn" title="Random number / name picker">🎲 Random</button>
     <button class="top-btn" id="import-pdf-btn" title="Import PDF">📄 PDF</button>
+    <button class="top-btn" id="import-image-btn" title="Upload image">🖼 Image</button>
     <button class="top-btn" id="save-btn" title="Export current tab">💾 Save</button>
     <button class="top-btn" id="load-btn" title="Import a saved whiteboard">📂 Load</button>
     <button class="top-btn" onclick="document.getElementById('help-modal').style.display='block'" title="Help">❓ Help</button>
@@ -1669,6 +1670,38 @@ document.getElementById('file-pdf').addEventListener('change', async (e) => {
   redraw();
   scheduleAutosave();
   showToast(`Imported ${pdf.numPages} page(s)`);
+});
+// ========== IMAGE UPLOAD ==========
+document.getElementById('import-image-btn').onclick = () => {
+  document.getElementById('file-image').click();
+};
+document.getElementById('file-image').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      pushUndo();
+      const maxW = 600;
+      const scale = img.width > maxW ? maxW / img.width : 1;
+      const rect = wrap.getBoundingClientRect();
+      const center = screenToWorld(rect.width / 2, rect.height / 2);
+      activeTab().objects.push({
+        id: uid(), type: 'image', img,
+        x: center.x - img.width * scale / 2,
+        y: center.y - img.height * scale / 2,
+        w: img.width * scale,
+        h: img.height * scale
+      });
+      redraw();
+      scheduleAutosave();
+      showToast('Image added');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
 });
 // ========== SAVE/LOAD ==========
 document.getElementById('save-btn').onclick = () => {
