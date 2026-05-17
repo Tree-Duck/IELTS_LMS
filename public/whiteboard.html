@@ -12,6 +12,13 @@
   #app { display:flex; flex-direction:column; height:100vh; }
   /* Top bar */
   #topbar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#222; border-bottom:1px solid #333; flex-wrap:wrap; }
+  @media (max-width: 768px) {
+    #topbar { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:6px 8px; gap:6px; }
+    #topbar::-webkit-scrollbar { display:none; }
+    #tabs { min-width:80px; }
+    .top-btn { white-space:nowrap; padding:6px 10px; font-size:12px; }
+    #zoom-controls { flex-shrink:0; }
+  }
   #tabs { display:flex; gap:4px; flex:1; overflow-x:auto; }
   .tab { padding:6px 14px; background:#2d2d2d; border:1px solid #3a3a3a; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:13px; display:flex; align-items:center; gap:6px; }
   .tab.active { background:#4a7cff; border-color:#5a8cff; }
@@ -1911,6 +1918,7 @@ document.getElementById('print-btn').onclick = () => {
   outCtx.drawImage(mainCanvas, 0, 0);
   const dataUrl = out.toDataURL('image/png');
   const win = window.open('', '_blank');
+  if (!win) { showToast('Popup blocked — allow popups to print/export'); return; }
   win.document.write(`<!DOCTYPE html><html><head><title>Whiteboard</title>
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
@@ -1923,6 +1931,11 @@ document.getElementById('print-btn').onclick = () => {
   win.document.close();
 };
 document.getElementById('help-btn').onclick = () => document.getElementById('help-modal').classList.add('show');
+// iOS: e.preventDefault() on canvas-wrap touchstart suppresses synthesized click — fix with explicit touchend
+document.getElementById('help-btn').addEventListener('touchend', (e) => {
+  e.preventDefault(); e.stopPropagation();
+  document.getElementById('help-modal').classList.add('show');
+}, { passive: false });
 
 // ========== AUTOSAVE TO BROWSER STORAGE ==========
 // All tabs are persisted to localStorage; reopening the app restores them.
