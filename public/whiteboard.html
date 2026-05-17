@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Whiteboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -43,7 +44,7 @@
   .prop-group { display:flex; align-items:center; gap:6px; padding:0 6px; border-right:1px solid #333; }
   .prop-group:last-child { border-right:none; }
   /* Canvas */
-  #canvas-wrap { flex:1; position:relative; overflow:hidden; background:#fafafa; cursor:default; }
+  #canvas-wrap { flex:1; position:relative; overflow:hidden; background:#fafafa; cursor:default; touch-action:none; -webkit-user-select:none; user-select:none; }
   #canvas-wrap.pan { cursor:grab; }
   #canvas-wrap.panning { cursor:grabbing; }
   canvas { position:absolute; top:0; left:0; }
@@ -220,6 +221,8 @@
     <button class="top-btn" id="import-image-btn" title="Upload image">🖼 Image</button>
     <button class="top-btn" id="save-btn" title="Export current tab">💾 Save</button>
     <button class="top-btn" id="load-btn" title="Import a saved whiteboard">📂 Load</button>
+    <button class="top-btn" id="export-png-btn" title="Save board as PNG image">📷 Export</button>
+    <button class="top-btn" id="print-btn" title="Print / Save as PDF">🖨 Print</button>
     <button class="top-btn" onclick="document.getElementById('help-modal').style.display='block'" title="Help">❓ Help</button>
     <button class="top-btn" id="share-btn" onclick="openShareModal()" title="Share live session">📡 Share</button>
     <span id="room-indicator" style="display:none;font-size:12px;padding:4px 10px;border-radius:6px;background:#1a472a;color:#6fcf97;font-weight:600"></span>
@@ -1207,6 +1210,9 @@ function prepareTextEditor(ta) {
   ['mousedown', 'mouseup', 'click', 'dblclick', 'pointerdown', 'pointerup'].forEach(evt => {
     ta.addEventListener(evt, e => e.stopPropagation());
   });
+  ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+    ta.addEventListener(evt, e => e.stopPropagation());
+  });
   ta.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
 }
 function openTextEditor(sx, sy, worldPt) {
@@ -1601,6 +1607,126 @@ window.addEventListener('mousemove', (e) => {
   timerEl.style.top = (e.clientY - timerDrag.y) + 'px';
 });
 window.addEventListener('mouseup', () => timerDrag = null);
+
+// ========== TIMER TOUCH DRAG ==========
+timerEl.addEventListener('touchstart', (e) => {
+  if (e.target.tagName === 'BUTTON') return;
+  e.preventDefault(); e.stopPropagation();
+  const r = timerEl.getBoundingClientRect();
+  const t = e.touches[0];
+  timerDrag = { x: t.clientX - r.left, y: t.clientY - r.top };
+  timerEl.style.transform = 'none';
+}, { passive: false });
+window.addEventListener('touchmove', (e) => {
+  if (!timerDrag) return;
+  const t = e.touches[0];
+  timerEl.style.left = (t.clientX - timerDrag.x) + 'px';
+  timerEl.style.top  = (t.clientY - timerDrag.y) + 'px';
+}, { passive: true });
+window.addEventListener('touchend', () => { timerDrag = null; });
+
+// ========== TOUCH + APPLE PENCIL SUPPORT ==========
+let _lastTouchDist = null;  // pinch: previous distance between 2 fingers
+let _lastTouchMid  = null;  // pinch: previous midpoint (screen px)
+let _lastTap = 0;           // double-tap detection timestamp
+
+function _touchXY(touch) {
+  const rect = wrap.getBoundingClientRect();
+  return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+}
+
+// -- Single finger: simulate mouse. Two fingers: pan + pinch-zoom. --
+wrap.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    // Double-tap → dblclick
+    const now = Date.now();
+    if (now - _lastTap < 300) {
+      wrap.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, clientX: t.clientX, clientY: t.clientY }));
+      _lastTap = 0; return;
+    }
+    _lastTap = now;
+    wrap.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: t.clientX, clientY: t.clientY, button: 0 }));
+  } else if (e.touches.length === 2) {
+    // Cancel any ongoing single-touch draw before switching to 2-finger gesture
+    window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    const a = e.touches[0], b = e.touches[1];
+    _lastTouchDist = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+    _lastTouchMid  = { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
+  }
+}, { passive: false });
+
+wrap.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    wrap.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: t.clientX, clientY: t.clientY }));
+  } else if (e.touches.length === 2) {
+    const a = e.touches[0], b = e.touches[1];
+    const dist = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+    const mid  = { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
+    const tab  = activeTab();
+    const rect = wrap.getBoundingClientRect();
+    // Pan by midpoint delta
+    if (_lastTouchMid) {
+      tab.pan.x += mid.x - _lastTouchMid.x;
+      tab.pan.y += mid.y - _lastTouchMid.y;
+    }
+    // Pinch-zoom centered on midpoint (mirrors wheel zoom logic)
+    if (_lastTouchDist && _lastTouchDist > 0) {
+      const factor = dist / _lastTouchDist;
+      const sx = mid.x - rect.left, sy = mid.y - rect.top;
+      const before = screenToWorld(sx, sy);
+      tab.zoom = Math.max(0.01, Math.min(3, tab.zoom * factor));
+      const after = screenToWorld(sx, sy);
+      tab.pan.x += (after.x - before.x) * tab.zoom;
+      tab.pan.y += (after.y - before.y) * tab.zoom;
+    }
+    _lastTouchDist = dist;
+    _lastTouchMid  = mid;
+    redraw();
+  }
+}, { passive: false });
+
+wrap.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (e.touches.length === 0) {
+    window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    _lastTouchDist = null; _lastTouchMid = null;
+  } else if (e.touches.length === 1) {
+    // Went from 2 → 1 finger; reset pinch, re-anchor single touch
+    _lastTouchDist = null; _lastTouchMid = null;
+    const t = e.touches[0];
+    wrap.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: t.clientX, clientY: t.clientY, button: 0 }));
+  }
+}, { passive: false });
+
+wrap.addEventListener('touchcancel', () => {
+  window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  _lastTouchDist = null; _lastTouchMid = null;
+});
+
+// -- Apple Pencil: fires pointerType='pen'; Safari does NOT synthesize mouse events from pencil. --
+wrap.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'pen') return;
+  e.preventDefault();
+  wrap.setPointerCapture(e.pointerId); // ensures pointermove fires even if pencil leaves element
+  wrap.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: e.clientX, clientY: e.clientY, button: 0 }));
+});
+wrap.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'pen') return;
+  wrap.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: e.clientX, clientY: e.clientY }));
+});
+wrap.addEventListener('pointerup', (e) => {
+  if (e.pointerType !== 'pen') return;
+  window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+});
+wrap.addEventListener('pointercancel', (e) => {
+  if (e.pointerType !== 'pen') return;
+  window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+});
+
 updateTimerDisplay();
 // ========== BELL ==========
 let audioCtx;
@@ -1753,6 +1879,48 @@ document.getElementById('clear-btn').onclick = () => {
   state.selectedId = null;
   redraw();
   scheduleAutosave();
+};
+
+// ========== EXPORT AS PNG ==========
+document.getElementById('export-png-btn').onclick = () => {
+  // Composite bgCanvas + mainCanvas into a fresh canvas
+  const w = bgCanvas.width;
+  const h = bgCanvas.height;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const outCtx = out.getContext('2d');
+  outCtx.drawImage(bgCanvas, 0, 0);
+  outCtx.drawImage(mainCanvas, 0, 0);
+  const t = activeTab();
+  const filename = (t ? t.name.replace(/[^\w\s-]/g,'_') : 'whiteboard') + '.png';
+  const a = document.createElement('a');
+  a.href = out.toDataURL('image/png');
+  a.download = filename;
+  a.click();
+  showToast('Saved as PNG');
+};
+
+// ========== PRINT / SAVE AS PDF ==========
+document.getElementById('print-btn').onclick = () => {
+  const w = bgCanvas.width;
+  const h = bgCanvas.height;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const outCtx = out.getContext('2d');
+  outCtx.drawImage(bgCanvas, 0, 0);
+  outCtx.drawImage(mainCanvas, 0, 0);
+  const dataUrl = out.toDataURL('image/png');
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Whiteboard</title>
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { background:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+      img { max-width:100%; max-height:100vh; object-fit:contain; }
+      @media print { body { min-height:unset; } img { width:100%; } @page { margin:10mm; } }
+    </style></head><body>
+    <img src="${dataUrl}" onload="window.print()">
+    </body></html>`);
+  win.document.close();
 };
 document.getElementById('help-btn').onclick = () => document.getElementById('help-modal').classList.add('show');
 
