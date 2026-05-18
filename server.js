@@ -9,6 +9,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { Resend } = require('resend');
 const db = require('./database');
 const path = require('path');
+const fs = require('fs');
 
 const rateLimit = require('express-rate-limit');
 const app = express();
@@ -23,7 +24,7 @@ const MODEL = 'claude-haiku-4-5';
 
 const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-app.use(cors());
+app.use(cors({ origin: 'https://tintinlab.com' }));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -837,6 +838,21 @@ app.get('/health', (req, res) => {
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
+
+// Database backup — admin only, returns full lms-data.json as download
+app.get('/api/admin/backup', authenticate, adminOnly, (req, res) => {
+  try {
+    const data = fs.readFileSync(path.join(__dirname, 'lms-data.json'), 'utf8');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="lms-backup-${stamp}.json"`);
+    res.send(data);
+  } catch (err) {
+    console.error('Backup error:', err);
+    res.status(500).json({ error: 'Backup failed' });
+  }
+});
+
 app.get('/api/admin/users', authenticate, teacherOrAdmin, (req, res) => {
   try {
     res.json(db.getAllUsersWithStats());
@@ -2223,7 +2239,7 @@ app.get('*', (req, res) => {
 
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
+  cors: { origin: 'https://tintinlab.com', methods: ['GET', 'POST'] }
 });
 
 io.on('connection', (socket) => {
