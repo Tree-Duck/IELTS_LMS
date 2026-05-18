@@ -10,6 +10,7 @@ const { Resend } = require('resend');
 const db = require('./database');
 const path = require('path');
 
+const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'ielts-lms-secret-key-change-in-production';
@@ -209,8 +210,27 @@ function authenticate(req, res, next) {
   }
 }
 
+// ─── Rate Limiters ────────────────────────────────────────────────────────────
+// Strict: login & forgot-password — primary brute-force targets
+const authStrictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 min
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again in 15 minutes.' }
+});
+
+// Looser: register / verify / resend — less sensitive but still throttled
+const authLooseLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 min
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again in 15 minutes.' }
+});
+
 // ─── Auth Routes ──────────────────────────────────────────────────────────────
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', authLooseLimiter, async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
@@ -236,7 +256,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authStrictLimiter, async (req, res) => {
   const { email, password, remember_me } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -263,7 +283,7 @@ app.post('/api/login', async (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
 });
 
-app.post('/api/verify-email', async (req, res) => {
+app.post('/api/verify-email', authLooseLimiter, async (req, res) => {
   try {
     const { email, code } = req.body;
     if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
@@ -281,7 +301,7 @@ app.post('/api/verify-email', async (req, res) => {
   }
 });
 
-app.post('/api/resend-verification', async (req, res) => {
+app.post('/api/resend-verification', authLooseLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     const user = db.getUserByEmail((email || '').toLowerCase());
@@ -709,7 +729,7 @@ ${submission.essay}`;
 });
 
 // ─── Password Reset (unauthenticated) ────────────────────────────────────────
-app.post('/api/forgot-password', async (req, res) => {
+app.post('/api/forgot-password', authStrictLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
@@ -726,7 +746,7 @@ app.post('/api/forgot-password', async (req, res) => {
   }
 });
 
-app.post('/api/reset-password', async (req, res) => {
+app.post('/api/reset-password', authStrictLimiter, async (req, res) => {
   try {
     const { email, code, new_password } = req.body;
     if (!email || !code || !new_password) return res.status(400).json({ error: 'Email, code, and new password are required' });
