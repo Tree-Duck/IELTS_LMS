@@ -581,6 +581,7 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
       messages: [{ role: 'user', content: userPrompt }],
     });
 
+    req.on('close', () => stream.abort());
     stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
     const finalMsg = await stream.finalMessage();
 
@@ -593,9 +594,9 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
+    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Task generation error:', err);
-    res.write('data: [DONE]\n\n');
-    res.end();
+    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
   }
 });
 
@@ -652,6 +653,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
       messages: [{ role: 'user', content: userPrompt }],
     });
 
+    req.on('close', () => stream.abort());
     stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
     const finalMsg = await stream.finalMessage();
 
@@ -664,9 +666,9 @@ app.post('/api/hint', authenticate, async (req, res) => {
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
+    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Hint error:', err);
-    res.write('data: [DONE]\n\n');
-    res.end();
+    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
   }
 });
 
@@ -715,6 +717,8 @@ ${submission.essay}`;
       messages: [{ role: 'user', content: userPrompt }],
     });
 
+    req.on('close', () => stream.abort());
+
     stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
     const finalMsg = await stream.finalMessage();
 
@@ -726,9 +730,9 @@ ${submission.essay}`;
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
+    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Rewrite error:', err);
-    res.write('data: [DONE]\n\n');
-    res.end();
+    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
   }
 });
 
