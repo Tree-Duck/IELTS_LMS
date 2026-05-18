@@ -13,7 +13,11 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'ielts-lms-secret-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET env var is not set. Refusing to start.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = 'claude-haiku-4-5';
 
