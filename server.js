@@ -581,27 +581,24 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
   }
 
   try {
-    const stream = client.messages.stream({
+    const response = await client.messages.create({
       model: MODEL,
       max_tokens: 300,
       system: 'You are an expert IELTS task writer. Output only the task text with no preamble, labels, or commentary.',
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    req.on('close', () => stream.abort());
-    stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
-    const finalMsg = await stream.finalMessage();
+    const text = response.content[0]?.text || '';
+    res.write(`data: ${JSON.stringify(text)}\n\n`);
 
-    // Track usage
-    const inputTokens = finalMsg.usage ? finalMsg.usage.input_tokens : 0;
-    const outputTokens = finalMsg.usage ? finalMsg.usage.output_tokens : 0;
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
     const cost = calculateCost(inputTokens, outputTokens);
     db.logUsage('generate-task', cost, inputTokens + outputTokens);
 
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
-    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Task generation error:', err.message || err);
     if (!res.writableEnded) {
       res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
@@ -659,27 +656,24 @@ app.post('/api/hint', authenticate, async (req, res) => {
     : `IELTS Writing Task 1 prompt:\n${prompt}\n\nGenerate structured writing phrases for THIS specific task. Every example sentence must reference what this specific chart/diagram actually shows.\n\n## 🔍 Overview Paragraph\n**Overview openers** (2 phrases + 1 example sentence each, referring to what this chart shows overall):\n**Key feature phrases** (2 phrases for highlighting the most striking trend or feature visible in this data):\n\n## 📊 Detail Paragraph 1 — describing the main trend or category\n**Opening / signposting phrases** (2 phrases + 1 example sentence each, using data from this chart):\n**Data reference phrases** (3 phrases for citing figures — e.g. "stood at", "reached a peak of", "accounted for X%"):\n\n## 📊 Detail Paragraph 2 — comparison or second trend\n**Comparison phrases** (2 phrases + 1 example sentence each, comparing two specific items from this chart):\n**Change / movement verbs** (5 precise verbs with example sentences drawn from this chart's actual data):\n\n## 🔄 Process / Map\n(Include this section ONLY if the task is a process diagram or map. If it is, provide 3 sequence/location phrases with example sentences specific to this task. Otherwise omit this section entirely.)\n\nEvery example sentence: use the actual data, figures, categories, or locations from this specific task.`;
 
   try {
-    const stream = client.messages.stream({
+    const response = await client.messages.create({
       model: MODEL,
       max_tokens: 1400,
       system: 'You are an expert IELTS writing coach. Be practical, specific, and concise. Do not repeat the prompt back.',
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    req.on('close', () => stream.abort());
-    stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
-    const finalMsg = await stream.finalMessage();
+    const text = response.content[0]?.text || '';
+    res.write(`data: ${JSON.stringify(text)}\n\n`);
 
-    // Track usage
-    const inputTokens = finalMsg.usage ? finalMsg.usage.input_tokens : 0;
-    const outputTokens = finalMsg.usage ? finalMsg.usage.output_tokens : 0;
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
     const cost = calculateCost(inputTokens, outputTokens);
     db.logUsage(`hint-${hint_type}`, cost, inputTokens + outputTokens);
 
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
-    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Hint error:', err.message || err);
     if (!res.writableEnded) {
       res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
@@ -729,27 +723,24 @@ Original essay${submission.overall_band != null ? ` (Band ${submission.overall_b
 ${submission.essay}`;
 
   try {
-    const stream = client.messages.stream({
+    const response = await client.messages.create({
       model: MODEL,
       max_tokens: 1500,
       system: 'You are an expert IELTS writing coach. Rewrite the essay at Band 8.0–8.5 level, then explain what you changed. Output the rewritten essay first, then the "## What Changed" section.',
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    req.on('close', () => stream.abort());
+    const text = response.content[0]?.text || '';
+    res.write(`data: ${JSON.stringify(text)}\n\n`);
 
-    stream.on('text', (text) => res.write(`data: ${JSON.stringify(text)}\n\n`));
-    const finalMsg = await stream.finalMessage();
-
-    const inputTokens = finalMsg.usage ? finalMsg.usage.input_tokens : 0;
-    const outputTokens = finalMsg.usage ? finalMsg.usage.output_tokens : 0;
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
     const cost = calculateCost(inputTokens, outputTokens);
     db.logUsage('rewrite', cost, inputTokens + outputTokens);
 
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
-    if (err.name === 'AbortError' || err.message?.includes('abort')) return;
     console.error('Rewrite error:', err.message || err);
     if (!res.writableEnded) {
       res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
