@@ -9,17 +9,31 @@ if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
+// In-memory cache — avoids reading from network volume on every request.
+// Invalidated whenever save() writes a new version (mtime advances).
+let _cache = null;
+let _cacheMtime = 0;
+
 function load() {
   try {
     if (fs.existsSync(DB_FILE)) {
-      return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+      const mtime = fs.statSync(DB_FILE).mtimeMs;
+      if (_cache && mtime === _cacheMtime) return _cache;
+      _cache = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+      _cacheMtime = mtime;
+      return _cache;
     }
   } catch {}
-  return { users: [], submissions: [], feedback: [], usage_logs: [], tests: [], test_attempts: [], task1_topics: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0, tests: 0, test_attempts: 0, task1_topics: 0 } };
+  const empty = { users: [], submissions: [], feedback: [], usage_logs: [], tests: [], test_attempts: [], task1_topics: [], _ids: { users: 0, submissions: 0, feedback: 0, usage_logs: 0, tests: 0, test_attempts: 0, task1_topics: 0 } };
+  _cache = empty;
+  return empty;
 }
 
 function save(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data));
+  _cache = data;
+  // mtime will advance after writeFileSync; sync it so next load() hit uses cache
+  try { _cacheMtime = fs.statSync(DB_FILE).mtimeMs; } catch {}
 }
 
 const db = {
