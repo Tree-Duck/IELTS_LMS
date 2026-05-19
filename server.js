@@ -22,7 +22,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = 'claude-haiku-4-5';
 
-const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+const client = new Anthropic({
+  apiKey: ANTHROPIC_API_KEY,
+  timeout: 60_000,   // 60 s — fail fast instead of hanging 10 min
+  maxRetries: 0,     // no silent retries; surface errors immediately
+});
 
 app.use(cors({ origin: 'https://tintinlab.com' }));
 app.use(express.json({ limit: '15mb' }));
@@ -596,8 +600,12 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
     res.end();
   } catch (err) {
     if (err.name === 'AbortError' || err.message?.includes('abort')) return;
-    console.error('Task generation error:', err);
-    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
+    console.error('Task generation error:', err.message || err);
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
   }
 });
 
@@ -668,8 +676,12 @@ app.post('/api/hint', authenticate, async (req, res) => {
     res.end();
   } catch (err) {
     if (err.name === 'AbortError' || err.message?.includes('abort')) return;
-    console.error('Hint error:', err);
-    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
+    console.error('Hint error:', err.message || err);
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
   }
 });
 
@@ -732,8 +744,12 @@ ${submission.essay}`;
     res.end();
   } catch (err) {
     if (err.name === 'AbortError' || err.message?.includes('abort')) return;
-    console.error('Rewrite error:', err);
-    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
+    console.error('Rewrite error:', err.message || err);
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify('[ERROR] ' + (err.message || 'AI service unavailable'))}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
   }
 });
 
@@ -838,6 +854,21 @@ app.get('/health', (req, res) => {
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
+
+// AI connectivity health check — admin only
+app.get('/api/admin/ai-health', authenticate, adminOnly, async (req, res) => {
+  try {
+    const start = Date.now();
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 5,
+      messages: [{ role: 'user', content: 'Reply "ok"' }],
+    });
+    res.json({ ok: true, ms: Date.now() - start, reply: response.content[0]?.text, model: MODEL });
+  } catch (err) {
+    res.json({ ok: false, error: err.message, type: err.constructor?.name, model: MODEL });
+  }
+});
 
 // Database backup — admin only, returns full lms-data.json as download
 app.get('/api/admin/backup', authenticate, adminOnly, (req, res) => {
