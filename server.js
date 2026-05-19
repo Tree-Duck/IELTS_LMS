@@ -571,6 +571,7 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
 
   {
     const topicClause = (topic && topic !== 'random')
@@ -627,6 +628,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
 
   const taskLabel = task_type === 'task1' ? 'Task 1' : 'Task 2';
   const draftSection = essay && essay.trim()
@@ -702,6 +704,7 @@ app.post('/api/rewrite', authenticate, async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
 
   const taskLabel = submission.task_type === 'task1' ? 'Task 1' : 'Task 2';
   const bandNote = submission.overall_band != null
