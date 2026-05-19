@@ -5,7 +5,7 @@
   --primary-dark: #D97706;
   --primary-light: #FEF3C7;
   --sidebar-bg: #0F172A;
-  --body-bg: #FFFBEB;
+  --body-bg: #F8FAFC;
   --success: #059669;
   --success-light: #ecfdf5;
   --warning: #d97706;
@@ -24,13 +24,14 @@
   --gray-900: #111827;
   --sidebar-width: 240px;
   --radius: 10px;
+  --primary-glow: rgba(245, 158, 11, 0.16);
   --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--body-bg);
   color: var(--gray-800);
   min-height: 100vh;
@@ -105,7 +106,7 @@ body {
 
 /* ─── TOPNAV: LEFT / BRAND ───────────────────────────────────────────────── */
 .topnav-left { display: flex; align-items: center; gap: 8px; margin-right: 8px; flex-shrink: 0; }
-.topnav-brand { font-weight: 800; font-size: 15px; white-space: nowrap; color: var(--primary); letter-spacing: .5px; }
+.topnav-brand { font-weight: 800; font-size: 17px; white-space: nowrap; color: var(--primary); letter-spacing: 0.2px; }
 .topnav-hamburger {
   display: none; background: none; border: none; font-size: 20px;
   cursor: pointer; padding: 4px 8px; color: var(--gray-400);
@@ -121,7 +122,7 @@ body {
   padding: 6px 12px; border-radius: 6px;
   background: none; border: none; cursor: pointer;
   font-size: 13px; font-weight: 500;
-  color: var(--gray-400);
+  color: var(--gray-300);
   white-space: nowrap;
   transition: background 150ms, color 150ms;
 }
@@ -296,7 +297,8 @@ body {
 }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary { background: var(--primary); color: #0F172A; }
-.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,.35); }
+.btn-primary:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
 .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
 .btn-secondary:hover { background: var(--gray-200); }
 .btn-ghost { background: transparent; color: var(--gray-500); border: none; }
@@ -419,7 +421,7 @@ input[type="text"], input[type="email"], input[type="password"], textarea, selec
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .submit-form { display: flex; flex-direction: column; gap: 24px; }
@@ -576,7 +578,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--gray-200);
   text-align: center;
 }
-.stat-value { font-size: 32px; font-weight: 800; color: var(--primary); }
+.stat-value { font-size: 32px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; line-height: 1; }
 .stat-label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
 
 /* ─── RECENT / HISTORY ──────────────────────────────────────────────────── */
@@ -2364,6 +2366,7 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--gray-200);
   border-radius: 12px;
   padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);
 }
 
 /* ─── Admin Cost Breakdown ────────────────────────────────────────────────── */
