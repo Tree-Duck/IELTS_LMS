@@ -2956,7 +2956,6 @@ async function handleSubmit(e) {
 /* ─── Feedback ───────────────────────────────────────────────────────────── */
 async function viewFeedback(id) {
   showView('feedback');
-  document.getElementById('nav-history').classList.add('active');
   document.getElementById('feedback-content').innerHTML = '<div class="loading">Loading feedback…</div>';
 
   try {
@@ -8611,5 +8610,514 @@ function _showVocabResult(title, score, total, message) {
   resultDiv.classList.remove('hidden');
   const titleEl = document.getElementById('vl-game-title');
   if (titleEl) titleEl.textContent = title;
+}
+
+/* =====================================================
+   PARA LAB — Pixel Art RPG Paragraph Battle Game
+   ===================================================== */
+
+// ---- State ----
+let _paraLabStage = 0;             // 0=point, 1=evidence, 2=analysis, 3=link
+let _paraLabSentences = [];        // accepted sentences
+let _paraLabScores = [];           // per-stage scores
+let _paraLabQuestion = null;
+let _paraLabThesis = null;
+let _paraLabHearts = 5;
+let _paraLabMonsterHp = 100;
+let _paraLabMonsterHpMax = 100;
+let _paraLabExp = 0;
+let _paraLabCurrentBand = 5;
+let _paraLabTargetBand = 6.5;
+let _paraLabSubmitting = false;
+let _paraLabCurrentMonster = null;
+
+// ---- Constants ----
+const PARA_MONSTERS = {
+  tautology:  { emoji: '🐉', name: 'TAUTOLOGY DRAGON' },
+  vague:      { emoji: '👻', name: 'VAGUE PHANTOM'    },
+  baby_words: { emoji: '🤡', name: 'BABY WORD CLOWN'  },
+  circular:   { emoji: '🕷️', name: 'CIRCULAR SPIDER'  },
+  none:       { emoji: '💀', name: 'LOGIC WRAITH'      },
+};
+
+const PARA_STAGE_META = [
+  { key: 'topic_sentence', label: 'STAGE 1 — POINT',    color: '#ffbb33', hint: 'Write a topic sentence — a clear claim linked to the thesis.' },
+  { key: 'evidence',       label: 'STAGE 2 — EVIDENCE', color: '#88aaff', hint: 'Provide a specific example or data. New information only — do not restate Stage 1.' },
+  { key: 'analysis',       label: 'STAGE 3 — ANALYSIS', color: '#ff8844', hint: 'Explain WHY the evidence proves your point. Avoid tautology.' },
+  { key: 'link',           label: 'STAGE 4 — LINK',     color: '#55ff88', hint: 'Connect back to the essay question without repeating it word-for-word.' },
+];
+
+const PARA_MONSTER_ATTACKS = {
+  tautology:  ['TAUTOLOGY BEAM!', 'CIRCULAR BREATH!', 'REPETITION ROAR!'],
+  vague:      ['VAGUENESS WAIL!', 'EMPTY HOWL!', 'PHANTOM STRIKE!'],
+  baby_words: ['BABY BLUDGEON!', 'WEAK WORD WALLOP!', 'CLOWN SMASH!'],
+  circular:   ['LOOP LUNGE!', 'SPIN SLASH!', 'CIRCULAR BITE!'],
+  none:       ['SHADOW STRIKE!', 'VOID SLASH!', 'WRAITH DRAIN!'],
+};
+
+// ---- Entry ----
+function showParaLab() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+  renderParaLabBandSelect();
+}
+
+// ---- Band Selection Screen ----
+function renderParaLabBandSelect() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+
+  const currentBands  = [4, 4.5, 5, 5.5, 6, 6.5];
+  const targetBands   = [5, 5.5, 6, 6.5, 7, 7.5, 8];
+
+  root.innerHTML = `
+    <div class="pl-card">
+      <div class="pl-band-screen">
+        <div class="pl-band-title">⚔️ PARA LAB</div>
+        <div class="pl-band-subtitle">Paragraph Battle Training — Destroy logic flaws in your IELTS writing</div>
+
+        <div class="pl-band-section">
+          <div class="pl-band-section-label">🎮 Your current band</div>
+          <div class="pl-band-row" id="pl-current-row">
+            ${currentBands.map(b => `
+              <button class="pl-band-btn${b === _paraLabCurrentBand ? ' selected' : ''}"
+                onclick="paraLabSelectCurrent(${b})">${b}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="pl-band-section">
+          <div class="pl-band-section-label">🎯 Your target band</div>
+          <div class="pl-band-row" id="pl-target-row">
+            ${targetBands.map(b => `
+              <button class="pl-band-btn${b === _paraLabTargetBand ? ' selected' : ''}"
+                id="pl-target-${b.toString().replace('.','_')}"
+                onclick="paraLabSelectTarget(${b})">${b}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <button class="pl-start-btn" id="pl-start-btn" onclick="paraLabBeginGame()">▶ START BATTLE</button>
+      </div>
+    </div>`;
+
+  _paraLabUpdateTargetButtons();
+}
+
+function paraLabSelectCurrent(band) {
+  _paraLabCurrentBand = band;
+  document.querySelectorAll('#pl-current-row .pl-band-btn').forEach(btn => {
+    btn.classList.toggle('selected', parseFloat(btn.textContent) === band);
+  });
+  // If target <= new current, bump target
+  if (_paraLabTargetBand <= _paraLabCurrentBand) {
+    _paraLabTargetBand = _paraLabCurrentBand + 0.5;
+  }
+  _paraLabUpdateTargetButtons();
+}
+
+function paraLabSelectTarget(band) {
+  if (band <= _paraLabCurrentBand) return;
+  _paraLabTargetBand = band;
+  _paraLabUpdateTargetButtons();
+}
+
+function _paraLabUpdateTargetButtons() {
+  document.querySelectorAll('#pl-target-row .pl-band-btn').forEach(btn => {
+    const v = parseFloat(btn.textContent);
+    const tooLow = v <= _paraLabCurrentBand;
+    btn.disabled = tooLow;
+    btn.classList.toggle('selected', v === _paraLabTargetBand);
+  });
+}
+
+function paraLabBeginGame() {
+  // Difficulty from gap
+  const gap = _paraLabTargetBand - _paraLabCurrentBand;
+  _paraLabHearts       = gap >= 2 ? 3 : gap >= 1 ? 4 : 5;
+  _paraLabMonsterHpMax = Math.round(60 + gap * 20);
+  _paraLabMonsterHp    = _paraLabMonsterHpMax;
+  _paraLabExp          = 0;
+  _paraLabStage        = 0;
+  _paraLabSentences    = [];
+  _paraLabScores       = [];
+
+  // Pick random task2 question
+  const pool = PROMPT_BANK.task2;
+  _paraLabQuestion = pool[Math.floor(Math.random() * pool.length)];
+
+  renderParaLabThesisChoice();
+}
+
+// ---- Thesis Choice Screen ----
+function renderParaLabThesisChoice() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+
+  const q = _paraLabQuestion;
+  const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
+
+  root.innerHTML = `
+    <div class="pl-card">
+      <div class="pl-thesis-screen">
+        <div class="pl-thesis-title">📜 Choose Your Position</div>
+        <div class="pl-question-box">${prompt}</div>
+        <div class="pl-thesis-options">
+          <button class="pl-thesis-btn" onclick="paraLabSetThesis('agree')">
+            <span style="color:#55ff88">▶ AGREE</span><br>
+            <span style="font-size:11px;color:#888">I will argue in favour of this statement</span>
+          </button>
+          <button class="pl-thesis-btn" onclick="paraLabSetThesis('disagree')">
+            <span style="color:#ff5555">▶ DISAGREE</span><br>
+            <span style="font-size:11px;color:#888">I will argue against this statement</span>
+          </button>
+          <button class="pl-thesis-btn" onclick="paraLabSetThesis('partly agree')">
+            <span style="color:#ffbb33">▶ PARTLY AGREE</span><br>
+            <span style="font-size:11px;color:#888">I will present a balanced view</span>
+          </button>
+        </div>
+        <div style="margin-top:14px;text-align:center">
+          <button class="pl-band-btn" onclick="renderParaLabBandSelect()" style="font-size:11px">← Back</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function paraLabSetThesis(position) {
+  const q = _paraLabQuestion;
+  const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
+  _paraLabThesis = `${position.charAt(0).toUpperCase() + position.slice(1)} — ${prompt}`;
+  _paraLabCurrentMonster = PARA_MONSTERS.none; // start with default, updated on first result
+  renderParaLabBattle();
+}
+
+// ---- Battle Screen ----
+function renderParaLabBattle() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+
+  const meta    = PARA_STAGE_META[_paraLabStage];
+  const monster = _paraLabCurrentMonster || PARA_MONSTERS.none;
+  const hpPct   = Math.round((_paraLabMonsterHp / _paraLabMonsterHpMax) * 100);
+  const expPct  = Math.min(100, Math.round((_paraLabExp / (PARA_STAGE_META.length * 25)) * 100));
+  const heartsHtml = _paraLabHeartsHtml();
+
+  root.innerHTML = `
+    <div class="pl-card" id="pl-card">
+
+      <!-- HUD -->
+      <div class="pl-hud">
+        <div class="pl-hud-hearts" id="pl-hearts-display">${heartsHtml}</div>
+        <div class="pl-hud-stage" style="color:${meta.color}">${meta.label}</div>
+        <div class="pl-hud-exp">EXP: ${_paraLabExp}</div>
+      </div>
+
+      <!-- Battle Field -->
+      <div class="pl-field" id="pl-field">
+        <!-- Hero -->
+        <div class="pl-hero">
+          <span class="pl-sprite pl-idle" id="pl-hero-sprite">🧙</span>
+          <span class="pl-sprite-label">WRITER</span>
+          <div class="pl-hp-bar-wrap">
+            <div class="pl-hp-label">HP</div>
+            <div class="pl-hp-track">
+              <div class="pl-hp-fill hero" id="pl-hero-hp-fill"
+                style="width:${Math.round((_paraLabHearts / ((_paraLabTargetBand - _paraLabCurrentBand) >= 2 ? 3 : (_paraLabTargetBand - _paraLabCurrentBand) >= 1 ? 4 : 5)) * 100)}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enemy -->
+        <div class="pl-enemy" id="pl-enemy-wrap">
+          <span class="pl-sprite pl-idle" id="pl-enemy-sprite">${monster.emoji}</span>
+          <span class="pl-sprite-label" id="pl-enemy-name">${monster.name}</span>
+          <div class="pl-hp-bar-wrap">
+            <div class="pl-hp-label">MONSTER HP</div>
+            <div class="pl-hp-track">
+              <div class="pl-hp-fill enemy" id="pl-enemy-hp-fill" style="width:${hpPct}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dialogue Box -->
+      <div class="pl-dialogue" id="pl-dialogue">
+        <span class="pl-dialogue-name">CLAUDE EXAMINER: </span>
+        <span id="pl-dialogue-text">${meta.hint}</span>
+        <span class="pl-blink pl-dialogue-cursor">█</span>
+      </div>
+
+      <!-- Stage Menu -->
+      <div class="pl-menu">
+        ${PARA_STAGE_META.map((s, i) => `
+          <div class="pl-menu-item${i === _paraLabStage ? ' active' : ''}">
+            ${i === _paraLabStage ? '<span class="pl-menu-arrow">▶</span>' : '<span style="opacity:0">▶</span>'}
+            ${i < _paraLabStage ? '✅' : ''} ${s.label.split('—')[1] || s.label}
+          </div>`).join('')}
+      </div>
+
+      <!-- Write Zone -->
+      <div class="pl-write-zone">
+        <div class="pl-stage-prompt" style="color:${meta.color}">${meta.label}: Write your sentence below</div>
+        <textarea class="pl-textarea" id="pl-textarea"
+          placeholder="${meta.hint}"
+          oninput="document.getElementById('pl-attack-btn').disabled = this.value.trim().length < 5"
+        ></textarea>
+        <button class="pl-attack-btn" id="pl-attack-btn" disabled
+          onclick="submitParaLabSentence()">⚔️ ATTACK</button>
+      </div>
+
+      <!-- EXP Bar -->
+      <div class="pl-exp-bar">
+        <div class="pl-exp-label">EXP ████ ${_paraLabExp} / ${PARA_STAGE_META.length * 25}</div>
+        <div class="pl-exp-track">
+          <div class="pl-exp-fill" id="pl-exp-fill" style="width:${expPct}%"></div>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+// ---- Submit Sentence ----
+async function submitParaLabSentence() {
+  if (_paraLabSubmitting) return;
+  const ta = document.getElementById('pl-textarea');
+  if (!ta) return;
+  const sentence = ta.value.trim();
+  if (sentence.length < 5) return;
+
+  _paraLabSubmitting = true;
+  const btn = document.getElementById('pl-attack-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analysing...'; }
+
+  paraLabUpdateDialogue('<span class="pl-dialogue-name">CLAUDE EXAMINER: </span>Analysing your sentence...', '');
+
+  try {
+    const q = _paraLabQuestion;
+    const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
+
+    const res = await fetch('/api/game/para-lab', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        stage: PARA_STAGE_META[_paraLabStage].key,
+        sentence,
+        question: prompt,
+        thesis: _paraLabThesis,
+        previousSentences: _paraLabSentences,
+        currentBand: _paraLabCurrentBand,
+        targetBand: _paraLabTargetBand,
+      }),
+    });
+
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    const data = await res.json();
+    animateParaLabResult(data, sentence);
+  } catch (err) {
+    paraLabUpdateDialogue(`<span class="pl-dialogue-name" style="color:#ff5555">ERROR: </span>${err.message}`, 'bad');
+    _paraLabSubmitting = false;
+    if (btn) { btn.disabled = false; btn.textContent = '⚔️ ATTACK'; }
+  }
+}
+
+// ---- Animate Result ----
+function animateParaLabResult(data, sentence) {
+  const score = data.score || 1;
+  const flaw  = data.flaw  || 'none';
+  const good  = score >= 3;
+
+  // Update current monster based on flaw
+  _paraLabCurrentMonster = PARA_MONSTERS[flaw] || PARA_MONSTERS.none;
+
+  // Update enemy sprite/name
+  const spriteEl = document.getElementById('pl-enemy-sprite');
+  const nameEl   = document.getElementById('pl-enemy-name');
+  if (spriteEl) spriteEl.textContent = _paraLabCurrentMonster.emoji;
+  if (nameEl)   nameEl.textContent   = _paraLabCurrentMonster.name;
+
+  if (good) {
+    // Deal damage to monster
+    const dmg = Math.round(score * 6 + Math.random() * 8);
+    _paraLabMonsterHp = Math.max(0, _paraLabMonsterHp - dmg);
+    _paraLabExp += score * 5;
+
+    spawnFloatNumber(`-${dmg}!`, true);
+    updateEnemyHpBar();
+
+    const expFill = document.getElementById('pl-exp-fill');
+    if (expFill) {
+      const pct = Math.min(100, Math.round((_paraLabExp / (PARA_STAGE_META.length * 25)) * 100));
+      expFill.style.width = pct + '%';
+    }
+    const expLabel = document.querySelector('.pl-exp-label');
+    if (expLabel) expLabel.textContent = `EXP ████ ${_paraLabExp} / ${PARA_STAGE_META.length * 25}`;
+
+    paraLabUpdateDialogue(
+      `<span class="pl-dialogue-name" style="color:#55ff88">CLAUDE EXAMINER: </span>${data.feedback || 'Good sentence!'} <br><span style="color:#aaa;font-size:11px">SCORE: ${score}/5</span>`,
+      'good'
+    );
+
+    // Accept sentence and advance after short delay
+    setTimeout(() => {
+      _paraLabSentences.push(sentence);
+      _paraLabScores.push(score);
+      _paraLabStage++;
+      _paraLabSubmitting = false;
+
+      if (_paraLabStage >= PARA_STAGE_META.length) {
+        renderParaLabFinal();
+      } else {
+        renderParaLabBattle();
+      }
+    }, 1800);
+
+  } else {
+    // Monster attacks player
+    _paraLabHearts = Math.max(0, _paraLabHearts - 1);
+
+    const attackMsgs = PARA_MONSTER_ATTACKS[flaw] || PARA_MONSTER_ATTACKS.none;
+    const attackMsg  = attackMsgs[Math.floor(Math.random() * attackMsgs.length)];
+
+    spawnFloatNumber('-1 ❤️', false);
+    shakeElement('pl-card');
+    updateHeartsDisplay();
+
+    paraLabUpdateDialogue(
+      `<span class="pl-dialogue-name" style="color:#ff5555">${_paraLabCurrentMonster.name}: ${attackMsg}</span><br>` +
+      `<span style="color:#ffbb33">CLAUDE: </span>${data.feedback || 'Try again.'}<br>` +
+      `<span style="color:#aaa;font-size:11px">💡 ${data.suggestion || 'Revise and attack again.'}</span>`,
+      'bad'
+    );
+
+    _paraLabSubmitting = false;
+    const btn = document.getElementById('pl-attack-btn');
+    if (btn) { btn.disabled = false; btn.textContent = '⚔️ ATTACK'; }
+
+    if (_paraLabHearts <= 0) {
+      setTimeout(renderParaLabGameOver, 1500);
+    }
+  }
+}
+
+// ---- UI Helpers ----
+function paraLabUpdateDialogue(html, type) {
+  const box = document.getElementById('pl-dialogue');
+  if (!box) return;
+  box.className = 'pl-dialogue' + (type ? ' ' + type : '');
+  box.innerHTML = html + '<span class="pl-blink pl-dialogue-cursor">█</span>';
+}
+
+function updateEnemyHpBar() {
+  const fill = document.getElementById('pl-enemy-hp-fill');
+  if (!fill) return;
+  const pct = Math.max(0, Math.round((_paraLabMonsterHp / _paraLabMonsterHpMax) * 100));
+  fill.style.width = pct + '%';
+}
+
+function updateHeartsDisplay() {
+  const el = document.getElementById('pl-hearts-display');
+  if (el) el.innerHTML = _paraLabHeartsHtml();
+}
+
+function _paraLabHeartsHtml() {
+  const maxH = (_paraLabTargetBand - _paraLabCurrentBand) >= 2 ? 3
+             : (_paraLabTargetBand - _paraLabCurrentBand) >= 1 ? 4 : 5;
+  let html = '';
+  for (let i = 0; i < maxH; i++) {
+    html += i < _paraLabHearts ? '❤️' : '<span style="opacity:0.25">🤍</span>';
+  }
+  return html;
+}
+
+function spawnFloatNumber(text, isGood) {
+  const field = document.getElementById('pl-field');
+  if (!field) return;
+  const span = document.createElement('span');
+  span.className = isGood ? 'pl-damage-float' : 'pl-heal-float';
+  span.textContent = text;
+  span.style.top  = (30 + Math.random() * 30) + 'px';
+  span.style.left = isGood ? (55 + Math.random() * 20) + '%' : (20 + Math.random() * 15) + '%';
+  if (!isGood) span.style.color = '#ff4444';
+  field.appendChild(span);
+  setTimeout(() => span.remove(), 1600);
+}
+
+function shakeElement(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('pl-shake');
+  setTimeout(() => el.classList.remove('pl-shake'), 450);
+}
+
+// ---- Game Over Screen ----
+function renderParaLabGameOver() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+  root.innerHTML = `
+    <div class="pl-card">
+      <div class="pl-gameover">
+        <div class="pl-gameover-title">💀 GAME OVER</div>
+        <div class="pl-gameover-sub">The ${(_paraLabCurrentMonster || PARA_MONSTERS.none).name} defeated you.<br>Study your flaws and try again.</div>
+        <button class="pl-retry-btn" onclick="paraLabBeginGame()">↺ RETRY (same topic)</button>
+        <button class="pl-retry-btn" style="background:#333;color:#aaa" onclick="showParaLab()">← NEW GAME</button>
+      </div>
+    </div>`;
+}
+
+// ---- Final Screen ----
+function renderParaLabFinal() {
+  const root = document.getElementById('para-lab-root');
+  if (!root) return;
+
+  const colorClasses = ['pl-sentence-point', 'pl-sentence-evidence', 'pl-sentence-analysis', 'pl-sentence-link'];
+  const labels       = ['POINT', 'EVIDENCE', 'ANALYSIS', 'LINK'];
+
+  const paraHtml = _paraLabSentences.map((s, i) =>
+    `<span class="${colorClasses[i]}">[${labels[i]}] ${s}</span>`
+  ).join('<br><br>');
+
+  const avgScore = _paraLabScores.length
+    ? (_paraLabScores.reduce((a, b) => a + b, 0) / _paraLabScores.length).toFixed(1)
+    : 0;
+  const bandEst  = Math.min(9, (_paraLabCurrentBand + parseFloat(avgScore) * 0.2)).toFixed(1);
+
+  root.innerHTML = `
+    <div class="pl-card">
+      <div class="pl-final">
+        <div class="pl-final-title">🏆 PARAGRAPH COMPLETE!</div>
+
+        <div class="pl-final-para">${paraHtml || '<span style="color:#555">No sentences recorded.</span>'}</div>
+
+        <div class="pl-stat-box">
+          <div class="pl-stat">
+            <div class="pl-stat-val">${_paraLabExp}</div>
+            <div class="pl-stat-lbl">Total EXP</div>
+          </div>
+          <div class="pl-stat">
+            <div class="pl-stat-val">${avgScore}</div>
+            <div class="pl-stat-lbl">Avg Score</div>
+          </div>
+          <div class="pl-stat">
+            <div class="pl-stat-val">${_paraLabHearts}❤️</div>
+            <div class="pl-stat-lbl">Hearts Left</div>
+          </div>
+          <div class="pl-stat">
+            <div class="pl-stat-val">~${bandEst}</div>
+            <div class="pl-stat-lbl">Est. Band</div>
+          </div>
+        </div>
+
+        <div style="font-family:monospace;font-size:12px;color:#888;margin-bottom:14px;text-align:center">
+          <span style="color:#ffbb33">■</span> Point &nbsp;
+          <span style="color:#88aaff">■</span> Evidence &nbsp;
+          <span style="color:#ff8844">■</span> Analysis &nbsp;
+          <span style="color:#55ff88">■</span> Link
+        </div>
+
+        <button class="pl-play-again-btn" onclick="showParaLab()">▶ PLAY AGAIN</button>
+      </div>
+    </div>`;
 }
 
