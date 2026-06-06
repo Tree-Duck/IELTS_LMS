@@ -1521,6 +1521,8 @@ function showView(name) {
   else if (name === 'practice-sentences') loadPracticeSentences();
   else if (name === 'practice-paragraphs') loadPracticeParagraphs();
   else if (name === 'practice-grammar') loadPracticeGrammar();
+  else if (name === 'grammar-hub') loadGrammarHub();
+  else if (name === 'translation') loadTranslation();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -8191,6 +8193,330 @@ function toggleGrammarCard(idx) {
   const isOpen = !body.classList.contains('hidden');
   body.classList.toggle('hidden', isOpen);
   if (chevron) chevron.textContent = isOpen ? '›' : '▾';
+}
+
+/* ─── Grammar Hub ────────────────────────────────────────────────────────── */
+const GRAMMAR_EXERCISES = [
+  { topic: 'Complex Sentences', type: 'mcq',
+    question: 'Which sentence correctly uses a relative clause?',
+    options: ['Students who study hard tend to succeed.', 'Students which study hard tend to succeed.', 'Students studying hard who tend to succeed.', 'Students, that study hard, tend to succeed.'],
+    answer: 0,
+    explanation: '"who" is used for people. The clause "who study hard" correctly modifies "Students".' },
+  { topic: 'Complex Sentences', type: 'mcq',
+    question: 'Choose the correct adverbial clause:',
+    options: ['Although governments invest in transport, but many people prefer cars.', 'Although governments invest in transport, many people still prefer cars.', 'Despite governments invest in transport, many people prefer cars.', 'Even governments invest in transport, many people prefer cars.'],
+    answer: 1,
+    explanation: '"Although" does not need "but". Correct structure: Although + clause, + main clause.' },
+  { topic: 'Passive Voice', type: 'mcq',
+    question: 'Which sentence uses passive voice correctly?',
+    options: ['The report published by the WHO.', 'The report was published by the WHO.', 'The report has publish by the WHO.', 'The report is publishing by the WHO.'],
+    answer: 1,
+    explanation: 'Passive = subject + be (past) + past participle. "was published" is correct past passive.' },
+  { topic: 'Passive Voice', type: 'mcq',
+    question: 'Convert to passive: "AI will replace millions of jobs."',
+    options: ['Millions of jobs will replaced by AI.', 'Millions of jobs will be replacing by AI.', 'Millions of jobs will be replaced by AI.', 'Millions of jobs are replaced by AI.'],
+    answer: 2,
+    explanation: 'Future passive = will + be + past participle. "will be replaced" is correct.' },
+  { topic: 'Conditionals', type: 'mcq',
+    question: 'Which is a correct Second Conditional sentence?',
+    options: ['If education is free, more people will access better jobs.', 'If education were free, more people would access better jobs.', 'If education was free, more people will access better jobs.', 'If education has been free, more people would access better jobs.'],
+    answer: 1,
+    explanation: 'Second Conditional = If + past simple (were for hypothetical), + would + infinitive.' },
+  { topic: 'Conditionals', type: 'mcq',
+    question: 'Identify the Third Conditional:',
+    options: ['If stricter policies are implemented, the damage will be less.', 'If stricter policies were implemented, the damage would be less.', 'If stricter policies had been implemented, the damage would have been less.', 'If stricter policies have been implemented, the damage would be less.'],
+    answer: 2,
+    explanation: 'Third Conditional = If + past perfect, + would have + past participle. Refers to unreal past.' },
+  { topic: 'Linking Words', type: 'mcq',
+    question: 'Choose the best linker: "Remote work reduces commuting. ___, it improves work-life balance."',
+    options: ['However', 'Despite', 'Furthermore', 'Although'],
+    answer: 2,
+    explanation: '"Furthermore" adds an extra supporting point. "However"/"Although" show contrast — wrong here.' },
+  { topic: 'Linking Words', type: 'mcq',
+    question: 'Which sentence uses a contrast linker correctly?',
+    options: ['Despite of the benefits, social media harms mental health.', 'Despite the benefits, social media harms mental health.', 'Despite the benefits but social media harms mental health.', 'Despite the benefits, however social media harms mental health.'],
+    answer: 1,
+    explanation: '"Despite" is followed by a noun phrase (no "of"). Do not add "but" or "however" after it.' },
+  { topic: 'Paraphrasing', type: 'mcq',
+    question: 'Best paraphrase of: "Many people think technology has changed education."',
+    options: ['Many people think technology has changed education.', 'It is widely believed that technological advancements have transformed the field of education.', 'Technology changed education according to many people.', 'Lots of people say technology changed education a lot.'],
+    answer: 1,
+    explanation: 'Good paraphrase: replace key words with synonyms ("believed", "advancements", "transformed") — never copy word-for-word.' },
+  { topic: 'Paraphrasing', type: 'mcq',
+    question: 'Which paraphrase of "Governments should spend more on public health." is best for Band 7+?',
+    options: ['Governments should spend more on health.', 'The government needs to give more money for health.', 'There is a compelling case for increasing state investment in healthcare systems.', 'Governments should invest in public health more than before.'],
+    answer: 2,
+    explanation: 'Band 7+ paraphrase uses sophisticated vocabulary: "compelling case", "state investment", "healthcare systems".' },
+];
+
+let _ghTab = 'theory';
+let _ghExIdx = 0;
+let _ghExScore = 0;
+let _ghExTotal = 0;
+let _ghAnswered = false;
+
+function loadGrammarHub() {
+  _ghTab = 'theory';
+  _ghExIdx = 0; _ghExScore = 0; _ghExTotal = 0; _ghAnswered = false;
+  switchGrammarTab('theory');
+}
+
+function switchGrammarTab(tab) {
+  _ghTab = tab;
+  document.getElementById('gh-tab-theory')?.classList.toggle('active', tab === 'theory');
+  document.getElementById('gh-tab-exercises')?.classList.toggle('active', tab === 'exercises');
+  document.getElementById('gh-panel-theory')?.classList.toggle('hidden', tab !== 'theory');
+  document.getElementById('gh-panel-exercises')?.classList.toggle('hidden', tab !== 'exercises');
+  if (tab === 'theory') renderGrammarHubTheory();
+  else renderGrammarHubExercise();
+}
+
+function renderGrammarHubTheory() {
+  const container = document.getElementById('gh-theory-content');
+  if (!container) return;
+  container.innerHTML = GRAMMAR_LESSONS.map((lesson, li) => `
+    <div class="gh-theory-card" id="gh-card-${li}">
+      <div class="gh-theory-header" onclick="toggleGhCard(${li})">
+        <span class="gh-theory-icon">${lesson.icon}</span>
+        <h3 class="gh-theory-title">${lesson.title}</h3>
+        <span class="gh-theory-chevron" id="gh-chevron-${li}">›</span>
+      </div>
+      <div class="gh-theory-body hidden" id="gh-body-${li}">
+        <div class="gh-band-tip">🎯 <strong>Band tip:</strong> ${lesson.band_tip}</div>
+        ${lesson.sections.map(s => `
+          <div class="gh-section">
+            <div class="gh-section-label">${s.label}</div>
+            <div class="gh-section-rule">${s.rule}</div>
+            <div class="gh-examples">
+              ${s.examples.map(ex => `<div class="gh-example">${ex}</div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleGhCard(idx) {
+  const body = document.getElementById(`gh-body-${idx}`);
+  const chevron = document.getElementById(`gh-chevron-${idx}`);
+  if (!body) return;
+  const open = !body.classList.contains('hidden');
+  body.classList.toggle('hidden', open);
+  if (chevron) chevron.textContent = open ? '›' : '▾';
+}
+
+function renderGrammarHubExercise() {
+  const ex = GRAMMAR_EXERCISES[_ghExIdx];
+  if (!ex) return;
+  _ghAnswered = false;
+  const counter = document.getElementById('gh-ex-counter');
+  const scoreEl = document.getElementById('gh-ex-score');
+  const progressBar = document.getElementById('gh-ex-progress-bar');
+  if (counter) counter.textContent = `Question ${_ghExIdx + 1} of ${GRAMMAR_EXERCISES.length}`;
+  if (scoreEl) scoreEl.textContent = `Score: ${_ghExScore} / ${_ghExTotal}`;
+  if (progressBar) progressBar.style.width = `${(_ghExIdx / GRAMMAR_EXERCISES.length) * 100}%`;
+
+  const checkBtn = document.getElementById('gh-check-btn');
+  const nextBtn = document.getElementById('gh-next-btn');
+  const feedbackEl = document.getElementById('gh-ex-feedback');
+  if (checkBtn) { checkBtn.classList.remove('hidden'); checkBtn.disabled = true; }
+  if (nextBtn) nextBtn.classList.add('hidden');
+  if (feedbackEl) { feedbackEl.classList.add('hidden'); feedbackEl.textContent = ''; }
+
+  const card = document.getElementById('gh-exercise-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div class="gh-ex-topic-tag">${ex.topic}</div>
+    <div class="gh-ex-question">${ex.question}</div>
+    <div class="gh-ex-options" id="gh-options">
+      ${ex.options.map((opt, i) => `
+        <label class="gh-option" id="gh-opt-${i}">
+          <input type="radio" name="gh-answer" value="${i}" onchange="onGhOptionChange(${i})">
+          <span class="gh-opt-letter">${String.fromCharCode(65+i)}</span>
+          <span class="gh-opt-text">${opt}</span>
+        </label>`).join('')}
+    </div>`;
+}
+
+function onGhOptionChange(idx) {
+  const checkBtn = document.getElementById('gh-check-btn');
+  if (checkBtn) checkBtn.disabled = false;
+}
+
+function checkGrammarExercise() {
+  if (_ghAnswered) return;
+  const selected = document.querySelector('input[name="gh-answer"]:checked');
+  if (!selected) return;
+  _ghAnswered = true;
+  const chosen = parseInt(selected.value);
+  const ex = GRAMMAR_EXERCISES[_ghExIdx];
+  const correct = chosen === ex.answer;
+  _ghExTotal++;
+  if (correct) _ghExScore++;
+
+  // Style options
+  ex.options.forEach((_, i) => {
+    const lbl = document.getElementById(`gh-opt-${i}`);
+    if (!lbl) return;
+    if (i === ex.answer) lbl.classList.add('gh-opt-correct');
+    else if (i === chosen && !correct) lbl.classList.add('gh-opt-wrong');
+  });
+
+  const feedbackEl = document.getElementById('gh-ex-feedback');
+  if (feedbackEl) {
+    feedbackEl.className = `gh-ex-feedback ${correct ? 'gh-feedback-correct' : 'gh-feedback-wrong'}`;
+    feedbackEl.innerHTML = `${correct ? '✅ Correct!' : '❌ Incorrect.'} ${ex.explanation}`;
+    feedbackEl.classList.remove('hidden');
+  }
+
+  const scoreEl = document.getElementById('gh-ex-score');
+  if (scoreEl) scoreEl.textContent = `Score: ${_ghExScore} / ${_ghExTotal}`;
+
+  const checkBtn = document.getElementById('gh-check-btn');
+  const nextBtn = document.getElementById('gh-next-btn');
+  if (checkBtn) checkBtn.classList.add('hidden');
+  if (nextBtn) {
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = _ghExIdx < GRAMMAR_EXERCISES.length - 1 ? 'Next →' : '🔁 Restart';
+  }
+}
+
+function nextGrammarExercise() {
+  if (_ghExIdx < GRAMMAR_EXERCISES.length - 1) {
+    _ghExIdx++;
+  } else {
+    _ghExIdx = 0; _ghExScore = 0; _ghExTotal = 0;
+  }
+  renderGrammarHubExercise();
+}
+
+/* ─── Translation Practice ───────────────────────────────────────────────── */
+const TRANSLATION_BANK = [
+  { vi: 'Ô nhiễm môi trường là một vấn đề nghiêm trọng trên toàn thế giới.', en: 'Environmental pollution is a serious problem worldwide.', hints: ['environmental', 'pollution', 'serious', 'worldwide'] },
+  { vi: 'Giáo dục đóng vai trò quan trọng trong việc phát triển kinh tế.', en: 'Education plays a crucial role in economic development.', hints: ['education', 'crucial', 'role', 'economic'] },
+  { vi: 'Nhiều người trẻ thích làm việc từ xa thay vì đến văn phòng.', en: 'Many young people prefer working remotely rather than going to the office.', hints: ['prefer', 'remotely', 'rather', 'office'] },
+  { vi: 'Biến đổi khí hậu đe dọa sự tồn tại của nhiều loài động vật.', en: 'Climate change threatens the survival of many animal species.', hints: ['climate', 'threatens', 'survival', 'species'] },
+  { vi: 'Chính phủ nên đầu tư nhiều hơn vào giao thông công cộng.', en: 'The government should invest more in public transport.', hints: ['government', 'invest', 'public', 'transport'] },
+  { vi: 'Mạng xã hội có tác động lớn đến cuộc sống hàng ngày của giới trẻ.', en: 'Social media has a significant impact on the daily lives of young people.', hints: ['significant', 'impact', 'daily', 'media'] },
+  { vi: 'Nghèo đói và bất bình đẳng vẫn còn là những thách thức lớn.', en: 'Poverty and inequality remain major challenges.', hints: ['poverty', 'inequality', 'remain', 'challenges'] },
+  { vi: 'Công nghệ đã thay đổi cách con người giao tiếp với nhau.', en: 'Technology has transformed the way people communicate with each other.', hints: ['transformed', 'communicate', 'technology', 'way'] },
+  { vi: 'Việc tái chế rác thải giúp bảo vệ tài nguyên thiên nhiên.', en: 'Recycling waste helps to protect natural resources.', hints: ['recycling', 'waste', 'protect', 'natural'] },
+  { vi: 'Du học nước ngoài mang lại nhiều cơ hội nhưng cũng có nhiều thách thức.', en: 'Studying abroad offers many opportunities but also comes with many challenges.', hints: ['abroad', 'opportunities', 'challenges', 'offers'] },
+  { vi: 'Sự phát triển của trí tuệ nhân tạo đang thay đổi thị trường lao động.', en: 'The development of artificial intelligence is changing the labour market.', hints: ['artificial', 'intelligence', 'labour', 'market'] },
+  { vi: 'Nhiều quốc gia đang nỗ lực giảm lượng khí thải carbon.', en: 'Many countries are working to reduce carbon emissions.', hints: ['countries', 'reduce', 'carbon', 'emissions'] },
+  { vi: 'Chế độ ăn uống lành mạnh và tập thể dục đều đặn giúp cải thiện sức khỏe.', en: 'A healthy diet and regular exercise help improve overall health.', hints: ['healthy', 'diet', 'regular', 'improve'] },
+  { vi: 'Toàn cầu hóa mang lại lợi ích kinh tế nhưng cũng gây ra mất đi bản sắc văn hóa.', en: 'Globalisation brings economic benefits but also causes a loss of cultural identity.', hints: ['globalisation', 'economic', 'cultural', 'identity'] },
+  { vi: 'Đô thị hóa nhanh chóng dẫn đến tình trạng quá tải dân số ở các thành phố.', en: 'Rapid urbanisation leads to overpopulation in cities.', hints: ['rapid', 'urbanisation', 'overpopulation', 'cities'] },
+  { vi: 'Nước sạch là một quyền cơ bản của con người, nhưng nhiều cộng đồng vẫn thiếu nó.', en: 'Clean water is a basic human right, but many communities still lack it.', hints: ['clean', 'basic', 'right', 'communities'] },
+  { vi: 'Các chính phủ nên thực hiện các chính sách nghiêm ngặt hơn để chống tham nhũng.', en: 'Governments should implement stricter policies to combat corruption.', hints: ['implement', 'stricter', 'policies', 'corruption'] },
+  { vi: 'Truyền thông đại chúng có ảnh hưởng sâu sắc đến nhận thức của công chúng.', en: 'The mass media has a profound influence on public perception.', hints: ['mass', 'profound', 'influence', 'perception'] },
+  { vi: 'Sự già hóa dân số là thách thức lớn đối với hệ thống phúc lợi xã hội.', en: 'An ageing population is a major challenge for welfare systems.', hints: ['ageing', 'population', 'major', 'welfare'] },
+  { vi: 'Đầu tư vào năng lượng tái tạo là chìa khóa để đối phó với biến đổi khí hậu.', en: 'Investing in renewable energy is key to addressing climate change.', hints: ['renewable', 'energy', 'addressing', 'climate'] },
+];
+
+let _transIdx = 0;
+let _transScore = 0;
+let _transTotal = 0;
+let _transOrder = [];
+let _transHintsRevealed = new Set();
+
+function loadTranslation() {
+  _transScore = 0; _transTotal = 0;
+  _transOrder = [...Array(TRANSLATION_BANK.length).keys()].sort(() => Math.random() - 0.5);
+  _transIdx = 0;
+  renderTranslationSentence();
+}
+
+function renderTranslationSentence() {
+  const item = TRANSLATION_BANK[_transOrder[_transIdx]];
+  _transHintsRevealed = new Set();
+
+  const viEl = document.getElementById('trans-vi-sentence');
+  if (viEl) viEl.textContent = item.vi;
+
+  const chipsEl = document.getElementById('trans-hint-chips');
+  if (chipsEl) {
+    chipsEl.innerHTML = item.hints.map((w, i) =>
+      `<button class="trans-hint-chip" id="trans-chip-${i}" onclick="toggleTransHint(${i},'${escapeHtml(w)}')">${'●'.repeat(w.length)}</button>`
+    ).join('');
+  }
+
+  const inputEl = document.getElementById('trans-en-input');
+  if (inputEl) { inputEl.value = ''; inputEl.disabled = false; }
+
+  const resultEl = document.getElementById('trans-result');
+  if (resultEl) resultEl.classList.add('hidden');
+
+  const checkBtn = document.getElementById('trans-check-btn');
+  if (checkBtn) { checkBtn.disabled = false; checkBtn.textContent = '✓ Check answer'; }
+
+  const counter = document.getElementById('trans-counter');
+  if (counter) counter.textContent = `Sentence ${_transIdx + 1} of ${TRANSLATION_BANK.length}`;
+
+  const scoreEl = document.getElementById('trans-score-display');
+  if (scoreEl) scoreEl.textContent = `Score: ${_transScore} / ${_transTotal}`;
+}
+
+function toggleTransHint(idx, word) {
+  const chip = document.getElementById(`trans-chip-${idx}`);
+  if (!chip) return;
+  if (_transHintsRevealed.has(idx)) {
+    _transHintsRevealed.delete(idx);
+    chip.textContent = '●'.repeat(word.length);
+    chip.classList.remove('revealed');
+  } else {
+    _transHintsRevealed.add(idx);
+    chip.textContent = word;
+    chip.classList.add('revealed');
+  }
+}
+
+function checkTranslation() {
+  const item = TRANSLATION_BANK[_transOrder[_transIdx]];
+  const inputEl = document.getElementById('trans-en-input');
+  const userText = (inputEl?.value || '').trim();
+  if (!userText) return;
+
+  _transTotal++;
+  // Simple normalised match: lowercase, strip punctuation
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  const similarity = (a, b) => {
+    const wordsA = new Set(norm(a).split(' '));
+    const wordsB = norm(b).split(' ');
+    const matched = wordsB.filter(w => wordsA.has(w)).length;
+    return matched / wordsB.length;
+  };
+  const score = similarity(userText, item.en);
+  const passed = score >= 0.65;
+  if (passed) _transScore++;
+
+  const resultEl = document.getElementById('trans-result');
+  const modelEl = document.getElementById('trans-model-text');
+  const verdictEl = document.getElementById('trans-verdict');
+  if (modelEl) modelEl.textContent = item.en;
+  if (verdictEl) {
+    if (score >= 0.85) verdictEl.innerHTML = '<span class="trans-v-great">✅ Excellent! Very close to model answer.</span>';
+    else if (score >= 0.65) verdictEl.innerHTML = '<span class="trans-v-ok">👍 Good effort! Check the model answer above.</span>';
+    else verdictEl.innerHTML = '<span class="trans-v-miss">📝 Keep practising. Compare with the model answer.</span>';
+  }
+  if (resultEl) resultEl.classList.remove('hidden');
+
+  if (inputEl) inputEl.disabled = true;
+  const checkBtn = document.getElementById('trans-check-btn');
+  if (checkBtn) checkBtn.disabled = true;
+
+  const scoreEl = document.getElementById('trans-score-display');
+  if (scoreEl) scoreEl.textContent = `Score: ${_transScore} / ${_transTotal}`;
+}
+
+function nextTranslation() {
+  if (_transIdx < TRANSLATION_BANK.length - 1) {
+    _transIdx++;
+  } else {
+    _transOrder = [...Array(TRANSLATION_BANK.length).keys()].sort(() => Math.random() - 0.5);
+    _transIdx = 0;
+    _transScore = 0; _transTotal = 0;
+  }
+  renderTranslationSentence();
 }
 
 /* ─── Vocab Learn Load ───────────────────────────────────────────────────── */

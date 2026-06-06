@@ -1557,29 +1557,73 @@
         </div>
       </div>
 
-      <!-- Grammar Hub View (new) -->
+      <!-- Grammar Hub View -->
       <div id="view-grammar-hub" class="view hidden">
         <div class="page-header">
           <h2>📐 Grammar Hub</h2>
           <p>Master IELTS grammar — theory, examples &amp; exercises</p>
         </div>
-        <div class="coming-soon-placeholder">
-          <div class="csp-icon">🚧</div>
-          <h3>Coming Soon</h3>
-          <p>Grammar topics and exercises are being built. Check back soon!</p>
+        <!-- Tab switcher -->
+        <div class="gh-tabs">
+          <button class="gh-tab active" id="gh-tab-theory"  onclick="switchGrammarTab('theory')">📖 Theory</button>
+          <button class="gh-tab"        id="gh-tab-exercises" onclick="switchGrammarTab('exercises')">✏️ Exercises</button>
+        </div>
+        <!-- Theory panel -->
+        <div id="gh-panel-theory">
+          <div id="gh-theory-content"></div>
+        </div>
+        <!-- Exercises panel -->
+        <div id="gh-panel-exercises" class="hidden">
+          <div class="gh-exercise-meta">
+            <span id="gh-ex-counter" class="gh-ex-counter">Question 1 of 10</span>
+            <span id="gh-ex-score"   class="gh-ex-score">Score: 0 / 0</span>
+          </div>
+          <div id="gh-exercise-card" class="gh-exercise-card"></div>
+          <div id="gh-ex-feedback"   class="gh-ex-feedback hidden"></div>
+          <div class="gh-ex-actions">
+            <button class="btn btn-primary" id="gh-check-btn" onclick="checkGrammarExercise()">✓ Check</button>
+            <button class="btn btn-outline hidden" id="gh-next-btn" onclick="nextGrammarExercise()">Next →</button>
+          </div>
+          <div class="gh-ex-progress-bar-wrap">
+            <div class="gh-ex-progress-bar" id="gh-ex-progress-bar"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Translation Practice View (new) -->
+      <!-- Translation Practice View -->
       <div id="view-translation" class="view hidden">
         <div class="page-header">
           <h2>🔤 Translation Practice</h2>
           <p>Translate Vietnamese sentences into English with word hints</p>
         </div>
-        <div class="coming-soon-placeholder">
-          <div class="csp-icon">🚧</div>
-          <h3>Coming Soon</h3>
-          <p>Translation exercises are being built. Check back soon!</p>
+        <div class="trans-progress-strip">
+          <span id="trans-counter" class="trans-counter">Sentence 1 of 20</span>
+          <span id="trans-score-display" class="trans-score-display">Score: 0 / 0</span>
+        </div>
+        <div class="translation-card">
+          <div class="trans-vi-label">🇻🇳 Vietnamese</div>
+          <div class="trans-vi-sentence" id="trans-vi-sentence">Loading…</div>
+          <div class="trans-hints-row">
+            <span class="trans-hints-label">💡 Word hints <span class="trans-hints-sub">(click to reveal)</span></span>
+            <div class="trans-hint-chips" id="trans-hint-chips"></div>
+          </div>
+          <div class="trans-en-label">🇬🇧 Your English translation</div>
+          <textarea id="trans-en-input" class="form-input trans-en-input" rows="3"
+            placeholder="Type your English translation here…"
+            onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))checkTranslation()"></textarea>
+          <div class="trans-actions">
+            <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Check answer</button>
+            <button class="btn btn-outline" onclick="nextTranslation()">→ Skip / Next</button>
+          </div>
+          <div id="trans-result" class="trans-result hidden">
+            <div class="trans-result-inner">
+              <div class="trans-model-row">
+                <span class="trans-model-label">Model answer:</span>
+                <span class="trans-model-text" id="trans-model-text"></span>
+              </div>
+              <div id="trans-verdict" class="trans-verdict"></div>
+            </div>
+          </div>
         </div>
       </div>
 
