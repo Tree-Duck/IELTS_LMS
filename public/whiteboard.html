@@ -919,13 +919,17 @@ wrap.addEventListener('mousedown', (e) => {
     if (handle && beginResizeSelection(handle, p)) return;
     const obj = hitTest(p.x, p.y);
     if (obj) {
+      const alreadySelected = state.selectedId === obj.id;
       state.selectedId = obj.id;
       state.draggingSelection = true;
       state.dragOffset = p;
+      // Flag: if re-clicking an already-selected text object, open editor on mouseup (if no drag)
+      state._pendingTextEdit = (alreadySelected && obj.type === 'text') ? obj.id : null;
       syncPropsPanel();
       redraw();
     } else {
       state.selectedId = null;
+      state._pendingTextEdit = null;
       syncPropsPanel();
       redraw();
     }
@@ -1042,6 +1046,7 @@ wrap.addEventListener('mousemove', (e) => {
     if (o) {
       const dx = p.x - state.dragOffset.x;
       const dy = p.y - state.dragOffset.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) state._dragMoved = true;
       moveObject(o, dx, dy);
       state.dragOffset = p;
       redraw();
@@ -1065,7 +1070,25 @@ wrap.addEventListener('mousemove', (e) => {
 window.addEventListener('mouseup', () => {
   if (state.isPanning) { state.isPanning = false; wrap.classList.remove('panning'); scheduleAutosave(); return; }
   if (state.resizingSelection) { state.resizingSelection = false; state.resizeHandle = null; state.resizeStart = null; scheduleAutosave(); return; }
-  if (state.draggingSelection) { state.draggingSelection = false; pushUndoSilent(); scheduleAutosave(); return; }
+  if (state.draggingSelection) {
+    state.draggingSelection = false;
+    // Re-click on already-selected text object (no drag) → open editor
+    if (state._pendingTextEdit) {
+      const t = activeTab();
+      const didDrag = state._dragMoved;
+      state._pendingTextEdit = null;
+      state._dragMoved = false;
+      if (!didDrag && t) {
+        const o = t.objects.find(x => x.id === state.selectedId && x.type === 'text');
+        if (o && !document.getElementById('text-editor')) {
+          openTextEditorForObject(o, t);
+        }
+      }
+    } else {
+      state._dragMoved = false;
+    }
+    pushUndoSilent(); scheduleAutosave(); return;
+  }
   if (state.isDrawing && state.currentObject) {
     pushUndo();
     activeTab().objects.push(state.currentObject);
@@ -1286,6 +1309,32 @@ function editObjectText(o) {
   ta.addEventListener('blur', finish);
   ta.addEventListener('keydown', (e) => { if (e.key==='Escape') ta.blur(); if (e.key==='Enter' && (e.metaKey||e.ctrlKey)) ta.blur(); });
 }
+// Open text editor overlay for an existing text object
+function openTextEditorForObject(o, t) {
+  if (!t) t = activeTab();
+  if (!t) return;
+  if (document.getElementById('text-editor')) return; // already open
+  const ta = document.createElement('textarea');
+  ta.id = 'text-editor';
+  ta.value = o.text || '';
+  const sp = worldToScreen(o.x, o.y);
+  ta.style.left = sp.x + 'px'; ta.style.top = sp.y + 'px';
+  ta.style.fontSize = (o.fontSize * t.zoom) + 'px';
+  ta.style.color = o.color || '#111';
+  ta.style.width = '300px'; ta.style.height = '60px';
+  prepareTextEditor(ta);
+  wrap.appendChild(ta);
+  requestAnimationFrame(() => { ta.focus(); ta.select(); });
+  ta.addEventListener('blur', () => {
+    pushUndo(); o.text = ta.value; ta.remove();
+    syncPropsPanel(); redraw(); scheduleAutosave();
+  });
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') ta.blur();
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) ta.blur();
+  });
+}
+
 // Double-click to edit text of object
 wrap.addEventListener('dblclick', (e) => {
   const rect = wrap.getBoundingClientRect();
@@ -1293,19 +1342,7 @@ wrap.addEventListener('dblclick', (e) => {
   const o = hitTest(p.x, p.y);
   if (o && ['sticky','mindmap','flow','text'].includes(o.type)) {
     if (o.type === 'text') {
-      const t = activeTab();
-      const ta = document.createElement('textarea');
-      ta.id = 'text-editor';
-      ta.value = o.text;
-      const sp = worldToScreen(o.x, o.y);
-      ta.style.left = sp.x + 'px'; ta.style.top = sp.y + 'px';
-      ta.style.fontSize = (o.fontSize*t.zoom) + 'px';
-      ta.style.color = o.color;
-      ta.style.width = '300px'; ta.style.height = '60px';
-      prepareTextEditor(ta);
-      wrap.appendChild(ta);
-      requestAnimationFrame(() => { ta.focus(); ta.select(); });
-      ta.addEventListener('blur', () => { pushUndo(); o.text = ta.value; ta.remove(); syncPropsPanel(); redraw(); scheduleAutosave(); });
+      openTextEditorForObject(o);
     } else {
       editObjectText(o);
     }

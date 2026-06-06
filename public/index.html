@@ -6,7 +6,7 @@
   <title>SSP IELTS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -140,10 +140,12 @@
       </div>
 
       <nav class="topnav-links" id="topnav-links">
+        <!-- Home (standalone) -->
+        <button class="tnav-group-trigger tnav-nav-link" data-view="home" onclick="showView('home')">🏠 Home</button>
         <!-- Dashboard (standalone) -->
-        <button class="tnav-group-trigger" onclick="showView('dashboard')">⬛ Dashboard</button>
+        <button class="tnav-group-trigger tnav-nav-link" data-view="dashboard" onclick="showView('dashboard')">⬛ Dashboard</button>
         <!-- Homework (standalone) -->
-        <button class="tnav-group-trigger" onclick="showView('homework')">📋 Homework</button>
+        <button class="tnav-group-trigger tnav-nav-link" data-view="homework" onclick="showView('homework')">📋 Homework</button>
 
         <!-- Mock Tests group -->
         <div class="tnav-group" id="tnav-group-tests">
@@ -179,9 +181,12 @@
         <div class="tnav-group" id="tnav-group-practice">
           <button class="tnav-group-trigger">🏋️ Practice ▾</button>
           <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Translation</button>
+            <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Grammar Hub</button>
             <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Sentence Exercises</button>
             <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Paragraph Writing</button>
             <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Grammar Guide</button>
+            <button class="tnav-nav-link" data-view="para-lab" onclick="showView('para-lab'); showParaLab()">⚔️ Para Lab</button>
           </div>
         </div>
 
@@ -244,6 +249,107 @@
 
     <!-- Main Content -->
     <main class="main-content">
+
+      <!-- ═══════════════════════════════════════════════════════ HOME VIEW -->
+      <div id="view-home" class="view">
+        <div class="home-hero">
+          <div class="home-hero-text">
+            <p class="home-hero-eyebrow">SSP IELTS Learning Platform</p>
+            <h1 class="home-hero-title">Welcome back, <span id="home-welcome-name">Student</span>! 👋</h1>
+            <p class="home-hero-sub">Pick up where you left off, or explore a new skill.</p>
+          </div>
+          <div class="home-hero-art" aria-hidden="true">
+            <div class="hha-circle hha-c1"></div>
+            <div class="hha-circle hha-c2"></div>
+            <div class="hha-rect hha-r1"></div>
+            <div class="hha-rect hha-r2"></div>
+          </div>
+        </div>
+
+        <div class="home-skills-grid">
+          <!-- Writing -->
+          <button class="skill-card skill-card--writing" onclick="showView('writing')">
+            <div class="skill-card__icon">✍️</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Writing</h3>
+              <p class="skill-card__desc">Task 1 &amp; Task 2 practice with AI feedback</p>
+            </div>
+            <div class="skill-card__arrow">→</div>
+          </button>
+
+          <!-- Speaking -->
+          <button class="skill-card skill-card--speaking" onclick="showView('speaking')">
+            <div class="skill-card__icon">🎤</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Speaking</h3>
+              <p class="skill-card__desc">Part 1, 2 &amp; 3 prompts with model answers</p>
+            </div>
+            <div class="skill-card__arrow">→</div>
+          </button>
+
+          <!-- Vocabulary -->
+          <button class="skill-card skill-card--vocab" onclick="showView('vocab')">
+            <div class="skill-card__icon">📚</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Vocabulary</h3>
+              <p class="skill-card__desc">Flashcards, quizzes &amp; word banks</p>
+            </div>
+            <div class="skill-card__arrow">→</div>
+          </button>
+
+          <!-- Grammar -->
+          <button class="skill-card skill-card--grammar" onclick="showView('grammar-hub')">
+            <div class="skill-card__icon">📐</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Grammar</h3>
+              <p class="skill-card__desc">Theory guides &amp; interactive exercises</p>
+            </div>
+            <div class="skill-card__arrow">→</div>
+          </button>
+
+          <!-- Translation -->
+          <button class="skill-card skill-card--translation" onclick="showView('translation')">
+            <div class="skill-card__icon">🔤</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Translation</h3>
+              <p class="skill-card__desc">Vietnamese → English with word hints</p>
+            </div>
+            <div class="skill-card__arrow">→</div>
+          </button>
+
+          <!-- Whiteboard (student only) -->
+          <button class="skill-card skill-card--whiteboard" id="home-whiteboard-card" onclick="window.open('/whiteboard.html','_blank')">
+            <div class="skill-card__icon">🖊️</div>
+            <div class="skill-card__body">
+              <h3 class="skill-card__title">Whiteboard</h3>
+              <p class="skill-card__desc">Freehand drawing &amp; annotation board</p>
+            </div>
+            <div class="skill-card__arrow">↗</div>
+          </button>
+        </div>
+
+        <!-- Quick stats strip -->
+        <div class="home-stats-strip" id="home-stats-strip">
+          <div class="hss-item">
+            <span class="hss-val" id="home-stat-streak">0</span>
+            <span class="hss-label">🔥 Day Streak</span>
+          </div>
+          <div class="hss-item">
+            <span class="hss-val" id="home-stat-submissions">–</span>
+            <span class="hss-label">Submissions</span>
+          </div>
+          <div class="hss-item">
+            <span class="hss-val" id="home-stat-avg">–</span>
+            <span class="hss-label">Writing Avg</span>
+          </div>
+          <div class="hss-item">
+            <span class="hss-val" id="home-stat-best">–</span>
+            <span class="hss-label">Writing Best</span>
+          </div>
+        </div>
+      </div>
+      <!-- ══════════════════════════════════════════════════════ /HOME VIEW -->
+
       <!-- Dashboard View -->
       <div id="view-dashboard" class="view">
         <div class="page-header">
@@ -1451,6 +1557,32 @@
         </div>
       </div>
 
+      <!-- Grammar Hub View (new) -->
+      <div id="view-grammar-hub" class="view hidden">
+        <div class="page-header">
+          <h2>📐 Grammar Hub</h2>
+          <p>Master IELTS grammar — theory, examples &amp; exercises</p>
+        </div>
+        <div class="coming-soon-placeholder">
+          <div class="csp-icon">🚧</div>
+          <h3>Coming Soon</h3>
+          <p>Grammar topics and exercises are being built. Check back soon!</p>
+        </div>
+      </div>
+
+      <!-- Translation Practice View (new) -->
+      <div id="view-translation" class="view hidden">
+        <div class="page-header">
+          <h2>🔤 Translation Practice</h2>
+          <p>Translate Vietnamese sentences into English with word hints</p>
+        </div>
+        <div class="coming-soon-placeholder">
+          <div class="csp-icon">🚧</div>
+          <h3>Coming Soon</h3>
+          <p>Translation exercises are being built. Check back soon!</p>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -1518,6 +1650,11 @@
         <p style="color:var(--text-secondary)">Loading…</p>
       </div>
     </div>
+  </div>
+
+  <!-- Para Lab Game View -->
+  <div id="view-para-lab" class="view hidden">
+    <div id="para-lab-root"></div>
   </div>
 
   <script src="app.js"></script>

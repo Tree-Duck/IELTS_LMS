@@ -1451,7 +1451,7 @@ async function showApp() {
   } catch (e) { /* network error — keep cached role */ }
 
   _buildMobileDrawer();
-  showView('dashboard');
+  showView('home');
 }
 
 function isOnSubmitWithContent() {
@@ -1499,7 +1499,8 @@ function showView(name) {
     document.getElementById('app-screen').classList.remove('test-mode');
   }
 
-  if (name === 'dashboard') loadDashboard();
+  if (name === 'home') loadHomeScreen();
+  else if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
   else if (name === 'submit') { _currentDraftId = null; updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); }
   else if (name === 'admin') loadAdminUsers();
@@ -1821,6 +1822,33 @@ async function handleChangePassword() {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
   }
+}
+
+/* ─── Home Screen ────────────────────────────────────────────────────────── */
+async function loadHomeScreen() {
+  const nameEl = document.getElementById('home-welcome-name');
+  if (nameEl && currentUser) nameEl.textContent = currentUser.name || currentUser.email.split('@')[0];
+
+  try {
+    const [submissions, profile] = await Promise.all([
+      api('/api/submissions').catch(() => []),
+      api('/api/user/profile').catch(() => ({ current_streak: 0 }))
+    ]);
+
+    const graded = (submissions || []).filter(s => s.status === 'graded' && s.overall_band != null);
+    const bands  = graded.map(s => s.overall_band);
+    const avg    = bands.length ? (bands.reduce((a, b) => a + b, 0) / bands.length).toFixed(1) : '–';
+    const best   = bands.length ? Math.max(...bands).toFixed(1) : '–';
+
+    const streakEl = document.getElementById('home-stat-streak');
+    const subsEl   = document.getElementById('home-stat-submissions');
+    const avgEl    = document.getElementById('home-stat-avg');
+    const bestEl   = document.getElementById('home-stat-best');
+    if (streakEl) streakEl.textContent = profile.current_streak || 0;
+    if (subsEl)   subsEl.textContent   = (submissions || []).length;
+    if (avgEl)    avgEl.textContent    = avg;
+    if (bestEl)   bestEl.textContent   = best;
+  } catch (e) { /* stats optional */ }
 }
 
 /* ─── Dashboard ──────────────────────────────────────────────────────────── */

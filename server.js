@@ -2260,6 +2260,81 @@ Give brief, specific, encouraging feedback. Return ONLY this JSON:
   }
 });
 
+// ─── Game: Para Lab (Pixel RPG Paragraph Battle) ─────────────────────────────
+app.post('/api/game/para-lab', async (req, res) => {
+  try {
+    const { stage, sentence, question, thesis, previousSentences = [], currentBand = 5, targetBand = 6.5 } = req.body;
+    if (!sentence || sentence.trim().length < 5) {
+      return res.status(400).json({ error: 'Sentence too short.' });
+    }
+
+    const stageDescriptions = {
+      topic_sentence: "TOPIC SENTENCE (Point) — a clear claim that answers the question and states the paragraph's main idea",
+      evidence:       'EVIDENCE sentence — a specific example, statistic, or real-world case that supports the topic sentence (must be new information, not a restatement)',
+      analysis:       'ANALYSIS sentence — explains WHY the evidence proves the topic sentence; must add new reasoning, not restate the evidence',
+      link:           'LINKING sentence — connects back to the essay question and thesis without simply repeating them',
+    };
+
+    const stageGuide = stageDescriptions[stage] || 'body paragraph sentence';
+    const prevContext = previousSentences.length
+      ? `Previously accepted sentences:\n${previousSentences.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\n`
+      : '';
+
+    const bandGap = targetBand - currentBand;
+    const strictnessNote = bandGap >= 2
+      ? `The student is targeting Band ${targetBand} from Band ${currentBand} — apply strict Band ${targetBand} standards. Penalise vague language, weak analysis, and simple vocabulary heavily.`
+      : bandGap >= 1
+      ? `The student is targeting Band ${targetBand} from Band ${currentBand} — apply Band ${targetBand} standards with constructive encouragement.`
+      : `The student is targeting Band ${targetBand} from Band ${currentBand} — be supportive and focus on one key improvement.`;
+
+    const prompt = `You are an IELTS Band 9 examiner evaluating a single sentence from a student's body paragraph.
+
+Essay question: "${question}"
+Thesis/position: "${thesis}"
+${prevContext}The student is now writing their ${stageGuide}.
+Student's sentence: "${sentence.trim()}"
+
+${strictnessNote}
+
+Evaluate strictly for role and quality. Check:
+1. Does it correctly fulfil the role of a ${stage.replace(/_/g, ' ')}?
+2. Is it tautological — does it restate what was already said without adding new meaning?
+3. What is the PRIMARY flaw (if any)? Choose exactly one: tautology | vague | baby_words | circular | none
+   - tautology: repeats evidence or prior sentence content as if it were new reasoning
+   - vague: too general, missing specific details or concrete reasoning
+   - baby_words: uses simple/weak vocabulary (good, bad, big, nice, very, a lot, etc.)
+   - circular: the link/conclusion restates the topic sentence verbatim
+   - none: sentence is acceptable quality for the target band
+
+Return ONLY valid JSON, no markdown:
+{
+  "score": <integer 1-5>,
+  "flaw": "tautology" | "vague" | "baby_words" | "circular" | "none",
+  "tautological": <boolean>,
+  "roleMatch": <boolean>,
+  "feedback": "<1 sentence: what this sentence does well or its main problem>",
+  "suggestion": "<1 concrete rewrite tip or example phrase>"
+}`;
+
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 250,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const inputTokens  = response.usage?.input_tokens  || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
+    db.logUsage('game-para-lab', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+
+    let raw = response.content[0].text.trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    res.json(JSON.parse(raw));
+  } catch (err) {
+    console.error('Para Lab error:', err);
+    res.status(500).json({ error: 'Failed to grade sentence.' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
