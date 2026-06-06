@@ -827,6 +827,8 @@
           <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Task 1 Topics</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Task 2 Prompts</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Speaking Topics</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('translation')" id="materials-tab-translation">🔤 Translation</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('grammar-ex')" id="materials-tab-grammar-ex">📐 Grammar Exercises</button>
         </div>
 
         <!-- Existing tests list -->
@@ -992,6 +994,75 @@
 
           <!-- Existing custom prompts list -->
           <div id="admin-task2-prompts-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- TRANSLATION SENTENCES PANEL -->
+        <div id="translation-sentences-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Add Translation Sentence</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Add Vietnamese→English sentences for Translation Practice. Students will translate each sentence with optional word hints.</p>
+            <div class="form-group">
+              <label for="ts-vi">Vietnamese Sentence</label>
+              <textarea id="ts-vi" class="form-input" rows="2" placeholder="Ô nhiễm môi trường là một vấn đề nghiêm trọng..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="ts-en">English Answer</label>
+              <textarea id="ts-en" class="form-input" rows="2" placeholder="Environmental pollution is a serious problem..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="ts-hints">Hint Words (comma-separated)</label>
+              <input type="text" id="ts-hints" class="form-input" placeholder="environmental, pollution, serious, worldwide">
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitAddTranslationSentence()">➕ Add Sentence</button>
+            </div>
+            <div id="ts-error" class="error-msg hidden"></div>
+            <div id="ts-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-translation-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- GRAMMAR EXERCISES PANEL -->
+        <div id="grammar-exercises-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Add Grammar Exercise</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Add MCQ grammar exercises for the Grammar Hub. Provide 4 options and mark the correct one (0-indexed).</p>
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="ge-topic">Topic</label>
+                <input type="text" id="ge-topic" class="form-input" placeholder="e.g. Conditionals, Passive Voice">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ge-question">Question</label>
+              <textarea id="ge-question" class="form-input" rows="2" placeholder="Which sentence is correct?"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Options (one per line — 4 required)</label>
+              <textarea id="ge-options" class="form-input" rows="4" placeholder="Option A&#10;Option B&#10;Option C&#10;Option D"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="ge-answer">Correct Option (0=A, 1=B, 2=C, 3=D)</label>
+                <select id="ge-answer" class="form-input">
+                  <option value="0">0 — A</option>
+                  <option value="1">1 — B</option>
+                  <option value="2">2 — C</option>
+                  <option value="3">3 — D</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ge-explanation">Explanation</label>
+              <textarea id="ge-explanation" class="form-input" rows="2" placeholder="Explain why the answer is correct..."></textarea>
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitAddGrammarExercise()">➕ Add Exercise</button>
+            </div>
+            <div id="ge-error" class="error-msg hidden"></div>
+            <div id="ge-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-grammar-exercises-list" style="margin-top:16px"></div>
         </div>
 
         <!-- IMPORT JSON panel -->

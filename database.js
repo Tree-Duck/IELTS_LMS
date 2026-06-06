@@ -1039,6 +1039,54 @@ const db = {
     return false;
   },
 
+  // ── Translation Sentences ───────────────────────────────────────────────────
+  getTranslationSentences() {
+    const data = load();
+    return data.translation_sentences || [];
+  },
+  addTranslationSentence(entry) {
+    const data = load();
+    if (!data.translation_sentences) data.translation_sentences = [];
+    if (!data._ids.translation_sentences) data._ids.translation_sentences = 0;
+    data._ids.translation_sentences++;
+    const item = { id: data._ids.translation_sentences, ...entry, created_at: new Date().toISOString() };
+    data.translation_sentences.push(item);
+    save(data);
+    return item;
+  },
+  deleteTranslationSentence(id) {
+    const data = load();
+    if (!data.translation_sentences) return false;
+    const before = data.translation_sentences.length;
+    data.translation_sentences = data.translation_sentences.filter(s => String(s.id) !== String(id));
+    if (data.translation_sentences.length < before) { save(data); return true; }
+    return false;
+  },
+
+  // ── Grammar Exercises ────────────────────────────────────────────────────────
+  getGrammarExercises() {
+    const data = load();
+    return data.grammar_exercises || [];
+  },
+  addGrammarExercise(entry) {
+    const data = load();
+    if (!data.grammar_exercises) data.grammar_exercises = [];
+    if (!data._ids.grammar_exercises) data._ids.grammar_exercises = 0;
+    data._ids.grammar_exercises++;
+    const item = { id: data._ids.grammar_exercises, ...entry, created_at: new Date().toISOString() };
+    data.grammar_exercises.push(item);
+    save(data);
+    return item;
+  },
+  deleteGrammarExercise(id) {
+    const data = load();
+    if (!data.grammar_exercises) return false;
+    const before = data.grammar_exercises.length;
+    data.grammar_exercises = data.grammar_exercises.filter(e => String(e.id) !== String(id));
+    if (data.grammar_exercises.length < before) { save(data); return true; }
+    return false;
+  },
+
   // ── Essay Drafts ────────────────────────────────────────────────────────────
   getDrafts(userId) {
     const data = load();

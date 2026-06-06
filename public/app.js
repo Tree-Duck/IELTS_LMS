@@ -4165,7 +4165,7 @@ let _materialsCache = null;
 
 function switchMaterialsTab(type) {
   currentMaterialsTab = type;
-  ['reading','listening','task1','speaking','task2'].forEach(t => {
+  ['reading','listening','task1','speaking','task2','translation','grammar-ex'].forEach(t => {
     const btn = document.getElementById(`materials-tab-${t}`);
     if (btn) btn.classList.toggle('active', t === type);
   });
@@ -4173,13 +4173,15 @@ function switchMaterialsTab(type) {
   const task1Panel        = document.getElementById('task1-topics-panel');
   const speakingPanel     = document.getElementById('speaking-topics-panel');
   const task2Panel        = document.getElementById('task2-prompts-panel');
+  const transPanel        = document.getElementById('translation-sentences-panel');
+  const grammarExPanel    = document.getElementById('grammar-exercises-panel');
   const listContent       = document.getElementById('materials-list-content');
   const actionTabs        = document.querySelector('.materials-action-tabs');
   const createPanel       = document.getElementById('mat-panel-create');
   const importPanel       = document.getElementById('mat-panel-import');
 
   // Hide all special panels first
-  [task1Panel, speakingPanel, task2Panel].forEach(p => p && p.classList.add('hidden'));
+  [task1Panel, speakingPanel, task2Panel, transPanel, grammarExPanel].forEach(p => p && p.classList.add('hidden'));
 
   if (type === 'task1') {
     if (task1Panel) task1Panel.classList.remove('hidden');
@@ -4202,6 +4204,20 @@ function switchMaterialsTab(type) {
     if (createPanel) createPanel.classList.add('hidden');
     if (importPanel) importPanel.classList.add('hidden');
     loadAdminTask2Prompts();
+  } else if (type === 'translation') {
+    if (transPanel) transPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminTranslationSentences();
+  } else if (type === 'grammar-ex') {
+    if (grammarExPanel) grammarExPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminGrammarExercises();
   } else {
     if (listContent) listContent.classList.remove('hidden');
     if (actionTabs) actionTabs.classList.remove('hidden');
@@ -4330,6 +4346,137 @@ async function deleteAdminTask2Prompt(id) {
     await api(`/api/admin/task2-prompts/${id}`, { method: 'DELETE' });
     window._customTask2Prompts = null;
     loadAdminTask2Prompts();
+  } catch (err) { alert('Failed to delete: ' + err.message); }
+}
+
+/* ─── Admin Translation Sentences ───────────────────────────────────────── */
+async function loadAdminTranslationSentences() {
+  const list = document.getElementById('admin-translation-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const items = await api('/api/admin/translation-sentences');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">No custom translation sentences yet.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Custom Sentences (${items.length})</h4>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Vietnamese</th><th>English</th><th>Hints</th><th></th></tr></thead>
+          <tbody>${items.map((s, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td style="max-width:240px;white-space:normal">${escHtml(s.vi)}</td>
+              <td style="max-width:240px;white-space:normal">${escHtml(s.en)}</td>
+              <td style="font-size:.8rem;color:var(--text-muted)">${(s.hints || []).join(', ')}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteAdminTranslationSentence(${s.id})">Delete</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function submitAddTranslationSentence() {
+  const vi = document.getElementById('ts-vi')?.value.trim();
+  const en = document.getElementById('ts-en')?.value.trim();
+  const hintsRaw = document.getElementById('ts-hints')?.value.trim();
+  const hints = hintsRaw ? hintsRaw.split(',').map(h => h.trim()).filter(Boolean) : [];
+  const errEl = document.getElementById('ts-error');
+  const okEl  = document.getElementById('ts-success');
+  if (errEl) errEl.classList.add('hidden');
+  if (okEl) okEl.classList.add('hidden');
+  if (!vi || !en) {
+    if (errEl) { errEl.textContent = 'Vietnamese and English fields required.'; errEl.classList.remove('hidden'); }
+    return;
+  }
+  try {
+    await api('/api/admin/translation-sentences', { method: 'POST', body: JSON.stringify({ vi, en, hints }) });
+    if (okEl) { okEl.textContent = 'Sentence added!'; okEl.classList.remove('hidden'); }
+    document.getElementById('ts-vi').value = '';
+    document.getElementById('ts-en').value = '';
+    document.getElementById('ts-hints').value = '';
+    _activeTranslationBank = null; // force reload next translation session
+    loadAdminTranslationSentences();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+  }
+}
+
+async function deleteAdminTranslationSentence(id) {
+  if (!confirm('Delete this sentence?')) return;
+  try {
+    await api(`/api/admin/translation-sentences/${id}`, { method: 'DELETE' });
+    _activeTranslationBank = null;
+    loadAdminTranslationSentences();
+  } catch (err) { alert('Failed to delete: ' + err.message); }
+}
+
+/* ─── Admin Grammar Exercises ────────────────────────────────────────────── */
+async function loadAdminGrammarExercises() {
+  const list = document.getElementById('admin-grammar-exercises-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const items = await api('/api/admin/grammar-exercises');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">No custom grammar exercises yet.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Custom Exercises (${items.length})</h4>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Topic</th><th>Question</th><th>Answer</th><th></th></tr></thead>
+          <tbody>${items.map((ex, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td><span class="badge badge-blue">${escHtml(ex.topic)}</span></td>
+              <td style="max-width:300px;white-space:normal">${escHtml(ex.question)}</td>
+              <td style="font-size:.8rem">${escHtml((ex.options || [])[ex.answer] || '')}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteAdminGrammarExercise(${ex.id})">Delete</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function submitAddGrammarExercise() {
+  const topic       = document.getElementById('ge-topic')?.value.trim();
+  const question    = document.getElementById('ge-question')?.value.trim();
+  const optionsRaw  = document.getElementById('ge-options')?.value.trim();
+  const answer      = parseInt(document.getElementById('ge-answer')?.value || '0');
+  const explanation = document.getElementById('ge-explanation')?.value.trim();
+  const errEl = document.getElementById('ge-error');
+  const okEl  = document.getElementById('ge-success');
+  if (errEl) errEl.classList.add('hidden');
+  if (okEl) okEl.classList.add('hidden');
+  const options = optionsRaw ? optionsRaw.split('\n').map(o => o.trim()).filter(Boolean) : [];
+  if (!topic || !question || options.length < 2) {
+    if (errEl) { errEl.textContent = 'Topic, question, and at least 2 options required.'; errEl.classList.remove('hidden'); }
+    return;
+  }
+  try {
+    await api('/api/admin/grammar-exercises', { method: 'POST', body: JSON.stringify({ topic, question, options, answer, explanation }) });
+    if (okEl) { okEl.textContent = 'Exercise added!'; okEl.classList.remove('hidden'); }
+    document.getElementById('ge-topic').value = '';
+    document.getElementById('ge-question').value = '';
+    document.getElementById('ge-options').value = '';
+    document.getElementById('ge-explanation').value = '';
+    _activeGrammarExercises = null; // force reload next grammar session
+    loadAdminGrammarExercises();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+  }
+}
+
+async function deleteAdminGrammarExercise(id) {
+  if (!confirm('Delete this exercise?')) return;
+  try {
+    await api(`/api/admin/grammar-exercises/${id}`, { method: 'DELETE' });
+    _activeGrammarExercises = null;
+    loadAdminGrammarExercises();
   } catch (err) { alert('Failed to delete: ' + err.message); }
 }
 
@@ -8254,10 +8401,19 @@ let _ghExIdx = 0;
 let _ghExScore = 0;
 let _ghExTotal = 0;
 let _ghAnswered = false;
+let _activeGrammarExercises = null; // null = not loaded yet
 
-function loadGrammarHub() {
+async function loadGrammarHub() {
   _ghTab = 'theory';
   _ghExIdx = 0; _ghExScore = 0; _ghExTotal = 0; _ghAnswered = false;
+  if (!_activeGrammarExercises) {
+    try {
+      const serverEx = await api('/api/grammar-exercises').catch(() => []);
+      _activeGrammarExercises = (serverEx && serverEx.length > 0) ? serverEx : GRAMMAR_EXERCISES;
+    } catch (e) {
+      _activeGrammarExercises = GRAMMAR_EXERCISES;
+    }
+  }
   switchGrammarTab('theory');
 }
 
@@ -8305,15 +8461,15 @@ function toggleGhCard(idx) {
 }
 
 function renderGrammarHubExercise() {
-  const ex = GRAMMAR_EXERCISES[_ghExIdx];
+  const ex = (_activeGrammarExercises || GRAMMAR_EXERCISES)[_ghExIdx];
   if (!ex) return;
   _ghAnswered = false;
   const counter = document.getElementById('gh-ex-counter');
   const scoreEl = document.getElementById('gh-ex-score');
   const progressBar = document.getElementById('gh-ex-progress-bar');
-  if (counter) counter.textContent = `Question ${_ghExIdx + 1} of ${GRAMMAR_EXERCISES.length}`;
+  if (counter) counter.textContent = `Question ${_ghExIdx + 1} of ${(_activeGrammarExercises || GRAMMAR_EXERCISES).length}`;
   if (scoreEl) scoreEl.textContent = `Score: ${_ghExScore} / ${_ghExTotal}`;
-  if (progressBar) progressBar.style.width = `${(_ghExIdx / GRAMMAR_EXERCISES.length) * 100}%`;
+  if (progressBar) progressBar.style.width = `${(_ghExIdx / (_activeGrammarExercises || GRAMMAR_EXERCISES).length) * 100}%`;
 
   const checkBtn = document.getElementById('gh-check-btn');
   const nextBtn = document.getElementById('gh-next-btn');
@@ -8348,7 +8504,7 @@ function checkGrammarExercise() {
   if (!selected) return;
   _ghAnswered = true;
   const chosen = parseInt(selected.value);
-  const ex = GRAMMAR_EXERCISES[_ghExIdx];
+  const ex = (_activeGrammarExercises || GRAMMAR_EXERCISES)[_ghExIdx];
   const correct = chosen === ex.answer;
   _ghExTotal++;
   if (correct) _ghExScore++;
@@ -8376,12 +8532,12 @@ function checkGrammarExercise() {
   if (checkBtn) checkBtn.classList.add('hidden');
   if (nextBtn) {
     nextBtn.classList.remove('hidden');
-    nextBtn.textContent = _ghExIdx < GRAMMAR_EXERCISES.length - 1 ? 'Next →' : '🔁 Restart';
+    nextBtn.textContent = _ghExIdx < (_activeGrammarExercises || GRAMMAR_EXERCISES).length - 1 ? 'Next →' : '🔁 Restart';
   }
 }
 
 function nextGrammarExercise() {
-  if (_ghExIdx < GRAMMAR_EXERCISES.length - 1) {
+  if (_ghExIdx < (_activeGrammarExercises || GRAMMAR_EXERCISES).length - 1) {
     _ghExIdx++;
   } else {
     _ghExIdx = 0; _ghExScore = 0; _ghExTotal = 0;
@@ -8417,17 +8573,25 @@ let _transIdx = 0;
 let _transScore = 0;
 let _transTotal = 0;
 let _transOrder = [];
+let _activeTranslationBank = null; // null = not fetched yet
 let _transHintsRevealed = new Set();
 
-function loadTranslation() {
-  _transScore = 0; _transTotal = 0;
-  _transOrder = [...Array(TRANSLATION_BANK.length).keys()].sort(() => Math.random() - 0.5);
-  _transIdx = 0;
+async function loadTranslation() {
+  _transScore = 0; _transTotal = 0; _transIdx = 0;
+  try {
+    const serverSentences = await api('/api/translation-sentences').catch(() => []);
+    _activeTranslationBank = (serverSentences && serverSentences.length > 0)
+      ? serverSentences
+      : TRANSLATION_BANK;
+  } catch (e) {
+    _activeTranslationBank = TRANSLATION_BANK;
+  }
+  _transOrder = [...Array(_activeTranslationBank.length).keys()].sort(() => Math.random() - 0.5);
   renderTranslationSentence();
 }
 
 function renderTranslationSentence() {
-  const item = TRANSLATION_BANK[_transOrder[_transIdx]];
+  const item = _activeTranslationBank[_transOrder[_transIdx]];
   _transHintsRevealed = new Set();
 
   const viEl = document.getElementById('trans-vi-sentence');
@@ -8450,7 +8614,7 @@ function renderTranslationSentence() {
   if (checkBtn) { checkBtn.disabled = false; checkBtn.textContent = '✓ Check answer'; }
 
   const counter = document.getElementById('trans-counter');
-  if (counter) counter.textContent = `Sentence ${_transIdx + 1} of ${TRANSLATION_BANK.length}`;
+  if (counter) counter.textContent = `Sentence ${_transIdx + 1} of ${_activeTranslationBank.length}`;
 
   const scoreEl = document.getElementById('trans-score-display');
   if (scoreEl) scoreEl.textContent = `Score: ${_transScore} / ${_transTotal}`;
@@ -8471,7 +8635,7 @@ function toggleTransHint(idx, word) {
 }
 
 function checkTranslation() {
-  const item = TRANSLATION_BANK[_transOrder[_transIdx]];
+  const item = _activeTranslationBank[_transOrder[_transIdx]];
   const inputEl = document.getElementById('trans-en-input');
   const userText = (inputEl?.value || '').trim();
   if (!userText) return;
@@ -8509,10 +8673,10 @@ function checkTranslation() {
 }
 
 function nextTranslation() {
-  if (_transIdx < TRANSLATION_BANK.length - 1) {
+  if (_transIdx < _activeTranslationBank.length - 1) {
     _transIdx++;
   } else {
-    _transOrder = [...Array(TRANSLATION_BANK.length).keys()].sort(() => Math.random() - 0.5);
+    _transOrder = [...Array(_activeTranslationBank.length).keys()].sort(() => Math.random() - 0.5);
     _transIdx = 0;
     _transScore = 0; _transTotal = 0;
   }

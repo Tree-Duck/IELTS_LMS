@@ -2179,6 +2179,74 @@ app.delete('/api/admin/task2-prompts/:id', authenticate, teacherOrAdmin, (req, r
   }
 });
 
+// ─── Translation Sentences ────────────────────────────────────────────────────
+app.get('/api/admin/translation-sentences', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getTranslationSentences()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load translation sentences' }); }
+});
+
+app.post('/api/admin/translation-sentences', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { vi, en, hints } = req.body;
+    if (!vi || !vi.trim()) return res.status(400).json({ error: 'Vietnamese sentence required' });
+    if (!en || !en.trim()) return res.status(400).json({ error: 'English translation required' });
+    const hintsArr = Array.isArray(hints) ? hints : (hints || '').split(',').map(s => s.trim()).filter(Boolean);
+    const item = db.addTranslationSentence({ vi: vi.trim(), en: en.trim(), hints: hintsArr });
+    res.json({ ok: true, item });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add translation sentence' });
+  }
+});
+
+app.delete('/api/admin/translation-sentences/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try { db.deleteTranslationSentence(req.params.id); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: 'Failed to delete translation sentence' }); }
+});
+
+// Public endpoint for app (no admin required)
+app.get('/api/translation-sentences', authenticate, (req, res) => {
+  try { res.json(db.getTranslationSentences()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load translation sentences' }); }
+});
+
+// ─── Grammar Exercises ────────────────────────────────────────────────────────
+app.get('/api/admin/grammar-exercises', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getGrammarExercises()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load grammar exercises' }); }
+});
+
+app.post('/api/admin/grammar-exercises', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { topic, question, options, answer, explanation } = req.body;
+    if (!question || !question.trim()) return res.status(400).json({ error: 'Question required' });
+    if (!Array.isArray(options) || options.length < 2) return res.status(400).json({ error: 'At least 2 options required' });
+    const ansIdx = parseInt(answer);
+    if (isNaN(ansIdx) || ansIdx < 0 || ansIdx >= options.length) return res.status(400).json({ error: 'Valid answer index required' });
+    const item = db.addGrammarExercise({
+      topic: (topic || 'General').trim(),
+      type: 'mcq',
+      question: question.trim(),
+      options: options.map(o => o.trim()),
+      answer: ansIdx,
+      explanation: (explanation || '').trim(),
+    });
+    res.json({ ok: true, item });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add grammar exercise' });
+  }
+});
+
+app.delete('/api/admin/grammar-exercises/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try { db.deleteGrammarExercise(req.params.id); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: 'Failed to delete grammar exercise' }); }
+});
+
+// Public endpoint for app
+app.get('/api/grammar-exercises', authenticate, (req, res) => {
+  try { res.json(db.getGrammarExercises()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load grammar exercises' }); }
+});
+
 // ─── Essay Drafts ─────────────────────────────────────────────────────────────
 app.get('/api/drafts', authenticate, (req, res) => {
   try {
