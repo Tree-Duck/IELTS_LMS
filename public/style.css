@@ -3045,8 +3045,8 @@ input:focus, textarea:focus, select:focus {
   gap: 12px;
   flex-wrap: wrap;
   padding: 10px 16px;
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
+  background: var(--primary-light);
+  border: 1.5px solid var(--primary-light);
   border-radius: var(--radius);
   margin-bottom: 16px;
 }
@@ -4026,16 +4026,24 @@ input:focus, textarea:focus, select:focus {
 .deadline-label.due-week  { background: #ede9fe; color: #6d28d9; }
 
 /* ─── Vocab Notebook ────────────────────────────────────────────────────── */
-.vocab-list { display: flex; flex-direction: column; gap: 8px; }
+.vocab-list { display: flex; flex-direction: column; gap: 10px; }
 .vocab-card-item {
   display: flex; justify-content: space-between; align-items: flex-start;
-  padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--card-bg);
+  padding: 14px 18px;
+  border: 1.5px solid var(--primary-light);
+  border-left: 4px solid var(--skill-vocab);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: box-shadow .15s, transform .15s;
+}
+.vocab-card-item:hover {
+  box-shadow: 0 4px 14px var(--primary-glow);
+  transform: translateY(-1px);
 }
 .vocab-card-main { flex: 1; min-width: 0; }
-.vocab-word { font-weight: 700; font-size: 16px; }
-.vocab-def  { color: var(--text-secondary); font-size: 13px; margin-top: 3px; }
-.vocab-example { color: var(--text-secondary); font-size: 13px; font-style: italic; margin-top: 2px; }
+.vocab-word { font-weight: 800; font-size: 17px; color: var(--primary); }
+.vocab-def  { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+.vocab-example { color: var(--text-secondary); font-size: 13px; font-style: italic; margin-top: 3px; opacity: .8; }
 .vocab-delete-btn { flex-shrink: 0; margin-left: 10px; }
 
 /* ─── Flashcard Save Row ────────────────────────────────────────────────── */
@@ -4265,8 +4273,9 @@ input:focus, textarea:focus, select:focus {
 
 /* Main topic card */
 .speaking-topic-card {
-  background: #fff;
-  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  border: 1.5px solid var(--primary-light);
+  border-left: 4px solid var(--skill-speaking);
   border-radius: 16px;
   padding: 28px 32px;
   margin-bottom: 20px;
@@ -4274,7 +4283,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 12px var(--primary-glow);
   transition: transform .35s ease, opacity .35s ease;
 }
 .speaking-topic-card.spinning {
@@ -4298,8 +4307,8 @@ input:focus, textarea:focus, select:focus {
   letter-spacing: .04em;
 }
 .speaking-topic-category-tag {
-  background: var(--gray-100);
-  color: var(--gray-600);
+  background: var(--primary-light);
+  color: var(--primary);
   font-size: 12px;
   font-weight: 600;
   padding: 3px 10px;
@@ -4316,9 +4325,9 @@ input:focus, textarea:focus, select:focus {
 .speaking-topic-diff-tag.diff-hard   { background: #fee2e2; color: #b91c1c; }
 .speaking-topic-question {
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.4;
-  color: var(--gray-800);
+  color: var(--text-primary);
 }
 .speaking-cue-bullets {
   list-style: disc;
@@ -4344,8 +4353,8 @@ input:focus, textarea:focus, select:focus {
 
 /* Timer section */
 .speaking-timer-section {
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
+  background: var(--primary-light);
+  border: 1.5px solid var(--primary-light);
   border-radius: 14px;
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -4376,9 +4385,9 @@ input:focus, textarea:focus, select:focus {
 }
 .speaking-timer-display {
   font-size: 52px;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--gray-800);
+  color: var(--primary);
   letter-spacing: -.02em;
   line-height: 1;
   transition: color .2s;
@@ -4428,9 +4437,9 @@ input:focus, textarea:focus, select:focus {
 }
 .frameworks-title {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 14px;
-  color: var(--gray-700);
+  color: var(--primary);
 }
 .frameworks-grid {
   display: grid;
@@ -4438,13 +4447,19 @@ input:focus, textarea:focus, select:focus {
   gap: 14px;
 }
 .framework-card {
-  background: #fff;
-  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  border: 1.5px solid var(--primary-light);
+  border-top: 3px solid var(--primary);
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition: box-shadow .15s, transform .15s;
+}
+.framework-card:hover {
+  box-shadow: 0 4px 16px var(--primary-glow);
+  transform: translateY(-2px);
 }
 .framework-name {
   font-size: 13px;
@@ -4484,8 +4499,8 @@ input:focus, textarea:focus, select:focus {
 [data-theme="dark"] .speaking-topic-question { color: var(--gray-800); }
 [data-theme="dark"] .speaking-topic-category-tag { background: #334155; color: var(--gray-600); }
 [data-theme="dark"] .speaking-part-tabs { background: #0f172a; }
-[data-theme="dark"] .speaking-timer-section { background: #0f172a; border-color: #334155; }
-[data-theme="dark"] .speaking-timer-display { color: var(--gray-800); }
+[data-theme="dark"] .speaking-timer-section { background: rgba(74,92,47,.18); border-color: rgba(74,92,47,.3); }
+[data-theme="dark"] .speaking-timer-display { color: #a8bd76; }
 [data-theme="dark"] .framework-card { background: #1e293b; border-color: #334155; }
 [data-theme="dark"] .framework-body { color: var(--gray-700); }
 [data-theme="dark"] .speaking-phase-btn { background: #1e293b; border-color: #334155; color: var(--gray-600); }
@@ -4704,7 +4719,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: 6px; padding: 6px 14px; font-size: 13px;
   font-weight: 600; cursor: pointer; transition: background .15s;
 }
-.btn-model-answer-toggle:hover { background: rgba(99,102,241,.08); }
+.btn-model-answer-toggle:hover { background: var(--primary-light); }
 
 .speaking-model-answer {
   margin-top: 10px; padding: 14px 16px;
@@ -4723,7 +4738,7 @@ input:focus, textarea:focus, select:focus {
 }
 .linked-part3-cat {
   display: inline-block; font-size: 11px; font-weight: 700; color: var(--primary);
-  background: rgba(99,102,241,.08); border-radius: 4px;
+  background: var(--primary-light); border-radius: 4px;
   padding: 1px 7px; margin-bottom: 5px;
 }
 .linked-part3-item p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-primary); }
@@ -4738,9 +4753,9 @@ input:focus, textarea:focus, select:focus {
 }
 .speaking-vocab-chip {
   display: inline-block; padding: 4px 10px;
-  background: var(--bg-secondary); border: 1px solid var(--border);
-  border-radius: 20px; font-size: 12px; color: var(--text-primary);
-  font-style: italic; cursor: default;
+  background: var(--primary-light); border: 1px solid rgba(74,92,47,.2);
+  border-radius: 20px; font-size: 12px; color: var(--primary);
+  font-style: italic; cursor: default; font-weight: 500;
 }
 
 /* =====================================================
