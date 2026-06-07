@@ -8814,49 +8814,49 @@ const WRITING_QUESTIONS = [
     id: 'wq1', type: 'task1', topic: 'Biểu đồ cột',
     tags: ['Bar chart', 'Energy'],
     prompt: `The bar chart below shows the average amount of energy used per person in six countries in 2015.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null
+    minWords: 150, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq2', type: 'task1', topic: 'Biểu đồ đường',
     tags: ['Line graph', 'Population'],
     prompt: `The line graph below shows the population of three cities between 1990 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null
+    minWords: 150, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq3', type: 'task1', topic: 'Sơ đồ quy trình',
     tags: ['Process diagram', 'Recycling'],
     prompt: `The diagram below shows the process of recycling plastic bottles.\n\nSummarise the information by selecting and reporting the main features.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null
+    minWords: 150, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq4', type: 'task1', topic: 'Bản đồ',
     tags: ['Map', 'Urban development'],
     prompt: `The maps below show how a small coastal town changed between 1980 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null
+    minWords: 150, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq5', type: 'task2', topic: 'Công nghệ & xã hội',
     tags: ['Technology', 'Opinion'],
     prompt: `Some people believe that technology has made modern life too complicated. Others think it has improved our lives.\n\nDiscuss both views and give your own opinion.\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null
+    minWords: 250, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq6', type: 'task2', topic: 'Môi trường',
     tags: ['Environment', 'Government vs individual'],
     prompt: `Protecting the environment is the responsibility of governments, not individuals.\n\nTo what extent do you agree or disagree with this statement?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null
+    minWords: 250, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq7', type: 'task2', topic: 'Giáo dục',
     tags: ['Education', 'Online learning'],
     prompt: `Online education will eventually replace traditional classroom learning.\n\nTo what extent do you agree or disagree?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null
+    minWords: 250, modelAnswer: null, imageUrl: null
   },
   {
     id: 'wq8', type: 'task2', topic: 'Đô thị hoá',
     tags: ['Urbanisation', 'Problems & solutions'],
     prompt: `Many cities around the world are facing serious problems caused by rapid urbanisation.\n\nWhat are the main problems of rapid urbanisation? What solutions can be taken to address these problems?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null
+    minWords: 250, modelAnswer: null, imageUrl: null
   },
 ];
 
@@ -8917,6 +8917,53 @@ function openWritingQuestion(id) {
   const meta = document.getElementById('wp-session-meta');
   meta.innerHTML = `<span class="tag-badge ${_wpCurrentQuestion.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${_wpCurrentQuestion.type === 'task1' ? 'Task 1' : 'Task 2'}</span> <strong>${_wpCurrentQuestion.topic}</strong>`;
   document.getElementById('wp-prompt-text').textContent = _wpCurrentQuestion.prompt;
+  // Chart image area (Task 1 only)
+  const imgArea = document.getElementById('wp-chart-area');
+  if (imgArea) {
+    if (_wpCurrentQuestion.type === 'task1') {
+      if (_wpCurrentQuestion.imageUrl) {
+        imgArea.innerHTML = `<img src="${escHtml(_wpCurrentQuestion.imageUrl)}" alt="Chart" class="wp-chart-img">`;
+      } else {
+        imgArea.innerHTML = `
+          <div class="wp-chart-upload" id="wp-chart-upload-box" onclick="document.getElementById('wp-chart-file').click()">
+            <input type="file" id="wp-chart-file" accept="image/*" style="display:none" onchange="wpHandleChartUpload(event)">
+            <div class="wp-chart-upload-icon">🖼️</div>
+            <div class="wp-chart-upload-text">Tải lên hình chart / biểu đồ</div>
+            <div class="wp-chart-upload-hint">JPG, PNG — kéo thả hoặc nhấp để chọn</div>
+          </div>`;
+      }
+      imgArea.classList.remove('hidden');
+    } else {
+      imgArea.innerHTML = '';
+      imgArea.classList.add('hidden');
+    }
+  }
+}
+
+function wpHandleChartUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const imgArea = document.getElementById('wp-chart-area');
+    imgArea.innerHTML = `
+      <div style="position:relative;display:inline-block;width:100%">
+        <img src="${e.target.result}" alt="Chart" class="wp-chart-img">
+        <button class="wp-chart-remove" onclick="wpRemoveChart()" title="Xóa hình">✕</button>
+      </div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function wpRemoveChart() {
+  const imgArea = document.getElementById('wp-chart-area');
+  imgArea.innerHTML = `
+    <div class="wp-chart-upload" id="wp-chart-upload-box" onclick="document.getElementById('wp-chart-file').click()">
+      <input type="file" id="wp-chart-file" accept="image/*" style="display:none" onchange="wpHandleChartUpload(event)">
+      <div class="wp-chart-upload-icon">🖼️</div>
+      <div class="wp-chart-upload-text">Tải lên hình chart / biểu đồ</div>
+      <div class="wp-chart-upload-hint">JPG, PNG — kéo thả hoặc nhấp để chọn</div>
+    </div>`;
 }
 
 function backToWritingBank() {

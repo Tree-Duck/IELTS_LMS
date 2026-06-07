@@ -5507,7 +5507,23 @@ input:focus, textarea:focus, select:focus {
   display: flex; flex-direction: column; gap: 0.75rem;
 }
 .wp-prompt-label { font-weight: 700; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
-.wp-prompt-text { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; color: #1f2937; flex: 1; }
+.wp-prompt-text { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; color: #1f2937; }
+.wp-chart-area { margin-top: 0.25rem; }
+.wp-chart-img { width: 100%; border-radius: 8px; border: 1.5px solid #e5e7eb; display: block; }
+.wp-chart-upload {
+  border: 2px dashed #d1d5db; border-radius: 10px; padding: 1.5rem 1rem;
+  text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  background: #f9fafb;
+}
+.wp-chart-upload:hover { border-color: var(--primary, #6366f1); background: #eef2ff; }
+.wp-chart-upload-icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
+.wp-chart-upload-text { font-size: 0.875rem; font-weight: 600; color: #374151; }
+.wp-chart-upload-hint { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
+.wp-chart-remove {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 50%;
+  width: 24px; height: 24px; font-size: 0.75rem; cursor: pointer; line-height: 24px; text-align: center;
+}
 .wp-editor-topbar { display: flex; justify-content: space-between; align-items: center; }
 .wp-word-counter { font-size: 1rem; font-weight: 700; color: #dc2626; transition: color 0.2s; }
 .wp-word-target  { font-size: 0.8rem; color: #9ca3af; }
