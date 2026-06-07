@@ -5517,6 +5517,15 @@ input:focus, textarea:focus, select:focus {
   font-family: inherit; transition: border-color 0.15s;
 }
 .wp-essay-textarea:focus { outline: none; border-color: #6366f1; }
+.wp-tools-section { margin-bottom: 0.5rem; }
+.wp-tools-toggle {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface-2, #f3f4f6); border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 0.55rem 0.9rem; font-size: 0.85rem; font-weight: 600; color: #374151;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.wp-tools-toggle:hover { border-color: var(--primary, #6366f1); background: #eef2ff; }
+.wp-tools-body { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
 .wp-editor-actions { display: flex; gap: 0.75rem; }
 .wp-ai-result { margin-top: 0.75rem; border-radius: 10px; overflow: hidden; }
 .wp-ai-loading { padding: 1rem; text-align: center; color: #6b7280; font-size: 0.9rem; }

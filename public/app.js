@@ -8911,6 +8911,7 @@ function openWritingQuestion(id) {
   document.getElementById('wp-ai-result').classList.add('hidden');
   document.getElementById('wp-ai-result').innerHTML = '';
   document.getElementById('wp-essay-input').value = '';
+  resetWpTools();
   document.getElementById('wp-word-counter').textContent = '0 từ';
   document.getElementById('wp-word-target').textContent = `Mục tiêu: ${_wpCurrentQuestion.minWords}+ từ`;
   const meta = document.getElementById('wp-session-meta');
@@ -8938,6 +8939,62 @@ function clearWritingEssay() {
   updateWordCount();
   document.getElementById('wp-ai-result').classList.add('hidden');
   document.getElementById('wp-ai-result').innerHTML = '';
+}
+
+function toggleWpTools() {
+  const body = document.getElementById('wp-tools-body');
+  const icon = document.getElementById('wp-tools-icon');
+  const isHidden = body.classList.toggle('hidden');
+  icon.textContent = isHidden ? '▸' : '▾';
+}
+
+function resetWpTools() {
+  const empty = { ideas: 'Nhấp "Tạo ✨" để nhận gợi ý ý tưởng cho bài.', phrases: 'Nhấp "Tạo ✨" để nhận các cụm từ & từ vựng học thuật.' };
+  ['ideas','phrases'].forEach(t => {
+    const el = document.getElementById(`wp-${t}-body`);
+    if (el) el.innerHTML = `<span class="hint-empty">${empty[t]}</span>`;
+    const btn = document.getElementById(`wp-${t}-btn`);
+    if (btn) { btn.disabled = false; btn.textContent = 'Tạo ✨'; }
+  });
+  // collapse tools panel
+  const body = document.getElementById('wp-tools-body');
+  const icon = document.getElementById('wp-tools-icon');
+  if (body && !body.classList.contains('hidden')) { body.classList.add('hidden'); if (icon) icon.textContent = '▸'; }
+}
+
+async function wpRequestHint(hint_type) {
+  if (!_wpCurrentQuestion) return;
+  const task_type = _wpCurrentQuestion.type; // 'task1' or 'task2'
+  const prompt = _wpCurrentQuestion.prompt;
+  const essay = document.getElementById('wp-essay-input').value.trim();
+
+  const bodyEl = document.getElementById(`wp-${hint_type}-body`);
+  const btnEl  = document.getElementById(`wp-${hint_type}-btn`);
+  if (!bodyEl) return;
+
+  // auto-expand tools panel
+  const toolsBody = document.getElementById('wp-tools-body');
+  const toolsIcon = document.getElementById('wp-tools-icon');
+  if (toolsBody && toolsBody.classList.contains('hidden')) {
+    toolsBody.classList.remove('hidden');
+    if (toolsIcon) toolsIcon.textContent = '▾';
+  }
+
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳'; }
+  bodyEl.innerHTML = '<span class="hint-thinking">Đang tạo…</span>';
+  let raw = '';
+  try {
+    await streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type },
+      (chunk) => { raw += chunk; bodyEl.innerHTML = renderHintMarkdown(raw); },
+      () => { bodyEl.innerHTML = renderHintMarkdown(raw); }
+    );
+  } catch(err) {
+    bodyEl.innerHTML = `<span style="color:var(--danger)">Lỗi: ${escHtml(err.message)}</span>`;
+  } finally {
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Tạo ✨'; }
+  }
 }
 
 async function submitWritingEssay() {

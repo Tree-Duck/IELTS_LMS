@@ -1753,6 +1753,27 @@
               <textarea id="wp-essay-input" class="wp-essay-textarea"
                 placeholder="Bắt đầu viết bài của bạn ở đây…"
                 oninput="updateWordCount()"></textarea>
+              <!-- AI Writing Tools (Idea Generator + Language Toolkit) -->
+              <div class="wp-tools-section" id="wp-tools-section">
+                <button class="wp-tools-toggle" onclick="toggleWpTools()">
+                  <span>✨ Hỗ trợ viết AI</span>
+                  <span id="wp-tools-icon">▸</span>
+                </button>
+                <div class="wp-tools-body hidden" id="wp-tools-body">
+                  <div class="hint-card">
+                    <div class="hint-card-header">💡 Ý kiến đoạn thân
+                      <button type="button" class="hint-generate-btn" id="wp-ideas-btn" onclick="wpRequestHint('ideas')">Tạo ✨</button>
+                    </div>
+                    <div class="hint-card-body" id="wp-ideas-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận gợi ý ý tưởng cho bài.</span></div>
+                  </div>
+                  <div class="hint-card">
+                    <div class="hint-card-header">📝 Bộ công cụ ngôn ngữ
+                      <button type="button" class="hint-generate-btn" id="wp-phrases-btn" onclick="wpRequestHint('phrases')">Tạo ✨</button>
+                    </div>
+                    <div class="hint-card-body" id="wp-phrases-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận các cụm từ & từ vựng học thuật.</span></div>
+                  </div>
+                </div>
+              </div>
               <div class="wp-editor-actions">
                 <button class="btn btn-outline" onclick="clearWritingEssay()">🗑 Xóa</button>
                 <button class="btn btn-primary" onclick="submitWritingEssay()">✨ Chấm bài với AI</button>
