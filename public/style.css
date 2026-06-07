@@ -370,35 +370,28 @@ body {
   right: -20px;
   top: 50%;
   transform: translateY(-50%);
-  width: 220px;
-  height: 235px;
+  width: 200px;
+  height: 210px;
   pointer-events: none;
-}
-/* Side arms */
-.bnr-side-arm {
-  fill: none;
-  stroke: rgba(255,255,255,0.88);
-  stroke-width: 13;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 /* Tentacles sway + bob */
 .bnr-t {
   fill: none;
-  stroke: rgba(255,255,255,0.82);
-  stroke-width: 11;
+  stroke: rgba(255,255,255,0.60);
+  stroke-width: 8;
   stroke-linecap: round;
   animation: bnr-sway 1.8s ease-in-out infinite alternate,
              bnr-bob  2.6s ease-in-out infinite;
   transform-box: fill-box;
   transform-origin: 50% 0%;
 }
-.bnr-t:nth-child(1) { animation-delay:  0.00s,  0.00s; }
-.bnr-t:nth-child(2) { animation-delay: -0.28s, -0.40s; }
-.bnr-t:nth-child(3) { animation-delay: -0.56s, -0.80s; }
-.bnr-t:nth-child(4) { animation-delay: -0.84s, -1.20s; }
-.bnr-t:nth-child(5) { animation-delay: -1.12s, -1.60s; }
-.bnr-t:nth-child(6) { animation-delay: -1.40s, -2.00s; }
+.bnr-t:nth-child(1) { animation-delay:  0.00s, 0.00s; }
+.bnr-t:nth-child(2) { animation-delay: -0.23s, -0.30s; }
+.bnr-t:nth-child(3) { animation-delay: -0.46s, -0.60s; }
+.bnr-t:nth-child(4) { animation-delay: -0.69s, -0.90s; }
+.bnr-t:nth-child(5) { animation-delay: -0.92s, -1.20s; }
+.bnr-t:nth-child(6) { animation-delay: -1.15s, -1.50s; }
+.bnr-t:nth-child(7) { animation-delay: -1.38s, -1.80s; }
 .bnr-t:nth-child(odd) { animation-direction: alternate-reverse, normal; }
 @keyframes bnr-sway {
   from { transform: rotate(-10deg); }

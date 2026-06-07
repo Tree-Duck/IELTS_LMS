@@ -260,39 +260,38 @@
           </div>
           <!-- Octopus banner mascot -->
           <div class="home-hero-octo" aria-hidden="true">
-            <svg id="banner-octo" viewBox="0 0 220 235" xmlns="http://www.w3.org/2000/svg" width="220" height="235">
-              <!-- Tentacles (behind body) -->
+            <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
+              <!-- Tentacles (bob animated, clipped by banner overflow at bottom) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" d="M77,163 Q62,186 68,212"/>
-                <path class="bnr-t" d="M92,170 Q82,196 86,220"/>
-                <path class="bnr-t" d="M110,173 Q104,200 108,226"/>
-                <path class="bnr-t" d="M128,173 Q134,200 130,226"/>
-                <path class="bnr-t" d="M146,170 Q155,196 149,220"/>
-                <path class="bnr-t" d="M161,163 Q173,186 166,212"/>
+                <path class="bnr-t" d="M62,148 Q48,168 52,195"/>
+                <path class="bnr-t" d="M76,155 Q62,178 65,205"/>
+                <path class="bnr-t" d="M92,159 Q82,182 84,210"/>
+                <path class="bnr-t" d="M108,160 Q100,184 102,210"/>
+                <path class="bnr-t" d="M124,159 Q132,182 128,210"/>
+                <path class="bnr-t" d="M140,155 Q152,178 146,205"/>
+                <path class="bnr-t" d="M154,148 Q166,168 160,195"/>
               </g>
-              <!-- Side arms (chubby stubs) -->
-              <path class="bnr-side-arm" d="M36,112 Q20,104 17,122 Q15,136 30,140"/>
-              <path class="bnr-side-arm" d="M184,112 Q200,104 203,122 Q205,136 190,140"/>
-              <!-- Body -->
-              <circle cx="110" cy="100" r="80" fill="rgba(255,255,255,0.92)" stroke="rgba(15,50,28,0.18)" stroke-width="3"/>
-              <!-- Head highlight -->
-              <circle cx="82" cy="64" r="13" fill="rgba(255,255,255,0.55)"/>
-              <circle cx="70" cy="80" r="7"  fill="rgba(255,255,255,0.35)"/>
-              <!-- Eye whites -->
-              <circle cx="88"  cy="94" r="18" fill="white"/>
-              <circle cx="132" cy="94" r="18" fill="white"/>
+              <!-- Body (semi-transparent, large circle fills banner) -->
+              <circle cx="113" cy="95" r="88" fill="rgba(255,255,255,0.15)"/>
+              <circle cx="113" cy="88" r="76" fill="rgba(255,255,255,0.12)"/>
+              <!-- Eye whites (big round cute eyes) -->
+              <circle cx="88"  cy="86" r="18" fill="rgba(255,255,255,0.92)"/>
+              <circle cx="138" cy="86" r="18" fill="rgba(255,255,255,0.92)"/>
               <!-- Pupils (JS-tracked) -->
-              <circle id="bnr-pl" cx="91"  cy="97" r="11" fill="#1a3224"/>
-              <circle id="bnr-pr" cx="135" cy="97" r="11" fill="#1a3224"/>
+              <circle id="bnr-pl" cx="91"  cy="89" r="11" fill="#173020"/>
+              <circle id="bnr-pr" cx="141" cy="89" r="11" fill="#173020"/>
               <!-- Eye shine -->
-              <circle cx="95"  cy="89" r="5" fill="white"/>
-              <circle cx="139" cy="89" r="5" fill="white"/>
+              <circle cx="95"  cy="82" r="5" fill="white"/>
+              <circle cx="145" cy="82" r="5" fill="white"/>
               <!-- Blush -->
-              <ellipse cx="67"  cy="118" rx="14" ry="9" fill="rgba(255,120,120,0.32)"/>
-              <ellipse cx="153" cy="118" rx="14" ry="9" fill="rgba(255,120,120,0.32)"/>
-              <!-- Smile -->
-              <path d="M90 120 Q110 144 130 120" fill="rgba(255,200,200,0.55)" stroke="rgba(15,50,28,0.5)" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M90 120 Q110 130 130 120" fill="rgba(255,255,255,0.7)" stroke="none"/>
+              <ellipse cx="70"  cy="108" rx="13" ry="8" fill="rgba(255,110,110,0.35)"/>
+              <ellipse cx="156" cy="108" rx="13" ry="8" fill="rgba(255,110,110,0.35)"/>
+              <!-- Smile (cute U-curve with soft pink fill) -->
+              <path d="M90 112 Q113 136 136 112" fill="rgba(255,180,180,0.5)" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M90 112 Q113 122 136 112" fill="rgba(255,255,255,0.6)" stroke="none"/>
+              <!-- Head highlight dots -->
+              <circle cx="88" cy="58" r="10" fill="rgba(255,255,255,0.45)"/>
+              <circle cx="78" cy="72" r="6"  fill="rgba(255,255,255,0.28)"/>
             </svg>
           </div>
         </div>
