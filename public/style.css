@@ -5506,9 +5506,6 @@ input:focus, textarea:focus, select:focus {
   background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 1.25rem;
   display: flex; flex-direction: column; gap: 0.75rem;
 }
-.wp-prompt-col {
-  position: sticky; top: 1rem;
-}
 .wp-prompt-label { font-weight: 700; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
 .wp-prompt-text { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; color: #1f2937; }
 .wp-chart-area { margin-top: 0.25rem; }
@@ -5536,7 +5533,7 @@ input:focus, textarea:focus, select:focus {
   font-family: inherit; transition: border-color 0.15s;
 }
 .wp-essay-textarea:focus { outline: none; border-color: #6366f1; }
-.wp-tools-section { margin-bottom: 0.5rem; }
+.wp-tools-section { margin-top: 0.25rem; }
 .wp-tools-toggle {
   width: 100%; display: flex; justify-content: space-between; align-items: center;
   background: var(--surface-2, #f3f4f6); border: 1.5px solid #e5e7eb; border-radius: 10px;

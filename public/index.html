@@ -1745,15 +1745,6 @@
               <div class="wp-prompt-label">📋 Đề bài</div>
               <div class="wp-prompt-text" id="wp-prompt-text"></div>
               <div id="wp-chart-area" class="wp-chart-area hidden"></div>
-            </div>
-            <div class="wp-editor-col">
-              <div class="wp-editor-topbar">
-                <span class="wp-word-counter" id="wp-word-counter">0 từ</span>
-                <span class="wp-word-target" id="wp-word-target"></span>
-              </div>
-              <textarea id="wp-essay-input" class="wp-essay-textarea"
-                placeholder="Bắt đầu viết bài của bạn ở đây…"
-                oninput="updateWordCount()"></textarea>
               <!-- AI Writing Tools (Idea Generator + Language Toolkit) -->
               <div class="wp-tools-section" id="wp-tools-section">
                 <button class="wp-tools-toggle" onclick="toggleWpTools()">
@@ -1775,6 +1766,15 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="wp-editor-col">
+              <div class="wp-editor-topbar">
+                <span class="wp-word-counter" id="wp-word-counter">0 từ</span>
+                <span class="wp-word-target" id="wp-word-target"></span>
+              </div>
+              <textarea id="wp-essay-input" class="wp-essay-textarea"
+                placeholder="Bắt đầu viết bài của bạn ở đây…"
+                oninput="updateWordCount()"></textarea>
               <div class="wp-editor-actions">
                 <button class="btn btn-outline" onclick="clearWritingEssay()">🗑 Xóa</button>
                 <button class="btn btn-primary" onclick="submitWritingEssay()">✨ Chấm bài với AI</button>
