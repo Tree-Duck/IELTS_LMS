@@ -1247,7 +1247,7 @@ app.post('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => 
 });
 
 // Admin: list all topics (no image data)
-app.get('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => {
+app.get('/api/admin/task1-topics', authenticate, (req, res) => {
   try {
     res.json(db.getAllTask1Topics(req.query.chart_type));
   } catch (err) {
@@ -1256,7 +1256,7 @@ app.get('/api/admin/task1-topics', authenticate, teacherOrAdmin, (req, res) => {
 });
 
 // Admin: get single topic (full, with image)
-app.get('/api/admin/task1-topics/:id', authenticate, teacherOrAdmin, (req, res) => {
+app.get('/api/admin/task1-topics/:id', authenticate, (req, res) => {
   try {
     const topic = db.getTask1TopicById(parseInt(req.params.id, 10));
     if (!topic) return res.status(404).json({ error: 'Topic not found' });
@@ -2154,7 +2154,7 @@ app.get('/api/task2-prompts-custom', (req, res) => {
   catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
 });
 
-app.get('/api/admin/task2-prompts', authenticate, teacherOrAdmin, (req, res) => {
+app.get('/api/admin/task2-prompts', authenticate, (req, res) => {
   try { res.json(db.getTask2PromptsCustom()); }
   catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
 });

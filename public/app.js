@@ -1576,6 +1576,7 @@ function showView(name) {
   else if (name === 'translation-exercise') { /* loaded via startTranslationBuoc */ }
   else if (name === 'paragraph-list') loadParagraphList();
   else if (name === 'paragraph-exercise') { /* loaded via openParagraphExercise */ }
+  else if (name === 'para-lab') showParaLab();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -1720,7 +1721,7 @@ async function viewStudentHistory(userId, userName) {
     const data = await api(`/api/admin/users/${userId}/submissions`);
     const subs = data.submissions;
     if (!subs.length) {
-      contentEl.innerHTML = '<div class="empty-state">No submissions yet.</div>';
+      contentEl.innerHTML = '<div class="empty-state">Học sinh chưa nộp bài nào.</div>';
       return;
     }
     contentEl.innerHTML = subs.map(s => {
@@ -1972,7 +1973,7 @@ async function loadDashboard() {
     const recentEl = document.getElementById('recent-list');
     const recent = submissions.slice(0, 5);
     if (recent.length === 0) {
-      recentEl.innerHTML = `<div class="empty-state">No submissions yet. <a href="#" onclick="showView('submit')">Submit your first essay!</a></div>`;
+      recentEl.innerHTML = `<div class="empty-state">Chưa có bài nộp nào. <a href="#" onclick="showView('submit')">Nộp bài essay đầu tiên!</a></div>`;
     } else {
       recentEl.innerHTML = recent.map(renderSubmissionCard).join('');
     }
@@ -1999,7 +2000,7 @@ function renderTargetBandBars(targetBand, writingAvg, readingAvg, listeningAvg) 
   if (!section || !barsEl) return;
 
   if (!targetBand) {
-    barsEl.innerHTML = '<div class="target-band-hint">Set a target band above to track your progress toward your goal.</div>';
+    barsEl.innerHTML = '<div class="target-band-hint">Chọn band mục tiêu ở trên để theo dõi tiến trình của bạn.</div>';
     return;
   }
 
@@ -2142,7 +2143,7 @@ async function loadHistory() {
   try {
     const submissions = await api('/api/submissions');
     if (submissions.length === 0) {
-      listEl.innerHTML = `<div class="empty-state">No submissions yet. <a href="#" onclick="showView('submit')">Submit your first essay!</a></div>`;
+      listEl.innerHTML = `<div class="empty-state">Chưa có bài nộp nào. <a href="#" onclick="showView('submit')">Nộp bài essay đầu tiên!</a></div>`;
       return;
     }
     listEl.innerHTML = submissions.map(renderSubmissionCard).join('');
@@ -5254,7 +5255,7 @@ async function loadHomework() {
   try {
     const assignments = await api('/api/assignments');
     if (!assignments.length) {
-      el.innerHTML = '<div class="empty-state">No assignments yet. Your teacher will set homework here.</div>';
+      el.innerHTML = '<div class="empty-state">Chưa có bài tập nào. Giáo viên sẽ giao bài tại đây.</div>';
       return;
     }
     const now = new Date();
@@ -8809,57 +8810,7 @@ async function submitParagraphTranslation() {
 }
 
 /* ─── Writing Questions Bank ─────────────────────────────────────────────── */
-const WRITING_QUESTIONS = [
-  {
-    id: 'wq1', type: 'task1', topic: 'Biểu đồ cột',
-    tags: ['Bar chart', 'Energy'],
-    prompt: `The bar chart below shows the average amount of energy used per person in six countries in 2015.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq2', type: 'task1', topic: 'Biểu đồ đường',
-    tags: ['Line graph', 'Population'],
-    prompt: `The line graph below shows the population of three cities between 1990 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq3', type: 'task1', topic: 'Sơ đồ quy trình',
-    tags: ['Process diagram', 'Recycling'],
-    prompt: `The diagram below shows the process of recycling plastic bottles.\n\nSummarise the information by selecting and reporting the main features.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq4', type: 'task1', topic: 'Bản đồ',
-    tags: ['Map', 'Urban development'],
-    prompt: `The maps below show how a small coastal town changed between 1980 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
-    minWords: 150, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq5', type: 'task2', topic: 'Công nghệ & xã hội',
-    tags: ['Technology', 'Opinion'],
-    prompt: `Some people believe that technology has made modern life too complicated. Others think it has improved our lives.\n\nDiscuss both views and give your own opinion.\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq6', type: 'task2', topic: 'Môi trường',
-    tags: ['Environment', 'Government vs individual'],
-    prompt: `Protecting the environment is the responsibility of governments, not individuals.\n\nTo what extent do you agree or disagree with this statement?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq7', type: 'task2', topic: 'Giáo dục',
-    tags: ['Education', 'Online learning'],
-    prompt: `Online education will eventually replace traditional classroom learning.\n\nTo what extent do you agree or disagree?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null, imageUrl: null
-  },
-  {
-    id: 'wq8', type: 'task2', topic: 'Đô thị hoá',
-    tags: ['Urbanisation', 'Problems & solutions'],
-    prompt: `Many cities around the world are facing serious problems caused by rapid urbanisation.\n\nWhat are the main problems of rapid urbanisation? What solutions can be taken to address these problems?\n\nWrite at least 250 words.`,
-    minWords: 250, modelAnswer: null, imageUrl: null
-  },
-];
-
+let _wpQuestions = [];
 let _wpCurrentQuestion = null;
 let _wpFilter = 'all';
 
@@ -8869,31 +8820,82 @@ function loadWritingHub() {
 }
 
 /* ─── Writing Practice ────────────────────────────────────────────────────── */
-function loadWritingPractice() {
+async function loadWritingPractice() {
   _wpFilter = 'all';
   _wpCurrentQuestion = null;
   document.getElementById('wp-bank-panel').classList.remove('hidden');
   document.getElementById('wp-session-panel').classList.add('hidden');
   document.getElementById('wp-ai-result').classList.add('hidden');
   document.getElementById('wp-ai-result').innerHTML = '';
+  // Reset filter buttons
+  document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.querySelector('.wp-filter-btn[data-filter="all"]');
+  if (allBtn) allBtn.classList.add('active');
+  // Show loading
+  const grid = document.getElementById('wp-question-grid');
+  grid.innerHTML = '<div class="wp-loading">Đang tải đề bài…</div>';
+  try {
+    const [t1Res, t2Res] = await Promise.all([
+      fetch('/api/admin/task1-topics'),
+      fetch('/api/admin/task2-prompts')
+    ]);
+    const task1 = t1Res.ok ? await t1Res.json() : [];
+    const task2 = t2Res.ok ? await t2Res.json() : [];
+    // Normalize task1 topics
+    const t1Questions = (Array.isArray(task1) ? task1 : []).map(t => ({
+      id: 't1_' + t.id,
+      dbId: t.id,
+      type: 'task1',
+      topic: t.label || t.chart_type || 'Task 1',
+      tags: [t.chart_type].filter(Boolean),
+      prompt: t.question_preview || t.question || '',
+      minWords: 150,
+      hasImage: false
+    }));
+    // Normalize task2 prompts
+    const t2Questions = (Array.isArray(task2) ? task2 : []).map(t => ({
+      id: 't2_' + t.id,
+      dbId: t.id,
+      type: 'task2',
+      topic: 'Task 2',
+      tags: t.difficulty ? [t.difficulty] : [],
+      prompt: t.q || '',
+      minWords: 250,
+      hasImage: false
+    }));
+    _wpQuestions = [...t1Questions, ...t2Questions];
+  } catch (e) {
+    _wpQuestions = [];
+  }
   renderWritingQuestionGrid();
 }
 
 function renderWritingQuestionGrid() {
   const grid = document.getElementById('wp-question-grid');
-  const questions = _wpFilter === 'all' ? WRITING_QUESTIONS
-    : WRITING_QUESTIONS.filter(q => q.type === _wpFilter);
+  const questions = _wpFilter === 'all' ? _wpQuestions
+    : _wpQuestions.filter(q => q.type === _wpFilter);
+  if (questions.length === 0) {
+    grid.innerHTML = '<div class="wp-empty-state">Chưa có đề bài. Giáo viên cần upload đề trong trang <strong>Quản lý nội dung</strong>.</div>';
+    return;
+  }
   grid.innerHTML = questions.map(q => `
-    <div class="wp-q-card" onclick="openWritingQuestion('${q.id}')">
+    <div class="wp-q-card" onclick="openWritingQuestion('${escHtml(q.id)}')">
       <div class="wp-q-card-top">
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
-        ${q.tags.map(t => `<span class="tag-badge tag-topic">${t}</span>`).join('')}
+        ${q.tags.map(t => `<span class="tag-badge tag-topic">${escHtml(t)}</span>`).join('')}
       </div>
-      <div class="wp-q-card-title">${q.topic}</div>
-      <div class="wp-q-card-preview">${q.prompt.substring(0, 100)}…</div>
+      <div class="wp-q-card-title">${escHtml(q.topic)}</div>
+      <div class="wp-q-card-preview">${escHtml(q.prompt.substring(0, 100))}…</div>
       <div class="wp-q-card-meta">Tối thiểu ${q.minWords} từ</div>
     </div>
   `).join('');
+}
+
+function randomWritingQuestion() {
+  const pool = _wpFilter === 'all' ? _wpQuestions : _wpQuestions.filter(q => q.type === _wpFilter);
+  if (!pool.length) { showToast('Chưa có đề bài nào.'); return; }
+  const q = pool[Math.floor(Math.random() * pool.length)];
+  openWritingQuestion(q.id);
 }
 
 function filterWritingQuestions(filter, btn) {
@@ -8903,8 +8905,8 @@ function filterWritingQuestions(filter, btn) {
   renderWritingQuestionGrid();
 }
 
-function openWritingQuestion(id) {
-  _wpCurrentQuestion = WRITING_QUESTIONS.find(q => q.id === id);
+async function openWritingQuestion(id) {
+  _wpCurrentQuestion = _wpQuestions.find(q => q.id === id);
   if (!_wpCurrentQuestion) return;
   document.getElementById('wp-bank-panel').classList.add('hidden');
   document.getElementById('wp-session-panel').classList.remove('hidden');
@@ -8915,24 +8917,37 @@ function openWritingQuestion(id) {
   document.getElementById('wp-word-counter').textContent = '0 từ';
   document.getElementById('wp-word-target').textContent = `Mục tiêu: ${_wpCurrentQuestion.minWords}+ từ`;
   const meta = document.getElementById('wp-session-meta');
-  meta.innerHTML = `<span class="tag-badge ${_wpCurrentQuestion.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${_wpCurrentQuestion.type === 'task1' ? 'Task 1' : 'Task 2'}</span> <strong>${_wpCurrentQuestion.topic}</strong>`;
+  meta.innerHTML = `<span class="tag-badge ${_wpCurrentQuestion.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${_wpCurrentQuestion.type === 'task1' ? 'Task 1' : 'Task 2'}</span> <strong>${escHtml(_wpCurrentQuestion.topic)}</strong>`;
   document.getElementById('wp-prompt-text').textContent = _wpCurrentQuestion.prompt;
   // Chart image area (Task 1 only)
   const imgArea = document.getElementById('wp-chart-area');
   if (imgArea) {
     if (_wpCurrentQuestion.type === 'task1') {
-      if (_wpCurrentQuestion.imageUrl) {
-        imgArea.innerHTML = `<img src="${escHtml(_wpCurrentQuestion.imageUrl)}" alt="Chart" class="wp-chart-img">`;
-      } else {
-        imgArea.innerHTML = `
-          <div class="wp-chart-upload" id="wp-chart-upload-box" onclick="document.getElementById('wp-chart-file').click()">
-            <input type="file" id="wp-chart-file" accept="image/*" style="display:none" onchange="wpHandleChartUpload(event)">
-            <div class="wp-chart-upload-icon">🖼️</div>
-            <div class="wp-chart-upload-text">Tải lên hình chart / biểu đồ</div>
-            <div class="wp-chart-upload-hint">JPG, PNG — kéo thả hoặc nhấp để chọn</div>
-          </div>`;
-      }
       imgArea.classList.remove('hidden');
+      imgArea.innerHTML = '<div class="wp-chart-loading">Đang tải hình…</div>';
+      try {
+        const res = await fetch(`/api/admin/task1-topics/${_wpCurrentQuestion.dbId}`);
+        if (res.ok) {
+          const topic = await res.json();
+          // Update prompt with full text (list only has preview)
+          if (topic.question) {
+            _wpCurrentQuestion.prompt = topic.question;
+            document.getElementById('wp-prompt-text').textContent = topic.question;
+          }
+          if (topic.image_base64 && topic.image_media_type) {
+            imgArea.innerHTML = `<img src="data:${escHtml(topic.image_media_type)};base64,${topic.image_base64}" alt="Chart" class="wp-chart-img">`;
+          } else {
+            imgArea.innerHTML = '';
+            imgArea.classList.add('hidden');
+          }
+        } else {
+          imgArea.innerHTML = '';
+          imgArea.classList.add('hidden');
+        }
+      } catch (e) {
+        imgArea.innerHTML = '';
+        imgArea.classList.add('hidden');
+      }
     } else {
       imgArea.innerHTML = '';
       imgArea.classList.add('hidden');

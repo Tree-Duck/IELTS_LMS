@@ -5489,6 +5489,12 @@ input:focus, textarea:focus, select:focus {
 .wp-q-card-title { font-weight: 700; font-size: 1rem; color: #111827; }
 .wp-q-card-preview { font-size: 0.8rem; color: #9ca3af; line-height: 1.5; }
 .wp-q-card-meta { font-size: 0.78rem; color: #6366f1; font-weight: 600; }
+.wp-random-btn { background: #fdf4ff; border-color: #d946ef; color: #a21caf; }
+.wp-random-btn:hover { background: #fae8ff; border-color: #a21caf; color: #a21caf; }
+.wp-empty-state { text-align: center; padding: 2.5rem 1rem; color: #6b7280; font-size: 0.95rem; }
+.wp-empty-state strong { color: #374151; }
+.wp-loading { text-align: center; padding: 2rem; color: #9ca3af; font-size: 0.9rem; }
+.wp-chart-loading { text-align: center; padding: 1rem; color: #9ca3af; font-size: 0.85rem; }
 
 /* ── Writing Practice — Session ─────────────────────────────── */
 .wp-session-header {
