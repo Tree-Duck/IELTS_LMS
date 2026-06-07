@@ -5526,22 +5526,59 @@ input:focus, textarea:focus, select:focus {
 .wp-ai-error { background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 0.85rem; color: #991b1b; font-size: 0.875rem; }
 
 /* ── Translation Curriculum Hub ─────────────────────────────── */
-.trans-curriculum-grid {
-  display: flex; flex-direction: column; gap: 0.85rem; max-width: 720px; margin: 1.25rem auto 0;
+/* ── Translation Hub Header ──────────────────────────────────── */
+.trans-hub-header {
+  background: var(--surface); border-bottom: 1.5px solid #e5e7eb;
+  padding: 1.5rem 2rem 0; display: flex; flex-direction: column; gap: 0.5rem;
 }
-.trans-buoc-card {
-  background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px;
-  padding: 1.1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 1rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+.trans-hub-label { font-size: 0.78rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.35rem; }
+.trans-hub-h2 { font-size: 2.2rem; font-weight: 900; color: #111827; line-height: 1.1; margin: 0; }
+.trans-hub-accent { color: var(--primary); }
+.trans-hub-sub { font-size: 0.88rem; color: #6b7280; margin: 0.15rem 0 1rem; max-width: 540px; }
+
+/* ── Translation Tab Bar ─────────────────────────────────────── */
+.trans-tab-bar {
+  display: flex; gap: 0.15rem; overflow-x: auto; padding-bottom: 0;
 }
-.trans-buoc-card:hover { border-color: #6366f1; box-shadow: 0 3px 12px rgba(99,102,241,0.12); }
-.tbc-emoji { font-size: 2rem; flex-shrink: 0; }
-.tbc-content { flex: 1; }
-.tbc-num  { font-size: 0.78rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.05em; }
-.tbc-title { font-size: 1rem; font-weight: 700; color: #111827; }
-.tbc-desc { font-size: 0.82rem; color: #6b7280; margin-top: 0.15rem; }
-.tbc-footer { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; flex-shrink: 0; }
-.tbc-count { font-size: 0.78rem; color: #9ca3af; }
+.trans-tab {
+  display: flex; flex-direction: column; align-items: flex-start; padding: 0.65rem 1.1rem 0.8rem;
+  border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent;
+  flex-shrink: 0; transition: border-color 0.15s, background 0.15s; border-radius: 8px 8px 0 0;
+}
+.trans-tab:hover { background: #f3f4f6; }
+.trans-tab.active { border-bottom-color: var(--primary); background: #f0fdf4; }
+.trans-tab--para.active { border-bottom-color: #f59e0b; background: #fffbeb; }
+.trans-tab-num { font-size: 0.68rem; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; }
+.trans-tab.active .trans-tab-num { color: var(--primary); }
+.trans-tab--para.active .trans-tab-num { color: #d97706; }
+.trans-tab-name { font-size: 0.82rem; font-weight: 700; color: #374151; margin-top: 0.1rem; }
+.trans-tab.active .trans-tab-name { color: #111827; }
+
+/* ── Translation Tab Content ─────────────────────────────────── */
+.trans-tab-content { max-width: 760px; margin: 0 auto; padding: 1.25rem 1.5rem 2rem; width: 100%; }
+.trans-tab-meta { font-size: 0.82rem; color: #9ca3af; margin-bottom: 0.75rem; }
+.trans-item-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.trans-item-row {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--surface); border: 1.5px solid #e5e7eb; border-radius: 12px;
+  padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.trans-item-row:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(46,125,85,0.1); }
+.trans-item-num {
+  width: 28px; height: 28px; border-radius: 50%; background: #f3f4f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; color: #6b7280; flex-shrink: 0;
+}
+.trans-item-body { flex: 1; }
+.trans-item-title { font-weight: 700; font-size: 0.9rem; color: #111827; }
+.trans-item-preview { font-size: 0.83rem; color: #6b7280; line-height: 1.5; margin-top: 0.1rem; }
+.trans-item-badge {
+  flex-shrink: 0; background: #fef3c7; color: #92400e;
+  border: 1px solid #fcd34d; border-radius: 8px; padding: 2px 8px;
+  font-size: 0.75rem; font-weight: 700;
+}
+.trans-item-arrow { color: #9ca3af; font-size: 1rem; flex-shrink: 0; }
+.trans-start-all-btn { margin-top: 0.75rem; align-self: flex-start; }
 
 /* ── Translation Exercise ────────────────────────────────────── */
 .trans-ex-layout {
@@ -5579,14 +5616,6 @@ input:focus, textarea:focus, select:focus {
   background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px;
   padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-width: 720px;
 }
-
-/* ── Paragraph translation card in curriculum ────────────────── */
-.trans-buoc-card--para {
-  border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
-}
-.trans-buoc-card--para:hover { border-color: #d97706; box-shadow: 0 3px 12px rgba(245,158,11,0.2); }
-.tbc-num--para { color: #d97706; }
-.tag-band { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; }
 
 /* ── Paragraph List View ──────────────────────────────────────── */
 .para-list-grid {

@@ -8973,40 +8973,89 @@ async function submitWritingEssay() {
 }
 
 /* ─── Translation Curriculum ─────────────────────────────────────────────── */
+let _activeTransTab = 1; // 1-5 = sentence bước, 6 = paragraph
+
 function loadTranslationCurriculum() {
-  const grid = document.getElementById('trans-curriculum-grid');
-  if (!grid) return;
-  const sentenceCards = TRANSLATION_CURRICULUM.map(b => `
-    <div class="trans-buoc-card" onclick="startTranslationBuoc(${b.buoc})">
-      <div class="tbc-emoji">${b.emoji}</div>
-      <div class="tbc-content">
-        <div class="tbc-num">Bước ${b.buoc}</div>
-        <div class="tbc-title">${b.title}</div>
-        <div class="tbc-desc">${b.desc}</div>
-      </div>
-      <div class="tbc-footer">
-        <span class="tbc-count">${b.sentences.length} câu</span>
-        <span class="tag-badge tag-level">${b.level}</span>
-      </div>
-    </div>
+  renderTransTabBar();
+  renderTransTabContent(_activeTransTab);
+}
+
+function renderTransTabBar() {
+  const bar = document.getElementById('trans-tab-bar');
+  if (!bar) return;
+  const tabs = TRANSLATION_CURRICULUM.map(b => `
+    <button class="trans-tab ${_activeTransTab === b.buoc ? 'active' : ''}" onclick="switchTransTab(${b.buoc})">
+      <span class="trans-tab-num">BƯỚC ${b.buoc}</span>
+      <span class="trans-tab-name">${b.title}</span>
+    </button>
   `).join('');
-
-  const paragraphCard = `
-    <div class="trans-buoc-card trans-buoc-card--para" onclick="showView('paragraph-list')">
-      <div class="tbc-emoji">📝</div>
-      <div class="tbc-content">
-        <div class="tbc-num tbc-num--para">Luyện dịch đoạn văn</div>
-        <div class="tbc-title">Dịch đoạn văn Band 6.5</div>
-        <div class="tbc-desc">Dịch các đoạn văn ngắn từ tiếng Việt sang tiếng Anh theo chủ đề IELTS</div>
-      </div>
-      <div class="tbc-footer">
-        <span class="tbc-count">${PARAGRAPH_BANK.length} đoạn văn</span>
-        <span class="tag-badge tag-band">Band 6.5</span>
-      </div>
-    </div>
+  const paraTab = `
+    <button class="trans-tab trans-tab--para ${_activeTransTab === 6 ? 'active' : ''}" onclick="switchTransTab(6)">
+      <span class="trans-tab-num">BƯỚC 6</span>
+      <span class="trans-tab-name">Dịch đoạn văn</span>
+    </button>
   `;
+  bar.innerHTML = tabs + paraTab;
+}
 
-  grid.innerHTML = sentenceCards + paragraphCard;
+function switchTransTab(n) {
+  _activeTransTab = n;
+  renderTransTabBar();
+  renderTransTabContent(n);
+}
+
+function renderTransTabContent(n) {
+  const content = document.getElementById('trans-tab-content');
+  if (!content) return;
+  if (n === 6) {
+    // Paragraph list inline
+    content.innerHTML = `
+      <div class="trans-item-list">
+        ${PARAGRAPH_BANK.map((p, i) => `
+          <div class="trans-item-row" onclick="openParagraphExercise('${p.id}')">
+            <span class="trans-item-num">${i + 1}</span>
+            <div class="trans-item-body">
+              <div class="trans-item-title">${p.emoji} ${p.topic}</div>
+              <div class="trans-item-preview">${p.vi.substring(0, 80)}…</div>
+            </div>
+            <span class="trans-item-badge">Band ${p.band}</span>
+            <span class="trans-item-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    const buoc = TRANSLATION_CURRICULUM.find(b => b.buoc === n);
+    if (!buoc) return;
+    content.innerHTML = `
+      <div class="trans-tab-meta">${buoc.sentences.length} câu · ${buoc.level}</div>
+      <div class="trans-item-list">
+        ${buoc.sentences.map((s, i) => `
+          <div class="trans-item-row" onclick="startTranslationBuocFromIdx(${n}, ${i})">
+            <span class="trans-item-num">${i + 1}</span>
+            <div class="trans-item-body">
+              <div class="trans-item-preview">${s.vi}</div>
+            </div>
+            <span class="trans-item-arrow">→</span>
+          </div>
+        `).join('')}
+        <button class="btn btn-primary trans-start-all-btn" onclick="startTranslationBuoc(${n})">▶ Luyện tất cả ${buoc.sentences.length} câu</button>
+      </div>
+    `;
+  }
+}
+
+function startTranslationBuocFromIdx(buocNum, startIdx) {
+  const buoc = TRANSLATION_CURRICULUM.find(b => b.buoc === buocNum);
+  if (!buoc) return;
+  _transOrder = buoc.sentences.map((_, i) => i);
+  _transIdx = startIdx;
+  _transScore = 0; _transTotal = 0; _transHintsRevealed = new Set();
+  _activeTranslationBank = buoc.sentences;
+  document.getElementById('trans-ex-buoc-title').textContent = `Bước ${buocNum}: ${buoc.title}`;
+  renderTranslationExSidebar();
+  renderTranslationSentence();
+  showView('translation-exercise');
 }
 
 function startTranslationBuoc(buocNum) {
