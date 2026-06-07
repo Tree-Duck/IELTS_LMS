@@ -1820,6 +1820,72 @@
         </div>
       </div>
 
+      <!-- Paragraph List View -->
+      <div id="view-paragraph-list" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back-plain" onclick="showView('translation')">← Quay lại</button>
+          <h2>📝 Dịch đoạn văn Band 6.5</h2>
+          <p>Dịch các đoạn văn ngắn từ tiếng Việt sang tiếng Anh — luyện tư duy học thuật</p>
+        </div>
+        <div class="para-list-grid" id="para-list-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Paragraph Exercise View -->
+      <div id="view-paragraph-exercise" class="view hidden">
+        <div class="para-ex-layout">
+          <div class="para-ex-header">
+            <button class="btn-back-plain" onclick="showView('paragraph-list')">← Chọn đoạn khác</button>
+            <span class="para-ex-topic-badge" id="para-ex-topic">📚 Giáo dục</span>
+          </div>
+          <div class="para-ex-body">
+            <!-- Left: VI paragraph -->
+            <div class="para-ex-left">
+              <div class="para-ex-vi-card">
+                <div class="para-ex-vi-label">🇻🇳 Đoạn văn tiếng Việt</div>
+                <div class="para-ex-vi-text" id="para-ex-vi-text">Đang tải…</div>
+              </div>
+              <div class="para-ex-instructions">
+                <strong>Hướng dẫn:</strong> Đọc đoạn văn và dịch sang tiếng Anh học thuật. Cố gắng giữ nguyên ý nghĩa và sử dụng từ vựng IELTS phù hợp.
+              </div>
+            </div>
+            <!-- Right: user input + result -->
+            <div class="para-ex-right">
+              <div class="para-ex-input-section">
+                <div class="para-ex-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
+                <textarea id="para-ex-input" class="form-input para-ex-textarea" rows="8"
+                  placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
+                  oninput="updateParaWordCount()"
+                  onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))submitParagraphTranslation()"></textarea>
+                <div class="para-ex-meta">
+                  <span class="para-wc" id="para-ex-wc">0 từ</span>
+                  <span class="para-hint-tip">Ctrl+Enter để nộp</span>
+                </div>
+                <button class="btn btn-primary para-ex-submit" id="para-ex-submit-btn" onclick="submitParagraphTranslation()">✓ Nộp bản dịch</button>
+              </div>
+
+              <!-- Result panel -->
+              <div id="para-ex-result" class="para-ex-result hidden">
+                <div class="para-result-section">
+                  <div class="para-result-label">📖 Bài dịch mẫu (Band 6.5)</div>
+                  <div class="para-model-text" id="para-ex-model-text"></div>
+                </div>
+                <div class="para-result-section">
+                  <div class="para-result-label">🔑 Cụm từ / từ vựng quan trọng</div>
+                  <div class="para-key-phrases-row" id="para-ex-key-phrases"></div>
+                </div>
+                <div class="para-result-section">
+                  <div class="para-result-label">🤖 Nhận xét AI</div>
+                  <div id="para-ex-ai-feedback"></div>
+                </div>
+                <button class="btn btn-outline" onclick="showView('paragraph-list')">← Chọn đoạn khác</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 

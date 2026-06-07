@@ -1526,6 +1526,8 @@ function showView(name) {
   else if (name === 'writing-practice') loadWritingPractice();
   else if (name === 'translation') loadTranslationCurriculum();
   else if (name === 'translation-exercise') { /* loaded via startTranslationBuoc */ }
+  else if (name === 'paragraph-list') loadParagraphList();
+  else if (name === 'paragraph-exercise') { /* loaded via openParagraphExercise */ }
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -8626,6 +8628,138 @@ const TRANSLATION_CURRICULUM = [
   },
 ];
 
+/* ─── Paragraph Translation Bank ────────────────────────────────────────── */
+const PARAGRAPH_BANK = [
+  {
+    id: 'p1', topic: 'Giáo dục', emoji: '📚', band: '6.5',
+    vi: `Giáo dục đóng vai trò quan trọng trong sự phát triển của mỗi cá nhân và xã hội. Khi con người được tiếp cận với nền giáo dục chất lượng, họ có khả năng tư duy phản biện tốt hơn và dễ dàng thích nghi với những thay đổi trong thị trường lao động. Chính vì vậy, chính phủ cần đầu tư mạnh mẽ vào hệ thống giáo dục quốc gia để đảm bảo mọi công dân đều có cơ hội học tập bình đẳng.`,
+    en: `Education plays a crucial role in the development of both individuals and society. When people have access to quality education, they are better able to think critically and adapt to changes in the labour market. For this reason, governments need to invest heavily in the national education system to ensure that all citizens have equal opportunities to learn.`,
+    keyPhrases: ['plays a crucial role', 'think critically', 'adapt to changes', 'invest heavily', 'equal opportunities']
+  },
+  {
+    id: 'p2', topic: 'Môi trường', emoji: '🌿', band: '6.5',
+    vi: `Biến đổi khí hậu là một trong những thách thức nghiêm trọng nhất mà nhân loại phải đối mặt trong thế kỷ 21. Nhiệt độ toàn cầu tăng cao đã dẫn đến nhiều hiện tượng thời tiết cực đoan như lũ lụt, hạn hán và bão nhiệt đới. Để giải quyết vấn đề này, cả chính phủ lẫn các cá nhân cần hành động ngay lập tức bằng cách giảm lượng khí thải carbon và chuyển sang sử dụng năng lượng tái tạo.`,
+    en: `Climate change is one of the most serious challenges that humanity must face in the 21st century. Rising global temperatures have led to many extreme weather events such as floods, droughts and tropical storms. To address this problem, both governments and individuals need to act immediately by reducing carbon emissions and switching to the use of renewable energy.`,
+    keyPhrases: ['serious challenges', 'extreme weather events', 'act immediately', 'reducing carbon emissions', 'renewable energy']
+  },
+  {
+    id: 'p3', topic: 'Công nghệ', emoji: '💻', band: '6.5',
+    vi: `Sự phát triển của trí tuệ nhân tạo đang thay đổi sâu sắc cách con người làm việc và sinh sống. Nhiều công việc truyền thống có nguy cơ bị tự động hóa, gây ra mối lo ngại về tình trạng thất nghiệp trên diện rộng. Tuy nhiên, công nghệ cũng tạo ra hàng loạt cơ hội mới trong các lĩnh vực như y tế, giáo dục và giao thông vận tải, do đó việc đào tạo kỹ năng mới là vô cùng cần thiết.`,
+    en: `The development of artificial intelligence is profoundly changing the way people work and live. Many traditional jobs are at risk of being automated, raising concerns about widespread unemployment. However, technology also creates numerous new opportunities in fields such as healthcare, education and transportation, so developing new skills is extremely necessary.`,
+    keyPhrases: ['profoundly changing', 'at risk of being automated', 'widespread unemployment', 'numerous new opportunities', 'developing new skills']
+  },
+  {
+    id: 'p4', topic: 'Sức khỏe', emoji: '🏥', band: '6.5',
+    vi: `Lối sống không lành mạnh, bao gồm ít vận động và chế độ ăn uống nhiều chất béo, đang dẫn đến sự gia tăng đáng báo động của các bệnh không lây nhiễm như tiểu đường và bệnh tim mạch. Để giải quyết vấn đề này, chính phủ nên triển khai các chương trình nâng cao nhận thức cộng đồng về tầm quan trọng của việc tập thể dục thường xuyên và ăn uống cân bằng. Đầu tư vào cơ sở hạ tầng y tế cũng cần được ưu tiên hàng đầu.`,
+    en: `An unhealthy lifestyle, including physical inactivity and a diet high in fat, is leading to an alarming rise in non-communicable diseases such as diabetes and cardiovascular disease. To address this issue, governments should implement community awareness programmes about the importance of regular exercise and a balanced diet. Investment in healthcare infrastructure also needs to be prioritised.`,
+    keyPhrases: ['physical inactivity', 'alarming rise', 'non-communicable diseases', 'community awareness programmes', 'regular exercise']
+  },
+  {
+    id: 'p5', topic: 'Đô thị hóa', emoji: '🏙️', band: '6.5',
+    vi: `Quá trình đô thị hóa nhanh chóng ở các nước đang phát triển đang tạo ra áp lực lớn lên hệ thống cơ sở hạ tầng đô thị. Sự gia tăng dân số đô thị dẫn đến tình trạng tắc nghẽn giao thông, thiếu hụt nhà ở và ô nhiễm môi trường. Chính phủ cần lập kế hoạch đô thị thông minh và đầu tư vào giao thông công cộng để cải thiện chất lượng cuộc sống của cư dân thành phố.`,
+    en: `Rapid urbanisation in developing countries is placing enormous pressure on urban infrastructure systems. The growth of urban populations leads to traffic congestion, housing shortages and environmental pollution. Governments need to plan smart cities and invest in public transport to improve the quality of life for city residents.`,
+    keyPhrases: ['rapid urbanisation', 'enormous pressure', 'traffic congestion', 'housing shortages', 'public transport']
+  },
+  {
+    id: 'p6', topic: 'Kinh tế', emoji: '📈', band: '6.5',
+    vi: `Toàn cầu hóa đã mang lại nhiều lợi ích kinh tế cho các quốc gia đang phát triển thông qua việc thúc đẩy thương mại quốc tế và thu hút vốn đầu tư nước ngoài. Tuy nhiên, quá trình này cũng làm gia tăng khoảng cách giàu nghèo khi chỉ một bộ phận dân số được hưởng lợi từ sự tăng trưởng kinh tế. Do đó, các chính sách phân phối thu nhập công bằng hơn là điều cần thiết để đảm bảo tất cả mọi người đều được hưởng lợi từ nền kinh tế toàn cầu.`,
+    en: `Globalisation has brought many economic benefits to developing countries by promoting international trade and attracting foreign investment. However, this process has also widened the wealth gap as only a portion of the population benefits from economic growth. Therefore, more equitable income distribution policies are necessary to ensure that everyone can benefit from the global economy.`,
+    keyPhrases: ['economic benefits', 'international trade', 'foreign investment', 'wealth gap', 'income distribution']
+  },
+];
+
+/* ─── Paragraph Translation State ───────────────────────────────────────── */
+let _activeParagraph = null;
+let _paraSubmitted = false;
+
+function loadParagraphList() {
+  const grid = document.getElementById('para-list-grid');
+  if (!grid) return;
+  grid.innerHTML = PARAGRAPH_BANK.map(p => `
+    <div class="para-topic-card" onclick="openParagraphExercise('${p.id}')">
+      <div class="ptc-emoji">${p.emoji}</div>
+      <div class="ptc-content">
+        <div class="ptc-topic">${p.topic}</div>
+        <div class="ptc-preview">${p.vi.substring(0, 70)}…</div>
+      </div>
+      <div class="ptc-badge">Band ${p.band}</div>
+    </div>
+  `).join('');
+}
+
+function openParagraphExercise(id) {
+  _activeParagraph = PARAGRAPH_BANK.find(p => p.id === id);
+  if (!_activeParagraph) return;
+  _paraSubmitted = false;
+  const p = _activeParagraph;
+
+  const topicEl = document.getElementById('para-ex-topic');
+  if (topicEl) topicEl.textContent = `${p.emoji} ${p.topic}`;
+
+  const viEl = document.getElementById('para-ex-vi-text');
+  if (viEl) viEl.textContent = p.vi;
+
+  const inputEl = document.getElementById('para-ex-input');
+  if (inputEl) { inputEl.value = ''; inputEl.disabled = false; }
+
+  const resultEl = document.getElementById('para-ex-result');
+  if (resultEl) resultEl.classList.add('hidden');
+
+  const submitBtn = document.getElementById('para-ex-submit-btn');
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '✓ Nộp bản dịch'; }
+
+  const wcEl = document.getElementById('para-ex-wc');
+  if (wcEl) wcEl.textContent = '0 từ';
+
+  showView('paragraph-exercise');
+}
+
+function updateParaWordCount() {
+  const inputEl = document.getElementById('para-ex-input');
+  const wcEl = document.getElementById('para-ex-wc');
+  if (!inputEl || !wcEl) return;
+  const words = inputEl.value.trim().split(/\s+/).filter(w => w.length > 0);
+  wcEl.textContent = `${words.length} từ`;
+}
+
+async function submitParagraphTranslation() {
+  if (!_activeParagraph || _paraSubmitted) return;
+  const inputEl = document.getElementById('para-ex-input');
+  const userText = inputEl ? inputEl.value.trim() : '';
+  if (!userText) { alert('Bạn chưa nhập bản dịch!'); return; }
+
+  _paraSubmitted = true;
+  const submitBtn = document.getElementById('para-ex-submit-btn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đã nộp'; }
+  if (inputEl) inputEl.disabled = true;
+
+  const p = _activeParagraph;
+  const resultEl = document.getElementById('para-ex-result');
+  const modelEl = document.getElementById('para-ex-model-text');
+  const phrasesEl = document.getElementById('para-ex-key-phrases');
+  const aiFeedbackEl = document.getElementById('para-ex-ai-feedback');
+
+  if (modelEl) modelEl.textContent = p.en;
+  if (phrasesEl) {
+    phrasesEl.innerHTML = p.keyPhrases.map(ph => `<span class="para-key-phrase">${ph}</span>`).join('');
+  }
+  if (aiFeedbackEl) aiFeedbackEl.innerHTML = '<div class="para-ai-loading">🤖 Đang phân tích bản dịch…</div>';
+  if (resultEl) resultEl.classList.remove('hidden');
+
+  // AI feedback
+  try {
+    const resp = await api('/api/ai/grade-paragraph', {
+      method: 'POST',
+      body: JSON.stringify({ vi: p.vi, modelEn: p.en, userEn: userText, topic: p.topic })
+    });
+    if (resp && resp.feedback && aiFeedbackEl) {
+      aiFeedbackEl.innerHTML = `<div class="para-ai-text">${escapeHtml(resp.feedback).replace(/\n/g, '<br>')}</div>`;
+    }
+  } catch (e) {
+    if (aiFeedbackEl) aiFeedbackEl.innerHTML = '<div class="para-ai-error">Không thể tải nhận xét AI lúc này.</div>';
+  }
+}
+
 /* ─── Writing Questions Bank ─────────────────────────────────────────────── */
 const WRITING_QUESTIONS = [
   {
@@ -8794,7 +8928,7 @@ async function submitWritingEssay() {
 function loadTranslationCurriculum() {
   const grid = document.getElementById('trans-curriculum-grid');
   if (!grid) return;
-  grid.innerHTML = TRANSLATION_CURRICULUM.map(b => `
+  const sentenceCards = TRANSLATION_CURRICULUM.map(b => `
     <div class="trans-buoc-card" onclick="startTranslationBuoc(${b.buoc})">
       <div class="tbc-emoji">${b.emoji}</div>
       <div class="tbc-content">
@@ -8808,6 +8942,23 @@ function loadTranslationCurriculum() {
       </div>
     </div>
   `).join('');
+
+  const paragraphCard = `
+    <div class="trans-buoc-card trans-buoc-card--para" onclick="showView('paragraph-list')">
+      <div class="tbc-emoji">📝</div>
+      <div class="tbc-content">
+        <div class="tbc-num tbc-num--para">Luyện dịch đoạn văn</div>
+        <div class="tbc-title">Dịch đoạn văn Band 6.5</div>
+        <div class="tbc-desc">Dịch các đoạn văn ngắn từ tiếng Việt sang tiếng Anh theo chủ đề IELTS</div>
+      </div>
+      <div class="tbc-footer">
+        <span class="tbc-count">${PARAGRAPH_BANK.length} đoạn văn</span>
+        <span class="tag-badge tag-band">Band 6.5</span>
+      </div>
+    </div>
+  `;
+
+  grid.innerHTML = sentenceCards + paragraphCard;
 }
 
 function startTranslationBuoc(buocNum) {

@@ -2471,6 +2471,38 @@ Be encouraging but honest. Keep total response under 350 words.`;
   }
 });
 
+app.post('/api/ai/grade-paragraph', authenticate, async (req, res) => {
+  const { vi, modelEn, userEn, topic } = req.body;
+  if (!vi || !userEn) return res.status(400).json({ error: 'Missing fields' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const system = `Bạn là giáo viên IELTS. Hãy nhận xét bản dịch tiếng Anh của học viên (dịch từ tiếng Việt sang tiếng Anh).
+Nhận xét bằng tiếng Việt, ngắn gọn (dưới 200 từ), bao gồm:
+1. **Điểm mạnh** — 1-2 điểm tốt trong bản dịch
+2. **Điểm cần sửa** — 1-2 lỗi cụ thể (sai từ vựng, ngữ pháp, hay biểu đạt không tự nhiên) với gợi ý sửa
+3. **Từ vựng học thuật** — gợi ý 1-2 từ/cụm từ học thuật tốt hơn nếu có
+Giọng điệu khích lệ nhưng thẳng thắn.`;
+
+  const userMsg = `Chủ đề: ${topic || 'IELTS'}
+Đoạn gốc (tiếng Việt): ${vi}
+Bản dịch mẫu: ${modelEn}
+Bản dịch của học viên: ${userEn}`;
+
+  try {
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 400,
+      system,
+      messages: [{ role: 'user', content: userMsg }],
+    });
+    const feedback = response.content?.[0]?.text || '';
+    res.json({ feedback });
+  } catch (e) {
+    console.error('grade-paragraph AI error:', e.message);
+    res.status(500).json({ error: 'AI error', detail: e.message });
+  }
+});
+
 httpServer.listen(PORT, () => {
   console.log(`IELTS LMS running at http://localhost:${PORT}`);
   if (!ANTHROPIC_API_KEY) {

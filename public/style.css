@@ -5537,3 +5537,83 @@ input:focus, textarea:focus, select:focus {
   padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-width: 720px;
 }
 
+/* ── Paragraph translation card in curriculum ────────────────── */
+.trans-buoc-card--para {
+  border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
+}
+.trans-buoc-card--para:hover { border-color: #d97706; box-shadow: 0 3px 12px rgba(245,158,11,0.2); }
+.tbc-num--para { color: #d97706; }
+.tag-band { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; }
+
+/* ── Paragraph List View ──────────────────────────────────────── */
+.para-list-grid {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  max-width: 760px; margin: 0 auto; padding: 0 1.25rem 2rem;
+}
+.para-topic-card {
+  background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px;
+  padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 1rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.para-topic-card:hover { border-color: #f59e0b; box-shadow: 0 3px 12px rgba(245,158,11,0.15); }
+.ptc-emoji { font-size: 2rem; flex-shrink: 0; }
+.ptc-content { flex: 1; }
+.ptc-topic { font-size: 1rem; font-weight: 700; color: #111827; }
+.ptc-preview { font-size: 0.82rem; color: #6b7280; margin-top: 0.2rem; line-height: 1.5; }
+.ptc-badge {
+  flex-shrink: 0; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+  border-radius: 8px; padding: 3px 10px; font-size: 0.78rem; font-weight: 700;
+}
+
+/* ── Paragraph Exercise View ─────────────────────────────────── */
+.para-ex-layout { display: flex; flex-direction: column; min-height: calc(100vh - 120px); }
+.para-ex-header {
+  display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb; background: #fafafa;
+}
+.para-ex-topic-badge {
+  font-size: 0.9rem; font-weight: 700; color: #92400e;
+  background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 3px 12px;
+}
+.para-ex-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  padding: 1.5rem; flex: 1; align-items: start;
+}
+@media (max-width: 900px) {
+  .para-ex-body { grid-template-columns: 1fr; }
+}
+.para-ex-left { display: flex; flex-direction: column; gap: 1rem; }
+.para-ex-vi-card {
+  background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.para-ex-vi-label { font-size: 0.8rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.05em; }
+.para-ex-vi-text { font-size: 1rem; line-height: 1.8; color: #1a2e1a; }
+.para-ex-instructions {
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+  padding: 0.75rem 1rem; font-size: 0.84rem; color: #1e40af; line-height: 1.5;
+}
+.para-ex-right { display: flex; flex-direction: column; gap: 1rem; }
+.para-ex-input-section { display: flex; flex-direction: column; gap: 0.6rem; }
+.para-ex-en-label { font-size: 0.8rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; }
+.para-ex-textarea { resize: vertical; font-size: 0.95rem; line-height: 1.7; }
+.para-ex-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.78rem; color: #9ca3af;
+}
+.para-ex-submit { width: 100%; margin-top: 0.25rem; }
+.para-ex-result { display: flex; flex-direction: column; gap: 1rem; }
+.para-result-section {
+  background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.para-result-label { font-size: 0.8rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; }
+.para-model-text { font-size: 0.95rem; line-height: 1.75; color: #1f2937; }
+.para-key-phrases-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.para-key-phrase {
+  background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+  border-radius: 20px; padding: 2px 10px; font-size: 0.8rem; font-weight: 600;
+}
+.para-ai-loading { color: #6b7280; font-style: italic; font-size: 0.88rem; }
+.para-ai-error { color: #ef4444; font-size: 0.85rem; }
+.para-ai-text { font-size: 0.9rem; line-height: 1.7; color: #374151; }
