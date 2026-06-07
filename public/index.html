@@ -181,7 +181,7 @@
         <div class="tnav-group" id="tnav-group-practice">
           <button class="tnav-group-trigger">🏋️ Luyện tập ▾</button>
           <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Dịch câu</button>
+            <button class="tnav-nav-link" data-view="writing" onclick="showView('writing')">✍️ Writing</button>
             <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Ngữ pháp</button>
             <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
             <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
@@ -1691,38 +1691,130 @@
         </div>
       </div>
 
-      <!-- Translation Practice View -->
+      <!-- Writing Hub View -->
+      <div id="view-writing" class="view hidden">
+        <div class="page-header">
+          <h2>✍️ Writing</h2>
+          <p>Luyện viết IELTS và tập dịch có cấu trúc</p>
+        </div>
+        <div class="writing-hub-grid">
+          <button class="writing-hub-card" onclick="showView('writing-practice')">
+            <div class="whc-icon">📝</div>
+            <div class="whc-body">
+              <h3>Luyện viết IELTS</h3>
+              <p>Task 1 &amp; Task 2 — đề ngân hàng + AI chấm bài</p>
+            </div>
+            <div class="whc-tags"><span class="tag-badge tag-t1">Task 1</span><span class="tag-badge tag-t2">Task 2</span></div>
+          </button>
+          <button class="writing-hub-card" onclick="showView('translation')">
+            <div class="whc-icon">🔤</div>
+            <div class="whc-body">
+              <h3>Tập dịch có cấu trúc</h3>
+              <p>5 bước từ câu cơ bản đến câu luận điểm phức tạp</p>
+            </div>
+            <div class="whc-tags"><span class="tag-badge tag-steps">Bước 1 → 5</span></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Writing Practice View -->
+      <div id="view-writing-practice" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back-plain" onclick="showView('writing')">← Quay lại</button>
+          <h2>📝 Luyện viết IELTS</h2>
+          <p>Chọn đề và luyện viết với AI chấm bài</p>
+        </div>
+        <!-- Question Bank Panel -->
+        <div id="wp-bank-panel">
+          <div class="wp-filter-tabs">
+            <button class="wp-filter-btn active" data-filter="all" onclick="filterWritingQuestions('all',this)">Tất cả</button>
+            <button class="wp-filter-btn" data-filter="task1" onclick="filterWritingQuestions('task1',this)">Task 1</button>
+            <button class="wp-filter-btn" data-filter="task2" onclick="filterWritingQuestions('task2',this)">Task 2</button>
+          </div>
+          <div class="wp-question-grid" id="wp-question-grid"></div>
+        </div>
+        <!-- Writing Session Panel (hidden until question selected) -->
+        <div id="wp-session-panel" class="hidden">
+          <div class="wp-session-header">
+            <button class="btn-back-plain" onclick="backToWritingBank()">← Đổi đề</button>
+            <div class="wp-session-meta" id="wp-session-meta"></div>
+          </div>
+          <div class="wp-session-body">
+            <div class="wp-prompt-col">
+              <div class="wp-prompt-label">📋 Đề bài</div>
+              <div class="wp-prompt-text" id="wp-prompt-text"></div>
+            </div>
+            <div class="wp-editor-col">
+              <div class="wp-editor-topbar">
+                <span class="wp-word-counter" id="wp-word-counter">0 từ</span>
+                <span class="wp-word-target" id="wp-word-target"></span>
+              </div>
+              <textarea id="wp-essay-input" class="wp-essay-textarea"
+                placeholder="Bắt đầu viết bài của bạn ở đây…"
+                oninput="updateWordCount()"></textarea>
+              <div class="wp-editor-actions">
+                <button class="btn btn-outline" onclick="clearWritingEssay()">🗑 Xóa</button>
+                <button class="btn btn-primary" onclick="submitWritingEssay()">✨ Chấm bài với AI</button>
+              </div>
+              <div id="wp-ai-result" class="wp-ai-result hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Translation Curriculum Hub View -->
       <div id="view-translation" class="view hidden">
         <div class="page-header">
-          <h2>🔤 Luyện dịch</h2>
-          <p>Dịch các câu tiếng Việt sang tiếng Anh với gợi ý từ</p>
+          <button class="btn-back-plain" onclick="showView('writing')">← Quay lại</button>
+          <h2>🔤 Tập dịch IELTS</h2>
+          <p>5 bước từ câu đơn giản đến câu luận điểm phức tạp</p>
         </div>
-        <div class="trans-progress-strip">
-          <span id="trans-counter" class="trans-counter">Câu 1 trong 20</span>
-          <span id="trans-score-display" class="trans-score-display">Điểm: 0 / 0</span>
+        <div class="trans-curriculum-grid" id="trans-curriculum-grid">
+          <!-- Rendered by JS -->
         </div>
-        <div class="translation-card">
-          <div class="trans-vi-label">🇻🇳 Tiếng Việt</div>
-          <div class="trans-vi-sentence" id="trans-vi-sentence">Đang tải…</div>
-          <div class="trans-hints-row">
-            <span class="trans-hints-label">💡 Gợi ý từ <span class="trans-hints-sub">(nhấp để hiển thị)</span></span>
-            <div class="trans-hint-chips" id="trans-hint-chips"></div>
+      </div>
+
+      <!-- Translation Exercise View -->
+      <div id="view-translation-exercise" class="view hidden">
+        <div class="trans-ex-layout">
+          <!-- Sidebar -->
+          <div class="trans-ex-sidebar">
+            <div class="trans-ex-sidebar-header">
+              <button class="btn-back-plain" onclick="showView('translation')">← Thoát</button>
+              <div class="trans-ex-buoc-title" id="trans-ex-buoc-title">Bước 1</div>
+            </div>
+            <div class="trans-ex-sentence-list" id="trans-ex-sentence-list"></div>
           </div>
-          <div class="trans-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
-          <textarea id="trans-en-input" class="form-input trans-en-input" rows="3"
-            placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
-            onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))checkTranslation()"></textarea>
-          <div class="trans-actions">
-            <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Kiểm tra câu trả lời</button>
-            <button class="btn btn-outline" onclick="nextTranslation()">→ Bỏ qua / Tiếp theo</button>
-          </div>
-          <div id="trans-result" class="trans-result hidden">
-            <div class="trans-result-inner">
-              <div class="trans-model-row">
-                <span class="trans-model-label">Bài mẫu:</span>
-                <span class="trans-model-text" id="trans-model-text"></span>
+          <!-- Main area -->
+          <div class="trans-ex-main">
+            <div class="trans-ex-progress">
+              <span id="trans-counter">Câu 1 / 4</span>
+              <span id="trans-score-display">Điểm: 0 / 0</span>
+            </div>
+            <div class="trans-ex-card">
+              <div class="trans-vi-label">🇻🇳 Tiếng Việt</div>
+              <div class="trans-vi-sentence" id="trans-vi-sentence">Đang tải…</div>
+              <div class="trans-hints-row">
+                <span class="trans-hints-label">💡 Gợi ý từ <span class="trans-hints-sub">(nhấp để hiển thị)</span></span>
+                <div class="trans-hint-chips" id="trans-hint-chips"></div>
               </div>
-              <div id="trans-verdict" class="trans-verdict"></div>
+              <div class="trans-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
+              <textarea id="trans-en-input" class="form-input trans-en-input" rows="3"
+                placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
+                onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))checkTranslation()"></textarea>
+              <div class="trans-actions">
+                <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Kiểm tra</button>
+                <button class="btn btn-outline" onclick="nextTranslation()">→ Bỏ qua / Tiếp</button>
+              </div>
+              <div id="trans-result" class="trans-result hidden">
+                <div class="trans-result-inner">
+                  <div class="trans-model-row">
+                    <span class="trans-model-label">Bài mẫu:</span>
+                    <span class="trans-model-text" id="trans-model-text"></span>
+                  </div>
+                  <div id="trans-verdict" class="trans-verdict"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

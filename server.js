@@ -2438,6 +2438,39 @@ io.on('connection', (socket) => {
   });
 });
 
+// ── AI: Grade Writing Essay ────────────────────────────────────────────────
+app.post('/api/ai/grade-writing', authenticate, async (req, res) => {
+  const { prompt, essay, type } = req.body;
+  if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const taskLabel = type === 'task1' ? 'Task 1 (Report)' : 'Task 2 (Essay)';
+  const system = `You are an expert IELTS examiner. Grade the student's IELTS Writing ${taskLabel} submission.
+Provide feedback in Vietnamese, covering:
+1. **Band score estimate** (overall and brief note on TA/CC/LR/GRA)
+2. **Điểm mạnh** — 2-3 things done well
+3. **Điểm cần cải thiện** — 2-3 specific issues with examples from their essay
+4. **Gợi ý từ vựng / cấu trúc** — suggest 2-3 better phrases or sentence structures
+
+Be encouraging but honest. Keep total response under 350 words.`;
+
+  const userMsg = `IELTS Writing ${taskLabel} Prompt:\n${prompt}\n\nStudent Essay:\n${essay}`;
+
+  try {
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 600,
+      system,
+      messages: [{ role: 'user', content: userMsg }],
+    });
+    const feedback = response.content?.[0]?.text || '';
+    res.json({ feedback });
+  } catch (e) {
+    console.error('grade-writing AI error:', e.message);
+    res.status(500).json({ error: 'AI error', detail: e.message });
+  }
+});
+
 httpServer.listen(PORT, () => {
   console.log(`IELTS LMS running at http://localhost:${PORT}`);
   if (!ANTHROPIC_API_KEY) {

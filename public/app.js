@@ -1522,7 +1522,10 @@ function showView(name) {
   else if (name === 'practice-paragraphs') loadPracticeParagraphs();
   else if (name === 'practice-grammar') loadPracticeGrammar();
   else if (name === 'grammar-hub') loadGrammarHub();
-  else if (name === 'translation') loadTranslation();
+  else if (name === 'writing') loadWritingHub();
+  else if (name === 'writing-practice') loadWritingPractice();
+  else if (name === 'translation') loadTranslationCurriculum();
+  else if (name === 'translation-exercise') { /* loaded via startTranslationBuoc */ }
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -8569,6 +8572,279 @@ const TRANSLATION_BANK = [
   { vi: 'Đầu tư vào năng lượng tái tạo là chìa khóa để đối phó với biến đổi khí hậu.', en: 'Investing in renewable energy is key to addressing climate change.', hints: ['renewable', 'energy', 'addressing', 'climate'] },
 ];
 
+/* ─── Translation Curriculum ─────────────────────────────────────────────── */
+const TRANSLATION_CURRICULUM = [
+  {
+    buoc: 1, title: 'Câu cơ bản', level: 'Dễ', emoji: '🌱',
+    desc: 'Câu đơn giản phát biểu sự thật về các chủ đề IELTS',
+    sentences: [
+      TRANSLATION_BANK[0],  // pollution
+      TRANSLATION_BANK[1],  // education
+      TRANSLATION_BANK[5],  // social media impact
+      TRANSLATION_BANK[8],  // recycling
+    ]
+  },
+  {
+    buoc: 2, title: 'Câu so sánh & sở thích', level: 'Dễ - Vừa', emoji: '⚖️',
+    desc: 'Diễn đạt sự so sánh, lựa chọn, và ưu điểm / nhược điểm',
+    sentences: [
+      TRANSLATION_BANK[2],  // prefer remote work
+      TRANSLATION_BANK[9],  // studying abroad
+      TRANSLATION_BANK[11], // reducing emissions
+      TRANSLATION_BANK[12], // diet and exercise
+    ]
+  },
+  {
+    buoc: 3, title: 'Câu nguyên nhân - kết quả', level: 'Vừa', emoji: '🔗',
+    desc: 'Diễn đạt mối quan hệ nhân quả và tác động',
+    sentences: [
+      TRANSLATION_BANK[3],  // climate change threatens
+      TRANSLATION_BANK[6],  // poverty and inequality
+      TRANSLATION_BANK[13], // globalisation
+      TRANSLATION_BANK[14], // urbanisation
+    ]
+  },
+  {
+    buoc: 4, title: 'Câu ý kiến & đề xuất', level: 'Vừa - Khó', emoji: '💡',
+    desc: 'Đưa ra quan điểm, kiến nghị chính sách',
+    sentences: [
+      TRANSLATION_BANK[4],  // gov should invest
+      TRANSLATION_BANK[15], // clean water right
+      TRANSLATION_BANK[16], // stricter policies
+      TRANSLATION_BANK[17], // mass media
+    ]
+  },
+  {
+    buoc: 5, title: 'Câu luận điểm phức tạp', level: 'Khó', emoji: '🎯',
+    desc: 'Câu với cấu trúc phức tạp và từ vựng học thuật cao',
+    sentences: [
+      TRANSLATION_BANK[7],  // technology transformed
+      TRANSLATION_BANK[10], // AI changing labour
+      TRANSLATION_BANK[18], // ageing population
+      TRANSLATION_BANK[19], // renewable energy
+    ]
+  },
+];
+
+/* ─── Writing Questions Bank ─────────────────────────────────────────────── */
+const WRITING_QUESTIONS = [
+  {
+    id: 'wq1', type: 'task1', topic: 'Biểu đồ cột',
+    tags: ['Bar chart', 'Energy'],
+    prompt: `The bar chart below shows the average amount of energy used per person in six countries in 2015.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
+    minWords: 150, modelAnswer: null
+  },
+  {
+    id: 'wq2', type: 'task1', topic: 'Biểu đồ đường',
+    tags: ['Line graph', 'Population'],
+    prompt: `The line graph below shows the population of three cities between 1990 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
+    minWords: 150, modelAnswer: null
+  },
+  {
+    id: 'wq3', type: 'task1', topic: 'Sơ đồ quy trình',
+    tags: ['Process diagram', 'Recycling'],
+    prompt: `The diagram below shows the process of recycling plastic bottles.\n\nSummarise the information by selecting and reporting the main features.\n\nWrite at least 150 words.`,
+    minWords: 150, modelAnswer: null
+  },
+  {
+    id: 'wq4', type: 'task1', topic: 'Bản đồ',
+    tags: ['Map', 'Urban development'],
+    prompt: `The maps below show how a small coastal town changed between 1980 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.\n\nWrite at least 150 words.`,
+    minWords: 150, modelAnswer: null
+  },
+  {
+    id: 'wq5', type: 'task2', topic: 'Công nghệ & xã hội',
+    tags: ['Technology', 'Opinion'],
+    prompt: `Some people believe that technology has made modern life too complicated. Others think it has improved our lives.\n\nDiscuss both views and give your own opinion.\n\nWrite at least 250 words.`,
+    minWords: 250, modelAnswer: null
+  },
+  {
+    id: 'wq6', type: 'task2', topic: 'Môi trường',
+    tags: ['Environment', 'Government vs individual'],
+    prompt: `Protecting the environment is the responsibility of governments, not individuals.\n\nTo what extent do you agree or disagree with this statement?\n\nWrite at least 250 words.`,
+    minWords: 250, modelAnswer: null
+  },
+  {
+    id: 'wq7', type: 'task2', topic: 'Giáo dục',
+    tags: ['Education', 'Online learning'],
+    prompt: `Online education will eventually replace traditional classroom learning.\n\nTo what extent do you agree or disagree?\n\nWrite at least 250 words.`,
+    minWords: 250, modelAnswer: null
+  },
+  {
+    id: 'wq8', type: 'task2', topic: 'Đô thị hoá',
+    tags: ['Urbanisation', 'Problems & solutions'],
+    prompt: `Many cities around the world are facing serious problems caused by rapid urbanisation.\n\nWhat are the main problems of rapid urbanisation? What solutions can be taken to address these problems?\n\nWrite at least 250 words.`,
+    minWords: 250, modelAnswer: null
+  },
+];
+
+let _wpCurrentQuestion = null;
+let _wpFilter = 'all';
+
+/* ─── Writing Hub ─────────────────────────────────────────────────────────── */
+function loadWritingHub() {
+  // nothing dynamic to load, just show the view
+}
+
+/* ─── Writing Practice ────────────────────────────────────────────────────── */
+function loadWritingPractice() {
+  _wpFilter = 'all';
+  _wpCurrentQuestion = null;
+  document.getElementById('wp-bank-panel').classList.remove('hidden');
+  document.getElementById('wp-session-panel').classList.add('hidden');
+  document.getElementById('wp-ai-result').classList.add('hidden');
+  document.getElementById('wp-ai-result').innerHTML = '';
+  renderWritingQuestionGrid();
+}
+
+function renderWritingQuestionGrid() {
+  const grid = document.getElementById('wp-question-grid');
+  const questions = _wpFilter === 'all' ? WRITING_QUESTIONS
+    : WRITING_QUESTIONS.filter(q => q.type === _wpFilter);
+  grid.innerHTML = questions.map(q => `
+    <div class="wp-q-card" onclick="openWritingQuestion('${q.id}')">
+      <div class="wp-q-card-top">
+        <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
+        ${q.tags.map(t => `<span class="tag-badge tag-topic">${t}</span>`).join('')}
+      </div>
+      <div class="wp-q-card-title">${q.topic}</div>
+      <div class="wp-q-card-preview">${q.prompt.substring(0, 100)}…</div>
+      <div class="wp-q-card-meta">Tối thiểu ${q.minWords} từ</div>
+    </div>
+  `).join('');
+}
+
+function filterWritingQuestions(filter, btn) {
+  _wpFilter = filter;
+  document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWritingQuestionGrid();
+}
+
+function openWritingQuestion(id) {
+  _wpCurrentQuestion = WRITING_QUESTIONS.find(q => q.id === id);
+  if (!_wpCurrentQuestion) return;
+  document.getElementById('wp-bank-panel').classList.add('hidden');
+  document.getElementById('wp-session-panel').classList.remove('hidden');
+  document.getElementById('wp-ai-result').classList.add('hidden');
+  document.getElementById('wp-ai-result').innerHTML = '';
+  document.getElementById('wp-essay-input').value = '';
+  document.getElementById('wp-word-counter').textContent = '0 từ';
+  document.getElementById('wp-word-target').textContent = `Mục tiêu: ${_wpCurrentQuestion.minWords}+ từ`;
+  const meta = document.getElementById('wp-session-meta');
+  meta.innerHTML = `<span class="tag-badge ${_wpCurrentQuestion.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${_wpCurrentQuestion.type === 'task1' ? 'Task 1' : 'Task 2'}</span> <strong>${_wpCurrentQuestion.topic}</strong>`;
+  document.getElementById('wp-prompt-text').textContent = _wpCurrentQuestion.prompt;
+}
+
+function backToWritingBank() {
+  document.getElementById('wp-bank-panel').classList.remove('hidden');
+  document.getElementById('wp-session-panel').classList.add('hidden');
+}
+
+function updateWordCount() {
+  const text = document.getElementById('wp-essay-input').value.trim();
+  const count = text ? text.split(/\s+/).filter(w => w).length : 0;
+  const counter = document.getElementById('wp-word-counter');
+  counter.textContent = `${count} từ`;
+  if (_wpCurrentQuestion) {
+    counter.style.color = count >= _wpCurrentQuestion.minWords ? '#16a34a' : '#dc2626';
+  }
+}
+
+function clearWritingEssay() {
+  document.getElementById('wp-essay-input').value = '';
+  updateWordCount();
+  document.getElementById('wp-ai-result').classList.add('hidden');
+  document.getElementById('wp-ai-result').innerHTML = '';
+}
+
+async function submitWritingEssay() {
+  const essay = document.getElementById('wp-essay-input').value.trim();
+  if (!essay) { showToast('Hãy viết bài trước!'); return; }
+  if (!_wpCurrentQuestion) return;
+  const wordCount = essay.split(/\s+/).filter(w => w).length;
+  if (wordCount < _wpCurrentQuestion.minWords * 0.8) {
+    showToast(`Bài viết cần ít nhất ${_wpCurrentQuestion.minWords} từ (hiện tại: ${wordCount} từ)`);
+    return;
+  }
+  const resultEl = document.getElementById('wp-ai-result');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="wp-ai-loading">✨ AI đang chấm bài… <span class="loading-dots">...</span></div>';
+  try {
+    const res = await fetch('/api/ai/grade-writing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt, essay, type: _wpCurrentQuestion.type })
+    });
+    const data = await res.json();
+    if (data.feedback) {
+      resultEl.innerHTML = `<div class="wp-ai-feedback">
+        <div class="wp-ai-feedback-title">✨ Phản hồi từ AI</div>
+        <div class="wp-ai-feedback-body">${data.feedback.replace(/\n/g, '<br>')}</div>
+      </div>`;
+    } else {
+      resultEl.innerHTML = '<div class="wp-ai-error">Không nhận được phản hồi từ AI. Thử lại sau.</div>';
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<div class="wp-ai-error">Lỗi kết nối. Kiểm tra mạng và thử lại.</div>';
+  }
+}
+
+/* ─── Translation Curriculum ─────────────────────────────────────────────── */
+function loadTranslationCurriculum() {
+  const grid = document.getElementById('trans-curriculum-grid');
+  if (!grid) return;
+  grid.innerHTML = TRANSLATION_CURRICULUM.map(b => `
+    <div class="trans-buoc-card" onclick="startTranslationBuoc(${b.buoc})">
+      <div class="tbc-emoji">${b.emoji}</div>
+      <div class="tbc-content">
+        <div class="tbc-num">Bước ${b.buoc}</div>
+        <div class="tbc-title">${b.title}</div>
+        <div class="tbc-desc">${b.desc}</div>
+      </div>
+      <div class="tbc-footer">
+        <span class="tbc-count">${b.sentences.length} câu</span>
+        <span class="tag-badge tag-level">${b.level}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function startTranslationBuoc(buocNum) {
+  const buoc = TRANSLATION_CURRICULUM.find(b => b.buoc === buocNum);
+  if (!buoc) return;
+  // Set up translation state using the buoc's sentences
+  _transOrder = buoc.sentences.map((_, i) => i);
+  _transIdx = 0;
+  _transScore = 0;
+  _transTotal = 0;
+  _transHintsRevealed = new Set();
+  _activeTranslationBank = buoc.sentences;
+  // Update sidebar
+  document.getElementById('trans-ex-buoc-title').textContent = `Bước ${buocNum}: ${buoc.title}`;
+  renderTranslationExSidebar();
+  renderTranslationSentence();
+  showView('translation-exercise');
+}
+
+function renderTranslationExSidebar() {
+  const list = document.getElementById('trans-ex-sentence-list');
+  if (!list || !_activeTranslationBank) return;
+  list.innerHTML = _activeTranslationBank.map((s, i) => `
+    <div class="trans-ex-sidebar-item ${i === _transIdx ? 'active' : ''}" id="trans-sidebar-item-${i}" onclick="jumpTranslation(${i})">
+      <span class="tesi-num">${i + 1}</span>
+      <span class="tesi-text">${s.vi.substring(0, 45)}${s.vi.length > 45 ? '…' : ''}</span>
+    </div>
+  `).join('');
+}
+
+function jumpTranslation(idx) {
+  _transIdx = idx;
+  _transHintsRevealed = new Set();
+  renderTranslationSentence();
+  renderTranslationExSidebar();
+}
+
 let _transIdx = 0;
 let _transScore = 0;
 let _transTotal = 0;
@@ -8611,13 +8887,15 @@ function renderTranslationSentence() {
   if (resultEl) resultEl.classList.add('hidden');
 
   const checkBtn = document.getElementById('trans-check-btn');
-  if (checkBtn) { checkBtn.disabled = false; checkBtn.textContent = '✓ Check answer'; }
+  if (checkBtn) { checkBtn.disabled = false; checkBtn.textContent = '✓ Kiểm tra'; }
 
   const counter = document.getElementById('trans-counter');
-  if (counter) counter.textContent = `Sentence ${_transIdx + 1} of ${_activeTranslationBank.length}`;
+  if (counter) counter.textContent = `Câu ${_transIdx + 1} / ${_activeTranslationBank.length}`;
 
   const scoreEl = document.getElementById('trans-score-display');
-  if (scoreEl) scoreEl.textContent = `Score: ${_transScore} / ${_transTotal}`;
+  if (scoreEl) scoreEl.textContent = `Điểm: ${_transScore} / ${_transTotal}`;
+
+  renderTranslationExSidebar();
 }
 
 function toggleTransHint(idx, word) {
@@ -8658,9 +8936,9 @@ function checkTranslation() {
   const verdictEl = document.getElementById('trans-verdict');
   if (modelEl) modelEl.textContent = item.en;
   if (verdictEl) {
-    if (score >= 0.85) verdictEl.innerHTML = '<span class="trans-v-great">✅ Excellent! Very close to model answer.</span>';
-    else if (score >= 0.65) verdictEl.innerHTML = '<span class="trans-v-ok">👍 Good effort! Check the model answer above.</span>';
-    else verdictEl.innerHTML = '<span class="trans-v-miss">📝 Keep practising. Compare with the model answer.</span>';
+    if (score >= 0.85) verdictEl.innerHTML = '<span class="trans-v-great">✅ Xuất sắc! Bản dịch rất sát bài mẫu.</span>';
+    else if (score >= 0.65) verdictEl.innerHTML = '<span class="trans-v-ok">👍 Khá tốt! Hãy so sánh với bài mẫu bên trên.</span>';
+    else verdictEl.innerHTML = '<span class="trans-v-miss">📝 Hãy luyện thêm. So sánh với bài mẫu để cải thiện.</span>';
   }
   if (resultEl) resultEl.classList.remove('hidden');
 
@@ -8669,7 +8947,8 @@ function checkTranslation() {
   if (checkBtn) checkBtn.disabled = true;
 
   const scoreEl = document.getElementById('trans-score-display');
-  if (scoreEl) scoreEl.textContent = `Score: ${_transScore} / ${_transTotal}`;
+  if (scoreEl) scoreEl.textContent = `Điểm: ${_transScore} / ${_transTotal}`;
+  renderTranslationExSidebar();
 }
 
 function nextTranslation() {
