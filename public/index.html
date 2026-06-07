@@ -20,12 +20,12 @@
       <div class="logo">
         <div class="logo-icon">✍</div>
         <h1>SSP IELTS</h1>
-        <p>Smart Feedback Writing Assessment</p>
+        <p>Đánh giá viết thông minh</p>
       </div>
 
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
-        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+        <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
+        <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
       </div>
 
       <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
@@ -34,97 +34,97 @@
           <input type="email" id="login-email" placeholder="you@example.com" required />
         </div>
         <div class="form-group">
-          <label>Password</label>
+          <label>Mật khẩu</label>
           <input type="password" id="login-password" placeholder="••••••••" required />
         </div>
         <div id="login-error" class="error-msg hidden"></div>
         <div class="forgot-link-row">
-          <a href="#" onclick="showForgotForm(); return false;" class="forgot-link">Forgot password?</a>
+          <a href="#" onclick="showForgotForm(); return false;" class="forgot-link">Quên mật khẩu?</a>
         </div>
         <div class="form-group remember-me-row">
           <label class="checkbox-label">
             <input type="checkbox" id="remember-me" />
-            <span>Remember me for 30 days</span>
+            <span>Ghi nhớ đăng nhập 30 ngày</span>
           </label>
         </div>
-        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+        <button type="submit" class="btn btn-primary btn-full">Đăng nhập</button>
       </form>
 
       <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
         <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="reg-name" placeholder="Your name" required />
+          <label>Họ và tên</label>
+          <input type="text" id="reg-name" placeholder="Tên của bạn" required />
         </div>
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="reg-email" placeholder="you@example.com" required />
         </div>
         <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="reg-password" placeholder="Min 6 characters" required />
+          <label>Mật khẩu</label>
+          <input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" required />
         </div>
         <div id="register-error" class="error-msg hidden"></div>
-        <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        <button type="submit" class="btn btn-primary btn-full">Đăng ký</button>
       </form>
 
       <!-- Forgot Password Form -->
       <div id="forgot-form" class="auth-form hidden">
         <div class="verify-info">
           <div class="verify-icon">🔑</div>
-          <p>Enter your email and we'll send you a reset code.</p>
+          <p>Nhập email của bạn và chúng tôi sẽ gửi cho bạn mã đặt lại mật khẩu.</p>
         </div>
         <div class="form-group">
-          <label>Email Address</label>
+          <label>Địa chỉ Email</label>
           <input type="email" id="forgot-email" placeholder="you@example.com" />
         </div>
         <div id="forgot-error" class="error-msg hidden"></div>
         <div id="forgot-success" class="success-msg hidden"></div>
-        <button type="button" class="btn btn-primary btn-full" onclick="handleForgotPassword()">Send Reset Code</button>
-        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showAuthForm('login')">← Back to Sign In</button>
+        <button type="button" class="btn btn-primary btn-full" onclick="handleForgotPassword()">Gửi mã đặt lại</button>
+        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showAuthForm('login')">← Quay lại đăng nhập</button>
       </div>
 
       <!-- Reset Password Form -->
       <div id="reset-form" class="auth-form hidden">
         <div class="verify-info">
           <div class="verify-icon">🔒</div>
-          <p>Enter the code sent to</p>
-          <strong id="reset-email-display">your email</strong>
+          <p>Nhập mã được gửi tới</p>
+          <strong id="reset-email-display">email của bạn</strong>
         </div>
         <div class="form-group">
-          <label>Reset Code</label>
+          <label>Mã đặt lại</label>
           <input type="text" id="reset-code" placeholder="123456" maxlength="6"
             inputmode="numeric" autocomplete="one-time-code" />
         </div>
         <div class="form-group">
-          <label>New Password</label>
-          <input type="password" id="reset-new-password" placeholder="Min 6 characters" />
+          <label>Mật khẩu mới</label>
+          <input type="password" id="reset-new-password" placeholder="Tối thiểu 6 ký tự" />
         </div>
         <div class="form-group">
-          <label>Confirm New Password</label>
-          <input type="password" id="reset-confirm-password" placeholder="Repeat new password" />
+          <label>Xác nhận mật khẩu mới</label>
+          <input type="password" id="reset-confirm-password" placeholder="Nhập lại mật khẩu mới" />
         </div>
         <div id="reset-error" class="error-msg hidden"></div>
-        <button type="button" class="btn btn-primary btn-full" onclick="handleResetPassword()">Set New Password</button>
-        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showForgotForm()">← Resend Code</button>
+        <button type="button" class="btn btn-primary btn-full" onclick="handleResetPassword()">Đặt mật khẩu mới</button>
+        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showForgotForm()">← Gửi lại mã</button>
       </div>
 
       <!-- Email Verification Form -->
       <div id="verify-form" class="auth-form hidden">
         <div class="verify-info">
           <div class="verify-icon">📬</div>
-          <p>We sent a 6-digit code to</p>
-          <strong id="verify-email-display">your email</strong>
+          <p>Chúng tôi đã gửi mã 6 chữ số tới</p>
+          <strong id="verify-email-display">email của bạn</strong>
         </div>
         <div class="form-group">
-          <label>Verification Code</label>
+          <label>Mã xác thực</label>
           <input type="text" id="verify-code" placeholder="123456" maxlength="6"
             inputmode="numeric" autocomplete="one-time-code" />
         </div>
         <div id="verify-error" class="error-msg hidden"></div>
         <div id="verify-success" class="success-msg hidden"></div>
-        <button type="button" class="btn btn-primary btn-full" onclick="handleVerify()">Verify Email</button>
-        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="handleResendCode()">Resend Code</button>
-        <button type="button" class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showAuthForm('login')">← Back to Sign In</button>
+        <button type="button" class="btn btn-primary btn-full" onclick="handleVerify()">Xác thực email</button>
+        <button type="button" class="btn btn-secondary btn-full" style="margin-top:8px" onclick="handleResendCode()">Gửi lại mã</button>
+        <button type="button" class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showAuthForm('login')">← Quay lại đăng nhập</button>
       </div>
     </div>
   </div>
@@ -141,15 +141,15 @@
 
       <nav class="topnav-links" id="topnav-links">
         <!-- Home (standalone) -->
-        <button class="tnav-group-trigger tnav-nav-link" data-view="home" onclick="showView('home')">🏠 Home</button>
+        <button class="tnav-group-trigger tnav-nav-link" data-view="home" onclick="showView('home')">🏠 Trang chủ</button>
         <!-- Dashboard (standalone) -->
-        <button class="tnav-group-trigger tnav-nav-link" data-view="dashboard" onclick="showView('dashboard')">⬛ Dashboard</button>
+        <button class="tnav-group-trigger tnav-nav-link" data-view="dashboard" onclick="showView('dashboard')">⬛ Tổng quan</button>
         <!-- Homework (standalone) -->
-        <button class="tnav-group-trigger tnav-nav-link" data-view="homework" onclick="showView('homework')">📋 Homework</button>
+        <button class="tnav-group-trigger tnav-nav-link" data-view="homework" onclick="showView('homework')">📋 Bài tập</button>
 
         <!-- Mock Tests group -->
         <div class="tnav-group" id="tnav-group-tests">
-          <button class="tnav-group-trigger">📝 Tests ▾</button>
+          <button class="tnav-group-trigger">📝 Kiểm tra ▾</button>
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('listening')">🎧 Listening</button>
             <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('reading')">📖 Reading</button>
@@ -160,49 +160,49 @@
 
         <!-- My Progress group -->
         <div class="tnav-group" id="tnav-group-progress">
-          <button class="tnav-group-trigger">📊 Progress ▾</button>
+          <button class="tnav-group-trigger">📊 Tiến độ ▾</button>
           <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="history" onclick="showView('history')">📋 My Submissions</button>
-            <button class="tnav-nav-link" data-view="test-history" onclick="showView('test-history')">🏆 Test Results</button>
-            <button class="tnav-nav-link" data-view="my-attendance" onclick="showView('my-attendance')">📅 Attendance</button>
+            <button class="tnav-nav-link" data-view="history" onclick="showView('history')">📋 Bài nộp của tôi</button>
+            <button class="tnav-nav-link" data-view="test-history" onclick="showView('test-history')">🏆 Kết quả kiểm tra</button>
+            <button class="tnav-nav-link" data-view="my-attendance" onclick="showView('my-attendance')">📅 Điểm danh</button>
           </div>
         </div>
 
         <!-- Vocabulary group -->
         <div class="tnav-group" id="tnav-group-vocab">
-          <button class="tnav-group-trigger">📖 Vocab ▾</button>
+          <button class="tnav-group-trigger">📖 Từ vựng ▾</button>
           <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcards</button>
-            <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 My Vocabulary</button>
+            <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcard</button>
+            <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 Từ vựng của tôi</button>
           </div>
         </div>
 
         <!-- Practice group -->
         <div class="tnav-group" id="tnav-group-practice">
-          <button class="tnav-group-trigger">🏋️ Practice ▾</button>
+          <button class="tnav-group-trigger">🏋️ Luyện tập ▾</button>
           <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Translation</button>
-            <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Grammar Hub</button>
-            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Sentence Exercises</button>
-            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Paragraph Writing</button>
-            <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Grammar Guide</button>
-            <button class="tnav-nav-link" data-view="para-lab" onclick="showView('para-lab'); showParaLab()">⚔️ Para Lab</button>
+            <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Dịch câu</button>
+            <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Ngữ pháp</button>
+            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
+            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
+            <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Hướng dẫn ngữ pháp</button>
+            <button class="tnav-nav-link" data-view="para-lab" onclick="showView('para-lab'); showParaLab()">⚔️ Lab đoạn văn</button>
           </div>
         </div>
 
         <!-- Teacher/Admin group (hidden for students) -->
         <div class="tnav-group hidden" id="tnav-group-teacher">
-          <button class="tnav-group-trigger">🎓 Teacher ▾</button>
+          <button class="tnav-group-trigger">🎓 Giáo viên ▾</button>
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="grade-queue" onclick="showView('grade-queue')">
-              📝 Grade Queue <span class="queue-badge hidden" id="grade-queue-badge">0</span>
+              📝 Hàng chờ chấm bài <span class="queue-badge hidden" id="grade-queue-badge">0</span>
             </button>
-            <button class="tnav-nav-link" data-view="submissions-archive" onclick="showView('submissions-archive')">🗂️ Submissions</button>
-            <button class="tnav-nav-link" data-view="admin" onclick="showView('admin')">👥 Users</button>
-            <button class="tnav-nav-link" data-view="admin-materials" onclick="showView('admin-materials')">📚 Materials</button>
-            <button class="tnav-nav-link" data-view="admin-assignments" onclick="showView('admin-assignments')">📋 Assignments</button>
-            <button class="tnav-nav-link" data-view="classes" onclick="showView('classes')">🏫 Classes</button>
-            <button class="tnav-nav-link" onclick="window.open('/whiteboard.html','_blank')">🖊️ Whiteboard</button>
+            <button class="tnav-nav-link" data-view="submissions-archive" onclick="showView('submissions-archive')">🗂️ Bài nộp</button>
+            <button class="tnav-nav-link" data-view="admin" onclick="showView('admin')">👥 Người dùng</button>
+            <button class="tnav-nav-link" data-view="admin-materials" onclick="showView('admin-materials')">📚 Học liệu</button>
+            <button class="tnav-nav-link" data-view="admin-assignments" onclick="showView('admin-assignments')">📋 Bài tập</button>
+            <button class="tnav-nav-link" data-view="classes" onclick="showView('classes')">🏫 Lớp học</button>
+            <button class="tnav-nav-link" onclick="window.open('/whiteboard.html','_blank')">🖊️ Bảng trắng</button>
           </div>
         </div>
       </nav>
@@ -226,12 +226,12 @@
           </button>
           <div class="tnav-dropdown tnav-dropdown-right">
             <div class="tnav-user-info">
-              <span class="tnav-user-display-name" id="user-name">Student</span>
-              <span class="tnav-role-badge" id="user-role-label">Student</span>
+              <span class="tnav-user-display-name" id="user-name">Học sinh</span>
+              <span class="tnav-role-badge" id="user-role-label">Học sinh</span>
             </div>
             <hr class="tnav-divider">
-            <button class="tnav-nav-link" data-view="change-password" onclick="showView('change-password')">🔑 Change Password</button>
-            <button class="tnav-nav-link tnav-logout-btn" onclick="closeAllDropdowns(); logout()">🚪 Sign Out</button>
+            <button class="tnav-nav-link" data-view="change-password" onclick="showView('change-password')">🔑 Đổi mật khẩu</button>
+            <button class="tnav-nav-link tnav-logout-btn" onclick="closeAllDropdowns(); logout()">🚪 Đăng xuất</button>
           </div>
         </div>
       </div>
@@ -254,9 +254,9 @@
       <div id="view-home" class="view">
         <div class="home-hero">
           <div class="home-hero-text">
-            <p class="home-hero-eyebrow">SSP IELTS Learning Platform</p>
-            <h1 class="home-hero-title">Welcome back, <span id="home-welcome-name">Student</span>! 👋</h1>
-            <p class="home-hero-sub">Pick up where you left off, or explore a new skill.</p>
+            <p class="home-hero-eyebrow">Nền tảng học IELTS SSP</p>
+            <h1 class="home-hero-title">Chào mừng trở lại, <span id="home-welcome-name">Học sinh</span>! 👋</h1>
+            <p class="home-hero-sub">Tiếp tục từ lần trước, hoặc khám phá kỹ năng mới.</p>
           </div>
           <!-- Octopus banner mascot -->
           <div class="home-hero-octo" aria-hidden="true">
@@ -302,7 +302,7 @@
             <div class="skill-card__icon">✍️</div>
             <div class="skill-card__body">
               <h3 class="skill-card__title">Writing</h3>
-              <p class="skill-card__desc">Task 1 &amp; Task 2 practice with AI feedback</p>
+              <p class="skill-card__desc">Luyện Task 1 & Task 2 với phản hồi AI</p>
             </div>
             <div class="skill-card__arrow">→</div>
           </button>
@@ -312,7 +312,7 @@
             <div class="skill-card__icon">🎤</div>
             <div class="skill-card__body">
               <h3 class="skill-card__title">Speaking</h3>
-              <p class="skill-card__desc">Part 1, 2 &amp; 3 prompts with model answers</p>
+              <p class="skill-card__desc">Đề Part 1, 2 & 3 với bài mẫu</p>
             </div>
             <div class="skill-card__arrow">→</div>
           </button>
@@ -321,8 +321,8 @@
           <button class="skill-card skill-card--vocab" onclick="showView('vocab')">
             <div class="skill-card__icon">📚</div>
             <div class="skill-card__body">
-              <h3 class="skill-card__title">Vocabulary</h3>
-              <p class="skill-card__desc">Flashcards, quizzes &amp; word banks</p>
+              <h3 class="skill-card__title">Từ vựng</h3>
+              <p class="skill-card__desc">Flashcard, kiểm tra & kho từ vựng</p>
             </div>
             <div class="skill-card__arrow">→</div>
           </button>
@@ -331,8 +331,8 @@
           <button class="skill-card skill-card--grammar" onclick="showView('grammar-hub')">
             <div class="skill-card__icon">📐</div>
             <div class="skill-card__body">
-              <h3 class="skill-card__title">Grammar</h3>
-              <p class="skill-card__desc">Theory guides &amp; interactive exercises</p>
+              <h3 class="skill-card__title">Ngữ pháp</h3>
+              <p class="skill-card__desc">Lý thuyết & bài tập tương tác</p>
             </div>
             <div class="skill-card__arrow">→</div>
           </button>
@@ -341,8 +341,8 @@
           <button class="skill-card skill-card--translation" onclick="showView('translation')">
             <div class="skill-card__icon">🔤</div>
             <div class="skill-card__body">
-              <h3 class="skill-card__title">Translation</h3>
-              <p class="skill-card__desc">Vietnamese → English with word hints</p>
+              <h3 class="skill-card__title">Dịch câu</h3>
+              <p class="skill-card__desc">Dịch Việt → Anh có gợi ý từ</p>
             </div>
             <div class="skill-card__arrow">→</div>
           </button>
@@ -351,8 +351,8 @@
           <button class="skill-card skill-card--whiteboard" id="home-whiteboard-card" onclick="window.open('/whiteboard.html','_blank')">
             <div class="skill-card__icon">🖊️</div>
             <div class="skill-card__body">
-              <h3 class="skill-card__title">Whiteboard</h3>
-              <p class="skill-card__desc">Freehand drawing &amp; annotation board</p>
+              <h3 class="skill-card__title">Bảng trắng</h3>
+              <p class="skill-card__desc">Bảng vẽ tự do & ghi chú</p>
             </div>
             <div class="skill-card__arrow">↗</div>
           </button>
@@ -362,19 +362,19 @@
         <div class="home-stats-strip" id="home-stats-strip">
           <div class="hss-item">
             <span class="hss-val" id="home-stat-streak">0</span>
-            <span class="hss-label">🔥 Day Streak</span>
+            <span class="hss-label">🔥 Ngày liên tiếp</span>
           </div>
           <div class="hss-item">
             <span class="hss-val" id="home-stat-submissions">–</span>
-            <span class="hss-label">Submissions</span>
+            <span class="hss-label">Bài nộp</span>
           </div>
           <div class="hss-item">
             <span class="hss-val" id="home-stat-avg">–</span>
-            <span class="hss-label">Writing Avg</span>
+            <span class="hss-label">TB Writing</span>
           </div>
           <div class="hss-item">
             <span class="hss-val" id="home-stat-best">–</span>
-            <span class="hss-label">Writing Best</span>
+            <span class="hss-label">Best Writing</span>
           </div>
         </div>
       </div>
@@ -383,38 +383,38 @@
       <!-- Dashboard View -->
       <div id="view-dashboard" class="view">
         <div class="page-header">
-          <h2>Dashboard</h2>
-          <p>Welcome back, <span id="welcome-name">Student</span>!</p>
+          <h2>Tổng quan</h2>
+          <p>Chào mừng trở lại, <span id="welcome-name">Học sinh</span>!</p>
         </div>
 
         <div class="stats-grid" id="stats-grid">
           <div class="stat-card">
             <div class="stat-value" id="stat-total">–</div>
-            <div class="stat-label">Total Submissions</div>
+            <div class="stat-label">Tổng bài nộp</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-avg">–</div>
-            <div class="stat-label">Writing Avg Band</div>
+            <div class="stat-label">Band TB Writing</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-best">–</div>
-            <div class="stat-label">Writing Best Band</div>
+            <div class="stat-label">Band cao nhất Writing</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-graded">–</div>
-            <div class="stat-label">Graded Essays</div>
+            <div class="stat-label">Bài đã chấm</div>
           </div>
           <div class="stat-card stat-streak-card">
             <div class="stat-value stat-streak-value" id="stat-streak">0</div>
-            <div class="stat-label">🔥 Day Streak</div>
+            <div class="stat-label">🔥 Ngày liên tiếp</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-reading-avg">–</div>
-            <div class="stat-label">Reading Avg Band</div>
+            <div class="stat-label">Band TB Reading</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-listening-avg">–</div>
-            <div class="stat-label">Listening Avg Band</div>
+            <div class="stat-label">Band TB Listening</div>
           </div>
         </div>
 
@@ -423,9 +423,9 @@
           <div class="weakest-criterion-inner">
             <span class="weakest-criterion-icon">🎯</span>
             <div class="weakest-criterion-text">
-              <strong>Focus Area: <span id="weakest-criterion-name"></span></strong>
+              <strong>Điểm cần cải thiện: <span id="weakest-criterion-name"></span></strong>
               <span class="weakest-criterion-band" id="weakest-criterion-band"></span>
-              <div class="weakest-criterion-hint">Improving this criterion will raise your overall band score the most.</div>
+              <div class="weakest-criterion-hint">Cải thiện tiêu chí này sẽ nâng band tổng nhiều nhất.</div>
             </div>
           </div>
         </div>
@@ -433,10 +433,10 @@
         <!-- Target Band Tracker -->
         <div class="target-band-section" id="target-band-section">
           <div class="section-header">
-            <h3>🎯 Target Band</h3>
+            <h3>🎯 Band mục tiêu</h3>
             <div class="target-band-controls">
               <select id="target-band-select">
-                <option value="">Set your goal…</option>
+                <option value="">Đặt mục tiêu…</option>
                 <option value="4">4.0</option>
                 <option value="4.5">4.5</option>
                 <option value="5">5.0</option>
@@ -449,7 +449,7 @@
                 <option value="8.5">8.5</option>
                 <option value="9">9.0</option>
               </select>
-              <button class="btn btn-secondary btn-sm" onclick="handleSetTargetBand()">Save</button>
+              <button class="btn btn-secondary btn-sm" onclick="handleSetTargetBand()">Lưu</button>
             </div>
           </div>
           <div id="target-band-bars"></div>
@@ -457,18 +457,18 @@
 
         <div class="recent-section">
           <div class="section-header">
-            <h3>Recent Submissions</h3>
-            <button class="btn btn-secondary btn-sm" onclick="showView('submit')">+ New Essay</button>
+            <h3>Bài nộp gần đây</h3>
+            <button class="btn btn-secondary btn-sm" onclick="showView('submit')">+ Bài essay mới</button>
           </div>
           <div id="recent-list">
-            <div class="empty-state">No submissions yet. <a href="#" onclick="showView('submit')">Submit your first essay!</a></div>
+            <div class="empty-state">Chưa có bài nộp nào. <a href="#" onclick="showView('submit')">Nộp bài đầu tiên!</a></div>
           </div>
         </div>
 
         <!-- Progress Chart -->
         <div class="chart-section hidden" id="chart-section">
           <div class="section-header">
-            <h3>📈 Progress Over Time</h3>
+            <h3>📈 Tiến độ theo thời gian</h3>
           </div>
           <div class="chart-container-dash">
             <canvas id="progress-chart"></canvas>
@@ -479,22 +479,22 @@
       <!-- Submit View -->
       <div id="view-submit" class="view hidden">
         <div class="page-header">
-          <h2>Submit Essay</h2>
-          <p>Write your IELTS essay and receive instant AI feedback</p>
+          <h2>Nộp bài essay</h2>
+          <p>Viết bài essay IELTS và nhận phản hồi AI ngay lập tức</p>
         </div>
 
         <!-- Writing Timer -->
         <div class="writing-timer-bar" id="writing-timer-bar">
           <div class="writing-timer-presets">
-            <span class="timer-label">⏱ Writing Timer:</span>
+            <span class="timer-label">⏱ Hẹn giờ viết:</span>
             <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(20)">20 min</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(40)">40 min</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="setWritingTimer(60)">60 min</button>
           </div>
           <div class="writing-timer-controls hidden" id="writing-timer-controls">
             <span class="writing-timer-display" id="writing-timer-display">40:00</span>
-            <button type="button" class="btn btn-secondary btn-sm" id="writing-timer-toggle" onclick="toggleWritingTimer()">⏸ Pause</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="resetWritingTimer()">↺ Reset</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="writing-timer-toggle" onclick="toggleWritingTimer()">⏸ Tạm dừng</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetWritingTimer()">↺ Đặt lại</button>
           </div>
         </div>
 
@@ -506,29 +506,29 @@
           <div class="submit-left">
             <form class="submit-form" onsubmit="handleSubmit(event)">
               <div class="form-group">
-                <label>Task Type</label>
+                <label>Loại bài</label>
                 <div class="task-selector">
                   <label class="task-option">
                     <input type="radio" name="task_type" value="task1" onchange="updateTaskInfo()" />
                     <div class="task-option-card">
                       <div class="task-option-title">Task 1</div>
-                      <div class="task-option-desc">Describe a graph, chart, table, or diagram</div>
-                      <div class="task-option-meta">Min. 150 words</div>
+                      <div class="task-option-desc">Mô tả biểu đồ, bảng, hoặc sơ đồ</div>
+                      <div class="task-option-meta">Tối thiểu 150 từ</div>
                     </div>
                   </label>
                   <label class="task-option">
                     <input type="radio" name="task_type" value="task2" checked onchange="updateTaskInfo()" />
                     <div class="task-option-card active">
                       <div class="task-option-title">Task 2</div>
-                      <div class="task-option-desc">Academic essay — argument, opinion, or problem</div>
-                      <div class="task-option-meta">Min. 250 words</div>
+                      <div class="task-option-desc">Essay học thuật — lập luận, ý kiến, hoặc vấn đề</div>
+                      <div class="task-option-meta">Tối thiểu 250 từ</div>
                     </div>
                   </label>
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Topic / Chart Type</label>
+                <label>Chủ đề / Loại biểu đồ</label>
                 <div class="topic-chips" id="topic-chips">
                   <!-- Chips injected by JS -->
                 </div>
@@ -536,22 +536,22 @@
 
               <div class="form-group">
                 <label for="essay-prompt">
-                  Essay Prompt / Question
+                  Đề bài / Câu hỏi
                   <button type="button" class="generate-btn" id="generate-btn" onclick="generateTask()">
-                    <span id="generate-btn-icon">✨</span> <span id="generate-btn-label">Generate Task</span>
+                    <span id="generate-btn-icon">✨</span> <span id="generate-btn-label">Tạo đề bài</span>
                   </button>
-                  <select id="prompt-difficulty-filter" class="filter-select" style="width:auto;font-size:12px;padding:3px 6px;margin-right:2px" title="Filter prompt difficulty">
-                    <option value="all">All levels</option>
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
+                  <select id="prompt-difficulty-filter" class="filter-select" style="width:auto;font-size:12px;padding:3px 6px;margin-right:2px" title="Lọc mức độ khó đề bài">
+                    <option value="all">Tất cả cấp độ</option>
+                    <option value="easy">Dễ</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="hard">Khó</option>
                   </select>
-                  <button type="button" class="generate-btn" id="random-prompt-btn" onclick="insertRandomPrompt()" title="Fill with a real IELTS question">
-                    🎲 Random IELTS
+                  <button type="button" class="generate-btn" id="random-prompt-btn" onclick="insertRandomPrompt()" title="Điền đề bài IELTS thực tế">
+                    🎲 IELTS ngẫu nhiên
                   </button>
                 </label>
                 <textarea id="essay-prompt" rows="4"
-                  placeholder="Paste your own IELTS question here, or click ✨ Generate Task to create one automatically..."
+                  placeholder="Dán câu hỏi IELTS của bạn ở đây, hoặc nhấp ✨ Tạo đề bài để tự động tạo..."
                   oninput="onPromptInput()" required></textarea>
               </div>
 
@@ -595,35 +595,35 @@
 
               <div class="form-group">
                 <label for="essay-text">
-                  Your Essay
-                  <span class="word-count-badge" id="word-count-badge">0 words</span>
+                  Bài viết của bạn
+                  <span class="word-count-badge" id="word-count-badge">0 từ</span>
                 </label>
-                <textarea id="essay-text" rows="18" placeholder="Write your essay here..." required oninput="updateWordCount(); onDraftInput()"></textarea>
+                <textarea id="essay-text" rows="18" placeholder="Viết bài của bạn tại đây..." required oninput="updateWordCount(); onDraftInput()"></textarea>
                 <div class="word-count-bar-wrap">
                   <div class="word-count-bar-track"><div class="word-count-bar-fill" id="word-count-bar-fill"></div></div>
-                  <span class="word-count-bar-text" id="word-count-bar-text">0 / 250 words</span>
+                  <span class="word-count-bar-text" id="word-count-bar-text">0 / 250 từ</span>
                 </div>
-                <div class="word-count-info" id="word-count-info">Task 2 requires a minimum of 250 words.</div>
+                <div class="word-count-info" id="word-count-info">Task 2 yêu cầu tối thiểu 250 từ.</div>
                 <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="openDraftsModal()">📂 My Drafts</button>
-                  <button type="button" class="btn-save-draft" onclick="manualSaveDraft()">💾 Save Draft</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openDraftsModal()">📂 Bản nháp</button>
+                  <button type="button" class="btn-save-draft" onclick="manualSaveDraft()">💾 Lưu nháp</button>
                 </div>
               </div>
 
               <div class="form-group grading-mode-selector">
-                <label>How would you like this graded?</label>
+                <label>Bạn muốn bài được chấm như thế nào?</label>
                 <div class="grading-mode-options">
                   <label class="grading-mode-option" id="mode-teacher-label">
                     <input type="radio" name="grading_mode" value="teacher" checked>
                     <span class="mode-icon">👩‍🏫</span>
-                    <span class="mode-title">Teacher Review</span>
-                    <span class="mode-desc">Teacher manually reviews and grades your essay</span>
+                    <span class="mode-title">Chấm bài của giáo viên</span>
+                    <span class="mode-desc">Giáo viên tự kiểm tra và chấm bài của bạn</span>
                   </label>
                   <label class="grading-mode-option" id="mode-ai-label">
                     <input type="radio" name="grading_mode" value="ai">
                     <span class="mode-icon">🤖</span>
-                    <span class="mode-title">AI Grading</span>
-                    <span class="mode-desc">Instant · AI evaluates your essay</span>
+                    <span class="mode-title">Chấm bài AI</span>
+                    <span class="mode-desc">Tức thời · AI đánh giá bài của bạn</span>
                   </label>
                 </div>
               </div>
@@ -633,7 +633,7 @@
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-                  Submit for Grading
+                  Nộp bài để chấm
                 </button>
               </div>
             </form>
@@ -643,55 +643,55 @@
           <div class="submit-right">
             <div class="hints-section">
               <div class="hints-section-header">
-                <span class="hints-section-title">✨ AI Writing Assistance</span>
-                <button type="button" class="btn-refresh-hints" id="refresh-hints-btn" onclick="requestBothHints()" style="font-size:.75rem;color:var(--gray-400);background:transparent;border:none;cursor:pointer;padding:2px 6px;">Generate All</button>
+                <span class="hints-section-title">✨ Hỗ trợ viết AI</span>
+                <button type="button" class="btn-refresh-hints" id="refresh-hints-btn" onclick="requestBothHints()" style="font-size:.75rem;color:var(--gray-400);background:transparent;border:none;cursor:pointer;padding:2px 6px;">Tạo tất cả</button>
               </div>
               <div class="hints-grid-vertical">
                 <div class="hint-card" id="ideas-card">
-                  <div class="hint-card-header">💡 Body Arguments<button type="button" class="hint-generate-btn" id="ideas-btn" onclick="requestSingleHint('ideas')">Generate ✨</button></div>
+                  <div class="hint-card-header">💡 Ý kiến đoạn thân<button type="button" class="hint-generate-btn" id="ideas-btn" onclick="requestSingleHint('ideas')">Tạo ✨</button></div>
                   <!-- Scaffold inputs — Task 2 only, shown by updateTopicOptions() -->
                   <div id="scaffold-toggle-row" class="scaffold-toggle-row hidden">
                     <button type="button" class="scaffold-toggle-btn" id="scaffold-toggle-btn" onclick="toggleScaffoldFields()">
-                      ✏️ Enter your own ideas <span id="scaffold-toggle-icon">▸</span>
+                      ✏️ Nhập ý tưởng của bạn <span id="scaffold-toggle-icon">▸</span>
                     </button>
                   </div>
                   <div id="scaffold-fields" class="scaffold-fields hidden">
-                    <p class="scaffold-hint">Enter your own ideas and the AI will develop them — leave blank for AI suggestions.</p>
+                    <p class="scaffold-hint">Nhập ý tưởng của bạn và AI sẽ phát triển chúng — bỏ trống để có đề xuất AI.</p>
                     <div class="scaffold-row">
-                      <label class="scaffold-label">My position / thesis</label>
+                      <label class="scaffold-label">Vị trí / luận điểm của tôi</label>
                       <input type="text" id="scaffold-thesis" class="form-input scaffold-input"
-                        placeholder="e.g. Governments should prioritise public transport over new roads.">
+                        placeholder="ví dụ: Chính phủ nên ưu tiên giao thông công cộng hơn đường mới.">
                     </div>
                     <div class="scaffold-row">
-                      <label class="scaffold-label">Body paragraph 1 idea</label>
+                      <label class="scaffold-label">Ý tưởng đoạn thân 1</label>
                       <input type="text" id="scaffold-bp1" class="form-input scaffold-input"
-                        placeholder="e.g. Public transport reduces congestion and pollution.">
+                        placeholder="ví dụ: Giao thông công cộng giảm tắc đường và ô nhiễm.">
                     </div>
                     <div class="scaffold-row">
-                      <label class="scaffold-label">Body paragraph 2 idea</label>
+                      <label class="scaffold-label">Ý tưởng đoạn thân 2</label>
                       <input type="text" id="scaffold-bp2" class="form-input scaffold-input"
-                        placeholder="e.g. New roads encourage more car use, worsening the problem.">
+                        placeholder="ví dụ: Đường mới khuyến khích sử dụng ô tô nhiều hơn, làm trầm trọng thêm vấn đề.">
                     </div>
                     <div class="scaffold-row">
-                      <label class="scaffold-label">Counterargument <span class="scaffold-optional">(optional)</span></label>
+                      <label class="scaffold-label">Lập luận đối lập <span class="scaffold-optional">(tùy chọn)</span></label>
                       <input type="text" id="scaffold-counter" class="form-input scaffold-input"
-                        placeholder="e.g. Some argue roads are essential for rural areas.">
+                        placeholder="ví dụ: Một số người lập luận rằng đường sá là cần thiết cho khu vực nông thôn.">
                     </div>
-                    <button type="button" class="scaffold-clear-btn" onclick="clearScaffold()">✕ Clear</button>
+                    <button type="button" class="scaffold-clear-btn" onclick="clearScaffold()">✕ Xóa</button>
                   </div>
-                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Enter your ideas above or click "Generate ✨" for AI suggestions.</span></div>
+                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Nhập ý tưởng của bạn ở trên hoặc nhấp "Tạo ✨" để có đề xuất AI.</span></div>
                 </div>
                 <div class="hint-card" id="vocab-card" style="display:none">
-                  <div class="hint-card-header">📚 Vocabulary &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Generate ✨</button></div>
-                  <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Click "Generate ✨" to get vocabulary suggestions.</span></div>
+                  <div class="hint-card-header">📚 Từ vựng &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Tạo ✨</button></div>
+                  <div class="hint-card-body" id="vocab-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận đề xuất từ vựng.</span></div>
                 </div>
                 <div class="hint-card" id="structure-card" style="display:none">
-                  <div class="hint-card-header">📋 Essay Structure Guide<button type="button" class="hint-generate-btn" id="structure-btn" onclick="requestSingleHint('structure')">Generate ✨</button></div>
-                  <div class="hint-card-body" id="structure-body"><span class="hint-empty">Click "Generate ✨" to get a section-by-section writing plan for this chart.</span></div>
+                  <div class="hint-card-header">📋 Hướng dẫn cấu trúc essay<button type="button" class="hint-generate-btn" id="structure-btn" onclick="requestSingleHint('structure')">Tạo ✨</button></div>
+                  <div class="hint-card-body" id="structure-body"><span class="hint-empty">Nhấp "Tạo ✨" để lấy kế hoạch viết từng phần cho biểu đồ này.</span></div>
                 </div>
                 <div class="hint-card" id="phrases-card">
-                  <div class="hint-card-header">📝 Language Toolkit<button type="button" class="hint-generate-btn" id="phrases-btn" onclick="requestSingleHint('phrases')">Generate ✨</button></div>
-                  <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Click "Generate ✨" to get phrases &amp; vocabulary.</span></div>
+                  <div class="hint-card-header">📝 Bộ công cụ ngôn ngữ<button type="button" class="hint-generate-btn" id="phrases-btn" onclick="requestSingleHint('phrases')">Tạo ✨</button></div>
+                  <div class="hint-card-body" id="phrases-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận các cụm từ &amp; từ vựng.</span></div>
                 </div>
               </div>
             </div>
@@ -700,24 +700,24 @@
       </div>
 
       <!-- Toast notification -->
-      <div id="draft-toast">✅ Draft saved</div>
+      <div id="draft-toast">✅ Đã lưu nháp</div>
 
       <!-- History View -->
       <div id="view-history" class="view hidden">
         <div class="page-header">
-          <h2>My Submissions</h2>
-          <p>Review all your essay submissions and AI feedback</p>
+          <h2>Bài nộp của tôi</h2>
+          <p>Xem lại tất cả các bài nộp essay và phản hồi AI của bạn</p>
         </div>
         <div id="history-list">
-          <div class="loading">Loading submissions...</div>
+          <div class="loading">Đang tải bài nộp...</div>
         </div>
       </div>
 
       <!-- Feedback View -->
       <div id="view-feedback" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('history')">← Back</button>
-          <h2>Essay Feedback</h2>
+          <button class="btn-back" onclick="showView('history')">← Quay lại</button>
+          <h2>Phản hồi Essay</h2>
         </div>
         <div id="feedback-content"></div>
       </div>
@@ -725,8 +725,8 @@
       <!-- Admin View -->
       <div id="view-admin" class="view hidden">
         <div class="page-header">
-          <h2>Users</h2>
-          <p>All registered accounts on this platform</p>
+          <h2>Người dùng</h2>
+          <p>Tất cả các tài khoản đã đăng ký trên nền tảng này</p>
         </div>
         <!-- AI Cost Breakdown (admin only) -->
         <div class="admin-cost-section" id="admin-cost-section">
@@ -760,26 +760,26 @@
       <!-- Change Password View -->
       <div id="view-change-password" class="view hidden">
         <div class="page-header">
-          <h2>Change Password</h2>
-          <p>Update your account password</p>
+          <h2>Đổi mật khẩu</h2>
+          <p>Cập nhật mật khẩu tài khoản của bạn</p>
         </div>
         <div class="change-password-card">
           <div class="form-group">
-            <label>Current Password</label>
-            <input type="password" id="cp-current" placeholder="Your current password" />
+            <label>Mật khẩu hiện tại</label>
+            <input type="password" id="cp-current" placeholder="Mật khẩu hiện tại của bạn" />
           </div>
           <div class="form-group">
-            <label>New Password</label>
-            <input type="password" id="cp-new" placeholder="Min 6 characters" />
+            <label>Mật khẩu mới</label>
+            <input type="password" id="cp-new" placeholder="Tối thiểu 6 ký tự" />
           </div>
           <div class="form-group">
-            <label>Confirm New Password</label>
-            <input type="password" id="cp-confirm" placeholder="Repeat new password" />
+            <label>Xác nhận mật khẩu mới</label>
+            <input type="password" id="cp-confirm" placeholder="Nhập lại mật khẩu mới" />
           </div>
           <div id="cp-error" class="error-msg hidden"></div>
           <div id="cp-success" class="success-msg hidden"></div>
           <div class="form-actions">
-            <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Update Password</button>
+            <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Cập nhật mật khẩu</button>
           </div>
         </div>
       </div>
@@ -787,27 +787,27 @@
       <!-- Mock Tests List View -->
       <div id="view-test-list" class="view hidden">
         <div class="page-header">
-          <h2>📝 Mock Tests</h2>
-          <p>Practice IELTS Reading and Listening under timed conditions</p>
+          <h2>📝 Bài kiểm tra mô phỏng</h2>
+          <p>Luyện IELTS Reading và Listening trong điều kiện có giới hạn thời gian</p>
         </div>
         <div class="test-type-tabs">
           <button class="test-tab-btn active" onclick="switchTestTab('reading')" id="test-tab-reading">Reading</button>
           <button class="test-tab-btn" onclick="switchTestTab('listening')" id="test-tab-listening">Listening</button>
         </div>
-        <div id="test-list-content"><div class="loading">Loading tests…</div></div>
+        <div id="test-list-content"><div class="loading">Đang tải bài kiểm tra…</div></div>
       </div>
 
       <!-- Test Taking View (full viewport, sidebar hidden via class) -->
       <div id="view-test-taking" class="view hidden">
         <div class="test-header">
           <div class="test-header-left">
-            <button class="btn-back-test" id="test-back-btn" onclick="handleTestBack()">← Exit Test</button>
-            <span id="test-taking-title" class="test-title-text">Test</span>
+            <button class="btn-back-test" id="test-back-btn" onclick="handleTestBack()">← Thoát bài kiểm tra</button>
+            <span id="test-taking-title" class="test-title-text">Bài kiểm tra</span>
             <div class="section-tabs" id="test-section-tabs"></div>
           </div>
           <div class="test-header-right">
             <div class="test-timer" id="test-timer">60:00</div>
-            <button class="btn btn-primary btn-sm" onclick="submitTest()">Submit Test</button>
+            <button class="btn btn-primary btn-sm" onclick="submitTest()">Nộp bài kiểm tra</button>
           </div>
         </div>
         <div class="test-body">
@@ -828,37 +828,37 @@
       <!-- Test Result View -->
       <div id="view-test-result" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('test-history')">← Back to Results</button>
-          <h2 id="test-result-title">Test Result</h2>
+          <button class="btn-back" onclick="showView('test-history')">← Quay lại kết quả</button>
+          <h2 id="test-result-title">Kết quả bài kiểm tra</h2>
         </div>
-        <div id="test-result-content"><div class="loading">Loading…</div></div>
+        <div id="test-result-content"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Test History View -->
       <div id="view-test-history" class="view hidden">
         <div class="page-header">
-          <h2>🏆 Test Results</h2>
-          <p>Your past Reading and Listening attempts</p>
+          <h2>🏆 Kết quả kiểm tra</h2>
+          <p>Các nỗ lực Reading và Listening trước đây của bạn</p>
         </div>
-        <div id="test-history-content"><div class="loading">Loading…</div></div>
+        <div id="test-history-content"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Admin Materials View -->
       <div id="view-admin-materials" class="view hidden">
         <div class="page-header">
-          <h2>📚 Materials</h2>
-          <p>Create and manage Reading and Listening tests</p>
+          <h2>📚 Học liệu</h2>
+          <p>Tạo và quản lý bài kiểm tra Reading và Listening</p>
         </div>
 
         <!-- Type tabs: Reading / Listening / Task 1 Topics / Speaking / Task 2 -->
         <div class="test-type-tabs" style="flex-wrap:wrap">
-          <button class="test-tab-btn active" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Listening Tests</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Reading Tests</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Task 1 Topics</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Task 2 Prompts</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Speaking Topics</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('translation')" id="materials-tab-translation">🔤 Translation</button>
-          <button class="test-tab-btn" onclick="switchMaterialsTab('grammar-ex')" id="materials-tab-grammar-ex">📐 Grammar Exercises</button>
+          <button class="test-tab-btn active" onclick="switchMaterialsTab('listening')" id="materials-tab-listening">Bài kiểm tra Listening</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('reading')" id="materials-tab-reading">Bài kiểm tra Reading</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('task1')" id="materials-tab-task1">🖼️ Chủ đề Task 1</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Đề Task 2</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Chủ đề Speaking</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('translation')" id="materials-tab-translation">🔤 Dịch câu</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('grammar-ex')" id="materials-tab-grammar-ex">📐 Bài tập ngữ pháp</button>
         </div>
 
         <!-- Existing tests list -->
@@ -866,20 +866,20 @@
 
         <!-- Action tabs: Create / Import -->
         <div class="materials-action-tabs">
-          <button class="materials-action-tab active" id="mat-action-tab-create" onclick="switchMaterialsAction('create')">+ Create with Form</button>
-          <button class="materials-action-tab" id="mat-action-tab-import" onclick="switchMaterialsAction('import')">⬆ Import JSON</button>
+          <button class="materials-action-tab active" id="mat-action-tab-create" onclick="switchMaterialsAction('create')">+ Tạo bằng biểu mẫu</button>
+          <button class="materials-action-tab" id="mat-action-tab-import" onclick="switchMaterialsAction('import')">⬆ Nhập JSON</button>
         </div>
 
         <!-- CREATE FORM panel -->
         <div id="mat-panel-create" class="materials-action-panel">
           <div class="materials-form-card">
             <div class="form-group">
-              <label>Test Title</label>
-              <input type="text" id="new-test-title" placeholder="e.g. Academic Reading Test 1" />
+              <label>Tiêu đề bài kiểm tra</label>
+              <input type="text" id="new-test-title" placeholder="ví dụ: Bài kiểm tra Reading học thuật 1" />
             </div>
             <div id="sections-container"></div>
             <div class="form-row-end">
-              <button class="btn btn-primary" onclick="submitCreateTest()">💾 Save Test</button>
+              <button class="btn btn-primary" onclick="submitCreateTest()">💾 Lưu bài kiểm tra</button>
             </div>
             <div id="create-test-error" class="error-msg hidden"></div>
           </div>
@@ -1144,46 +1144,46 @@
       <!-- Homework View (Student) -->
       <div id="view-homework" class="view hidden">
         <div class="page-header">
-          <h2>📋 Homework</h2>
-          <p>Assignments set by your teacher — complete them before the deadline</p>
+          <h2>📋 Bài tập</h2>
+          <p>Bài tập được đặt bởi giáo viên của bạn — hoàn thành trước hạn cuối cùng</p>
         </div>
-        <div id="homework-content"><div class="loading">Loading…</div></div>
+        <div id="homework-content"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Grade Queue View (Teacher & Admin) -->
       <div id="view-grade-queue" class="view hidden">
         <div class="page-header">
-          <h2>📝 Grade Queue</h2>
-          <p>Essays awaiting teacher review — oldest first</p>
+          <h2>📝 Hàng chờ chấm bài</h2>
+          <p>Các essay đang chờ xem xét của giáo viên — những bài cũ nhất trước</p>
         </div>
-        <div id="grade-queue-list"><div class="loading">Loading…</div></div>
+        <div id="grade-queue-list"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Submissions Archive View (Teacher & Admin) -->
       <div id="view-submissions-archive" class="view hidden">
         <div class="page-header">
-          <h2>🗂️ Submissions Archive</h2>
-          <p>All graded student submissions</p>
+          <h2>🗂️ Kho bài nộp</h2>
+          <p>Tất cả các bài nộp của học sinh đã được chấm</p>
         </div>
         <!-- Filters -->
         <div class="card mb-4" style="padding:16px">
           <div class="form-row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
             <div class="form-group" style="flex:1;min-width:160px;margin:0">
-              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Student name</label>
-              <input type="text" id="archive-filter-name" class="form-input" placeholder="Search…" oninput="filterArchive()" style="margin-top:4px">
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Tên học sinh</label>
+              <input type="text" id="archive-filter-name" class="form-input" placeholder="Tìm kiếm…" oninput="filterArchive()" style="margin-top:4px">
             </div>
             <div class="form-group" style="flex:1;min-width:140px;margin:0">
-              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Task type</label>
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Loại bài</label>
               <select id="archive-filter-type" class="form-input" onchange="filterArchive()" style="margin-top:4px">
-                <option value="">All types</option>
+                <option value="">Tất cả loại</option>
                 <option value="task1">Task 1</option>
                 <option value="task2">Task 2</option>
               </select>
             </div>
             <div class="form-group" style="flex:1;min-width:140px;margin:0">
-              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Band score</label>
+              <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Điểm band</label>
               <select id="archive-filter-band" class="form-input" onchange="filterArchive()" style="margin-top:4px">
-                <option value="">All bands</option>
+                <option value="">Tất cả band</option>
                 <option value="9">9</option>
                 <option value="8.5">8.5</option>
                 <option value="8">8</option>
@@ -1197,71 +1197,71 @@
                 <option value="4">≤ 4</option>
               </select>
             </div>
-            <button class="btn btn-outline" onclick="loadSubmissionsArchive()" style="margin:0;height:38px">↺ Refresh</button>
+            <button class="btn btn-outline" onclick="loadSubmissionsArchive()" style="margin:0;height:38px">↺ Làm mới</button>
           </div>
         </div>
-        <div id="archive-list"><div class="loading">Loading…</div></div>
+        <div id="archive-list"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Admin Assignments View -->
       <div id="view-admin-assignments" class="view hidden">
         <div class="page-header">
-          <h2>📋 Assignments</h2>
-          <p>Set homework for your students with deadlines</p>
+          <h2>📋 Bài tập</h2>
+          <p>Giao bài tập cho học sinh của bạn với hạn chót</p>
         </div>
 
         <!-- Create form -->
         <div class="card mb-4">
-          <h3 style="margin-bottom:16px;font-size:1rem;font-weight:600">Create New Assignment</h3>
+          <h3 style="margin-bottom:16px;font-size:1rem;font-weight:600">Tạo bài tập mới</h3>
           <div class="form-group">
-            <label for="assign-title">Title</label>
-            <input type="text" id="assign-title" class="form-input" placeholder="e.g. Task 1 – Bar Chart Practice">
+            <label for="assign-title">Tiêu đề</label>
+            <input type="text" id="assign-title" class="form-input" placeholder="ví dụ: Task 1 – Luyện biểu đồ cột">
           </div>
           <div class="form-row">
             <div class="form-group" style="flex:1">
-              <label for="assign-type">Type</label>
+              <label for="assign-type">Loại</label>
               <select id="assign-type" class="form-input" onchange="updateAssignTestField()">
                 <option value="writing_task1">Writing Task 1</option>
                 <option value="writing_task2">Writing Task 2</option>
-                <option value="reading">Reading Test</option>
-                <option value="listening">Listening Test</option>
+                <option value="reading">Bài kiểm tra Reading</option>
+                <option value="listening">Bài kiểm tra Listening</option>
               </select>
             </div>
             <div class="form-group" style="flex:1">
-              <label for="assign-deadline">Deadline</label>
+              <label for="assign-deadline">Hạn chót</label>
               <input type="datetime-local" id="assign-deadline" class="form-input">
             </div>
           </div>
           <div class="form-group" id="assign-test-group" style="display:none">
-            <label for="assign-test-id">Link to Test (optional)</label>
+            <label for="assign-test-id">Liên kết đến bài kiểm tra (tùy chọn)</label>
             <select id="assign-test-id" class="form-input">
-              <option value="">— Select a test —</option>
+              <option value="">— Chọn bài kiểm tra —</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="assign-students">Assign To</label>
+            <label for="assign-students">Giao cho</label>
             <div class="assign-students-wrap">
               <label class="assign-all-label">
-                <input type="checkbox" id="assign-all-students" checked onchange="toggleStudentSelect()"> All students
+                <input type="checkbox" id="assign-all-students" checked onchange="toggleStudentSelect()"> Tất cả học sinh
               </label>
               <div id="assign-students-list" class="assign-students-list hidden">
-                <div class="loading" style="font-size:13px">Loading students…</div>
+                <div class="loading" style="font-size:13px">Đang tải học sinh…</div>
               </div>
             </div>
-            <div class="form-hint">Uncheck "All students" to select specific individuals</div>
+            <div class="form-hint">Bỏ chọn "Tất cả học sinh" để chọn các cá nhân cụ thể</div>
           </div>
           <div class="form-group">
-            <label for="assign-description">Instructions / Description</label>
-            <textarea id="assign-description" class="form-input" rows="3" placeholder="Describe what students need to do..."></textarea>
+            <label for="assign-description">Hướng dẫn / Mô tả</label>
+            <textarea id="assign-description" class="form-input" rows="3" placeholder="Mô tả những gì học sinh cần làm..."></textarea>
           </div>
           <div class="form-group" id="assign-custom-prompt-group" style="display:none">
-            <label>Custom Writing Prompt <small class="text-muted">(optional — pre-fills the student's essay form)</small></label>
-            <textarea id="assign-custom-prompt" class="form-input" rows="4" placeholder="The chart below shows… / Some people believe…"></textarea>
+            <label>Đề bài viết tùy chỉnh <small class="text-muted">(tùy chọn — điền sẵn vào biểu mẫu essay của học sinh)</small></label>
+            <textarea id="assign-custom-prompt" class="form-input" rows="4" placeholder="Biểu đồ dưới đây cho thấy… / Một số người cho rằng…"></textarea>
             <div class="form-group" style="margin-top:8px" id="assign-image-url-group">
-              <label>Chart Image <small class="text-muted">(Task 1 only)</small></label>
+              <label>Hình ảnh biểu đồ <small class="text-muted">(chỉ Task 1)</small></label>
               <div class="assign-img-tabs">
-                <button type="button" class="assign-img-tab active" onclick="switchAssignImgTab('url')">🔗 Paste URL</button>
-                <button type="button" class="assign-img-tab" onclick="switchAssignImgTab('upload')">📁 Upload File</button>
+                <button type="button" class="assign-img-tab active" onclick="switchAssignImgTab('url')">🔗 Dán URL</button>
+                <button type="button" class="assign-img-tab" onclick="switchAssignImgTab('upload')">📁 Tải tệp lên</button>
               </div>
               <div id="assign-img-tab-url">
                 <input type="url" id="assign-custom-image-url" class="form-input" placeholder="https://…">
@@ -1269,7 +1269,7 @@
               <div id="assign-img-tab-upload" style="display:none">
                 <label class="assign-img-upload-area" for="assign-image-file">
                   <span class="assign-img-upload-icon">🖼️</span>
-                  <span id="assign-img-upload-text">Click to choose an image file</span>
+                  <span id="assign-img-upload-text">Nhấp để chọn tệp hình ảnh</span>
                   <input type="file" id="assign-image-file" accept="image/*" style="display:none" onchange="handleAssignImageFile(this)">
                 </label>
                 <img id="assign-img-preview" style="display:none;max-width:100%;border-radius:8px;margin-top:10px;border:1px solid var(--border)">
@@ -1278,21 +1278,21 @@
           </div>
           <div id="assign-error" class="error-msg hidden"></div>
           <div id="assign-success" class="success-msg hidden"></div>
-          <button class="btn btn-primary" onclick="createAssignment()">+ Create Assignment</button>
+          <button class="btn btn-primary" onclick="createAssignment()">+ Tạo bài tập</button>
         </div>
 
         <!-- Existing assignments list -->
-        <div id="admin-assignments-list"><div class="loading">Loading…</div></div>
+        <div id="admin-assignments-list"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Rewrite View -->
       <div id="view-rewrite" class="view hidden">
         <div class="page-header rewrite-page-header">
           <div class="rewrite-header-left">
-            <button class="btn-back" onclick="showView('feedback')">← Back to Feedback</button>
-            <h2>Smart Rewrite — Band 8+</h2>
+            <button class="btn-back" onclick="showView('feedback')">← Quay lại phản hồi</button>
+            <h2>Viết lại thông minh — Band 8+</h2>
           </div>
-          <p>Smart rewrite of your essay targeting Band 8.0–8.5 with explanations of what changed</p>
+          <p>Viết lại thông minh essay của bạn hướng tới Band 8.0–8.5 với giải thích những gì đã thay đổi</p>
         </div>
         <div id="rewrite-content"></div>
       </div>
@@ -1300,19 +1300,19 @@
       <!-- Classes List View (Teacher / Admin) -->
       <div id="view-classes" class="view hidden">
         <div class="page-header">
-          <h2>🏫 Classes</h2>
-          <p>Manage your classes and track student attendance</p>
+          <h2>🏫 Lớp học</h2>
+          <p>Quản lý lớp học của bạn và theo dõi điểm danh học sinh</p>
         </div>
         <div id="classes-teacher-controls"></div>
-        <div id="classes-list-container"><div class="loading">Loading classes…</div></div>
+        <div id="classes-list-container"><div class="loading">Đang tải lớp học…</div></div>
       </div>
 
       <!-- Class Detail View -->
       <div id="view-class-detail" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('classes')" id="class-detail-back">← Back to Classes</button>
+          <button class="btn-back" onclick="showView('classes')" id="class-detail-back">← Quay lại lớp học</button>
           <div id="class-detail-header-text">
-            <h2 id="class-detail-title">Class</h2>
+            <h2 id="class-detail-title">Lớp học</h2>
             <p id="class-detail-desc"></p>
           </div>
           <div id="class-detail-actions" class="class-detail-actions"></div>
@@ -1320,9 +1320,9 @@
 
         <!-- Tabs: Roster / Calendar / Stats -->
         <div class="test-type-tabs" id="class-detail-tabs">
-          <button class="test-tab-btn active" onclick="switchClassTab('calendar')" id="class-tab-calendar">📅 Calendar</button>
-          <button class="test-tab-btn" onclick="switchClassTab('roster')" id="class-tab-roster">👥 Roster</button>
-          <button class="test-tab-btn" onclick="switchClassTab('stats')" id="class-tab-stats">📊 Stats</button>
+          <button class="test-tab-btn active" onclick="switchClassTab('calendar')" id="class-tab-calendar">📅 Lịch</button>
+          <button class="test-tab-btn" onclick="switchClassTab('roster')" id="class-tab-roster">👥 Danh sách lớp</button>
+          <button class="test-tab-btn" onclick="switchClassTab('stats')" id="class-tab-stats">📊 Thống kê</button>
         </div>
 
         <!-- Calendar panel -->
@@ -1345,14 +1345,14 @@
       <div class="modal-overlay hidden" id="attendance-modal-overlay" onclick="closeAttendanceModal(event)">
         <div class="modal-box attendance-modal-box">
           <div class="modal-header">
-            <h3 id="attendance-modal-title">Attendance — 2025-01-01</h3>
-            <button class="btn btn-secondary btn-sm" onclick="closeAttendanceModal()">✕ Close</button>
+            <h3 id="attendance-modal-title">Điểm danh — 2025-01-01</h3>
+            <button class="btn btn-secondary btn-sm" onclick="closeAttendanceModal()">✕ Đóng</button>
           </div>
           <div id="attendance-modal-body">
-            <div class="loading">Loading…</div>
+            <div class="loading">Đang tải…</div>
           </div>
           <div class="modal-actions" id="attendance-modal-actions" style="display:none">
-            <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+            <button class="btn btn-primary" onclick="saveAttendance()">💾 Lưu điểm danh</button>
           </div>
         </div>
       </div>
@@ -1360,8 +1360,8 @@
       <!-- My Attendance View (Student) -->
       <div id="view-my-attendance" class="view hidden">
         <div class="page-header">
-          <h2>📅 My Attendance</h2>
-          <p>View your attendance record across all classes</p>
+          <h2>📅 Điểm danh của tôi</h2>
+          <p>Xem hồ sơ điểm danh của bạn trong tất cả các lớp</p>
         </div>
         <div id="my-attendance-class-selector" style="margin-bottom:16px"></div>
         <div id="my-attendance-calendar"></div>
@@ -1371,15 +1371,15 @@
       <!-- Vocabulary Learning View -->
       <div id="view-vocab-learn" class="view hidden">
         <div class="page-header">
-          <h2>📚 Vocabulary Learning</h2>
-          <p>Master IELTS vocabulary with games</p>
+          <h2>📚 Học từ vựng</h2>
+          <p>Nắm vững từ vựng IELTS bằng các trò chơi</p>
         </div>
 
         <!-- Section tabs -->
         <div class="vl-section-tabs">
-          <button class="vl-section-tab active" onclick="switchVocabSection('words')" id="vl-tab-words">📚 Words</button>
+          <button class="vl-section-tab active" onclick="switchVocabSection('words')" id="vl-tab-words">📚 Từ vựng</button>
           <button class="vl-section-tab" onclick="switchVocabSection('collocations')" id="vl-tab-collocations">📎 Collocations</button>
-          <button class="vl-section-tab" onclick="switchVocabSection('baby-words')" id="vl-tab-baby-words">🚀 Upgrade Words</button>
+          <button class="vl-section-tab" onclick="switchVocabSection('baby-words')" id="vl-tab-baby-words">🚀 Nâng cấp từ vựng</button>
         </div>
 
         <!-- Words section -->
@@ -1401,21 +1401,21 @@
             </div>
             <div id="vl-word-preview" class="vl-word-preview"></div>
             <div class="vl-game-buttons">
-              <button class="btn btn-outline" onclick="startVocabFlip()">🃏 Flip Cards</button>
-              <button class="btn btn-outline" onclick="startVocabQuiz()">🎯 Quiz</button>
-              <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Typing Test</button>
-              <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Matching</button>
+              <button class="btn btn-outline" onclick="startVocabFlip()">🃏 Lật thẻ</button>
+              <button class="btn btn-outline" onclick="startVocabQuiz()">🎯 Câu hỏi</button>
+              <button class="btn btn-outline" onclick="startVocabTyping()">⌨️ Bài kiểm tra gõ</button>
+              <button class="btn btn-outline" onclick="startVocabMatching()">🔗 Ghép cặp</button>
             </div>
             <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-              <button class="btn btn-outline btn-sm" onclick="exportVocabToExcel()">📥 Download vocab (Excel)</button>
-              <button class="btn btn-outline btn-sm" onclick="showVocabUpdateReminder()">➕ Update vocabulary bank</button>
+              <button class="btn btn-outline btn-sm" onclick="exportVocabToExcel()">📥 Tải từ vựng (Excel)</button>
+              <button class="btn btn-outline btn-sm" onclick="showVocabUpdateReminder()">➕ Cập nhật kho từ vựng</button>
             </div>
           </div>
 
           <!-- Game container (shown during game) -->
           <div id="vl-game" class="hidden">
             <div class="vl-game-header">
-              <button class="btn btn-secondary btn-sm" onclick="exitVocabGame()">← Back</button>
+              <button class="btn btn-secondary btn-sm" onclick="exitVocabGame()">← Quay lại</button>
               <span id="vl-game-title"></span>
               <span id="vl-game-progress"></span>
             </div>
@@ -1448,16 +1448,16 @@
       <!-- Sentence Exercises View -->
       <div id="view-practice-sentences" class="view hidden">
         <div class="page-header">
-          <h2>✏️ Sentence Exercises</h2>
-          <p>Practice using IELTS vocabulary in context</p>
+          <h2>✏️ Luyện câu</h2>
+          <p>Luyện sử dụng từ vựng IELTS trong ngữ cảnh</p>
         </div>
         <div class="practice-controls">
           <div class="vl-picker-row">
-            <label>Topic</label>
+            <label>Chủ đề</label>
             <div id="pse-topic-chips" class="vl-topic-chips"></div>
           </div>
           <div class="vl-picker-row">
-            <label>Level</label>
+            <label>Cấp độ</label>
             <div class="vl-level-chips">
               <button class="vl-chip vl-level-chip" data-level="B1" onclick="psSelectLevel('B1')">B1</button>
               <button class="vl-chip vl-level-chip" data-level="B2" onclick="psSelectLevel('B2')">B2</button>
@@ -1466,9 +1466,9 @@
             </div>
           </div>
           <div class="practice-mode-tabs">
-            <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Fill in Blank</button>
-            <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Write a Sentence</button>
-            <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Unscramble</button>
+            <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Điền vào chỗ trống</button>
+            <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Viết một câu</button>
+            <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Sắp xếp lại</button>
           </div>
         </div>
         <div id="pse-exercise-area"></div>
@@ -1477,34 +1477,34 @@
       <!-- Paragraph Writing View -->
       <div id="view-practice-paragraphs" class="view hidden">
         <div class="page-header">
-          <h2>📝 Paragraph Writing</h2>
-          <p>Write a paragraph and get AI feedback instantly</p>
+          <h2>📝 Luyện đoạn văn</h2>
+          <p>Viết đoạn văn và nhận phản hồi AI ngay lập tức</p>
         </div>
         <div class="practice-controls">
           <div class="vl-picker-row">
-            <label>Topic</label>
+            <label>Chủ đề</label>
             <div id="pp-topic-chips" class="vl-topic-chips"></div>
           </div>
         </div>
         <div id="pp-prompt-box" class="pp-prompt-box hidden">
-          <div class="pp-starter-label">Start your paragraph with:</div>
+          <div class="pp-starter-label">Bắt đầu đoạn văn của bạn bằng:</div>
           <div id="pp-starter-text" class="pp-starter-text"></div>
-          <button class="btn btn-ghost btn-sm" onclick="ppNewStarter()">🔀 New starter</button>
+          <button class="btn btn-ghost btn-sm" onclick="ppNewStarter()">🔀 Cách bắt đầu mới</button>
         </div>
         <div id="pp-write-area" class="hidden">
-          <textarea id="pp-textarea" class="pp-textarea" placeholder="Continue writing your paragraph here... (aim for 80–120 words)"></textarea>
-          <div id="pp-word-count" class="pp-word-count">0 words</div>
-          <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Get AI Feedback ✨</button>
+          <textarea id="pp-textarea" class="pp-textarea" placeholder="Tiếp tục viết đoạn văn của bạn ở đây... (hướng tới 80–120 từ)"></textarea>
+          <div id="pp-word-count" class="pp-word-count">0 từ</div>
+          <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Lấy phản hồi AI ✨</button>
         </div>
         <div id="pp-feedback-area" class="hidden"></div>
-        <button class="btn btn-outline btn-sm" id="pp-try-again-btn" onclick="ppReset()" style="margin-top:16px;display:none">Try another paragraph →</button>
+        <button class="btn btn-outline btn-sm" id="pp-try-again-btn" onclick="ppReset()" style="margin-top:16px;display:none">Thử đoạn văn khác →</button>
       </div>
 
       <!-- Grammar Guide View -->
       <div id="view-practice-grammar" class="view hidden">
         <div class="page-header">
-          <h2>📖 Grammar Guide</h2>
-          <p>Key grammar structures for IELTS Band 6+</p>
+          <h2>📖 Hướng dẫn ngữ pháp</h2>
+          <p>Các cấu trúc ngữ pháp chính cho IELTS Band 6+</p>
         </div>
         <div id="grammar-guide-content"></div>
       </div>
@@ -1512,25 +1512,25 @@
       <!-- Vocabulary Notebook View -->
       <div id="view-vocab" class="view hidden">
         <div class="page-header">
-          <h2>📓 My Vocabulary</h2>
-          <p>Words saved from your flashcards</p>
+          <h2>📓 Từ vựng của tôi</h2>
+          <p>Các từ được lưu từ flashcard của bạn</p>
         </div>
         <div id="vocab-list-container">
-          <div class="empty-state">No saved words yet. Open any essay's flashcards and click 💾 Save Word.</div>
+          <div class="empty-state">Chưa lưu từ nào. Mở flashcard của bất kỳ essay nào và nhấp 💾 Lưu từ.</div>
         </div>
       </div>
 
       <!-- Speaking Practice View -->
       <div id="view-speaking" class="view hidden">
         <div class="page-header">
-          <h2>🎙️ Speaking Practice</h2>
-          <p>Random IELTS Speaking topics with frameworks and a built-in timer</p>
+          <h2>🎙️ Luyện Speaking</h2>
+          <p>Chủ đề Speaking IELTS ngẫu nhiên với khung cấu trúc và bộ hẹn giờ tích hợp</p>
         </div>
 
         <!-- Mode switcher -->
         <div class="speaking-mode-tabs">
           <button class="speaking-mode-btn active" id="speaking-mode-ielts" onclick="setSpeakingMode('ielts')">🎓 IELTS Parts</button>
-          <button class="speaking-mode-btn" id="speaking-mode-impromptu" onclick="setSpeakingMode('impromptu')">🎲 Impromptu</button>
+          <button class="speaking-mode-btn" id="speaking-mode-impromptu" onclick="setSpeakingMode('impromptu')">🎲 Tức thời</button>
         </div>
 
         <!-- Filters -->
@@ -1541,13 +1541,13 @@
             <button class="speaking-part-btn" onclick="setSpeakingPart(3)" id="speaking-part-btn-3">Part 3</button>
           </div>
           <select id="speaking-category" class="form-input speaking-select" onchange="spinSpeakingTopic()">
-            <option value="all">🎲 All Categories</option>
+            <option value="all">🎲 Tất cả danh mục</option>
           </select>
           <select id="speaking-difficulty" class="form-input speaking-select">
-            <option value="all">Any Difficulty</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="all">Bất kỳ độ khó nào</option>
+            <option value="easy">Dễ</option>
+            <option value="medium">Trung bình</option>
+            <option value="hard">Khó</option>
           </select>
         </div>
 
@@ -1555,65 +1555,65 @@
         <div class="speaking-topic-card" id="speaking-topic-card">
           <div class="speaking-topic-meta">
             <span class="speaking-topic-part-badge" id="speaking-topic-part-badge">Part 1</span>
-            <span class="speaking-topic-category-tag" id="speaking-topic-category">Work &amp; Study</span>
-            <span class="speaking-topic-diff-tag" id="speaking-topic-diff">Easy</span>
+            <span class="speaking-topic-category-tag" id="speaking-topic-category">Công việc &amp; Học tập</span>
+            <span class="speaking-topic-diff-tag" id="speaking-topic-diff">Dễ</span>
           </div>
           <div class="speaking-topic-question" id="speaking-topic-question">
-            Click <strong>🎲 Spin!</strong> to get a random topic
+            Nhấp <strong>🎲 Quay!</strong> để lấy một chủ đề ngẫu nhiên
           </div>
           <ul class="speaking-cue-bullets hidden" id="speaking-cue-bullets"></ul>
 
           <!-- Key Vocabulary (Part 1 & Part 3 only) -->
           <div id="speaking-vocab-panel" class="hidden">
-            <div class="speaking-vocab-heading">📚 Key vocabulary</div>
+            <div class="speaking-vocab-heading">📚 Từ vựng chính</div>
             <div id="speaking-vocab-chips"></div>
           </div>
 
           <!-- Model answer (Parts 1, 2, 3) -->
           <div id="speaking-model-answer-wrap" class="hidden">
-            <button class="btn-model-answer-toggle" onclick="toggleModelAnswer()" id="model-answer-toggle-btn">💡 Show model answer ▸</button>
+            <button class="btn-model-answer-toggle" onclick="toggleModelAnswer()" id="model-answer-toggle-btn">💡 Hiển thị bài mẫu ▸</button>
             <div id="speaking-model-answer" class="speaking-model-answer hidden"></div>
           </div>
 
           <!-- Linked Part 3 questions (Part 2 only) -->
           <div id="speaking-linked-part3" class="hidden">
-            <div class="linked-part3-heading">🔗 Practice Part 3 next</div>
+            <div class="linked-part3-heading">🔗 Luyện Part 3 tiếp theo</div>
             <div id="speaking-linked-part3-list"></div>
           </div>
         </div>
 
         <!-- Controls -->
         <div class="speaking-main-controls">
-          <button class="btn btn-primary btn-lg speaking-spin-btn" onclick="spinSpeakingTopic()">🎲 Spin!</button>
-          <button class="btn btn-outline btn-sm hidden" id="impromptu-add-reminder-btn" onclick="showImpromptAddReminder()" title="How to add more topics">➕ Add more topics</button>
+          <button class="btn btn-primary btn-lg speaking-spin-btn" onclick="spinSpeakingTopic()">🎲 Quay!</button>
+          <button class="btn btn-outline btn-sm hidden" id="impromptu-add-reminder-btn" onclick="showImpromptAddReminder()" title="Cách thêm chủ đề khác">➕ Thêm chủ đề khác</button>
         </div>
         <!-- Impromptu reminder banner -->
         <div id="impromptu-reminder-banner" class="impromptu-reminder-banner hidden">
-          <span>💡 To add more Impromptu topics, open <strong>Claude Code</strong> and say: <em>"Add more entries to IMPROMPTU_BANK in public/app.js"</em></span>
+          <span>💡 Để thêm chủ đề tức thời khác, hãy mở <strong>Claude Code</strong> và nói: <em>"Thêm các mục khác vào IMPROMPTU_BANK trong public/app.js"</em></span>
           <button onclick="this.parentElement.classList.add('hidden')" class="btn-close-banner">✕</button>
         </div>
 
         <!-- Timer -->
         <div class="speaking-timer-section" id="speaking-timer-section">
           <div class="speaking-timer-phases" id="speaking-timer-phases">
-            <button class="speaking-phase-btn active" onclick="setSpeakingPhase('prep')" id="phase-btn-prep">⏳ Prep (1 min)</button>
-            <button class="speaking-phase-btn" onclick="setSpeakingPhase('speak')" id="phase-btn-speak">🗣️ Speak (2 min)</button>
+            <button class="speaking-phase-btn active" onclick="setSpeakingPhase('prep')" id="phase-btn-prep">⏳ Chuẩn bị (1 phút)</button>
+            <button class="speaking-phase-btn" onclick="setSpeakingPhase('speak')" id="phase-btn-speak">🗣️ Nói (2 phút)</button>
           </div>
           <div class="speaking-timer-display" id="speaking-timer-display">1:00</div>
-          <div class="speaking-timer-label" id="speaking-timer-label">Preparation time</div>
+          <div class="speaking-timer-label" id="speaking-timer-label">Thời gian chuẩn bị</div>
           <!-- Impromptu-only: Speak button (think phase) -->
-          <button class="btn btn-impromptu-speak hidden" id="impromptu-speak-btn" onclick="startImpromtuSpeak()">🎙️ Speak</button>
+          <button class="btn btn-impromptu-speak hidden" id="impromptu-speak-btn" onclick="startImpromtuSpeak()">🎙️ Nói</button>
           <div class="speaking-timer-btns">
             <button class="btn btn-secondary speaking-adjust-btn hidden" id="speaking-adjust-minus" onclick="adjustSpeakingTimer(-30)">−30s</button>
-            <button class="btn btn-primary" onclick="startSpeakingTimer()" id="speaking-timer-start-btn">▶ Start</button>
-            <button class="btn btn-secondary" onclick="resetSpeakingTimer()">↺ Reset</button>
+            <button class="btn btn-primary" onclick="startSpeakingTimer()" id="speaking-timer-start-btn">▶ Bắt đầu</button>
+            <button class="btn btn-secondary" onclick="resetSpeakingTimer()">↺ Đặt lại</button>
             <button class="btn btn-secondary speaking-adjust-btn hidden" id="speaking-adjust-plus" onclick="adjustSpeakingTimer(30)">+30s</button>
           </div>
         </div>
 
         <!-- Frameworks -->
         <div class="speaking-frameworks">
-          <h3 class="frameworks-title">💡 Speaking Frameworks</h3>
+          <h3 class="frameworks-title">💡 Khung cấu trúc Speaking</h3>
           <div class="frameworks-grid">
             <div class="framework-card">
               <div class="framework-name">PREP</div>
@@ -1661,13 +1661,13 @@
       <!-- Grammar Hub View -->
       <div id="view-grammar-hub" class="view hidden">
         <div class="page-header">
-          <h2>📐 Grammar Hub</h2>
-          <p>Master IELTS grammar — theory, examples &amp; exercises</p>
+          <h2>📐 Ngữ pháp</h2>
+          <p>Nắm vững ngữ pháp IELTS — lý thuyết, ví dụ &amp; bài tập</p>
         </div>
         <!-- Tab switcher -->
         <div class="gh-tabs">
-          <button class="gh-tab active" id="gh-tab-theory"  onclick="switchGrammarTab('theory')">📖 Theory</button>
-          <button class="gh-tab"        id="gh-tab-exercises" onclick="switchGrammarTab('exercises')">✏️ Exercises</button>
+          <button class="gh-tab active" id="gh-tab-theory"  onclick="switchGrammarTab('theory')">📖 Lý thuyết</button>
+          <button class="gh-tab"        id="gh-tab-exercises" onclick="switchGrammarTab('exercises')">✏️ Bài tập</button>
         </div>
         <!-- Theory panel -->
         <div id="gh-panel-theory">
@@ -1676,14 +1676,14 @@
         <!-- Exercises panel -->
         <div id="gh-panel-exercises" class="hidden">
           <div class="gh-exercise-meta">
-            <span id="gh-ex-counter" class="gh-ex-counter">Question 1 of 10</span>
-            <span id="gh-ex-score"   class="gh-ex-score">Score: 0 / 0</span>
+            <span id="gh-ex-counter" class="gh-ex-counter">Câu hỏi 1 trong 10</span>
+            <span id="gh-ex-score"   class="gh-ex-score">Điểm: 0 / 0</span>
           </div>
           <div id="gh-exercise-card" class="gh-exercise-card"></div>
           <div id="gh-ex-feedback"   class="gh-ex-feedback hidden"></div>
           <div class="gh-ex-actions">
-            <button class="btn btn-primary" id="gh-check-btn" onclick="checkGrammarExercise()">✓ Check</button>
-            <button class="btn btn-outline hidden" id="gh-next-btn" onclick="nextGrammarExercise()">Next →</button>
+            <button class="btn btn-primary" id="gh-check-btn" onclick="checkGrammarExercise()">✓ Kiểm tra</button>
+            <button class="btn btn-outline hidden" id="gh-next-btn" onclick="nextGrammarExercise()">Tiếp theo →</button>
           </div>
           <div class="gh-ex-progress-bar-wrap">
             <div class="gh-ex-progress-bar" id="gh-ex-progress-bar"></div>
@@ -1694,32 +1694,32 @@
       <!-- Translation Practice View -->
       <div id="view-translation" class="view hidden">
         <div class="page-header">
-          <h2>🔤 Translation Practice</h2>
-          <p>Translate Vietnamese sentences into English with word hints</p>
+          <h2>🔤 Luyện dịch</h2>
+          <p>Dịch các câu tiếng Việt sang tiếng Anh với gợi ý từ</p>
         </div>
         <div class="trans-progress-strip">
-          <span id="trans-counter" class="trans-counter">Sentence 1 of 20</span>
-          <span id="trans-score-display" class="trans-score-display">Score: 0 / 0</span>
+          <span id="trans-counter" class="trans-counter">Câu 1 trong 20</span>
+          <span id="trans-score-display" class="trans-score-display">Điểm: 0 / 0</span>
         </div>
         <div class="translation-card">
-          <div class="trans-vi-label">🇻🇳 Vietnamese</div>
-          <div class="trans-vi-sentence" id="trans-vi-sentence">Loading…</div>
+          <div class="trans-vi-label">🇻🇳 Tiếng Việt</div>
+          <div class="trans-vi-sentence" id="trans-vi-sentence">Đang tải…</div>
           <div class="trans-hints-row">
-            <span class="trans-hints-label">💡 Word hints <span class="trans-hints-sub">(click to reveal)</span></span>
+            <span class="trans-hints-label">💡 Gợi ý từ <span class="trans-hints-sub">(nhấp để hiển thị)</span></span>
             <div class="trans-hint-chips" id="trans-hint-chips"></div>
           </div>
-          <div class="trans-en-label">🇬🇧 Your English translation</div>
+          <div class="trans-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
           <textarea id="trans-en-input" class="form-input trans-en-input" rows="3"
-            placeholder="Type your English translation here…"
+            placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
             onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))checkTranslation()"></textarea>
           <div class="trans-actions">
-            <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Check answer</button>
-            <button class="btn btn-outline" onclick="nextTranslation()">→ Skip / Next</button>
+            <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Kiểm tra câu trả lời</button>
+            <button class="btn btn-outline" onclick="nextTranslation()">→ Bỏ qua / Tiếp theo</button>
           </div>
           <div id="trans-result" class="trans-result hidden">
             <div class="trans-result-inner">
               <div class="trans-model-row">
-                <span class="trans-model-label">Model answer:</span>
+                <span class="trans-model-label">Bài mẫu:</span>
                 <span class="trans-model-text" id="trans-model-text"></span>
               </div>
               <div id="trans-verdict" class="trans-verdict"></div>
@@ -1735,22 +1735,22 @@
   <div class="modal-overlay hidden" id="flashcard-modal-overlay" onclick="closeFlashcardModal(event)">
     <div class="flashcard-modal-box">
       <div class="flashcard-modal-header">
-        <h3>📚 Vocabulary Flashcards</h3>
-        <button class="btn btn-secondary btn-sm" onclick="closeFlashcardModal()">✕ Close</button>
+        <h3>📚 Flashcard từ vựng</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeFlashcardModal()">✕ Đóng</button>
       </div>
-      <div id="flashcard-loading" class="loading" style="padding:24px 0">Generating flashcards…</div>
+      <div id="flashcard-loading" class="loading" style="padding:24px 0">Đang tạo flashcard…</div>
       <div id="flashcard-container" class="hidden">
         <div class="flashcard-nav">
-          <button class="btn btn-secondary btn-sm" onclick="prevCard()">← Prev</button>
+          <button class="btn btn-secondary btn-sm" onclick="prevCard()">← Trước</button>
           <span id="flashcard-counter">1 / 8</span>
-          <button class="btn btn-secondary btn-sm" onclick="nextCard()">Next →</button>
+          <button class="btn btn-secondary btn-sm" onclick="nextCard()">Tiếp theo →</button>
         </div>
         <div class="flashcard-scene" onclick="flipCard()">
           <div class="flashcard-card" id="flashcard-card">
             <div class="flashcard-face flashcard-front">
               <div id="flashcard-type-badge" style="margin-bottom:4px"></div>
               <div class="flashcard-word" id="flashcard-word">meticulous</div>
-              <div class="flashcard-hint">Tap to reveal definition</div>
+              <div class="flashcard-hint">Nhấp để hiển thị định nghĩa</div>
             </div>
             <div class="flashcard-face flashcard-back">
               <div class="flashcard-definition" id="flashcard-definition">Very careful and precise</div>
@@ -1759,12 +1759,12 @@
           </div>
         </div>
         <div class="flashcard-actions">
-          <button class="btn btn-secondary btn-sm" onclick="markCard('hard')">😓 Hard</button>
-          <button class="btn btn-primary btn-sm" onclick="markCard('got')">✓ Got it</button>
+          <button class="btn btn-secondary btn-sm" onclick="markCard('hard')">😓 Khó</button>
+          <button class="btn btn-primary btn-sm" onclick="markCard('got')">✓ Hiểu rồi</button>
         </div>
         <div class="flashcard-save-row">
-          <button class="btn btn-secondary btn-sm" id="flashcard-save-btn" onclick="saveFlashcardWord()">💾 Save Word</button>
-          <span class="flashcard-saved-msg hidden" id="flashcard-saved-msg">✓ Saved to notebook!</span>
+          <button class="btn btn-secondary btn-sm" id="flashcard-save-btn" onclick="saveFlashcardWord()">💾 Lưu từ</button>
+          <span class="flashcard-saved-msg hidden" id="flashcard-saved-msg">✓ Đã lưu vào sổ tay!</span>
         </div>
       </div>
       <div id="flashcard-error" class="error-msg hidden"></div>
@@ -1774,12 +1774,12 @@
   <!-- Discard / Partial Submit Modal -->
   <div class="modal-overlay hidden" id="discard-modal-overlay">
     <div class="modal-box">
-      <h3 class="modal-title">Exit Test?</h3>
-      <p class="modal-desc">You have unanswered questions. What would you like to do?</p>
+      <h3 class="modal-title">Thoát bài kiểm tra?</h3>
+      <p class="modal-desc">Bạn có những câu hỏi chưa trả lời. Bạn muốn làm gì?</p>
       <div class="modal-actions">
-        <button class="btn btn-modal-submit" onclick="handlePartialSubmit()">Submit Answered</button>
-        <button class="btn btn-modal-discard" onclick="handleDiscardTest()">Discard &amp; Exit</button>
-        <button class="btn btn-modal-cancel" onclick="closeDiscardModal()">Keep Testing</button>
+        <button class="btn btn-modal-submit" onclick="handlePartialSubmit()">Nộp những câu đã trả lời</button>
+        <button class="btn btn-modal-discard" onclick="handleDiscardTest()">Bỏ &amp; Thoát</button>
+        <button class="btn btn-modal-cancel" onclick="closeDiscardModal()">Tiếp tục làm bài</button>
       </div>
     </div>
   </div>
@@ -1788,11 +1788,11 @@
   <div class="modal-overlay hidden" id="drafts-modal" onclick="if(event.target===this)closeDraftsModal()">
     <div class="modal-box drafts-modal-box">
       <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <h3 style="margin:0">📂 My Saved Drafts</h3>
-        <button class="btn btn-secondary btn-sm" onclick="closeDraftsModal()">✕ Close</button>
+        <h3 style="margin:0">📂 Bản nháp đã lưu</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeDraftsModal()">✕ Đóng</button>
       </div>
       <div id="drafts-modal-list">
-        <p style="color:var(--text-secondary)">Loading…</p>
+        <p style="color:var(--text-secondary)">Đang tải…</p>
       </div>
     </div>
   </div>

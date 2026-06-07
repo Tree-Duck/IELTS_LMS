@@ -1208,7 +1208,7 @@ async function handleLogin(e) {
   const errEl = document.getElementById('login-error');
   errEl.classList.add('hidden');
   const btn = e.target.querySelector('button[type=submit]');
-  btn.disabled = true; btn.textContent = 'Signing in…';
+  btn.disabled = true; btn.textContent = 'Đang đăng nhập…';
   try {
     const data = await api('/api/login', {
       method: 'POST',
@@ -1225,7 +1225,7 @@ async function handleLogin(e) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
   } finally {
-    btn.disabled = false; btn.textContent = 'Sign In';
+    btn.disabled = false; btn.textContent = 'Đăng nhập';
   }
 }
 
@@ -1234,7 +1234,7 @@ async function handleRegister(e) {
   const errEl = document.getElementById('register-error');
   errEl.classList.add('hidden');
   const btn = e.target.querySelector('button[type=submit]');
-  btn.disabled = true; btn.textContent = 'Creating account…';
+  btn.disabled = true; btn.textContent = 'Đang tạo tài khoản…';
   try {
     const data = await api('/api/register', {
       method: 'POST',
@@ -1244,7 +1244,7 @@ async function handleRegister(e) {
       showVerifyForm(data.email);
       if (data.emailSent === false) {
         const verifyErr = document.getElementById('verify-error');
-        verifyErr.textContent = "⚠️ We couldn't send the verification code. Click \"Resend Code\" to try again.";
+        verifyErr.textContent = "⚠️ Chúng tôi không thể gửi mã xác thực. Nhấp \"Gửi lại mã\" để thử lại.";
         verifyErr.classList.remove('hidden');
       }
       return;
@@ -1255,7 +1255,7 @@ async function handleRegister(e) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
   } finally {
-    btn.disabled = false; btn.textContent = 'Create Account';
+    btn.disabled = false; btn.textContent = 'Đăng ký';
   }
 }
 
@@ -1278,7 +1278,7 @@ async function handleVerify() {
   errEl.classList.add('hidden'); okEl.classList.add('hidden');
   const code = document.getElementById('verify-code').value.trim().replace(/\s/g, '');
   if (code.length !== 6) {
-    errEl.textContent = 'Please enter the 6-digit code from your email.';
+    errEl.textContent = 'Vui lòng nhập mã 6 chữ số từ email của bạn.';
     errEl.classList.remove('hidden');
     return;
   }
@@ -1304,7 +1304,7 @@ async function handleResendCode() {
       method: 'POST',
       body: JSON.stringify({ email: pendingVerifyEmail })
     });
-    okEl.textContent = 'New code sent! Check your inbox (and spam folder).';
+    okEl.textContent = 'Mã mới đã được gửi! Kiểm tra hộp thư đến của bạn (và thư mục spam).';
     okEl.classList.remove('hidden');
   } catch (err) {
     errEl.textContent = err.message;
@@ -1337,7 +1337,7 @@ async function handleForgotPassword() {
   const okEl = document.getElementById('forgot-success');
   errEl.classList.add('hidden'); okEl.classList.add('hidden');
   const email = document.getElementById('forgot-email').value.trim();
-  if (!email) { errEl.textContent = 'Please enter your email address.'; errEl.classList.remove('hidden'); return; }
+  if (!email) { errEl.textContent = 'Vui lòng nhập địa chỉ email của bạn.'; errEl.classList.remove('hidden'); return; }
   try {
     const data = await api('/api/forgot-password', {
       method: 'POST',
@@ -1347,7 +1347,7 @@ async function handleForgotPassword() {
       showResetForm(data.email);
     } else {
       // User not found — still show success message to avoid enumeration
-      okEl.textContent = 'If that email is registered, a reset code has been sent.';
+      okEl.textContent = 'Nếu email đó được đăng ký, mã đặt lại sẽ được gửi.';
       okEl.classList.remove('hidden');
     }
   } catch (err) {
@@ -1362,9 +1362,9 @@ async function handleResetPassword() {
   const code = document.getElementById('reset-code').value.trim();
   const newPw = document.getElementById('reset-new-password').value;
   const confirmPw = document.getElementById('reset-confirm-password').value;
-  if (code.length !== 6) { errEl.textContent = 'Enter the 6-digit reset code.'; errEl.classList.remove('hidden'); return; }
-  if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
-  if (newPw !== confirmPw) { errEl.textContent = 'Passwords do not match.'; errEl.classList.remove('hidden'); return; }
+  if (code.length !== 6) { errEl.textContent = 'Nhập mã đặt lại 6 chữ số.'; errEl.classList.remove('hidden'); return; }
+  if (newPw.length < 6) { errEl.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.'; errEl.classList.remove('hidden'); return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Mật khẩu không khớp.'; errEl.classList.remove('hidden'); return; }
   try {
     const data = await api('/api/reset-password', {
       method: 'POST',
@@ -1815,7 +1815,7 @@ async function handleChangePassword() {
       method: 'POST',
       body: JSON.stringify({ current_password: current, new_password: newPw })
     });
-    okEl.textContent = '✓ Password updated successfully!';
+    okEl.textContent = '✓ Mật khẩu đã cập nhật thành công!';
     okEl.classList.remove('hidden');
     document.getElementById('cp-current').value = '';
     document.getElementById('cp-new').value = '';
@@ -2564,7 +2564,7 @@ async function requestSingleHint(hint_type) {
   if (hint_type === 'vocabulary' && task_type !== 'task1') hint_type = 'phrases';
   const prompt = document.getElementById('essay-prompt').value.trim();
   const essay = document.getElementById('essay-text').value.trim();
-  if (!prompt) { alert('Please enter a writing prompt first.'); return; }
+  if (!prompt) { alert('Vui lòng nhập đề bài viết trước.'); return; }
 
   const bodyMap = { ideas: 'ideas-body', vocabulary: 'vocab-body', phrases: 'phrases-body', structure: 'structure-body' };
   const btnMap  = { ideas: 'ideas-btn',  vocabulary: 'vocab-btn',  phrases: 'phrases-btn',  structure: 'structure-btn'  };
@@ -2595,7 +2595,7 @@ async function requestBothHints() {
   const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
   const prompt = document.getElementById('essay-prompt').value.trim();
   const essay = document.getElementById('essay-text').value.trim();
-  if (!prompt) { alert('Please enter a writing prompt first.'); return; }
+  if (!prompt) { alert('Vui lòng nhập đề bài viết trước.'); return; }
 
   const isTask1 = task_type === 'task1';
 
@@ -2674,7 +2674,7 @@ async function requestBothHints() {
 async function syncAnthropicBalance() {
   const input = document.getElementById('balance-input');
   const val = parseFloat(input?.value);
-  if (isNaN(val) || val < 0) { alert('Please enter a valid balance (e.g. 4.65)'); return; }
+  if (isNaN(val) || val < 0) { alert('Vui lòng nhập số dư hợp lệ (ví dụ: 4.65)'); return; }
   try {
     await api('/api/admin/settings/balance', { method: 'PUT', body: JSON.stringify({ balance: val }) });
     input.value = '';
@@ -2834,7 +2834,7 @@ function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) {
-    alert('Image must be under 5 MB.');
+    alert('Hình ảnh phải dưới 5 MB.');
     event.target.value = '';
     return;
   }
