@@ -9652,22 +9652,21 @@ function renderParaLabFinal() {
       const svgEl = document.getElementById('banner-octo');
       if (svgEl) {
         const rect = svgEl.getBoundingClientRect();
-        // SVG viewBox center of left eye: (86,90), right eye: (140,90)
-        // Map to screen coords via scale
-        const scaleX = rect.width  / 200;
-        const scaleY = rect.height / 210;
-        const lx = rect.left + 86  * scaleX;
-        const ly = rect.top  + 90  * scaleY;
-        const rx = rect.left + 140 * scaleX;
-        const ry = rect.top  + 90  * scaleY;
+        // SVG viewBox eye centers: left (88,94), right (132,94) — viewBox 220x235
+        const scaleX = rect.width  / 220;
+        const scaleY = rect.height / 235;
+        const lx = rect.left + 88  * scaleX;
+        const ly = rect.top  + 94  * scaleY;
+        const rx = rect.left + 132 * scaleX;
+        const ry = rect.top  + 94  * scaleY;
 
         const aL = Math.atan2(my - ly, mx - lx);
         const aR = Math.atan2(my - ry, mx - rx);
-        const d  = 4;
-        pl.setAttribute('cx', 86  + Math.cos(aL) * d);
-        pl.setAttribute('cy', 92  + Math.sin(aL) * d);
-        pr.setAttribute('cx', 140 + Math.cos(aR) * d);
-        pr.setAttribute('cy', 92  + Math.sin(aR) * d);
+        const d  = 5;
+        pl.setAttribute('cx', 91  + Math.cos(aL) * d);
+        pl.setAttribute('cy', 97  + Math.sin(aL) * d);
+        pr.setAttribute('cx', 135 + Math.cos(aR) * d);
+        pr.setAttribute('cy', 97  + Math.sin(aR) * d);
       }
     }
     requestAnimationFrame(tick);

@@ -260,33 +260,39 @@
           </div>
           <!-- Octopus banner mascot -->
           <div class="home-hero-octo" aria-hidden="true">
-            <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
-              <!-- Tentacles (bob animated via CSS) -->
+            <svg id="banner-octo" viewBox="0 0 220 235" xmlns="http://www.w3.org/2000/svg" width="220" height="235">
+              <!-- Tentacles (behind body) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" d="M62,148 Q48,168 52,195"/>
-                <path class="bnr-t" d="M76,155 Q62,178 65,205"/>
-                <path class="bnr-t" d="M92,159 Q82,182 84,210"/>
-                <path class="bnr-t" d="M108,160 Q100,184 102,210"/>
-                <path class="bnr-t" d="M124,159 Q132,182 128,210"/>
-                <path class="bnr-t" d="M140,155 Q152,178 146,205"/>
-                <path class="bnr-t" d="M154,148 Q166,168 160,195"/>
-                <path class="bnr-t" d="M164,138 Q178,156 174,182"/>
+                <path class="bnr-t" d="M77,163 Q62,186 68,212"/>
+                <path class="bnr-t" d="M92,170 Q82,196 86,220"/>
+                <path class="bnr-t" d="M110,173 Q104,200 108,226"/>
+                <path class="bnr-t" d="M128,173 Q134,200 130,226"/>
+                <path class="bnr-t" d="M146,170 Q155,196 149,220"/>
+                <path class="bnr-t" d="M161,163 Q173,186 166,212"/>
               </g>
-              <!-- Body circle (large, will be clipped by banner overflow) -->
-              <circle cx="113" cy="100" r="90" fill="rgba(255,255,255,0.13)"/>
-              <circle cx="113" cy="92" r="78" fill="rgba(255,255,255,0.10)"/>
-              <!-- Face -->
-              <circle cx="86"  cy="90" r="14" fill="rgba(255,255,255,0.9)"/>
-              <circle cx="140" cy="90" r="14" fill="rgba(255,255,255,0.9)"/>
-              <circle id="bnr-pl" cx="89"  cy="92" r="8" fill="#193322"/>
-              <circle id="bnr-pr" cx="143" cy="92" r="8" fill="#193322"/>
-              <circle cx="91"  cy="88" r="3.5" fill="white"/>
-              <circle cx="145" cy="88" r="3.5" fill="white"/>
+              <!-- Side arms (chubby stubs) -->
+              <path class="bnr-side-arm" d="M36,112 Q20,104 17,122 Q15,136 30,140"/>
+              <path class="bnr-side-arm" d="M184,112 Q200,104 203,122 Q205,136 190,140"/>
+              <!-- Body -->
+              <circle cx="110" cy="100" r="80" fill="rgba(255,255,255,0.92)" stroke="rgba(15,50,28,0.18)" stroke-width="3"/>
+              <!-- Head highlight -->
+              <circle cx="82" cy="64" r="13" fill="rgba(255,255,255,0.55)"/>
+              <circle cx="70" cy="80" r="7"  fill="rgba(255,255,255,0.35)"/>
+              <!-- Eye whites -->
+              <circle cx="88"  cy="94" r="18" fill="white"/>
+              <circle cx="132" cy="94" r="18" fill="white"/>
+              <!-- Pupils (JS-tracked) -->
+              <circle id="bnr-pl" cx="91"  cy="97" r="11" fill="#1a3224"/>
+              <circle id="bnr-pr" cx="135" cy="97" r="11" fill="#1a3224"/>
+              <!-- Eye shine -->
+              <circle cx="95"  cy="89" r="5" fill="white"/>
+              <circle cx="139" cy="89" r="5" fill="white"/>
               <!-- Blush -->
-              <ellipse cx="70"  cy="104" rx="10" ry="6" fill="rgba(255,140,140,0.22)"/>
-              <ellipse cx="156" cy="104" rx="10" ry="6" fill="rgba(255,140,140,0.22)"/>
+              <ellipse cx="67"  cy="118" rx="14" ry="9" fill="rgba(255,120,120,0.32)"/>
+              <ellipse cx="153" cy="118" rx="14" ry="9" fill="rgba(255,120,120,0.32)"/>
               <!-- Smile -->
-              <path d="M88 110 Q113 124 138 110" stroke="rgba(255,255,255,0.6)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+              <path d="M90 120 Q110 144 130 120" fill="rgba(255,200,200,0.55)" stroke="rgba(15,50,28,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M90 120 Q110 130 130 120" fill="rgba(255,255,255,0.7)" stroke="none"/>
             </svg>
           </div>
         </div>
