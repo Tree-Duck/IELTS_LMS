@@ -5497,7 +5497,7 @@ input:focus, textarea:focus, select:focus {
 .wp-session-meta { display: flex; align-items: center; gap: 0.5rem; }
 .wp-session-body {
   display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.25rem;
-  min-height: 520px;
+  align-items: start;
 }
 @media (max-width: 768px) {
   .wp-session-body { grid-template-columns: 1fr; }
@@ -5505,6 +5505,9 @@ input:focus, textarea:focus, select:focus {
 .wp-prompt-col, .wp-editor-col {
   background: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 1.25rem;
   display: flex; flex-direction: column; gap: 0.75rem;
+}
+.wp-prompt-col {
+  position: sticky; top: 1rem;
 }
 .wp-prompt-label { font-weight: 700; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
 .wp-prompt-text { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; color: #1f2937; }
