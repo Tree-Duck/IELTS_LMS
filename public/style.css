@@ -5312,3 +5312,46 @@ input:focus, textarea:focus, select:focus {
   transition: background 0.15s; margin: 6px;
 }
 .pl-retry-btn:hover { background: #ee4444; }
+
+/* ─── Mascot ─────────────────────────────────────────────────────────────── */
+#mascot {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  width: 80px;
+  height: 104px;
+  /* offset so tip of mascot is at cursor, not center */
+  transform: translate(-50%, -30%);
+  will-change: left, top;
+  left: -200px; top: -200px;
+  animation: msc-bob 2.6s ease-in-out infinite;
+}
+@keyframes msc-bob {
+  0%, 100% { transform: translate(-50%, -30%) translateY(0); }
+  50%       { transform: translate(-50%, -30%) translateY(-7px); }
+}
+/* tentacles */
+.msc-t {
+  fill: none;
+  stroke: #1f5c3d;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  animation: msc-sway 1.7s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+.msc-t:nth-child(1) { animation-delay:  0.00s; }
+.msc-t:nth-child(2) { animation-delay: -0.22s; }
+.msc-t:nth-child(3) { animation-delay: -0.44s; }
+.msc-t:nth-child(4) { animation-delay: -0.66s; }
+.msc-t:nth-child(5) { animation-delay: -0.88s; }
+.msc-t:nth-child(6) { animation-delay: -1.10s; }
+.msc-t:nth-child(7) { animation-delay: -1.32s; }
+.msc-t:nth-child(8) { animation-delay: -1.54s; }
+.msc-t:nth-child(odd)  { animation-direction: alternate-reverse; }
+@keyframes msc-sway {
+  from { transform: rotate(-12deg); }
+  to   { transform: rotate(12deg);  }
+}
+/* hide on touch devices (no cursor) */
+@media (hover: none) and (pointer: coarse) { #mascot { display: none; } }

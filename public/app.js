@@ -9639,3 +9639,41 @@ function renderParaLabFinal() {
     </div>`;
 }
 
+/* ─── Mascot: octopus follows cursor ────────────────────────────────────── */
+(function () {
+  let mx = -300, my = -300;  // off-screen until first mousemove
+  let ox = -300, oy = -300;
+
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  const pl = document.getElementById('msc-pl');
+  const pr = document.getElementById('msc-pr');
+
+  function tick() {
+    // lerp mascot position toward cursor
+    ox += (mx - ox) * 0.09;
+    oy += (my - oy) * 0.09;
+
+    const el = document.getElementById('mascot');
+    if (el) {
+      el.style.left = ox + 'px';
+      el.style.top  = oy + 'px';
+    }
+
+    // pupils look toward cursor from mascot center
+    if (pl && pr) {
+      const angle = Math.atan2(my - oy, mx - ox);
+      const d = 2.8;
+      const pdx = Math.cos(angle) * d;
+      const pdy = Math.sin(angle) * d;
+      pl.setAttribute('cx', 34 + pdx);
+      pl.setAttribute('cy', 38 + pdy);
+      pr.setAttribute('cx', 56 + pdx);
+      pr.setAttribute('cy', 38 + pdy);
+    }
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
