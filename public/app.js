@@ -9639,38 +9639,41 @@ function renderParaLabFinal() {
     </div>`;
 }
 
-/* ─── Mascot: octopus follows cursor ────────────────────────────────────── */
+/* ─── Mascot: octopus reacts to cursor ──────────────────────────────────── */
 (function () {
-  let mx = -300, my = -300;  // off-screen until first mousemove
-  let ox = -300, oy = -300;
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  // smooth targets for tilt
+  let tiltTarget = 0, tiltCurrent = 0;
 
   document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
 
-  const pl = document.getElementById('msc-pl');
-  const pr = document.getElementById('msc-pr');
+  const el  = document.getElementById('mascot');
+  const svg = el ? el.querySelector('svg') : null;
+  const pl  = document.getElementById('msc-pl');
+  const pr  = document.getElementById('msc-pr');
 
   function tick() {
-    // lerp mascot position toward cursor
-    ox += (mx - ox) * 0.09;
-    oy += (my - oy) * 0.09;
+    if (!el) { requestAnimationFrame(tick); return; }
 
-    const el = document.getElementById('mascot');
-    if (el) {
-      el.style.left = ox + 'px';
-      el.style.top  = oy + 'px';
-    }
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
 
-    // pupils look toward cursor from mascot center
-    if (pl && pr) {
-      const angle = Math.atan2(my - oy, mx - ox);
-      const d = 2.8;
-      const pdx = Math.cos(angle) * d;
-      const pdy = Math.sin(angle) * d;
-      pl.setAttribute('cx', 34 + pdx);
-      pl.setAttribute('cy', 38 + pdy);
-      pr.setAttribute('cx', 56 + pdx);
-      pr.setAttribute('cy', 38 + pdy);
-    }
+    // angle from mascot center → cursor
+    const angle = Math.atan2(my - cy, mx - cx);
+    const dist  = Math.hypot(mx - cx, my - cy);
+
+    // pupils shift up to 3px toward cursor
+    const pMax = 3;
+    const pdx = Math.cos(angle) * Math.min(dist / 120, 1) * pMax;
+    const pdy = Math.sin(angle) * Math.min(dist / 120, 1) * pMax;
+    if (pl) { pl.setAttribute('cx', 34 + pdx); pl.setAttribute('cy', 38 + pdy); }
+    if (pr) { pr.setAttribute('cx', 56 + pdx); pr.setAttribute('cy', 38 + pdy); }
+
+    // body leans slightly toward cursor (max ±10deg), lerp smooth
+    tiltTarget  = Math.cos(angle) * Math.min(dist / 300, 1) * 10;
+    tiltCurrent += (tiltTarget - tiltCurrent) * 0.06;
+    if (svg) svg.style.transform = `rotate(${tiltCurrent.toFixed(2)}deg)`;
 
     requestAnimationFrame(tick);
   }
