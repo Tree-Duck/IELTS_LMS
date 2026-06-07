@@ -1108,7 +1108,55 @@ let _vocabMatchSelected = null; // for matching game: { col, idx }
 let _vocabMatchPaired = new Set();
 
 /* ─── Init ───────────────────────────────────────────────────────────────── */
+/* ─── Theme (Background Color) ───────────────────────────────────────────── */
+const THEMES = [
+  { id: 'mint',     name: 'Xanh lá',  dot: '#d4ede0', bg: '#f2f9f5' },
+  { id: 'ocean',    name: 'Xanh biển', dot: '#bfd8f5', bg: '#eef4fb' },
+  { id: 'lavender', name: 'Tím nhạt', dot: '#d8d0f5', bg: '#f3f0fb' },
+  { id: 'cream',    name: 'Kem',       dot: '#f0e0c0', bg: '#fdf8f0' },
+  { id: 'rose',     name: 'Hồng',      dot: '#f5c0cc', bg: '#fdf2f4' },
+  { id: 'slate',    name: 'Xám',       dot: '#d0d5df', bg: '#f1f3f6' },
+];
+
+function applyTheme(id) {
+  if (id) {
+    document.documentElement.setAttribute('data-bg-theme', id);
+    localStorage.setItem('ielts_bg_theme', id);
+  } else {
+    document.documentElement.removeAttribute('data-bg-theme');
+    localStorage.removeItem('ielts_bg_theme');
+  }
+  // Refresh active state in modal if open
+  document.querySelectorAll('.theme-swatch').forEach(el => {
+    el.classList.toggle('active', el.dataset.themeId === (id || ''));
+  });
+}
+
+function openThemeModal() {
+  const overlay = document.getElementById('theme-modal-overlay');
+  const grid = document.getElementById('theme-swatches');
+  if (!overlay || !grid) return;
+  const current = localStorage.getItem('ielts_bg_theme') || '';
+  grid.innerHTML = THEMES.map(t => `
+    <div class="theme-swatch ${t.id === current ? 'active' : ''}" data-theme-id="${t.id}"
+         style="background:${t.bg}" onclick="applyTheme('${t.id}')">
+      <div class="theme-swatch-dot" style="background:${t.dot}"></div>
+      <div class="theme-swatch-name">${t.name}</div>
+    </div>
+  `).join('');
+  overlay.classList.remove('hidden');
+}
+
+function closeThemeModal(e) {
+  if (e && e.target !== document.getElementById('theme-modal-overlay')) return;
+  document.getElementById('theme-modal-overlay')?.classList.add('hidden');
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  // Restore bg theme
+  const savedTheme = localStorage.getItem('ielts_bg_theme');
+  if (savedTheme) document.documentElement.setAttribute('data-bg-theme', savedTheme);
+
   // Restore dark mode preference
   if (localStorage.getItem('ielts_dark_mode') === '1') {
     document.documentElement.setAttribute('data-theme', 'dark');

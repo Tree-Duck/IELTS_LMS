@@ -231,6 +231,7 @@
             </div>
             <hr class="tnav-divider">
             <button class="tnav-nav-link" data-view="change-password" onclick="showView('change-password')">🔑 Đổi mật khẩu</button>
+            <button class="tnav-nav-link" onclick="closeAllDropdowns(); openThemeModal()">🎨 Giao diện</button>
             <button class="tnav-nav-link tnav-logout-btn" onclick="closeAllDropdowns(); logout()">🚪 Đăng xuất</button>
           </div>
         </div>
@@ -1997,5 +1998,17 @@
       <path d="M34 49 Q43 56 52 49" stroke="rgba(255,255,255,0.55)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
     </svg>
   </div>
+
+  <!-- Theme Modal -->
+  <div class="theme-modal-overlay hidden" id="theme-modal-overlay" onclick="closeThemeModal(event)">
+    <div class="theme-modal-box" onclick="event.stopPropagation()">
+      <div class="theme-modal-title">🎨 Chọn màu nền</div>
+      <div class="theme-swatches" id="theme-swatches">
+        <!-- Rendered by JS -->
+      </div>
+      <button class="btn btn-outline theme-modal-close" onclick="closeThemeModal()">Đóng</button>
+    </div>
+  </div>
+
 </body>
 </html>

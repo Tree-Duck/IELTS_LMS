@@ -51,6 +51,49 @@
 
 }
 
+/* ── Themes ───────────────────────────────────────────────────── */
+[data-bg-theme="mint"] {
+  --body-bg: #f2f9f5; --surface: #fff; --surface-2: #e8f3ed;
+}
+[data-bg-theme="ocean"] {
+  --body-bg: #eef4fb; --surface: #fff; --surface-2: #ddeaf7;
+}
+[data-bg-theme="lavender"] {
+  --body-bg: #f3f0fb; --surface: #fff; --surface-2: #e8e1f7;
+}
+[data-bg-theme="cream"] {
+  --body-bg: #fdf8f0; --surface: #fffcf7; --surface-2: #f5ede0;
+}
+[data-bg-theme="rose"] {
+  --body-bg: #fdf2f4; --surface: #fff; --surface-2: #fce8ec;
+}
+[data-bg-theme="slate"] {
+  --body-bg: #f1f3f6; --surface: #fff; --surface-2: #e4e7ed;
+}
+
+/* ── Theme Modal ──────────────────────────────────────────────── */
+.theme-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.theme-modal-overlay.hidden { display: none; }
+.theme-modal-box {
+  background: var(--surface); border-radius: 18px; padding: 1.75rem;
+  width: min(420px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+.theme-modal-title { font-size: 1.1rem; font-weight: 800; color: var(--gray-800); margin-bottom: 1.25rem; }
+.theme-swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+.theme-swatch {
+  border-radius: 12px; padding: 0.9rem 0.75rem; cursor: pointer; text-align: center;
+  border: 2.5px solid transparent; transition: border-color 0.15s, box-shadow 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+}
+.theme-swatch:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
+.theme-swatch.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+.theme-swatch-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); }
+.theme-swatch-name { font-size: 0.8rem; font-weight: 700; color: var(--gray-700); }
+.theme-modal-close { width: 100%; }
+
 body {
   font-family: 'Nunito', 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--body-bg);
