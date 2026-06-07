@@ -1576,7 +1576,9 @@ function showView(name) {
   else if (name === 'translation-exercise') { /* loaded via startTranslationBuoc */ }
   else if (name === 'paragraph-list') loadParagraphList();
   else if (name === 'paragraph-exercise') { /* loaded via openParagraphExercise */ }
-  else if (name === 'para-lab') showParaLab();
+  else if (name === 'games') { /* static hub, no loader */ }
+  else if (name === 'vocab-blitz') showVocabBlitz();
+  else if (name === 'band-climber') showBandClimber();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -9777,510 +9779,540 @@ function _showVocabResult(title, score, total, message) {
 }
 
 /* =====================================================
-   PARA LAB — Pixel Art RPG Paragraph Battle Game
+   GAMES — Vocab Blitz (arcade) + Band Climber (AI writing)
+   Replaces the old Para-Lab pixel-RPG.
    ===================================================== */
 
-// ---- State ----
-let _paraLabStage = 0;             // 0=point, 1=evidence, 2=analysis, 3=link
-let _paraLabSentences = [];        // accepted sentences
-let _paraLabScores = [];           // per-stage scores
-let _paraLabQuestion = null;
-let _paraLabThesis = null;
-let _paraLabHearts = 5;
-let _paraLabMonsterHp = 100;
-let _paraLabMonsterHpMax = 100;
-let _paraLabExp = 0;
-let _paraLabCurrentBand = 5;
-let _paraLabTargetBand = 6.5;
-let _paraLabSubmitting = false;
-let _paraLabCurrentMonster = null;
+/* =====================================================
+   VOCAB BLITZ — 60s arcade vocabulary game (no AI)
+   ===================================================== */
+let _vbWords = [];
+let _vbIndex = 0;
+let _vbScore = 0;
+let _vbCombo = 0;
+let _vbMult = 1;
+let _vbTimeLeft = 60;
+let _vbTimerId = null;
+let _vbTopic = 'all';
+let _vbLevel = 'all';
+let _vbMode = 'choice';   // 'choice' | 'type'
+let _vbCorrect = 0;
+let _vbWrong = 0;
+let _vbMissed = [];
+let _vbAnswered = false;
 
-// ---- Constants ----
-const PARA_MONSTERS = {
-  tautology:  { emoji: '🐉', name: 'TAUTOLOGY DRAGON' },
-  vague:      { emoji: '👻', name: 'VAGUE PHANTOM'    },
-  baby_words: { emoji: '🤡', name: 'BABY WORD CLOWN'  },
-  circular:   { emoji: '🕷️', name: 'CIRCULAR SPIDER'  },
-  none:       { emoji: '💀', name: 'LOGIC WRAITH'      },
-};
+const VB_DURATION = 60;
 
-const PARA_STAGE_META = [
-  { key: 'topic_sentence', label: 'STAGE 1 — POINT',    color: '#ffbb33', hint: 'Write a topic sentence — a clear claim linked to the thesis.' },
-  { key: 'evidence',       label: 'STAGE 2 — EVIDENCE', color: '#88aaff', hint: 'Provide a specific example or data. New information only — do not restate Stage 1.' },
-  { key: 'analysis',       label: 'STAGE 3 — ANALYSIS', color: '#ff8844', hint: 'Explain WHY the evidence proves your point. Avoid tautology.' },
-  { key: 'link',           label: 'STAGE 4 — LINK',     color: '#55ff88', hint: 'Connect back to the essay question without repeating it word-for-word.' },
+function vbPool() {
+  const topics = _vbTopic === 'all' ? Object.keys(VOCAB_BANK) : [_vbTopic];
+  const levels = _vbLevel === 'all' ? ['B1', 'B2', 'C1', 'C2'] : [_vbLevel];
+  const out = [];
+  topics.forEach(t => {
+    levels.forEach(l => {
+      ((VOCAB_BANK[t] && VOCAB_BANK[t][l]) || []).forEach(w => {
+        if (w.word && w.vietnamese) out.push(w);
+      });
+    });
+  });
+  return out;
+}
+
+function vbBestKey() { return `vbBest_${_vbTopic}_${_vbLevel}_${_vbMode}`; }
+function vbGetBest() { return parseInt(localStorage.getItem(vbBestKey()) || '0', 10); }
+function vbSetBest(s) { try { localStorage.setItem(vbBestKey(), String(s)); } catch (e) {} }
+
+function vbShuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showVocabBlitz() {
+  const root = document.getElementById('vocab-blitz-root');
+  if (!root) return;
+  if (_vbTimerId) { clearInterval(_vbTimerId); _vbTimerId = null; }
+  renderVbStart();
+}
+
+function renderVbStart() {
+  const root = document.getElementById('vocab-blitz-root');
+  if (!root) return;
+  const topics = Object.keys(VOCAB_BANK);
+  const levels = ['B1', 'B2', 'C1', 'C2'];
+  const best = vbGetBest();
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
+      <div class="vb-start">
+        <div class="vb-logo">⚡ Vocab Blitz</div>
+        <div class="vb-tagline">Nhớ từ vựng tốc độ — ${VB_DURATION} giây, càng nhanh càng nhiều điểm!</div>
+
+        <div class="vb-opt-group">
+          <div class="vb-opt-label">Chủ đề</div>
+          <div class="vb-chips" id="vb-topic-chips">
+            <button class="vb-chip${_vbTopic === 'all' ? ' active' : ''}" onclick="vbSetTopic('all')">Tất cả</button>
+            ${topics.map(t => `<button class="vb-chip${_vbTopic === t ? ' active' : ''}" onclick="vbSetTopic('${t.replace(/'/g, "\\'")}')">${escapeHtml(t)}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="vb-opt-group">
+          <div class="vb-opt-label">Cấp độ</div>
+          <div class="vb-chips" id="vb-level-chips">
+            <button class="vb-chip${_vbLevel === 'all' ? ' active' : ''}" onclick="vbSetLevel('all')">Tất cả</button>
+            ${levels.map(l => `<button class="vb-chip${_vbLevel === l ? ' active' : ''}" onclick="vbSetLevel('${l}')">${l}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="vb-opt-group">
+          <div class="vb-opt-label">Chế độ</div>
+          <div class="vb-chips" id="vb-mode-chips">
+            <button class="vb-chip${_vbMode === 'choice' ? ' active' : ''}" onclick="vbSetMode('choice')">Trắc nghiệm</button>
+            <button class="vb-chip${_vbMode === 'type' ? ' active' : ''}" onclick="vbSetMode('type')">Gõ chữ</button>
+          </div>
+        </div>
+
+        <div class="vb-best">🏆 Kỷ lục: <strong>${best}</strong></div>
+        <button class="vb-start-btn" onclick="vbStartGame()">▶ Bắt đầu</button>
+        <div class="vb-hint-text">Hiện nghĩa tiếng Việt → chọn/gõ từ tiếng Anh đúng. Đúng liên tiếp = combo nhân điểm 🔥</div>
+      </div>
+    </div>`;
+}
+
+function vbSetTopic(t) { _vbTopic = t; renderVbStart(); }
+function vbSetLevel(l) { _vbLevel = l; renderVbStart(); }
+function vbSetMode(m) { _vbMode = m; renderVbStart(); }
+
+function vbStartGame() {
+  const pool = vbPool();
+  if (pool.length < 4) { showToast('Cần ít nhất 4 từ — chọn chủ đề/cấp độ rộng hơn.', 4000); return; }
+  _vbWords = vbShuffle(pool);
+  _vbIndex = 0; _vbScore = 0; _vbCombo = 0; _vbMult = 1;
+  _vbCorrect = 0; _vbWrong = 0; _vbMissed = [];
+  _vbTimeLeft = VB_DURATION;
+  renderVbQuestion();
+  if (_vbTimerId) clearInterval(_vbTimerId);
+  _vbTimerId = setInterval(vbTick, 1000);
+}
+
+function vbTick() {
+  _vbTimeLeft--;
+  vbUpdateTimer();
+  if (_vbTimeLeft <= 0) vbEndGame();
+}
+
+function vbUpdateTimer() {
+  const t = document.getElementById('vb-timer');
+  if (t) t.textContent = Math.max(0, _vbTimeLeft);
+  const bar = document.getElementById('vb-timer-bar');
+  if (bar) bar.style.width = Math.max(0, (_vbTimeLeft / VB_DURATION) * 100) + '%';
+}
+
+function vbCurrentWord() {
+  if (_vbIndex >= _vbWords.length) { _vbWords = vbShuffle(_vbWords); _vbIndex = 0; }
+  return _vbWords[_vbIndex];
+}
+
+function vbPickDistractors(correct) {
+  const pool = _vbWords.filter(w => w.word !== correct.word);
+  return vbShuffle(pool).slice(0, 3).map(w => w.word);
+}
+
+function renderVbQuestion() {
+  const root = document.getElementById('vocab-blitz-root');
+  if (!root) return;
+  _vbAnswered = false;
+  const w = vbCurrentWord();
+
+  let answerHtml;
+  if (_vbMode === 'choice') {
+    const options = vbShuffle([w.word, ...vbPickDistractors(w)]);
+    answerHtml = `<div class="vb-options">
+      ${options.map(o => `<button class="vb-option" onclick="vbAnswer(this, '${o.replace(/'/g, "\\'")}')">${escapeHtml(o)}</button>`).join('')}
+    </div>`;
+  } else {
+    answerHtml = `<div class="vb-type-row">
+      <input class="vb-type-input" id="vb-type-input" autocomplete="off" autocapitalize="off" spellcheck="false"
+        placeholder="Gõ từ tiếng Anh..." onkeydown="if(event.key==='Enter')vbCheckTyped()">
+      <button class="vb-type-btn" onclick="vbCheckTyped()">✓</button>
+    </div>
+    <button class="vb-skip" onclick="vbSkip()">Bỏ qua →</button>`;
+  }
+
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-hud">
+        <div class="vb-hud-score">⭐ <span id="vb-score">${_vbScore}</span></div>
+        <div class="vb-hud-combo" id="vb-combo">${_vbCombo >= 2 ? `🔥 x${_vbMult} · ${_vbCombo}` : ''}</div>
+        <div class="vb-hud-timer">⏱ <span id="vb-timer">${_vbTimeLeft}</span>s</div>
+      </div>
+      <div class="vb-timer-track"><div class="vb-timer-bar" id="vb-timer-bar" style="width:${(_vbTimeLeft / VB_DURATION) * 100}%"></div></div>
+
+      <div class="vb-q-card" id="vb-q-card">
+        <div class="vb-q-label">Nghĩa tiếng Việt</div>
+        <div class="vb-q-vi">${escapeHtml(w.vietnamese)}</div>
+        <div class="vb-q-def">${escapeHtml(w.definition || '')}</div>
+      </div>
+
+      ${answerHtml}
+      <div class="vb-float-layer" id="vb-float-layer"></div>
+    </div>`;
+
+  if (_vbMode === 'type') { const inp = document.getElementById('vb-type-input'); if (inp) inp.focus(); }
+}
+
+function vbFloatScore(text, good) {
+  const layer = document.getElementById('vb-float-layer');
+  if (!layer) return;
+  const s = document.createElement('span');
+  s.className = 'vb-float ' + (good ? 'good' : 'bad');
+  s.textContent = text;
+  s.style.left = (35 + Math.random() * 30) + '%';
+  layer.appendChild(s);
+  setTimeout(() => s.remove(), 900);
+}
+
+function vbAdvance() {
+  _vbIndex++;
+  if (_vbTimeLeft > 0) renderVbQuestion();
+}
+
+function vbUpdateHud() {
+  const sc = document.getElementById('vb-score');
+  if (sc) sc.textContent = _vbScore;
+  const cb = document.getElementById('vb-combo');
+  if (cb) cb.textContent = _vbCombo >= 2 ? `🔥 x${_vbMult} · ${_vbCombo}` : '';
+}
+
+function vbHandleCorrect() {
+  _vbCombo++;
+  if (_vbCombo > 0 && _vbCombo % 5 === 0 && _vbMult < 5) _vbMult++;
+  const gain = 100 * _vbMult;
+  _vbScore += gain;
+  _vbCorrect++;
+  vbUpdateHud();
+  vbFloatScore('+' + gain, true);
+  const card = document.getElementById('vb-q-card');
+  if (card) card.classList.add('vb-flash-good');
+  setTimeout(vbAdvance, 280);
+}
+
+function vbHandleWrong() {
+  _vbCombo = 0; _vbMult = 1;
+  _vbWrong++;
+  _vbTimeLeft = Math.max(0, _vbTimeLeft - 2);
+  vbUpdateTimer();
+  vbUpdateHud();
+  const w = vbCurrentWord();
+  if (!_vbMissed.find(m => m.word === w.word)) _vbMissed.push(w);
+  vbFloatScore('-2s', false);
+  const card = document.getElementById('vb-q-card');
+  if (card) card.classList.add('vb-flash-bad');
+  setTimeout(vbAdvance, 750);
+}
+
+function vbAnswer(btn, choice) {
+  if (_vbAnswered) return;
+  _vbAnswered = true;
+  const w = vbCurrentWord();
+  const correct = choice === w.word;
+  document.querySelectorAll('.vb-option').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === w.word) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  if (correct) vbHandleCorrect(); else vbHandleWrong();
+}
+
+function vbCheckTyped() {
+  if (_vbAnswered) return;
+  const inp = document.getElementById('vb-type-input');
+  if (!inp) return;
+  const val = (inp.value || '').trim().toLowerCase();
+  if (!val) return;
+  _vbAnswered = true;
+  const w = vbCurrentWord();
+  const correct = val === w.word.toLowerCase();
+  inp.classList.add(correct ? 'correct' : 'wrong');
+  inp.disabled = true;
+  if (!correct) inp.value = w.word;
+  if (correct) vbHandleCorrect(); else vbHandleWrong();
+}
+
+function vbSkip() {
+  if (_vbAnswered) return;
+  _vbAnswered = true;
+  vbHandleWrong();
+}
+
+function vbEndGame() {
+  if (_vbTimerId) { clearInterval(_vbTimerId); _vbTimerId = null; }
+  renderVbResults();
+}
+
+function renderVbResults() {
+  const root = document.getElementById('vocab-blitz-root');
+  if (!root) return;
+  const total = _vbCorrect + _vbWrong;
+  const acc = total ? Math.round(_vbCorrect / total * 100) : 0;
+  const prevBest = vbGetBest();
+  const isNew = _vbScore > prevBest;
+  if (isNew) vbSetBest(_vbScore);
+
+  const missedHtml = _vbMissed.length
+    ? _vbMissed.slice(0, 12).map(w => `<div class="vb-missed-item"><strong>${escapeHtml(w.word)}</strong> — ${escapeHtml(w.vietnamese)}</div>`).join('')
+    : '<div class="vb-missed-empty">Tuyệt vời! Không sai từ nào 🎉</div>';
+
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results">
+        ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
+        <div class="vb-results-score">${_vbScore}</div>
+        <div class="vb-results-score-lbl">điểm</div>
+        <div class="vb-results-stats">
+          <div class="vb-rstat"><div class="vb-rstat-val">${_vbCorrect}</div><div class="vb-rstat-lbl">Đúng</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${_vbWrong}</div><div class="vb-rstat-lbl">Sai</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${acc}%</div><div class="vb-rstat-lbl">Chính xác</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${prevBest}</div><div class="vb-rstat-lbl">Kỷ lục cũ</div></div>
+        </div>
+        <div class="vb-missed">
+          <div class="vb-missed-title">📒 Từ cần ôn</div>
+          ${missedHtml}
+        </div>
+        <div class="vb-results-btns">
+          <button class="vb-start-btn" onclick="vbStartGame()">↺ Chơi lại</button>
+          <button class="vb-secondary-btn" onclick="renderVbStart()">⚙ Đổi chủ đề</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* =====================================================
+   BAND CLIMBER — AI sentence-by-sentence writing climb
+   (reuses POST /api/game/para-lab — backend unchanged)
+   ===================================================== */
+let _bcStage = 0;
+let _bcSentences = [];
+let _bcScores = [];
+let _bcQuestion = null;
+let _bcThesis = null;
+let _bcPosition = null;
+let _bcCurrentBand = 5;
+let _bcTargetBand = 7;
+let _bcSubmitting = false;
+
+const BC_STAGES = [
+  { key: 'topic_sentence', label: 'Câu chủ đề', color: '#f59e0b', hint: 'Viết câu chủ đề — nêu rõ luận điểm gắn với quan điểm của bạn.' },
+  { key: 'evidence',       label: 'Dẫn chứng',  color: '#3b82f6', hint: 'Đưa ví dụ/số liệu cụ thể. Thông tin mới — không lặp lại câu chủ đề.' },
+  { key: 'analysis',       label: 'Phân tích',  color: '#f97316', hint: 'Giải thích VÌ SAO dẫn chứng chứng minh luận điểm. Tránh lặp ý.' },
+  { key: 'link',           label: 'Liên kết',   color: '#10b981', hint: 'Nối lại với đề bài mà không lặp y nguyên từng chữ.' },
 ];
 
-const PARA_MONSTER_ATTACKS = {
-  tautology:  ['TAUTOLOGY BEAM!', 'CIRCULAR BREATH!', 'REPETITION ROAR!'],
-  vague:      ['VAGUENESS WAIL!', 'EMPTY HOWL!', 'PHANTOM STRIKE!'],
-  baby_words: ['BABY BLUDGEON!', 'WEAK WORD WALLOP!', 'CLOWN SMASH!'],
-  circular:   ['LOOP LUNGE!', 'SPIN SLASH!', 'CIRCULAR BITE!'],
-  none:       ['SHADOW STRIKE!', 'VOID SLASH!', 'WRAITH DRAIN!'],
-};
+function bcQText(q) {
+  if (!q) return '';
+  return typeof q === 'string' ? q : (q.q || q.prompt || q.question || '');
+}
 
-// ---- Entry ----
-function showParaLab() {
-  const root = document.getElementById('para-lab-root');
+function showBandClimber() {
+  const root = document.getElementById('band-climber-root');
   if (!root) return;
-  renderParaLabBandSelect();
+  bcReshuffle();
 }
 
-// ---- Band Selection Screen ----
-function renderParaLabBandSelect() {
-  const root = document.getElementById('para-lab-root');
-  if (!root) return;
-
-  const currentBands  = [4, 4.5, 5, 5.5, 6, 6.5];
-  const targetBands   = [5, 5.5, 6, 6.5, 7, 7.5, 8];
-
-  root.innerHTML = `
-    <div class="pl-card">
-      <div class="pl-band-screen">
-        <div class="pl-band-title">⚔️ PARA LAB</div>
-        <div class="pl-band-subtitle">Paragraph Battle Training — Destroy logic flaws in your IELTS writing</div>
-
-        <div class="pl-band-section">
-          <div class="pl-band-section-label">🎮 Your current band</div>
-          <div class="pl-band-row" id="pl-current-row">
-            ${currentBands.map(b => `
-              <button class="pl-band-btn${b === _paraLabCurrentBand ? ' selected' : ''}"
-                onclick="paraLabSelectCurrent(${b})">${b}</button>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="pl-band-section">
-          <div class="pl-band-section-label">🎯 Your target band</div>
-          <div class="pl-band-row" id="pl-target-row">
-            ${targetBands.map(b => `
-              <button class="pl-band-btn${b === _paraLabTargetBand ? ' selected' : ''}"
-                id="pl-target-${b.toString().replace('.','_')}"
-                onclick="paraLabSelectTarget(${b})">${b}</button>
-            `).join('')}
-          </div>
-        </div>
-
-        <button class="pl-start-btn" id="pl-start-btn" onclick="paraLabBeginGame()">▶ START BATTLE</button>
-      </div>
-    </div>`;
-
-  _paraLabUpdateTargetButtons();
-}
-
-function paraLabSelectCurrent(band) {
-  _paraLabCurrentBand = band;
-  document.querySelectorAll('#pl-current-row .pl-band-btn').forEach(btn => {
-    btn.classList.toggle('selected', parseFloat(btn.textContent) === band);
-  });
-  // If target <= new current, bump target
-  if (_paraLabTargetBand <= _paraLabCurrentBand) {
-    _paraLabTargetBand = _paraLabCurrentBand + 0.5;
-  }
-  _paraLabUpdateTargetButtons();
-}
-
-function paraLabSelectTarget(band) {
-  if (band <= _paraLabCurrentBand) return;
-  _paraLabTargetBand = band;
-  _paraLabUpdateTargetButtons();
-}
-
-function _paraLabUpdateTargetButtons() {
-  document.querySelectorAll('#pl-target-row .pl-band-btn').forEach(btn => {
-    const v = parseFloat(btn.textContent);
-    const tooLow = v <= _paraLabCurrentBand;
-    btn.disabled = tooLow;
-    btn.classList.toggle('selected', v === _paraLabTargetBand);
-  });
-}
-
-function paraLabBeginGame() {
-  // Difficulty from gap
-  const gap = _paraLabTargetBand - _paraLabCurrentBand;
-  _paraLabHearts       = gap >= 2 ? 3 : gap >= 1 ? 4 : 5;
-  _paraLabMonsterHpMax = Math.round(60 + gap * 20);
-  _paraLabMonsterHp    = _paraLabMonsterHpMax;
-  _paraLabExp          = 0;
-  _paraLabStage        = 0;
-  _paraLabSentences    = [];
-  _paraLabScores       = [];
-
-  // Pick random task2 question
+function bcReshuffle() {
   const pool = PROMPT_BANK.task2;
-  _paraLabQuestion = pool[Math.floor(Math.random() * pool.length)];
-
-  renderParaLabThesisChoice();
+  _bcQuestion = pool[Math.floor(Math.random() * pool.length)];
+  _bcPosition = null;
+  renderBcStart();
 }
 
-// ---- Thesis Choice Screen ----
-function renderParaLabThesisChoice() {
-  const root = document.getElementById('para-lab-root');
+function renderBcStart() {
+  const root = document.getElementById('band-climber-root');
   if (!root) return;
-
-  const q = _paraLabQuestion;
-  const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
-
   root.innerHTML = `
-    <div class="pl-card">
-      <div class="pl-thesis-screen">
-        <div class="pl-thesis-title">📜 Choose Your Position</div>
-        <div class="pl-question-box">${prompt}</div>
-        <div class="pl-thesis-options">
-          <button class="pl-thesis-btn" onclick="paraLabSetThesis('agree')">
-            <span style="color:#55ff88">▶ AGREE</span><br>
-            <span style="font-size:11px;color:#888">I will argue in favour of this statement</span>
-          </button>
-          <button class="pl-thesis-btn" onclick="paraLabSetThesis('disagree')">
-            <span style="color:#ff5555">▶ DISAGREE</span><br>
-            <span style="font-size:11px;color:#888">I will argue against this statement</span>
-          </button>
-          <button class="pl-thesis-btn" onclick="paraLabSetThesis('partly agree')">
-            <span style="color:#ffbb33">▶ PARTLY AGREE</span><br>
-            <span style="font-size:11px;color:#888">I will present a balanced view</span>
-          </button>
+    <div class="bc-wrap">
+      <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
+      <div class="bc-start">
+        <div class="bc-logo">🧗 Band Climber</div>
+        <div class="bc-tagline">Viết từng câu — AI chấm band tức thì — leo thang từ 4.0 lên 9.0</div>
+
+        <div class="bc-q-box">
+          <div class="bc-q-label">Đề bài (Task 2)</div>
+          <div class="bc-q-text">${escapeHtml(bcQText(_bcQuestion))}</div>
+          <button class="bc-reshuffle" onclick="bcReshuffle()">🎲 Đổi đề</button>
         </div>
-        <div style="margin-top:14px;text-align:center">
-          <button class="pl-band-btn" onclick="renderParaLabBandSelect()" style="font-size:11px">← Back</button>
+
+        <div class="bc-pos-label">Chọn quan điểm của bạn:</div>
+        <div class="bc-pos-options">
+          <button class="bc-pos-btn" onclick="bcSetPosition('Đồng ý')"><strong>Đồng ý</strong><span>Ủng hộ quan điểm</span></button>
+          <button class="bc-pos-btn" onclick="bcSetPosition('Phản đối')"><strong>Phản đối</strong><span>Phản bác quan điểm</span></button>
+          <button class="bc-pos-btn" onclick="bcSetPosition('Đồng ý một phần')"><strong>Đồng ý một phần</strong><span>Quan điểm cân bằng</span></button>
+        </div>
+
+        <div class="bc-band-row">
+          <label class="bc-band-sel"><span>Band hiện tại</span>
+            <select id="bc-current-band" onchange="bcBandChange()">
+              ${[4, 4.5, 5, 5.5, 6, 6.5].map(b => `<option value="${b}"${b === _bcCurrentBand ? ' selected' : ''}>${b}</option>`).join('')}
+            </select>
+          </label>
+          <label class="bc-band-sel"><span>Band mục tiêu</span>
+            <select id="bc-target-band" onchange="bcBandChange()">
+              ${[5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5].map(b => `<option value="${b}"${b === _bcTargetBand ? ' selected' : ''}>${b}</option>`).join('')}
+            </select>
+          </label>
         </div>
       </div>
     </div>`;
 }
 
-function paraLabSetThesis(position) {
-  const q = _paraLabQuestion;
-  const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
-  _paraLabThesis = `${position.charAt(0).toUpperCase() + position.slice(1)} — ${prompt}`;
-  _paraLabCurrentMonster = PARA_MONSTERS.none; // start with default, updated on first result
-  renderParaLabBattle();
+function bcBandChange() {
+  const c = parseFloat(document.getElementById('bc-current-band').value);
+  const t = parseFloat(document.getElementById('bc-target-band').value);
+  _bcCurrentBand = c;
+  _bcTargetBand = Math.max(t, c + 0.5);
 }
 
-// ---- Battle Screen ----
-function renderParaLabBattle() {
-  const root = document.getElementById('para-lab-root');
-  if (!root) return;
+function bcSetPosition(pos) {
+  _bcPosition = pos;
+  _bcThesis = `${pos} — ${bcQText(_bcQuestion)}`;
+  _bcStage = 0; _bcSentences = []; _bcScores = [];
+  renderBcClimb();
+}
 
-  const meta    = PARA_STAGE_META[_paraLabStage];
-  const monster = _paraLabCurrentMonster || PARA_MONSTERS.none;
-  const hpPct   = Math.round((_paraLabMonsterHp / _paraLabMonsterHpMax) * 100);
-  const expPct  = Math.min(100, Math.round((_paraLabExp / (PARA_STAGE_META.length * 25)) * 100));
-  const heartsHtml = _paraLabHeartsHtml();
+function bcLadderHtml() {
+  const bands = [9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4];
+  const avg = _bcScores.length ? _bcScores.reduce((a, b) => a + b, 0) / _bcScores.length : 0;
+  const pos = Math.min(9, _bcCurrentBand + avg * 0.2);
+  return `<div class="bc-ladder">
+    ${bands.map(b => {
+      const here = Math.abs(b - pos) < 0.26;
+      return `<div class="bc-rung${here ? ' here' : ''}"><span class="bc-rung-num">${b.toFixed(1)}</span>${here ? '<span class="bc-climber">🧗</span>' : ''}</div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderBcClimb() {
+  const root = document.getElementById('band-climber-root');
+  if (!root) return;
+  const meta = BC_STAGES[_bcStage];
+  const doneHtml = _bcSentences.map((s, i) =>
+    `<div class="bc-done-sent" style="border-left-color:${BC_STAGES[i].color}">
+      <span class="bc-done-tag" style="color:${BC_STAGES[i].color}">${BC_STAGES[i].label}</span>
+      ${escapeHtml(s)}
+    </div>`).join('');
 
   root.innerHTML = `
-    <div class="pl-card" id="pl-card">
-
-      <!-- HUD -->
-      <div class="pl-hud">
-        <div class="pl-hud-hearts" id="pl-hearts-display">${heartsHtml}</div>
-        <div class="pl-hud-stage" style="color:${meta.color}">${meta.label}</div>
-        <div class="pl-hud-exp">EXP: ${_paraLabExp}</div>
-      </div>
-
-      <!-- Battle Field -->
-      <div class="pl-field" id="pl-field">
-        <!-- Hero -->
-        <div class="pl-hero">
-          <span class="pl-sprite pl-idle" id="pl-hero-sprite">🧙</span>
-          <span class="pl-sprite-label">WRITER</span>
-          <div class="pl-hp-bar-wrap">
-            <div class="pl-hp-label">HP</div>
-            <div class="pl-hp-track">
-              <div class="pl-hp-fill hero" id="pl-hero-hp-fill"
-                style="width:${Math.round((_paraLabHearts / ((_paraLabTargetBand - _paraLabCurrentBand) >= 2 ? 3 : (_paraLabTargetBand - _paraLabCurrentBand) >= 1 ? 4 : 5)) * 100)}%"></div>
-            </div>
+    <div class="bc-wrap">
+      <div class="bc-climb-grid">
+        <div class="bc-climb-left">
+          <div class="bc-ladder-title">Thang Band</div>
+          ${bcLadderHtml()}
+        </div>
+        <div class="bc-climb-right">
+          <div class="bc-stage-progress">
+            ${BC_STAGES.map((s, i) => `<span class="bc-step${i === _bcStage ? ' active' : ''}${i < _bcStage ? ' done' : ''}" style="${i <= _bcStage ? `background:${s.color};border-color:${s.color};color:#fff` : ''}">${i < _bcStage ? '✓' : i + 1}</span>`).join('')}
           </div>
-        </div>
-
-        <!-- Enemy -->
-        <div class="pl-enemy" id="pl-enemy-wrap">
-          <span class="pl-sprite pl-idle" id="pl-enemy-sprite">${monster.emoji}</span>
-          <span class="pl-sprite-label" id="pl-enemy-name">${monster.name}</span>
-          <div class="pl-hp-bar-wrap">
-            <div class="pl-hp-label">MONSTER HP</div>
-            <div class="pl-hp-track">
-              <div class="pl-hp-fill enemy" id="pl-enemy-hp-fill" style="width:${hpPct}%"></div>
-            </div>
+          <div class="bc-stage-card">
+            <div class="bc-stage-label" style="color:${meta.color}">${meta.label}</div>
+            <div class="bc-stage-hint">${meta.hint}</div>
+            <textarea class="bc-textarea" id="bc-textarea" placeholder="Viết câu của bạn..."
+              oninput="document.getElementById('bc-submit').disabled=this.value.trim().length<5"></textarea>
+            <button class="bc-submit" id="bc-submit" disabled onclick="submitBcSentence()">Gửi câu →</button>
           </div>
+          <div class="bc-feedback" id="bc-feedback"></div>
+          ${doneHtml ? `<div class="bc-done-list">${doneHtml}</div>` : ''}
         </div>
       </div>
-
-      <!-- Dialogue Box -->
-      <div class="pl-dialogue" id="pl-dialogue">
-        <span class="pl-dialogue-name">CLAUDE EXAMINER: </span>
-        <span id="pl-dialogue-text">${meta.hint}</span>
-        <span class="pl-blink pl-dialogue-cursor">█</span>
-      </div>
-
-      <!-- Stage Menu -->
-      <div class="pl-menu">
-        ${PARA_STAGE_META.map((s, i) => `
-          <div class="pl-menu-item${i === _paraLabStage ? ' active' : ''}">
-            ${i === _paraLabStage ? '<span class="pl-menu-arrow">▶</span>' : '<span style="opacity:0">▶</span>'}
-            ${i < _paraLabStage ? '✅' : ''} ${s.label.split('—')[1] || s.label}
-          </div>`).join('')}
-      </div>
-
-      <!-- Write Zone -->
-      <div class="pl-write-zone">
-        <div class="pl-stage-prompt" style="color:${meta.color}">${meta.label}: Write your sentence below</div>
-        <textarea class="pl-textarea" id="pl-textarea"
-          placeholder="${meta.hint}"
-          oninput="document.getElementById('pl-attack-btn').disabled = this.value.trim().length < 5"
-        ></textarea>
-        <button class="pl-attack-btn" id="pl-attack-btn" disabled
-          onclick="submitParaLabSentence()">⚔️ ATTACK</button>
-      </div>
-
-      <!-- EXP Bar -->
-      <div class="pl-exp-bar">
-        <div class="pl-exp-label">EXP ████ ${_paraLabExp} / ${PARA_STAGE_META.length * 25}</div>
-        <div class="pl-exp-track">
-          <div class="pl-exp-fill" id="pl-exp-fill" style="width:${expPct}%"></div>
-        </div>
-      </div>
-
     </div>`;
 }
 
-// ---- Submit Sentence ----
-async function submitParaLabSentence() {
-  if (_paraLabSubmitting) return;
-  const ta = document.getElementById('pl-textarea');
+async function submitBcSentence() {
+  if (_bcSubmitting) return;
+  const ta = document.getElementById('bc-textarea');
   if (!ta) return;
   const sentence = ta.value.trim();
   if (sentence.length < 5) return;
-
-  _paraLabSubmitting = true;
-  const btn = document.getElementById('pl-attack-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analysing...'; }
-
-  paraLabUpdateDialogue('<span class="pl-dialogue-name">CLAUDE EXAMINER: </span>Analysing your sentence...', '');
+  _bcSubmitting = true;
+  const btn = document.getElementById('bc-submit');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chấm...'; }
+  const fb = document.getElementById('bc-feedback');
+  if (fb) { fb.className = 'bc-feedback'; fb.innerHTML = '<div class="bc-fb-loading">AI đang chấm câu của bạn…</div>'; }
 
   try {
-    const q = _paraLabQuestion;
-    const prompt = typeof q === 'string' ? q : (q.prompt || q.question || JSON.stringify(q));
-
     const res = await fetch('/api/game/para-lab', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        stage: PARA_STAGE_META[_paraLabStage].key,
+        stage: BC_STAGES[_bcStage].key,
         sentence,
-        question: prompt,
-        thesis: _paraLabThesis,
-        previousSentences: _paraLabSentences,
-        currentBand: _paraLabCurrentBand,
-        targetBand: _paraLabTargetBand,
+        question: bcQText(_bcQuestion),
+        thesis: _bcThesis,
+        previousSentences: _bcSentences,
+        currentBand: _bcCurrentBand,
+        targetBand: _bcTargetBand,
       }),
     });
-
-    if (!res.ok) throw new Error('Server error ' + res.status);
+    if (!res.ok) throw new Error('Lỗi máy chủ ' + res.status);
     const data = await res.json();
-    animateParaLabResult(data, sentence);
+    bcHandleResult(data, sentence);
   } catch (err) {
-    paraLabUpdateDialogue(`<span class="pl-dialogue-name" style="color:#ff5555">ERROR: </span>${err.message}`, 'bad');
-    _paraLabSubmitting = false;
-    if (btn) { btn.disabled = false; btn.textContent = '⚔️ ATTACK'; }
+    if (fb) { fb.className = 'bc-feedback bad'; fb.innerHTML = `<strong>Lỗi:</strong> ${escapeHtml(err.message)}`; }
+    _bcSubmitting = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Gửi câu →'; }
   }
 }
 
-// ---- Animate Result ----
-function animateParaLabResult(data, sentence) {
+function bcHandleResult(data, sentence) {
   const score = data.score || 1;
-  const flaw  = data.flaw  || 'none';
-  const good  = score >= 3;
-
-  // Update current monster based on flaw
-  _paraLabCurrentMonster = PARA_MONSTERS[flaw] || PARA_MONSTERS.none;
-
-  // Update enemy sprite/name
-  const spriteEl = document.getElementById('pl-enemy-sprite');
-  const nameEl   = document.getElementById('pl-enemy-name');
-  if (spriteEl) spriteEl.textContent = _paraLabCurrentMonster.emoji;
-  if (nameEl)   nameEl.textContent   = _paraLabCurrentMonster.name;
-
+  const good = score >= 3;
+  _bcSubmitting = false;
+  const fb = document.getElementById('bc-feedback');
   if (good) {
-    // Deal damage to monster
-    const dmg = Math.round(score * 6 + Math.random() * 8);
-    _paraLabMonsterHp = Math.max(0, _paraLabMonsterHp - dmg);
-    _paraLabExp += score * 5;
-
-    spawnFloatNumber(`-${dmg}!`, true);
-    updateEnemyHpBar();
-
-    const expFill = document.getElementById('pl-exp-fill');
-    if (expFill) {
-      const pct = Math.min(100, Math.round((_paraLabExp / (PARA_STAGE_META.length * 25)) * 100));
-      expFill.style.width = pct + '%';
+    _bcSentences.push(sentence);
+    _bcScores.push(score);
+    _bcStage++;
+    if (fb) {
+      fb.className = 'bc-feedback good';
+      fb.innerHTML = `<div class="bc-fb-score">✅ ${score}/5</div><div>${escapeHtml(data.feedback || 'Câu tốt!')}</div>${data.suggestion ? `<div class="bc-fb-tip">💡 ${escapeHtml(data.suggestion)}</div>` : ''}`;
     }
-    const expLabel = document.querySelector('.pl-exp-label');
-    if (expLabel) expLabel.textContent = `EXP ████ ${_paraLabExp} / ${PARA_STAGE_META.length * 25}`;
-
-    paraLabUpdateDialogue(
-      `<span class="pl-dialogue-name" style="color:#55ff88">CLAUDE EXAMINER: </span>${data.feedback || 'Good sentence!'} <br><span style="color:#aaa;font-size:11px">SCORE: ${score}/5</span>`,
-      'good'
-    );
-
-    // Accept sentence and advance after short delay
     setTimeout(() => {
-      _paraLabSentences.push(sentence);
-      _paraLabScores.push(score);
-      _paraLabStage++;
-      _paraLabSubmitting = false;
-
-      if (_paraLabStage >= PARA_STAGE_META.length) {
-        renderParaLabFinal();
-      } else {
-        renderParaLabBattle();
-      }
-    }, 1800);
-
+      if (_bcStage >= BC_STAGES.length) renderBcFinal();
+      else renderBcClimb();
+    }, 1400);
   } else {
-    // Monster attacks player
-    _paraLabHearts = Math.max(0, _paraLabHearts - 1);
-
-    const attackMsgs = PARA_MONSTER_ATTACKS[flaw] || PARA_MONSTER_ATTACKS.none;
-    const attackMsg  = attackMsgs[Math.floor(Math.random() * attackMsgs.length)];
-
-    spawnFloatNumber('-1 ❤️', false);
-    shakeElement('pl-card');
-    updateHeartsDisplay();
-
-    paraLabUpdateDialogue(
-      `<span class="pl-dialogue-name" style="color:#ff5555">${_paraLabCurrentMonster.name}: ${attackMsg}</span><br>` +
-      `<span style="color:#ffbb33">CLAUDE: </span>${data.feedback || 'Try again.'}<br>` +
-      `<span style="color:#aaa;font-size:11px">💡 ${data.suggestion || 'Revise and attack again.'}</span>`,
-      'bad'
-    );
-
-    _paraLabSubmitting = false;
-    const btn = document.getElementById('pl-attack-btn');
-    if (btn) { btn.disabled = false; btn.textContent = '⚔️ ATTACK'; }
-
-    if (_paraLabHearts <= 0) {
-      setTimeout(renderParaLabGameOver, 1500);
+    const btn = document.getElementById('bc-submit');
+    if (btn) { btn.disabled = false; btn.textContent = 'Thử lại →'; }
+    if (fb) {
+      fb.className = 'bc-feedback bad';
+      fb.innerHTML = `<div class="bc-fb-score">${score}/5 · thử lại</div><div>${escapeHtml(data.feedback || 'Chưa đạt, sửa lại nhé.')}</div>${data.suggestion ? `<div class="bc-fb-tip">💡 ${escapeHtml(data.suggestion)}</div>` : ''}`;
     }
   }
 }
 
-// ---- UI Helpers ----
-function paraLabUpdateDialogue(html, type) {
-  const box = document.getElementById('pl-dialogue');
-  if (!box) return;
-  box.className = 'pl-dialogue' + (type ? ' ' + type : '');
-  box.innerHTML = html + '<span class="pl-blink pl-dialogue-cursor">█</span>';
-}
-
-function updateEnemyHpBar() {
-  const fill = document.getElementById('pl-enemy-hp-fill');
-  if (!fill) return;
-  const pct = Math.max(0, Math.round((_paraLabMonsterHp / _paraLabMonsterHpMax) * 100));
-  fill.style.width = pct + '%';
-}
-
-function updateHeartsDisplay() {
-  const el = document.getElementById('pl-hearts-display');
-  if (el) el.innerHTML = _paraLabHeartsHtml();
-}
-
-function _paraLabHeartsHtml() {
-  const maxH = (_paraLabTargetBand - _paraLabCurrentBand) >= 2 ? 3
-             : (_paraLabTargetBand - _paraLabCurrentBand) >= 1 ? 4 : 5;
-  let html = '';
-  for (let i = 0; i < maxH; i++) {
-    html += i < _paraLabHearts ? '❤️' : '<span style="opacity:0.25">🤍</span>';
-  }
-  return html;
-}
-
-function spawnFloatNumber(text, isGood) {
-  const field = document.getElementById('pl-field');
-  if (!field) return;
-  const span = document.createElement('span');
-  span.className = isGood ? 'pl-damage-float' : 'pl-heal-float';
-  span.textContent = text;
-  span.style.top  = (30 + Math.random() * 30) + 'px';
-  span.style.left = isGood ? (55 + Math.random() * 20) + '%' : (20 + Math.random() * 15) + '%';
-  if (!isGood) span.style.color = '#ff4444';
-  field.appendChild(span);
-  setTimeout(() => span.remove(), 1600);
-}
-
-function shakeElement(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.add('pl-shake');
-  setTimeout(() => el.classList.remove('pl-shake'), 450);
-}
-
-// ---- Game Over Screen ----
-function renderParaLabGameOver() {
-  const root = document.getElementById('para-lab-root');
+function renderBcFinal() {
+  const root = document.getElementById('band-climber-root');
   if (!root) return;
-  root.innerHTML = `
-    <div class="pl-card">
-      <div class="pl-gameover">
-        <div class="pl-gameover-title">💀 GAME OVER</div>
-        <div class="pl-gameover-sub">The ${(_paraLabCurrentMonster || PARA_MONSTERS.none).name} defeated you.<br>Study your flaws and try again.</div>
-        <button class="pl-retry-btn" onclick="paraLabBeginGame()">↺ RETRY (same topic)</button>
-        <button class="pl-retry-btn" style="background:#333;color:#aaa" onclick="showParaLab()">← NEW GAME</button>
-      </div>
-    </div>`;
-}
-
-// ---- Final Screen ----
-function renderParaLabFinal() {
-  const root = document.getElementById('para-lab-root');
-  if (!root) return;
-
-  const colorClasses = ['pl-sentence-point', 'pl-sentence-evidence', 'pl-sentence-analysis', 'pl-sentence-link'];
-  const labels       = ['POINT', 'EVIDENCE', 'ANALYSIS', 'LINK'];
-
-  const paraHtml = _paraLabSentences.map((s, i) =>
-    `<span class="${colorClasses[i]}">[${labels[i]}] ${s}</span>`
-  ).join('<br><br>');
-
-  const avgScore = _paraLabScores.length
-    ? (_paraLabScores.reduce((a, b) => a + b, 0) / _paraLabScores.length).toFixed(1)
-    : 0;
-  const bandEst  = Math.min(9, (_paraLabCurrentBand + parseFloat(avgScore) * 0.2)).toFixed(1);
+  const avg = _bcScores.length ? (_bcScores.reduce((a, b) => a + b, 0) / _bcScores.length) : 0;
+  const bandEst = Math.min(9, _bcCurrentBand + avg * 0.2).toFixed(1);
+  const paraHtml = _bcSentences.map((s, i) =>
+    `<span class="bc-final-sent" style="color:${BC_STAGES[i].color}">${escapeHtml(s)}</span>`).join(' ');
+  const sentRows = _bcSentences.map((s, i) =>
+    `<div class="bc-final-row"><span style="color:${BC_STAGES[i].color}">${BC_STAGES[i].label}</span><strong>${_bcScores[i]}/5</strong></div>`).join('');
 
   root.innerHTML = `
-    <div class="pl-card">
-      <div class="pl-final">
-        <div class="pl-final-title">🏆 PARAGRAPH COMPLETE!</div>
-
-        <div class="pl-final-para">${paraHtml || '<span style="color:#555">No sentences recorded.</span>'}</div>
-
-        <div class="pl-stat-box">
-          <div class="pl-stat">
-            <div class="pl-stat-val">${_paraLabExp}</div>
-            <div class="pl-stat-lbl">Total EXP</div>
-          </div>
-          <div class="pl-stat">
-            <div class="pl-stat-val">${avgScore}</div>
-            <div class="pl-stat-lbl">Avg Score</div>
-          </div>
-          <div class="pl-stat">
-            <div class="pl-stat-val">${_paraLabHearts}❤️</div>
-            <div class="pl-stat-lbl">Hearts Left</div>
-          </div>
-          <div class="pl-stat">
-            <div class="pl-stat-val">~${bandEst}</div>
-            <div class="pl-stat-lbl">Est. Band</div>
-          </div>
+    <div class="bc-wrap">
+      <div class="bc-final">
+        <div class="bc-final-title">🏔️ Hoàn thành đoạn văn!</div>
+        <div class="bc-final-band">~${bandEst}</div>
+        <div class="bc-final-band-lbl">Band ước tính</div>
+        <div class="bc-final-para">${paraHtml}</div>
+        <div class="bc-final-scores">${sentRows}</div>
+        <div class="bc-results-btns">
+          <button class="bc-submit-lg" onclick="showBandClimber()">▶ Đoạn mới</button>
+          <button class="bc-secondary-btn" onclick="showView('games')">← Trò chơi</button>
         </div>
-
-        <div style="font-family:monospace;font-size:12px;color:#888;margin-bottom:14px;text-align:center">
-          <span style="color:#ffbb33">■</span> Point &nbsp;
-          <span style="color:#88aaff">■</span> Evidence &nbsp;
-          <span style="color:#ff8844">■</span> Analysis &nbsp;
-          <span style="color:#55ff88">■</span> Link
-        </div>
-
-        <button class="pl-play-again-btn" onclick="showParaLab()">▶ PLAY AGAIN</button>
       </div>
     </div>`;
 }

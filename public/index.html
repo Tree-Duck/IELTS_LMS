@@ -186,7 +186,7 @@
             <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
             <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
             <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Hướng dẫn ngữ pháp</button>
-            <button class="tnav-nav-link" data-view="para-lab" onclick="showView('para-lab'); showParaLab()">⚔️ Lab đoạn văn</button>
+            <button class="tnav-nav-link" data-view="games" onclick="showView('games')">🎮 Trò chơi</button>
           </div>
         </div>
 
@@ -1983,9 +1983,34 @@
     </div>
   </div>
 
-  <!-- Para Lab Game View -->
-  <div id="view-para-lab" class="view hidden">
-    <div id="para-lab-root"></div>
+  <!-- Games Hub -->
+  <div id="view-games" class="view hidden">
+    <div class="games-hub">
+      <h2 class="games-hub-title">🎮 Trò chơi</h2>
+      <p class="games-hub-sub">Học mà chơi — luyện từ vựng và viết IELTS</p>
+      <div class="games-grid">
+        <button class="game-card" onclick="showView('vocab-blitz')">
+          <span class="game-card-icon">⚡</span>
+          <span class="game-card-name">Vocab Blitz</span>
+          <span class="game-card-desc">Nhớ từ vựng tốc độ — 60 giây, combo nhân điểm, đua kỷ lục</span>
+        </button>
+        <button class="game-card" onclick="showView('band-climber')">
+          <span class="game-card-icon">🧗</span>
+          <span class="game-card-name">Band Climber</span>
+          <span class="game-card-desc">Viết từng câu, AI chấm band tức thì, leo thang 4.0 → 9.0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vocab Blitz Game View -->
+  <div id="view-vocab-blitz" class="view hidden">
+    <div id="vocab-blitz-root"></div>
+  </div>
+
+  <!-- Band Climber Game View -->
+  <div id="view-band-climber" class="view hidden">
+    <div id="band-climber-root"></div>
   </div>
 
   <script src="app.js"></script>
