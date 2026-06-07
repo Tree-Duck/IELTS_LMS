@@ -258,11 +258,36 @@
             <h1 class="home-hero-title">Welcome back, <span id="home-welcome-name">Student</span>! 👋</h1>
             <p class="home-hero-sub">Pick up where you left off, or explore a new skill.</p>
           </div>
-          <div class="home-hero-art" aria-hidden="true">
-            <div class="hha-circle hha-c1"></div>
-            <div class="hha-circle hha-c2"></div>
-            <div class="hha-rect hha-r1"></div>
-            <div class="hha-rect hha-r2"></div>
+          <!-- Octopus banner mascot -->
+          <div class="home-hero-octo" aria-hidden="true">
+            <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
+              <!-- Tentacles (bob animated via CSS) -->
+              <g class="octo-tentacles">
+                <path class="bnr-t" d="M62,148 Q48,168 52,195"/>
+                <path class="bnr-t" d="M76,155 Q62,178 65,205"/>
+                <path class="bnr-t" d="M92,159 Q82,182 84,210"/>
+                <path class="bnr-t" d="M108,160 Q100,184 102,210"/>
+                <path class="bnr-t" d="M124,159 Q132,182 128,210"/>
+                <path class="bnr-t" d="M140,155 Q152,178 146,205"/>
+                <path class="bnr-t" d="M154,148 Q166,168 160,195"/>
+                <path class="bnr-t" d="M164,138 Q178,156 174,182"/>
+              </g>
+              <!-- Body circle (large, will be clipped by banner overflow) -->
+              <circle cx="113" cy="100" r="90" fill="rgba(255,255,255,0.13)"/>
+              <circle cx="113" cy="92" r="78" fill="rgba(255,255,255,0.10)"/>
+              <!-- Face -->
+              <circle cx="86"  cy="90" r="14" fill="rgba(255,255,255,0.9)"/>
+              <circle cx="140" cy="90" r="14" fill="rgba(255,255,255,0.9)"/>
+              <circle id="bnr-pl" cx="89"  cy="92" r="8" fill="#193322"/>
+              <circle id="bnr-pr" cx="143" cy="92" r="8" fill="#193322"/>
+              <circle cx="91"  cy="88" r="3.5" fill="white"/>
+              <circle cx="145" cy="88" r="3.5" fill="white"/>
+              <!-- Blush -->
+              <ellipse cx="70"  cy="104" rx="10" ry="6" fill="rgba(255,140,140,0.22)"/>
+              <ellipse cx="156" cy="104" rx="10" ry="6" fill="rgba(255,140,140,0.22)"/>
+              <!-- Smile -->
+              <path d="M88 110 Q113 124 138 110" stroke="rgba(255,255,255,0.6)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            </svg>
           </div>
         </div>
 

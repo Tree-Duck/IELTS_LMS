@@ -301,6 +301,8 @@ body {
   /* Home screen mobile */
   .home-hero { padding: 28px 24px; flex-direction: column; }
   .home-hero-art { display: none; }
+  .home-hero-octo { display: none; }
+  .home-hero-text { max-width: 100%; }
   .home-hero-title { font-size: 20px; }
   .home-skills-grid { grid-template-columns: 1fr; }
   .home-stats-strip { gap: 8px; }
@@ -341,7 +343,7 @@ body {
   align-items: center;
   justify-content: space-between;
 }
-.home-hero-text { position: relative; z-index: 1; }
+.home-hero-text { position: relative; z-index: 1; max-width: calc(100% - 200px); }
 .home-hero-eyebrow {
   font-size: 12px;
   font-weight: 700;
@@ -362,8 +364,47 @@ body {
   color: rgba(255,255,255,.75);
 }
 
-/* Bauhaus art decoration inside hero */
+/* Octopus banner mascot */
+.home-hero-octo {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 210px;
+  pointer-events: none;
+}
+/* Tentacles sway + bob */
+.bnr-t {
+  fill: none;
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 7;
+  stroke-linecap: round;
+  animation: bnr-sway 1.8s ease-in-out infinite alternate,
+             bnr-bob  2.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+.bnr-t:nth-child(1) { animation-delay:  0.00s, 0.00s; }
+.bnr-t:nth-child(2) { animation-delay: -0.23s, -0.30s; }
+.bnr-t:nth-child(3) { animation-delay: -0.46s, -0.60s; }
+.bnr-t:nth-child(4) { animation-delay: -0.69s, -0.90s; }
+.bnr-t:nth-child(5) { animation-delay: -0.92s, -1.20s; }
+.bnr-t:nth-child(6) { animation-delay: -1.15s, -1.50s; }
+.bnr-t:nth-child(7) { animation-delay: -1.38s, -1.80s; }
+.bnr-t:nth-child(8) { animation-delay: -1.61s, -2.10s; }
+.bnr-t:nth-child(odd) { animation-direction: alternate-reverse, normal; }
+@keyframes bnr-sway {
+  from { transform: rotate(-10deg); }
+  to   { transform: rotate(10deg);  }
+}
+@keyframes bnr-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+/* Bauhaus art decoration inside hero (kept for compat, hidden) */
 .home-hero-art {
+  display: none;
   position: relative;
   width: 160px;
   height: 120px;
@@ -5313,22 +5354,8 @@ input:focus, textarea:focus, select:focus {
 }
 .pl-retry-btn:hover { background: #ee4444; }
 
-/* ─── Mascot ─────────────────────────────────────────────────────────────── */
-#mascot {
-  position: fixed;
-  bottom: 28px;
-  right: 32px;
-  pointer-events: none;
-  z-index: 9998;
-  width: 110px;
-  height: 140px;
-  animation: msc-bob 2.6s ease-in-out infinite;
-  transform-origin: bottom center;
-}
-@keyframes msc-bob {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
-}
+/* ─── Corner mascot (retired — octopus now lives in banner) ─────────────── */
+#mascot { display: none; }
 /* tentacles */
 .msc-t {
   fill: none;

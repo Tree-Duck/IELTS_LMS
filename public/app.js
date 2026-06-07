@@ -9639,42 +9639,37 @@ function renderParaLabFinal() {
     </div>`;
 }
 
-/* ─── Mascot: octopus reacts to cursor ──────────────────────────────────── */
+/* ─── Banner octopus: pupils track cursor ────────────────────────────────── */
 (function () {
   let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-  // smooth targets for tilt
-  let tiltTarget = 0, tiltCurrent = 0;
-
   document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
 
-  const el  = document.getElementById('mascot');
-  const svg = el ? el.querySelector('svg') : null;
-  const pl  = document.getElementById('msc-pl');
-  const pr  = document.getElementById('msc-pr');
+  const pl = document.getElementById('bnr-pl');
+  const pr = document.getElementById('bnr-pr');
 
   function tick() {
-    if (!el) { requestAnimationFrame(tick); return; }
+    if (pl && pr) {
+      const svgEl = document.getElementById('banner-octo');
+      if (svgEl) {
+        const rect = svgEl.getBoundingClientRect();
+        // SVG viewBox center of left eye: (86,90), right eye: (140,90)
+        // Map to screen coords via scale
+        const scaleX = rect.width  / 200;
+        const scaleY = rect.height / 210;
+        const lx = rect.left + 86  * scaleX;
+        const ly = rect.top  + 90  * scaleY;
+        const rx = rect.left + 140 * scaleX;
+        const ry = rect.top  + 90  * scaleY;
 
-    const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width  / 2;
-    const cy = rect.top  + rect.height / 2;
-
-    // angle from mascot center → cursor
-    const angle = Math.atan2(my - cy, mx - cx);
-    const dist  = Math.hypot(mx - cx, my - cy);
-
-    // pupils shift up to 3px toward cursor
-    const pMax = 3;
-    const pdx = Math.cos(angle) * Math.min(dist / 120, 1) * pMax;
-    const pdy = Math.sin(angle) * Math.min(dist / 120, 1) * pMax;
-    if (pl) { pl.setAttribute('cx', 34 + pdx); pl.setAttribute('cy', 38 + pdy); }
-    if (pr) { pr.setAttribute('cx', 56 + pdx); pr.setAttribute('cy', 38 + pdy); }
-
-    // body leans slightly toward cursor (max ±10deg), lerp smooth
-    tiltTarget  = Math.cos(angle) * Math.min(dist / 300, 1) * 10;
-    tiltCurrent += (tiltTarget - tiltCurrent) * 0.06;
-    if (svg) svg.style.transform = `rotate(${tiltCurrent.toFixed(2)}deg)`;
-
+        const aL = Math.atan2(my - ly, mx - lx);
+        const aR = Math.atan2(my - ry, mx - rx);
+        const d  = 4;
+        pl.setAttribute('cx', 86  + Math.cos(aL) * d);
+        pl.setAttribute('cy', 92  + Math.sin(aL) * d);
+        pr.setAttribute('cx', 140 + Math.cos(aR) * d);
+        pr.setAttribute('cy', 92  + Math.sin(aR) * d);
+      }
+    }
     requestAnimationFrame(tick);
   }
   tick();
