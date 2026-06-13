@@ -230,8 +230,8 @@
               <span class="tnav-role-badge" id="user-role-label">Học sinh</span>
             </div>
             <hr class="tnav-divider">
+            <button class="tnav-nav-link" data-view="settings" onclick="showView('settings')">⚙️ Giao diện & Hồ sơ</button>
             <button class="tnav-nav-link" data-view="change-password" onclick="showView('change-password')">🔑 Đổi mật khẩu</button>
-            <button class="tnav-nav-link" onclick="closeAllDropdowns(); openThemeModal()">🎨 Giao diện</button>
             <button class="tnav-nav-link tnav-logout-btn" onclick="closeAllDropdowns(); logout()">🚪 Đăng xuất</button>
           </div>
         </div>
@@ -262,37 +262,41 @@
           <!-- Octopus banner mascot -->
           <div class="home-hero-octo" aria-hidden="true">
             <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
-              <!-- Tentacles (bob animated, clipped by banner overflow at bottom) -->
+              <defs>
+                <linearGradient id="octo-body-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffd2b3"/>
+                  <stop offset="1" stop-color="#ff8f63"/>
+                </linearGradient>
+              </defs>
+              <!-- Tentacles (sway/bob animated, coral, clipped by banner overflow) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" d="M62,148 Q48,168 52,195"/>
-                <path class="bnr-t" d="M76,155 Q62,178 65,205"/>
-                <path class="bnr-t" d="M92,159 Q82,182 84,210"/>
-                <path class="bnr-t" d="M108,160 Q100,184 102,210"/>
-                <path class="bnr-t" d="M124,159 Q132,182 128,210"/>
-                <path class="bnr-t" d="M140,155 Q152,178 146,205"/>
-                <path class="bnr-t" d="M154,148 Q166,168 160,195"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M62,148 Q48,168 52,195"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M76,155 Q62,178 65,205"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M92,159 Q82,182 84,210"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M108,160 Q100,184 102,210"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M124,159 Q132,182 128,210"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M140,155 Q152,178 146,205"/>
+                <path class="bnr-t" style="stroke:#ff8f63" d="M154,148 Q166,168 160,195"/>
               </g>
-              <!-- Body (semi-transparent, large circle fills banner) -->
-              <circle cx="113" cy="95" r="88" fill="rgba(255,255,255,0.15)"/>
-              <circle cx="113" cy="88" r="76" fill="rgba(255,255,255,0.12)"/>
-              <!-- Eye whites (big round cute eyes) -->
-              <circle cx="88"  cy="86" r="18" fill="rgba(255,255,255,0.92)"/>
-              <circle cx="138" cy="86" r="18" fill="rgba(255,255,255,0.92)"/>
+              <!-- Body (solid coral so it pops on any accent-coloured banner) -->
+              <ellipse cx="113" cy="92" rx="74" ry="78" fill="url(#octo-body-grad)"/>
+              <!-- Belly + top sheen -->
+              <ellipse cx="113" cy="110" rx="46" ry="40" fill="rgba(255,255,255,0.28)"/>
+              <ellipse cx="90"  cy="50"  rx="24" ry="15" fill="rgba(255,255,255,0.40)"/>
+              <!-- Eye whites (centres 88,86 & 138,86 — tracked by JS) -->
+              <circle cx="88"  cy="86" r="18" fill="#ffffff"/>
+              <circle cx="138" cy="86" r="18" fill="#ffffff"/>
               <!-- Pupils (JS-tracked) -->
-              <circle id="bnr-pl" cx="91"  cy="89" r="11" fill="#173020"/>
-              <circle id="bnr-pr" cx="141" cy="89" r="11" fill="#173020"/>
+              <circle id="bnr-pl" cx="91"  cy="89" r="11" fill="#3a2b4d"/>
+              <circle id="bnr-pr" cx="141" cy="89" r="11" fill="#3a2b4d"/>
               <!-- Eye shine -->
-              <circle cx="95"  cy="82" r="5" fill="white"/>
-              <circle cx="145" cy="82" r="5" fill="white"/>
-              <!-- Blush -->
-              <ellipse cx="70"  cy="108" rx="13" ry="8" fill="rgba(255,110,110,0.35)"/>
-              <ellipse cx="156" cy="108" rx="13" ry="8" fill="rgba(255,110,110,0.35)"/>
-              <!-- Smile (cute U-curve with soft pink fill) -->
-              <path d="M90 112 Q113 136 136 112" fill="rgba(255,180,180,0.5)" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M90 112 Q113 122 136 112" fill="rgba(255,255,255,0.6)" stroke="none"/>
-              <!-- Head highlight dots -->
-              <circle cx="88" cy="58" r="10" fill="rgba(255,255,255,0.45)"/>
-              <circle cx="78" cy="72" r="6"  fill="rgba(255,255,255,0.28)"/>
+              <circle cx="95"  cy="82" r="4.5" fill="#fff"/>
+              <circle cx="145" cy="82" r="4.5" fill="#fff"/>
+              <!-- Cheeks -->
+              <ellipse cx="64"  cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
+              <ellipse cx="162" cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
+              <!-- Smile -->
+              <path d="M97 116 Q113 132 129 116" fill="none" stroke="#a5455f" stroke-width="4" stroke-linecap="round"/>
             </svg>
           </div>
         </div>
@@ -782,6 +786,43 @@
           <div class="form-actions">
             <button type="button" class="btn btn-primary" onclick="handleChangePassword()">Cập nhật mật khẩu</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Settings (Appearance & Profile) View -->
+      <div id="view-settings" class="view hidden">
+        <div class="page-header">
+          <h2>⚙️ Giao diện & Hồ sơ</h2>
+          <p>Cá nhân hoá màu sắc, chế độ tối và ảnh đại diện của bạn</p>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-section-title">🎨 Màu chủ đạo</h3>
+          <p class="settings-section-hint">Chọn màu thương hiệu yêu thích — áp dụng cho toàn bộ giao diện.</p>
+          <div class="accent-grid" id="accent-grid"><!-- JS --></div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-section-title">🌗 Chế độ hiển thị</h3>
+          <p class="settings-section-hint">Nền sáng dễ đọc ban ngày, nền tối dịu mắt ban đêm.</p>
+          <div class="settings-mode-row">
+            <button type="button" class="settings-mode-btn" id="settings-light-btn" onclick="setDarkMode(false)">☀️ Sáng</button>
+            <button type="button" class="settings-mode-btn" id="settings-dark-btn" onclick="setDarkMode(true)">🌙 Tối</button>
+          </div>
+          <div class="settings-bg-block" id="settings-bg-block">
+            <p class="settings-section-hint" style="margin-top:1rem">Tông nền (chế độ sáng):</p>
+            <div class="theme-swatches" id="settings-bg-swatches"><!-- JS --></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 class="settings-section-title">🙂 Ảnh đại diện</h3>
+          <p class="settings-section-hint">Chọn một biểu tượng làm ảnh đại diện của bạn.</p>
+          <div class="avatar-current-row">
+            <div class="avatar-current" id="settings-avatar-preview">S</div>
+            <span class="settings-section-hint" id="settings-avatar-label">Ảnh đại diện hiện tại</span>
+          </div>
+          <div class="avatar-grid" id="avatar-grid"><!-- JS --></div>
         </div>
       </div>
 

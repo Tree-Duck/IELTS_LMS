@@ -946,6 +946,7 @@ app.get('/api/user/profile', authenticate, (req, res) => {
     email: user.email,
     role: user.role,
     target_band: user.target_band ?? null,
+    avatar: user.avatar ?? null,
     current_streak: (() => {
       if (!user.last_activity_date || !(user.current_streak > 0)) return 0;
       const today = new Date().toISOString().slice(0, 10);
@@ -960,13 +961,18 @@ app.get('/api/user/profile', authenticate, (req, res) => {
 });
 
 app.put('/api/user/profile', authenticate, (req, res) => {
-  const { target_band } = req.body;
+  const { target_band, avatar } = req.body;
   if (target_band !== null && target_band !== undefined) {
     const band = parseFloat(target_band);
     if (isNaN(band) || band < 4 || band > 9) {
       return res.status(400).json({ error: 'target_band must be a number between 4.0 and 9.0' });
     }
     db.updateUserProfile(req.user.id, { target_band: band });
+  }
+  if (avatar !== undefined) {
+    // Short emoji/string only; empty string resets to initials (null)
+    const av = (typeof avatar === 'string' && avatar.trim()) ? avatar.trim().slice(0, 8) : null;
+    db.updateUserProfile(req.user.id, { avatar: av });
   }
   res.json({ success: true });
 });

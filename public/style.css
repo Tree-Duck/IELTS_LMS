@@ -1,12 +1,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Mint Emerald palette ── */
-  --primary: #2e7d55;
-  --primary-dark: #1f5c3d;
-  --primary-light: #d4ede0;
-  --primary-mid: #4a9b72;
-  --primary-glow: rgba(46, 125, 85, 0.12);
+  /* ── Light-green palette (default accent) ──
+     --primary is used as a solid fill WITH WHITE TEXT in ~30 places,
+     so every accent preset keeps --primary white-text-safe (≥3.5:1).
+     --primary-dark is the deeper shade for chrome gradients/sidebar/hover. */
+  --primary: #2e9e63;
+  --primary-dark: #1f6e44;
+  --primary-light: #e4f6ec;
+  --primary-mid: #59b585;
+  --primary-glow: rgba(46, 158, 99, 0.12);
 
   /* ── Skill accent colors ── */
   --skill-writing:   #d4863a;
@@ -20,7 +23,7 @@
   --body-bg: #f2f9f5;
   --surface: #ffffff;
   --surface-2: #e8f3ed;
-  --sidebar-bg: #2e7d55;
+  --sidebar-bg: #1f6e44;
 
   /* ── Semantic ── */
   --success: #059669;
@@ -93,6 +96,56 @@
 .theme-swatch-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); }
 .theme-swatch-name { font-size: 0.8rem; font-weight: 700; color: var(--gray-700); }
 .theme-modal-close { width: 100%; }
+
+/* ── Settings (Appearance & Profile) ──────────────────────────── */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 1.5rem 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.settings-section-title { font-size: 1.05rem; font-weight: 800; color: var(--gray-800); margin-bottom: .25rem; }
+.settings-section-hint { font-size: .85rem; color: var(--gray-500); margin-bottom: 1rem; }
+.accent-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
+.accent-swatch {
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  padding: .85rem .5rem; border: 2.5px solid transparent; border-radius: 14px;
+  background: var(--gray-50); cursor: pointer; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s, transform .12s;
+}
+.accent-swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.accent-swatch.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+.accent-swatch-dot { width: 38px; height: 38px; border-radius: 50%; box-shadow: inset 0 -3px 6px rgba(0,0,0,.18); }
+.accent-swatch-name { font-size: .78rem; font-weight: 700; color: var(--gray-700); }
+.settings-mode-row { display: flex; gap: .75rem; }
+.settings-mode-btn {
+  flex: 1; padding: .8rem; border: 2px solid var(--gray-200); border-radius: 12px;
+  background: var(--gray-50); font-weight: 700; font-size: .95rem; color: var(--gray-700);
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.settings-mode-btn:hover { border-color: var(--primary-mid); }
+.settings-mode-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+.avatar-current-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+.avatar-current {
+  width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--primary); color: #fff; font-size: 28px; font-weight: 800;
+  box-shadow: var(--shadow-md); flex-shrink: 0;
+}
+.avatar-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: .6rem; }
+.avatar-opt {
+  aspect-ratio: 1; border: 2px solid var(--gray-200); border-radius: 12px; background: var(--gray-50);
+  font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s; font-family: inherit;
+}
+.avatar-opt:hover { transform: translateY(-2px); border-color: var(--primary-mid); }
+.avatar-opt.active { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-glow); }
+.avatar-opt-reset { font-size: 15px; font-weight: 800; color: var(--gray-600); }
+@media (max-width: 560px) {
+  .accent-grid { grid-template-columns: repeat(3, 1fr); }
+  .avatar-grid { grid-template-columns: repeat(6, 1fr); }
+}
 
 body {
   font-family: 'Nunito', 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

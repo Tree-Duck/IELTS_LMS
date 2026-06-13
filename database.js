@@ -49,6 +49,7 @@ const db = {
       reset_code: null, reset_expires: null,
       created_at: new Date().toISOString(),
       target_band: null,
+      avatar: null,
       current_streak: 0, longest_streak: 0, last_activity_date: null
     };
     data.users.push(user);
@@ -304,6 +305,7 @@ const db = {
     const u = data.users.find(u => u.id === userId);
     if (u) {
       if ('target_band' in fields) u.target_band = fields.target_band;
+      if ('avatar' in fields) u.avatar = fields.avatar;
       save(data);
     }
   },

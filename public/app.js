@@ -1132,6 +1132,107 @@ function applyTheme(id) {
   });
 }
 
+/* ─── Accent Color (per-student brand color) ─────────────────────────────────
+   Each preset swaps the --primary family + --sidebar-bg. Every `primary` value
+   is white-text-safe (≥3.5:1) because --primary is used as a solid fill with
+   white text in ~30 places; `dark` is the deeper shade for chrome/gradients. */
+const ACCENT_THEMES = [
+  { id: 'light-green', name: 'Xanh lá',  primary: '#2e9e63', dark: '#1f6e44', light: '#e4f6ec', mid: '#59b585' },
+  { id: 'emerald',     name: 'Ngọc lục', primary: '#0f9d6b', dark: '#0a6e4a', light: '#d6f3e8', mid: '#34c08e' },
+  { id: 'teal',        name: 'Xanh mòng', primary: '#0d9488', dark: '#0a6b62', light: '#d3f0ed', mid: '#2bb3a6' },
+  { id: 'ocean',       name: 'Xanh biển', primary: '#2477c4', dark: '#18548c', light: '#dbeafb', mid: '#4f97d8' },
+  { id: 'indigo',      name: 'Chàm',      primary: '#5a5ae0', dark: '#3a3aa8', light: '#e6e6fb', mid: '#8585ee' },
+  { id: 'violet',      name: 'Tím',       primary: '#8b3fd6', dark: '#6321a0', light: '#f0e6fb', mid: '#a877e6' },
+  { id: 'rose',        name: 'Hồng',      primary: '#d63a6e', dark: '#a32450', light: '#fde2eb', mid: '#ec6f97' },
+  { id: 'amber',       name: 'Hổ phách', primary: '#c2790f', dark: '#8f570a', light: '#fcedcf', mid: '#e0a43a' },
+];
+
+function _hexToRgba(hex, a) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function applyAccentTheme(id) {
+  const t = ACCENT_THEMES.find(a => a.id === id) || ACCENT_THEMES[0];
+  const root = document.documentElement.style;
+  root.setProperty('--primary', t.primary);
+  root.setProperty('--primary-dark', t.dark);
+  root.setProperty('--primary-light', t.light);
+  root.setProperty('--primary-mid', t.mid);
+  root.setProperty('--primary-glow', _hexToRgba(t.primary, 0.12));
+  root.setProperty('--sidebar-bg', t.dark);
+  localStorage.setItem('ielts_accent', t.id);
+  document.querySelectorAll('.accent-swatch').forEach(el => {
+    el.classList.toggle('active', el.dataset.accentId === t.id);
+  });
+}
+
+/* ─── Avatar presets ─────────────────────────────────────────────────────── */
+const AVATARS = ['🐙','🦉','🦆','🤖','📚','✏️','🎯','🔥','🌱','⭐','🧠','🚀','🎓','🐱','🐧','🦊'];
+
+async function saveAvatar(emoji) {
+  if (!currentUser) return;
+  const prev = currentUser.avatar;
+  currentUser.avatar = emoji;
+  localStorage.setItem('ielts_user', JSON.stringify(currentUser));
+  applyUserToUI();
+  loadSettings(); // refresh active state + preview
+  try {
+    await api('/api/user/profile', { method: 'PUT', body: JSON.stringify({ avatar: emoji }) });
+  } catch (e) {
+    // revert on failure
+    currentUser.avatar = prev;
+    localStorage.setItem('ielts_user', JSON.stringify(currentUser));
+    applyUserToUI();
+    loadSettings();
+    showToast('Không lưu được ảnh đại diện, thử lại sau.');
+  }
+}
+
+/* ─── Settings view (Appearance & Profile) ───────────────────────────────── */
+function loadSettings() {
+  // Accent color grid
+  const ag = document.getElementById('accent-grid');
+  const curAccent = localStorage.getItem('ielts_accent') || 'light-green';
+  if (ag) {
+    ag.innerHTML = ACCENT_THEMES.map(t => `
+      <button type="button" class="accent-swatch ${t.id === curAccent ? 'active' : ''}" data-accent-id="${t.id}"
+              onclick="applyAccentTheme('${t.id}')" title="${t.name}">
+        <span class="accent-swatch-dot" style="background:linear-gradient(135deg, ${t.primary} 0%, ${t.dark} 100%)"></span>
+        <span class="accent-swatch-name">${t.name}</span>
+      </button>`).join('');
+  }
+
+  // Dark/light mode buttons + bg swatches
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('settings-light-btn')?.classList.toggle('active', !isDark);
+  document.getElementById('settings-dark-btn')?.classList.toggle('active', isDark);
+  const bgBlock = document.getElementById('settings-bg-block');
+  if (bgBlock) bgBlock.style.display = isDark ? 'none' : '';
+  const bgGrid = document.getElementById('settings-bg-swatches');
+  const curBg = localStorage.getItem('ielts_bg_theme') || 'mint';
+  if (bgGrid) {
+    bgGrid.innerHTML = THEMES.map(t => `
+      <div class="theme-swatch ${t.id === curBg ? 'active' : ''}" data-theme-id="${t.id}"
+           style="background:${t.bg}" onclick="applyTheme('${t.id}')">
+        <div class="theme-swatch-dot" style="background:${t.dot}"></div>
+        <div class="theme-swatch-name">${t.name}</div>
+      </div>`).join('');
+  }
+
+  // Avatar grid + preview
+  const cur = (currentUser && currentUser.avatar) || '';
+  const preview = document.getElementById('settings-avatar-preview');
+  if (preview) preview.textContent = cur || (currentUser ? currentUser.name[0].toUpperCase() : 'S');
+  const avg = document.getElementById('avatar-grid');
+  if (avg) {
+    avg.innerHTML = AVATARS.map(a => `
+      <button type="button" class="avatar-opt ${a === cur ? 'active' : ''}" onclick="saveAvatar('${a}')">${a}</button>`).join('')
+      + `<button type="button" class="avatar-opt avatar-opt-reset ${cur === '' ? 'active' : ''}" onclick="saveAvatar('')" title="Dùng chữ cái tên">Aa</button>`;
+  }
+}
+
 function openThemeModal() {
   const overlay = document.getElementById('theme-modal-overlay');
   const grid = document.getElementById('theme-swatches');
@@ -1153,6 +1254,9 @@ function closeThemeModal(e) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Restore accent color (per-student brand color) before first paint
+  applyAccentTheme(localStorage.getItem('ielts_accent') || 'light-green');
+
   // Restore bg theme
   const savedTheme = localStorage.getItem('ielts_bg_theme');
   if (savedTheme) document.documentElement.setAttribute('data-bg-theme', savedTheme);
@@ -1446,7 +1550,7 @@ function logout() {
 function applyUserToUI() {
   document.getElementById('user-name').textContent = currentUser.name;
   document.getElementById('welcome-name').textContent = currentUser.name.split(' ')[0];
-  document.getElementById('user-avatar').textContent = currentUser.name[0].toUpperCase();
+  document.getElementById('user-avatar').textContent = currentUser.avatar || currentUser.name[0].toUpperCase();
 
   // Role label in sidebar footer
   const roleLabelEl = document.getElementById('user-role-label');
@@ -1490,11 +1594,12 @@ async function showApp() {
   // without requiring the user to log out and back in
   try {
     const fresh = await api('/api/user/profile');
-    if (fresh.role && (fresh.role !== currentUser.role || fresh.name !== currentUser.name)) {
+    if (fresh.role && (fresh.role !== currentUser.role || fresh.name !== currentUser.name || fresh.avatar !== currentUser.avatar)) {
       currentUser.role = fresh.role;
       currentUser.name = fresh.name || currentUser.name;
+      currentUser.avatar = fresh.avatar || null;
       localStorage.setItem('ielts_user', JSON.stringify(currentUser));
-      applyUserToUI(); // re-render nav with updated role
+      applyUserToUI(); // re-render nav with updated role/avatar
     }
   } catch (e) { /* network error — keep cached role */ }
 
@@ -1579,6 +1684,7 @@ function showView(name) {
   else if (name === 'games') { /* static hub, no loader */ }
   else if (name === 'vocab-blitz') showVocabBlitz();
   else if (name === 'band-climber') showBandClimber();
+  else if (name === 'settings') loadSettings();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -6328,17 +6434,25 @@ function initTopnav() {
 /* ═══════════════════════════════════════════════════════════════════════════
    DARK MODE TOGGLE
    ═══════════════════════════════════════════════════════════════════════════ */
-function toggleDarkMode() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('ielts_dark_mode', '0');
-    document.getElementById('dark-mode-btn').textContent = '🌙';
-  } else {
+function setDarkMode(dark) {
+  if (dark) {
     document.documentElement.setAttribute('data-theme', 'dark');
     localStorage.setItem('ielts_dark_mode', '1');
-    document.getElementById('dark-mode-btn').textContent = '☀️';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ielts_dark_mode', '0');
   }
+  const btn = document.getElementById('dark-mode-btn');
+  if (btn) btn.textContent = dark ? '☀️' : '🌙';
+  // Refresh Settings-view controls if present
+  document.getElementById('settings-light-btn')?.classList.toggle('active', !dark);
+  document.getElementById('settings-dark-btn')?.classList.toggle('active', dark);
+  const bgBlock = document.getElementById('settings-bg-block');
+  if (bgBlock) bgBlock.style.display = dark ? 'none' : '';
+}
+
+function toggleDarkMode() {
+  setDarkMode(document.documentElement.getAttribute('data-theme') !== 'dark');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
