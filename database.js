@@ -1053,6 +1053,7 @@ const db = {
     if (!data.model_essays) data.model_essays = [];
     if (!data._ids.model_essays) data._ids.model_essays = 0;
     data._ids.model_essays++;
+    if (!entry.word_count && entry.essay) entry.word_count = entry.essay.trim().split(/\s+/).filter(Boolean).length;
     const item = { id: data._ids.model_essays, ...entry, created_at: new Date().toISOString() };
     data.model_essays.push(item);
     save(data);

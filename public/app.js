@@ -2061,7 +2061,7 @@ async function loadModelEssays() {
           <span class="me-badge me-badge-${e.task_type}">${e.task_type === 'task1' ? 'Task 1' : 'Task 2'}</span>
           ${e.topic_category ? `<span class="me-topic">${escHtml(e.topic_category)}</span>` : ''}
           <span class="me-band">Band ${e.band_estimate}</span>
-          <span class="me-wc">${e.word_count} từ</span>
+          <span class="me-wc">${e.word_count || (e.essay || '').trim().split(/\s+/).filter(Boolean).length} từ</span>
         </div>
         <p class="me-prompt">${escHtml(e.prompt)}</p>
         <div class="me-essay"><p>${escHtml(e.essay).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
