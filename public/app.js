@@ -1687,6 +1687,9 @@ function showView(name) {
   else if (name === 'vocab-blitz') showVocabBlitz();
   else if (name === 'band-climber') showBandClimber();
   else if (name === 'settings') loadSettings();
+  else if (name === 'model-essays') loadModelEssays();
+  else if (name === 'collocations') loadCollocations();
+  else if (name === 'speaking-samples') loadSpeakingSamples();
   else if (name === 'change-password') {
     ['cp-current','cp-new','cp-confirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('cp-error').classList.add('hidden');
@@ -2036,6 +2039,93 @@ function renderHomeQuote() {
   if (enEl) enEl.textContent = q.en;
   if (viEl) viEl.textContent = q.vi;
   box.hidden = false;
+}
+
+/* ─── Model Essays (student view) ────────────────────────────────────────── */
+let _meTask = 'all';
+function setMeTask(v) { _meTask = v; loadModelEssays(); }
+async function loadModelEssays() {
+  const chips = document.getElementById('me-filter-chips');
+  const list = document.getElementById('model-essays-list');
+  if (!list) return;
+  if (chips) chips.innerHTML = [['all', 'Tất cả'], ['task2', 'Task 2'], ['task1', 'Task 1']]
+    .map(([v, l]) => `<button class="filter-chip ${_meTask === v ? 'active' : ''}" onclick="setMeTask('${v}')">${l}</button>`).join('');
+  list.innerHTML = '<div class="loading">Đang tải…</div>';
+  try {
+    const q = _meTask === 'all' ? '' : `?task_type=${_meTask}`;
+    const essays = await api('/api/model-essays' + q);
+    if (!essays.length) { list.innerHTML = '<div class="empty-state">Chưa có bài mẫu nào.</div>'; return; }
+    list.innerHTML = essays.map(e => `
+      <div class="me-card">
+        <div class="me-head">
+          <span class="me-badge me-badge-${e.task_type}">${e.task_type === 'task1' ? 'Task 1' : 'Task 2'}</span>
+          ${e.topic_category ? `<span class="me-topic">${escHtml(e.topic_category)}</span>` : ''}
+          <span class="me-band">Band ${e.band_estimate}</span>
+          <span class="me-wc">${e.word_count} từ</span>
+        </div>
+        <p class="me-prompt">${escHtml(e.prompt)}</p>
+        <div class="me-essay"><p>${escHtml(e.essay).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
+        ${(e.model_strengths && e.model_strengths.length) ? `<div class="me-strengths"><strong>Điểm mạnh:</strong> ${e.model_strengths.map(s => `<span class="me-tag">${escHtml(s)}</span>`).join('')}</div>` : ''}
+      </div>`).join('');
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
+}
+
+/* ─── Collocations (student view) ────────────────────────────────────────── */
+let _collTopic = 'all';
+function setCollTopic(t) { _collTopic = t; loadCollocations(); }
+async function loadCollocations() {
+  const list = document.getElementById('collocations-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Đang tải…</div>';
+  try {
+    const sets = await api('/api/collocation-sets');
+    if (!sets.length) { list.innerHTML = '<div class="empty-state">Chưa có collocation nào.</div>'; return; }
+    const topics = ['all', ...new Set(sets.map(s => s.topic))];
+    const chips = document.getElementById('colloc-filter-chips');
+    if (chips) chips.innerHTML = topics.map(t =>
+      `<button class="filter-chip ${_collTopic === t ? 'active' : ''}" onclick="setCollTopic(${JSON.stringify(t).replace(/"/g, '&quot;')})">${t === 'all' ? 'Tất cả' : escHtml(t)}</button>`).join('');
+    const shown = _collTopic === 'all' ? sets : sets.filter(s => s.topic === _collTopic);
+    list.innerHTML = shown.map(s => `
+      <div class="colloc-set">
+        <div class="colloc-head"><span class="colloc-topic">${escHtml(s.topic)}</span><span class="colloc-level">${escHtml(s.level)}</span></div>
+        <table class="colloc-table"><tbody>
+          ${(s.collocations || []).map(c => `
+            <tr>
+              <td class="cc-phrase">${escHtml(c.collocation)}</td>
+              <td class="cc-def">${escHtml(c.definition || '')}${c.vietnamese ? `<div class="cc-vi">${escHtml(c.vietnamese)}</div>` : ''}</td>
+              <td class="cc-ex">${escHtml(c.example || '')}</td>
+            </tr>`).join('')}
+        </tbody></table>
+      </div>`).join('');
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
+}
+
+/* ─── Speaking Model Answers (student view) ──────────────────────────────── */
+let _ssPart = 'all';
+function setSsPart(v) { _ssPart = v; loadSpeakingSamples(); }
+async function loadSpeakingSamples() {
+  const chips = document.getElementById('ss-filter-chips');
+  const list = document.getElementById('speaking-samples-list');
+  if (!list) return;
+  if (chips) chips.innerHTML = [['all', 'Tất cả'], ['1', 'Part 1'], ['2', 'Part 2'], ['3', 'Part 3']]
+    .map(([v, l]) => `<button class="filter-chip ${_ssPart === v ? 'active' : ''}" onclick="setSsPart('${v}')">${l}</button>`).join('');
+  list.innerHTML = '<div class="loading">Đang tải…</div>';
+  try {
+    const q = _ssPart === 'all' ? '' : `?part=${_ssPart}`;
+    const answers = await api('/api/speaking-model-answers' + q);
+    if (!answers.length) { list.innerHTML = '<div class="empty-state">Chưa có bài mẫu nào.</div>'; return; }
+    list.innerHTML = answers.map(a => `
+      <div class="ss-card">
+        <div class="ss-head">
+          <span class="ss-part">Part ${a.part}</span>
+          ${a.category ? `<span class="ss-cat">${escHtml(a.category)}</span>` : ''}
+          <span class="ss-band">Band ${a.band_estimate}</span>
+        </div>
+        <p class="ss-q">${escHtml(a.question)}</p>
+        <div class="ss-answer"><p>${escHtml(a.model_answer).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
+        ${(a.key_phrases && a.key_phrases.length) ? `<div class="ss-phrases"><strong>Cụm từ hay:</strong> ${a.key_phrases.map(p => `<span class="ss-tag">${escHtml(p)}</span>`).join('')}</div>` : ''}
+      </div>`).join('');
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
 }
 
 async function loadHomeScreen() {
@@ -4377,7 +4467,7 @@ let _materialsCache = null;
 
 function switchMaterialsTab(type) {
   currentMaterialsTab = type;
-  ['reading','listening','task1','speaking','task2','translation','grammar-ex'].forEach(t => {
+  ['reading','listening','task1','speaking','task2','translation','grammar-ex','essays','collocations','speaking-answers'].forEach(t => {
     const btn = document.getElementById(`materials-tab-${t}`);
     if (btn) btn.classList.toggle('active', t === type);
   });
@@ -4387,13 +4477,16 @@ function switchMaterialsTab(type) {
   const task2Panel        = document.getElementById('task2-prompts-panel');
   const transPanel        = document.getElementById('translation-sentences-panel');
   const grammarExPanel    = document.getElementById('grammar-exercises-panel');
+  const essaysPanel       = document.getElementById('essays-panel');
+  const collocPanel       = document.getElementById('collocations-panel');
+  const spkAnsPanel       = document.getElementById('speaking-answers-panel');
   const listContent       = document.getElementById('materials-list-content');
   const actionTabs        = document.querySelector('.materials-action-tabs');
   const createPanel       = document.getElementById('mat-panel-create');
   const importPanel       = document.getElementById('mat-panel-import');
 
   // Hide all special panels first
-  [task1Panel, speakingPanel, task2Panel, transPanel, grammarExPanel].forEach(p => p && p.classList.add('hidden'));
+  [task1Panel, speakingPanel, task2Panel, transPanel, grammarExPanel, essaysPanel, collocPanel, spkAnsPanel].forEach(p => p && p.classList.add('hidden'));
 
   if (type === 'task1') {
     if (task1Panel) task1Panel.classList.remove('hidden');
@@ -4430,6 +4523,27 @@ function switchMaterialsTab(type) {
     if (createPanel) createPanel.classList.add('hidden');
     if (importPanel) importPanel.classList.add('hidden');
     loadAdminGrammarExercises();
+  } else if (type === 'essays') {
+    if (essaysPanel) essaysPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminModelEssays();
+  } else if (type === 'collocations') {
+    if (collocPanel) collocPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminCollocations();
+  } else if (type === 'speaking-answers') {
+    if (spkAnsPanel) spkAnsPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminSpeakingAnswers();
   } else {
     if (listContent) listContent.classList.remove('hidden');
     if (actionTabs) actionTabs.classList.remove('hidden');
@@ -4559,6 +4673,149 @@ async function deleteAdminTask2Prompt(id) {
     window._customTask2Prompts = null;
     loadAdminTask2Prompts();
   } catch (err) { alert('Failed to delete: ' + err.message); }
+}
+
+/* ─── Admin: Model Essays ───────────────────────────────────────────────── */
+async function loadAdminModelEssays() {
+  const list = document.getElementById('admin-essays-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const items = await api('/api/admin/model-essays');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">Chưa có bài mẫu nào.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Bài viết mẫu (${items.length})</h4>
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Loại</th><th>Chủ đề</th><th>Band</th><th>Đề bài</th><th></th></tr></thead>
+        <tbody>${items.map(e => `
+          <tr>
+            <td><span class="badge badge-gray">${e.task_type === 'task1' ? 'Task 1' : 'Task 2'}</span></td>
+            <td>${escHtml(e.topic_category || '')}</td>
+            <td>${e.band_estimate}</td>
+            <td style="max-width:360px;white-space:normal">${escHtml((e.prompt || '').slice(0, 90))}…</td>
+            <td><button class="btn btn-danger btn-xs" onclick="deleteAdminModelEssay(${e.id})">Xoá</button></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
+}
+async function submitModelEssay() {
+  const errEl = document.getElementById('me-admin-error');
+  const okEl = document.getElementById('me-admin-success');
+  errEl?.classList.add('hidden'); okEl?.classList.add('hidden');
+  const body = {
+    task_type: document.getElementById('me-task')?.value || 'task2',
+    topic_category: document.getElementById('me-topic')?.value?.trim() || '',
+    band_estimate: document.getElementById('me-band')?.value || 8,
+    prompt: document.getElementById('me-prompt')?.value?.trim(),
+    essay: document.getElementById('me-essay')?.value?.trim(),
+    model_strengths: document.getElementById('me-strengths')?.value || ''
+  };
+  if (!body.prompt || !body.essay) { if (errEl) { errEl.textContent = 'Cần có đề bài và bài viết.'; errEl.classList.remove('hidden'); } return; }
+  try {
+    await api('/api/admin/model-essays', { method: 'POST', body: JSON.stringify(body) });
+    if (okEl) { okEl.textContent = '✓ Đã thêm bài mẫu!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    ['me-topic', 'me-prompt', 'me-essay', 'me-strengths'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    loadAdminModelEssays();
+  } catch (err) { if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); } }
+}
+async function deleteAdminModelEssay(id) {
+  if (!confirm('Xoá bài mẫu này?')) return;
+  try { await api(`/api/admin/model-essays/${id}`, { method: 'DELETE' }); loadAdminModelEssays(); }
+  catch (err) { alert('Không xoá được: ' + err.message); }
+}
+
+/* ─── Admin: Collocation Sets ───────────────────────────────────────────── */
+async function loadAdminCollocations() {
+  const list = document.getElementById('admin-collocations-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const items = await api('/api/admin/collocation-sets');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">Chưa có bộ collocation nào.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Bộ collocation (${items.length})</h4>
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Chủ đề</th><th>Trình độ</th><th>Số cụm</th><th></th></tr></thead>
+        <tbody>${items.map(s => `
+          <tr>
+            <td>${escHtml(s.topic)}</td>
+            <td><span class="badge badge-gray">${escHtml(s.level)}</span></td>
+            <td>${(s.collocations || []).length}</td>
+            <td><button class="btn btn-danger btn-xs" onclick="deleteAdminCollocation(${s.id})">Xoá</button></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
+}
+async function submitCollocationSet() {
+  const errEl = document.getElementById('cs-admin-error');
+  const okEl = document.getElementById('cs-admin-success');
+  errEl?.classList.add('hidden'); okEl?.classList.add('hidden');
+  const topic = document.getElementById('cs-topic')?.value?.trim();
+  const level = document.getElementById('cs-level')?.value || 'B2';
+  const raw = document.getElementById('cs-json')?.value?.trim();
+  if (!topic || !raw) { if (errEl) { errEl.textContent = 'Cần có chủ đề và mảng JSON collocations.'; errEl.classList.remove('hidden'); } return; }
+  let collocations;
+  try { collocations = JSON.parse(raw); } catch { if (errEl) { errEl.textContent = 'JSON không hợp lệ.'; errEl.classList.remove('hidden'); } return; }
+  try {
+    await api('/api/admin/collocation-sets', { method: 'POST', body: JSON.stringify({ topic, level, collocations }) });
+    if (okEl) { okEl.textContent = '✓ Đã thêm bộ collocation!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    document.getElementById('cs-topic').value = ''; document.getElementById('cs-json').value = '';
+    loadAdminCollocations();
+  } catch (err) { if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); } }
+}
+async function deleteAdminCollocation(id) {
+  if (!confirm('Xoá bộ collocation này?')) return;
+  try { await api(`/api/admin/collocation-sets/${id}`, { method: 'DELETE' }); loadAdminCollocations(); }
+  catch (err) { alert('Không xoá được: ' + err.message); }
+}
+
+/* ─── Admin: Speaking Model Answers ─────────────────────────────────────── */
+async function loadAdminSpeakingAnswers() {
+  const list = document.getElementById('admin-speaking-answers-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const items = await api('/api/admin/speaking-model-answers');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">Chưa có bài nói mẫu nào.</div>'; return; }
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Bài nói mẫu (${items.length})</h4>
+      <div class="admin-table-wrap"><table class="admin-table">
+        <thead><tr><th>Part</th><th>Chủ đề</th><th>Band</th><th>Câu hỏi</th><th></th></tr></thead>
+        <tbody>${items.map(a => `
+          <tr>
+            <td><span class="badge badge-gray">Part ${a.part}</span></td>
+            <td>${escHtml(a.category || '')}</td>
+            <td>${a.band_estimate}</td>
+            <td style="max-width:340px;white-space:normal">${escHtml((a.question || '').slice(0, 90))}…</td>
+            <td><button class="btn btn-danger btn-xs" onclick="deleteAdminSpeakingAnswer(${a.id})">Xoá</button></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  } catch (err) { list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`; }
+}
+async function submitSpeakingAnswer() {
+  const errEl = document.getElementById('sa-admin-error');
+  const okEl = document.getElementById('sa-admin-success');
+  errEl?.classList.add('hidden'); okEl?.classList.add('hidden');
+  const body = {
+    part: document.getElementById('sa-part')?.value || '2',
+    category: document.getElementById('sa-cat')?.value?.trim() || 'General',
+    band_estimate: document.getElementById('sa-band')?.value || 8,
+    question: document.getElementById('sa-q')?.value?.trim(),
+    model_answer: document.getElementById('sa-answer')?.value?.trim(),
+    key_phrases: document.getElementById('sa-phrases')?.value || ''
+  };
+  if (!body.question || !body.model_answer) { if (errEl) { errEl.textContent = 'Cần có câu hỏi và câu trả lời mẫu.'; errEl.classList.remove('hidden'); } return; }
+  try {
+    await api('/api/admin/speaking-model-answers', { method: 'POST', body: JSON.stringify(body) });
+    if (okEl) { okEl.textContent = '✓ Đã thêm bài nói mẫu!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    ['sa-cat', 'sa-q', 'sa-answer', 'sa-phrases'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    loadAdminSpeakingAnswers();
+  } catch (err) { if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); } }
+}
+async function deleteAdminSpeakingAnswer(id) {
+  if (!confirm('Xoá bài nói mẫu này?')) return;
+  try { await api(`/api/admin/speaking-model-answers/${id}`, { method: 'DELETE' }); loadAdminSpeakingAnswers(); }
+  catch (err) { alert('Không xoá được: ' + err.message); }
 }
 
 /* ─── Admin Translation Sentences ───────────────────────────────────────── */

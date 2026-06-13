@@ -2185,6 +2185,95 @@ app.delete('/api/admin/task2-prompts/:id', authenticate, teacherOrAdmin, (req, r
   }
 });
 
+// ── Model Essays (band 8-9 samples) ────────────────────────────────────────
+app.get('/api/model-essays', (req, res) => {
+  try { res.json(db.getModelEssays(req.query.task_type || null, req.query.topic || null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load model essays' }); }
+});
+app.get('/api/admin/model-essays', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getModelEssays(null, null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load model essays' }); }
+});
+app.post('/api/admin/model-essays', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { task_type, topic_category, chart_type, prompt, essay, band_estimate, model_strengths } = req.body;
+    if (!task_type || !['task1', 'task2'].includes(task_type)) return res.status(400).json({ error: 'task_type must be task1 or task2' });
+    if (!prompt || !prompt.trim() || !essay || !essay.trim()) return res.status(400).json({ error: 'Prompt and essay are required' });
+    const word_count = essay.trim().split(/\s+/).length;
+    const strengths = Array.isArray(model_strengths)
+      ? model_strengths
+      : (typeof model_strengths === 'string' ? model_strengths.split(',').map(s => s.trim()).filter(Boolean) : []);
+    const item = db.addModelEssay({
+      task_type, topic_category: (topic_category || '').trim(), chart_type: chart_type || null,
+      prompt: prompt.trim(), essay: essay.trim(), word_count,
+      band_estimate: parseInt(band_estimate) || 8, model_strengths: strengths
+    });
+    res.json({ ok: true, item });
+  } catch (err) { res.status(500).json({ error: 'Failed to add model essay' }); }
+});
+app.delete('/api/admin/model-essays/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try { db.deleteModelEssay(req.params.id); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: 'Failed to delete model essay' }); }
+});
+
+// ── Collocation Sets ────────────────────────────────────────────────────────
+app.get('/api/collocation-sets', (req, res) => {
+  try { res.json(db.getCollocationSets(req.query.topic || null, req.query.level || null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load collocations' }); }
+});
+app.get('/api/admin/collocation-sets', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getCollocationSets(null, null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load collocations' }); }
+});
+app.post('/api/admin/collocation-sets', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { topic, level } = req.body;
+    let { collocations } = req.body;
+    if (typeof collocations === 'string') {
+      try { collocations = JSON.parse(collocations); } catch { return res.status(400).json({ error: 'Collocations must be a valid JSON array' }); }
+    }
+    if (!topic || !topic.trim() || !level || !Array.isArray(collocations) || !collocations.length) {
+      return res.status(400).json({ error: 'Topic, level and a non-empty collocations array are required' });
+    }
+    const item = db.addCollocationSet({ topic: topic.trim(), level, collocations });
+    res.json({ ok: true, item });
+  } catch (err) { res.status(500).json({ error: 'Failed to add collocation set' }); }
+});
+app.delete('/api/admin/collocation-sets/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try { db.deleteCollocationSet(req.params.id); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: 'Failed to delete collocation set' }); }
+});
+
+// ── Speaking Model Answers ──────────────────────────────────────────────────
+app.get('/api/speaking-model-answers', (req, res) => {
+  try { res.json(db.getSpeakingModelAnswers(req.query.part || null, req.query.category || null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load speaking answers' }); }
+});
+app.get('/api/admin/speaking-model-answers', authenticate, teacherOrAdmin, (req, res) => {
+  try { res.json(db.getSpeakingModelAnswers(null, null)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load speaking answers' }); }
+});
+app.post('/api/admin/speaking-model-answers', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { part, category, question, model_answer, band_estimate, key_phrases } = req.body;
+    if (!part || !['1', '2', '3', 1, 2, 3].includes(part)) return res.status(400).json({ error: 'part must be 1, 2 or 3' });
+    if (!question || !question.trim() || !model_answer || !model_answer.trim()) return res.status(400).json({ error: 'Question and model answer are required' });
+    const phrases = Array.isArray(key_phrases)
+      ? key_phrases
+      : (typeof key_phrases === 'string' ? key_phrases.split(',').map(s => s.trim()).filter(Boolean) : []);
+    const item = db.addSpeakingModelAnswer({
+      part: parseInt(part), category: (category || 'General').trim(),
+      question: question.trim(), model_answer: model_answer.trim(),
+      band_estimate: parseInt(band_estimate) || 8, key_phrases: phrases
+    });
+    res.json({ ok: true, item });
+  } catch (err) { res.status(500).json({ error: 'Failed to add speaking answer' }); }
+});
+app.delete('/api/admin/speaking-model-answers/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try { db.deleteSpeakingModelAnswer(req.params.id); res.json({ ok: true }); }
+  catch (err) { res.status(500).json({ error: 'Failed to delete speaking answer' }); }
+});
+
 // ─── Translation Sentences ────────────────────────────────────────────────────
 app.get('/api/admin/translation-sentences', authenticate, teacherOrAdmin, (req, res) => {
   try { res.json(db.getTranslationSentences()); }

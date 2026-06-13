@@ -1041,6 +1041,84 @@ const db = {
     return false;
   },
 
+  // ── Model Essays (band 8-9 sample answers) ───────────────────────────────
+  getModelEssays(task_type, topic) {
+    let items = load().model_essays || [];
+    if (task_type) items = items.filter(e => e.task_type === task_type);
+    if (topic) items = items.filter(e => e.topic_category === topic);
+    return items;
+  },
+  addModelEssay(entry) {
+    const data = load();
+    if (!data.model_essays) data.model_essays = [];
+    if (!data._ids.model_essays) data._ids.model_essays = 0;
+    data._ids.model_essays++;
+    const item = { id: data._ids.model_essays, ...entry, created_at: new Date().toISOString() };
+    data.model_essays.push(item);
+    save(data);
+    return item;
+  },
+  deleteModelEssay(id) {
+    const data = load();
+    if (!data.model_essays) return false;
+    const before = data.model_essays.length;
+    data.model_essays = data.model_essays.filter(e => String(e.id) !== String(id));
+    if (data.model_essays.length < before) { save(data); return true; }
+    return false;
+  },
+
+  // ── Collocation Sets ──────────────────────────────────────────────────────
+  getCollocationSets(topic, level) {
+    let items = load().collocation_sets || [];
+    if (topic) items = items.filter(s => s.topic === topic);
+    if (level) items = items.filter(s => s.level === level);
+    return items;
+  },
+  addCollocationSet(entry) {
+    const data = load();
+    if (!data.collocation_sets) data.collocation_sets = [];
+    if (!data._ids.collocation_sets) data._ids.collocation_sets = 0;
+    data._ids.collocation_sets++;
+    const item = { id: data._ids.collocation_sets, ...entry, created_at: new Date().toISOString() };
+    data.collocation_sets.push(item);
+    save(data);
+    return item;
+  },
+  deleteCollocationSet(id) {
+    const data = load();
+    if (!data.collocation_sets) return false;
+    const before = data.collocation_sets.length;
+    data.collocation_sets = data.collocation_sets.filter(s => String(s.id) !== String(id));
+    if (data.collocation_sets.length < before) { save(data); return true; }
+    return false;
+  },
+
+  // ── Speaking Model Answers ────────────────────────────────────────────────
+  getSpeakingModelAnswers(part, category) {
+    let items = load().speaking_model_answers || [];
+    if (part) items = items.filter(a => String(a.part) === String(part));
+    if (category) items = items.filter(a => a.category === category);
+    return items;
+  },
+  addSpeakingModelAnswer(entry) {
+    const data = load();
+    if (!data.speaking_model_answers) data.speaking_model_answers = [];
+    if (!data._ids.speaking_model_answers) data._ids.speaking_model_answers = 0;
+    data._ids.speaking_model_answers++;
+    const item = { id: data._ids.speaking_model_answers, ...entry, created_at: new Date().toISOString() };
+    data.speaking_model_answers.push(item);
+    save(data);
+    return item;
+  },
+  deleteSpeakingModelAnswer(id) {
+    const data = load();
+    if (!data.speaking_model_answers) return false;
+    const before = data.speaking_model_answers.length;
+    data.speaking_model_answers = data.speaking_model_answers.filter(a => String(a.id) !== String(id));
+    if (data.speaking_model_answers.length < before) { save(data); return true; }
+    return false;
+  },
+
   // ── Translation Sentences ───────────────────────────────────────────────────
   getTranslationSentences() {
     const data = load();
@@ -1215,7 +1293,27 @@ const db = {
   if (!data._ids.task2_prompts_custom) { data._ids.task2_prompts_custom = 0; changed = true; }
   if (!data.drafts) { data.drafts = []; changed = true; }
   if (!data._ids.drafts) { data._ids.drafts = 0; changed = true; }
+  if (!data.model_essays) { data.model_essays = []; changed = true; }
+  if (!data._ids.model_essays) { data._ids.model_essays = 0; changed = true; }
+  if (!data.collocation_sets) { data.collocation_sets = []; changed = true; }
+  if (!data._ids.collocation_sets) { data._ids.collocation_sets = 0; changed = true; }
+  if (!data.speaking_model_answers) { data.speaking_model_answers = []; changed = true; }
+  if (!data._ids.speaking_model_answers) { data._ids.speaking_model_answers = 0; changed = true; }
   if (changed) save(data);
+})();
+
+// Seed original sample content on first boot. Ships in code, so a Railway redeploy
+// that wipes the data file will re-seed automatically. Only inserts when empty —
+// never overwrites teacher-added content.
+(function seedDefaultContent() {
+  try {
+    const { MODEL_ESSAY_SEED, COLLOCATION_SEED, SPEAKING_ANSWER_SEED } = require('./seed-content');
+    if (db.getModelEssays().length === 0) MODEL_ESSAY_SEED.forEach(e => db.addModelEssay(e));
+    if (db.getCollocationSets().length === 0) COLLOCATION_SEED.forEach(s => db.addCollocationSet(s));
+    if (db.getSpeakingModelAnswers().length === 0) SPEAKING_ANSWER_SEED.forEach(a => db.addSpeakingModelAnswer(a));
+  } catch (e) {
+    console.warn('Seed content skipped:', e.message);
+  }
 })();
 
 // Migration: auto-verify legacy users who registered before email verification was enforced.

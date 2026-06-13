@@ -153,6 +153,7 @@
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="writing-practice" onclick="showView('writing-practice')">✍️ Luyện viết</button>
             <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Nộp bài chấm điểm</button>
+            <button class="tnav-nav-link" data-view="model-essays" onclick="showView('model-essays')">📄 Bài viết mẫu</button>
           </div>
         </div>
 
@@ -170,6 +171,7 @@
           <button class="tnav-group-trigger">🎤 Speaking ▾</button>
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="speaking" onclick="showView('speaking')">🎤 Luyện nói</button>
+            <button class="tnav-nav-link" data-view="speaking-samples" onclick="showView('speaking-samples')">💬 Bài nói mẫu</button>
           </div>
         </div>
 
@@ -179,6 +181,7 @@
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcard</button>
             <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 Từ vựng của tôi</button>
+            <button class="tnav-nav-link" data-view="collocations" onclick="showView('collocations')">🔗 Collocations</button>
             <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Ngữ pháp</button>
             <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Hướng dẫn ngữ pháp</button>
           </div>
@@ -846,6 +849,36 @@
         </div>
       </div>
 
+      <!-- Model Essays (band 8-9 samples) View -->
+      <div id="view-model-essays" class="view hidden">
+        <div class="page-header">
+          <h2>📄 Bài viết mẫu (Band 8–9)</h2>
+          <p>Đọc và phân tích các bài mẫu chuẩn — học cách triển khai ý, dùng từ và liên kết câu.</p>
+        </div>
+        <div class="filter-chips" id="me-filter-chips"></div>
+        <div id="model-essays-list"><div class="loading">Đang tải…</div></div>
+      </div>
+
+      <!-- Collocations Library View -->
+      <div id="view-collocations" class="view hidden">
+        <div class="page-header">
+          <h2>🔗 Collocations theo chủ đề</h2>
+          <p>Cụm từ ghi điểm (collocation) theo chủ đề và trình độ — dùng ngay trong Writing & Speaking.</p>
+        </div>
+        <div class="filter-chips" id="colloc-filter-chips"></div>
+        <div id="collocations-list"><div class="loading">Đang tải…</div></div>
+      </div>
+
+      <!-- Speaking Model Answers View -->
+      <div id="view-speaking-samples" class="view hidden">
+        <div class="page-header">
+          <h2>💬 Bài nói mẫu</h2>
+          <p>Câu trả lời mẫu cho Part 1, 2 & 3 — kèm cụm từ hữu ích để học theo.</p>
+        </div>
+        <div class="filter-chips" id="ss-filter-chips"></div>
+        <div id="speaking-samples-list"><div class="loading">Đang tải…</div></div>
+      </div>
+
       <!-- Mock Tests List View -->
       <div id="view-test-list" class="view hidden">
         <div class="page-header">
@@ -921,6 +954,9 @@
           <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Chủ đề Speaking</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('translation')" id="materials-tab-translation">🔤 Dịch câu</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('grammar-ex')" id="materials-tab-grammar-ex">📐 Bài tập ngữ pháp</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('essays')" id="materials-tab-essays">📄 Bài viết mẫu</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('collocations')" id="materials-tab-collocations">🔗 Collocations</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('speaking-answers')" id="materials-tab-speaking-answers">💬 Bài nói mẫu</button>
         </div>
 
         <!-- Existing tests list -->
@@ -1155,6 +1191,135 @@
             <div id="ge-success" class="success-msg hidden"></div>
           </div>
           <div id="admin-grammar-exercises-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- MODEL ESSAYS PANEL -->
+        <div id="essays-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Thêm bài viết mẫu</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Thêm bài Writing band 8–9 để học sinh đọc tham khảo trong mục "Bài viết mẫu".</p>
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="me-task">Loại bài</label>
+                <select id="me-task" class="form-input">
+                  <option value="task2">Task 2 (Essay)</option>
+                  <option value="task1">Task 1 (Mô tả biểu đồ)</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="me-topic">Chủ đề</label>
+                <input type="text" id="me-topic" class="form-input" placeholder="VD: Technology, Environment, Line graph">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="me-band">Band</label>
+                <select id="me-band" class="form-input">
+                  <option value="7">7</option>
+                  <option value="8" selected>8</option>
+                  <option value="9">9</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="me-prompt">Đề bài</label>
+              <textarea id="me-prompt" class="form-input" rows="3" placeholder="Some people believe that... To what extent do you agree or disagree?"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="me-essay">Bài viết mẫu</label>
+              <textarea id="me-essay" class="form-input" rows="10" placeholder="Nội dung bài mẫu (cách đoạn bằng dòng trống)..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="me-strengths">Điểm mạnh (phân tách bằng dấu phẩy)</label>
+              <input type="text" id="me-strengths" class="form-input" placeholder="Cấu trúc rõ ràng, Từ vựng học thuật, Liên kết tốt">
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitModelEssay()">➕ Thêm bài mẫu</button>
+            </div>
+            <div id="me-admin-error" class="error-msg hidden"></div>
+            <div id="me-admin-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-essays-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- COLLOCATIONS PANEL -->
+        <div id="collocations-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Thêm bộ Collocation</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Thêm bộ cụm từ theo chủ đề & trình độ. Dán mảng JSON các collocation bên dưới.</p>
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="cs-topic">Chủ đề</label>
+                <input type="text" id="cs-topic" class="form-input" placeholder="VD: Education, Environment, Technology">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="cs-level">Trình độ</label>
+                <select id="cs-level" class="form-input">
+                  <option value="B1">B1</option>
+                  <option value="B2" selected>B2</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="cs-json">Collocations (mảng JSON)</label>
+              <textarea id="cs-json" class="form-input" rows="8" placeholder='[{"collocation":"broaden your horizons","definition":"to increase your knowledge","vietnamese":"mở rộng hiểu biết","example":"Travel broadens your horizons.","part_of_speech":"verb phrase"}]'></textarea>
+              <small style="color:var(--text-muted)">Mỗi mục có: collocation, definition, vietnamese, example, part_of_speech</small>
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitCollocationSet()">➕ Thêm bộ</button>
+            </div>
+            <div id="cs-admin-error" class="error-msg hidden"></div>
+            <div id="cs-admin-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-collocations-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- SPEAKING MODEL ANSWERS PANEL -->
+        <div id="speaking-answers-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Thêm bài nói mẫu</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Thêm câu trả lời mẫu Speaking band 7–9 cho từng Part.</p>
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label for="sa-part">Part</label>
+                <select id="sa-part" class="form-input">
+                  <option value="1">Part 1</option>
+                  <option value="2" selected>Part 2 (Cue Card)</option>
+                  <option value="3">Part 3</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="sa-cat">Chủ đề</label>
+                <input type="text" id="sa-cat" class="form-input" placeholder="VD: People, Places, Society">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="sa-band">Band</label>
+                <select id="sa-band" class="form-input">
+                  <option value="7">7</option>
+                  <option value="8" selected>8</option>
+                  <option value="9">9</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="sa-q">Câu hỏi / Cue card</label>
+              <textarea id="sa-q" class="form-input" rows="3" placeholder="Describe a place you like to visit..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="sa-answer">Câu trả lời mẫu</label>
+              <textarea id="sa-answer" class="form-input" rows="10" placeholder="Nội dung bài nói mẫu (cách đoạn bằng dòng trống)..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="sa-phrases">Cụm từ hay (phân tách bằng dấu phẩy)</label>
+              <input type="text" id="sa-phrases" class="form-input" placeholder="I'd like to talk about, what I find interesting, to sum up">
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitSpeakingAnswer()">➕ Thêm bài mẫu</button>
+            </div>
+            <div id="sa-admin-error" class="error-msg hidden"></div>
+            <div id="sa-admin-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-speaking-answers-list" style="margin-top:16px"></div>
         </div>
 
         <!-- IMPORT JSON panel -->
