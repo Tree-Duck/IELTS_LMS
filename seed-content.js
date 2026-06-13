@@ -237,4 +237,42 @@ The main reason I want to learn it is for relaxation. I spend a lot of time stud
   },
 ];
 
-module.exports = { MODEL_ESSAY_SEED, COLLOCATION_SEED, SPEAKING_ANSWER_SEED };
+// Real IELTS Writing Task 2 questions (recent exams). Exam questions are short
+// factual prompts widely reproduced across IELTS sites — used here as practice
+// topics. No sample essays/analysis copied. Sources: recent 2025–2026 exam lists.
+const TASK2_PROMPT_SEED = [
+  { difficulty: 'hard',   q: "Some people believe that showing imported films and TV programmes is beneficial for a country's culture, while others argue that countries should produce their own films and television programmes. Discuss both views and give your own opinion." },
+  { difficulty: 'hard',   q: "Some people believe that it is acceptable to use animals in any way that benefits humans, while others argue that this is morally wrong. Discuss both views and give your own opinion." },
+  { difficulty: 'medium', q: "Nowadays, many celebrities are famous for their glamour and wealth rather than their achievements, which may set a negative example for young people. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "Some people believe that detailed reporting of crimes in newspapers and on television can lead to harmful consequences and should therefore be limited. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "There is a view that the widespread use of computers and mobile phones has contributed to a decline in reading and writing abilities among young people. To what extent do you agree or disagree?" },
+  { difficulty: 'hard',   q: "Nowadays, many parents work abroad and take their families with them. Do the benefits of this trend for families outweigh the drawbacks?" },
+  { difficulty: 'hard',   q: "In many societies, competitiveness is regarded as an important personal quality. How does this affect individuals? Do you think this is a beneficial or harmful trend?" },
+  { difficulty: 'hard',   q: "In the modern world, more scientific research is being funded and conducted by private companies rather than governments. Do the benefits of this trend outweigh the drawbacks?" },
+  { difficulty: 'hard',   q: "Some people think that governments should be responsible for providing transport for children to get to school, whereas others believe this duty should belong to parents. Discuss both views and give your own opinion." },
+  { difficulty: 'hard',   q: "In certain cities, public parks and open areas are being turned into community gardens where residents can grow fruit and vegetables. Do the benefits of this trend outweigh the drawbacks?" },
+  { difficulty: 'hard',   q: "In the past, people travelled abroad to experience differences from their home country. Nowadays, however, places around the world are becoming increasingly similar. What are the reasons for this trend? Do the advantages outweigh the disadvantages?" },
+  { difficulty: 'hard',   q: "Some countries allocate large amounts of money to train athletes for major international events such as the Olympic Games. However, some people believe this funding would be better spent encouraging children to participate in sports from a young age. Discuss both views and give your own opinion." },
+  { difficulty: 'hard',   q: "Research has shown that the transportation of goods and people is a major source of pollution. Some people believe that the government should be responsible for this, while others argue that individuals are to blame. Discuss both views and give your own opinion." },
+  { difficulty: 'medium', q: "Some people believe that significant historical objects displayed in museums should be returned to the countries they originally came from. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "Some people believe that art classes such as painting and drawing are equally as important as other school subjects and should be made compulsory in high schools. To what extent do you agree or disagree?" },
+  { difficulty: 'hard',   q: "Some people believe that all offenders should be sent to prison, while others argue that there are more effective alternatives for those who commit minor crimes, such as community service. Discuss both views and give your own opinion." },
+  { difficulty: 'hard',   q: "Nowadays the media is more influential in people's lives than in the past. Why is this the case? Do you think this is a positive or negative development?" },
+  { difficulty: 'medium', q: "In today's world, it is no longer necessary to attend live performances such as shows or concerts, as watching them on television or a computer at home is a better option. To what extent do you agree or disagree?" },
+  { difficulty: 'hard',   q: "In some countries, laws have been passed to limit the number of hours people are allowed to work. What are the reasons for this policy? Do you think it is a positive or negative change?" },
+  { difficulty: 'medium', q: "The main purpose of advertising is to increase the sales of products that people do not really need. To what extent do you agree or disagree?" },
+  { difficulty: 'hard',   q: "In education and employment, some people work harder than others. Why do some people work harder? Is it always a good thing to work hard?" },
+  { difficulty: 'hard',   q: "Some people think that people should be given the right to use fresh water as they like, while others believe governments should strictly control its use. Discuss both views and give your own opinion." },
+  { difficulty: 'hard',   q: "In many countries, the quality of life in large cities is becoming worse. What do you think are the causes of this problem? What measures could be taken to solve it?" },
+  { difficulty: 'hard',   q: "Some people think that museums should be enjoyable places to entertain people, while others believe that the purpose of museums is to educate. Discuss both views and give your own opinion." },
+  { difficulty: 'easy',   q: "Everyone should stay at school until the age of 18. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "Nations should spend more money on skills and vocational training for practical work rather than on university education. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "More and more people no longer read newspapers or watch television to get the news; instead, they get news about the world through the Internet. Is this a positive or negative development?" },
+  { difficulty: 'medium', q: "Some people think that the money spent on developing the technology for space exploration is not justified, and that there are more beneficial ways to spend it. To what extent do you agree or disagree?" },
+  { difficulty: 'easy',   q: "University education should be free for all students. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "Today, more and more people use mobile phones and computers, and as a result they are losing the ability to communicate face to face. To what extent do you agree or disagree?" },
+  { difficulty: 'medium', q: "Some people believe that young people who commit serious crimes should be punished in the same way as adults. To what extent do you agree or disagree?" },
+];
+
+module.exports = { MODEL_ESSAY_SEED, COLLOCATION_SEED, SPEAKING_ANSWER_SEED, TASK2_PROMPT_SEED };

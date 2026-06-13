@@ -9272,12 +9272,11 @@ async function loadWritingPractice() {
   const grid = document.getElementById('wp-question-grid');
   grid.innerHTML = '<div class="wp-loading">Đang tải đề bài…</div>';
   try {
-    const [t1Res, t2Res] = await Promise.all([
-      fetch('/api/admin/task1-topics'),
-      fetch('/api/admin/task2-prompts')
+    // Use api() so the auth token is sent — these endpoints require a logged-in user
+    const [task1, task2] = await Promise.all([
+      api('/api/admin/task1-topics').catch(() => []),
+      api('/api/admin/task2-prompts').catch(() => [])
     ]);
-    const task1 = t1Res.ok ? await t1Res.json() : [];
-    const task2 = t2Res.ok ? await t2Res.json() : [];
     // Normalize task1 topics
     const t1Questions = (Array.isArray(task1) ? task1 : []).map(t => ({
       id: 't1_' + t.id,

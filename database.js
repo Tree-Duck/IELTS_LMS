@@ -1308,10 +1308,11 @@ const db = {
 // never overwrites teacher-added content.
 (function seedDefaultContent() {
   try {
-    const { MODEL_ESSAY_SEED, COLLOCATION_SEED, SPEAKING_ANSWER_SEED } = require('./seed-content');
+    const { MODEL_ESSAY_SEED, COLLOCATION_SEED, SPEAKING_ANSWER_SEED, TASK2_PROMPT_SEED } = require('./seed-content');
     if (db.getModelEssays().length === 0) MODEL_ESSAY_SEED.forEach(e => db.addModelEssay(e));
     if (db.getCollocationSets().length === 0) COLLOCATION_SEED.forEach(s => db.addCollocationSet(s));
     if (db.getSpeakingModelAnswers().length === 0) SPEAKING_ANSWER_SEED.forEach(a => db.addSpeakingModelAnswer(a));
+    if (db.getTask2PromptsCustom().length === 0) TASK2_PROMPT_SEED.forEach(p => db.addTask2Prompt(p));
   } catch (e) {
     console.warn('Seed content skipped:', e.message);
   }
