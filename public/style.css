@@ -459,6 +459,30 @@ body {
   font-size: 15px;
   color: rgba(255,255,255,.75);
 }
+.home-hero-quote {
+  position: relative;
+  margin-top: 18px;
+  padding: 12px 16px 12px 18px;
+  max-width: 560px;
+  background: rgba(255,255,255,.12);
+  border-left: 4px solid rgba(255,255,255,.55);
+  border-radius: 10px;
+}
+.home-hero-quote .hq-mark { display: none; }
+.home-hero-quote .hq-en {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.4;
+}
+.home-hero-quote .hq-vi {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,.8);
+}
 
 /* Octopus banner mascot */
 .home-hero-octo {

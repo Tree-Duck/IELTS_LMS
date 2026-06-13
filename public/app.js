@@ -1624,6 +1624,8 @@ function toggleMobileSidebar() {
 }
 
 function showView(name) {
+  // The old thin "writing" hub is gone — send it straight to writing practice
+  if (name === 'writing') name = 'writing-practice';
   // Close mobile drawer if open
   closeMobileDrawer();
 
@@ -1989,9 +1991,57 @@ async function handleChangePassword() {
 }
 
 /* ─── Home Screen ────────────────────────────────────────────────────────── */
+/* ─── Motivational quote of the day (original, bilingual) ────────────────── */
+const QUOTES = [
+  { en: 'Every band score starts with one honest sentence.', vi: 'Mỗi band điểm bắt đầu từ một câu viết thật lòng.' },
+  { en: 'You don’t need perfect English — you need brave practice.', vi: 'Bạn không cần tiếng Anh hoàn hảo — bạn cần luyện tập can đảm.' },
+  { en: 'Small daily reps beat one heroic cram.', vi: 'Luyện đều mỗi ngày hơn cày dồn một bữa.' },
+  { en: 'Mistakes are just feedback wearing a costume.', vi: 'Lỗi sai chỉ là phản hồi đang hoá trang thôi.' },
+  { en: 'Read one more passage than you feel like reading.', vi: 'Đọc thêm một bài nữa so với mức bạn muốn dừng.' },
+  { en: 'Fluency is built one collocation at a time.', vi: 'Sự trôi chảy được xây từng cụm từ một.' },
+  { en: 'The examiner rewards clarity, not big words.', vi: 'Giám khảo thưởng cho sự rõ ràng, không phải từ to.' },
+  { en: 'Today’s draft is tomorrow’s model answer.', vi: 'Bản nháp hôm nay là bài mẫu của ngày mai.' },
+  { en: 'Listen twice, understand once, remember forever.', vi: 'Nghe hai lần, hiểu một lần, nhớ mãi mãi.' },
+  { en: 'Progress hides in the boring repetitions.', vi: 'Tiến bộ nấp trong những lần lặp lại nhàm chán.' },
+  { en: 'A timer is your friend, not your enemy.', vi: 'Đồng hồ bấm giờ là bạn, không phải kẻ thù.' },
+  { en: 'Speak before you feel ready — readiness comes after.', vi: 'Hãy nói trước khi thấy sẵn sàng — sự sẵn sàng đến sau.' },
+  { en: 'Vocabulary you use beats vocabulary you memorise.', vi: 'Từ vựng bạn dùng hơn từ vựng bạn học thuộc.' },
+  { en: 'Band 7 is just band 6 that refused to quit.', vi: 'Band 7 chỉ là band 6 không chịu bỏ cuộc.' },
+  { en: 'Plan two minutes, write twenty, check three.', vi: 'Lập dàn ý 2 phút, viết 20 phút, soát lại 3 phút.' },
+  { en: 'Your weakest skill is your biggest opportunity.', vi: 'Kỹ năng yếu nhất là cơ hội lớn nhất của bạn.' },
+  { en: 'Write to be understood, not to impress.', vi: 'Viết để người ta hiểu, không phải để gây ấn tượng.' },
+  { en: 'One topic mastered today, one topic gone tomorrow.', vi: 'Hôm nay nắm một chủ đề, mai bớt một nỗi lo.' },
+  { en: 'Consistency is the quiet superpower of high scorers.', vi: 'Sự đều đặn là siêu năng lực thầm lặng của người điểm cao.' },
+  { en: 'Don’t fear the blank page — fill it badly first.', vi: 'Đừng sợ trang giấy trắng — cứ viết dở trước đã.' },
+  { en: 'Good grammar is invisible; bad grammar shouts.', vi: 'Ngữ pháp tốt thì vô hình; ngữ pháp sai thì hét lên.' },
+  { en: 'Practice under pressure so the test feels easy.', vi: 'Luyện trong áp lực để khi thi thấy nhẹ nhàng.' },
+  { en: 'Every native speaker was once a beginner too.', vi: 'Người bản xứ nào cũng từng là người mới bắt đầu.' },
+  { en: 'Re-reading your own essay is half the lesson.', vi: 'Đọc lại bài của chính mình là một nửa bài học.' },
+  { en: 'Aim for the next half-band, not the whole mountain.', vi: 'Nhắm tới nửa band kế tiếp, đừng nhắm cả ngọn núi.' },
+  { en: 'Curiosity learns faster than fear.', vi: 'Sự tò mò học nhanh hơn nỗi sợ.' },
+  { en: 'Turn “I can’t” into “I can’t yet.”', vi: 'Biến “tôi không thể” thành “tôi chưa thể”.' },
+  { en: 'Showing up beats motivation every single day.', vi: 'Xuất hiện đều đặn thắng động lực mỗi ngày.' },
+  { en: 'The best time to practice was yesterday; the second best is now.', vi: 'Thời điểm tốt nhất để luyện là hôm qua; tốt nhì là bây giờ.' },
+  { en: 'Speak slowly and clearly — confidence sounds calm.', vi: 'Nói chậm và rõ — sự tự tin nghe rất điềm tĩnh.' },
+];
+
+function renderHomeQuote() {
+  const box = document.getElementById('home-quote');
+  if (!box) return;
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  const q = QUOTES[dayOfYear % QUOTES.length];
+  const enEl = document.getElementById('home-quote-en');
+  const viEl = document.getElementById('home-quote-vi');
+  if (enEl) enEl.textContent = q.en;
+  if (viEl) viEl.textContent = q.vi;
+  box.hidden = false;
+}
+
 async function loadHomeScreen() {
   const nameEl = document.getElementById('home-welcome-name');
   if (nameEl && currentUser) nameEl.textContent = currentUser.name || currentUser.email.split('@')[0];
+  renderHomeQuote();
 
   try {
     const [submissions, profile] = await Promise.all([

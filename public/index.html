@@ -147,14 +147,51 @@
         <!-- Homework (standalone) -->
         <button class="tnav-group-trigger tnav-nav-link" data-view="homework" onclick="showView('homework')">📋 Bài tập</button>
 
-        <!-- Mock Tests group -->
+        <!-- Writing skill group -->
+        <div class="tnav-group" id="tnav-group-writing">
+          <button class="tnav-group-trigger">📝 Writing ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="writing-practice" onclick="showView('writing-practice')">✍️ Luyện viết</button>
+            <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Nộp bài chấm điểm</button>
+          </div>
+        </div>
+
+        <!-- Reading / Listening mock tests group -->
         <div class="tnav-group" id="tnav-group-tests">
           <button class="tnav-group-trigger">📝 Kiểm tra ▾</button>
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('listening')">🎧 Listening</button>
             <button class="tnav-nav-link" data-view="test-list" onclick="showView('test-list'); switchTestTab('reading')">📖 Reading</button>
-            <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Writing</button>
-            <button class="tnav-nav-link" data-view="speaking" onclick="showView('speaking')">🎙️ Speaking</button>
+          </div>
+        </div>
+
+        <!-- Speaking skill group -->
+        <div class="tnav-group" id="tnav-group-speaking">
+          <button class="tnav-group-trigger">🎤 Speaking ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="speaking" onclick="showView('speaking')">🎤 Luyện nói</button>
+          </div>
+        </div>
+
+        <!-- Vocabulary & Grammar group -->
+        <div class="tnav-group" id="tnav-group-vocab">
+          <button class="tnav-group-trigger">📚 Từ vựng ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcard</button>
+            <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 Từ vựng của tôi</button>
+            <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Ngữ pháp</button>
+            <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Hướng dẫn ngữ pháp</button>
+          </div>
+        </div>
+
+        <!-- Other practice group -->
+        <div class="tnav-group" id="tnav-group-practice">
+          <button class="tnav-group-trigger">🏋️ Luyện tập ▾</button>
+          <div class="tnav-dropdown">
+            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
+            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
+            <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Dịch câu</button>
+            <button class="tnav-nav-link" data-view="games" onclick="showView('games')">🎮 Trò chơi</button>
           </div>
         </div>
 
@@ -165,28 +202,6 @@
             <button class="tnav-nav-link" data-view="history" onclick="showView('history')">📋 Bài nộp của tôi</button>
             <button class="tnav-nav-link" data-view="test-history" onclick="showView('test-history')">🏆 Kết quả kiểm tra</button>
             <button class="tnav-nav-link" data-view="my-attendance" onclick="showView('my-attendance')">📅 Điểm danh</button>
-          </div>
-        </div>
-
-        <!-- Vocabulary group -->
-        <div class="tnav-group" id="tnav-group-vocab">
-          <button class="tnav-group-trigger">📖 Từ vựng ▾</button>
-          <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="vocab-learn" onclick="showView('vocab-learn')">📚 Flashcard</button>
-            <button class="tnav-nav-link" data-view="vocab" onclick="showView('vocab')">📓 Từ vựng của tôi</button>
-          </div>
-        </div>
-
-        <!-- Practice group -->
-        <div class="tnav-group" id="tnav-group-practice">
-          <button class="tnav-group-trigger">🏋️ Luyện tập ▾</button>
-          <div class="tnav-dropdown">
-            <button class="tnav-nav-link" data-view="writing" onclick="showView('writing')">✍️ Writing</button>
-            <button class="tnav-nav-link" data-view="grammar-hub" onclick="showView('grammar-hub')">📐 Ngữ pháp</button>
-            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
-            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
-            <button class="tnav-nav-link" data-view="practice-grammar" onclick="showView('practice-grammar')">📖 Hướng dẫn ngữ pháp</button>
-            <button class="tnav-nav-link" data-view="games" onclick="showView('games')">🎮 Trò chơi</button>
           </div>
         </div>
 
@@ -258,6 +273,11 @@
             <p class="home-hero-eyebrow">Nền tảng học IELTS SSP</p>
             <h1 class="home-hero-title">Chào mừng trở lại, <span id="home-welcome-name">Học sinh</span>! 👋</h1>
             <p class="home-hero-sub">Tiếp tục từ lần trước, hoặc khám phá kỹ năng mới.</p>
+            <div class="home-hero-quote" id="home-quote" hidden>
+              <span class="hq-mark">"</span>
+              <span class="hq-en" id="home-quote-en"></span>
+              <span class="hq-vi" id="home-quote-vi"></span>
+            </div>
           </div>
           <!-- Octopus banner mascot -->
           <div class="home-hero-octo" aria-hidden="true">
@@ -303,7 +323,7 @@
 
         <div class="home-skills-grid">
           <!-- Writing -->
-          <button class="skill-card skill-card--writing" onclick="showView('writing')">
+          <button class="skill-card skill-card--writing" onclick="showView('writing-practice')">
             <div class="skill-card__icon">✍️</div>
             <div class="skill-card__body">
               <h3 class="skill-card__title">Writing</h3>
