@@ -9362,20 +9362,15 @@ async function openWritingQuestion(id) {
       imgArea.classList.remove('hidden');
       imgArea.innerHTML = '<div class="wp-chart-loading">Đang tải hình…</div>';
       try {
-        const res = await fetch(`/api/admin/task1-topics/${_wpCurrentQuestion.dbId}`);
-        if (res.ok) {
-          const topic = await res.json();
-          // Update prompt with full text (list only has preview)
-          if (topic.question) {
-            _wpCurrentQuestion.prompt = topic.question;
-            document.getElementById('wp-prompt-text').textContent = topic.question;
-          }
-          if (topic.image_base64 && topic.image_media_type) {
-            imgArea.innerHTML = `<img src="data:${escHtml(topic.image_media_type)};base64,${topic.image_base64}" alt="Chart" class="wp-chart-img">`;
-          } else {
-            imgArea.innerHTML = '';
-            imgArea.classList.add('hidden');
-          }
+        // api() sends the auth token — bare fetch 401s and the chart never loads
+        const topic = await api(`/api/admin/task1-topics/${_wpCurrentQuestion.dbId}`);
+        // Update prompt with full text (list only has preview)
+        if (topic.question) {
+          _wpCurrentQuestion.prompt = topic.question;
+          document.getElementById('wp-prompt-text').textContent = topic.question;
+        }
+        if (topic.image_base64 && topic.image_media_type) {
+          imgArea.innerHTML = `<img src="data:${escHtml(topic.image_media_type)};base64,${topic.image_base64}" alt="Chart" class="wp-chart-img">`;
         } else {
           imgArea.innerHTML = '';
           imgArea.classList.add('hidden');
