@@ -1273,10 +1273,23 @@ window.addEventListener('DOMContentLoaded', () => {
   if (token && currentUser) {
     showApp();
   } else {
-    show('auth-screen');
+    show('landing-screen');
+    hide('auth-screen');
     hide('app-screen');
   }
 });
+
+// Landing → auth transitions
+function openAuth(which) {
+  hide('landing-screen');
+  hide('app-screen');
+  show('auth-screen');
+  showAuthForm(which === 'register' ? 'register' : 'login');
+}
+function backToLanding() {
+  hide('auth-screen');
+  show('landing-screen');
+}
 
 // Warn on tab close / refresh when essay has content
 window.addEventListener('beforeunload', (e) => {
@@ -1543,7 +1556,8 @@ function logout() {
   localStorage.removeItem('ielts_user');
   clearInterval(pollingInterval);
   hide('app-screen');
-  show('auth-screen');
+  hide('auth-screen');
+  show('landing-screen');
 }
 
 /* ─── App Shell ──────────────────────────────────────────────────────────── */

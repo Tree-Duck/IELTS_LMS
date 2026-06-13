@@ -14,9 +14,89 @@
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 </head>
 <body>
+  <!-- LANDING (marketing) SCREEN -->
+  <div id="landing-screen" class="screen hidden">
+    <header class="lp-nav">
+      <span class="lp-brand">🌿 SSP IELTS</span>
+      <div class="lp-nav-actions">
+        <button class="lp-btn lp-btn-ghost" onclick="openAuth('login')">Đăng nhập</button>
+        <button class="lp-btn lp-btn-solid" onclick="openAuth('register')">Đăng ký</button>
+      </div>
+    </header>
+
+    <section class="lp-hero">
+      <div class="lp-hero-text">
+        <span class="lp-eyebrow">Nền tảng luyện IELTS toàn diện</span>
+        <h1 class="lp-title">Luyện IELTS thông minh,<br>tiến bộ mỗi ngày 🌱</h1>
+        <p class="lp-sub">Bài viết được AI chấm tức thì, đề Reading &amp; Listening mô phỏng, Speaking có bài mẫu, cùng từ vựng, ngữ pháp và trò chơi — tất cả trong một nơi.</p>
+        <div class="lp-cta-row">
+          <button class="lp-btn lp-btn-solid lp-btn-lg" onclick="openAuth('register')">Bắt đầu miễn phí →</button>
+          <button class="lp-btn lp-btn-ghost lp-btn-lg" onclick="openAuth('login')">Tôi đã có tài khoản</button>
+        </div>
+      </div>
+      <div class="lp-hero-art" aria-hidden="true">
+        <svg viewBox="0 0 220 230" xmlns="http://www.w3.org/2000/svg" width="260" height="272" class="lp-octo">
+          <defs>
+            <linearGradient id="lp-octo-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffd2b3"/><stop offset="1" stop-color="#ff8f63"/>
+            </linearGradient>
+          </defs>
+          <g class="lp-octo-tentacles" fill="none" stroke="#ff8f63" stroke-width="9" stroke-linecap="round">
+            <path d="M70,162 Q54,188 60,222"/>
+            <path d="M90,172 Q78,198 80,228"/>
+            <path d="M110,176 Q106,202 106,230"/>
+            <path d="M138,176 Q146,202 142,230"/>
+            <path d="M158,172 Q172,198 164,228"/>
+            <path d="M176,162 Q192,188 182,222"/>
+          </g>
+          <ellipse cx="124" cy="100" rx="82" ry="86" fill="url(#lp-octo-grad)"/>
+          <ellipse cx="124" cy="120" rx="50" ry="44" fill="rgba(255,255,255,0.28)"/>
+          <ellipse cx="98" cy="54" rx="26" ry="16" fill="rgba(255,255,255,0.40)"/>
+          <circle cx="98"  cy="94" r="20" fill="#fff"/>
+          <circle cx="152" cy="94" r="20" fill="#fff"/>
+          <circle cx="102" cy="98" r="12" fill="#3a2b4d"/>
+          <circle cx="156" cy="98" r="12" fill="#3a2b4d"/>
+          <circle cx="106" cy="89" r="5" fill="#fff"/>
+          <circle cx="160" cy="89" r="5" fill="#fff"/>
+          <ellipse cx="72"  cy="120" rx="13" ry="8" fill="rgba(233,84,107,0.45)"/>
+          <ellipse cx="178" cy="120" rx="13" ry="8" fill="rgba(233,84,107,0.45)"/>
+          <path d="M106 126 Q124 144 142 126" fill="none" stroke="#a5455f" stroke-width="4.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="lp-features">
+      <h2 class="lp-section-title">Mọi kỹ năng, một nền tảng</h2>
+      <div class="lp-feature-grid">
+        <div class="lp-feature"><div class="lp-feature-icon">✍️</div><h3>Writing AI</h3><p>Nộp essay Task 1 &amp; 2, nhận band điểm và nhận xét chi tiết trong vài giây.</p></div>
+        <div class="lp-feature"><div class="lp-feature-icon">📖</div><h3>Reading &amp; Listening</h3><p>Đề thi mô phỏng có tính giờ, chấm tự động và quy đổi band.</p></div>
+        <div class="lp-feature"><div class="lp-feature-icon">🎤</div><h3>Speaking</h3><p>Bộ đề Part 1·2·3 kèm bài nói mẫu band 7–9 để học theo.</p></div>
+        <div class="lp-feature"><div class="lp-feature-icon">🎮</div><h3>Từ vựng &amp; Trò chơi</h3><p>Flashcard, collocation theo chủ đề và game luyện từ vui nhộn.</p></div>
+      </div>
+    </section>
+
+    <section class="lp-steps">
+      <h2 class="lp-section-title">Bắt đầu trong 3 bước</h2>
+      <div class="lp-step-grid">
+        <div class="lp-step"><span class="lp-step-num">1</span><h3>Tạo tài khoản</h3><p>Đăng ký miễn phí chỉ với email.</p></div>
+        <div class="lp-step"><span class="lp-step-num">2</span><h3>Luyện tập</h3><p>Chọn kỹ năng và bắt đầu làm bài ngay.</p></div>
+        <div class="lp-step"><span class="lp-step-num">3</span><h3>Theo dõi tiến bộ</h3><p>Xem band điểm và điểm cần cải thiện theo thời gian.</p></div>
+      </div>
+      <div class="lp-cta-center">
+        <button class="lp-btn lp-btn-solid lp-btn-lg" onclick="openAuth('register')">Tạo tài khoản miễn phí</button>
+      </div>
+    </section>
+
+    <footer class="lp-footer">
+      <span class="lp-foot-brand">🌿 SSP IELTS</span>
+      <span>Học mà vui, tiến bộ thật · tintinlab.com</span>
+    </footer>
+  </div>
+
   <!-- AUTH SCREEN -->
-  <div id="auth-screen" class="screen">
+  <div id="auth-screen" class="screen hidden">
     <div class="auth-box">
+      <div class="auth-back-row"><a href="#" class="auth-back-link" onclick="backToLanding(); return false;">← Về trang chủ</a></div>
       <div class="logo">
         <div class="logo-icon">✍</div>
         <h1>SSP IELTS</h1>
