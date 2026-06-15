@@ -8064,6 +8064,159 @@ async function spinSpeakingTopic() {
 
   // Reset timer on each spin
   resetSpeakingTimer(false);
+  resetSpeakingPractice();
+}
+
+/* ─── Speaking practice: TTS + voice recording + AI scoring ──────────────── */
+let _spRec = null, _spRecording = false, _spFinal = '', _spStart = 0, _spTimerId = null;
+
+function _spCurrentQuestion() {
+  const el = document.getElementById('speaking-topic-question');
+  return el ? el.textContent.trim() : '';
+}
+
+function speakQuestion() {
+  if (!('speechSynthesis' in window)) { showToast('Trình duyệt không hỗ trợ đọc câu hỏi.'); return; }
+  const text = _spCurrentQuestion();
+  if (!text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const voices = speechSynthesis.getVoices();
+  const en = voices.find(v => /en[-_]GB/i.test(v.lang)) || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  if (en) u.voice = en;
+  u.lang = (en && en.lang) || 'en-US';
+  u.rate = 0.95;
+  speechSynthesis.speak(u);
+}
+
+function clearSpeakingTranscript() {
+  _spFinal = '';
+  const t = document.getElementById('sp-transcript'); if (t) t.value = '';
+  const r = document.getElementById('sp-score-result'); if (r) { r.classList.add('hidden'); r.innerHTML = ''; }
+}
+
+function resetSpeakingPractice() {
+  if (_spRecording) { try { _spRec && _spRec.stop(); } catch (e) {} }
+  _spRecording = false;
+  if (_spTimerId) { clearInterval(_spTimerId); _spTimerId = null; }
+  clearSpeakingTranscript();
+  const btn = document.getElementById('sp-rec-btn');
+  if (btn) { btn.textContent = '🎤 Bắt đầu nói'; btn.classList.remove('sp-rec-on'); }
+  const st = document.getElementById('sp-rec-status'); if (st) st.textContent = '';
+}
+
+function toggleSpeakRec() { if (_spRecording) stopSpeakRec(); else startSpeakRec(); }
+
+function startSpeakRec() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const fb = document.getElementById('sp-fallback');
+  if (!SR) { if (fb) fb.classList.remove('hidden'); return; }
+  if (fb) fb.classList.add('hidden');
+  _spRec = new SR();
+  _spRec.lang = 'en-US';
+  _spRec.continuous = true;
+  _spRec.interimResults = true;
+  const tEl = document.getElementById('sp-transcript');
+  _spFinal = (tEl && tEl.value.trim()) ? tEl.value.trim() + ' ' : '';
+  _spRec.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const txt = e.results[i][0].transcript;
+      if (e.results[i].isFinal) _spFinal += txt + ' '; else interim += txt;
+    }
+    if (tEl) tEl.value = (_spFinal + interim).replace(/\s+/g, ' ').trimStart();
+  };
+  _spRec.onerror = (e) => {
+    const st = document.getElementById('sp-rec-status');
+    if (st) st.textContent = e.error === 'no-speech' ? 'Không nghe thấy gì…' : 'Lỗi ghi âm: ' + e.error;
+  };
+  _spRec.onend = () => { if (_spRecording) { try { _spRec.start(); } catch (e) {} } }; // auto-restart while recording
+  try { _spRec.start(); } catch (e) {}
+  _spRecording = true;
+  _spStart = performance.now();
+  const btn = document.getElementById('sp-rec-btn');
+  if (btn) { btn.textContent = '⏹ Dừng'; btn.classList.add('sp-rec-on'); }
+  const st = document.getElementById('sp-rec-status');
+  _spTimerId = setInterval(() => { if (st) st.textContent = '🔴 Đang ghi… ' + Math.round((performance.now() - _spStart) / 1000) + 's'; }, 500);
+}
+
+function stopSpeakRec() {
+  _spRecording = false;
+  if (_spTimerId) { clearInterval(_spTimerId); _spTimerId = null; }
+  try { _spRec && _spRec.stop(); } catch (e) {}
+  const btn = document.getElementById('sp-rec-btn');
+  if (btn) { btn.textContent = '🎤 Bắt đầu nói'; btn.classList.remove('sp-rec-on'); }
+  const secs = Math.round((performance.now() - _spStart) / 1000);
+  window._spDuration = secs;
+  const st = document.getElementById('sp-rec-status'); if (st) st.textContent = secs > 0 ? `Đã ghi ${secs}s` : '';
+}
+
+async function scoreSpeaking() {
+  const tEl = document.getElementById('sp-transcript');
+  const transcript = (tEl ? tEl.value : '').trim();
+  const resEl = document.getElementById('sp-score-result');
+  if (!transcript) { showToast('Chưa có câu trả lời để chấm.'); return; }
+  if (_spRecording) stopSpeakRec();
+  const btn = document.getElementById('sp-score-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chấm…'; }
+  if (resEl) { resEl.classList.remove('hidden'); resEl.innerHTML = '<div class="loading">AI đang chấm bài nói…</div>'; }
+  try {
+    const data = await api('/api/speaking/score', { method: 'POST', body: JSON.stringify({
+      part: speakingPart, question: _spCurrentQuestion(), transcript, durationSec: window._spDuration || 0
+    }) });
+    renderSpeakingScore(data);
+  } catch (e) {
+    if (resEl) resEl.innerHTML = `<div class="error-msg" style="display:block">${e.message}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Chấm điểm'; }
+  }
+}
+
+function _spBar(label, val) {
+  const v = Math.max(0, Math.min(9, Number(val) || 0));
+  return `<div class="sp-crit"><span class="sp-crit-label">${label}</span>
+    <span class="sp-crit-track"><span class="sp-crit-fill" style="width:${(v / 9 * 100).toFixed(0)}%"></span></span>
+    <span class="sp-crit-val">${v}</span></div>`;
+}
+
+function renderSpeakingScore(d) {
+  const resEl = document.getElementById('sp-score-result');
+  if (!resEl) return;
+  const list = (arr, cls) => (Array.isArray(arr) && arr.length)
+    ? `<ul class="sp-list ${cls}">${arr.map(s => `<li>${escapeHtml(String(s))}</li>`).join('')}</ul>` : '';
+  resEl.innerHTML = `
+    <div class="sp-score-head">
+      <div class="sp-band">${d.band ?? '–'}<small>band</small></div>
+      <div class="sp-crits">
+        ${_spBar('Fluency', d.fluency)}
+        ${_spBar('Vocabulary', d.lexical)}
+        ${_spBar('Grammar', d.grammar)}
+        ${_spBar('Pronunciation*', d.pronunciation)}
+      </div>
+    </div>
+    ${d.comment ? `<p class="sp-comment">${escapeHtml(d.comment)}</p>` : ''}
+    ${d.strengths ? `<div class="sp-block"><strong>✅ Điểm mạnh</strong>${list(d.strengths, 'good')}</div>` : ''}
+    ${d.improvements ? `<div class="sp-block"><strong>🔧 Cần cải thiện</strong>${list(d.improvements, 'bad')}</div>` : ''}
+    ${d.better_phrases ? `<div class="sp-block"><strong>💬 Cụm từ nâng cấp</strong>${list(d.better_phrases, 'phrase')}</div>` : ''}
+    <p class="sp-note">*Pronunciation chỉ là ước lượng từ bản ghi chữ — không phản ánh phát âm thật.</p>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="showSpeakingModel()">📖 Xem bài mẫu</button>
+    <div id="sp-model" class="sp-model hidden"></div>`;
+}
+
+async function showSpeakingModel() {
+  const box = document.getElementById('sp-model');
+  if (!box) return;
+  if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  box.innerHTML = '<div class="loading">Đang tải bài mẫu…</div>';
+  try {
+    const all = await api('/api/speaking-model-answers?part=' + (speakingPart || 1));
+    if (!all.length) { box.innerHTML = '<div class="empty-state">Chưa có bài mẫu cho phần này.</div>'; return; }
+    const m = all[Math.floor(Math.random() * all.length)];
+    box.innerHTML = `<div class="sp-model-q">${escapeHtml(m.question)}</div>
+      <div class="sp-model-a">${escapeHtml(m.model_answer).replace(/\n+/g, '<br>')}</div>
+      ${(m.key_phrases && m.key_phrases.length) ? `<div class="sp-model-phr"><strong>Cụm từ hay:</strong> ${m.key_phrases.map(p => `<span class="me-tag">${escapeHtml(p)}</span>`).join('')}</div>` : ''}`;
+  } catch (e) { box.innerHTML = `<div class="error-msg" style="display:block">${e.message}</div>`; }
 }
 
 function toggleModelAnswer() {

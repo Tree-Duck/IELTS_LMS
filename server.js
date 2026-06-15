@@ -2498,6 +2498,40 @@ Return ONLY valid JSON, no markdown:
   }
 });
 
+// ─── Speaking practice: AI score a spoken answer (from its transcript) ──────────
+app.post('/api/speaking/score', authenticate, async (req, res) => {
+  try {
+    const { part, question, transcript, durationSec } = req.body;
+    if (!transcript || !transcript.trim()) return res.status(400).json({ error: 'Transcript is empty.' });
+    if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+    const partNum = parseInt(part) || 1;
+    const dur = Math.round(Number(durationSec) || 0);
+    const expected = partNum === 2 ? 'about 90–120 seconds of continuous speech' : 'about 20–50 seconds per answer';
+    const prompt = `You are an experienced IELTS Speaking examiner. A student answered an IELTS Speaking Part ${partNum} question. You are given the QUESTION and an automatic TRANSCRIPT of what they said (speech-to-text — ignore minor transcription typos and missing punctuation). They spoke for roughly ${dur} seconds (expected: ${expected}).
+
+QUESTION: ${question || '(not provided)'}
+TRANSCRIPT: ${transcript.trim()}
+
+Assess on the four IELTS Speaking criteria (0-9, half-bands allowed): Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation.
+IMPORTANT: pronunciation CANNOT be reliably judged from a text transcript — give a cautious, tentative estimate from coherence and language control, and keep it moderate. Use the spoken duration to inform fluency (a very short answer = limited fluency).
+
+Reply with ONLY a JSON object — no markdown, no extra text — in exactly this shape:
+{"band": <overall 0-9, half-steps>, "fluency": <0-9>, "lexical": <0-9>, "grammar": <0-9>, "pronunciation": <0-9>, "strengths": ["<vi>","<vi>"], "improvements": ["<vi>","<vi>"], "better_phrases": ["<English phrase> — <nghĩa tiếng Việt>","..."], "comment": "<2-3 câu nhận xét tiếng Việt>"}
+All of strengths, improvements and comment must be in Vietnamese; better_phrases give 2-3 natural English upgrades each with a short Vietnamese gloss. Be encouraging but honest.`;
+    const response = await client.messages.create({ model: MODEL, max_tokens: 700, messages: [{ role: 'user', content: prompt }] });
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
+    db.logUsage('speaking-score', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+    let raw = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    let data;
+    try { data = JSON.parse(raw); } catch { return res.status(500).json({ error: 'Không đọc được kết quả chấm. Vui lòng thử lại.' }); }
+    res.json(data);
+  } catch (err) {
+    console.error('Speaking score error:', err);
+    res.status(500).json({ error: 'Failed to score speaking answer.' });
+  }
+});
+
 // ─── Serve SPA ────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -1918,6 +1918,25 @@
           </div>
         </div>
 
+        <!-- Speak & AI-score panel -->
+        <div class="sp-practice" id="sp-practice">
+          <h3 class="sp-practice-title">🎤 Luyện nói &amp; chấm điểm AI</h3>
+          <p class="sp-practice-sub">Nghe câu hỏi → nói câu trả lời → AI chấm band &amp; góp ý.</p>
+          <div class="sp-controls">
+            <button type="button" class="btn btn-secondary" onclick="speakQuestion()">🔊 Nghe câu hỏi</button>
+            <button type="button" class="btn btn-primary sp-rec-btn" id="sp-rec-btn" onclick="toggleSpeakRec()">🎤 Bắt đầu nói</button>
+            <span class="sp-rec-status" id="sp-rec-status"></span>
+          </div>
+          <div class="sp-fallback hidden" id="sp-fallback">⚠️ Trình duyệt không hỗ trợ ghi âm bằng giọng nói. Hãy dùng <strong>Chrome/Edge</strong>, hoặc gõ câu trả lời bên dưới rồi bấm Chấm điểm.</div>
+          <textarea id="sp-transcript" class="sp-transcript" rows="5" placeholder="Câu trả lời của bạn sẽ hiện ở đây khi nói (có thể sửa lại trước khi chấm)…"></textarea>
+          <div class="sp-actions">
+            <button type="button" class="btn btn-primary" id="sp-score-btn" onclick="scoreSpeaking()">✅ Chấm điểm</button>
+            <button type="button" class="btn btn-secondary" onclick="clearSpeakingTranscript()">🗑️ Xoá</button>
+            <span class="sp-privacy">🔒 Giọng nói được gửi tới dịch vụ nhận diện của trình duyệt để chuyển thành chữ.</span>
+          </div>
+          <div id="sp-score-result" class="sp-score-result hidden"></div>
+        </div>
+
         <!-- Frameworks -->
         <div class="speaking-frameworks">
           <h3 class="frameworks-title">💡 Khung cấu trúc Speaking</h3>
