@@ -428,8 +428,7 @@ body {
 }
 
 /* ─── TOPNAV: LINKS ROW ──────────────────────────────────────────────────── */
-.topnav-links { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; overflow-x: auto; scrollbar-width: none; justify-content: space-between; padding: 0 8px; }
-.topnav-links::-webkit-scrollbar { display: none; }
+.topnav-links { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; justify-content: space-between; padding: 0 8px; }
 
 /* ─── TNAV GROUP + TRIGGER ───────────────────────────────────────────────── */
 .tnav-group { position: relative; }
