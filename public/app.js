@@ -9078,7 +9078,10 @@ function renderGrammarHubTheory() {
     <div class="gh-theory-card" id="gh-card-${li}">
       <div class="gh-theory-header" onclick="toggleGhCard(${li})">
         <span class="gh-theory-icon">${lesson.icon}</span>
-        <h3 class="gh-theory-title">${lesson.title}</h3>
+        <div class="gh-theory-titlewrap">
+          <h3 class="gh-theory-title">${lesson.title}</h3>
+          <p class="gh-theory-desc">${lesson.band_tip}</p>
+        </div>
         <span class="gh-theory-chevron" id="gh-chevron-${li}">›</span>
       </div>
       <div class="gh-theory-body hidden" id="gh-body-${li}">
