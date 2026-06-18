@@ -405,7 +405,7 @@ body {
 .auth-form { display: flex; flex-direction: column; gap: 16px; }
 
 /* ─── APP LAYOUT ────────────────────────────────────────────────────────── */
-:root { --topnav-height: 62px; }
+:root { --topnav-height: 70px; }
 #app-screen { display: block; min-height: 100vh; }
 
 /* ─── TOPNAV SHELL ───────────────────────────────────────────────────────── */
@@ -421,14 +421,14 @@ body {
 
 /* ─── TOPNAV: LEFT / BRAND ───────────────────────────────────────────────── */
 .topnav-left { display: flex; align-items: center; gap: 8px; margin-right: 8px; flex-shrink: 0; }
-.topnav-brand { font-weight: 900; font-size: 20px; white-space: nowrap; color: #fff; letter-spacing: 0.2px; }
+.topnav-brand { font-weight: 900; font-size: 23px; white-space: nowrap; color: #fff; letter-spacing: 0.2px; }
 .topnav-hamburger {
   display: none; background: none; border: none; font-size: 20px;
   cursor: pointer; padding: 4px 8px; color: rgba(255,255,255,.8);
 }
 
 /* ─── TOPNAV: LINKS ROW ──────────────────────────────────────────────────── */
-.topnav-links { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.topnav-links { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; overflow-x: auto; scrollbar-width: none; justify-content: space-between; padding: 0 8px; }
 .topnav-links::-webkit-scrollbar { display: none; }
 
 /* ─── TNAV GROUP + TRIGGER ───────────────────────────────────────────────── */
@@ -438,7 +438,7 @@ body {
   padding: 8px 12px; border-radius: 7px;
   background: none; border: none; cursor: pointer;
   white-space: nowrap;
-  font-size: 14.5px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   color: rgba(255,255,255,.82);
   white-space: nowrap;
   transition: background 150ms, color 150ms;
@@ -506,16 +506,16 @@ body {
 .topnav-right { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; }
 .topnav-darkmode-btn {
   background: none; border: none; cursor: pointer;
-  font-size: 19px; padding: 6px 8px; border-radius: 6px; color: rgba(255,255,255,.85);
+  font-size: 21px; padding: 6px 8px; border-radius: 6px; color: rgba(255,255,255,.85);
   transition: background 150ms, color 150ms;
 }
 .topnav-darkmode-btn:hover { background: rgba(255,255,255,.14); color: #fff; }
 .topnav-avatar-btn {
-  width: 40px; height: 40px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   background: rgba(255,255,255,.2);
   border: 2px solid rgba(255,255,255,.5);
   color: #fff;
-  font-size: 17px; font-weight: 800;
+  font-size: 19px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; flex-shrink: 0;
   transition: background 150ms;
