@@ -405,7 +405,7 @@ body {
 .auth-form { display: flex; flex-direction: column; gap: 16px; }
 
 /* ─── APP LAYOUT ────────────────────────────────────────────────────────── */
-:root { --topnav-height: 56px; }
+:root { --topnav-height: 62px; }
 #app-screen { display: block; min-height: 100vh; }
 
 /* ─── TOPNAV SHELL ───────────────────────────────────────────────────────── */
@@ -421,22 +421,24 @@ body {
 
 /* ─── TOPNAV: LEFT / BRAND ───────────────────────────────────────────────── */
 .topnav-left { display: flex; align-items: center; gap: 8px; margin-right: 8px; flex-shrink: 0; }
-.topnav-brand { font-weight: 800; font-size: 17px; white-space: nowrap; color: #fff; letter-spacing: 0.2px; }
+.topnav-brand { font-weight: 900; font-size: 20px; white-space: nowrap; color: #fff; letter-spacing: 0.2px; }
 .topnav-hamburger {
   display: none; background: none; border: none; font-size: 20px;
   cursor: pointer; padding: 4px 8px; color: rgba(255,255,255,.8);
 }
 
 /* ─── TOPNAV: LINKS ROW ──────────────────────────────────────────────────── */
-.topnav-links { display: flex; align-items: center; flex: 1; gap: 2px; }
+.topnav-links { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.topnav-links::-webkit-scrollbar { display: none; }
 
 /* ─── TNAV GROUP + TRIGGER ───────────────────────────────────────────────── */
 .tnav-group { position: relative; }
 .tnav-group-trigger {
   display: flex; align-items: center; gap: 5px;
-  padding: 6px 12px; border-radius: 6px;
+  padding: 8px 12px; border-radius: 7px;
   background: none; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 600;
+  white-space: nowrap;
+  font-size: 14.5px; font-weight: 700;
   color: rgba(255,255,255,.82);
   white-space: nowrap;
   transition: background 150ms, color 150ms;
@@ -504,16 +506,16 @@ body {
 .topnav-right { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0; }
 .topnav-darkmode-btn {
   background: none; border: none; cursor: pointer;
-  font-size: 16px; padding: 6px 8px; border-radius: 6px; color: rgba(255,255,255,.7);
+  font-size: 19px; padding: 6px 8px; border-radius: 6px; color: rgba(255,255,255,.85);
   transition: background 150ms, color 150ms;
 }
 .topnav-darkmode-btn:hover { background: rgba(255,255,255,.14); color: #fff; }
 .topnav-avatar-btn {
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
   background: rgba(255,255,255,.2);
   border: 2px solid rgba(255,255,255,.5);
   color: #fff;
-  font-size: 13px; font-weight: 800;
+  font-size: 17px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; flex-shrink: 0;
   transition: background 150ms;
@@ -557,10 +559,13 @@ body {
 }
 
 /* ─── RESPONSIVE BREAKPOINT ──────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* Switch to the drawer early — a 10-group bar is too cramped below ~1024px,
+   where it used to overflow and hide the account/dark-mode buttons. */
+@media (max-width: 1024px) {
   .topnav-links { display: none; }
   .topnav-hamburger { display: flex; }
-
+}
+@media (max-width: 768px) {
   /* Home screen mobile */
   .home-hero { padding: 28px 24px; flex-direction: column; }
   .home-hero-art { display: none; }
@@ -571,7 +576,7 @@ body {
   .home-stats-strip { gap: 8px; }
   .hss-item { min-width: 0; padding: 12px 16px; }
 }
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .topnav-hamburger { display: none !important; }
 }
 
@@ -761,8 +766,8 @@ body {
 
 .skill-card__icon { font-size: 32px; flex-shrink: 0; line-height: 1; }
 .skill-card__body { flex: 1; }
-.skill-card__title { font-size: 16px; font-weight: 800; margin-bottom: 3px; color: var(--gray-900); }
-.skill-card__desc { font-size: 13px; color: var(--gray-500); line-height: 1.4; }
+.skill-card__title { font-size: 17px; font-weight: 800; margin-bottom: 3px; color: var(--gray-900); }
+.skill-card__desc { font-size: 14px; color: var(--gray-500); line-height: 1.45; }
 .skill-card__arrow {
   font-size: 20px;
   font-weight: 700;
@@ -806,7 +811,7 @@ body {
   box-shadow: var(--shadow);
 }
 .hss-val { font-size: 22px; font-weight: 800; color: var(--primary); }
-.hss-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+.hss-label { font-size: 13px; color: var(--gray-500); font-weight: 600; }
 
 /* ══════════════════════════════════════════════════════════════ /HOME VIEW */
 
