@@ -1637,6 +1637,20 @@ function toggleMobileSidebar() {
   backdrop.classList.toggle('active', !isOpen);
 }
 
+/* ─── View history — real "back to the previous page" ────────────────────── */
+let _viewHistory = [];
+let _currentView = null;
+let _goingBack = false;
+const _NO_BACK = new Set(['test-taking']); // never land back here
+
+function goBack() {
+  let prev = _viewHistory.pop();
+  while (prev && _NO_BACK.has(prev)) prev = _viewHistory.pop();
+  _goingBack = true;
+  showView(prev || 'home');
+  _goingBack = false;
+}
+
 function showView(name) {
   // The old thin "writing" hub is gone — send it straight to writing practice
   if (name === 'writing') name = 'writing-practice';
@@ -1647,11 +1661,17 @@ function showView(name) {
   if (name !== 'submit' && isOnSubmitWithContent()) {
     if (!confirm('You have an essay in progress. Leave without saving your draft?')) return;
   }
+  // Track navigation history so the Back button returns to the real previous view
+  if (!_goingBack && _currentView && _currentView !== name && !_NO_BACK.has(_currentView)) {
+    _viewHistory.push(_currentView);
+    if (_viewHistory.length > 30) _viewHistory.shift();
+  }
+  _currentView = name;
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   // Reset feedback back button to default when not coming from archive
   if (name !== 'feedback') {
     const backBtn = document.querySelector('#view-feedback .btn-back');
-    if (backBtn) { backBtn.onclick = () => showView('history'); backBtn.textContent = '← Back'; }
+    if (backBtn) { backBtn.onclick = () => goBack(); backBtn.textContent = '← Back'; }
   }
   show(`view-${name}`);
 

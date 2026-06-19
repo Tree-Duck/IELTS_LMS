@@ -824,7 +824,7 @@
       <!-- Feedback View -->
       <div id="view-feedback" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('history')">← Quay lại</button>
+          <button class="btn-back" onclick="goBack()">← Quay lại</button>
           <h2>Phản hồi Essay</h2>
         </div>
         <div id="feedback-content"></div>
@@ -858,7 +858,7 @@
       <!-- Admin: Student Submission History -->
       <div id="view-admin-student-history" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('admin')">← Back to Users</button>
+          <button class="btn-back" onclick="goBack()">← Back</button>
           <h2 id="admin-student-history-title">Student History</h2>
           <p id="admin-student-history-sub">Essay submissions and AI grading details</p>
         </div>
@@ -1003,7 +1003,7 @@
       <!-- Test Result View -->
       <div id="view-test-result" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('test-history')">← Quay lại kết quả</button>
+          <button class="btn-back" onclick="goBack()">← Quay lại</button>
           <h2 id="test-result-title">Kết quả bài kiểm tra</h2>
         </div>
         <div id="test-result-content"><div class="loading">Đang tải…</div></div>
@@ -1596,7 +1596,7 @@
       <div id="view-rewrite" class="view hidden">
         <div class="page-header rewrite-page-header">
           <div class="rewrite-header-left">
-            <button class="btn-back" onclick="showView('feedback')">← Quay lại phản hồi</button>
+            <button class="btn-back" onclick="goBack()">← Quay lại</button>
             <h2>Viết lại thông minh — Band 8+</h2>
           </div>
           <p>Viết lại thông minh essay của bạn hướng tới Band 8.0–8.5 với giải thích những gì đã thay đổi</p>
@@ -1617,7 +1617,7 @@
       <!-- Class Detail View -->
       <div id="view-class-detail" class="view hidden">
         <div class="page-header">
-          <button class="btn-back" onclick="showView('classes')" id="class-detail-back">← Quay lại lớp học</button>
+          <button class="btn-back" onclick="goBack()" id="class-detail-back">← Quay lại</button>
           <div id="class-detail-header-text">
             <h2 id="class-detail-title">Lớp học</h2>
             <p id="class-detail-desc"></p>
@@ -2046,7 +2046,7 @@
       <!-- Writing Practice View -->
       <div id="view-writing-practice" class="view hidden">
         <div class="page-header">
-          <button class="btn-back-plain" onclick="showView('writing')">← Quay lại</button>
+          <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
           <h2>📝 Luyện viết IELTS</h2>
           <p>Chọn đề và luyện viết với AI chấm bài</p>
         </div>
@@ -2114,7 +2114,7 @@
       <!-- Translation Curriculum Hub View -->
       <div id="view-translation" class="view hidden">
         <div class="trans-hub-header">
-          <button class="btn-back-plain" onclick="showView('writing')">← Quay lại</button>
+          <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
           <div class="trans-hub-title">
             <span class="trans-hub-label">✏️ LUYỆN DỊCH THUẬT</span>
             <h2 class="trans-hub-h2">TẬP DỊCH <span class="trans-hub-accent">IELTS</span></h2>
@@ -2176,7 +2176,7 @@
       <!-- Paragraph List View -->
       <div id="view-paragraph-list" class="view hidden">
         <div class="page-header">
-          <button class="btn-back-plain" onclick="showView('translation')">← Quay lại</button>
+          <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
           <h2>📝 Dịch đoạn văn Band 6.5</h2>
           <p>Dịch các đoạn văn ngắn từ tiếng Việt sang tiếng Anh — luyện tư duy học thuật</p>
         </div>
