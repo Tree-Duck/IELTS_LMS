@@ -9524,10 +9524,10 @@ async function openWritingQuestion(id) {
   document.getElementById('wp-session-panel').classList.remove('hidden');
   document.getElementById('wp-ai-result').classList.add('hidden');
   document.getElementById('wp-ai-result').innerHTML = '';
-  document.getElementById('wp-essay-input').value = '';
+  document.getElementById('wp-essay-input').value = localStorage.getItem('wp_draft_' + _wpCurrentQuestion.id) || '';
   resetWpTools();
-  document.getElementById('wp-word-counter').textContent = '0 từ';
   document.getElementById('wp-word-target').textContent = `Mục tiêu: ${_wpCurrentQuestion.minWords}+ từ`;
+  updateWordCount(); // reflect any restored draft + show "đã lưu nháp"
   const meta = document.getElementById('wp-session-meta');
   meta.innerHTML = `<span class="tag-badge ${_wpCurrentQuestion.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${_wpCurrentQuestion.type === 'task1' ? 'Task 1' : 'Task 2'}</span> <strong>${escHtml(_wpCurrentQuestion.topic)}</strong>`;
   document.getElementById('wp-prompt-text').textContent = _wpCurrentQuestion.prompt;
@@ -9600,11 +9600,17 @@ function updateWordCount() {
   counter.textContent = `${count} từ`;
   if (_wpCurrentQuestion) {
     counter.style.color = count >= _wpCurrentQuestion.minWords ? '#16a34a' : '#dc2626';
+    // Autosave draft for this question
+    try { localStorage.setItem('wp_draft_' + _wpCurrentQuestion.id, document.getElementById('wp-essay-input').value); } catch (e) {}
+    const st = document.getElementById('wp-draft-status');
+    if (st) st.textContent = (document.getElementById('wp-essay-input').value.trim()) ? '💾 Đã lưu nháp' : '';
   }
 }
 
 function clearWritingEssay() {
+  if (!confirm('Xoá bài viết hiện tại? Nháp đã lưu của đề này cũng sẽ bị xoá.')) return;
   document.getElementById('wp-essay-input').value = '';
+  if (_wpCurrentQuestion) { try { localStorage.removeItem('wp_draft_' + _wpCurrentQuestion.id); } catch (e) {} }
   updateWordCount();
   document.getElementById('wp-ai-result').classList.add('hidden');
   document.getElementById('wp-ai-result').innerHTML = '';
@@ -9679,22 +9685,51 @@ async function submitWritingEssay() {
   resultEl.classList.remove('hidden');
   resultEl.innerHTML = '<div class="wp-ai-loading">✨ AI đang chấm bài… <span class="loading-dots">...</span></div>';
   try {
-    const res = await fetch('/api/ai/grade-writing', {
+    // api() sends the auth token — /api/ai/grade-writing requires a logged-in user
+    const data = await api('/api/ai/grade-writing', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt, essay, type: _wpCurrentQuestion.type })
     });
-    const data = await res.json();
     if (data.feedback) {
       resultEl.innerHTML = `<div class="wp-ai-feedback">
         <div class="wp-ai-feedback-title">✨ Phản hồi từ AI</div>
-        <div class="wp-ai-feedback-body">${data.feedback.replace(/\n/g, '<br>')}</div>
+        <div class="wp-ai-feedback-body">${escHtml(data.feedback).replace(/\n/g, '<br>')}</div>
+        <button class="btn btn-outline btn-sm wp-improve-btn" onclick="improveWritingEssay()">📈 Xem bản viết mẫu Band 8+</button>
+        <div id="wp-improve-result" class="wp-improve-result hidden"></div>
       </div>`;
     } else {
       resultEl.innerHTML = '<div class="wp-ai-error">Không nhận được phản hồi từ AI. Thử lại sau.</div>';
     }
   } catch(e) {
-    resultEl.innerHTML = '<div class="wp-ai-error">Lỗi kết nối. Kiểm tra mạng và thử lại.</div>';
+    resultEl.innerHTML = `<div class="wp-ai-error">${escHtml(e.message || 'Lỗi kết nối. Kiểm tra mạng và thử lại.')}</div>`;
+  }
+}
+
+// Rewrite the student's own essay to a Band 8+ model — shown when they review their work
+async function improveWritingEssay() {
+  if (!_wpCurrentQuestion) return;
+  const essay = document.getElementById('wp-essay-input').value.trim();
+  if (!essay) { showToast('Chưa có bài để cải thiện.'); return; }
+  const box = document.getElementById('wp-improve-result');
+  const btn = document.querySelector('.wp-improve-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang viết lại Band 8+…'; }
+  if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="wp-ai-loading">✨ Đang nâng cấp bài của bạn lên chuẩn Band 8+…</div>'; }
+  try {
+    const data = await api('/api/ai/improve-writing', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt, essay, type: _wpCurrentQuestion.type })
+    });
+    if (data.improved && box) {
+      box.innerHTML = `<div class="wp-improve-title">📈 Bản viết mẫu Band 8+</div>
+        <div class="wp-improve-body"><p>${escHtml(data.improved).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
+        <p class="wp-improve-note">Bản này nâng cấp từ chính bài của bạn — giữ ý của bạn, cải thiện từ vựng, ngữ pháp và liên kết.</p>`;
+    } else if (box) {
+      box.innerHTML = '<div class="wp-ai-error">Không tạo được bản cải thiện. Thử lại.</div>';
+    }
+  } catch (e) {
+    if (box) box.innerHTML = `<div class="wp-ai-error">${escHtml(e.message || 'Lỗi. Thử lại.')}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📈 Xem bản viết mẫu Band 8+'; }
   }
 }
 

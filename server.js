@@ -2600,6 +2600,39 @@ Be encouraging but honest. Keep total response under 350 words.`;
   }
 });
 
+// Rewrite the student's OWN essay up to a Band 8+ standard (model improvement)
+app.post('/api/ai/improve-writing', authenticate, async (req, res) => {
+  const { prompt, essay, type } = req.body;
+  if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const taskLabel = type === 'task1' ? 'Task 1 (Report)' : 'Task 2 (Essay)';
+  const system = `You are an expert IELTS writing tutor. Rewrite the student's IELTS Writing ${taskLabel} so it would score around Band 8.0–8.5.
+RULES:
+- Keep the student's own ideas, opinion and overall structure — upgrade their writing, do not replace the content with a different argument.
+- Improve lexical resource (precise words, natural collocations), grammatical range & accuracy, cohesion, and task response.
+- Keep a realistic length (Task 1 ~170–190 words; Task 2 ~270–300 words). Do not pad.
+- Output ONLY the improved essay in English: clean paragraphs, no preamble, no commentary, no markdown headings.`;
+  const userMsg = `IELTS Writing ${taskLabel} Prompt:\n${prompt}\n\nStudent Essay:\n${essay}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 900,
+      system,
+      messages: [{ role: 'user', content: userMsg }],
+    });
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
+    db.logUsage('improve-writing', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+    const improved = response.content?.[0]?.text?.trim() || '';
+    res.json({ improved });
+  } catch (e) {
+    console.error('improve-writing AI error:', e.message);
+    res.status(500).json({ error: 'AI error', detail: e.message });
+  }
+});
+
 app.post('/api/ai/grade-paragraph', authenticate, async (req, res) => {
   const { vi, modelEn, userEn, topic } = req.body;
   if (!vi || !userEn) return res.status(400).json({ error: 'Missing fields' });
