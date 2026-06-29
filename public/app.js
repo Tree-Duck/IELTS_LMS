@@ -9682,26 +9682,31 @@ async function submitWritingEssay() {
     return;
   }
   const resultEl = document.getElementById('wp-ai-result');
+  const btn = document.getElementById('wp-submit-btn');
   resultEl.classList.remove('hidden');
-  resultEl.innerHTML = '<div class="wp-ai-loading">✨ AI đang chấm bài… <span class="loading-dots">...</span></div>';
+  resultEl.innerHTML = '<div class="wp-ai-loading">✨ Đang nộp bài để AI chấm… <span class="loading-dots">...</span></div>';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chấm…'; }
   try {
-    // api() sends the auth token — /api/ai/grade-writing requires a logged-in user
-    const data = await api('/api/ai/grade-writing', {
+    // Create a real submission with AI grading — saved to the student's history,
+    // graded with full band breakdown (TA/CC/LR/GRA), and visible to teachers.
+    const result = await api('/api/submissions', {
       method: 'POST',
-      body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt, essay, type: _wpCurrentQuestion.type })
+      body: JSON.stringify({
+        task_type: _wpCurrentQuestion.type,
+        prompt: _wpCurrentQuestion.prompt,
+        essay,
+        grading_mode: 'ai'
+      })
     });
-    if (data.feedback) {
-      resultEl.innerHTML = `<div class="wp-ai-feedback">
-        <div class="wp-ai-feedback-title">✨ Phản hồi từ AI</div>
-        <div class="wp-ai-feedback-body">${escHtml(data.feedback).replace(/\n/g, '<br>')}</div>
-        <button class="btn btn-outline btn-sm wp-improve-btn" onclick="improveWritingEssay()">📈 Xem bản viết mẫu Band 8+</button>
-        <div id="wp-improve-result" class="wp-improve-result hidden"></div>
-      </div>`;
-    } else {
-      resultEl.innerHTML = '<div class="wp-ai-error">Không nhận được phản hồi từ AI. Thử lại sau.</div>';
-    }
+    // Clear the saved practice draft now that the essay is submitted
+    try { localStorage.removeItem('wp_draft_' + _wpCurrentQuestion.id); } catch (e) {}
+    // Hand off to the full feedback view — reuses the rich graded UI and polls
+    // until grading completes (band score, criterion cards, sentence analysis, rewrite, PDF).
+    viewFeedback(result.id);
   } catch(e) {
     resultEl.innerHTML = `<div class="wp-ai-error">${escHtml(e.message || 'Lỗi kết nối. Kiểm tra mạng và thử lại.')}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Chấm bài với AI'; }
   }
 }
 
