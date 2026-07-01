@@ -6846,13 +6846,13 @@ async function saveServerDraft() {
     if (_currentDraftId) {
       res = await fetch(`/api/drafts/${_currentDraftId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ielts_token') },
         body: JSON.stringify(body)
       });
     } else {
       res = await fetch('/api/drafts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ielts_token') },
         body: JSON.stringify(body)
       });
     }
@@ -6941,7 +6941,7 @@ async function loadServerDrafts() {
   }
   try {
     const res = await fetch('/api/drafts', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('ielts_token') }
     });
     if (!res.ok) { list.innerHTML = '<p style="color:var(--danger)">Failed to load drafts.</p>'; return; }
     const drafts = await res.json();
@@ -6979,7 +6979,7 @@ async function loadServerDrafts() {
 function loadDraftFromServer(id) {
   if (!currentUser) return;
   fetch('/api/drafts', {
-    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('ielts_token') }
   }).then(r => r.json()).then(drafts => {
     const draft = drafts.find(d => d.id === id);
     if (!draft) { showToast('Draft not found.'); return; }
@@ -7005,7 +7005,7 @@ async function deleteServerDraft(id) {
   try {
     const res = await fetch(`/api/drafts/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('ielts_token') }
     });
     if (res.ok) {
       if (_currentDraftId === id) _currentDraftId = null;
