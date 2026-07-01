@@ -2078,17 +2078,28 @@
                   <span id="wp-tools-icon">▸</span>
                 </button>
                 <div class="wp-tools-body hidden" id="wp-tools-body">
+                  <div class="wp-hint-level">
+                    <label for="wp-hint-level">🎯 Trình độ của em</label>
+                    <select id="wp-hint-level" class="wp-hint-level-select">
+                      <option value="basic">Cơ bản (Band 5.5–6.5)</option>
+                      <option value="intermediate">Trung cấp (Band 6.5–7.0)</option>
+                      <option value="advanced">Nâng cao (Band 7.0+)</option>
+                    </select>
+                  </div>
                   <div class="hint-card">
                     <div class="hint-card-header">💡 Ý kiến đoạn thân
                       <button type="button" class="hint-generate-btn" id="wp-ideas-btn" onclick="wpRequestHint('ideas')">Tạo ✨</button>
                     </div>
-                    <div class="hint-card-body" id="wp-ideas-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận gợi ý ý tưởng cho bài.</span></div>
+                    <textarea id="wp-ideas-input" class="wp-ideas-input" rows="2"
+                      placeholder="Nhập quan điểm + 1-2 ý thô của em trước. AI sẽ phát triển ý CỦA EM, không thay bằng ý khác."></textarea>
+                    <div class="hint-card-body" id="wp-ideas-body"><span class="hint-empty">Nhập ý của em rồi nhấp "Tạo ✨". AI nhận dạng đề + cho khung để em tự triển khai.</span></div>
+                    <button type="button" class="wp-socratic-btn hidden" id="wp-socratic-btn" onclick="wpSocraticFollowUp()">🔍 Hỏi sâu hơn</button>
                   </div>
                   <div class="hint-card">
                     <div class="hint-card-header">📝 Bộ công cụ ngôn ngữ
                       <button type="button" class="hint-generate-btn" id="wp-phrases-btn" onclick="wpRequestHint('phrases')">Tạo ✨</button>
                     </div>
-                    <div class="hint-card-body" id="wp-phrases-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận các cụm từ & từ vựng học thuật.</span></div>
+                    <div class="hint-card-body" id="wp-phrases-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận cụm từ theo chủ đề + bài tập tự đặt câu.</span></div>
                   </div>
                 </div>
               </div>

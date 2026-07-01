@@ -3100,10 +3100,29 @@ async function loadAdminCostBreakdown() {
 }
 
 function renderHintMarkdown(text) {
-  // Bold **text**
-  let html = escHtml(text)
+  const inline = (s) => s
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+  const lines = escHtml(text).split('\n');
+  let html = '';
+  let inList = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) { closeList(); continue; }
+    let m;
+    if ((m = t.match(/^#{1,3}\s+(.*)$/))) {
+      closeList();
+      html += `<div class="hint-h">${inline(m[1])}</div>`;
+    } else if ((m = t.match(/^[-*•]\s+(.*)$/))) {
+      if (!inList) { html += '<ul class="hint-ul">'; inList = true; }
+      html += `<li>${inline(m[1])}</li>`;
+    } else {
+      closeList();
+      html += `<p class="hint-p">${inline(t)}</p>`;
+    }
+  }
+  closeList();
   return html;
 }
 
@@ -9624,13 +9643,20 @@ function toggleWpTools() {
 }
 
 function resetWpTools() {
-  const empty = { ideas: 'Nhấp "Tạo ✨" để nhận gợi ý ý tưởng cho bài.', phrases: 'Nhấp "Tạo ✨" để nhận các cụm từ & từ vựng học thuật.' };
+  const empty = {
+    ideas: 'Nhập ý của em rồi nhấp "Tạo ✨". AI nhận dạng đề + cho khung để em tự triển khai.',
+    phrases: 'Nhấp "Tạo ✨" để nhận cụm từ theo chủ đề + bài tập tự đặt câu.'
+  };
   ['ideas','phrases'].forEach(t => {
     const el = document.getElementById(`wp-${t}-body`);
     if (el) el.innerHTML = `<span class="hint-empty">${empty[t]}</span>`;
     const btn = document.getElementById(`wp-${t}-btn`);
     if (btn) { btn.disabled = false; btn.textContent = 'Tạo ✨'; }
   });
+  const ideasInput = document.getElementById('wp-ideas-input');
+  if (ideasInput) ideasInput.value = '';
+  const sb = document.getElementById('wp-socratic-btn');
+  if (sb) sb.classList.add('hidden');
   // collapse tools panel
   const body = document.getElementById('wp-tools-body');
   const icon = document.getElementById('wp-tools-icon');
@@ -9642,6 +9668,8 @@ async function wpRequestHint(hint_type) {
   const task_type = _wpCurrentQuestion.type; // 'task1' or 'task2'
   const prompt = _wpCurrentQuestion.prompt;
   const essay = document.getElementById('wp-essay-input').value.trim();
+  const level = (document.getElementById('wp-hint-level') || {}).value || 'basic';
+  const student_ideas = (document.getElementById('wp-ideas-input') || {}).value || '';
 
   const bodyEl = document.getElementById(`wp-${hint_type}-body`);
   const btnEl  = document.getElementById(`wp-${hint_type}-btn`);
@@ -9661,14 +9689,52 @@ async function wpRequestHint(hint_type) {
   try {
     await streamSSE(
       '/api/hint',
-      { task_type, prompt, essay, hint_type },
+      { task_type, prompt, essay, hint_type, level, student_ideas },
       (chunk) => { raw += chunk; bodyEl.innerHTML = renderHintMarkdown(raw); },
       () => { bodyEl.innerHTML = renderHintMarkdown(raw); }
     );
+    // After the idea scaffold, offer the optional Socratic deep-dive
+    if (hint_type === 'ideas') {
+      const sb = document.getElementById('wp-socratic-btn');
+      if (sb) sb.classList.remove('hidden');
+    }
   } catch(err) {
     bodyEl.innerHTML = `<span style="color:var(--danger)">Lỗi: ${escHtml(err.message)}</span>`;
   } finally {
     if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Tạo ✨'; }
+  }
+}
+
+// Socratic deep-dive: one probing question based on the student's current ideas.
+// Bounded to a single follow-up; the student answers in the ideas box then
+// re-runs "Tạo ✨" so the AI develops their new thinking.
+async function wpSocraticFollowUp() {
+  if (!_wpCurrentQuestion) return;
+  const task_type = _wpCurrentQuestion.type;
+  const prompt = _wpCurrentQuestion.prompt;
+  const essay = document.getElementById('wp-essay-input').value.trim();
+  const level = (document.getElementById('wp-hint-level') || {}).value || 'basic';
+  const student_ideas = (document.getElementById('wp-ideas-input') || {}).value || '';
+  const bodyEl = document.getElementById('wp-ideas-body');
+  const sb = document.getElementById('wp-socratic-btn');
+  if (!bodyEl) return;
+  if (sb) { sb.disabled = true; sb.textContent = '⏳ Đang hỏi…'; }
+  const qBox = document.createElement('div');
+  qBox.className = 'wp-socratic-q';
+  qBox.innerHTML = '<span class="hint-thinking">Đang nghĩ câu hỏi…</span>';
+  bodyEl.appendChild(qBox);
+  let raw = '';
+  try {
+    await streamSSE(
+      '/api/hint',
+      { task_type, prompt, essay, hint_type: 'follow_up', level, student_ideas },
+      (chunk) => { raw += chunk; qBox.innerHTML = '🔍 ' + renderHintMarkdown(raw); },
+      () => { qBox.innerHTML = '🔍 ' + renderHintMarkdown(raw) + '<div class="wp-socratic-hint">Trả lời vào ô ý tưởng phía trên rồi nhấn "Tạo ✨" để AI phát triển tiếp.</div>'; }
+    );
+  } catch(err) {
+    qBox.innerHTML = `<span style="color:var(--danger)">Lỗi: ${escHtml(err.message)}</span>`;
+  } finally {
+    if (sb) { sb.disabled = false; sb.textContent = '🔍 Hỏi sâu hơn'; }
   }
 }
 

@@ -610,12 +610,12 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
 
 // ─── Hints ────────────────────────────────────────────────────────────────────
 app.post('/api/hint', authenticate, async (req, res) => {
-  const { task_type, prompt, essay, hint_type, student_ideas } = req.body;
+  const { task_type, prompt, essay, hint_type, student_ideas, level } = req.body;
   if (!['task1', 'task2'].includes(task_type)) {
     return res.status(400).json({ error: 'Invalid task_type' });
   }
-  if (!['ideas', 'vocabulary', 'phrases', 'structure'].includes(hint_type)) {
-    return res.status(400).json({ error: 'hint_type must be ideas, vocabulary, phrases, or structure' });
+  if (!['ideas', 'vocabulary', 'phrases', 'structure', 'follow_up'].includes(hint_type)) {
+    return res.status(400).json({ error: 'hint_type must be ideas, vocabulary, phrases, structure, or follow_up' });
   }
   if (!prompt) {
     return res.status(400).json({ error: 'prompt is required' });
@@ -655,12 +655,39 @@ app.post('/api/hint', authenticate, async (req, res) => {
     ? `IELTS Writing Task 2 topic:\n${prompt}\n\nGenerate structured writing phrases and key vocabulary for this topic in one combined reference. Every example sentence must be directly about THIS specific topic — not a generic template.\n\n## 📝 Introduction\n**General Statement starters** (2 phrases + 1 example sentence each, about this topic):\n**Thesis Statement starters** (2 phrases + 1 example sentence each, taking a clear position on this topic):\n\n## 💡 Body Paragraph — Supporting Argument\n**Topic sentence starters** (2 phrases + 1 example sentence each, for a paragraph supporting the main argument on this topic):\n**Evidence / Elaboration phrases** (2 phrases + 1 example sentence each):\n\n## ⚖️ Body Paragraph — Counter-argument / Concession\n**Concession starters** (2 phrases + 1 example sentence each, acknowledging the opposing view on this topic):\n**Refutation phrases** (2 phrases + 1 example sentence each, rebutting it):\n\n## ✅ Conclusion\n**Restatement starters** (2 phrases + 1 example sentence each, restating the position on this topic):\n**Final thought / recommendation** (1 phrase + 1 example sentence):\n\n## 📚 Key Vocabulary Bank\n**Topic-specific terms** (6 words or collocations + 1 example sentence each, directly relevant to this topic):\n**Academic linking expressions** (3 transitions with example sentences for this topic):\n\nEvery example sentence: specific to this exact topic, thesis-quality, ready to paste into an essay.`
     : `IELTS Writing Task 1 prompt:\n${prompt}\n\nGenerate structured writing phrases for THIS specific task. Every example sentence must reference what this specific chart/diagram actually shows.\n\n## 🔍 Overview Paragraph\n**Overview openers** (2 phrases + 1 example sentence each, referring to what this chart shows overall):\n**Key feature phrases** (2 phrases for highlighting the most striking trend or feature visible in this data):\n\n## 📊 Detail Paragraph 1 — describing the main trend or category\n**Opening / signposting phrases** (2 phrases + 1 example sentence each, using data from this chart):\n**Data reference phrases** (3 phrases for citing figures — e.g. "stood at", "reached a peak of", "accounted for X%"):\n\n## 📊 Detail Paragraph 2 — comparison or second trend\n**Comparison phrases** (2 phrases + 1 example sentence each, comparing two specific items from this chart):\n**Change / movement verbs** (5 precise verbs with example sentences drawn from this chart's actual data):\n\n## 🔄 Process / Map\n(Include this section ONLY if the task is a process diagram or map. If it is, provide 3 sequence/location phrases with example sentences specific to this task. Otherwise omit this section entirely.)\n\nEvery example sentence: use the actual data, figures, categories, or locations from this specific task.`;
 
+  // ── Level-adaptive scaffolding + Socratic follow-up ──────────────────────
+  const LEVEL_GUIDES = {
+    basic: 'Target level: Band 5.5–6.5. Give MORE structure and simpler language. Lean on the T-E-E frame (Topic sentence → Explanation → Example) as a fillable skeleton, and prefer everyday-life or general-society examples.',
+    intermediate: 'Target level: Band 6.5–7.0. Push a short cause–effect idea chain (A→B→C) and self-checking ("why? how?"). Prefer specific real-world or country examples.',
+    advanced: 'Target level: Band 7.0+. Expect a full idea-progression chain (A→E), screen the reasoning for logic fallacies, and use precise collocations. Ask more, give less.',
+  };
+  const levelGuide = LEVEL_GUIDES[level] || LEVEL_GUIDES.basic;
+
+  const SCAFFOLD_RULES = {
+    ideas: 'Give a fillable idea FRAME plus one guiding question per slot. If the student supplied their own ideas, develop THOSE — do not replace them with different arguments. Never write finished paragraphs for the student to copy.',
+    phrases: 'OVERRIDE any earlier instruction to hand over copy-ready example sentences. Instead, give a SHORT set of topic collocations and, for each, set a mini-task telling the student to write their OWN sentence using it (about this topic or their own life). At advanced level, add one "noticing" item: show a single Band 8 model sentence and ask which chunks are worth stealing.',
+    vocabulary: 'Give a short set of collocations and, for each, ask the student to write their own sentence rather than handing a copy-ready one.',
+    structure: 'Give a section-by-section skeleton with guiding questions, not filled-in example sentences to copy.',
+  };
+
+  const typeStep = (hint_type === 'ideas' && task_type === 'task2')
+    ? '\n\nFIRST, in one short line, name the Task 2 question type (Opinion / Discuss both views + opinion / Advantages–Disadvantages / Problem–Solution / Two-part question) and the paragraph structure it needs. THEN give the guidance.'
+    : '';
+
+  let systemPrompt = 'You are an expert IELTS writing COACH. You scaffold: you give frameworks, guiding questions, and you develop the student\'s OWN ideas. You never write the essay or hand over finished ideas to copy. Write guidance in Vietnamese but keep IELTS example phrases and collocations in English. Be specific to this exact topic and concise. Do not repeat the prompt back.';
+  let finalPrompt = `${userPrompt}\n\n${levelGuide}\n\n${SCAFFOLD_RULES[hint_type] || ''}${typeStep}`;
+
+  if (hint_type === 'follow_up') {
+    systemPrompt = 'You are a Socratic IELTS writing coach. Ask EXACTLY ONE short, friendly probing question in Vietnamese that pushes the student to deepen, sharpen, or fix the weakest part of what they have so far. Never give the answer. Never ask more than one question.';
+    finalPrompt = `IELTS Writing ${taskLabel} prompt:\n${prompt}${draftSection}\n\nStudent's ideas / notes so far:\n${student_ideas && student_ideas.trim() ? student_ideas.trim() : '(none provided yet)'}\n\nAsk one probing question to move their thinking forward.`;
+  }
+
   try {
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 1400,
-      system: 'You are an expert IELTS writing coach. Be practical, specific, and concise. Do not repeat the prompt back.',
-      messages: [{ role: 'user', content: userPrompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: finalPrompt }],
     });
 
     const text = response.content[0]?.text || '';
