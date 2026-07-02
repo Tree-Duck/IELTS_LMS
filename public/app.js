@@ -4685,10 +4685,11 @@ async function loadAdminTask2Prompts() {
       <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Custom Prompts (${prompts.length})</h4>
       <div class="admin-table-wrap">
         <table class="admin-table">
-          <thead><tr><th>Difficulty</th><th>Prompt</th><th></th></tr></thead>
+          <thead><tr><th>Difficulty</th><th>Type</th><th>Prompt</th><th></th></tr></thead>
           <tbody>${prompts.map(p => `
             <tr>
               <td><span class="badge badge-gray">${p.difficulty}</span></td>
+              <td><span class="badge badge-gray">${escHtml(T2_TYPE_LABELS[p.question_type] || p.question_type || '—')}</span></td>
               <td style="max-width:400px;white-space:normal">${escHtml(p.q)}</td>
               <td><button class="btn btn-danger btn-xs" onclick="deleteAdminTask2Prompt(${p.id})">Delete</button></td>
             </tr>`).join('')}
@@ -4702,6 +4703,7 @@ async function loadAdminTask2Prompts() {
 
 async function submitAddTask2Prompt() {
   const diff = document.getElementById('t2p-diff')?.value || 'medium';
+  const qtype = document.getElementById('t2p-type')?.value || '';
   const q    = document.getElementById('t2p-q')?.value?.trim();
   const errEl = document.getElementById('t2p-error');
   const okEl  = document.getElementById('t2p-success');
@@ -4709,7 +4711,7 @@ async function submitAddTask2Prompt() {
   if (okEl)  okEl.classList.add('hidden');
   if (!q) { if (errEl) { errEl.textContent = 'Prompt text is required.'; errEl.classList.remove('hidden'); } return; }
   try {
-    await api('/api/admin/task2-prompts', { method: 'POST', body: JSON.stringify({ difficulty: diff, q }) });
+    await api('/api/admin/task2-prompts', { method: 'POST', body: JSON.stringify({ difficulty: diff, q, question_type: qtype }) });
     if (okEl) { okEl.textContent = '✓ Prompt added!'; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
     document.getElementById('t2p-q').value = '';
     window._customTask2Prompts = null;
@@ -9445,6 +9447,15 @@ async function submitParagraphTranslation() {
 let _wpQuestions = [];
 let _wpCurrentQuestion = null;
 let _wpFilter = 'all';
+let _wpTypeFilter = null; // Task 2 question-type sub-filter
+const T2_TYPE_LABELS = {
+  opinion: 'Opinion (Agree/Disagree)',
+  discussion: 'Discuss both views',
+  advantage_disadvantage: 'Advantages / Disadvantages',
+  problem_solution: 'Problem / Solution',
+  two_part: 'Two-part question',
+  other: 'Khác'
+};
 
 /* ─── Writing Hub ─────────────────────────────────────────────────────────── */
 function loadWritingHub() {
@@ -9454,6 +9465,7 @@ function loadWritingHub() {
 /* ─── Writing Practice ────────────────────────────────────────────────────── */
 async function loadWritingPractice() {
   _wpFilter = 'all';
+  _wpTypeFilter = null;
   _wpCurrentQuestion = null;
   document.getElementById('wp-bank-panel').classList.remove('hidden');
   document.getElementById('wp-session-panel').classList.add('hidden');
@@ -9461,6 +9473,7 @@ async function loadWritingPractice() {
   document.getElementById('wp-ai-result').innerHTML = '';
   // Reset filter buttons
   document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.wp-type-chip').forEach(b => b.classList.remove('active'));
   const allBtn = document.querySelector('.wp-filter-btn[data-filter="all"]');
   if (allBtn) allBtn.classList.add('active');
   // Show loading
@@ -9484,16 +9497,20 @@ async function loadWritingPractice() {
       hasImage: false
     }));
     // Normalize task2 prompts
-    const t2Questions = (Array.isArray(task2) ? task2 : []).map(t => ({
-      id: 't2_' + t.id,
-      dbId: t.id,
-      type: 'task2',
-      topic: 'Task 2',
-      tags: t.difficulty ? [t.difficulty] : [],
-      prompt: t.q || '',
-      minWords: 250,
-      hasImage: false
-    }));
+    const t2Questions = (Array.isArray(task2) ? task2 : []).map(t => {
+      const qt = t.question_type || 'other';
+      return {
+        id: 't2_' + t.id,
+        dbId: t.id,
+        type: 'task2',
+        questionType: qt,
+        topic: T2_TYPE_LABELS[qt] || 'Task 2',
+        tags: t.difficulty ? [t.difficulty] : [],
+        prompt: t.q || '',
+        minWords: 250,
+        hasImage: false
+      };
+    });
     _wpQuestions = [...t1Questions, ...t2Questions];
   } catch (e) {
     _wpQuestions = [];
@@ -9501,10 +9518,15 @@ async function loadWritingPractice() {
   renderWritingQuestionGrid();
 }
 
+function getFilteredWritingQuestions() {
+  if (_wpTypeFilter) return _wpQuestions.filter(q => q.type === 'task2' && (q.questionType || 'other') === _wpTypeFilter);
+  if (_wpFilter === 'all') return _wpQuestions;
+  return _wpQuestions.filter(q => q.type === _wpFilter);
+}
+
 function renderWritingQuestionGrid() {
   const grid = document.getElementById('wp-question-grid');
-  const questions = _wpFilter === 'all' ? _wpQuestions
-    : _wpQuestions.filter(q => q.type === _wpFilter);
+  const questions = getFilteredWritingQuestions();
   if (questions.length === 0) {
     grid.innerHTML = '<div class="wp-empty-state">Chưa có đề bài. Giáo viên cần upload đề trong trang <strong>Quản lý nội dung</strong>.</div>';
     return;
@@ -9513,6 +9535,7 @@ function renderWritingQuestionGrid() {
     <div class="wp-q-card" onclick="openWritingQuestion('${escHtml(q.id)}')">
       <div class="wp-q-card-top">
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
+        ${q.type === 'task2' && q.questionType ? `<span class="tag-badge tag-qtype">${escHtml(T2_TYPE_LABELS[q.questionType] || q.questionType)}</span>` : ''}
         ${q.tags.map(t => `<span class="tag-badge tag-topic">${escHtml(t)}</span>`).join('')}
       </div>
       <div class="wp-q-card-title">${escHtml(q.topic)}</div>
@@ -9523,7 +9546,7 @@ function renderWritingQuestionGrid() {
 }
 
 function randomWritingQuestion() {
-  const pool = _wpFilter === 'all' ? _wpQuestions : _wpQuestions.filter(q => q.type === _wpFilter);
+  const pool = getFilteredWritingQuestions();
   if (!pool.length) { showToast('Chưa có đề bài nào.'); return; }
   const q = pool[Math.floor(Math.random() * pool.length)];
   openWritingQuestion(q.id);
@@ -9531,8 +9554,19 @@ function randomWritingQuestion() {
 
 function filterWritingQuestions(filter, btn) {
   _wpFilter = filter;
+  _wpTypeFilter = null;
   document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.wp-type-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderWritingQuestionGrid();
+}
+
+function filterWritingByType(qt, btn) {
+  _wpTypeFilter = qt;
+  _wpFilter = 'task2';
+  document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.wp-type-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   renderWritingQuestionGrid();
 }
 

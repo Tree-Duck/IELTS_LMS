@@ -2194,12 +2194,23 @@ app.get('/api/admin/task2-prompts', authenticate, (req, res) => {
 
 app.post('/api/admin/task2-prompts', authenticate, teacherOrAdmin, (req, res) => {
   try {
-    const { difficulty, q } = req.body;
+    const { difficulty, q, question_type } = req.body;
     if (!q || !q.trim()) return res.status(400).json({ error: 'Prompt text is required' });
-    const item = db.addTask2Prompt({ difficulty: difficulty || 'medium', q: q.trim() });
+    const item = db.addTask2Prompt({ difficulty: difficulty || 'medium', q: q.trim(), question_type: question_type || undefined });
     res.json({ ok: true, item });
   } catch (err) {
     res.status(500).json({ error: 'Failed to add Task 2 prompt' });
+  }
+});
+
+app.put('/api/admin/task2-prompts/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { question_type, difficulty, q } = req.body;
+    const ok = db.updateTask2Prompt(req.params.id, { question_type, difficulty, q: q ? q.trim() : undefined });
+    if (!ok) return res.status(404).json({ error: 'Prompt not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update Task 2 prompt' });
   }
 });
 

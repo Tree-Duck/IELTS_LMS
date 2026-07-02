@@ -1713,6 +1713,18 @@ input:focus, textarea:focus, select:focus {
   font-size: 12px;
 }
 
+/* Task 2 question-type filter chips + card badge */
+.wp-type-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
+.wp-type-chips-label { font-size: 12px; font-weight: 700; color: var(--gray-600); margin-right: 4px; }
+.wp-type-chip {
+  padding: 4px 12px; border: 1px solid var(--gray-300); border-radius: 999px;
+  background: white; color: var(--gray-700); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.wp-type-chip:hover { border-color: var(--primary); color: var(--primary); }
+.wp-type-chip.active { background: var(--primary); border-color: var(--primary); color: white; }
+.tag-badge.tag-qtype { background: #ede9fe; color: #5b21b6; }
+
 /* ─── CRITERION CARDS ────────────────────────────────────────────────────── */
 .criterion-grid {
   display: grid;

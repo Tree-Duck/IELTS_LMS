@@ -1026,7 +1026,8 @@ const db = {
     if (!data.task2_prompts_custom) data.task2_prompts_custom = [];
     if (!data._ids.task2_prompts_custom) data._ids.task2_prompts_custom = 0;
     data._ids.task2_prompts_custom++;
-    const item = { id: data._ids.task2_prompts_custom, ...entry, created_at: new Date().toISOString() };
+    const question_type = entry.question_type || classifyTask2Type(entry.q);
+    const item = { id: data._ids.task2_prompts_custom, ...entry, question_type, created_at: new Date().toISOString() };
     data.task2_prompts_custom.push(item);
     save(data);
     return item;
@@ -1039,6 +1040,18 @@ const db = {
     data.task2_prompts_custom = data.task2_prompts_custom.filter(p => String(p.id) !== String(id));
     if (data.task2_prompts_custom.length < before) { save(data); return true; }
     return false;
+  },
+
+  updateTask2Prompt(id, fields) {
+    const data = load();
+    if (!data.task2_prompts_custom) return false;
+    const p = data.task2_prompts_custom.find(x => String(x.id) === String(id));
+    if (!p) return false;
+    if (fields.question_type !== undefined && fields.question_type !== '') p.question_type = fields.question_type;
+    if (fields.difficulty !== undefined && fields.difficulty !== '') p.difficulty = fields.difficulty;
+    if (fields.q !== undefined) p.q = fields.q;
+    save(data);
+    return true;
   },
 
   // ── Model Essays (band 8-9 sample answers) ───────────────────────────────
@@ -1265,6 +1278,20 @@ const db = {
   }
 };
 
+// Rule-based IELTS Writing Task 2 question-type classifier (deterministic, no AI cost).
+// Order matters: discussion is checked before opinion because "discuss both views and
+// give your opinion" contains "opinion" but is a discussion-type task.
+function classifyTask2Type(q) {
+  const s = (q || '').toLowerCase();
+  if (/discuss both (views|sides|these views|of these)|discuss both/.test(s)) return 'discussion';
+  if (/advantages?\s+and\s+disadvantages?|disadvantages?\s+and\s+advantages?|\boutweigh\b|benefits?\s+and\s+drawbacks?|\bdrawbacks?\b/.test(s)) return 'advantage_disadvantage';
+  if (/\bproblems?\b.*\b(solutions?|solved|solve|addressed|tackled|prevent|reduce)\b|\bcauses?\b.*\b(solutions?|solved|solve|addressed|tackled|effects?|problems?)\b|what\s+(problems|solutions|measures|steps)|how\s+(can|could|might)\b.*\b(problem|issue|situation|solved|solve|prevent|reduce|address|tackle)\b|reasons?.*solutions?/.test(s)) return 'problem_solution';
+  if (/to what extent do you agree|agree or disagree|do you agree|positive or negative (development|trend)|a positive or (a )?negative/.test(s)) return 'opinion';
+  const qmarks = (s.match(/\?/g) || []).length;
+  if (qmarks >= 2) return 'two_part';
+  return 'other';
+}
+
 // Migration: ensure new collections exist in existing databases
 (function migrateCollections() {
   const data = load();
@@ -1292,6 +1319,12 @@ const db = {
   if (!data._ids.speaking_bank_custom) { data._ids.speaking_bank_custom = 0; changed = true; }
   if (!data.task2_prompts_custom) { data.task2_prompts_custom = []; changed = true; }
   if (!data._ids.task2_prompts_custom) { data._ids.task2_prompts_custom = 0; changed = true; }
+  // Backfill question_type on Task 2 prompts that predate the classifier
+  if (Array.isArray(data.task2_prompts_custom)) {
+    for (const p of data.task2_prompts_custom) {
+      if (!p.question_type) { p.question_type = classifyTask2Type(p.q); changed = true; }
+    }
+  }
   if (!data.drafts) { data.drafts = []; changed = true; }
   if (!data._ids.drafts) { data._ids.drafts = 0; changed = true; }
   if (!data.model_essays) { data.model_essays = []; changed = true; }

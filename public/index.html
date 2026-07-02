@@ -1188,6 +1188,19 @@
               </select>
             </div>
 
+            <div class="form-group" style="max-width:260px">
+              <label for="t2p-type">Question type</label>
+              <select id="t2p-type" class="form-input">
+                <option value="">Auto (tự nhận diện)</option>
+                <option value="opinion">Opinion (Agree/Disagree)</option>
+                <option value="discussion">Discuss both views</option>
+                <option value="advantage_disadvantage">Advantages / Disadvantages</option>
+                <option value="problem_solution">Problem / Solution</option>
+                <option value="two_part">Two-part question</option>
+                <option value="other">Khác</option>
+              </select>
+            </div>
+
             <div class="form-group">
               <label for="t2p-q">Task 2 Question</label>
               <textarea id="t2p-q" class="form-input" rows="4" placeholder="Some people believe that... To what extent do you agree or disagree?"></textarea>
@@ -2057,6 +2070,14 @@
             <button class="wp-filter-btn" data-filter="task1" onclick="filterWritingQuestions('task1',this)">Task 1</button>
             <button class="wp-filter-btn" data-filter="task2" onclick="filterWritingQuestions('task2',this)">Task 2</button>
             <button class="wp-filter-btn wp-random-btn" onclick="randomWritingQuestion()" title="Chọn đề ngẫu nhiên">🎲 Ngẫu nhiên</button>
+          </div>
+          <div class="wp-type-chips" id="wp-type-chips">
+            <span class="wp-type-chips-label">Task 2 theo dạng:</span>
+            <button class="wp-type-chip" onclick="filterWritingByType('opinion',this)">Opinion</button>
+            <button class="wp-type-chip" onclick="filterWritingByType('discussion',this)">Discuss both</button>
+            <button class="wp-type-chip" onclick="filterWritingByType('advantage_disadvantage',this)">Adv/Disadv</button>
+            <button class="wp-type-chip" onclick="filterWritingByType('problem_solution',this)">Problem/Solution</button>
+            <button class="wp-type-chip" onclick="filterWritingByType('two_part',this)">Two-part</button>
           </div>
           <div class="wp-question-grid" id="wp-question-grid"></div>
         </div>
