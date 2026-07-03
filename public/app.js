@@ -1154,18 +1154,9 @@ function _hexToRgba(hex, a) {
 }
 
 function applyAccentTheme(id) {
-  const t = ACCENT_THEMES.find(a => a.id === id) || ACCENT_THEMES[0];
-  const root = document.documentElement.style;
-  root.setProperty('--primary', t.primary);
-  root.setProperty('--primary-dark', t.dark);
-  root.setProperty('--primary-light', t.light);
-  root.setProperty('--primary-mid', t.mid);
-  root.setProperty('--primary-glow', _hexToRgba(t.primary, 0.12));
-  root.setProperty('--sidebar-bg', t.dark);
-  localStorage.setItem('ielts_accent', t.id);
-  document.querySelectorAll('.accent-swatch').forEach(el => {
-    el.classList.toggle('active', el.dataset.accentId === t.id);
-  });
+  // Single-brand redesign: accent presets are retired. The brand palette lives
+  // in style.css :root; inline overrides here would defeat it, so this is a no-op.
+  return;
 }
 
 /* ─── Avatar presets ─────────────────────────────────────────────────────── */
