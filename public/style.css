@@ -648,7 +648,8 @@ body {
 /* Hero banner */
 .home-hero {
   position: relative;
-  background: var(--primary);
+  background: var(--forest);
+  border: 2px solid var(--forest-deep);
   border-radius: 20px;
   padding: 48px 48px 44px;
   margin-bottom: 32px;

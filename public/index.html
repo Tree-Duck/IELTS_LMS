@@ -350,44 +350,34 @@
               <span class="hq-vi" id="home-quote-vi"></span>
             </div>
           </div>
-          <!-- Octopus banner mascot -->
+          <!-- Octopus banner mascot — flat coral, tilted egg head, raised side arms -->
           <div class="home-hero-octo" aria-hidden="true">
             <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
-              <defs>
-                <linearGradient id="octo-body-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#ffd2b3"/>
-                  <stop offset="1" stop-color="#ff8f63"/>
-                </linearGradient>
-              </defs>
-              <!-- Tentacles (sway/bob animated, coral, clipped by banner overflow) -->
+              <!-- Raised side arms (behind head) -->
+              <path d="M52,118 Q16,106 10,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
+              <path d="M148,118 Q184,106 190,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
+              <!-- Bottom tentacles (sway/bob animated) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" style="stroke:#ff8f63" d="M62,148 Q48,168 52,195"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M76,155 Q62,178 65,205"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M92,159 Q82,182 84,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M108,160 Q100,184 102,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M124,159 Q132,182 128,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M140,155 Q152,178 146,205"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M154,148 Q166,168 160,195"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M58,140 Q34,166 26,194"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M76,150 Q62,178 60,204"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M96,156 Q90,183 92,208"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M116,156 Q124,183 120,208"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M134,150 Q150,176 148,200"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M148,138 Q172,158 178,184"/>
               </g>
-              <!-- Body (solid coral so it pops on any accent-coloured banner) -->
-              <ellipse cx="113" cy="92" rx="74" ry="78" fill="url(#octo-body-grad)"/>
-              <!-- Belly + top sheen -->
-              <ellipse cx="113" cy="110" rx="46" ry="40" fill="rgba(255,255,255,0.28)"/>
-              <ellipse cx="90"  cy="50"  rx="24" ry="15" fill="rgba(255,255,255,0.40)"/>
-              <!-- Eye whites (centres 88,86 & 138,86 — tracked by JS) -->
-              <circle cx="88"  cy="86" r="18" fill="#ffffff"/>
-              <circle cx="138" cy="86" r="18" fill="#ffffff"/>
-              <!-- Pupils (JS-tracked) -->
-              <circle id="bnr-pl" cx="91"  cy="89" r="11" fill="#3a2b4d"/>
-              <circle id="bnr-pr" cx="141" cy="89" r="11" fill="#3a2b4d"/>
-              <!-- Eye shine -->
-              <circle cx="95"  cy="82" r="4.5" fill="#fff"/>
-              <circle cx="145" cy="82" r="4.5" fill="#fff"/>
-              <!-- Cheeks -->
-              <ellipse cx="64"  cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
-              <ellipse cx="162" cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
-              <!-- Smile -->
-              <path d="M97 116 Q113 132 129 116" fill="none" stroke="#a5455f" stroke-width="4" stroke-linecap="round"/>
+              <!-- Head: tilted egg, flat coral -->
+              <ellipse cx="100" cy="84" rx="58" ry="72" transform="rotate(-14 100 84)" fill="#FF7A59"/>
+              <!-- Darker patches on head (like the reference) -->
+              <ellipse cx="130" cy="34" rx="18" ry="12" transform="rotate(-20 130 34)" fill="#E05C3D"/>
+              <circle cx="108" cy="22" r="7" fill="#E05C3D"/>
+              <circle cx="146" cy="52" r="5" fill="#E05C3D"/>
+              <!-- Eyes: small, close together (centres 86,84 & 116,84 — tracked by JS) -->
+              <circle cx="86"  cy="84" r="8" fill="#ffffff"/>
+              <circle cx="116" cy="84" r="8" fill="#ffffff"/>
+              <circle id="bnr-pl" cx="86"  cy="84" r="4.6" fill="#171717"/>
+              <circle id="bnr-pr" cx="116" cy="84" r="4.6" fill="#171717"/>
+              <!-- Pursed lips (ε) -->
+              <path d="M96 105 q5 -4 10 0 q-5 4 -10 0 q5 4 10 0" fill="none" stroke="#B23A24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
         </div>
