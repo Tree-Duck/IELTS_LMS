@@ -1154,18 +1154,9 @@ function _hexToRgba(hex, a) {
 }
 
 function applyAccentTheme(id) {
-  const t = ACCENT_THEMES.find(a => a.id === id) || ACCENT_THEMES[0];
-  const root = document.documentElement.style;
-  root.setProperty('--primary', t.primary);
-  root.setProperty('--primary-dark', t.dark);
-  root.setProperty('--primary-light', t.light);
-  root.setProperty('--primary-mid', t.mid);
-  root.setProperty('--primary-glow', _hexToRgba(t.primary, 0.12));
-  root.setProperty('--sidebar-bg', t.dark);
-  localStorage.setItem('ielts_accent', t.id);
-  document.querySelectorAll('.accent-swatch').forEach(el => {
-    el.classList.toggle('active', el.dataset.accentId === t.id);
-  });
+  // Single-brand redesign: accent presets are retired. The brand palette lives
+  // in style.css :root; inline overrides here would defeat it, so this is a no-op.
+  return;
 }
 
 /* ─── Avatar presets ─────────────────────────────────────────────────────── */
@@ -11075,21 +11066,21 @@ function renderBcFinal() {
       const svgEl = document.getElementById('banner-octo');
       if (svgEl) {
         const rect = svgEl.getBoundingClientRect();
-        // SVG viewBox eye centers: left (88,86), right (138,86) — viewBox 200x210
+        // SVG viewBox eye centers: left (86,84), right (116,84) — viewBox 200x210
         const scaleX = rect.width  / 200;
         const scaleY = rect.height / 210;
-        const lx = rect.left + 88  * scaleX;
-        const ly = rect.top  + 86  * scaleY;
-        const rx = rect.left + 138 * scaleX;
-        const ry = rect.top  + 86  * scaleY;
+        const lx = rect.left + 86  * scaleX;
+        const ly = rect.top  + 84  * scaleY;
+        const rx = rect.left + 116 * scaleX;
+        const ry = rect.top  + 84  * scaleY;
 
         const aL = Math.atan2(my - ly, mx - lx);
         const aR = Math.atan2(my - ry, mx - rx);
-        const d  = 5;
-        pl.setAttribute('cx', 91  + Math.cos(aL) * d);
-        pl.setAttribute('cy', 89  + Math.sin(aL) * d);
-        pr.setAttribute('cx', 141 + Math.cos(aR) * d);
-        pr.setAttribute('cy', 89  + Math.sin(aR) * d);
+        const d  = 2.6;
+        pl.setAttribute('cx', 86  + Math.cos(aL) * d);
+        pl.setAttribute('cy', 84  + Math.sin(aL) * d);
+        pr.setAttribute('cx', 116 + Math.cos(aR) * d);
+        pr.setAttribute('cy', 84  + Math.sin(aR) * d);
       }
     }
     requestAnimationFrame(tick);

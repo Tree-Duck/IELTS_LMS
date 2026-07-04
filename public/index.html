@@ -6,7 +6,7 @@
   <title>SSP IELTS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -26,42 +26,30 @@
 
     <section class="lp-hero">
       <div class="lp-hero-text">
-        <span class="lp-eyebrow">Nền tảng luyện IELTS toàn diện</span>
-        <h1 class="lp-title">Luyện IELTS thông minh,<br>tiến bộ mỗi ngày 🌱</h1>
-        <p class="lp-sub">Bài viết được AI chấm tức thì, đề Reading &amp; Listening mô phỏng, Speaking có bài mẫu, cùng từ vựng, ngữ pháp và trò chơi — tất cả trong một nơi.</p>
+        <span class="lp-eyebrow">🌿 Nền tảng luyện IELTS toàn diện</span>
+        <h1 class="lp-title">Lên band <span class="hl-lime">nhanh hơn</span><br>mà không học vẹt.</h1>
+        <p class="lp-sub">Bài học ngắn, luyện mỗi ngày, chấm sát tiêu chí thật. Giữ streak, theo dõi tiến bộ, và biết chính xác mình yếu ở đâu.</p>
         <div class="lp-cta-row">
-          <button class="lp-btn lp-btn-solid lp-btn-lg" onclick="openAuth('register')">Bắt đầu miễn phí →</button>
+          <button class="lp-btn lp-btn-solid lp-btn-lg" onclick="openAuth('register')">Học thử miễn phí</button>
           <button class="lp-btn lp-btn-ghost lp-btn-lg" onclick="openAuth('login')">Tôi đã có tài khoản</button>
         </div>
       </div>
       <div class="lp-hero-art" aria-hidden="true">
-        <svg viewBox="0 0 220 230" xmlns="http://www.w3.org/2000/svg" width="260" height="272" class="lp-octo">
-          <defs>
-            <linearGradient id="lp-octo-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#ffd2b3"/><stop offset="1" stop-color="#ff8f63"/>
-            </linearGradient>
-          </defs>
-          <g class="lp-octo-tentacles" fill="none" stroke="#ff8f63" stroke-width="9" stroke-linecap="round">
-            <path d="M70,162 Q54,188 60,222"/>
-            <path d="M90,172 Q78,198 80,228"/>
-            <path d="M110,176 Q106,202 106,230"/>
-            <path d="M138,176 Q146,202 142,230"/>
-            <path d="M158,172 Q172,198 164,228"/>
-            <path d="M176,162 Q192,188 182,222"/>
-          </g>
-          <ellipse cx="124" cy="100" rx="82" ry="86" fill="url(#lp-octo-grad)"/>
-          <ellipse cx="124" cy="120" rx="50" ry="44" fill="rgba(255,255,255,0.28)"/>
-          <ellipse cx="98" cy="54" rx="26" ry="16" fill="rgba(255,255,255,0.40)"/>
-          <circle cx="98"  cy="94" r="20" fill="#fff"/>
-          <circle cx="152" cy="94" r="20" fill="#fff"/>
-          <circle cx="102" cy="98" r="12" fill="#3a2b4d"/>
-          <circle cx="156" cy="98" r="12" fill="#3a2b4d"/>
-          <circle cx="106" cy="89" r="5" fill="#fff"/>
-          <circle cx="160" cy="89" r="5" fill="#fff"/>
-          <ellipse cx="72"  cy="120" rx="13" ry="8" fill="rgba(233,84,107,0.45)"/>
-          <ellipse cx="178" cy="120" rx="13" ry="8" fill="rgba(233,84,107,0.45)"/>
-          <path d="M106 126 Q124 144 142 126" fill="none" stroke="#a5455f" stroke-width="4.5" stroke-linecap="round"/>
-        </svg>
+        <div class="lp-hero-card">
+          <div class="lp-hero-card-head">
+            <span class="lp-hero-card-title">Tiến độ tuần này</span>
+            <span class="lp-hero-card-badge">+0.5 band</span>
+          </div>
+          <div class="lp-hero-row">
+            <div class="lp-hero-row-label"><span>Writing Task 2</span><span>76%</span></div>
+            <div class="lp-hero-track"><div class="lp-hero-fill" style="width:76%"></div></div>
+          </div>
+          <div class="lp-hero-row">
+            <div class="lp-hero-row-label"><span>Speaking Part 2</span><span>60%</span></div>
+            <div class="lp-hero-track"><div class="lp-hero-fill" style="width:60%"></div></div>
+          </div>
+          <div class="lp-hero-streak">🔥 Streak 14 ngày — giữ vững nhé!</div>
+        </div>
       </div>
     </section>
 
@@ -362,44 +350,34 @@
               <span class="hq-vi" id="home-quote-vi"></span>
             </div>
           </div>
-          <!-- Octopus banner mascot -->
+          <!-- Octopus banner mascot — flat coral, tilted egg head, raised side arms -->
           <div class="home-hero-octo" aria-hidden="true">
             <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
-              <defs>
-                <linearGradient id="octo-body-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#ffd2b3"/>
-                  <stop offset="1" stop-color="#ff8f63"/>
-                </linearGradient>
-              </defs>
-              <!-- Tentacles (sway/bob animated, coral, clipped by banner overflow) -->
+              <!-- Raised side arms (behind head) -->
+              <path d="M52,118 Q16,106 10,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
+              <path d="M148,118 Q184,106 190,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
+              <!-- Bottom tentacles (sway/bob animated) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" style="stroke:#ff8f63" d="M62,148 Q48,168 52,195"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M76,155 Q62,178 65,205"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M92,159 Q82,182 84,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M108,160 Q100,184 102,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M124,159 Q132,182 128,210"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M140,155 Q152,178 146,205"/>
-                <path class="bnr-t" style="stroke:#ff8f63" d="M154,148 Q166,168 160,195"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M58,140 Q34,166 26,194"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M76,150 Q62,178 60,204"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M96,156 Q90,183 92,208"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M116,156 Q124,183 120,208"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M134,150 Q150,176 148,200"/>
+                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M148,138 Q172,158 178,184"/>
               </g>
-              <!-- Body (solid coral so it pops on any accent-coloured banner) -->
-              <ellipse cx="113" cy="92" rx="74" ry="78" fill="url(#octo-body-grad)"/>
-              <!-- Belly + top sheen -->
-              <ellipse cx="113" cy="110" rx="46" ry="40" fill="rgba(255,255,255,0.28)"/>
-              <ellipse cx="90"  cy="50"  rx="24" ry="15" fill="rgba(255,255,255,0.40)"/>
-              <!-- Eye whites (centres 88,86 & 138,86 — tracked by JS) -->
-              <circle cx="88"  cy="86" r="18" fill="#ffffff"/>
-              <circle cx="138" cy="86" r="18" fill="#ffffff"/>
-              <!-- Pupils (JS-tracked) -->
-              <circle id="bnr-pl" cx="91"  cy="89" r="11" fill="#3a2b4d"/>
-              <circle id="bnr-pr" cx="141" cy="89" r="11" fill="#3a2b4d"/>
-              <!-- Eye shine -->
-              <circle cx="95"  cy="82" r="4.5" fill="#fff"/>
-              <circle cx="145" cy="82" r="4.5" fill="#fff"/>
-              <!-- Cheeks -->
-              <ellipse cx="64"  cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
-              <ellipse cx="162" cy="110" rx="12" ry="7.5" fill="rgba(233,84,107,0.45)"/>
-              <!-- Smile -->
-              <path d="M97 116 Q113 132 129 116" fill="none" stroke="#a5455f" stroke-width="4" stroke-linecap="round"/>
+              <!-- Head: tilted egg, flat coral -->
+              <ellipse cx="100" cy="84" rx="58" ry="72" transform="rotate(-14 100 84)" fill="#FF7A59"/>
+              <!-- Darker patches on head (like the reference) -->
+              <ellipse cx="130" cy="34" rx="18" ry="12" transform="rotate(-20 130 34)" fill="#E05C3D"/>
+              <circle cx="108" cy="22" r="7" fill="#E05C3D"/>
+              <circle cx="146" cy="52" r="5" fill="#E05C3D"/>
+              <!-- Eyes: small, close together (centres 86,84 & 116,84 — tracked by JS) -->
+              <circle cx="86"  cy="84" r="8" fill="#ffffff"/>
+              <circle cx="116" cy="84" r="8" fill="#ffffff"/>
+              <circle id="bnr-pl" cx="86"  cy="84" r="4.6" fill="#171717"/>
+              <circle id="bnr-pr" cx="116" cy="84" r="4.6" fill="#171717"/>
+              <!-- Pursed lips (ε) -->
+              <path d="M96 105 q5 -4 10 0 q-5 4 -10 0 q5 4 10 0" fill="none" stroke="#B23A24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
         </div>
@@ -896,7 +874,7 @@
       <div id="view-settings" class="view hidden">
         <div class="page-header">
           <h2>⚙️ Giao diện & Hồ sơ</h2>
-          <p>Cá nhân hoá màu sắc, chế độ tối và ảnh đại diện của bạn</p>
+          <p>Cá nhân hoá ảnh đại diện của bạn</p>
         </div>
 
         <div class="settings-card">
