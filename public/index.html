@@ -350,23 +350,23 @@
               <span class="hq-vi" id="home-quote-vi"></span>
             </div>
           </div>
-          <!-- Octopus banner mascot — flat coral, tilted egg head, raised side arms -->
+          <!-- Octopus banner mascot — flat coral; tentacles are FILLED tapered shapes (wide base → curled point) -->
           <div class="home-hero-octo" aria-hidden="true">
             <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
-              <!-- Raised side arms (behind head) -->
-              <path d="M52,118 Q16,106 10,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
-              <path d="M148,118 Q184,106 190,80" fill="none" stroke="#FF7A59" stroke-width="15" stroke-linecap="round"/>
-              <!-- Bottom tentacles (sway/bob animated) -->
+              <!-- Raised side arms: filled, tapered, wing-like -->
+              <path fill="#FF7A59" d="M56,112 C38,108 22,100 12,86 C7,79 13,71 19,76 C30,86 44,95 62,100 C68,102 66,110 56,112 Z"/>
+              <path fill="#FF7A59" d="M144,112 C162,108 178,100 188,86 C193,79 187,71 181,76 C170,86 156,95 138,100 C132,102 134,110 144,112 Z"/>
+              <!-- Bottom tentacles: 6 filled tapered curls fanning like a skirt (sway/bob animated) -->
               <g class="octo-tentacles">
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M58,140 Q34,166 26,194"/>
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M76,150 Q62,178 60,204"/>
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M96,156 Q90,183 92,208"/>
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M116,156 Q124,183 120,208"/>
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M134,150 Q150,176 148,200"/>
-                <path class="bnr-t" style="stroke:#FF7A59;stroke-width:12" d="M148,138 Q172,158 178,184"/>
+                <path class="bnr-t" fill="#FF7A59" d="M60,126 C48,150 36,166 26,178 C19,186 26,195 33,188 C46,175 60,156 76,138 Z"/>
+                <path class="bnr-t" fill="#FF7A59" d="M74,140 C66,164 58,182 54,198 C51,207 61,211 64,202 C71,184 80,162 90,144 Z"/>
+                <path class="bnr-t" fill="#FF7A59" d="M92,148 C88,170 86,190 88,205 C89,213 99,213 99,204 C99,186 100,166 104,148 Z"/>
+                <path class="bnr-t" fill="#FF7A59" d="M108,148 C114,170 118,188 117,204 C117,212 127,212 127,203 C127,186 122,164 118,146 Z"/>
+                <path class="bnr-t" fill="#FF7A59" d="M124,142 C134,162 142,178 148,192 C152,200 162,196 158,188 C151,172 142,154 134,138 Z"/>
+                <path class="bnr-t" fill="#FF7A59" d="M138,128 C152,146 164,158 176,168 C184,174 190,165 184,159 C172,148 160,134 150,120 Z"/>
               </g>
               <!-- Head: tilted egg, flat coral -->
-              <ellipse cx="100" cy="84" rx="58" ry="72" transform="rotate(-14 100 84)" fill="#FF7A59"/>
+              <ellipse cx="100" cy="82" rx="57" ry="70" transform="rotate(-14 100 82)" fill="#FF7A59"/>
               <!-- Darker patches on head (like the reference) -->
               <ellipse cx="130" cy="34" rx="18" ry="12" transform="rotate(-20 130 34)" fill="#E05C3D"/>
               <circle cx="108" cy="22" r="7" fill="#E05C3D"/>
@@ -374,8 +374,8 @@
               <!-- Eyes: small, close together (centres 86,84 & 116,84 — tracked by JS) -->
               <circle cx="86"  cy="84" r="8" fill="#ffffff"/>
               <circle cx="116" cy="84" r="8" fill="#ffffff"/>
-              <circle id="bnr-pl" cx="86"  cy="84" r="4.6" fill="#171717"/>
-              <circle id="bnr-pr" cx="116" cy="84" r="4.6" fill="#171717"/>
+              <circle id="bnr-pl" cx="86"  cy="84" r="4.6" fill="#08301F"/>
+              <circle id="bnr-pr" cx="116" cy="84" r="4.6" fill="#08301F"/>
               <!-- Pursed lips (ε) -->
               <path d="M96 105 q5 -4 10 0 q-5 4 -10 0 q5 4 10 0" fill="none" stroke="#B23A24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -2352,40 +2352,6 @@
   <script src="app.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <!-- ── Mascot: octopus follows cursor ── -->
-  <div id="mascot" aria-hidden="true">
-    <svg viewBox="0 0 80 104" xmlns="http://www.w3.org/2000/svg" width="110" height="140" style="transform-origin: bottom center; display:block;">
-      <!-- Tentacles (behind body) -->
-      <path class="msc-t" d="M18,60 Q10,76 14,94"/>
-      <path class="msc-t" d="M25,63 Q17,79 20,97"/>
-      <path class="msc-t" d="M32,65 Q26,82 28,100"/>
-      <path class="msc-t" d="M39,66 Q35,83 37,102"/>
-      <path class="msc-t" d="M47,66 Q51,83 49,102"/>
-      <path class="msc-t" d="M54,65 Q60,82 57,100"/>
-      <path class="msc-t" d="M61,63 Q69,79 65,97"/>
-      <path class="msc-t" d="M68,60 Q76,76 72,94"/>
-      <!-- Body -->
-      <ellipse cx="43" cy="38" rx="29" ry="27" fill="#2e7d55"/>
-      <!-- Head dome -->
-      <ellipse cx="43" cy="23" rx="21" ry="16" fill="#379163"/>
-      <!-- Shine -->
-      <ellipse cx="34" cy="18" rx="8" ry="5.5" fill="rgba(255,255,255,0.20)" transform="rotate(-18,34,18)"/>
-      <!-- Eyes white -->
-      <circle cx="32" cy="37" r="9" fill="white"/>
-      <circle cx="54" cy="37" r="9" fill="white"/>
-      <!-- Pupils (moved by JS) -->
-      <circle id="msc-pl" cx="34" cy="38" r="5.5" fill="#193322"/>
-      <circle id="msc-pr" cx="56" cy="38" r="5.5" fill="#193322"/>
-      <!-- Eye shine -->
-      <circle cx="36" cy="35" r="2.2" fill="white"/>
-      <circle cx="58" cy="35" r="2.2" fill="white"/>
-      <!-- Blush -->
-      <ellipse cx="22" cy="44" rx="5.5" ry="3" fill="rgba(255,140,140,0.28)"/>
-      <ellipse cx="64" cy="44" rx="5.5" ry="3" fill="rgba(255,140,140,0.28)"/>
-      <!-- Smile -->
-      <path d="M34 49 Q43 56 52 49" stroke="rgba(255,255,255,0.55)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    </svg>
-  </div>
 
   <!-- Theme Modal -->
   <div class="theme-modal-overlay hidden" id="theme-modal-overlay" onclick="closeThemeModal(event)">

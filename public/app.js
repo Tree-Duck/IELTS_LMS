@@ -7659,7 +7659,7 @@ async function renderMyAttendanceCalendar(classId) {
     const records = await api(`/api/classes/${classId}/attendance/me`);
     calEl.innerHTML = '';
 
-    const statusColors = { present: '#16a34a', late: '#ca8a04', absent: '#dc2626', excused: '#6366f1' };
+    const statusColors = { present: '#16a34a', late: '#ca8a04', absent: '#dc2626', excused: '#0E4D3C' };
     const events = records.map(r => ({
       title: r.status,
       date: r.session_date,
