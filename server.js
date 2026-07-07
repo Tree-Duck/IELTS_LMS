@@ -408,6 +408,40 @@ app.delete('/api/submissions/:id', authenticate, (req, res) => {
 });
 
 // ─── AI Grading ───────────────────────────────────────────────────────────────
+// Convert AI "quote"-based error marks into offset annotations compatible with
+// the teacher annotation editor: {id, start_offset, end_offset, type, comment}.
+// Quotes the model paraphrased (not found verbatim) are dropped; overlapping
+// ranges are dropped (the renderer assumes non-overlapping, sorted spans).
+function mapQuotesToAnnotations(essay, rawAnnotations) {
+  if (!Array.isArray(rawAnnotations)) return [];
+  const validTypes = ['grammar', 'vocabulary', 'argument', 'structure', 'strength'];
+  const found = [];
+  for (const a of rawAnnotations) {
+    if (!a || typeof a.quote !== 'string' || !a.quote.trim() || typeof a.comment !== 'string') continue;
+    const type = validTypes.includes(a.type) ? a.type : 'grammar';
+    let quote = a.quote.trim();
+    let idx = essay.indexOf(quote);
+    if (idx === -1) {
+      // Whitespace-tolerant fallback: collapse runs of whitespace on both sides
+      const pattern = quote.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+      const m = essay.match(new RegExp(pattern));
+      if (m) { idx = m.index; quote = m[0]; }
+    }
+    if (idx === -1) continue;
+    found.push({ start_offset: idx, end_offset: idx + quote.length, type, comment: a.comment.slice(0, 500) });
+  }
+  // Sort and drop overlaps
+  found.sort((x, y) => x.start_offset - y.start_offset);
+  const out = [];
+  let lastEnd = -1;
+  for (const f of found) {
+    if (f.start_offset < lastEnd) continue;
+    out.push({ id: `ai-${out.length + 1}`, ...f });
+    lastEnd = f.end_offset;
+  }
+  return out;
+}
+
 async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords, imageData) {
   db.updateSubmissionStatus(submissionId, 'grading');
 
@@ -477,8 +511,13 @@ Respond ONLY with this exact JSON structure:
     "coherence": "<actionable advice referencing a specific transition or linking issue in this essay>"
   },
   "strengths": ["<strength quoting specific essay text>", "<strength quoting specific essay text>", "<strength quoting specific essay text>"],
-  "improvements": ["<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>"]
+  "improvements": ["<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>"],
+  "annotations": [
+    {"quote": "<EXACT substring copied VERBATIM from the student's essay, 2-12 words — character-for-character identical including typos>", "type": "grammar", "comment": "Lỗi: <tên lỗi ngắn bằng tiếng Việt> → Sửa: \"<corrected English text>\" — <giải thích ngắn tiếng Việt>"}
+  ]
 }
+
+For annotations: mark 6-12 SPECIFIC errors in the essay, prioritising the mistakes that cost the most band points. Types: "grammar" (verb tense, agreement, articles, sentence structure errors), "vocabulary" (wrong word choice, unnatural collocation, repetition), "structure" (weak topic sentence, missing linking), "argument" (unsupported or unclear claim). Also include 1-2 "strength" annotations marking genuinely good phrases (comment: "Điểm tốt: <vì sao> "). CRITICAL: each "quote" MUST be copied character-for-character from the student's essay (including their typos and errors) so it can be located — do NOT paraphrase or fix the quote. Every comment must give the corrected version.
 
 For sentence_analysis: include one entry per sentence in order. Types are: simple, compound, complex, compound-complex, uncertain.`;
 
@@ -537,6 +576,10 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
     const criterionDetails = result.criterion_details ? JSON.stringify(result.criterion_details) : null;
     const overallImprovements = result.overall_improvements ? JSON.stringify(result.overall_improvements) : null;
 
+    // Map AI error quotes to character offsets so the essay renders with inline
+    // highlights (same annotation shape the teacher annotation editor uses).
+    const aiAnnotations = mapQuotesToAnnotations(essay, result.annotations);
+
     db.insertFeedback(
       submissionId, ta, cc, lr, gra, overall,
       result.detailed_feedback,
@@ -546,7 +589,9 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
       criterionDetails,
       overallImprovements,
       totalTokens,
-      cost
+      cost,
+      null,
+      aiAnnotations.length ? aiAnnotations : null
     );
     db.updateSubmissionStatus(submissionId, 'graded');
     // Update study streak for the student

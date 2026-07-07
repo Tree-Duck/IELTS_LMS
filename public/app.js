@@ -3682,7 +3682,7 @@ function renderFeedback(s) {
     // Render annotated essay with colored marks (read-only)
     html += `
       <div class="feedback-section">
-        <h3>Your Essay <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">(teacher annotations shown)</span></h3>
+        <h3>Your Essay <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">— các lỗi được đánh dấu, rê chuột để xem cách sửa</span></h3>
         <div class="annotation-legend">
           <span class="ann-type grammar">Grammar</span>
           <span class="ann-type vocabulary">Vocabulary</span>
@@ -3817,8 +3817,10 @@ let currentRewriteSubmissionId = null;
 async function viewRewrite(submissionId) {
   currentRewriteSubmissionId = submissionId;
   showView('rewrite');
-  // Keep history nav active so back button is intuitive
-  document.getElementById('nav-history').classList.add('active');
+  // Keep history nav active so back button is intuitive (element may not exist
+  // in the current topnav layout — a missing node must not kill the rewrite)
+  const navHist = document.getElementById('nav-history');
+  if (navHist) navHist.classList.add('active');
 
   // Store original essay for diff view
   window._rewriteOriginalEssay = '';
