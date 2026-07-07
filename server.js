@@ -454,7 +454,7 @@ async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wo
     ? `Note: The student wrote ${wordCount} words, which is below the recommended minimum of ${minWords} words. Apply appropriate penalty.`
     : `Word count: ${wordCount} words (meets the minimum of ${minWords}).`;
 
-  const systemPrompt = `You are an expert IELTS examiner with 15+ years of experience grading IELTS Writing tests. You provide accurate, detailed, and constructive feedback following official IELTS band descriptors. Always respond with valid JSON only — no markdown, no code blocks, no extra text.`;
+  const systemPrompt = `You are an expert IELTS examiner with 15+ years of experience grading IELTS Writing tests. You provide accurate, detailed, and constructive feedback following official IELTS band descriptors. LANGUAGE RULE: write ALL explanatory feedback text in VIETNAMESE (natural, encouraging teacher tone) — but keep quoted essay excerpts, corrected English phrases, and IELTS terminology (Task Response, cohesion, collocation...) in English. Always respond with valid JSON only — no markdown, no code blocks, no extra text.`;
 
   const userPrompt = `Grade the following IELTS ${taskLabel} submission using official IELTS band descriptors (bands 0–9, in 0.5 increments).
 
@@ -497,7 +497,7 @@ Respond ONLY with this exact JSON structure:
     "lexical_resource": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] },
     "grammatical_range": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] }
   },
-  "detailed_feedback": "<200-300 word comprehensive analysis that quotes specific sentences from the essay>",
+  "detailed_feedback": "<phân tích 180-250 từ BẰNG TIẾNG VIỆT, trích dẫn câu cụ thể từ bài (giữ tiếng Anh). Chia thành 2-3 đoạn ngắn, ngăn cách bằng \\n\\n — KHÔNG viết 1 khối dài>",
   "sentence_analysis": [
     {"i": 1, "t": "simple"},
     {"i": 2, "t": "complex"}
@@ -517,7 +517,7 @@ Respond ONLY with this exact JSON structure:
   ]
 }
 
-For annotations: mark 6-12 SPECIFIC errors in the essay, prioritising the mistakes that cost the most band points. Types: "grammar" (verb tense, agreement, articles, sentence structure errors), "vocabulary" (wrong word choice, unnatural collocation, repetition), "structure" (weak topic sentence, missing linking), "argument" (unsupported or unclear claim). Also include 1-2 "strength" annotations marking genuinely good phrases (comment: "Điểm tốt: <vì sao> "). CRITICAL: each "quote" MUST be copied character-for-character from the student's essay (including their typos and errors) so it can be located — do NOT paraphrase or fix the quote. Every comment must give the corrected version.
+For annotations: mark 8-14 SPECIFIC errors in the essay, prioritising the mistakes that cost the most band points. COVERAGE RULE — do NOT mark only grammar. Sweep the essay once per lens and mark what you find in EACH: "grammar" (verb tense, agreement, articles, sentence structure), "vocabulary" (wrong word choice, unnatural collocation, repetition — mark AT LEAST 2 if any exist), "structure" (weak/missing topic sentence, missing or mechanical linking — mark AT LEAST 1 if any exist), "argument" (unsupported, vague or contradictory claim — mark AT LEAST 1 if any exist). Also include 1-2 "strength" annotations marking genuinely good phrases (comment: "Điểm tốt: <vì sao>"). Comments BẰNG TIẾNG VIỆT theo mẫu: "Lỗi: <tên lỗi> → Sửa: \"<corrected English>\" — <giải thích ngắn>". CRITICAL: each "quote" MUST be copied character-for-character from the student's essay (including their typos and errors) so it can be located — do NOT paraphrase or fix the quote. Every comment must give the corrected version.
 
 For sentence_analysis: include one entry per sentence in order. Types are: simple, compound, complex, compound-complex, uncertain.`;
 

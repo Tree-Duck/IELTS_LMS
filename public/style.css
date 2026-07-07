@@ -883,7 +883,7 @@ body {
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* Dashboard / History / Feedback stay comfortably readable */
-#view-dashboard, #view-history, #view-feedback { max-width: 900px; }
+#view-dashboard, #view-history, #view-feedback { max-width: 960px; margin-left: auto; margin-right: auto; }
 
 /* ─── PAGE HEADER ───────────────────────────────────────────────────────── */
 .page-header {

@@ -3377,7 +3377,7 @@ function renderFeedback(s) {
 
   // PDF export button (only when graded)
   if (s.status === 'graded' && s.overall_band != null) {
-    html += `<div class="pdf-export-bar"><button id="pdf-btn" class="btn btn-secondary btn-sm" onclick="exportFeedbackPDF()">⬇️ Download PDF</button></div>`;
+    html += `<div class="pdf-export-bar"><button id="pdf-btn" class="btn btn-secondary btn-sm" onclick="exportFeedbackPDF()">⬇️ Tải PDF</button></div>`;
   }
 
   // Header card
@@ -3385,46 +3385,46 @@ function renderFeedback(s) {
     <div class="feedback-header">
       <div class="feedback-task-info">
         <span class="submission-badge ${badgeClass}" style="width:auto;padding:4px 12px;">${taskLabel}</span>
-        <span style="color:var(--gray-500);font-size:13px;">${s.word_count} words · Submitted ${formatDate(s.created_at)}</span>
+        <span style="color:var(--gray-500);font-size:13px;">${s.word_count} từ · Nộp ${formatDate(s.created_at)}</span>
       </div>
-      <div style="font-weight:600;color:var(--gray-700);margin-bottom:8px;">Prompt:</div>
+      <div style="font-weight:600;color:var(--gray-700);margin-bottom:8px;">Đề bài:</div>
       <div style="font-size:14px;color:var(--gray-600);line-height:1.6;">${escHtml(s.prompt)}</div>
     </div>`;
 
   if (s.status === 'pending_review') {
     html += `
       <div class="grading-notice grading-notice-review">
-        <strong>👩‍🏫 Awaiting Teacher Review</strong>
-        Your essay is in the grading queue. A teacher will review and grade it soon. This page will update automatically when grading is complete.
+        <strong>👩‍🏫 Đang chờ giáo viên chấm</strong>
+        Bài của bạn đang trong hàng chờ. Giáo viên sẽ xem và chấm sớm. Trang này tự cập nhật khi chấm xong.
       </div>`;
   } else if (s.status === 'grading' || s.status === 'pending') {
     html += `
       <div class="grading-notice">
-        <strong>⏳ AI Grading in Progress</strong>
-        Your essay is being graded by AI. This usually takes 15–30 seconds. This page will update automatically.
+        <strong>⏳ AI đang chấm bài</strong>
+        Thường mất 15–30 giây. Trang này sẽ tự cập nhật.
       </div>`;
   } else if (s.status === 'error') {
     html += `
       <div class="grading-notice" style="background:var(--danger-light);border-color:#fecaca;color:var(--danger);">
-        <strong>Grading Error</strong>
-        There was a problem grading this essay.
+        <strong>Lỗi chấm bài</strong>
+        Có trục trặc khi chấm bài này.
       </div>
       <div class="retry-grade-bar">
-        <button class="btn btn-primary btn-sm" onclick="retryGrading(${s.id})">🔄 Retry Grading</button>
+        <button class="btn btn-primary btn-sm" onclick="retryGrading(${s.id})">🔄 Chấm lại</button>
       </div>`;
   } else if (s.status === 'graded' && s.overall_band != null) {
     // Show graded-by badge
     if (s.graded_by) {
-      html += `<div style="margin-bottom:12px;"><span class="badge-teacher-graded">👨‍🏫 Graded by Teacher</span></div>`;
+      html += `<div style="margin-bottom:12px;"><span class="badge-teacher-graded">👨‍🏫 Giáo viên chấm</span></div>`;
     } else {
-      html += `<div style="margin-bottom:12px;"><span class="badge-ai-graded">🤖 AI Graded</span></div>`;
+      html += `<div style="margin-bottom:12px;"><span class="badge-ai-graded">🤖 AI chấm</span></div>`;
     }
 
     // Overall band
     html += `
       <div class="overall-band-display">
         <div class="overall-number">${s.overall_band}</div>
-        <div class="overall-label">Overall Band Score</div>
+        <div class="overall-label">Band tổng</div>
       </div>`;
 
     // Band breakdown
@@ -3471,7 +3471,7 @@ function renderFeedback(s) {
       if (topFixes.length > 0) {
         html += `
           <div class="feedback-section fix-summary-card">
-            <h3>🎯 Focus for Your Next Essay</h3>
+            <h3>🎯 Trọng tâm cho bài sau</h3>
             <div class="fix-items">
               ${topFixes.map((f, i) => `
                 <div class="fix-item">
@@ -3498,7 +3498,7 @@ function renderFeedback(s) {
     // Flashcard button
     html += `
       <div class="pdf-export-bar" style="margin-bottom:0">
-        <button class="btn btn-secondary btn-sm" onclick="openFlashcards(${s.id})">📚 Vocabulary Flashcards</button>
+        <button class="btn btn-secondary btn-sm" onclick="openFlashcards(${s.id})">📚 Flashcard từ vựng</button>
       </div>`;
 
     // Criterion details cards
@@ -3510,7 +3510,7 @@ function renderFeedback(s) {
         grammatical_range: 'Grammatical Range & Accuracy'
       };
 
-      html += `<div class="feedback-section"><h3>Criterion Analysis</h3><div class="criterion-grid">`;
+      html += `<div class="feedback-section"><h3>Phân tích theo tiêu chí</h3><div class="criterion-grid">`;
 
       for (const key of ['task_achievement', 'coherence_cohesion', 'lexical_resource', 'grammatical_range']) {
         const cd = criterionData[key];
@@ -3529,8 +3529,8 @@ function renderFeedback(s) {
             </div>
             <div class="criterion-body">
               ${cd.descriptor ? `<div class="criterion-descriptor">${escHtml(cd.descriptor)}</div>` : ''}
-              ${strengthsList ? `<div class="criterion-strengths"><h5>Strengths</h5><ul>${strengthsList}</ul></div>` : ''}
-              ${improvList ? `<div class="criterion-improvements"><h5>Improvements</h5><ul>${improvList}</ul></div>` : ''}
+              ${strengthsList ? `<div class="criterion-strengths"><h5>Điểm mạnh</h5><ul>${strengthsList}</ul></div>` : ''}
+              ${improvList ? `<div class="criterion-improvements"><h5>Cần sửa</h5><ul>${improvList}</ul></div>` : ''}
             </div>
           </div>`;
       }
@@ -3608,7 +3608,7 @@ function renderFeedback(s) {
 
       html += `
         <div class="feedback-section sentence-analysis-section">
-          <h3>Sentence Structure Analysis</h3>
+          <h3>Phân tích cấu trúc câu</h3>
           ${legendHtml}
           ${countsHtml}
           <div class="highlighted-essay">${highlightedEssay}</div>
@@ -3633,7 +3633,7 @@ function renderFeedback(s) {
         { key: 'coherence', label: 'Coherence' }
       ];
 
-      html += `<div class="feedback-section overall-improvements-section"><h3>Areas for Improvement</h3><div class="improvements-grid">`;
+      html += `<div class="feedback-section overall-improvements-section"><h3>Cần cải thiện</h3><div class="improvements-grid">`;
       for (const { key, label } of improvKeys) {
         if (overallImprovData[key]) {
           html += `
@@ -3650,7 +3650,7 @@ function renderFeedback(s) {
     if (s.detailed_feedback) {
       html += `
         <div class="feedback-section">
-          <h3>Detailed Feedback</h3>
+          <h3>Nhận xét chi tiết</h3>
           <div class="feedback-text">${escHtml(s.detailed_feedback)}</div>
         </div>`;
     }
@@ -3660,7 +3660,7 @@ function renderFeedback(s) {
     if (strengths.length) {
       html += `
         <div class="feedback-section">
-          <h3>Strengths</h3>
+          <h3>Điểm mạnh</h3>
           <ul class="list-items strengths-list">${strengths.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>
         </div>`;
     }
@@ -3670,7 +3670,7 @@ function renderFeedback(s) {
     if (improvements.length && !overallImprovData) {
       html += `
         <div class="feedback-section">
-          <h3>Areas for Improvement</h3>
+          <h3>Cần cải thiện</h3>
           <ul class="list-items improvements-list">${improvements.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>
         </div>`;
     }
@@ -3682,20 +3682,20 @@ function renderFeedback(s) {
     // Render annotated essay with colored marks (read-only)
     html += `
       <div class="feedback-section">
-        <h3>Your Essay <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">— các lỗi được đánh dấu, rê chuột để xem cách sửa</span></h3>
+        <h3>Bài của bạn <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">— các lỗi được đánh dấu, rê chuột để xem cách sửa</span></h3>
         <div class="annotation-legend">
-          <span class="ann-type grammar">Grammar</span>
-          <span class="ann-type vocabulary">Vocabulary</span>
-          <span class="ann-type argument">Argument</span>
-          <span class="ann-type structure">Structure</span>
-          <span class="ann-type strength">Strength</span>
+          <span class="ann-type grammar">Ngữ pháp</span>
+          <span class="ann-type vocabulary">Từ vựng</span>
+          <span class="ann-type argument">Lập luận</span>
+          <span class="ann-type structure">Cấu trúc</span>
+          <span class="ann-type strength">Điểm tốt</span>
         </div>
         <div class="essay-box annotated-essay-view" id="annotated-essay-view"></div>
       </div>`;
   } else {
     html += `
       <div class="feedback-section">
-        <h3>Your Essay</h3>
+        <h3>Bài của bạn</h3>
         <div class="essay-box">${escHtml(s.essay)}</div>
       </div>`;
   }
@@ -3724,10 +3724,10 @@ function renderFeedback(s) {
     html += `
       <div class="rewrite-cta">
         <div class="rewrite-cta-text">
-          <strong>✨ Want to see a Band 8+ version?</strong>
-          <span>AI will rewrite your essay with higher vocabulary, better structure, and improved grammar — plus explain every change.</span>
+          <strong>✨ Muốn xem bản Band 8+?</strong>
+          <span>AI viết lại bài của bạn với từ vựng cao cấp hơn, cấu trúc tốt hơn — kèm giải thích từng thay đổi.</span>
         </div>
-        <button class="btn btn-rewrite" onclick="viewRewrite(${s.id})">🔄 AI Rewrite at Band 8+</button>
+        <button class="btn btn-rewrite" onclick="viewRewrite(${s.id})">🔄 AI viết lại Band 8+</button>
       </div>`;
   }
 
@@ -6092,11 +6092,11 @@ function openGradingPanel(id) {
         <span style="font-size:.78rem;color:var(--gray-500)">Select text in essay to annotate</span>
       </div>
       <div class="annotation-legend">
-        <span class="ann-type grammar">Grammar</span>
-        <span class="ann-type vocabulary">Vocabulary</span>
-        <span class="ann-type argument">Argument</span>
-        <span class="ann-type structure">Structure</span>
-        <span class="ann-type strength">Strength</span>
+        <span class="ann-type grammar">Ngữ pháp</span>
+        <span class="ann-type vocabulary">Từ vựng</span>
+        <span class="ann-type argument">Lập luận</span>
+        <span class="ann-type structure">Cấu trúc</span>
+        <span class="ann-type strength">Điểm tốt</span>
       </div>
       <div class="annotatable-essay" id="annotatable-essay-${id}"></div>
     </div>` : '';
