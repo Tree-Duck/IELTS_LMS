@@ -497,7 +497,7 @@ Respond ONLY with this exact JSON structure:
     "lexical_resource": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] },
     "grammatical_range": { "band": <n>, "descriptor": "...", "strengths": ["<quote essay text>", "..."], "improvements": ["<quote essay text + fix>", "..."] }
   },
-  "detailed_feedback": "<phân tích 180-250 từ BẰNG TIẾNG VIỆT, trích dẫn câu cụ thể từ bài (giữ tiếng Anh). Chia thành 2-3 đoạn ngắn, ngăn cách bằng \\n\\n — KHÔNG viết 1 khối dài>",
+  "detailed_feedback": "<nhận xét tổng BẰNG TIẾNG VIỆT, DỄ QUÉT, tuyệt đối KHÔNG viết đoạn văn dài liền mạch. Định dạng CHÍNH XÁC: dòng đầu '**Đánh giá chung:** <1 câu tóm gọn bài mạnh/yếu ở đâu>', xuống dòng, rồi 4 gạch đầu dòng, mỗi dòng dạng '- **Task/Bố cục/Từ vựng/Ngữ pháp:** <1-2 câu nhận xét, trích cụm tiếng Anh cụ thể từ bài>'. Mỗi bullet tối đa ~30 từ>",
   "sentence_analysis": [
     {"i": 1, "t": "simple"},
     {"i": 2, "t": "complex"}

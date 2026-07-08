@@ -3625,12 +3625,12 @@ function renderFeedback(s) {
 
     if (overallImprovData) {
       const improvKeys = [
-        { key: 'content', label: 'Content' },
-        { key: 'organization', label: 'Organization' },
-        { key: 'vocabulary', label: 'Vocabulary' },
-        { key: 'grammar', label: 'Grammar' },
-        { key: 'sentence_variety', label: 'Sentence Variety' },
-        { key: 'coherence', label: 'Coherence' }
+        { key: 'content', label: 'Nội dung' },
+        { key: 'organization', label: 'Bố cục' },
+        { key: 'vocabulary', label: 'Từ vựng' },
+        { key: 'grammar', label: 'Ngữ pháp' },
+        { key: 'sentence_variety', label: 'Đa dạng câu' },
+        { key: 'coherence', label: 'Mạch lạc' }
       ];
 
       html += `<div class="feedback-section overall-improvements-section"><h3>Cần cải thiện</h3><div class="improvements-grid">`;
@@ -3646,12 +3646,14 @@ function renderFeedback(s) {
       html += `</div></div>`;
     }
 
-    // Detailed feedback
+    // Detailed feedback — rendered as scannable markdown (bold labels + bullet
+    // cards) instead of a raw wall of text. Plain-prose old data still renders
+    // as clean paragraphs.
     if (s.detailed_feedback) {
       html += `
         <div class="feedback-section">
           <h3>Nhận xét chi tiết</h3>
-          <div class="feedback-text">${escHtml(s.detailed_feedback)}</div>
+          <div class="feedback-rich">${renderHintMarkdown(s.detailed_feedback)}</div>
         </div>`;
     }
 
