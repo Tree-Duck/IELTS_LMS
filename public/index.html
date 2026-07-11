@@ -262,6 +262,7 @@
             <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">✏️ Luyện câu</button>
             <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
             <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🔤 Dịch câu</button>
+            <button class="tnav-nav-link" data-view="dictation" onclick="showView('dictation')">🎧 Nghe chép chính tả</button>
             <button class="tnav-nav-link" data-view="games" onclick="showView('games')">🎮 Trò chơi</button>
           </div>
         </div>
@@ -1011,6 +1012,7 @@
           <button class="test-tab-btn" onclick="switchMaterialsTab('task2')" id="materials-tab-task2">✍️ Đề Task 2</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('speaking')" id="materials-tab-speaking">🎙️ Chủ đề Speaking</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('translation')" id="materials-tab-translation">🔤 Dịch câu</button>
+          <button class="test-tab-btn" onclick="switchMaterialsTab('dictation')" id="materials-tab-dictation">🎧 Dictation</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('grammar-ex')" id="materials-tab-grammar-ex">📐 Bài tập ngữ pháp</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('essays')" id="materials-tab-essays">📄 Bài viết mẫu</button>
           <button class="test-tab-btn" onclick="switchMaterialsTab('collocations')" id="materials-tab-collocations">🔗 Collocations</button>
@@ -1193,6 +1195,40 @@
 
           <!-- Existing custom prompts list -->
           <div id="admin-task2-prompts-list" style="margin-top:16px"></div>
+        </div>
+
+        <!-- DICTATION PANEL -->
+        <div id="dictation-panel" class="hidden">
+          <div class="materials-form-card">
+            <h3 class="import-title" style="margin-bottom:8px">Thêm bài Dictation</h3>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Dán link audio/video trực tiếp (mp3/mp4 — ví dụ link R2). Transcript: mỗi câu 1 dòng; có thể thêm mốc thời gian đầu dòng dạng <code>[0:07]</code> để máy phát đúng đoạn từng câu.</p>
+            <div class="form-group">
+              <label for="dict-f-title">Tiêu đề</label>
+              <input id="dict-f-title" class="form-input" placeholder="VD: BBC 6 Minute English — Coffee" />
+            </div>
+            <div class="form-group" style="max-width:200px">
+              <label for="dict-f-diff">Độ khó</label>
+              <select id="dict-f-diff" class="form-input">
+                <option value="easy">Dễ</option>
+                <option value="medium" selected>Vừa</option>
+                <option value="hard">Khó</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dict-f-audio">Link audio/video (mp3/mp4)</label>
+              <input id="dict-f-audio" class="form-input" placeholder="https://...mp3" />
+            </div>
+            <div class="form-group">
+              <label for="dict-f-transcript">Transcript (mỗi câu 1 dòng, tùy chọn [m:ss] đầu dòng)</label>
+              <textarea id="dict-f-transcript" class="form-input" rows="8" placeholder="[0:02] Hello and welcome to the programme.&#10;[0:06] Today we are talking about coffee."></textarea>
+            </div>
+            <div class="form-row-end">
+              <button class="btn btn-primary" onclick="submitAddDictation()">➕ Thêm bài</button>
+            </div>
+            <div id="dict-f-error" class="error-msg hidden"></div>
+            <div id="dict-f-success" class="success-msg hidden"></div>
+          </div>
+          <div id="admin-dictation-list" style="margin-top:16px"></div>
         </div>
 
         <!-- TRANSLATION SENTENCES PANEL -->
@@ -2247,6 +2283,44 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Dictation practice -->
+      <div id="view-dictation" class="view hidden">
+        <div class="page-header">
+          <h2>🎧 Nghe chép chính tả</h2>
+          <p class="page-sub">Nghe từng câu, gõ lại chính xác — luyện tai và chính tả cùng lúc.</p>
+        </div>
+        <div id="dict-bank-panel">
+          <div class="wp-question-grid" id="dict-list-grid"><div class="wp-loading">Đang tải bài…</div></div>
+        </div>
+        <div id="dict-session-panel" class="hidden">
+          <button class="btn-back-plain" onclick="backToDictationList()">← Chọn bài khác</button>
+          <div class="dict-session-card">
+            <div class="dict-session-head">
+              <div>
+                <div class="dict-title" id="dict-title"></div>
+                <div class="dict-progress" id="dict-progress"></div>
+              </div>
+              <span class="tag-badge tag-level" id="dict-diff"></span>
+            </div>
+            <audio id="dict-audio" preload="auto"></audio>
+            <div class="dict-controls">
+              <button class="btn btn-primary" id="dict-play-btn" onclick="dictPlaySentence()">▶ Nghe câu này</button>
+              <button class="btn btn-secondary" onclick="dictReplay()">🔁 Nghe lại</button>
+              <button class="btn btn-secondary" id="dict-speed-btn" onclick="dictToggleSpeed()">🐢 0.75x</button>
+            </div>
+            <div class="dict-hint" id="dict-hint"></div>
+            <textarea id="dict-input" class="dict-input" rows="2" placeholder="Gõ lại câu bạn vừa nghe…"></textarea>
+            <div class="dict-actions">
+              <button class="btn btn-primary" id="dict-check-btn" onclick="dictCheck()">✔ Kiểm tra</button>
+              <button class="btn btn-ghost" id="dict-reveal-btn" onclick="dictReveal()">👀 Hiện đáp án</button>
+              <button class="btn btn-secondary hidden" id="dict-next-btn" onclick="dictNext()">Câu tiếp →</button>
+            </div>
+            <div id="dict-result" class="dict-result hidden"></div>
+          </div>
+          <div id="dict-summary" class="dict-summary hidden"></div>
         </div>
       </div>
 

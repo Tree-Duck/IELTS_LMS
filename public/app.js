@@ -1709,6 +1709,7 @@ function showView(name) {
   else if (name === 'paragraph-list') loadParagraphList();
   else if (name === 'paragraph-exercise') { /* loaded via openParagraphExercise */ }
   else if (name === 'games') { /* static hub, no loader */ }
+  else if (name === 'dictation') loadDictation();
   else if (name === 'vocab-blitz') showVocabBlitz();
   else if (name === 'band-climber') showBandClimber();
   else if (name === 'settings') loadSettings();
@@ -4515,7 +4516,7 @@ let _materialsCache = null;
 
 function switchMaterialsTab(type) {
   currentMaterialsTab = type;
-  ['reading','listening','task1','speaking','task2','translation','grammar-ex','essays','collocations','speaking-answers'].forEach(t => {
+  ['reading','listening','task1','speaking','task2','translation','dictation','grammar-ex','essays','collocations','speaking-answers'].forEach(t => {
     const btn = document.getElementById(`materials-tab-${t}`);
     if (btn) btn.classList.toggle('active', t === type);
   });
@@ -4524,6 +4525,7 @@ function switchMaterialsTab(type) {
   const speakingPanel     = document.getElementById('speaking-topics-panel');
   const task2Panel        = document.getElementById('task2-prompts-panel');
   const transPanel        = document.getElementById('translation-sentences-panel');
+  const dictPanel         = document.getElementById('dictation-panel');
   const grammarExPanel    = document.getElementById('grammar-exercises-panel');
   const essaysPanel       = document.getElementById('essays-panel');
   const collocPanel       = document.getElementById('collocations-panel');
@@ -4534,7 +4536,7 @@ function switchMaterialsTab(type) {
   const importPanel       = document.getElementById('mat-panel-import');
 
   // Hide all special panels first
-  [task1Panel, speakingPanel, task2Panel, transPanel, grammarExPanel, essaysPanel, collocPanel, spkAnsPanel].forEach(p => p && p.classList.add('hidden'));
+  [task1Panel, speakingPanel, task2Panel, transPanel, dictPanel, grammarExPanel, essaysPanel, collocPanel, spkAnsPanel].forEach(p => p && p.classList.add('hidden'));
 
   if (type === 'task1') {
     if (task1Panel) task1Panel.classList.remove('hidden');
@@ -4564,6 +4566,13 @@ function switchMaterialsTab(type) {
     if (createPanel) createPanel.classList.add('hidden');
     if (importPanel) importPanel.classList.add('hidden');
     loadAdminTranslationSentences();
+  } else if (type === 'dictation') {
+    if (dictPanel) dictPanel.classList.remove('hidden');
+    if (listContent) listContent.classList.add('hidden');
+    if (actionTabs) actionTabs.classList.add('hidden');
+    if (createPanel) createPanel.classList.add('hidden');
+    if (importPanel) importPanel.classList.add('hidden');
+    loadAdminDictation();
   } else if (type === 'grammar-ex') {
     if (grammarExPanel) grammarExPanel.classList.remove('hidden');
     if (listContent) listContent.classList.add('hidden');
@@ -9831,6 +9840,294 @@ async function improveWritingEssay() {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '📈 Xem bản viết mẫu Band 8+'; }
   }
+}
+
+/* ─── Dictation practice ─────────────────────────────────────────────────── */
+let _dictEx = null;      // current exercise (full, with sentences)
+let _dictIdx = 0;        // current sentence index
+let _dictStats = [];     // per-sentence {correct, total, revealed}
+let _dictSlow = false;
+
+async function loadDictation() {
+  document.getElementById('dict-bank-panel').classList.remove('hidden');
+  document.getElementById('dict-session-panel').classList.add('hidden');
+  const grid = document.getElementById('dict-list-grid');
+  grid.innerHTML = '<div class="wp-loading">Đang tải bài…</div>';
+  try {
+    const items = await api('/api/dictation');
+    if (!items.length) {
+      grid.innerHTML = '<div class="wp-empty-state">Chưa có bài dictation. Giáo viên thêm bài trong <strong>Quản lý nội dung → 🎧 Dictation</strong>.</div>';
+      return;
+    }
+    const diffLabel = { easy: 'Dễ', medium: 'Vừa', hard: 'Khó' };
+    grid.innerHTML = items.map(d => {
+      const best = localStorage.getItem(`dict_best_${d.id}`);
+      return `
+      <div class="wp-q-card" onclick="openDictationExercise(${d.id})">
+        <div class="wp-q-card-top">
+          <span class="tag-badge tag-t1">🎧 Dictation</span>
+          <span class="tag-badge tag-level">${diffLabel[d.difficulty] || d.difficulty}</span>
+          ${best ? `<span class="tag-badge tag-steps">🏅 ${best}%</span>` : ''}
+        </div>
+        <div class="wp-q-card-title">${escHtml(d.title)}</div>
+        <div class="wp-q-card-meta">${d.sentence_count} câu</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = `<div class="wp-empty-state">Lỗi tải bài: ${escHtml(e.message)}</div>`;
+  }
+}
+
+async function openDictationExercise(id) {
+  try {
+    _dictEx = await api(`/api/dictation/${id}`);
+  } catch (e) { showToast('Không tải được bài: ' + e.message); return; }
+  _dictIdx = 0;
+  _dictStats = [];
+  _dictSlow = false;
+  document.getElementById('dict-bank-panel').classList.add('hidden');
+  document.getElementById('dict-session-panel').classList.remove('hidden');
+  document.getElementById('dict-summary').classList.add('hidden');
+  document.getElementById('dict-summary').innerHTML = '';
+  document.getElementById('dict-title').textContent = _dictEx.title;
+  const diffLabel = { easy: 'Dễ', medium: 'Vừa', hard: 'Khó' };
+  document.getElementById('dict-diff').textContent = diffLabel[_dictEx.difficulty] || _dictEx.difficulty;
+  const audio = document.getElementById('dict-audio');
+  audio.src = _dictEx.audio_url;
+  audio.playbackRate = 1;
+  const speedBtn = document.getElementById('dict-speed-btn');
+  if (speedBtn) speedBtn.textContent = '🐢 0.75x';
+  dictShowSentence();
+}
+
+function backToDictationList() {
+  const audio = document.getElementById('dict-audio');
+  if (audio) audio.pause();
+  loadDictation();
+}
+
+function dictShowSentence() {
+  const total = _dictEx.sentences.length;
+  document.getElementById('dict-progress').textContent = `Câu ${_dictIdx + 1}/${total}`;
+  const sen = _dictEx.sentences[_dictIdx];
+  const hint = document.getElementById('dict-hint');
+  const words = _dictWords(sen.text).length;
+  hint.textContent = `Gợi ý: câu này có ${words} từ.` + (sen.start == null ? ' (Bài không có mốc thời gian — tự tua audio tới câu tương ứng.)' : '');
+  const input = document.getElementById('dict-input');
+  input.value = '';
+  input.disabled = false;
+  document.getElementById('dict-result').classList.add('hidden');
+  document.getElementById('dict-result').innerHTML = '';
+  document.getElementById('dict-check-btn').classList.remove('hidden');
+  document.getElementById('dict-reveal-btn').classList.remove('hidden');
+  document.getElementById('dict-next-btn').classList.add('hidden');
+  input.focus();
+}
+
+function dictPlaySentence() {
+  const audio = document.getElementById('dict-audio');
+  const sen = _dictEx.sentences[_dictIdx];
+  if (audio._dictStop) { audio.removeEventListener('timeupdate', audio._dictStop); audio._dictStop = null; }
+  if (sen.start != null) {
+    audio.currentTime = sen.start;
+    if (sen.end != null) {
+      const stop = () => {
+        if (audio.currentTime >= sen.end) { audio.pause(); audio.removeEventListener('timeupdate', stop); audio._dictStop = null; }
+      };
+      audio._dictStop = stop;
+      audio.addEventListener('timeupdate', stop);
+    }
+    audio.play().catch(() => showToast('Không phát được audio — kiểm tra link file.'));
+  } else {
+    // No timestamps: simple play/pause toggle on the whole file
+    if (audio.paused) audio.play().catch(() => showToast('Không phát được audio — kiểm tra link file.'));
+    else audio.pause();
+  }
+}
+
+function dictReplay() {
+  const audio = document.getElementById('dict-audio');
+  const sen = _dictEx.sentences[_dictIdx];
+  if (sen.start == null) audio.currentTime = Math.max(0, audio.currentTime - 5); // no timestamps: jump back 5s
+  dictPlaySentence();
+}
+
+function dictToggleSpeed() {
+  _dictSlow = !_dictSlow;
+  const audio = document.getElementById('dict-audio');
+  audio.playbackRate = _dictSlow ? 0.75 : 1;
+  document.getElementById('dict-speed-btn').textContent = _dictSlow ? '🐇 1x' : '🐢 0.75x';
+}
+
+// Normalize into comparable words: lowercase, strip punctuation (keep letters/digits/apostrophes/hyphens)
+function _dictWords(text) {
+  return String(text).toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[^a-z0-9'\s-]/gi, ' ')
+    .split(/\s+/).filter(Boolean);
+}
+
+// LCS alignment between target and typed words → set of matched target indexes
+function _dictMatchTarget(target, typed) {
+  const n = target.length, m = typed.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = target[i] === typed[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const matched = new Set();
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (target[i] === typed[j]) { matched.add(i); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  return matched;
+}
+
+function dictCheck() {
+  const sen = _dictEx.sentences[_dictIdx];
+  const typedRaw = document.getElementById('dict-input').value.trim();
+  if (!typedRaw) { showToast('Gõ câu bạn nghe được trước đã!'); return; }
+  const targetWordsDisplay = sen.text.split(/\s+/).filter(Boolean);
+  const target = _dictWords(sen.text);
+  const typed = _dictWords(typedRaw);
+  const matched = _dictMatchTarget(target, typed);
+  const correct = matched.size, total = target.length;
+  const pct = total ? Math.round((correct / total) * 100) : 0;
+  _dictStats[_dictIdx] = { correct, total, revealed: false };
+
+  // Mark each display token green/red. Display tokens can normalize to 1+ words;
+  // a token counts as correct only if ALL its normalized words matched.
+  let wi = 0;
+  const marked = targetWordsDisplay.map(w => {
+    const norm = _dictWords(w);
+    if (!norm.length) return `<span>${escHtml(w)}</span>`;
+    let ok = true;
+    for (let k = 0; k < norm.length; k++) if (!matched.has(wi + k)) ok = false;
+    wi += norm.length;
+    return `<span class="dict-w ${ok ? 'dict-w-ok' : 'dict-w-miss'}">${escHtml(w)}</span>`;
+  }).join(' ');
+
+  const resEl = document.getElementById('dict-result');
+  resEl.classList.remove('hidden');
+  resEl.innerHTML = `
+    <div class="dict-score ${pct >= 80 ? 'good' : pct >= 50 ? 'mid' : 'low'}">${pct}% <span>(${correct}/${total} từ đúng)</span></div>
+    <div class="dict-answer">${marked}</div>
+    <div class="dict-typed">Bạn gõ: <em>${escHtml(typedRaw)}</em></div>`;
+  document.getElementById('dict-input').disabled = true;
+  document.getElementById('dict-check-btn').classList.add('hidden');
+  document.getElementById('dict-reveal-btn').classList.add('hidden');
+  document.getElementById('dict-next-btn').classList.remove('hidden');
+}
+
+function dictReveal() {
+  const sen = _dictEx.sentences[_dictIdx];
+  _dictStats[_dictIdx] = { correct: 0, total: _dictWords(sen.text).length, revealed: true };
+  const resEl = document.getElementById('dict-result');
+  resEl.classList.remove('hidden');
+  resEl.innerHTML = `
+    <div class="dict-score low">Đã xem đáp án (0 điểm câu này)</div>
+    <div class="dict-answer">${escHtml(sen.text)}</div>`;
+  document.getElementById('dict-input').disabled = true;
+  document.getElementById('dict-check-btn').classList.add('hidden');
+  document.getElementById('dict-reveal-btn').classList.add('hidden');
+  document.getElementById('dict-next-btn').classList.remove('hidden');
+}
+
+function dictNext() {
+  if (_dictIdx + 1 < _dictEx.sentences.length) {
+    _dictIdx++;
+    dictShowSentence();
+    dictPlaySentence();
+    return;
+  }
+  // Finished — summary
+  const totals = _dictStats.reduce((a, s) => ({ c: a.c + (s ? s.correct : 0), t: a.t + (s ? s.total : 0) }), { c: 0, t: 0 });
+  const pct = totals.t ? Math.round((totals.c / totals.t) * 100) : 0;
+  const bestKey = `dict_best_${_dictEx.id}`;
+  const prevBest = parseInt(localStorage.getItem(bestKey) || '0', 10);
+  const isBest = pct > prevBest;
+  if (isBest) { try { localStorage.setItem(bestKey, String(pct)); } catch (e) {} }
+  const revealedCount = _dictStats.filter(s => s && s.revealed).length;
+  document.getElementById('dict-summary').classList.remove('hidden');
+  document.getElementById('dict-summary').innerHTML = `
+    <div class="dict-summary-card">
+      <div class="dict-summary-pct">${pct}%</div>
+      <div class="dict-summary-label">Độ chính xác toàn bài (${totals.c}/${totals.t} từ)${isBest ? ' — 🏅 Kỷ lục mới!' : ''}</div>
+      ${revealedCount ? `<div class="dict-summary-note">Đã xem đáp án ${revealedCount} câu.</div>` : ''}
+      <div class="dict-actions" style="justify-content:center;margin-top:14px">
+        <button class="btn btn-primary" onclick="openDictationExercise(${_dictEx.id})">🔁 Làm lại</button>
+        <button class="btn btn-secondary" onclick="backToDictationList()">📚 Chọn bài khác</button>
+      </div>
+    </div>`;
+  document.getElementById('dict-summary').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('dict-next-btn').classList.add('hidden');
+}
+
+// Enter checks the sentence (Shift+Enter for a newline)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && e.target && e.target.id === 'dict-input') {
+    e.preventDefault();
+    const checkBtn = document.getElementById('dict-check-btn');
+    if (checkBtn && !checkBtn.classList.contains('hidden')) dictCheck();
+    else dictNext();
+  }
+});
+
+/* ── Dictation admin ── */
+async function loadAdminDictation() {
+  const list = document.getElementById('admin-dictation-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading">Đang tải…</div>';
+  try {
+    const items = await api('/api/dictation');
+    if (!items.length) { list.innerHTML = '<div class="empty-state">Chưa có bài dictation nào.</div>'; return; }
+    const diffLabel = { easy: 'Dễ', medium: 'Vừa', hard: 'Khó' };
+    list.innerHTML = `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">Bài hiện có (${items.length})</h4>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Tiêu đề</th><th>Độ khó</th><th>Số câu</th><th></th></tr></thead>
+          <tbody>${items.map(d => `
+            <tr>
+              <td style="max-width:340px;white-space:normal">${escHtml(d.title)}</td>
+              <td><span class="badge badge-gray">${diffLabel[d.difficulty] || d.difficulty}</span></td>
+              <td>${d.sentence_count}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteAdminDictation(${d.id})">Xóa</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    list.innerHTML = `<div class="error-msg" style="display:block">${err.message}</div>`;
+  }
+}
+
+async function submitAddDictation() {
+  const title = document.getElementById('dict-f-title')?.value?.trim();
+  const difficulty = document.getElementById('dict-f-diff')?.value || 'medium';
+  const audio_url = document.getElementById('dict-f-audio')?.value?.trim();
+  const transcript = document.getElementById('dict-f-transcript')?.value || '';
+  const errEl = document.getElementById('dict-f-error');
+  const okEl = document.getElementById('dict-f-success');
+  if (errEl) errEl.classList.add('hidden');
+  if (okEl) okEl.classList.add('hidden');
+  try {
+    const r = await api('/api/admin/dictation', { method: 'POST', body: JSON.stringify({ title, difficulty, audio_url, transcript }) });
+    if (okEl) { okEl.textContent = `✓ Đã thêm (${r.sentence_count} câu)!`; okEl.classList.remove('hidden'); setTimeout(() => okEl.classList.add('hidden'), 3000); }
+    ['dict-f-title', 'dict-f-audio', 'dict-f-transcript'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    loadAdminDictation();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+  }
+}
+
+async function deleteAdminDictation(id) {
+  if (!confirm('Xóa bài dictation này?')) return;
+  try {
+    await api(`/api/admin/dictation/${id}`, { method: 'DELETE' });
+    loadAdminDictation();
+  } catch (err) { alert('Xóa thất bại: ' + err.message); }
 }
 
 /* ─── Translation Curriculum ─────────────────────────────────────────────── */

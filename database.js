@@ -1054,6 +1054,37 @@ const db = {
     return true;
   },
 
+  // ── Dictation exercises (listen & type practice) ─────────────────────────
+  getDictationExercises() {
+    const data = load();
+    return (data.dictation_exercises || []).map(d => ({
+      id: d.id, title: d.title, difficulty: d.difficulty,
+      sentence_count: (d.sentences || []).length, created_at: d.created_at,
+    }));
+  },
+  getDictationById(id) {
+    const data = load();
+    return (data.dictation_exercises || []).find(d => String(d.id) === String(id)) || null;
+  },
+  addDictationExercise(entry) {
+    const data = load();
+    if (!data.dictation_exercises) data.dictation_exercises = [];
+    if (!data._ids.dictation_exercises) data._ids.dictation_exercises = 0;
+    data._ids.dictation_exercises++;
+    const item = { id: data._ids.dictation_exercises, ...entry, created_at: new Date().toISOString() };
+    data.dictation_exercises.push(item);
+    save(data);
+    return item;
+  },
+  deleteDictationExercise(id) {
+    const data = load();
+    if (!data.dictation_exercises) return false;
+    const before = data.dictation_exercises.length;
+    data.dictation_exercises = data.dictation_exercises.filter(d => String(d.id) !== String(id));
+    if (data.dictation_exercises.length < before) { save(data); return true; }
+    return false;
+  },
+
   // ── Model Essays (band 8-9 sample answers) ───────────────────────────────
   getModelEssays(task_type, topic) {
     let items = load().model_essays || [];
@@ -1327,6 +1358,8 @@ function classifyTask2Type(q) {
   }
   if (!data.drafts) { data.drafts = []; changed = true; }
   if (!data._ids.drafts) { data._ids.drafts = 0; changed = true; }
+  if (!data.dictation_exercises) { data.dictation_exercises = []; changed = true; }
+  if (!data._ids.dictation_exercises) { data._ids.dictation_exercises = 0; changed = true; }
   if (!data.model_essays) { data.model_essays = []; changed = true; }
   if (!data._ids.model_essays) { data._ids.model_essays = 0; changed = true; }
   if (!data.collocation_sets) { data.collocation_sets = []; changed = true; }

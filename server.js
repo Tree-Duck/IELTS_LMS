@@ -2227,6 +2227,69 @@ app.delete('/api/admin/speaking-topics/:id', authenticate, teacherOrAdmin, (req,
 });
 
 // ─── Custom Task 2 Prompts (admin CRUD + public read) ────────────────────────
+// ─── Dictation Exercises ─────────────────────────────────────────────────────
+// Transcript format: one sentence per line, optionally prefixed with a
+// timestamp "[mm:ss]" or "mm:ss" (seconds may have decimals). With timestamps
+// the player can seek per sentence; without, students control the audio freely.
+function parseDictationTranscript(text) {
+  const sentences = [];
+  for (const rawLine of String(text).split('\n')) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const m = line.match(/^\[?(\d{1,3}):(\d{2}(?:\.\d+)?)\]?\s+(.+)$/);
+    if (m) {
+      sentences.push({ text: m[3].trim(), start: parseInt(m[1], 10) * 60 + parseFloat(m[2]) });
+    } else {
+      sentences.push({ text: line, start: null });
+    }
+  }
+  // end = next sentence's start (only meaningful when timestamps are present)
+  for (let i = 0; i < sentences.length; i++) {
+    sentences[i].end = (i + 1 < sentences.length && sentences[i + 1].start != null) ? sentences[i + 1].start : null;
+  }
+  return sentences;
+}
+
+app.get('/api/dictation', authenticate, (req, res) => {
+  try { res.json(db.getDictationExercises()); }
+  catch (err) { res.status(500).json({ error: 'Failed to load dictation exercises' }); }
+});
+
+app.get('/api/dictation/:id', authenticate, (req, res) => {
+  try {
+    const ex = db.getDictationById(req.params.id);
+    if (!ex) return res.status(404).json({ error: 'Exercise not found' });
+    res.json(ex);
+  } catch (err) { res.status(500).json({ error: 'Failed to load exercise' }); }
+});
+
+app.post('/api/admin/dictation', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const { title, audio_url, difficulty, transcript } = req.body;
+    if (!title || !title.trim()) return res.status(400).json({ error: 'title is required' });
+    if (!audio_url || !/^https?:\/\//.test(audio_url.trim())) return res.status(400).json({ error: 'audio_url must be a direct http(s) link to an mp3/mp4 file' });
+    const sentences = parseDictationTranscript(transcript || '');
+    if (!sentences.length) return res.status(400).json({ error: 'transcript is required (one sentence per line)' });
+    const item = db.addDictationExercise({
+      title: title.trim(),
+      audio_url: audio_url.trim(),
+      difficulty: ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium',
+      sentences,
+    });
+    res.json({ ok: true, id: item.id, sentence_count: sentences.length });
+  } catch (err) {
+    console.error('Add dictation error:', err);
+    res.status(500).json({ error: 'Failed to add dictation exercise' });
+  }
+});
+
+app.delete('/api/admin/dictation/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    if (!db.deleteDictationExercise(req.params.id)) return res.status(404).json({ error: 'Exercise not found' });
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Failed to delete exercise' }); }
+});
+
 app.get('/api/task2-prompts-custom', (req, res) => {
   try { res.json(db.getTask2PromptsCustom()); }
   catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
