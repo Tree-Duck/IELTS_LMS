@@ -9878,6 +9878,49 @@ async function loadDictation() {
   }
 }
 
+/* ── YouTube playback support (uses the IFrame Player API) ── */
+let _dictYT = null;          // YT.Player instance
+let _dictIsYT = false;       // current exercise is a YouTube link
+let _dictYTStopTimer = null; // interval that pauses at a sentence's end
+let _ytApiPromise = null;
+
+function _ytExtractId(url) {
+  const m = String(url || '').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function _loadYTApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (_ytApiPromise) return _ytApiPromise;
+  _ytApiPromise = new Promise((resolve) => {
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { if (typeof prev === 'function') prev(); resolve(); };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  });
+  return _ytApiPromise;
+}
+function _dictDestroyYT() {
+  if (_dictYTStopTimer) { clearInterval(_dictYTStopTimer); _dictYTStopTimer = null; }
+  if (_dictYT) { try { _dictYT.destroy(); } catch (e) {} _dictYT = null; }
+}
+function _dictInitYT(videoId) {
+  return _loadYTApi().then(() => new Promise((resolve) => {
+    _dictDestroyYT();
+    const wrap = document.getElementById('dict-yt-wrap');
+    const old = wrap.querySelector('#dict-yt');
+    if (old) old.remove();
+    const holder = document.createElement('div');
+    holder.id = 'dict-yt';
+    wrap.insertBefore(holder, wrap.firstChild);
+    _dictYT = new YT.Player('dict-yt', {
+      videoId,
+      playerVars: { controls: 0, disablekb: 1, modestbranding: 1, rel: 0, cc_load_policy: 0, fs: 0, playsinline: 1, iv_load_policy: 3 },
+      events: { onReady: () => resolve() }
+    });
+  }));
+}
+
 async function openDictationExercise(id) {
   try {
     _dictEx = await api(`/api/dictation/${id}`);
@@ -9892,17 +9935,31 @@ async function openDictationExercise(id) {
   document.getElementById('dict-title').textContent = _dictEx.title;
   const diffLabel = { easy: 'Dễ', medium: 'Vừa', hard: 'Khó' };
   document.getElementById('dict-diff').textContent = diffLabel[_dictEx.difficulty] || _dictEx.difficulty;
-  const audio = document.getElementById('dict-audio');
-  audio.src = _dictEx.audio_url;
-  audio.playbackRate = 1;
   const speedBtn = document.getElementById('dict-speed-btn');
   if (speedBtn) speedBtn.textContent = '🐢 0.75x';
+
+  const ytId = _ytExtractId(_dictEx.audio_url);
+  _dictIsYT = !!ytId;
+  const audio = document.getElementById('dict-audio');
+  const ytWrap = document.getElementById('dict-yt-wrap');
+  if (_dictIsYT) {
+    audio.pause();
+    ytWrap.classList.remove('hidden');
+    document.getElementById('dict-hint').textContent = 'Đang tải video…';
+    try { await _dictInitYT(ytId); } catch (e) {}
+  } else {
+    _dictDestroyYT();
+    ytWrap.classList.add('hidden');
+    audio.src = _dictEx.audio_url;
+    audio.playbackRate = 1;
+  }
   dictShowSentence();
 }
 
 function backToDictationList() {
   const audio = document.getElementById('dict-audio');
   if (audio) audio.pause();
+  if (_dictYT) { try { _dictYT.pauseVideo(); } catch (e) {} }
   loadDictation();
 }
 
@@ -9912,7 +9969,7 @@ function dictShowSentence() {
   const sen = _dictEx.sentences[_dictIdx];
   const hint = document.getElementById('dict-hint');
   const words = _dictWords(sen.text).length;
-  hint.textContent = `Gợi ý: câu này có ${words} từ.` + (sen.start == null ? ' (Bài không có mốc thời gian — tự tua audio tới câu tương ứng.)' : '');
+  hint.textContent = `Gợi ý: câu này có ${words} từ.` + (sen.start == null ? ' (Bài không có mốc thời gian — tự tua tới câu tương ứng.)' : '');
   const input = document.getElementById('dict-input');
   input.value = '';
   input.disabled = false;
@@ -9925,8 +9982,25 @@ function dictShowSentence() {
 }
 
 function dictPlaySentence() {
-  const audio = document.getElementById('dict-audio');
   const sen = _dictEx.sentences[_dictIdx];
+  if (_dictIsYT) {
+    if (!_dictYT || !_dictYT.playVideo) return;
+    if (_dictYTStopTimer) { clearInterval(_dictYTStopTimer); _dictYTStopTimer = null; }
+    if (sen.start != null) {
+      _dictYT.seekTo(sen.start, true);
+      _dictYT.playVideo();
+      if (sen.end != null) {
+        _dictYTStopTimer = setInterval(() => {
+          try { if (_dictYT.getCurrentTime() >= sen.end) { _dictYT.pauseVideo(); clearInterval(_dictYTStopTimer); _dictYTStopTimer = null; } } catch (e) {}
+        }, 120);
+      }
+    } else {
+      const st = _dictYT.getPlayerState ? _dictYT.getPlayerState() : -1;
+      if (st === 1) _dictYT.pauseVideo(); else _dictYT.playVideo();
+    }
+    return;
+  }
+  const audio = document.getElementById('dict-audio');
   if (audio._dictStop) { audio.removeEventListener('timeupdate', audio._dictStop); audio._dictStop = null; }
   if (sen.start != null) {
     audio.currentTime = sen.start;
@@ -9946,16 +10020,22 @@ function dictPlaySentence() {
 }
 
 function dictReplay() {
-  const audio = document.getElementById('dict-audio');
   const sen = _dictEx.sentences[_dictIdx];
+  if (_dictIsYT) {
+    if (sen.start == null && _dictYT) { try { _dictYT.seekTo(Math.max(0, _dictYT.getCurrentTime() - 5), true); } catch (e) {} }
+    dictPlaySentence();
+    return;
+  }
+  const audio = document.getElementById('dict-audio');
   if (sen.start == null) audio.currentTime = Math.max(0, audio.currentTime - 5); // no timestamps: jump back 5s
   dictPlaySentence();
 }
 
 function dictToggleSpeed() {
   _dictSlow = !_dictSlow;
-  const audio = document.getElementById('dict-audio');
-  audio.playbackRate = _dictSlow ? 0.75 : 1;
+  const rate = _dictSlow ? 0.75 : 1;
+  if (_dictIsYT && _dictYT && _dictYT.setPlaybackRate) _dictYT.setPlaybackRate(rate);
+  else document.getElementById('dict-audio').playbackRate = rate;
   document.getElementById('dict-speed-btn').textContent = _dictSlow ? '🐇 1x' : '🐢 0.75x';
 }
 

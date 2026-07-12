@@ -2267,7 +2267,7 @@ app.post('/api/admin/dictation', authenticate, teacherOrAdmin, (req, res) => {
   try {
     const { title, audio_url, difficulty, transcript } = req.body;
     if (!title || !title.trim()) return res.status(400).json({ error: 'title is required' });
-    if (!audio_url || !/^https?:\/\//.test(audio_url.trim())) return res.status(400).json({ error: 'audio_url must be a direct http(s) link to an mp3/mp4 file' });
+    if (!audio_url || !/^https?:\/\//.test(audio_url.trim())) return res.status(400).json({ error: 'audio_url must be an http(s) link — a YouTube link or a direct mp3/mp4 file' });
     const sentences = parseDictationTranscript(transcript || '');
     if (!sentences.length) return res.status(400).json({ error: 'transcript is required (one sentence per line)' });
     const item = db.addDictationExercise({

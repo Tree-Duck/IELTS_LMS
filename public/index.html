@@ -1201,7 +1201,7 @@
         <div id="dictation-panel" class="hidden">
           <div class="materials-form-card">
             <h3 class="import-title" style="margin-bottom:8px">Thêm bài Dictation</h3>
-            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Dán link audio/video trực tiếp (mp3/mp4 — ví dụ link R2). Transcript: mỗi câu 1 dòng; có thể thêm mốc thời gian đầu dòng dạng <code>[0:07]</code> để máy phát đúng đoạn từng câu.</p>
+            <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Dán <strong>link YouTube</strong> hoặc link audio/video trực tiếp (mp3/mp4 — ví dụ link R2). Transcript: mỗi câu 1 dòng; nên thêm mốc thời gian đầu dòng dạng <code>[0:07]</code> để máy tự phát đúng đoạn từng câu (nhất là với YouTube).</p>
             <div class="form-group">
               <label for="dict-f-title">Tiêu đề</label>
               <input id="dict-f-title" class="form-input" placeholder="VD: BBC 6 Minute English — Coffee" />
@@ -1215,8 +1215,8 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="dict-f-audio">Link audio/video (mp3/mp4)</label>
-              <input id="dict-f-audio" class="form-input" placeholder="https://...mp3" />
+              <label for="dict-f-audio">Link YouTube hoặc audio/video (mp3/mp4)</label>
+              <input id="dict-f-audio" class="form-input" placeholder="https://youtu.be/... hoặc https://...mp3" />
             </div>
             <div class="form-group">
               <label for="dict-f-transcript">Transcript (mỗi câu 1 dòng, tùy chọn [m:ss] đầu dòng)</label>
@@ -2304,6 +2304,10 @@
                 <div class="dict-progress" id="dict-progress"></div>
               </div>
               <span class="tag-badge tag-level" id="dict-diff"></span>
+            </div>
+            <div class="dict-yt-wrap hidden" id="dict-yt-wrap">
+              <div id="dict-yt"></div>
+              <div class="dict-yt-cover">🎧 Chỉ nghe — tập trung vào âm thanh, không cần nhìn video</div>
             </div>
             <audio id="dict-audio" preload="auto"></audio>
             <div class="dict-controls">
