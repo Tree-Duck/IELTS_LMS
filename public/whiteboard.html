@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Whiteboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-  html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background:#1a1a1a; color:#eee; }
+  html, body { height: 100%; overflow: hidden; font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif; background:#1a1a1a; color:#eee; }
   #app { display:flex; flex-direction:column; height:100vh; }
   /* Top bar */
   #topbar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#222; border-bottom:1px solid #333; flex-wrap:wrap; }
@@ -20,18 +21,18 @@
     #zoom-controls { flex-shrink:0; }
   }
   #tabs { display:flex; gap:4px; flex:1; overflow-x:auto; }
-  .tab { padding:6px 14px; background:#2d2d2d; border:1px solid #3a3a3a; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:13px; display:flex; align-items:center; gap:6px; }
-  .tab.active { background:#4a7cff; border-color:#5a8cff; }
+  .tab { padding:6px 14px; background:#2d2d2d; border:1px solid #2C6A52; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:13px; display:flex; align-items:center; gap:6px; }
+  .tab.active { background:#FF7A59; border-color:#e8653f; }
   .tab .close { opacity:.5; font-size:14px; padding:0 2px; border-radius:4px; }
   .tab .close:hover { background:rgba(255,255,255,.2); opacity:1; }
   .tab input { background:transparent; border:none; color:inherit; width:120px; outline:none; font-size:13px; font-family:inherit; }
-  .top-btn { background:#2d2d2d; border:1px solid #3a3a3a; color:#eee; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:4px; }
-  .top-btn:hover { background:#3a3a3a; }
+  .top-btn { background:#2d2d2d; border:1px solid #2C6A52; color:#eee; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:4px; }
+  .top-btn:hover { background:#2C6A52; }
   .top-btn.bell { background:#d4a017; border-color:#e0b030; }
   .top-btn.bell:hover { background:#e0b030; }
-  #zoom-controls { display:flex; align-items:center; gap:4px; background:#2d2d2d; padding:4px; border-radius:8px; border:1px solid #3a3a3a; }
+  #zoom-controls { display:flex; align-items:center; gap:4px; background:#2d2d2d; padding:4px; border-radius:8px; border:1px solid #2C6A52; }
   #zoom-controls button { background:transparent; border:none; color:#eee; padding:4px 10px; cursor:pointer; font-size:14px; border-radius:4px; }
-  #zoom-controls button:hover { background:#3a3a3a; }
+  #zoom-controls button:hover { background:#2C6A52; }
   #zoom-val { min-width:50px; text-align:center; font-size:12px; font-variant-numeric:tabular-nums; }
   /* Workspace */
   #workspace { flex:1; display:flex; position:relative; overflow:hidden; }
@@ -39,7 +40,7 @@
   #sidebar { width:56px; background:#222; border-right:1px solid #333; display:flex; flex-direction:column; padding:8px 4px; gap:4px; z-index:10; }
   .tool { width:48px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:transparent; border:1px solid transparent; border-radius:8px; color:#bbb; font-size:18px; }
   .tool:hover { background:#2d2d2d; color:#fff; }
-  .tool.active { background:#4a7cff; color:#fff; border-color:#5a8cff; }
+  .tool.active { background:#FF7A59; color:#fff; border-color:#e8653f; }
   .tool svg { width:22px; height:22px; }
   .divider { height:1px; background:#333; margin:6px 4px; }
   /* Properties panel */
@@ -56,14 +57,14 @@
   #canvas-wrap.panning { cursor:grabbing; }
   canvas { position:absolute; top:0; left:0; }
   /* Text editor overlay */
-  #text-editor { position:absolute; background:rgba(255,255,255,.92); border:2px dashed #4a7cff; outline:none; resize:both; font-family:inherit; padding:4px; z-index:50; min-width:120px; min-height:40px; pointer-events:auto; user-select:text; -webkit-user-select:text; }
+  #text-editor { position:absolute; background:rgba(255,255,255,.92); border:2px dashed #FF7A59; outline:none; resize:both; font-family:inherit; padding:4px; z-index:50; min-width:120px; min-height:40px; pointer-events:auto; user-select:text; -webkit-user-select:text; }
   /* Timer */
-  #timer { position:absolute; background:rgba(0,0,0,.85); color:#fff; border-radius:16px; padding:20px 30px; font-family:"SF Mono", Menlo, monospace; font-variant-numeric:tabular-nums; z-index:30; cursor:move; border:2px solid #4a7cff; box-shadow:0 10px 40px rgba(0,0,0,.4); display:none; flex-direction:column; align-items:center; gap:8px; }
+  #timer { position:absolute; background:rgba(0,0,0,.85); color:#fff; border-radius:16px; padding:20px 30px; font-family:"SF Mono", Menlo, monospace; font-variant-numeric:tabular-nums; z-index:30; cursor:move; border:2px solid #FF7A59; box-shadow:0 10px 40px rgba(0,0,0,.4); display:none; flex-direction:column; align-items:center; gap:8px; }
   #timer.show { display:flex; }
   #timer-display { font-weight:700; line-height:1; }
   #timer-controls { display:flex; gap:6px; }
   #timer-controls button { background:#333; border:none; color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; }
-  #timer-controls button:hover { background:#4a7cff; }
+  #timer-controls button:hover { background:#FF7A59; }
   #timer-size { display:flex; gap:4px; }
   #timer-size button { background:#333; border:none; color:#fff; width:26px; height:26px; border-radius:4px; cursor:pointer; }
   #timer.finished { border-color:#ff4a4a; animation:pulse 1s infinite; }
@@ -71,13 +72,13 @@
   /* Modal */
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; }
   .modal-overlay.show { display:flex; }
-  .modal { background:#2a2a2a; border-radius:12px; padding:24px; min-width:320px; max-width:90vw; border:1px solid #3a3a3a; }
+  .modal { background:#2a2a2a; border-radius:12px; padding:24px; min-width:320px; max-width:90vw; border:1px solid #2C6A52; }
   .modal h3 { margin-bottom:16px; color:#fff; }
-  .modal input, .modal select { width:100%; padding:8px 12px; background:#1a1a1a; border:1px solid #3a3a3a; color:#fff; border-radius:6px; font-size:14px; margin-bottom:12px; font-family:inherit; }
+  .modal input, .modal select { width:100%; padding:8px 12px; background:#1a1a1a; border:1px solid #2C6A52; color:#fff; border-radius:6px; font-size:14px; margin-bottom:12px; font-family:inherit; }
   .modal-buttons { display:flex; gap:8px; justify-content:flex-end; }
   .modal-buttons button { padding:8px 16px; border-radius:6px; border:none; cursor:pointer; font-size:13px; }
-  .btn-primary { background:#4a7cff; color:#fff; }
-  .btn-secondary { background:#3a3a3a; color:#fff; }
+  .btn-primary { background:#FF7A59; color:#fff; }
+  .btn-secondary { background:#2C6A52; color:#fff; }
   .time-inputs { display:flex; gap:8px; }
   .time-inputs > div { flex:1; }
   .time-inputs label { font-size:11px; color:#aaa; display:block; margin-bottom:4px; }
@@ -85,10 +86,10 @@
   #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.9); color:#fff; padding:10px 20px; border-radius:8px; z-index:200; font-size:13px; opacity:0; transition:opacity .3s; pointer-events:none; }
   #toast.show { opacity:1; }
   /* Help */
-  #help-btn { position:absolute; bottom:12px; right:12px; width:36px; height:36px; border-radius:50%; background:#2d2d2d; color:#fff; border:1px solid #3a3a3a; cursor:pointer; z-index:10; font-size:16px; }
-  #help-btn:hover { background:#4a7cff; }
+  #help-btn { position:absolute; bottom:12px; right:12px; width:36px; height:36px; border-radius:50%; background:#2d2d2d; color:#fff; border:1px solid #2C6A52; cursor:pointer; z-index:10; font-size:16px; }
+  #help-btn:hover { background:#FF7A59; }
   /* Selection box */
-  .sel-handle { position:absolute; width:10px; height:10px; background:#fff; border:2px solid #4a7cff; border-radius:2px; z-index:15; }
+  .sel-handle { position:absolute; width:10px; height:10px; background:#fff; border:2px solid #FF7A59; border-radius:2px; z-index:15; }
   /* ---- Collapsible sidebar ---- */
   #sidebar { transition: width .18s ease, min-width .18s ease, padding .18s ease, border .18s ease; }
   #sidebar.collapsed { width:0; min-width:0; padding:0; border-right:none; overflow:hidden; }
@@ -97,14 +98,14 @@
     position:absolute; top:50%; left:0;
     transform: translate(var(--sidebar-w, 56px), -50%);
     width:18px; height:64px;
-    background:#2d2d2d; border:1px solid #3a3a3a; border-left:none;
+    background:#2d2d2d; border:1px solid #2C6A52; border-left:none;
     border-radius:0 8px 8px 0; color:#bbb; cursor:pointer; z-index:11;
     font-size:12px; display:flex; align-items:center; justify-content:center;
     transition: transform .18s ease, background .15s, border-left .15s;
   }
-  #sidebar-toggle:hover { background:#4a7cff; color:#fff; }
+  #sidebar-toggle:hover { background:#FF7A59; color:#fff; }
   #workspace.sidebar-collapsed { --sidebar-w: 0px; }
-  #workspace.sidebar-collapsed #sidebar-toggle { border-left:1px solid #3a3a3a; }
+  #workspace.sidebar-collapsed #sidebar-toggle { border-left:1px solid #2C6A52; }
   /* ---- Collapsible properties panel ---- */
   /* Override original #props left so it sits next to (whatever current) sidebar width is. */
   #props {
@@ -122,7 +123,7 @@
   }
   /* Hide the "Style ▾" button while the props panel is open; only show it when collapsed */
   #props-toggle.hidden { opacity:0; pointer-events:none; transform:translateY(-8px); }
-  #props-toggle:hover { background:#4a7cff; color:#fff; }
+  #props-toggle:hover { background:#FF7A59; color:#fff; }
   /* ---- Tab edit pencil ---- */
   .tab .edit { opacity:0; font-size:12px; padding:0 4px; border-radius:4px; transition:opacity .15s; }
   .tab:hover .edit { opacity:.55; }
@@ -130,28 +131,28 @@
   /* ---- Random picker modal ---- */
   #random-modal .modal { min-width:420px; max-width:520px; }
   .picker-tabs { display:flex; gap:6px; margin-bottom:14px; }
-  .picker-tabs button { flex:1; padding:10px; background:#1a1a1a; border:1px solid #3a3a3a; color:#ccc; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; }
-  .picker-tabs button.active { background:#4a7cff; color:#fff; border-color:#5a8cff; }
+  .picker-tabs button { flex:1; padding:10px; background:#1a1a1a; border:1px solid #2C6A52; color:#ccc; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; }
+  .picker-tabs button.active { background:#FF7A59; color:#fff; border-color:#e8653f; }
   .picker-pane { display:none; }
   .picker-pane.show { display:block; }
   .picker-result {
     font-size:64px; font-weight:800; text-align:center; padding:24px 0;
-    color:#4a7cff; font-variant-numeric:tabular-nums; min-height:120px;
+    color:#FF7A59; font-variant-numeric:tabular-nums; min-height:120px;
     line-height:1.1; word-break:break-word;
   }
   .picker-result.placeholder { color:#555; font-size:18px; font-weight:400; padding-top:50px; }
   .range-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
   .range-row label { color:#aaa; font-size:12px; min-width:42px; }
   .range-row input { width:120px !important; margin-bottom:0 !important; }
-  textarea#name-list { width:100%; min-height:110px; padding:8px 10px; background:#1a1a1a; border:1px solid #3a3a3a; color:#fff; border-radius:6px; font-family:inherit; font-size:13px; resize:vertical; margin-bottom:8px; }
+  textarea#name-list { width:100%; min-height:110px; padding:8px 10px; background:#1a1a1a; border:1px solid #2C6A52; color:#fff; border-radius:6px; font-family:inherit; font-size:13px; resize:vertical; margin-bottom:8px; }
   .picker-opts { display:flex; align-items:center; gap:6px; color:#aaa; font-size:12px; margin-top:8px; margin-bottom:4px; }
   .picker-opts input[type=checkbox] { width:auto !important; margin:0; }
   .pool-info { font-size:11px; color:#888; margin-bottom:8px; text-align:right; }
   /* ---- Tab context menu ---- */
-  #tab-menu { position:fixed; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:8px; padding:4px; z-index:300; box-shadow:0 8px 24px rgba(0,0,0,.5); display:none; min-width:140px; }
+  #tab-menu { position:fixed; background:#2a2a2a; border:1px solid #2C6A52; border-radius:8px; padding:4px; z-index:300; box-shadow:0 8px 24px rgba(0,0,0,.5); display:none; min-width:140px; }
   #tab-menu.show { display:block; }
   #tab-menu button { display:block; width:100%; text-align:left; background:transparent; border:none; color:#eee; padding:8px 12px; border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
-  #tab-menu button:hover { background:#4a7cff; }
+  #tab-menu button:hover { background:#FF7A59; }
 </style>
 </head>
 <body>
@@ -163,7 +164,7 @@
       <h2 style="margin:0;font-size:17px">Whiteboard Guide</h2>
       <button onclick="document.getElementById('help-modal').style.display='none'" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">✕</button>
     </div>
-    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px">Tools</h3>
+    <h3 style="color:#FF7A59;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px">Tools</h3>
     <table style="width:100%;border-collapse:collapse">
       <tr><td style="padding:4px 8px">🖱️ <b>Select (V)</b></td><td style="color:#aaa">Click/drag to move &amp; resize objects</td></tr>
       <tr><td style="padding:4px 8px">✏️ <b>Pen (P)</b></td><td style="color:#aaa">Freehand drawing</td></tr>
@@ -179,7 +180,7 @@
       <tr><td style="padding:4px 8px">🔷 <b>Flowchart</b></td><td style="color:#aaa">Labelled flow shapes</td></tr>
       <tr><td style="padding:4px 8px">🔗 <b>Connector</b></td><td style="color:#aaa">Connect two objects with a line</td></tr>
     </table>
-    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Keyboard Shortcuts</h3>
+    <h3 style="color:#FF7A59;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Keyboard Shortcuts</h3>
     <table style="width:100%;border-collapse:collapse">
       <tr><td style="padding:4px 8px"><b>Space + drag</b></td><td style="color:#aaa">Pan canvas</td></tr>
       <tr><td style="padding:4px 8px"><b>+ / −</b></td><td style="color:#aaa">Zoom in / out</td></tr>
@@ -190,7 +191,7 @@
       <tr><td style="padding:4px 8px"><b>B</b></td><td style="color:#aaa">Ring bell</td></tr>
       <tr><td style="padding:4px 8px"><b>V P E T</b></td><td style="color:#aaa">Switch tools</td></tr>
     </table>
-    <h3 style="color:#4a7cff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Live Session</h3>
+    <h3 style="color:#FF7A59;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">Live Session</h3>
     <p style="color:#aaa;margin:0">Click <b>📡 Share</b> in the toolbar → copy the link → send to students. Anyone who opens the link joins the same live session and sees the canvas update in real time.</p>
   </div>
 </div>
@@ -205,7 +206,7 @@
     <p style="color:#aaa;margin:0 0 14px">Share this link with students. They join and see your whiteboard live.</p>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <input id="share-link-input" readonly style="flex:1;background:#1a1a1a;border:1px solid #444;color:#eee;padding:8px 10px;border-radius:6px;font-size:12px;font-family:monospace" />
-      <button onclick="copyShareLink()" style="background:#4a7cff;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px">Copy</button>
+      <button onclick="copyShareLink()" style="background:#FF7A59;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px">Copy</button>
     </div>
     <div id="share-peer-info" style="color:#aaa;font-size:12px"></div>
   </div>
@@ -766,7 +767,7 @@ function drawOverlay() {
   const tl = worldToScreen(b.x, b.y);
   const br = worldToScreen(b.x+b.w, b.y+b.h);
   ovCtx.save();
-  ovCtx.strokeStyle = '#4a7cff';
+  ovCtx.strokeStyle = '#FF7A59';
   ovCtx.setLineDash([4, 4]);
   ovCtx.lineWidth = 1.5;
   ovCtx.strokeRect(tl.x-4, tl.y-4, br.x-tl.x+8, br.y-tl.y+8);
@@ -774,7 +775,7 @@ function drawOverlay() {
   if (isResizable(o)) {
     const handles = getResizeHandlesScreen(b);
     ovCtx.fillStyle = '#fff';
-    ovCtx.strokeStyle = '#4a7cff';
+    ovCtx.strokeStyle = '#FF7A59';
     ovCtx.lineWidth = 2;
     Object.values(handles).forEach(r => {
       ovCtx.fillRect(r.x, r.y, r.w, r.h);
@@ -788,7 +789,7 @@ function drawOverlay() {
       worldToScreen(b.x + b.w/2, b.y + b.h),
       worldToScreen(b.x, b.y + b.h/2)
     ];
-    ovCtx.fillStyle = '#4a7cff';
+    ovCtx.fillStyle = '#FF7A59';
     pts.forEach(p => { ovCtx.beginPath(); ovCtx.arc(p.x, p.y, 4, 0, Math.PI*2); ovCtx.fill(); });
   }
   ovCtx.restore();

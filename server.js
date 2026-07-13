@@ -73,10 +73,10 @@ async function sendVerificationEmail(email, name, code) {
     subject: 'Your IELTS LMS verification code',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
-        <h2 style="color:#4f46e5;margin-bottom:8px">SSP's IELTS Writing LMS</h2>
+        <h2 style="color:#0E4D3C;margin-bottom:8px">🌿 SSP IELTS</h2>
         <p style="color:#374151">Hi <strong>${name}</strong>, thanks for registering!</p>
         <p style="color:#374151">Your email verification code is:</p>
-        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
+        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#0E4D3C;text-align:center;padding:28px 0;background:#FFF7E9;border:2px solid #0E4D3C;border-radius:14px;margin:16px 0">${code}</div>
         <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't register, you can safely ignore this email.</p>
       </div>
     `
@@ -91,10 +91,10 @@ async function sendPasswordResetEmail(email, name, code) {
     subject: 'Reset your IELTS LMS password',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
-        <h2 style="color:#4f46e5;margin-bottom:8px">SSP's IELTS Writing LMS</h2>
+        <h2 style="color:#0E4D3C;margin-bottom:8px">🌿 SSP IELTS</h2>
         <p style="color:#374151">Hi <strong>${name}</strong>,</p>
         <p style="color:#374151">We received a request to reset your password. Your reset code is:</p>
-        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#4f46e5;text-align:center;padding:28px 0;background:#f5f3ff;border-radius:12px;margin:16px 0">${code}</div>
+        <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#0E4D3C;text-align:center;padding:28px 0;background:#FFF7E9;border:2px solid #0E4D3C;border-radius:14px;margin:16px 0">${code}</div>
         <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't request a password reset, you can safely ignore this email.</p>
       </div>
     `
