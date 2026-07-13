@@ -442,6 +442,48 @@ function mapQuotesToAnnotations(essay, rawAnnotations) {
   return out;
 }
 
+// Parse grading JSON, recovering from output truncated by the token limit.
+// The prompt lists annotations / sentence_analysis LAST, so cutting to the last
+// completed value and closing open containers preserves band scores + earlier
+// feedback rather than failing the whole grading.
+function parseGradingJson(text) {
+  try { return JSON.parse(text); } catch (e) {}
+  // Recovery: try cutting at each value boundary from the end, close any open
+  // containers, and parse — falling back to an earlier comma when a cut lands
+  // on a dangling key. Returns the deepest object that parses.
+  const closeAndParse = (s) => {
+    const stack = [];
+    let inS = false, e = false;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (inS) { if (e) e = false; else if (c === '\\') e = true; else if (c === '"') inS = false; continue; }
+      if (c === '"') inS = true;
+      else if (c === '{') stack.push('}');
+      else if (c === '[') stack.push(']');
+      else if (c === '}' || c === ']') stack.pop();
+    }
+    if (inS) return null; // ended mid-string
+    let t = s.replace(/[\s,:]+$/, '');
+    for (let k = stack.length - 1; k >= 0; k--) t += stack[k];
+    try { const r = JSON.parse(t); return (r && typeof r === 'object') ? r : null; } catch (e2) { return null; }
+  };
+  let inStr = false, esc = false;
+  const cuts = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inStr) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') { inStr = false; cuts.push(i + 1); } continue; }
+    if (c === '"') inStr = true;
+    else if (c === '}' || c === ']') cuts.push(i + 1);
+    else if (c === ',') cuts.push(i);
+  }
+  const tries = Math.min(cuts.length, 400);
+  for (let k = cuts.length - 1; k >= cuts.length - tries; k--) {
+    const r = closeAndParse(text.slice(0, cuts[k]));
+    if (r) return r;
+  }
+  return JSON.parse(text); // give up → caller marks status 'error'
+}
+
 async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords, imageData) {
   db.updateSubmissionStatus(submissionId, 'grading');
 
@@ -538,7 +580,7 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 6000,
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [{ role: 'user', content: messageContent }],
     });
@@ -549,7 +591,7 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
     }
 
     jsonText = jsonText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const result = JSON.parse(jsonText);
+    const result = parseGradingJson(jsonText);
 
     const normalize = (v) => Math.round(parseFloat(v) * 2) / 2;
     const ta = normalize(result.task_achievement);
