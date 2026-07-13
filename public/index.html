@@ -2298,24 +2298,28 @@
               </div>
               <span class="tag-badge tag-level" id="dict-diff"></span>
             </div>
-            <div class="dict-yt-wrap hidden" id="dict-yt-wrap">
-              <div id="dict-yt"></div>
-              <div class="dict-yt-cover">🎧 Chỉ nghe — tập trung vào âm thanh, không cần nhìn video</div>
+            <div class="dict-media">
+              <div class="dict-yt-wrap hidden" id="dict-yt-wrap">
+                <div id="dict-yt"></div>
+                <div class="dict-yt-cover">🎧 Chỉ nghe — tập trung vào âm thanh, không cần nhìn video</div>
+              </div>
+              <audio id="dict-audio" preload="auto"></audio>
+              <div class="dict-controls">
+                <button class="btn btn-primary" id="dict-play-btn" onclick="dictPlaySentence()">▶ Nghe câu này</button>
+                <button class="btn btn-secondary" onclick="dictReplay()">🔁 Nghe lại</button>
+                <button class="btn btn-secondary" id="dict-speed-btn" onclick="dictToggleSpeed()">🐢 0.75x</button>
+              </div>
+              <div class="dict-hint" id="dict-hint"></div>
             </div>
-            <audio id="dict-audio" preload="auto"></audio>
-            <div class="dict-controls">
-              <button class="btn btn-primary" id="dict-play-btn" onclick="dictPlaySentence()">▶ Nghe câu này</button>
-              <button class="btn btn-secondary" onclick="dictReplay()">🔁 Nghe lại</button>
-              <button class="btn btn-secondary" id="dict-speed-btn" onclick="dictToggleSpeed()">🐢 0.75x</button>
+            <div class="dict-work">
+              <textarea id="dict-input" class="dict-input" rows="3" placeholder="Gõ lại câu bạn vừa nghe…"></textarea>
+              <div class="dict-actions">
+                <button class="btn btn-primary" id="dict-check-btn" onclick="dictCheck()">✔ Kiểm tra</button>
+                <button class="btn btn-ghost" id="dict-reveal-btn" onclick="dictReveal()">👀 Hiện đáp án</button>
+                <button class="btn btn-secondary hidden" id="dict-next-btn" onclick="dictNext()">Câu tiếp →</button>
+              </div>
+              <div id="dict-result" class="dict-result hidden"></div>
             </div>
-            <div class="dict-hint" id="dict-hint"></div>
-            <textarea id="dict-input" class="dict-input" rows="2" placeholder="Gõ lại câu bạn vừa nghe…"></textarea>
-            <div class="dict-actions">
-              <button class="btn btn-primary" id="dict-check-btn" onclick="dictCheck()">✔ Kiểm tra</button>
-              <button class="btn btn-ghost" id="dict-reveal-btn" onclick="dictReveal()">👀 Hiện đáp án</button>
-              <button class="btn btn-secondary hidden" id="dict-next-btn" onclick="dictNext()">Câu tiếp →</button>
-            </div>
-            <div id="dict-result" class="dict-result hidden"></div>
           </div>
           <div id="dict-summary" class="dict-summary hidden"></div>
         </div>
