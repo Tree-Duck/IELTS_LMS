@@ -6758,10 +6758,16 @@ function closeMobileDrawer() {
 }
 
 function _buildMobileDrawer() {
-  const groups = document.querySelectorAll('.tnav-group[id^="tnav-group-"]:not(#tnav-group-account)');
   const container = document.getElementById('topnav-drawer-links');
   if (!container) return;
   container.innerHTML = '';
+  // Standalone top-level links (Trang chủ, Đọc) — not inside a group
+  document.querySelectorAll('#topnav-links > button.tnav-nav-link').forEach(link => {
+    const clone = link.cloneNode(true);
+    clone.addEventListener('click', () => closeMobileDrawer());
+    container.appendChild(clone);
+  });
+  const groups = document.querySelectorAll('.tnav-group[id^="tnav-group-"]:not(#tnav-group-account)');
   groups.forEach(group => {
     if (group.classList.contains('hidden')) return;
     const label = group.querySelector('.tnav-group-trigger')?.textContent?.replace('▾', '').trim() || '';
