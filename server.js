@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const Anthropic = require('@anthropic-ai/sdk');
 const { Resend } = require('resend');
 const db = require('./database');
@@ -21,6 +22,10 @@ if (!process.env.JWT_SECRET) {
 const JWT_SECRET = process.env.JWT_SECRET;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = 'claude-haiku-4-5';
+// Public Google OAuth client id (falls back to the project's id so it works
+// without a Railway env var; override with GOOGLE_CLIENT_ID if it ever changes).
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '703041029920-q4lroi649gohg7gp3hvsg256o2ijbc3j.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const client = new Anthropic({
   apiKey: ANTHROPIC_API_KEY,
@@ -290,6 +295,42 @@ app.post('/api/login', authStrictLimiter, async (req, res) => {
   const expiry = remember_me ? '30d' : '7d';
   const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: expiry });
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
+});
+
+// Public config the frontend needs before auth (e.g. the Google client id)
+app.get('/api/public-config', (req, res) => {
+  res.json({ googleClientId: GOOGLE_CLIENT_ID });
+});
+
+// Sign in / sign up with Google (Google Identity Services ID-token flow)
+app.post('/api/auth/google', authLooseLimiter, async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) return res.status(400).json({ error: 'Missing Google credential' });
+  try {
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email || !payload.email_verified) {
+      return res.status(401).json({ error: 'Google account email not verified' });
+    }
+    const email = payload.email.toLowerCase();
+    let user = db.getUserByEmail(email);
+    if (!user) {
+      // First Google login → create a verified account with an unusable password
+      const placeholder = await bcrypt.hash('google:' + Math.random().toString(36) + Date.now(), 10);
+      const name = payload.name || payload.given_name || email.split('@')[0];
+      const result = db.insertUser(name, email, placeholder, adminRole(email));
+      user = db.getUserById(result.lastInsertRowid);
+      db.verifyUser(user.id);
+    } else if (!user.verified) {
+      db.verifyUser(user.id); // Google proves the email is real
+    }
+    const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
+  } catch (err) {
+    console.error('Google auth error:', err.message || err);
+    res.status(401).json({ error: 'Google sign-in failed. Please try again.' });
+  }
 });
 
 app.post('/api/verify-email', authLooseLimiter, async (req, res) => {

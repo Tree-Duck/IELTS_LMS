@@ -450,6 +450,10 @@ body {
 .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
 .auth-form { display: flex; flex-direction: column; gap: 16px; }
+.google-auth-wrap { margin-bottom: 2px; }
+#g_id_signin { display: flex; justify-content: center; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 6px; color: var(--moss); font-size: 12.5px; font-weight: 600; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
 
 /* ─── APP LAYOUT ────────────────────────────────────────────────────────── */
 :root { --topnav-height: 70px; }

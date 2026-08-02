@@ -1260,6 +1260,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   initTopnav();
+  initGoogleSignin();
 
   if (token && currentUser) {
     showApp();
@@ -1356,6 +1357,36 @@ function showAuthForm(which) {
   } else {
     tabBar.classList.add('hidden');
     document.getElementById(which + '-form').classList.remove('hidden');
+  }
+}
+
+/* ── Google Sign-In (GIS ID-token flow) ── */
+async function initGoogleSignin() {
+  let cfg;
+  try { cfg = await fetch('/api/public-config').then(r => r.json()); } catch (e) { return; }
+  if (!cfg || !cfg.googleClientId) return;
+  const start = Date.now();
+  (function waitForGIS() {
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.initialize({ client_id: cfg.googleClientId, callback: handleGoogleCredential });
+      const btn = document.getElementById('g_id_signin');
+      if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', width: 300, text: 'continue_with', shape: 'pill', logo_alignment: 'center' });
+      const wrap = document.getElementById('google-auth-wrap');
+      if (wrap) wrap.style.display = 'block';
+      return;
+    }
+    if (Date.now() - start < 8000) setTimeout(waitForGIS, 200);
+  })();
+}
+
+async function handleGoogleCredential(response) {
+  const errEl = document.getElementById('login-error');
+  try {
+    const data = await api('/api/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential }) });
+    saveSession(data);
+    showApp();
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'Đăng nhập Google thất bại'; errEl.classList.remove('hidden'); }
   }
 }
 

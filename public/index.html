@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
@@ -89,6 +90,11 @@
         <div class="logo-icon">✍</div>
         <h1>SSP IELTS</h1>
         <p>Đánh giá viết thông minh</p>
+      </div>
+
+      <div class="google-auth-wrap" id="google-auth-wrap" style="display:none">
+        <div id="g_id_signin"></div>
+        <div class="auth-divider"><span>hoặc dùng email</span></div>
       </div>
 
       <div class="tab-bar">
