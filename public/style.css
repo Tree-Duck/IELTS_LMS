@@ -872,12 +872,13 @@ body {
 
 /* ─── MAIN CONTENT LAYOUT ────────────────────────────────────────────────── */
 .main-content {
-  margin-left: 0;
-  padding: 36px;
-  padding-top: calc(var(--topnav-height) + 36px);
-  max-width: none;
+  margin: 0 auto;                 /* anchor content in a centered column */
+  max-width: 1152px;              /* like theieltsdictionary.com (max-w-6xl) */
+  padding: calc(var(--topnav-height) + 30px) 24px 56px;
   min-width: 0;
 }
+/* Full-screen test taking opts out of the centered cap */
+#app-screen.test-mode .main-content { max-width: none; padding-left: 0; padding-right: 0; }
 
 .view { animation: fadeIn .18s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
