@@ -886,6 +886,24 @@ body {
 /* Dashboard / History / Feedback stay comfortably readable */
 #view-dashboard, #view-history, #view-feedback { max-width: 960px; margin-left: auto; margin-right: auto; }
 
+/* ─── GLOBAL MICRO-INTERACTIONS / POLISH ─────────────────────────────────── */
+html { scroll-behavior: smooth; }
+::selection { background: var(--lime); color: var(--forest); }
+/* Consistent, on-brand keyboard focus ring (mouse clicks unaffected) */
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+/* Tactile press feedback on all buttons */
+.btn:active:not(:disabled), .tnav-nav-link:active, .wp-type-chip:active { transform: translateY(1px); }
+/* Slim brand scrollbar */
+* { scrollbar-width: thin; scrollbar-color: var(--gray-300) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 999px; border: 2px solid var(--body-bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--moss); }
+
 /* ─── PAGE HEADER ───────────────────────────────────────────────────────── */
 .page-header {
   margin-bottom: 28px;
@@ -1413,20 +1431,43 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid #a7f3d0;
 }
 
-.empty-state {
+.empty-state, .wp-empty-state {
   text-align: center;
-  padding: 48px 20px;
-  color: var(--gray-400);
+  padding: 52px 20px;
+  color: var(--moss);
   font-size: 15px;
+  line-height: 1.6;
 }
-.empty-state a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.empty-state::before, .wp-empty-state::before {
+  content: '🌱';
+  display: block;
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: .8;
+}
+.empty-state a { color: var(--coral); text-decoration: none; font-weight: 700; }
+.empty-state strong, .wp-empty-state strong { color: var(--forest-deep); }
 
-.loading {
+.loading, .wp-loading {
   text-align: center;
-  padding: 40px;
-  color: var(--gray-400);
-  font-size: 15px;
+  padding: 44px 20px;
+  color: var(--moss);
+  font-size: 14.5px;
 }
+.loading::before, .wp-loading::before {
+  content: '';
+  display: block;
+  width: 30px; height: 30px;
+  margin: 0 auto 14px;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--forest);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { position: relative; overflow: hidden; background: var(--gray-100); border-radius: 12px; }
+.skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); animation: shimmer 1.3s infinite; }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
 
 .grading-notice {
   background: var(--warning-light);
@@ -3415,15 +3456,17 @@ input:focus, textarea:focus, select:focus {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #1e293b;
-  color: #f8fafc;
-  padding: 10px 22px;
-  border-radius: 24px;
+  background: var(--forest-deep);
+  color: var(--cream);
+  border: 1.5px solid var(--lime);
+  padding: 11px 22px;
+  border-radius: 14px;
+  box-shadow: 4px 5px 0 rgba(200, 241, 105, 0.35);
   font-size: .85rem;
   font-weight: 600;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .2s, transform .2s;
+  transition: opacity .22s cubic-bezier(.4,0,.2,1), transform .22s cubic-bezier(.4,0,.2,1);
   z-index: 9999;
 }
 #draft-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
