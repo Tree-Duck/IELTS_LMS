@@ -4724,7 +4724,7 @@ async function loadAdminTask2Prompts() {
           <tbody>${prompts.map(p => `
             <tr>
               <td><span class="badge badge-gray">${p.difficulty}</span></td>
-              <td><span class="badge badge-gray">${escHtml(T2_TYPE_LABELS[p.question_type] || p.question_type || '—')}</span></td>
+              <td><span class="badge badge-gray">${escHtml(T2_TYPE_LABELS[p.question_type] || p.question_type || '—')}</span>${p.exam_date ? `<br><span class="badge badge-gray" style="margin-top:4px">📅 ${escHtml(p.exam_date)}</span>` : ''}</td>
               <td style="max-width:400px;white-space:normal">${escHtml(p.q)}</td>
               <td><button class="btn btn-danger btn-xs" onclick="deleteAdminTask2Prompt(${p.id})">Delete</button></td>
             </tr>`).join('')}
@@ -6773,6 +6773,9 @@ function closeAllDropdowns() {
 }
 
 function toggleTopnavGroup(groupEl) {
+  // Standalone top-level links (Trang chủ, Đọc) share the trigger class but have
+  // no .tnav-group parent — they navigate via onclick, so just close menus.
+  if (!groupEl) { closeAllDropdowns(); return; }
   const isOpen = groupEl.classList.contains('open');
   closeAllDropdowns();
   if (!isOpen) groupEl.classList.add('open');
@@ -9545,6 +9548,7 @@ async function loadWritingPractice() {
         dbId: t.id,
         type: 'task2',
         questionType: qt,
+        examDate: t.exam_date || null,
         topic: T2_TYPE_LABELS[qt] || 'Task 2',
         tags: t.difficulty ? [t.difficulty] : [],
         prompt: t.q || '',
@@ -9577,6 +9581,7 @@ function renderWritingQuestionGrid() {
       <div class="wp-q-card-top">
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
         ${q.type === 'task2' && q.questionType ? `<span class="tag-badge tag-qtype">${escHtml(T2_TYPE_LABELS[q.questionType] || q.questionType)}</span>` : ''}
+        ${q.examDate ? `<span class="tag-badge tag-exam">📅 Đề thi ${escHtml(q.examDate)}</span>` : ''}
         ${q.tags.map(t => `<span class="tag-badge tag-topic">${escHtml(t)}</span>`).join('')}
       </div>
       <div class="wp-q-card-title">${escHtml(q.topic)}</div>

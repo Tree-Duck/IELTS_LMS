@@ -2385,9 +2385,11 @@ app.get('/api/admin/task2-prompts', authenticate, (req, res) => {
 
 app.post('/api/admin/task2-prompts', authenticate, teacherOrAdmin, (req, res) => {
   try {
-    const { difficulty, q, question_type } = req.body;
+    const { difficulty, q, question_type, exam_date } = req.body;
     if (!q || !q.trim()) return res.status(400).json({ error: 'Prompt text is required' });
-    const item = db.addTask2Prompt({ difficulty: difficulty || 'medium', q: q.trim(), question_type: question_type || undefined });
+    // exam_date marks a real past exam question (dd-mm-yyyy); optional
+    const safeDate = (typeof exam_date === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(exam_date)) ? exam_date : undefined;
+    const item = db.addTask2Prompt({ difficulty: difficulty || 'medium', q: q.trim(), question_type: question_type || undefined, exam_date: safeDate });
     res.json({ ok: true, item });
   } catch (err) {
     res.status(500).json({ error: 'Failed to add Task 2 prompt' });

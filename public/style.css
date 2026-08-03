@@ -1829,6 +1829,7 @@ input:focus, textarea:focus, select:focus {
 .wp-type-chip:hover { background: var(--forest); color: var(--lime); transform: translateY(-1px); }
 .wp-type-chip.active { background: var(--lime); border-color: var(--forest-deep); color: var(--forest); }
 .tag-badge.tag-qtype { background: var(--forest-deep); color: var(--lime); border: 1px solid var(--line); }
+.tag-badge.tag-exam { background: var(--coral); color: #fff; }
 
 /* ─── CRITERION CARDS ────────────────────────────────────────────────────── */
 .criterion-grid {
