@@ -902,6 +902,66 @@ function vocabPromptBlock(units) {
     ).join('\n') + '\n';
 }
 
+const TASK1_RULES = `TASK 1 RULES (from the teacher's own handbook — follow exactly).
+
+STRUCTURE for every type: Introduction (1 sentence) -> Overview (2 sentences) -> Body 1 -> Body 2.
+- Introduction: paraphrase the prompt in ONE sentence. Never copy its wording. Swap "shows" for illustrates / compares / provides a breakdown of, and restructure the noun phrase.
+- Overview: exactly 2 sentences, opened with "Overall,". NEVER put specific figures in the overview. Missing or figure-stuffed overview caps the band at 6.
+- Task 1 has no conclusion.
+
+FIRST decide the variant, then follow its template:
+- dynamic        : any time axis (years, periods) — describe TRENDS
+- static         : a single time point / no time axis — describe COMPARISONS
+- mixed          : two charts, usually one static + one dynamic
+- map            : plans of a place before/after or now/proposed
+- process_linear : a manufacturing or man-made process with a start and an end
+- process_cycle  : a natural cycle that closes back on itself
+
+TEMPLATE dynamic
+  Overview sentence 1 = the general movement (rise / fall / fluctuation). Sentence 2 = the highest or lowest item, or a change of rank.
+  Bodies: group data by trend direction (everything rising together, everything falling together) — do not walk year by year.
+  Quote only the telling figures: start, end, peak, trough, and any intersection.
+  Language: rose, surged, plummeted, fluctuated, plateaued, levelled off + sharply / dramatically / steadily / gradually / slightly / marginally; "peaked at X in YEAR"; "fell to a low of X".
+  Vary the sentence opening: subject-led ("Car use experienced a dramatic surge"), unit-led ("There was a sharp decline in..."), time-led ("By 2020, coal production had fallen...").
+  Tense: past for past periods.
+
+TEMPLATE static
+  Overview sentence 1 = the largest and smallest category. Sentence 2 = the standout distribution pattern.
+  Bodies: group by size or by category type; compare, never "increase/decrease".
+  Language: recorded, had, consumed, ranked first, outstripped, trailed behind; significantly higher than, far more than, the highest proportion.
+  Rotate how a figure is delivered: subject-led ("Americans spent $300,000"), unit-led ("The amount Americans spent was $300,000"), figure-led ("$300,000 was the amount...").
+  Tense: PRESENT SIMPLE when there is no year. This is a common band-losing error.
+
+TEMPLATE mixed
+  Introduction combines both charts in one sentence ("The line graph illustrates X, while the pie chart details Y").
+  Overview must touch a highlight from BOTH charts; if there is a causal link, name it ("suggesting a strong correlation between the two variables").
+  Body 1 handles one chart, Body 2 the other. Do not force them into shared sentences.
+
+TEMPLATE map
+  Focus is spatial language and change language, not figures.
+  Passive voice is mandatory: was constructed, was demolished, was converted into, was replaced by.
+  Position language: to the north of, adjacent to, in the vicinity of, runs parallel to.
+  Band 7+ also names what did NOT change ("the church remained unchanged, retaining its original position").
+  Bodies: split by area (e.g. north vs south) or by period (before vs after).
+
+TEMPLATE process_linear
+  Overview: how many stages, what it starts from and what it ends as.
+  Grammar: PASSIVE voice, because people or machines act ("The grain is heated...").
+  Body 2 closes with "Finally," or "The process culminates in...".
+  Sequencing: commences with, subsequently, concurrently, "Once X has been completed, Y...". Do not rely on First/Then/After that.
+
+TEMPLATE process_cycle
+  Overview: how many stages, and that it is cyclical and continuous.
+  Grammar: ACTIVE voice, because nature acts ("The butterfly lays eggs...").
+  NEVER end with "Finally". Close with "...and the cycle begins again / recommences".
+  Same sequencing vocabulary as linear.
+
+FIGURE LANGUAGE
+  If the chart is in PERCENTAGES: proportion / percentage / share / the figure for; accounted for, made up, represented, constituted, comprised; fractions score well (nearly half, just over a quarter, roughly a third).
+    Critical: "increased TO 35%" states the end value. A gap must be given in PERCENTAGE POINTS — "increased by 15 percentage points", never "increased by 15%".
+  If the chart is in ABSOLUTE numbers: the number of (countable), the amount of (uncountable); verbs consumed, spent, produced. Do not use "accounted for" unless a share is actually being computed.
+  If the time axis runs past today: is projected to / is predicted to / is expected to / is estimated to.`;
+
 const CHAIN_RULES = `MECHANISM CHAIN — the causal spine a body paragraph must follow:
 CLAIM   – the paragraph's main claim.
 ACTOR   – a class of people or institutions doing a camera-recordable action. Must read "When <plural actors> ..." or an anchoring phrase ("In a lecture hall where laptops are allowed, ..."). Never "A student..."; never "people"/"society".
@@ -921,7 +981,7 @@ const LEVEL_NOTE = {
 
 // ── Stage 1: multiple-choice planning ────────────────────────────────────────
 app.post('/api/outline/options', authenticate, async (req, res) => {
-  const { task_type, prompt, level } = req.body;
+  const { task_type, prompt, level, chart_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
 
@@ -929,18 +989,23 @@ app.post('/api/outline/options', authenticate, async (req, res) => {
   const userPrompt = isTask1
     ? `You are an IELTS Writing Task 1 examiner. For the task below, offer the student choices about how to organise their report.
 
+${TASK1_RULES}
+
 Task 1 prompt:
 ${prompt}
+${chart_type ? `The teacher has tagged this task as: ${chart_type}` : ''}
 
 Return ONLY this JSON:
 {
  "task":"task1",
  "questions":[
-  {"id":"overview","q":"Which overall trend will you put in your overview?","options":["<distinct, specific option>","<option>","<option>"]},
-  {"id":"grouping","q":"How will you split the data across your two body paragraphs?","options":["<option>","<option>","<option>"]}
+  {"id":"overview","q":"<dynamic: which overall trend goes in your overview? | static: which comparison? | map: which biggest change? | process: how would you sum the process up?>","q_vi":"<Vietnamese>",
+   "options":[{"short":"<3-7 words>","full":"<the full choice, 12-22 words>","short_vi":"<Vietnamese, 3-7 words>","full_vi":"<Vietnamese>"},{...},{...}]},
+  {"id":"grouping","q":"<charts: how will you split the data across the two bodies? | map: split by area or by period? | process: where do you break the stages?>","q_vi":"<Vietnamese>",
+   "options":[{"short":"...","full":"...","short_vi":"...","full_vi":"..."},{...},{...}]}
  ]
 }
-Each option must be a full, concrete choice about THIS chart (8-20 words), and the options must be genuinely different from each other. English only.`
+RULES: "short" is a scannable label the student reads first — 3-7 words, no full sentence, no trailing full stop. "full" carries the detail. Options must be genuinely different and specific to THIS chart.`
     : `You are an IELTS Writing Task 2 examiner. Before the student writes, make them commit to a position and to their own arguments.
 
 Task 2 prompt:
@@ -950,16 +1015,24 @@ Return ONLY this JSON:
 {
  "task":"task2",
  "questions":[
-  {"id":"position","q":"What is your position?","options":["<a defensible stance in 10-20 words>","<a different stance>","<a third stance>"]},
-  {"id":"body1","q":"Which argument will you develop in body paragraph 1?","options":["<argument>","<argument>","<argument>"]},
-  {"id":"body2","q":"Which argument will you develop in body paragraph 2?","options":["<argument>","<argument>","<argument>"]}
+  {"id":"position","q":"What is your position?","q_vi":"<Vietnamese>",
+   "options":[{"short":"<3-7 words>","full":"<the stance in 12-22 words>","short_vi":"<Vietnamese, 3-7 words>","full_vi":"<Vietnamese>"},{...},{...}]},
+  {"id":"body1","q":"Argument for body paragraph 1?","q_vi":"<Vietnamese>",
+   "options":[{"short":"...","full":"...","short_vi":"...","full_vi":"..."},{...},{...}]},
+  {"id":"body2","q":"Argument for body paragraph 2?","q_vi":"<Vietnamese>",
+   "options":[{"short":"...","full":"...","short_vi":"...","full_vi":"..."},{...},{...}]}
  ]
 }
-RULES: stances must be genuinely arguable and different (not "agree"/"disagree"/"partly" restated). Arguments must be causal claims a student could actually prove, not topic labels. English only. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+RULES:
+- "short" is the label the student scans first: 3-7 words, a noun phrase or clipped clause, no trailing full stop (e.g. "Fees deter poorer applicants").
+- "full" spells the same choice out in 12-22 words.
+- Stances must be genuinely arguable and different — not "agree"/"disagree"/"partly" restated.
+- Arguments must be causal claims a student could prove, not topic labels.
+- Vietnamese must read like a Vietnamese teacher wrote it, not a literal gloss. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 1200,
+      model: MODEL, max_tokens: 2200,
       system: 'You are an expert IELTS examiner. Respond with valid JSON only — no markdown fences, no commentary.',
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -975,7 +1048,7 @@ RULES: stances must be genuinely arguable and different (not "agree"/"disagree"/
 
 // ── Stage 2: the outline itself ──────────────────────────────────────────────
 app.post('/api/outline', authenticate, async (req, res) => {
-  const { task_type, prompt, level, choices, student_ideas } = req.body;
+  const { task_type, prompt, level, choices, student_ideas, chart_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
 
@@ -988,32 +1061,37 @@ app.post('/api/outline', authenticate, async (req, res) => {
     ? `\nThe student's own rough notes (develop these, do not replace them):\n${student_ideas.trim()}\n` : '';
 
   const task1Prompt = `You are an IELTS Writing Task 1 coach. Build a paragraph-by-paragraph plan.
+
+${TASK1_RULES}
 ${chosenBlock}${ideasBlock}
 Task 1 prompt:
 ${prompt}
+${chart_type ? `The teacher has tagged this task as: ${chart_type}` : ''}
 ${vocabPromptBlock(units)}
 Return ONLY this JSON:
 {
  "task":"task1",
+ "variant":"<dynamic|static|mixed|map|process_linear|process_cycle>",
+ "variant_note":"<max 14 words: the one grammar or voice rule this variant forces>",
  "topic":"<2-4 word topic label>",
  "paragraphs":[
   {"kind":"intro","title":"Introduction","steps":[
-     {"code":"PARAPHRASE","do":"<what to paraphrase and how, referencing this chart>"},
-     {"code":"SCOPE","do":"<the period / categories to name>"}],
+     {"code":"PARAPHRASE","do":"<what to paraphrase, referencing this chart>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<the period / categories to name>","do_vi":"<Vietnamese>"}],
    "vocab":["<term from the list>","<term>"]},
   {"kind":"overview","title":"Overview","steps":[
-     {"code":"TREND","do":"<the dominant trend to state, no figures>"},
-     {"code":"CONTRAST","do":"<the clearest exception or contrast>"}],
+     {"code":"TREND","do":"<the dominant trend to state, no figures>","do_vi":"<Vietnamese>"},
+     {"code":"CONTRAST","do":"<the clearest exception or contrast>","do_vi":"<Vietnamese>"}],
    "vocab":["<term>","<term>"]},
   {"kind":"body","title":"Body 1","steps":[
-     {"code":"GROUP","do":"<which data goes here and why>"},
-     {"code":"FIGURES","do":"<which 2-3 figures to quote>"},
-     {"code":"COMPARE","do":"<the comparison to draw>"}],
+     {"code":"<GROUP for charts | AREA for maps | STAGES for processes>","do":"<what this paragraph covers and why>","do_vi":"<Vietnamese>"},
+     {"code":"<FIGURES for charts | CHANGES for maps | SEQUENCE for processes>","do":"<the specific detail to give>","do_vi":"<Vietnamese>"},
+     {"code":"<COMPARE for charts | UNCHANGED for maps | GRAMMAR for processes>","do":"<the comparison, what stayed the same, or the voice to use>","do_vi":"<Vietnamese>"}],
    "vocab":["<term>","<term>","<term>"]},
-  {"kind":"body","title":"Body 2","steps":[ same three codes ],"vocab":["<term>","<term>","<term>"]}
+  {"kind":"body","title":"Body 2","steps":[ the same three codes for this variant ],"vocab":["<term>","<term>","<term>"]}
  ]
 }
-RULES: "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Reference the actual categories and periods in THIS task. Task 1 has no conclusion. Do not invent figures. English only. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+RULES: "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Reference the actual categories and periods in THIS task. Pick the variant FIRST, then follow that variant's template exactly - a map plan must never talk about trends, a process plan must never quote figures, a static plan must never say increase/decrease. Task 1 has no conclusion. Do not invent figures. Add "do_vi" for every step: the same instruction in natural Vietnamese. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
 
   const task2Prompt = `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
 
@@ -1031,35 +1109,35 @@ Return ONLY this JSON:
  "pivot":"<the pivot variable, or \\"\\" if the prompt is one-sided>",
  "paragraphs":[
   {"kind":"intro","title":"Introduction","steps":[
-     {"code":"FRAME","do":"<which two questions the prompt mixes, and the criterion to judge by>"},
-     {"code":"THESIS","do":"<how to state the chosen position>"}],
+     {"code":"FRAME","do":"<which two questions the prompt mixes, and the criterion to judge by>","do_vi":"<Vietnamese>"},
+     {"code":"THESIS","do":"<how to state the chosen position>","do_vi":"<Vietnamese>"}],
    "vocab":["<term from the list>","<term>"]},
   {"kind":"body","title":"Body 1","steps":[
-     {"code":"CLAIM","do":"<the claim to open with>"},
-     {"code":"ACTOR","do":"<which plural actors do what recordable action>"},
-     {"code":"CHANGE","do":"<what rises or falls>"},
-     {"code":"KNOCK-ON","do":"<which NEW actor absorbs it>"},
-     {"code":"EVIDENCE","do":"<the form the consequence takes>"}],
+     {"code":"CLAIM","do":"<the claim to open with>","do_vi":"<Vietnamese>"},
+     {"code":"ACTOR","do":"<which plural actors do what recordable action>","do_vi":"<Vietnamese>"},
+     {"code":"CHANGE","do":"<what rises or falls>","do_vi":"<Vietnamese>"},
+     {"code":"KNOCK-ON","do":"<which NEW actor absorbs it>","do_vi":"<Vietnamese>"},
+     {"code":"EVIDENCE","do":"<the form the consequence takes>","do_vi":"<Vietnamese>"}],
    "vocab":["<term>","<term>","<term>"]},
   {"kind":"body","title":"Body 2","steps":[ same five codes, same engine running in reverse ],"vocab":["<term>","<term>","<term>"]},
   {"kind":"conclusion","title":"Conclusion","steps":[
-     {"code":"RESTATE","do":"<how to restate the position>"},
-     {"code":"SCOPE","do":"<the limit of the argument>"}],
+     {"code":"RESTATE","do":"<how to restate the position>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<the limit of the argument>","do_vi":"<Vietnamese>"}],
    "vocab":["<term>","<term>"]}
  ]
 }
 RULES:
 - "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Start each with a verb ("Name...", "Show...", "Trace...").
-- Keep each "do" under 22 words.
+- Keep each "do" under 16 words and start it with a verb.
+- "do_vi" is the same instruction in natural Vietnamese a teacher would say — not a literal gloss.
 - "vocab" items must be copied verbatim from the target vocabulary lists above.
 - ACTOR must be a plural class; KNOCK-ON must be a different actor.
 - Never invent statistics or studies.
-- English only.
 - ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 2500,
+      model: MODEL, max_tokens: 3600,
       system: 'You are an expert IELTS writing coach. Respond with valid JSON only — no markdown fences, no commentary.',
       messages: [{ role: 'user', content: isTask1 ? task1Prompt : task2Prompt }],
     });

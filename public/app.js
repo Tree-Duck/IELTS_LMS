@@ -9534,6 +9534,7 @@ async function loadWritingPractice() {
       id: 't1_' + t.id,
       dbId: t.id,
       type: 'task1',
+      chartType: t.chart_type || '',
       topic: t.label || t.chart_type || 'Task 1',
       tags: [t.chart_type].filter(Boolean),
       prompt: t.question_preview || t.question || '',
@@ -9737,6 +9738,7 @@ function resetWpTools() {
   _wpOutline = null;
   _wpPlanOpts = null;
   _wpChoices = {};
+  _wpChoiceLabels = {};
   _wpChecked = new Set();
   const ob = document.getElementById('wp-outline-body');
   if (ob) ob.innerHTML = '<div class="wp-outline-empty">Press <strong>Plan my essay</strong>: choose your position and arguments first, then get the outline.</div>';
@@ -9852,7 +9854,9 @@ async function improveWritingEssay() {
 /* ─── Planner: choose your ideas, then get a mechanism-chain outline ──────── */
 let _wpOutline = null;      // outline JSON from stage 2
 let _wpPlanOpts = null;     // multiple-choice questions from stage 1
-let _wpChoices = {};        // {questionId: chosen option text}
+let _wpChoices = {};        // {questionId: full wording sent to the model}
+let _wpChoiceLabels = {};   // {questionId: short label shown to the student}
+let _wpBilingual = (localStorage.getItem('wp_bilingual') || '0') === '1';
 let _wpChecked = new Set(); // "p<i>s<j>" steps ticked while writing
 
 // Chain code → tooltip explaining what the step must contain
@@ -9892,6 +9896,7 @@ async function wpBuildOutline() {
       body: JSON.stringify({
         task_type: _wpCurrentQuestion.type,
         prompt: _wpCurrentQuestion.prompt,
+        chart_type: _wpCurrentQuestion.chartType || '',
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
       }),
     });
@@ -9905,33 +9910,64 @@ async function wpBuildOutline() {
   }
 }
 
+// Options arrive as {short, full, short_vi, full_vi}; older shapes may be plain strings.
+function wpOptText(opt, field) {
+  if (typeof opt === 'string') return field.startsWith('short') ? opt : '';
+  return opt[field] || '';
+}
+
+function wpToggleBilingual() {
+  _wpBilingual = !_wpBilingual;
+  try { localStorage.setItem('wp_bilingual', _wpBilingual ? '1' : '0'); } catch (e) {}
+  const sec = document.getElementById('wp-outline-section');
+  if (sec) sec.classList.toggle('bilingual', _wpBilingual);
+  const btn = document.getElementById('wp-lang-btn');
+  if (btn) { btn.classList.toggle('on', _wpBilingual); btn.title = _wpBilingual ? 'Ẩn tiếng Việt' : 'Hiện tiếng Việt'; }
+}
+
 function wpRenderPlanner() {
   const qs = (_wpPlanOpts && _wpPlanOpts.questions) || [];
   const body = document.getElementById('wp-outline-body');
   if (!qs.length) { body.innerHTML = '<div class="wp-outline-empty">No choices returned — try again.</div>'; return; }
   body.innerHTML = `
-    <div class="wp-plan-intro">Commit to your own line of argument first. The outline is built from what you pick.</div>
+    <div class="wp-plan-intro">Pick your line of argument. The outline is built from what you choose.</div>
     ${qs.map((q, qi) => `
       <div class="wp-plan-q">
-        <div class="wp-plan-q-title">${qi + 1}. ${escHtml(q.q || '')}</div>
+        <div class="wp-plan-q-title">${qi + 1}. ${escHtml(q.q || '')}
+          ${q.q_vi ? `<span class="wp-vi">${escHtml(q.q_vi)}</span>` : ''}</div>
         <div class="wp-plan-opts">
-          ${(q.options || []).map((opt, oi) => `
-            <label class="wp-plan-opt" data-q="${escHtml(q.id)}">
+          ${(q.options || []).map((opt, oi) => {
+            const short = wpOptText(opt, 'short'), full = wpOptText(opt, 'full');
+            const shortVi = wpOptText(opt, 'short_vi'), fullVi = wpOptText(opt, 'full_vi');
+            return `
+            <label class="wp-plan-opt" data-q="${escHtml(q.id)}" title="${escHtml(full)}">
               <input type="radio" name="wpq-${escHtml(q.id)}" value="${oi}"
-                     onchange="wpPickOption('${escHtml(q.id)}', ${JSON.stringify(opt).replace(/"/g, '&quot;')})">
-              <span>${escHtml(opt)}</span>
-            </label>`).join('')}
+                     onchange="wpPickOption('${escHtml(q.id)}', ${oi})">
+              <span class="wp-opt-body">
+                <span class="wp-opt-short">${escHtml(short)}</span>
+                ${shortVi ? `<span class="wp-vi">${escHtml(shortVi)}</span>` : ''}
+                ${full ? `<span class="wp-opt-full">${escHtml(full)}</span>` : ''}
+                ${fullVi ? `<span class="wp-opt-full wp-vi">${escHtml(fullVi)}</span>` : ''}
+              </span>
+            </label>`;
+          }).join('')}
         </div>
       </div>`).join('')}
     <button class="btn btn-primary wp-plan-go" id="wp-plan-go" disabled onclick="wpConfirmPlan()">
       Build my outline →
     </button>`;
+  const sec = document.getElementById('wp-outline-section');
+  if (sec) sec.classList.toggle('bilingual', _wpBilingual);
   const prog = document.getElementById('wp-outline-progress');
   if (prog) { prog.textContent = `0/${qs.length}`; prog.classList.remove('full'); }
 }
 
-function wpPickOption(qid, optText) {
-  _wpChoices[qid] = optText;
+function wpPickOption(qid, optIndex) {
+  const q = ((_wpPlanOpts && _wpPlanOpts.questions) || []).find(x => x.id === qid);
+  const opt = q && q.options ? q.options[optIndex] : null;
+  // send the full wording to the model, show the short one to the student
+  _wpChoices[qid] = wpOptText(opt, 'full') || wpOptText(opt, 'short') || '';
+  _wpChoiceLabels[qid] = wpOptText(opt, 'short') || _wpChoices[qid];
   document.querySelectorAll(`.wp-plan-opt[data-q="${qid}"]`).forEach(l => {
     const input = l.querySelector('input');
     l.classList.toggle('picked', input && input.checked);
@@ -9957,6 +9993,7 @@ async function wpConfirmPlan() {
       body: JSON.stringify({
         task_type: _wpCurrentQuestion.type,
         prompt: _wpCurrentQuestion.prompt,
+        chart_type: _wpCurrentQuestion.chartType || '',
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
         choices: _wpChoices,
         student_ideas: (document.getElementById('wp-ideas-input') || {}).value || '',
@@ -9979,7 +10016,11 @@ function wpRenderOutline() {
   if (!o || !Array.isArray(o.paragraphs)) { body.innerHTML = '<div class="wp-outline-empty">Empty outline — try again.</div>'; return; }
 
   if (badge) {
-    if (o.engine) {
+    if (o.variant) {
+      badge.classList.remove('hidden');
+      badge.innerHTML = `<span class="wp-engine-tag">${escHtml(String(o.variant).replace(/_/g, ' ').toUpperCase())}</span>` +
+        (o.variant_note ? `<span class="wp-engine-why">${escHtml(o.variant_note)}</span>` : '');
+    } else if (o.engine) {
       badge.classList.remove('hidden');
       badge.innerHTML =
         `<span class="wp-engine-tag">⚙️ ENGINE: ${escHtml(ENGINE_LABEL[o.engine] || o.engine)}</span>` +
@@ -9988,9 +10029,11 @@ function wpRenderOutline() {
     } else { badge.classList.add('hidden'); }
   }
 
+  const sec = document.getElementById('wp-outline-section');
+  if (sec) sec.classList.toggle('bilingual', _wpBilingual);
   body.innerHTML = `
     <div class="wp-plan-recap">
-      ${Object.entries(_wpChoices).map(([k, v]) => `<div><span>${escHtml(k)}</span>${escHtml(v)}</div>`).join('')}
+      ${Object.entries(_wpChoiceLabels).map(([k, v]) => `<div><span>${escHtml(k)}</span>${escHtml(v)}</div>`).join('')}
       <button class="wp-replan-btn" onclick="wpRenderPlanner()">Change my choices</button>
     </div>
     ${o.paragraphs.map((p, i) => {
@@ -10010,7 +10053,8 @@ function wpRenderOutline() {
             <label class="wp-step ${_wpChecked.has(key) ? 'done' : ''}" title="${escHtml(hint)}">
               <input type="checkbox" ${_wpChecked.has(key) ? 'checked' : ''} onchange="wpToggleStep('${key}', this)">
               <span class="wp-step-code">${escHtml(s.code || '•')}</span>
-              <span class="wp-step-label">${escHtml(s.do || s.label || '')}</span>
+              <span class="wp-step-label">${escHtml(s.do || s.label || '')}
+                ${s.do_vi ? `<span class="wp-vi">${escHtml(s.do_vi)}</span>` : ''}</span>
             </label>`;
           }).join('')}
         </div>
