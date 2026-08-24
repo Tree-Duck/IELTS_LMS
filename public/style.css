@@ -5982,6 +5982,56 @@ input:focus, textarea:focus, select:focus {
 .wp-outline-section.bilingual .wp-plan-opt.picked .wp-opt-full.wp-vi { display: block; }
 .wp-step-label .wp-vi { margin-top: 2px; }
 
+/* Bank: done / not-done filter */
+.wp-done-filter { display: flex; align-items: center; gap: 16px; margin: 0 0 10px; }
+.wp-done-check {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--gray-700);
+}
+.wp-done-check input { accent-color: var(--forest); cursor: pointer; }
+.wp-done-check span { color: var(--moss); font-weight: 500; }
+.tag-badge.tag-done { background: var(--success-light); color: var(--success); }
+.wp-q-card.q-done { opacity: .72; }
+.wp-q-card.q-done:hover { opacity: 1; }
+
+/* Planner: opt-in "write my own idea first" */
+.wp-own-wrap { margin: 0 0 14px; }
+.wp-own-toggle {
+  background: none; border: 1.5px dashed var(--line); border-radius: 10px;
+  color: var(--forest); font-size: 12.5px; font-weight: 700; font-family: inherit;
+  padding: 7px 12px; cursor: pointer; width: 100%; text-align: left; transition: all .15s;
+}
+.wp-own-toggle:hover { background: var(--gray-50); }
+.wp-own-toggle.open { border-style: solid; background: var(--gray-50); }
+.wp-own-panel { margin-top: 8px; }
+.wp-own-hint { font-size: 12.5px; color: var(--moss); line-height: 1.55; margin-bottom: 7px; }
+.wp-own-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.wp-own-count { font-size: 12px; color: var(--moss); }
+.wp-own-feedback {
+  margin-top: 9px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; line-height: 1.6;
+  background: var(--gray-50); border-left: 3px solid var(--forest); color: var(--gray-800);
+}
+.wp-own-feedback.good { background: var(--success-light); border-left-color: var(--success); }
+.wp-own-feedback.warn { background: var(--warning-light); border-left-color: var(--warning); }
+.wp-fb-verdict { font-weight: 700; color: var(--forest-deep); margin-bottom: 4px; }
+.wp-fb-row { margin-bottom: 3px; }
+.wp-fb-row span {
+  display: inline-block; min-width: 44px; font-size: 10px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--moss);
+}
+.wp-fb-nudge { margin-top: 6px; font-style: italic; color: var(--forest); }
+
+/* Planner: development detail sits behind a reveal */
+.wp-reveal-btn {
+  background: none; border: none; padding: 0; cursor: pointer; font-family: inherit;
+  color: var(--coral); font-size: 12px; font-weight: 700; text-decoration: underline;
+}
+.wp-reveal-nudge { display: block; font-size: 12px; font-style: italic; color: var(--moss); margin-bottom: 3px; }
+.wp-opt-detail { display: none; }
+.wp-opt-full.revealed .wp-reveal-btn,
+.wp-opt-full.revealed .wp-reveal-nudge { display: none; }
+.wp-opt-full.revealed .wp-opt-detail { display: block; }
+
 /* ─── DICTATION PRACTICE ─────────────────────────────────────────────────── */
 .dict-yt-wrap { position: relative; width: 260px; height: 148px; margin-bottom: 12px; border-radius: 12px; overflow: hidden; border: 2px solid var(--forest-deep); background: var(--forest); }
 .dict-yt-wrap iframe, .dict-yt-wrap > div { width: 100%; height: 100%; border: 0; }

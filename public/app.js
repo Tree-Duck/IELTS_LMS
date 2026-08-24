@@ -9492,6 +9492,11 @@ let _wpQuestions = [];
 let _wpCurrentQuestion = null;
 let _wpFilter = 'all';
 let _wpTypeFilter = null; // Task 2 question-type sub-filter
+let _wpDonePrompts = new Set();
+// Prompts are stored with the rubric tail appended on submit, so compare the question only.
+const _wpPromptKey = (p) => String(p || '')
+  .split(/give reasons for your answer|write at least \d+ words|summarise the information|provide an overview/i)[0]
+  .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 90);
 const T2_TYPE_LABELS = {
   opinion: 'Opinion (Agree/Disagree)',
   discussion: 'Discuss both views',
@@ -9558,6 +9563,12 @@ async function loadWritingPractice() {
       };
     });
     _wpQuestions = [...t1Questions, ...t2Questions];
+    // mark which prompts this student has already submitted
+    try {
+      const subs = await api('/api/submissions');
+      _wpDonePrompts = new Set((Array.isArray(subs) ? subs : []).map(s => _wpPromptKey(s.prompt)));
+    } catch (e) { _wpDonePrompts = new Set(); }
+    _wpQuestions.forEach(q => { q.done = _wpDonePrompts.has(_wpPromptKey(q.prompt)); });
   } catch (e) {
     _wpQuestions = [];
   }
@@ -9565,21 +9576,38 @@ async function loadWritingPractice() {
 }
 
 function getFilteredWritingQuestions() {
-  if (_wpTypeFilter) return _wpQuestions.filter(q => q.type === 'task2' && (q.questionType || 'other') === _wpTypeFilter);
-  if (_wpFilter === 'all') return _wpQuestions;
-  return _wpQuestions.filter(q => q.type === _wpFilter);
+  let list;
+  if (_wpTypeFilter) list = _wpQuestions.filter(q => q.type === 'task2' && (q.questionType || 'other') === _wpTypeFilter);
+  else if (_wpFilter === 'all') list = _wpQuestions;
+  else list = _wpQuestions.filter(q => q.type === _wpFilter);
+  const showDone = (document.getElementById('wp-show-done') || {}).checked !== false;
+  const showUndone = (document.getElementById('wp-show-undone') || {}).checked !== false;
+  return list.filter(q => (q.done ? showDone : showUndone));
 }
 
 function renderWritingQuestionGrid() {
   const grid = document.getElementById('wp-question-grid');
   const questions = getFilteredWritingQuestions();
   if (questions.length === 0) {
-    grid.innerHTML = '<div class="wp-empty-state">Chưa có đề bài. Giáo viên cần upload đề trong trang <strong>Quản lý nội dung</strong>.</div>';
+    grid.innerHTML = _wpQuestions.length
+      ? '<div class="wp-empty-state">Không còn đề nào khớp bộ lọc. Bật lại <strong>Đã làm</strong> để xem các đề đã nộp.</div>'
+      : '<div class="wp-empty-state">Chưa có đề bài. Giáo viên cần upload đề trong trang <strong>Quản lý nội dung</strong>.</div>';
     return;
   }
+  // counts reflect the current task/type filter, not the done filter itself
+  let scope;
+  if (_wpTypeFilter) scope = _wpQuestions.filter(q => q.type === 'task2' && (q.questionType || 'other') === _wpTypeFilter);
+  else if (_wpFilter === 'all') scope = _wpQuestions;
+  else scope = _wpQuestions.filter(q => q.type === _wpFilter);
+  const nDone = scope.filter(q => q.done).length;
+  const cu = document.getElementById('wp-count-undone'), cd = document.getElementById('wp-count-done');
+  if (cu) cu.textContent = `(${scope.length - nDone})`;
+  if (cd) cd.textContent = `(${nDone})`;
+
   grid.innerHTML = questions.map(q => `
-    <div class="wp-q-card" onclick="openWritingQuestion('${escHtml(q.id)}')">
+    <div class="wp-q-card ${q.done ? 'q-done' : ''}" onclick="openWritingQuestion('${escHtml(q.id)}')">
       <div class="wp-q-card-top">
+        ${q.done ? '<span class="tag-badge tag-done">✓ Đã làm</span>' : ''}
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
         ${q.type === 'task2' && q.questionType ? `<span class="tag-badge tag-qtype">${escHtml(T2_TYPE_LABELS[q.questionType] || q.questionType)}</span>` : ''}
         ${q.examDate ? `<span class="tag-badge tag-exam">📅 Đề thi ${escHtml(q.examDate)}</span>` : ''}
@@ -9857,6 +9885,8 @@ let _wpPlanOpts = null;     // multiple-choice questions from stage 1
 let _wpChoices = {};        // {questionId: full wording sent to the model}
 let _wpChoiceLabels = {};   // {questionId: short label shown to the student}
 let _wpBilingual = (localStorage.getItem('wp_bilingual') || '0') === '1';
+let _wpRevealed = new Set();   // question ids whose full wording the student has unlocked
+let _wpIdeaCache = {};         // idea text -> feedback, so re-clicking never re-bills
 let _wpChecked = new Set(); // "p<i>s<j>" steps ticked while writing
 
 // Chain code → tooltip explaining what the step must contain
@@ -9931,6 +9961,18 @@ function wpRenderPlanner() {
   if (!qs.length) { body.innerHTML = '<div class="wp-outline-empty">No choices returned — try again.</div>'; return; }
   body.innerHTML = `
     <div class="wp-plan-intro">Pick your line of argument. The outline is built from what you choose.</div>
+    <div class="wp-own-wrap">
+      <button class="wp-own-toggle" id="wp-own-toggle" onclick="wpToggleOwnIdea()">✍️ Tự đi ý trước</button>
+      <div class="wp-own-panel hidden" id="wp-own-panel">
+        <div class="wp-own-hint">Viết đại quan điểm + 1-2 lý do. Sai cũng được — nghĩ trước rồi hẵng xem gợi ý.</div>
+        <textarea id="wp-own-text" class="wp-ideas-input" rows="3" placeholder="Ví dụ: miễn học phí chỉ đáng nếu sinh viên ở lại làm việc trong nước…"></textarea>
+        <div class="wp-own-actions">
+          <button class="btn btn-secondary btn-sm" id="wp-own-check" onclick="wpCheckOwnIdea()">Nhờ AI soi ý</button>
+          <span class="wp-own-count" id="wp-own-count"></span>
+        </div>
+        <div class="wp-own-feedback hidden" id="wp-own-feedback"></div>
+      </div>
+    </div>
     ${qs.map((q, qi) => `
       <div class="wp-plan-q">
         <div class="wp-plan-q-title">${qi + 1}. ${escHtml(q.q || '')}
@@ -9946,8 +9988,11 @@ function wpRenderPlanner() {
               <span class="wp-opt-body">
                 <span class="wp-opt-short">${escHtml(short)}</span>
                 ${shortVi ? `<span class="wp-vi">${escHtml(shortVi)}</span>` : ''}
-                ${full ? `<span class="wp-opt-full">${escHtml(full)}</span>` : ''}
-                ${fullVi ? `<span class="wp-opt-full wp-vi">${escHtml(fullVi)}</span>` : ''}
+                ${full ? `<span class="wp-opt-full">
+                  <button type="button" class="wp-reveal-btn" onclick="wpRevealDetail(event, '${escHtml(q.id)}')">Xem cách đi ý này</button>
+                  <span class="wp-opt-detail">${escHtml(full)}
+                    ${fullVi ? `<span class="wp-vi">${escHtml(fullVi)}</span>` : ''}</span>
+                </span>` : ''}
               </span>
             </label>`;
           }).join('')}
@@ -9978,6 +10023,98 @@ function wpPickOption(qid, optIndex) {
   if (prog) { prog.textContent = `${done}/${total}`; prog.classList.toggle('full', done === total); }
   const go = document.getElementById('wp-plan-go');
   if (go) go.disabled = done < total;
+}
+
+/* ── Own-idea mode: think first, then look ───────────────────────────────── */
+function wpToggleOwnIdea() {
+  const panel = document.getElementById('wp-own-panel');
+  const btn = document.getElementById('wp-own-toggle');
+  if (!panel) return;
+  const open = !panel.classList.toggle('hidden');
+  if (btn) btn.classList.toggle('open', open);
+  if (open) {
+    const ta = document.getElementById('wp-own-text');
+    const carried = (document.getElementById('wp-ideas-input') || {}).value || '';
+    if (ta && !ta.value && carried) ta.value = carried;
+    if (ta) ta.focus();
+  }
+}
+
+async function wpCheckOwnIdea() {
+  const ta = document.getElementById('wp-own-text');
+  const box = document.getElementById('wp-own-feedback');
+  const btn = document.getElementById('wp-own-check');
+  const countEl = document.getElementById('wp-own-count');
+  if (!ta || !box) return;
+  const idea = ta.value.trim();
+  const words = idea ? idea.split(/\s+/).filter(Boolean).length : 0;
+  box.classList.remove('hidden');
+  if (words < 8) {
+    box.className = 'wp-own-feedback warn';
+    box.textContent = 'Viết thêm chút nữa đã — ít nhất một câu có quan điểm.';
+    return;
+  }
+  // never re-bill the same text
+  if (_wpIdeaCache[idea]) { wpRenderIdeaFeedback(_wpIdeaCache[idea]); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang soi…'; }
+  box.className = 'wp-own-feedback';
+  box.innerHTML = '<span class="hint-thinking">Đang đọc ý của em…</span>';
+  try {
+    const r = await api('/api/check-idea', {
+      method: 'POST',
+      body: JSON.stringify({
+        task_type: _wpCurrentQuestion.type,
+        prompt: _wpCurrentQuestion.prompt,
+        idea,
+        level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
+      }),
+    });
+    _wpIdeaCache[idea] = r;
+    wpRenderIdeaFeedback(r);
+    // the idea feeds the outline later
+    const hidden = document.getElementById('wp-ideas-input');
+    if (hidden) hidden.value = idea;
+  } catch (e) {
+    box.className = 'wp-own-feedback warn';
+    box.textContent = e.message || 'Chưa soi được ý. Thử lại.';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Nhờ AI soi ý'; }
+    if (countEl) countEl.textContent = `${words} từ`;
+  }
+}
+
+function wpRenderIdeaFeedback(r) {
+  const box = document.getElementById('wp-own-feedback');
+  if (!box) return;
+  const verdict = { solid: 'Ý chắc', thin: 'Ý còn mỏng', 'off-track': 'Lệch đề' }[r.verdict] || 'Nhận xét';
+  box.className = 'wp-own-feedback ' + (r.verdict === 'solid' ? 'good' : r.verdict === 'off-track' ? 'warn' : '');
+  box.classList.remove('hidden');
+  box.innerHTML = `
+    <div class="wp-fb-verdict">${escHtml(verdict)}</div>
+    ${r.good ? `<div class="wp-fb-row"><span>Được</span>${escHtml(r.good)}</div>` : ''}
+    ${r.missing ? `<div class="wp-fb-row"><span>Thiếu</span>${escHtml(r.missing)}</div>` : ''}
+    ${r.nudge ? `<div class="wp-fb-nudge">${escHtml(r.nudge)}</div>` : ''}`;
+}
+
+/* ── Reveal the development detail, with a nudge the first few times ─────── */
+function wpRevealDetail(ev, qid) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  const wrap = ev.target.closest('.wp-opt-full');
+  if (!wrap) return;
+  const seen = parseInt(localStorage.getItem('wp_reveal_count') || '0', 10);
+  if (seen < 3 && !_wpRevealed.has(qid) && !wrap.dataset.nudged) {
+    wrap.dataset.nudged = '1';
+    ev.target.textContent = 'Cứ cho xem :}';
+    const note = document.createElement('span');
+    note.className = 'wp-reveal-nudge';
+    note.textContent = 'Thử tự nghĩ cách triển khai trước đã nào.';
+    wrap.insertBefore(note, ev.target);
+    return;
+  }
+  _wpRevealed.add(qid);
+  try { localStorage.setItem('wp_reveal_count', String(seen + 1)); } catch (e) {}
+  wrap.classList.add('revealed');
 }
 
 /* ── Stage 2: the outline ────────────────────────────────────────────────── */

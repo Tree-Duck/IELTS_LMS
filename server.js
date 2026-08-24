@@ -1050,6 +1050,65 @@ RULES:
   }
 });
 
+// Quick feedback on the student's own idea, before they look at any suggestion.
+// Deliberately cheap: hard word floor on the client, small max_tokens, no vocab
+// bank, no outline — just "is this provable, and which chain step is missing".
+app.post('/api/check-idea', authenticate, async (req, res) => {
+  const { task_type, prompt, idea, level } = req.body;
+  if (!idea || idea.trim().split(/\s+/).filter(Boolean).length < 8) {
+    return res.status(400).json({ error: 'Viết dài hơn một chút rồi tôi soi cho.' });
+  }
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const isTask1 = task_type === 'task1';
+  const userPrompt = isTask1
+    ? `An IELTS Task 1 student has sketched how they will describe this chart. React to their plan.
+
+Task 1 prompt:
+${prompt}
+
+Their plan:
+${idea.trim()}
+
+Return ONLY this JSON:
+{"verdict":"<one of: solid|thin|off-track>",
+ "good":"<max 18 words in Vietnamese: the one thing that already works>",
+ "missing":"<max 22 words in Vietnamese: the single most useful thing to add — an overview without figures, a grouping, a comparison, the right tense>",
+ "nudge":"<max 14 words in Vietnamese: one question that makes them fix it themselves>"}
+Never write the improved plan for them. Vietnamese must sound like a teacher speaking, not a translation.`
+    : `An IELTS Task 2 student has written their own idea before seeing any suggestions. React to it.
+
+Task 2 prompt:
+${prompt}
+
+Their idea:
+${idea.trim()}
+
+Judge it against the mechanism chain: a claim needs a class of ACTORS doing something recordable, something that measurably RISES or FALLS, and a DIFFERENT group who absorbs the consequence.
+
+Return ONLY this JSON:
+{"verdict":"<one of: solid|thin|off-track>",
+ "good":"<max 18 words in Vietnamese: the one thing that already works>",
+ "missing":"<max 22 words in Vietnamese: the single weakest link — name the missing step in plain words, e.g. chưa nói ai là người chịu tác động>",
+ "nudge":"<max 14 words in Vietnamese: one question that makes them fix it themselves>"}
+RULES: never rewrite the idea for them, never hand them a replacement argument, never invent statistics. Vietnamese must sound like a teacher speaking, not a translation. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL, max_tokens: 400,
+      system: 'You are an IELTS writing coach giving fast, blunt, encouraging feedback. Respond with valid JSON only — no markdown fences.',
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('check-idea', calculateCost(i, o), i + o);
+    res.json(parseGradingJson(text));
+  } catch (err) {
+    console.error('Check idea error:', err.message || err);
+    res.status(500).json({ error: 'Chưa soi được ý. Thử lại.' });
+  }
+});
+
 // ── Stage 2: the outline itself ──────────────────────────────────────────────
 app.post('/api/outline', authenticate, async (req, res) => {
   const { task_type, prompt, level, choices, student_ideas, chart_type } = req.body;

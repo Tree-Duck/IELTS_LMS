@@ -2084,6 +2084,10 @@
             <button class="wp-filter-btn" data-filter="task2" onclick="filterWritingQuestions('task2',this)">Task 2</button>
             <button class="wp-filter-btn wp-random-btn" onclick="randomWritingQuestion()" title="Chọn đề ngẫu nhiên">🎲 Ngẫu nhiên</button>
           </div>
+          <div class="wp-done-filter">
+            <label class="wp-done-check"><input type="checkbox" id="wp-show-undone" checked onchange="renderWritingQuestionGrid()"> Chưa làm <span id="wp-count-undone"></span></label>
+            <label class="wp-done-check"><input type="checkbox" id="wp-show-done" checked onchange="renderWritingQuestionGrid()"> Đã làm <span id="wp-count-done"></span></label>
+          </div>
           <div class="wp-type-chips" id="wp-type-chips">
             <span class="wp-type-chips-label">Task 2 theo dạng:</span>
             <button class="wp-type-chip" onclick="filterWritingByType('opinion',this)">Opinion</button>
