@@ -5995,15 +5995,35 @@ input:focus, textarea:focus, select:focus {
 .wp-q-card.q-done:hover { opacity: 1; }
 
 /* Planner: opt-in "write my own idea first" */
-.wp-own-wrap { margin: 0 0 14px; }
-.wp-own-toggle {
-  background: none; border: 1.5px dashed var(--line); border-radius: 10px;
-  color: var(--forest); font-size: 12.5px; font-weight: 700; font-family: inherit;
-  padding: 7px 12px; cursor: pointer; width: 100%; text-align: left; transition: all .15s;
+.wp-own-panel {
+  background: var(--gray-50); border: 1.5px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
 }
-.wp-own-toggle:hover { background: var(--gray-50); }
-.wp-own-toggle.open { border-style: solid; background: var(--gray-50); }
-.wp-own-panel { margin-top: 8px; }
+.wp-own-title { font-weight: 700; font-size: 13.5px; color: var(--forest-deep); margin-bottom: 3px; }
+
+/* Gate in front of the suggested options */
+.wp-mcq-gate { margin-bottom: 12px; }
+.wp-mcq-gate-btn {
+  width: 100%; background: none; border: 1.5px dashed var(--line); border-radius: 10px;
+  color: var(--forest); font-size: 12.5px; font-weight: 700; font-family: inherit;
+  padding: 9px 12px; cursor: pointer; transition: all .15s;
+}
+.wp-mcq-gate-btn:hover { background: var(--gray-50); border-color: var(--forest); }
+.wp-mcq-gate-btn.lazy { border-style: solid; color: var(--coral); }
+.wp-mcq-nudge { font-size: 12.5px; color: var(--moss); font-style: italic; margin-bottom: 7px; text-align: center; }
+
+/* Chart zoom (Task 1) */
+.wp-chart-wrap { margin-bottom: 10px; }
+.wp-chart-wrap .wp-chart-area { overflow: auto; }
+.wp-chart-zoom { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.wp-zoom-btn {
+  width: 26px; height: 26px; border: 1.5px solid var(--gray-300); border-radius: 8px;
+  background: var(--surface); color: var(--forest-deep); font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; line-height: 1; transition: all .15s;
+}
+.wp-zoom-btn:hover { border-color: var(--forest); background: var(--gray-50); }
+.wp-zoom-reset { font-size: 13px; }
+.wp-zoom-level { font-size: 12px; font-weight: 600; color: var(--moss); min-width: 40px; text-align: center; }
 .wp-own-hint { font-size: 12.5px; color: var(--moss); line-height: 1.55; margin-bottom: 7px; }
 .wp-own-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .wp-own-count { font-size: 12px; color: var(--moss); }

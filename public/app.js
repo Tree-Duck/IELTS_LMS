@@ -9661,9 +9661,11 @@ async function openWritingQuestion(id) {
   document.getElementById('wp-prompt-text').textContent = _wpCurrentQuestion.prompt;
   // Chart image area (Task 1 only)
   const imgArea = document.getElementById('wp-chart-area');
+  const chartWrap = document.getElementById('wp-chart-wrap');
   if (imgArea) {
     if (_wpCurrentQuestion.type === 'task1') {
-      imgArea.classList.remove('hidden');
+      if (chartWrap) chartWrap.classList.remove('hidden');
+      _wpChartZoom = 1; wpApplyChartZoom();
       imgArea.innerHTML = '<div class="wp-chart-loading">Đang tải hình…</div>';
       try {
         // api() sends the auth token — bare fetch 401s and the chart never loads
@@ -9677,15 +9679,15 @@ async function openWritingQuestion(id) {
           imgArea.innerHTML = `<img src="data:${escHtml(topic.image_media_type)};base64,${topic.image_base64}" alt="Chart" class="wp-chart-img">`;
         } else {
           imgArea.innerHTML = '';
-          imgArea.classList.add('hidden');
+          if (chartWrap) chartWrap.classList.add('hidden');
         }
       } catch (e) {
         imgArea.innerHTML = '';
-        imgArea.classList.add('hidden');
+        if (chartWrap) chartWrap.classList.add('hidden');
       }
     } else {
       imgArea.innerHTML = '';
-      imgArea.classList.add('hidden');
+      if (chartWrap) chartWrap.classList.add('hidden');
     }
   }
 }
@@ -9703,6 +9705,20 @@ function wpHandleChartUpload(event) {
       </div>`;
   };
   reader.readAsDataURL(file);
+}
+
+/* Chart zoom for Task 1 — charts arrive at wildly different sizes. */
+let _wpChartZoom = 1;
+function wpChartZoom(dir) {
+  if (dir === 0) _wpChartZoom = 1;
+  else _wpChartZoom = Math.min(3, Math.max(0.5, _wpChartZoom + dir * 0.25));
+  wpApplyChartZoom();
+}
+function wpApplyChartZoom() {
+  const img = document.querySelector('#wp-chart-area .wp-chart-img');
+  if (img) img.style.width = Math.round(_wpChartZoom * 100) + '%';
+  const lvl = document.getElementById('wp-zoom-level');
+  if (lvl) lvl.textContent = Math.round(_wpChartZoom * 100) + '%';
 }
 
 function wpRemoveChart() {
@@ -9758,8 +9774,10 @@ function toggleWpTools() {
 }
 
 function resetWpTools() {
-  const ideasInput = document.getElementById('wp-ideas-input');
-  if (ideasInput) ideasInput.value = '';
+  const ownText = document.getElementById('wp-own-text');
+  if (ownText) ownText.value = '';
+  _wpIdeaCache = {};
+  _wpRevealed = new Set();
   const sb = document.getElementById('wp-socratic-btn');
   if (sb) sb.classList.add('hidden');
   // Planner + outline reset with the question
@@ -9789,7 +9807,7 @@ async function wpSocraticFollowUp() {
   const prompt = _wpCurrentQuestion.prompt;
   const essay = document.getElementById('wp-essay-input').value.trim();
   const level = (document.getElementById('wp-hint-level') || {}).value || 'basic';
-  const student_ideas = (document.getElementById('wp-ideas-input') || {}).value || '';
+  const student_ideas = (document.getElementById('wp-own-text') || {}).value || '';
   const bodyEl = document.getElementById('wp-outline-body');
   const sb = document.getElementById('wp-socratic-btn');
   if (!bodyEl) return;
@@ -9960,19 +9978,25 @@ function wpRenderPlanner() {
   const body = document.getElementById('wp-outline-body');
   if (!qs.length) { body.innerHTML = '<div class="wp-outline-empty">No choices returned — try again.</div>'; return; }
   body.innerHTML = `
-    <div class="wp-plan-intro">Pick your line of argument. The outline is built from what you choose.</div>
-    <div class="wp-own-wrap">
-      <button class="wp-own-toggle" id="wp-own-toggle" onclick="wpToggleOwnIdea()">✍️ Tự đi ý trước</button>
-      <div class="wp-own-panel hidden" id="wp-own-panel">
-        <div class="wp-own-hint">Viết đại quan điểm + 1-2 lý do. Sai cũng được — nghĩ trước rồi hẵng xem gợi ý.</div>
-        <textarea id="wp-own-text" class="wp-ideas-input" rows="3" placeholder="Ví dụ: miễn học phí chỉ đáng nếu sinh viên ở lại làm việc trong nước…"></textarea>
-        <div class="wp-own-actions">
-          <button class="btn btn-secondary btn-sm" id="wp-own-check" onclick="wpCheckOwnIdea()">Nhờ AI soi ý</button>
-          <span class="wp-own-count" id="wp-own-count"></span>
-        </div>
-        <div class="wp-own-feedback hidden" id="wp-own-feedback"></div>
+    <div class="wp-own-panel" id="wp-own-panel">
+      <div class="wp-own-title">✍️ Tự đi ý trước</div>
+      <div class="wp-own-hint">Viết đại quan điểm + 1-2 lý do. Sai cũng được — nghĩ trước rồi hẵng xem gợi ý.</div>
+      <textarea id="wp-own-text" class="wp-ideas-input" rows="3" oninput="wpOwnIdeaTyped()"
+        placeholder="Ví dụ: miễn học phí chỉ đáng nếu sinh viên ở lại làm việc trong nước…"></textarea>
+      <div class="wp-own-actions">
+        <button class="btn btn-secondary btn-sm" id="wp-own-check" onclick="wpCheckOwnIdea()">Nhờ AI soi ý</button>
+        <button class="btn btn-primary btn-sm hidden" id="wp-own-build" onclick="wpConfirmPlan()">Dựng dàn ý từ ý của em →</button>
+        <span class="wp-own-count" id="wp-own-count"></span>
       </div>
+      <div class="wp-own-feedback hidden" id="wp-own-feedback"></div>
     </div>
+
+    <div class="wp-mcq-gate" id="wp-mcq-gate">
+      <button class="wp-mcq-gate-btn" id="wp-mcq-gate-btn" onclick="wpRevealMcq()">💡 Xem outline gợi ý</button>
+    </div>
+
+    <div class="wp-mcq hidden" id="wp-mcq">
+    <div class="wp-plan-intro">Pick your line of argument. The outline is built from what you choose.</div>
     ${qs.map((q, qi) => `
       <div class="wp-plan-q">
         <div class="wp-plan-q-title">${qi + 1}. ${escHtml(q.q || '')}
@@ -10000,7 +10024,8 @@ function wpRenderPlanner() {
       </div>`).join('')}
     <button class="btn btn-primary wp-plan-go" id="wp-plan-go" disabled onclick="wpConfirmPlan()">
       Build my outline →
-    </button>`;
+    </button>
+    </div>`;
   const sec = document.getElementById('wp-outline-section');
   if (sec) sec.classList.toggle('bilingual', _wpBilingual);
   const prog = document.getElementById('wp-outline-progress');
@@ -10026,18 +10051,34 @@ function wpPickOption(qid, optIndex) {
 }
 
 /* ── Own-idea mode: think first, then look ───────────────────────────────── */
-function wpToggleOwnIdea() {
-  const panel = document.getElementById('wp-own-panel');
-  const btn = document.getElementById('wp-own-toggle');
-  if (!panel) return;
-  const open = !panel.classList.toggle('hidden');
-  if (btn) btn.classList.toggle('open', open);
-  if (open) {
-    const ta = document.getElementById('wp-own-text');
-    const carried = (document.getElementById('wp-ideas-input') || {}).value || '';
-    if (ta && !ta.value && carried) ta.value = carried;
-    if (ta) ta.focus();
+// Writing enough of your own unlocks building the outline straight from it,
+// so "think first" is a real path and not a dead end.
+function wpOwnIdeaTyped() {
+  const ta = document.getElementById('wp-own-text');
+  const build = document.getElementById('wp-own-build');
+  if (!ta || !build) return;
+  const words = ta.value.trim() ? ta.value.trim().split(/\s+/).filter(Boolean).length : 0;
+  build.classList.toggle('hidden', words < 8);
+  const c = document.getElementById('wp-own-count');
+  if (c) c.textContent = words ? `${words} từ` : '';
+}
+
+// The suggested options sit behind one nudge — for the first few essays only.
+function wpRevealMcq() {
+  const gate = document.getElementById('wp-mcq-gate');
+  const mcq = document.getElementById('wp-mcq');
+  if (!gate || !mcq) return;
+  const seen = parseInt(localStorage.getItem('wp_mcq_reveals') || '0', 10);
+  if (seen < 5 && !gate.dataset.nudged) {
+    gate.dataset.nudged = '1';
+    gate.innerHTML = `
+      <div class="wp-mcq-nudge">Thử tự đi ý trước đê, rồi coi cũng được mòa :}</div>
+      <button class="wp-mcq-gate-btn lazy" onclick="wpRevealMcq()">Làm biếng quá, cứ coi thôi</button>`;
+    return;
   }
+  try { localStorage.setItem('wp_mcq_reveals', String(seen + 1)); } catch (e) {}
+  gate.classList.add('hidden');
+  mcq.classList.remove('hidden');
 }
 
 async function wpCheckOwnIdea() {
@@ -10071,15 +10112,14 @@ async function wpCheckOwnIdea() {
     });
     _wpIdeaCache[idea] = r;
     wpRenderIdeaFeedback(r);
-    // the idea feeds the outline later
-    const hidden = document.getElementById('wp-ideas-input');
-    if (hidden) hidden.value = idea;
+    // the idea already lives in #wp-own-text and feeds the outline from there
   } catch (e) {
     box.className = 'wp-own-feedback warn';
     box.textContent = e.message || 'Chưa soi được ý. Thử lại.';
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Nhờ AI soi ý'; }
     if (countEl) countEl.textContent = `${words} từ`;
+    wpOwnIdeaTyped();
   }
 }
 
@@ -10133,7 +10173,7 @@ async function wpConfirmPlan() {
         chart_type: _wpCurrentQuestion.chartType || '',
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
         choices: _wpChoices,
-        student_ideas: (document.getElementById('wp-ideas-input') || {}).value || '',
+        student_ideas: (document.getElementById('wp-own-text') || {}).value || '',
       }),
     });
     _wpChecked = new Set();

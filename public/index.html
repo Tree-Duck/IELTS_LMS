@@ -2109,7 +2109,15 @@
               <div class="wp-prompt-label">📋 Đề bài</div>
               <div class="wp-prompt-text" id="wp-prompt-text"></div>
               <div class="wp-translate-box hidden" id="wp-translate-box"></div>
-              <div id="wp-chart-area" class="wp-chart-area hidden"></div>
+              <div class="wp-chart-wrap hidden" id="wp-chart-wrap">
+                <div id="wp-chart-area" class="wp-chart-area"></div>
+                <div class="wp-chart-zoom">
+                  <button class="wp-zoom-btn" onclick="wpChartZoom(-1)" title="Thu nhỏ" aria-label="Thu nhỏ">−</button>
+                  <span class="wp-zoom-level" id="wp-zoom-level">100%</span>
+                  <button class="wp-zoom-btn" onclick="wpChartZoom(1)" title="Phóng to" aria-label="Phóng to">+</button>
+                  <button class="wp-zoom-btn wp-zoom-reset" onclick="wpChartZoom(0)" title="Về mặc định">⟲</button>
+                </div>
+              </div>
 
               <!-- Outline builder (mechanism chain) -->
               <div class="wp-outline-section" id="wp-outline-section">
@@ -2131,8 +2139,6 @@
                   </select>
                   <button class="btn btn-primary btn-sm" id="wp-outline-btn" onclick="wpBuildOutline()">✨ Plan my essay</button>
                 </div>
-                <textarea id="wp-ideas-input" class="wp-ideas-input" rows="2"
-                  placeholder="Optional: your own rough ideas — the outline will build on them."></textarea>
                 <div class="wp-engine-badge hidden" id="wp-engine-badge"></div>
                 <div id="wp-outline-body" class="wp-outline-body">
                   <div class="wp-outline-empty">Press <strong>Plan my essay</strong>: choose your position and arguments first, then get the outline.</div>
