@@ -5917,6 +5917,47 @@ input:focus, textarea:focus, select:focus {
 #wp-session-panel.wp-focus .wp-session-body { grid-template-columns: 1fr; }
 #wp-session-panel.wp-focus .wp-essay-textarea { min-height: 60vh; }
 
+/* Planner: multiple-choice stage */
+.wp-plan-intro { font-size: 12.5px; color: var(--moss); line-height: 1.6; margin-bottom: 12px; }
+.wp-plan-q { margin-bottom: 14px; }
+.wp-plan-q-title { font-weight: 700; font-size: 13.5px; color: var(--forest-deep); margin-bottom: 7px; }
+.wp-plan-opts { display: flex; flex-direction: column; gap: 6px; }
+.wp-plan-opt {
+  display: flex; align-items: flex-start; gap: 8px; cursor: pointer;
+  border: 1.5px solid var(--gray-200); border-radius: 10px; padding: 9px 11px;
+  background: var(--surface); font-size: 13px; line-height: 1.5; color: var(--gray-800);
+  transition: all .15s;
+}
+.wp-plan-opt:hover { border-color: var(--forest); }
+.wp-plan-opt.picked { border-color: var(--forest-deep); background: var(--lime); }
+.wp-plan-opt input { margin-top: 2px; accent-color: var(--forest); flex-shrink: 0; }
+.wp-plan-go { width: 100%; margin-top: 4px; }
+.wp-plan-go:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Recap of the student's choices above the outline */
+.wp-plan-recap {
+  background: var(--gray-50); border: 1px dashed var(--line); border-radius: 10px;
+  padding: 9px 11px; margin-bottom: 10px; font-size: 12.5px; line-height: 1.55; color: var(--gray-700);
+}
+.wp-plan-recap > div { margin-bottom: 3px; }
+.wp-plan-recap span {
+  display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--moss); margin-right: 6px;
+}
+.wp-replan-btn {
+  margin-top: 5px; background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--coral); font-weight: 700; font-size: 12px; font-family: inherit;
+}
+.wp-replan-btn:hover { text-decoration: underline; }
+
+/* Target vocabulary strip inside each paragraph card */
+.wp-vocab-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 9px; }
+.wp-vocab-lead { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--moss); }
+.wp-vocab-chip {
+  background: var(--lime); color: var(--forest); border-radius: var(--radius-pill);
+  padding: 2px 10px; font-size: 12px; font-weight: 600; cursor: help;
+}
+
 /* ─── DICTATION PRACTICE ─────────────────────────────────────────────────── */
 .dict-yt-wrap { position: relative; width: 260px; height: 148px; margin-bottom: 12px; border-radius: 12px; overflow: hidden; border: 2px solid var(--forest-deep); background: var(--forest); }
 .dict-yt-wrap iframe, .dict-yt-wrap > div { width: 100%; height: 100%; border: 0; }

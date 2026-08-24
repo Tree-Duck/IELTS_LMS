@@ -9729,25 +9729,17 @@ function toggleWpTools() {
 }
 
 function resetWpTools() {
-  const empty = {
-    ideas: 'Nhập ý của em rồi nhấp "Tạo ✨". AI nhận dạng đề + cho khung để em tự triển khai.',
-    phrases: 'Nhấp "Tạo ✨" để nhận cụm từ theo chủ đề + bài tập tự đặt câu.'
-  };
-  ['ideas','phrases'].forEach(t => {
-    const el = document.getElementById(`wp-${t}-body`);
-    if (el) el.innerHTML = `<span class="hint-empty">${empty[t]}</span>`;
-    const btn = document.getElementById(`wp-${t}-btn`);
-    if (btn) { btn.disabled = false; btn.textContent = 'Tạo ✨'; }
-  });
   const ideasInput = document.getElementById('wp-ideas-input');
   if (ideasInput) ideasInput.value = '';
   const sb = document.getElementById('wp-socratic-btn');
   if (sb) sb.classList.add('hidden');
-  // Outline builder resets with the question
+  // Planner + outline reset with the question
   _wpOutline = null;
+  _wpPlanOpts = null;
+  _wpChoices = {};
   _wpChecked = new Set();
   const ob = document.getElementById('wp-outline-body');
-  if (ob) ob.innerHTML = '<div class="wp-outline-empty">Nhấn <strong>Tạo dàn ý</strong> để AI dựng khung 4 đoạn theo chuỗi cơ chế (engine → actor → resource → hệ quả).</div>';
+  if (ob) ob.innerHTML = '<div class="wp-outline-empty">Press <strong>Plan my essay</strong>: choose your position and arguments first, then get the outline.</div>';
   const eb = document.getElementById('wp-engine-badge');
   if (eb) eb.classList.add('hidden');
   const op = document.getElementById('wp-outline-progress');
@@ -9756,52 +9748,6 @@ function resetWpTools() {
   if (tb) tb.classList.add('hidden');
   const panel = document.getElementById('wp-session-panel');
   if (panel) panel.classList.remove('wp-focus');
-  // collapse tools panel
-  const body = document.getElementById('wp-tools-body');
-  const icon = document.getElementById('wp-tools-icon');
-  if (body && !body.classList.contains('hidden')) { body.classList.add('hidden'); if (icon) icon.textContent = '▸'; }
-}
-
-async function wpRequestHint(hint_type) {
-  if (!_wpCurrentQuestion) return;
-  const task_type = _wpCurrentQuestion.type; // 'task1' or 'task2'
-  const prompt = _wpCurrentQuestion.prompt;
-  const essay = document.getElementById('wp-essay-input').value.trim();
-  const level = (document.getElementById('wp-hint-level') || {}).value || 'basic';
-  const student_ideas = (document.getElementById('wp-ideas-input') || {}).value || '';
-
-  const bodyEl = document.getElementById(`wp-${hint_type}-body`);
-  const btnEl  = document.getElementById(`wp-${hint_type}-btn`);
-  if (!bodyEl) return;
-
-  // auto-expand tools panel
-  const toolsBody = document.getElementById('wp-tools-body');
-  const toolsIcon = document.getElementById('wp-tools-icon');
-  if (toolsBody && toolsBody.classList.contains('hidden')) {
-    toolsBody.classList.remove('hidden');
-    if (toolsIcon) toolsIcon.textContent = '▾';
-  }
-
-  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳'; }
-  bodyEl.innerHTML = '<span class="hint-thinking">Đang tạo…</span>';
-  let raw = '';
-  try {
-    await streamSSE(
-      '/api/hint',
-      { task_type, prompt, essay, hint_type, level, student_ideas },
-      (chunk) => { raw += chunk; bodyEl.innerHTML = renderHintMarkdown(raw); },
-      () => { bodyEl.innerHTML = renderHintMarkdown(raw); }
-    );
-    // After the idea scaffold, offer the optional Socratic deep-dive
-    if (hint_type === 'ideas') {
-      const sb = document.getElementById('wp-socratic-btn');
-      if (sb) sb.classList.remove('hidden');
-    }
-  } catch(err) {
-    bodyEl.innerHTML = `<span style="color:var(--danger)">Lỗi: ${escHtml(err.message)}</span>`;
-  } finally {
-    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Tạo ✨'; }
-  }
 }
 
 // Socratic deep-dive: one probing question based on the student's current ideas.
@@ -9814,13 +9760,13 @@ async function wpSocraticFollowUp() {
   const essay = document.getElementById('wp-essay-input').value.trim();
   const level = (document.getElementById('wp-hint-level') || {}).value || 'basic';
   const student_ideas = (document.getElementById('wp-ideas-input') || {}).value || '';
-  const bodyEl = document.getElementById('wp-ideas-body');
+  const bodyEl = document.getElementById('wp-outline-body');
   const sb = document.getElementById('wp-socratic-btn');
   if (!bodyEl) return;
-  if (sb) { sb.disabled = true; sb.textContent = '⏳ Đang hỏi…'; }
+  if (sb) { sb.disabled = true; sb.textContent = '⏳ Asking…'; }
   const qBox = document.createElement('div');
   qBox.className = 'wp-socratic-q';
-  qBox.innerHTML = '<span class="hint-thinking">Đang nghĩ câu hỏi…</span>';
+  qBox.innerHTML = '<span class="hint-thinking">Thinking of a question…</span>';
   bodyEl.appendChild(qBox);
   let raw = '';
   try {
@@ -9828,12 +9774,12 @@ async function wpSocraticFollowUp() {
       '/api/hint',
       { task_type, prompt, essay, hint_type: 'follow_up', level, student_ideas },
       (chunk) => { raw += chunk; qBox.innerHTML = '🔍 ' + renderHintMarkdown(raw); },
-      () => { qBox.innerHTML = '🔍 ' + renderHintMarkdown(raw) + '<div class="wp-socratic-hint">Trả lời vào ô ý tưởng phía trên rồi nhấn "Tạo ✨" để AI phát triển tiếp.</div>'; }
+      () => { qBox.innerHTML = '🔍 ' + renderHintMarkdown(raw) + '<div class="wp-socratic-hint">Answer this in your notes box, then re-plan to fold it in.</div>'; }
     );
   } catch(err) {
     qBox.innerHTML = `<span style="color:var(--danger)">Lỗi: ${escHtml(err.message)}</span>`;
   } finally {
-    if (sb) { sb.disabled = false; sb.textContent = '🔍 Hỏi sâu hơn'; }
+    if (sb) { sb.disabled = false; sb.textContent = '🔍 Push me harder'; }
   }
 }
 
@@ -9903,41 +9849,108 @@ async function improveWritingEssay() {
   }
 }
 
-/* ─── Outline builder (mechanism chain) ──────────────────────────────────── */
-let _wpOutline = null;          // last generated outline JSON
-let _wpChecked = new Set();     // "p<i>s<j>" keys the student has ticked
+/* ─── Planner: choose your ideas, then get a mechanism-chain outline ──────── */
+let _wpOutline = null;      // outline JSON from stage 2
+let _wpPlanOpts = null;     // multiple-choice questions from stage 1
+let _wpChoices = {};        // {questionId: chosen option text}
+let _wpChecked = new Set(); // "p<i>s<j>" steps ticked while writing
 
-// Chain step codes → short Vietnamese chips shown next to each step
-const CHAIN_LABELS = {
-  F:    { t: 'KHUNG',    hint: 'Đề trộn hai câu hỏi nào — và mình chấm theo tiêu chí nào' },
-  A:    { t: 'LUẬN ĐIỂM', hint: 'Ý chính của đoạn, chưa cần chi tiết' },
-  B:    { t: 'AI LÀM GÌ', hint: 'Lớp người cụ thể + hành động camera quay được' },
-  C:    { t: 'TĂNG/GIẢM', hint: 'Tiền, giờ, sức khoẻ, lòng tin… cái gì đổi lượng' },
-  D:    { t: 'AI HỨNG',   hint: 'Một actor MỚI hứng hệ quả (khác nhóm ở bước B)' },
-  'D+': { t: 'THẤY Ở ĐÂU', hint: 'Hệ quả nổi lên dạng gì: ngân sách, chỉ dấu đếm được…' },
-  N:    { t: 'Ý PHỤ',     hint: 'Ý phụ / nhượng bộ / khoanh phạm vi (chọn 1)' },
-  E:    { t: 'VỀ ĐỀ',     hint: 'Trả lời đúng chữ mà đề dùng' },
-  // Task 1 codes
-  PARA:    { t: 'PARAPHRASE', hint: 'Diễn đạt lại đề bằng từ của mình' },
-  COVER:   { t: 'PHẠM VI',    hint: 'Biểu đồ bao gồm gì: mốc thời gian, nhóm dữ liệu' },
-  TREND:   { t: 'XU HƯỚNG',   hint: 'Xu hướng nổi bật nhất — không kèm số' },
-  CONTRAST:{ t: 'TƯƠNG PHẢN', hint: 'Khác biệt / ngoại lệ rõ nhất' },
-  GROUP:   { t: 'NHÓM',       hint: 'Dữ liệu nào gom chung một đoạn' },
-  FIGURE:  { t: 'SỐ LIỆU',    hint: 'Chọn 2–3 số đáng trích' },
-  COMPARE: { t: 'SO SÁNH',    hint: 'So sánh giữa các mục' },
+// Chain code → tooltip explaining what the step must contain
+const CHAIN_HINTS = {
+  FRAME:      'Which two questions the prompt mixes — and the criterion you judge by',
+  THESIS:     'Your position, in one sentence',
+  CLAIM:      'The claim this paragraph proves',
+  ACTOR:      'A class of people doing something a camera could record',
+  CHANGE:     'What measurably rises or falls: money, hours, health, trust',
+  'KNOCK-ON': 'A different group who absorbs the consequence',
+  EVIDENCE:   'The form the consequence takes — a budget line, a countable indicator',
+  LINK:       'Answer the prompt using its own words',
+  RESTATE:    'Restate the position without repeating the wording',
+  SCOPE:      'The limit of your argument',
+  PARAPHRASE: 'Reword the prompt in your own words',
+  TREND:      'The dominant trend — no figures here',
+  CONTRAST:   'The clearest exception or contrast',
+  GROUP:      'Which data belongs in this paragraph',
+  FIGURES:    'The 2-3 figures worth quoting',
+  COMPARE:    'The comparison to draw',
 };
-const ENGINE_VI = {
-  MONEY: 'TIỀN', TIME: 'THỜI GIAN', HABIT: 'THÓI QUEN', INCENTIVE: 'THƯỞNG/PHẠT',
-  NORM: 'SỐ ĐÔNG', INFORMATION: 'THÔNG TIN', IDENTITY_TRUST: 'BẢN SẮC/LÒNG TIN',
-  SCALE: 'QUY MÔ', SKILL: 'KỸ NĂNG',
+const ENGINE_LABEL = {
+  MONEY: 'MONEY', TIME: 'TIME', HABIT: 'HABIT', INCENTIVE: 'INCENTIVE', NORM: 'NORM',
+  INFORMATION: 'INFORMATION', IDENTITY_TRUST: 'IDENTITY / TRUST', SCALE: 'SCALE', SKILL: 'SKILL',
 };
 
+/* ── Stage 1: planning questions ─────────────────────────────────────────── */
 async function wpBuildOutline() {
   if (!_wpCurrentQuestion) return;
   const btn = document.getElementById('wp-outline-btn');
   const body = document.getElementById('wp-outline-body');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang dựng…'; }
-  body.innerHTML = '<div class="loading">AI đang tìm engine và dựng chuỗi cơ chế…</div>';
+  if (btn) { btn.disabled = true; btn.textContent = 'Thinking…'; }
+  body.innerHTML = '<div class="loading">Preparing your planning choices…</div>';
+  try {
+    _wpPlanOpts = await api('/api/outline/options', {
+      method: 'POST',
+      body: JSON.stringify({
+        task_type: _wpCurrentQuestion.type,
+        prompt: _wpCurrentQuestion.prompt,
+        level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
+      }),
+    });
+    _wpChoices = {};
+    _wpOutline = null;
+    wpRenderPlanner();
+  } catch (e) {
+    body.innerHTML = `<div class="wp-outline-empty" style="color:var(--danger)">${escHtml(e.message || 'Could not load choices')}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Plan my essay'; }
+  }
+}
+
+function wpRenderPlanner() {
+  const qs = (_wpPlanOpts && _wpPlanOpts.questions) || [];
+  const body = document.getElementById('wp-outline-body');
+  if (!qs.length) { body.innerHTML = '<div class="wp-outline-empty">No choices returned — try again.</div>'; return; }
+  body.innerHTML = `
+    <div class="wp-plan-intro">Commit to your own line of argument first. The outline is built from what you pick.</div>
+    ${qs.map((q, qi) => `
+      <div class="wp-plan-q">
+        <div class="wp-plan-q-title">${qi + 1}. ${escHtml(q.q || '')}</div>
+        <div class="wp-plan-opts">
+          ${(q.options || []).map((opt, oi) => `
+            <label class="wp-plan-opt" data-q="${escHtml(q.id)}">
+              <input type="radio" name="wpq-${escHtml(q.id)}" value="${oi}"
+                     onchange="wpPickOption('${escHtml(q.id)}', ${JSON.stringify(opt).replace(/"/g, '&quot;')})">
+              <span>${escHtml(opt)}</span>
+            </label>`).join('')}
+        </div>
+      </div>`).join('')}
+    <button class="btn btn-primary wp-plan-go" id="wp-plan-go" disabled onclick="wpConfirmPlan()">
+      Build my outline →
+    </button>`;
+  const prog = document.getElementById('wp-outline-progress');
+  if (prog) { prog.textContent = `0/${qs.length}`; prog.classList.remove('full'); }
+}
+
+function wpPickOption(qid, optText) {
+  _wpChoices[qid] = optText;
+  document.querySelectorAll(`.wp-plan-opt[data-q="${qid}"]`).forEach(l => {
+    const input = l.querySelector('input');
+    l.classList.toggle('picked', input && input.checked);
+  });
+  const total = ((_wpPlanOpts && _wpPlanOpts.questions) || []).length;
+  const done = Object.keys(_wpChoices).length;
+  const prog = document.getElementById('wp-outline-progress');
+  if (prog) { prog.textContent = `${done}/${total}`; prog.classList.toggle('full', done === total); }
+  const go = document.getElementById('wp-plan-go');
+  if (go) go.disabled = done < total;
+}
+
+/* ── Stage 2: the outline ────────────────────────────────────────────────── */
+async function wpConfirmPlan() {
+  if (!_wpCurrentQuestion) return;
+  const go = document.getElementById('wp-plan-go');
+  const body = document.getElementById('wp-outline-body');
+  if (go) { go.disabled = true; go.textContent = 'Building…'; }
+  body.innerHTML = '<div class="loading">Finding the engine and building your chain…</div>';
   try {
     _wpOutline = await api('/api/outline', {
       method: 'POST',
@@ -9945,6 +9958,7 @@ async function wpBuildOutline() {
         task_type: _wpCurrentQuestion.type,
         prompt: _wpCurrentQuestion.prompt,
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
+        choices: _wpChoices,
         student_ideas: (document.getElementById('wp-ideas-input') || {}).value || '',
       }),
     });
@@ -9953,9 +9967,8 @@ async function wpBuildOutline() {
     const sb = document.getElementById('wp-socratic-btn');
     if (sb) sb.classList.remove('hidden');
   } catch (e) {
-    body.innerHTML = `<div class="wp-outline-empty" style="color:var(--danger)">${escHtml(e.message || 'Lỗi tạo dàn ý')}</div>`;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '✨ Tạo dàn ý'; }
+    body.innerHTML = `<div class="wp-outline-empty" style="color:var(--danger)">${escHtml(e.message || 'Could not build the outline')}</div>
+      <button class="btn btn-secondary btn-sm" onclick="wpRenderPlanner()">← Back to choices</button>`;
   }
 }
 
@@ -9963,39 +9976,54 @@ function wpRenderOutline() {
   const o = _wpOutline;
   const body = document.getElementById('wp-outline-body');
   const badge = document.getElementById('wp-engine-badge');
-  if (!o || !Array.isArray(o.paragraphs)) { body.innerHTML = '<div class="wp-outline-empty">Dàn ý trống — thử tạo lại.</div>'; return; }
+  if (!o || !Array.isArray(o.paragraphs)) { body.innerHTML = '<div class="wp-outline-empty">Empty outline — try again.</div>'; return; }
 
-  if (o.engine && badge) {
-    badge.classList.remove('hidden');
-    badge.innerHTML = `<span class="wp-engine-tag">⚙️ ENGINE: ${escHtml(ENGINE_VI[o.engine] || o.engine)}</span>` +
-      (o.engine_why ? `<span class="wp-engine-why">${escHtml(o.engine_why)}</span>` : '') +
-      (o.pivot ? `<span class="wp-engine-pivot">🔄 Biến trục: ${escHtml(o.pivot)}</span>` : '');
-  } else if (badge) { badge.classList.add('hidden'); }
+  if (badge) {
+    if (o.engine) {
+      badge.classList.remove('hidden');
+      badge.innerHTML =
+        `<span class="wp-engine-tag">⚙️ ENGINE: ${escHtml(ENGINE_LABEL[o.engine] || o.engine)}</span>` +
+        (o.engine_note ? `<span class="wp-engine-why">${escHtml(o.engine_note)}</span>` : '') +
+        (o.pivot ? `<span class="wp-engine-pivot">🔄 ${escHtml(o.pivot)}</span>` : '');
+    } else { badge.classList.add('hidden'); }
+  }
 
-  body.innerHTML = o.paragraphs.map((p, i) => {
-    const steps = Array.isArray(p.steps) ? p.steps : [];
-    return `
-    <div class="wp-para-card" data-kind="${escHtml(p.kind || '')}">
-      <div class="wp-para-head">
-        <span class="wp-para-num">${i + 1}</span>
-        <span class="wp-para-title">${escHtml(p.title || '')}</span>
-        <span class="wp-para-kind">${escHtml((p.kind || '').toUpperCase())}</span>
-      </div>
-      ${p.model ? `<div class="wp-para-model">${escHtml(p.model)}</div>` : ''}
-      <div class="wp-step-list">
-        ${steps.map((s, j) => {
-          const meta = CHAIN_LABELS[s.code] || { t: s.code || '•', hint: '' };
-          const key = `p${i}s${j}`;
-          return `
-          <label class="wp-step ${_wpChecked.has(key) ? 'done' : ''}" data-key="${key}" title="${escHtml(meta.hint)}">
-            <input type="checkbox" ${_wpChecked.has(key) ? 'checked' : ''} onchange="wpToggleStep('${key}', this)">
-            <span class="wp-step-code">${escHtml(meta.t)}</span>
-            <span class="wp-step-label">${escHtml(s.label || '')}</span>
-          </label>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
+  body.innerHTML = `
+    <div class="wp-plan-recap">
+      ${Object.entries(_wpChoices).map(([k, v]) => `<div><span>${escHtml(k)}</span>${escHtml(v)}</div>`).join('')}
+      <button class="wp-replan-btn" onclick="wpRenderPlanner()">Change my choices</button>
+    </div>
+    ${o.paragraphs.map((p, i) => {
+      const steps = Array.isArray(p.steps) ? p.steps : [];
+      const vocab = Array.isArray(p.vocab) ? p.vocab : [];
+      return `
+      <div class="wp-para-card">
+        <div class="wp-para-head">
+          <span class="wp-para-num">${i + 1}</span>
+          <span class="wp-para-title">${escHtml(p.title || '')}</span>
+        </div>
+        <div class="wp-step-list">
+          ${steps.map((s, j) => {
+            const key = `p${i}s${j}`;
+            const hint = CHAIN_HINTS[s.code] || '';
+            return `
+            <label class="wp-step ${_wpChecked.has(key) ? 'done' : ''}" title="${escHtml(hint)}">
+              <input type="checkbox" ${_wpChecked.has(key) ? 'checked' : ''} onchange="wpToggleStep('${key}', this)">
+              <span class="wp-step-code">${escHtml(s.code || '•')}</span>
+              <span class="wp-step-label">${escHtml(s.do || s.label || '')}</span>
+            </label>`;
+          }).join('')}
+        </div>
+        ${vocab.length ? `<div class="wp-vocab-strip">
+          <span class="wp-vocab-lead">Use:</span>
+          ${vocab.map(v => {
+            const term = typeof v === 'string' ? v : (v.term || '');
+            const vi = typeof v === 'string' ? '' : (v.vi || '');
+            return `<span class="wp-vocab-chip" title="${escHtml(vi)}">${escHtml(term)}</span>`;
+          }).join('')}
+        </div>` : ''}
+      </div>`;
+    }).join('')}`;
   wpUpdateOutlineProgress();
 }
 
@@ -10010,15 +10038,11 @@ function wpUpdateOutlineProgress() {
   const total = document.querySelectorAll('#wp-outline-body .wp-step').length;
   const done = _wpChecked.size;
   const el = document.getElementById('wp-outline-progress');
-  if (el) {
-    el.textContent = `${done}/${total}`;
-    el.classList.toggle('full', total > 0 && done === total);
-  }
-  // A paragraph card gets a done state when all of its steps are ticked
+  if (el) { el.textContent = `${done}/${total}`; el.classList.toggle('full', total > 0 && done === total); }
   document.querySelectorAll('#wp-outline-body .wp-para-card').forEach(card => {
-    const boxes = card.querySelectorAll('.wp-step');
+    const all = card.querySelectorAll('.wp-step');
     const ticked = card.querySelectorAll('.wp-step.done');
-    card.classList.toggle('para-done', boxes.length > 0 && boxes.length === ticked.length);
+    card.classList.toggle('para-done', all.length > 0 && all.length === ticked.length);
   });
 }
 
@@ -10028,7 +10052,7 @@ async function wpTranslatePrompt() {
   const box = document.getElementById('wp-translate-box');
   if (!box) return;
   if (!box.classList.contains('hidden') && box.dataset.for === _wpCurrentQuestion.id) {
-    box.classList.add('hidden'); return;                       // toggle off
+    box.classList.add('hidden'); return;
   }
   const cacheKey = 'wp_tr_' + _wpCurrentQuestion.id;
   const cached = localStorage.getItem(cacheKey);
@@ -10037,9 +10061,7 @@ async function wpTranslatePrompt() {
   if (cached) { box.innerHTML = `<div class="wp-translate-label">Bản dịch tiếng Việt</div>${escHtml(cached)}`; return; }
   box.innerHTML = '<div class="loading">Đang dịch…</div>';
   try {
-    const r = await api('/api/translate-prompt', {
-      method: 'POST', body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt }),
-    });
+    const r = await api('/api/translate-prompt', { method: 'POST', body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt }) });
     try { localStorage.setItem(cacheKey, r.translation); } catch (e) {}
     box.innerHTML = `<div class="wp-translate-label">Bản dịch tiếng Việt</div>${escHtml(r.translation)}`;
   } catch (e) {

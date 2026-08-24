@@ -1,0 +1,3121 @@
+[
+ {
+  "n": 1,
+  "topic": "Character & Psychology",
+  "collocations": [
+   {
+    "term": "personality traits",
+    "vi": "nét tính cách"
+   },
+   {
+    "term": "innate ability / talent",
+    "vi": "năng lực bẩm sinh"
+   },
+   {
+    "term": "nature versus nurture",
+    "vi": "bẩm sinh và nuôi dưỡng"
+   },
+   {
+    "term": "a supportive upbringing",
+    "vi": "sự dạy dỗ nâng đỡ"
+   },
+   {
+    "term": "self-esteem",
+    "vi": "lòng tự trọng, cách tự đánh giá"
+   },
+   {
+    "term": "emotional resilience",
+    "vi": "khả năng phục hồi cảm xúc"
+   },
+   {
+    "term": "peer pressure",
+    "vi": "áp lực đồng trang lứa"
+   },
+   {
+    "term": "a sense of belonging",
+    "vi": "cảm giác thuộc về"
+   },
+   {
+    "term": "a coping mechanism",
+    "vi": "cơ chế đối phó"
+   },
+   {
+    "term": "mental wellbeing",
+    "vi": "sức khỏe tinh thần"
+   },
+   {
+    "term": "intrinsic motivation",
+    "vi": "động lực nội tại"
+   },
+   {
+    "term": "delayed gratification",
+    "vi": "trì hoãn thỏa mãn"
+   },
+   {
+    "term": "emotional intelligence",
+    "vi": "trí tuệ cảm xúc"
+   },
+   {
+    "term": "a role model",
+    "vi": "hình mẫu"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "shape",
+    "vi": "định hình dần qua thời gian",
+    "with": "character, identity, values",
+    "eg": "Early experiences shape a child’s character."
+   },
+   {
+    "verb": "instil",
+    "vi": "gieo dần vào ai (tích cực)",
+    "with": "discipline, values, confidence (in sb)",
+    "eg": "Good parents instil discipline in their children."
+   },
+   {
+    "verb": "foster",
+    "vi": "khuyến khích phát triển (phẩm chất, quan hệ)",
+    "with": "resilience, independence, a sense of",
+    "eg": "Team sports foster resilience."
+   },
+   {
+    "verb": "cultivate",
+    "vi": "vun đắp có chủ đích qua thời gian",
+    "with": "a mindset, a habit, talent",
+    "eg": "Reading widely cultivates a curious mindset."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm suy yếu (một lần hoặc dần)",
+    "with": "confidence, self-esteem",
+    "eg": "Harsh criticism undermines confidence."
+   },
+   {
+    "verb": "erode",
+    "vi": "bào mòn dần (luôn từ từ)",
+    "with": "self-worth, trust",
+    "eg": "Constant comparison erodes self-worth."
+   },
+   {
+    "verb": "reinforce",
+    "vi": "củng cố, làm mạnh thêm",
+    "with": "a habit, behaviour, a belief",
+    "eg": "Praise reinforces positive behaviour."
+   },
+   {
+    "verb": "trigger",
+    "vi": "kích hoạt đột ngột",
+    "with": "anxiety, a relapse, stress",
+    "eg": "Exams can trigger severe anxiety."
+   }
+  ],
+  "synonyms": [
+   "instil vs impose. instil values/discipline nghe tích cực, gieo dần. impose rules/discipline nghe cưỡng ép, thiên áp đặt. Với nhân cách chọn instil.",
+   "foster vs nurture vs cultivate. foster khuyến khích một phẩm chất hoặc quan hệ (foster cooperation). nurture chăm cho một người hoặc tài năng lớn lên (nurture talent). cultivate vun có chủ đích, hợp skill và mindset (cultivate a habit).",
+   "undermine vs erode. undermine có thể là một hành động đơn lẻ hoặc dần (undermine confidence). erode luôn là quá trình từ từ (erode trust). Đừng viết \"erode confidence in one comment\".",
+   "self-esteem vs self-confidence. self-esteem là mức bạn coi trọng bản thân (giá trị). self-confidence là niềm tin vào khả năng làm được việc. Hai cái khác nhau, đừng dùng lẫn.",
+   "trait vs quality vs characteristic. trait nét tâm lý ổn định (a personality trait). quality thiên đánh giá, thường tích cực (a good quality). characteristic trung tính, đặc điểm nhận dạng."
+  ],
+  "samples": [
+   "A supportive upbringing tends to instil the emotional resilience children need to cope with setbacks later in life.",
+   "Constant comparison on social media can quietly erode teenagers’ self-esteem, even when no direct criticism is involved.",
+   "Schools that reward effort rather than raw talent foster intrinsic motivation, which outlasts the promise of external rewards.",
+   "Whether personality is shaped more by genes or by environment remains one of psychology’s most contested questions."
+  ]
+ },
+ {
+  "n": 2,
+  "topic": "Family & Relationships",
+  "collocations": [
+   {
+    "term": "nuclear family",
+    "vi": "gia đình hạt nhân"
+   },
+   {
+    "term": "extended family",
+    "vi": "đại gia đình nhiều thế hệ"
+   },
+   {
+    "term": "upbringing",
+    "vi": "sự nuôi dạy thời thơ ấu"
+   },
+   {
+    "term": "parenting style",
+    "vi": "phong cách nuôi dạy con"
+   },
+   {
+    "term": "family ties",
+    "vi": "mối gắn kết gia đình"
+   },
+   {
+    "term": "sibling rivalry",
+    "vi": "sự ganh đua giữa anh chị em"
+   },
+   {
+    "term": "work-life balance",
+    "vi": "cân bằng công việc và cuộc sống"
+   },
+   {
+    "term": "marital breakdown",
+    "vi": "sự đổ vỡ hôn nhân"
+   },
+   {
+    "term": "divorce rate",
+    "vi": "tỷ lệ ly hôn"
+   },
+   {
+    "term": "single-parent household",
+    "vi": "hộ gia đình cha hoặc mẹ đơn thân"
+   },
+   {
+    "term": "generation gap",
+    "vi": "khoảng cách thế hệ"
+   },
+   {
+    "term": "quality time",
+    "vi": "thời gian chất lượng bên nhau"
+   },
+   {
+    "term": "domestic responsibilities",
+    "vi": "trách nhiệm việc nhà"
+   },
+   {
+    "term": "emotional support",
+    "vi": "sự hỗ trợ về tinh thần"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "nurture",
+    "vi": "nuôi dưỡng vun đắp, sắc thái tích cực",
+    "with": "bond, talent, confidence",
+    "eg": "A loving home nurtures a child's confidence."
+   },
+   {
+    "verb": "strain",
+    "vi": "gây căng thẳng cho quan hệ",
+    "with": "relationship, marriage, ties",
+    "eg": "Long working hours can strain family relationships."
+   },
+   {
+    "verb": "foster",
+    "vi": "thúc đẩy vun đắp dần",
+    "with": "closeness, cooperation, trust",
+    "eg": "Shared meals foster closeness between generations."
+   },
+   {
+    "verb": "sever",
+    "vi": "cắt đứt dứt khoát, trang trọng",
+    "with": "ties, contact, links",
+    "eg": "Some adults choose to sever ties with abusive relatives."
+   },
+   {
+    "verb": "reconcile",
+    "vi": "hòa giải làm lành",
+    "with": "differences, family, with sb",
+    "eg": "It took years for the estranged brothers to reconcile."
+   },
+   {
+    "verb": "juggle",
+    "vi": "xoay xở nhiều việc cùng lúc",
+    "with": "responsibilities, work and family",
+    "eg": "Many parents struggle to juggle work and childcare."
+   },
+   {
+    "verb": "erode",
+    "vi": "bào mòn dần dần",
+    "with": "intimacy, trust, respect",
+    "eg": "Constant arguments slowly erode intimacy between partners."
+   },
+   {
+    "verb": "cement",
+    "vi": "củng cố gắn chặt",
+    "with": "bond, relationship, loyalty",
+    "eg": "Shared hardship can cement family bonds."
+   }
+  ],
+  "synonyms": [
+   "sever ties vs cut ties. Cả hai đi với ties nghĩa cắt đứt quan hệ. Cut ties trung tính đời thường, sever ties trang trọng và dứt khoát hơn, hợp văn viết học thuật band 8.",
+   "nurture vs raise. Raise a child hoặc raise a family là nuôi lớn trung tính. Nurture nhấn vào vun đắp tiềm năng và tình cảm, đi với talent, bond, confidence, mang sắc thái tích cực.",
+   "bring up vs grow up. Bring up là ngoại động, chủ ngữ là cha mẹ, She was brought up in the countryside. Grow up là nội động, chủ ngữ là đứa trẻ, I grew up in Hanoi. Người học rất hay dùng nhầm.",
+   "marriage vs wedding. Wedding là lễ cưới, một sự kiện đếm được. Marriage là hôn nhân, đời sống vợ chồng lâu dài. Divorce rate gắn với marriage chứ không phải wedding.",
+   "relationship vs relations. Relationship số ít chỉ mối quan hệ giữa người với người, have a close relationship with sb. Relations số nhiều thường chỉ quan hệ chính thức như diplomatic relations. Chớ viết a relation with my mother."
+  ],
+  "samples": [
+   "A stable upbringing tends to nurture the emotional support networks that children draw on later in life.",
+   "Long working hours can put a considerable strain on family relationships, leaving parents little quality time with their children.",
+   "While the extended family once played a central role, the rise of the nuclear family has arguably widened the generation gap.",
+   "Many working parents find it increasingly difficult to juggle domestic responsibilities with the demands of a full-time career."
+  ]
+ },
+ {
+  "n": 3,
+  "topic": "Youth & Aging",
+  "collocations": [
+   {
+    "term": "ageing population",
+    "vi": "dân số già hóa"
+   },
+   {
+    "term": "life expectancy",
+    "vi": "tuổi thọ kỳ vọng trung bình"
+   },
+   {
+    "term": "senior citizens",
+    "vi": "người cao tuổi, lịch sự"
+   },
+   {
+    "term": "retirement age",
+    "vi": "tuổi nghỉ hưu"
+   },
+   {
+    "term": "pension system",
+    "vi": "hệ thống lương hưu"
+   },
+   {
+    "term": "adolescence",
+    "vi": "tuổi vị thành niên"
+   },
+   {
+    "term": "peer pressure",
+    "vi": "áp lực từ bạn bè đồng trang lứa"
+   },
+   {
+    "term": "formative years",
+    "vi": "những năm hình thành nhân cách"
+   },
+   {
+    "term": "generation gap",
+    "vi": "khoảng cách thế hệ"
+   },
+   {
+    "term": "care home",
+    "vi": "viện dưỡng lão"
+   },
+   {
+    "term": "intergenerational bond",
+    "vi": "gắn kết liên thế hệ"
+   },
+   {
+    "term": "financial independence",
+    "vi": "sự tự chủ tài chính"
+   },
+   {
+    "term": "maturity",
+    "vi": "sự trưởng thành"
+   },
+   {
+    "term": "dependency ratio",
+    "vi": "tỷ lệ dân số phụ thuộc"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "age",
+    "vi": "già đi, nội động",
+    "with": "population, workforce",
+    "eg": "As populations age, pressure on healthcare systems mounts."
+   },
+   {
+    "verb": "rejuvenate",
+    "vi": "trẻ hóa hồi sinh",
+    "with": "workforce, economy",
+    "eg": "Immigration can rejuvenate an ageing workforce."
+   },
+   {
+    "verb": "cater for",
+    "vi": "đáp ứng nhu cầu của",
+    "with": "needs, the elderly",
+    "eg": "Public services must cater for the needs of an ageing population."
+   },
+   {
+    "verb": "shoulder",
+    "vi": "gánh vác",
+    "with": "burden, cost, responsibility",
+    "eg": "Fewer workers must now shoulder the cost of state pensions."
+   },
+   {
+    "verb": "mature",
+    "vi": "trưởng thành về tâm lý",
+    "with": "into adulthood",
+    "eg": "Young people mature at very different rates."
+   },
+   {
+    "verb": "succumb to",
+    "vi": "chịu thua trước, tiêu cực",
+    "with": "pressure, temptation",
+    "eg": "Teenagers can easily succumb to peer pressure."
+   },
+   {
+    "verb": "broaden",
+    "vi": "mở rộng",
+    "with": "horizons, outlook",
+    "eg": "Gap years broaden young people's horizons."
+   },
+   {
+    "verb": "outlive",
+    "vi": "sống lâu hơn cả",
+    "with": "savings, usefulness",
+    "eg": "Longer lifespans mean many pensioners outlive their savings."
+   }
+  ],
+  "synonyms": [
+   "elderly vs old. The elderly và elderly people lịch sự trang trọng hơn old people. Văn học thuật ưu tiên older people hoặc senior citizens. Elderly mang sắc thái tôn trọng.",
+   "ageing vs aged. Ageing population là dân số đang già đi, tính từ chỉ quá trình. Aged nghĩa đã già hoặc chỉ độ tuổi cụ thể, people aged 65 and over. Đừng viết aged population.",
+   "adolescent vs teenager. Teenager đời thường, 13 đến 19 tuổi. Adolescent trang trọng hơn và nhấn giai đoạn phát triển tâm sinh lý, hợp văn học thuật. Adolescence là danh từ chỉ giai đoạn đó.",
+   "mature vs grow up. Mature nhấn sự trưởng thành về tâm lý và cảm xúc, có thể là tính từ a mature attitude. Grow up trung tính chỉ lớn lên về thể chất và tuổi. Mature nghe học thuật hơn.",
+   "life expectancy vs lifespan. Life expectancy là tuổi thọ kỳ vọng trung bình của một nhóm dân số, dùng cho thống kê. Lifespan là độ dài đời sống của một cá thể hay loài. Số liệu quốc gia dùng life expectancy."
+  ],
+  "samples": [
+   "As life expectancy rises, many governments are being forced to raise the retirement age to keep pension systems solvent.",
+   "An ageing population places a growing burden on the working-age generation, who must shoulder higher taxes.",
+   "During their formative years, adolescents are particularly susceptible to peer pressure, which can shape lifelong habits.",
+   "Encouraging intergenerational bonds, some argue, benefits both the young and the elderly."
+  ]
+ },
+ {
+  "n": 4,
+  "topic": "Society & Social Issues",
+  "collocations": [
+   {
+    "term": "social inequality",
+    "vi": "bất bình đẳng xã hội"
+   },
+   {
+    "term": "the wealth gap",
+    "vi": "khoảng cách giàu nghèo"
+   },
+   {
+    "term": "social mobility",
+    "vi": "sự dịch chuyển tầng lớp xã hội"
+   },
+   {
+    "term": "the welfare state",
+    "vi": "nhà nước phúc lợi"
+   },
+   {
+    "term": "social cohesion",
+    "vi": "sự gắn kết xã hội"
+   },
+   {
+    "term": "marginalised groups",
+    "vi": "các nhóm bị gạt ra bên lề"
+   },
+   {
+    "term": "the poverty line",
+    "vi": "ngưỡng nghèo"
+   },
+   {
+    "term": "living standards",
+    "vi": "mức sống"
+   },
+   {
+    "term": "public services",
+    "vi": "dịch vụ công"
+   },
+   {
+    "term": "social safety net",
+    "vi": "lưới an sinh xã hội"
+   },
+   {
+    "term": "deprivation",
+    "vi": "sự thiếu thốn bần cùng"
+   },
+   {
+    "term": "discrimination",
+    "vi": "sự phân biệt đối xử"
+   },
+   {
+    "term": "integration",
+    "vi": "sự hòa nhập"
+   },
+   {
+    "term": "the underprivileged",
+    "vi": "những người thiệt thòi kém may mắn"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "alleviate",
+    "vi": "làm giảm nhẹ nỗi khổ",
+    "with": "poverty, suffering, hardship",
+    "eg": "Well-targeted subsidies can help alleviate poverty."
+   },
+   {
+    "verb": "tackle",
+    "vi": "xử lý giải quyết trực diện",
+    "with": "inequality, homelessness",
+    "eg": "Policymakers must tackle inequality head-on."
+   },
+   {
+    "verb": "exacerbate",
+    "vi": "làm trầm trọng thêm, tiêu cực",
+    "with": "inequality, tensions",
+    "eg": "Automation may exacerbate the wealth gap."
+   },
+   {
+    "verb": "marginalise",
+    "vi": "đẩy ra bên lề",
+    "with": "minorities, the poor",
+    "eg": "Poor housing policy can marginalise vulnerable groups."
+   },
+   {
+    "verb": "bridge",
+    "vi": "thu hẹp khoảng cách, tích cực",
+    "with": "gap, divide",
+    "eg": "Education helps to bridge the social divide."
+   },
+   {
+    "verb": "promote",
+    "vi": "thúc đẩy khuyến khích",
+    "with": "cohesion, integration",
+    "eg": "Community events promote social cohesion."
+   },
+   {
+    "verb": "widen",
+    "vi": "nới rộng, tiêu cực",
+    "with": "gap, divide, inequality",
+    "eg": "Tax cuts for the rich tend to widen the wealth gap."
+   },
+   {
+    "verb": "lift",
+    "vi": "đưa ra khỏi",
+    "with": "out of poverty",
+    "eg": "Rapid growth has lifted millions out of poverty."
+   }
+  ],
+  "synonyms": [
+   "alleviate vs reduce. Alleviate đi với nỗi khổ của con người, alleviate poverty, suffering, hardship, pain. Không viết alleviate pollution hay alleviate crime, những cái đó dùng reduce hoặc curb. Reduce trung tính hợp mọi thứ đo được.",
+   "exacerbate vs worsen. Cả hai làm xấu đi. Exacerbate trang trọng học thuật, đi với problem, tension, inequality, semantic prosody luôn tiêu cực. Worsen đời thường hơn.",
+   "poverty không đếm được. Poverty là danh từ không đếm được, không có a poverty hay poverties. Nói live in poverty, be trapped in poverty. Đi với alleviate, eradicate, tackle.",
+   "the poor vs poor people. The cộng tính từ chỉ cả nhóm người, the poor, the elderly, the unemployed, luôn số nhiều và không thêm s. The poors là sai. Poor people cũng đúng nhưng the poor cô đọng hơn trong văn học thuật.",
+   "bridge vs widen the gap. Bridge the gap và narrow the gap nghĩa thu hẹp khoảng cách, hướng tích cực. Widen the gap nghĩa nới rộng, sắc thái tiêu cực. Chọn động từ theo hướng lập luận."
+  ],
+  "samples": [
+   "Well-targeted welfare programmes can go some way towards alleviating poverty, though they rarely address its root causes.",
+   "Critics argue that unregulated markets tend to widen the wealth gap and erode social cohesion.",
+   "Access to quality education is widely seen as one of the most effective ways to bridge the social divide.",
+   "Unless governments tackle discrimination directly, marginalised groups will continue to be denied genuine social mobility."
+  ]
+ },
+ {
+  "n": 5,
+  "topic": "Crime & Justice",
+  "collocations": [
+   {
+    "term": "crime rate",
+    "vi": "tỷ lệ tội phạm"
+   },
+   {
+    "term": "the criminal justice system",
+    "vi": "hệ thống tư pháp hình sự"
+   },
+   {
+    "term": "law enforcement",
+    "vi": "việc thực thi pháp luật"
+   },
+   {
+    "term": "capital punishment",
+    "vi": "án tử hình"
+   },
+   {
+    "term": "deterrent",
+    "vi": "yếu tố răn đe"
+   },
+   {
+    "term": "rehabilitation",
+    "vi": "sự cải tạo và tái hòa nhập"
+   },
+   {
+    "term": "recidivism",
+    "vi": "sự tái phạm"
+   },
+   {
+    "term": "petty crime",
+    "vi": "tội vặt"
+   },
+   {
+    "term": "juvenile delinquency",
+    "vi": "tội phạm vị thành niên"
+   },
+   {
+    "term": "custodial sentence",
+    "vi": "án tù giam"
+   },
+   {
+    "term": "the root causes of crime",
+    "vi": "căn nguyên của tội phạm"
+   },
+   {
+    "term": "surveillance",
+    "vi": "sự giám sát theo dõi"
+   },
+   {
+    "term": "miscarriage of justice",
+    "vi": "án oan, sai lệch công lý"
+   },
+   {
+    "term": "community service",
+    "vi": "lao động công ích"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "deter",
+    "vi": "răn đe khiến không dám",
+    "with": "offenders, crime",
+    "eg": "Harsh penalties may deter potential offenders."
+   },
+   {
+    "verb": "rehabilitate",
+    "vi": "cải tạo tái hòa nhập",
+    "with": "offenders, prisoners",
+    "eg": "Prisons should aim to rehabilitate rather than merely punish."
+   },
+   {
+    "verb": "commit",
+    "vi": "phạm, thực hiện hành vi sai",
+    "with": "crime, offence, fraud",
+    "eg": "Young people who commit petty crimes can often be reformed."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế cho chậm lại",
+    "with": "crime, violence",
+    "eg": "Better street lighting can help curb crime."
+   },
+   {
+    "verb": "reoffend",
+    "vi": "tái phạm, nội động",
+    "with": "Many released prisoners reoffend within two years.",
+    "eg": "impose"
+   },
+   {
+    "verb": "áp đặt hình phạt",
+    "vi": "sentence, penalty, fine",
+    "with": "Judges can impose harsher sentences on repeat offenders.",
+    "eg": "address"
+   },
+   {
+    "verb": "giải quyết căn nguyên",
+    "vi": "root causes, problem",
+    "with": "Policies should address the root causes of crime.",
+    "eg": "prosecute"
+   }
+  ],
+  "synonyms": [
+   "commit vs make a crime. Phạm tội là commit a crime, commit an offence, commit fraud. Không bao giờ make a crime. Commit đi với danh từ chỉ hành vi sai trái, commit murder, commit suicide.",
+   "deter vs prevent. Deter là răn đe khiến ai không dám làm vì sợ hậu quả, deter offenders. Prevent là ngăn chặn không cho xảy ra bằng biện pháp thực tế, prevent crime. Deter tác động vào tâm lý, prevent vào cơ hội.",
+   "curb vs cut. Curb nghĩa kiềm chế kiểm soát cho chậm lại, curb crime, curb spending, hàm ý vẫn còn nhưng bị hạn chế. Cut là cắt giảm số lượng cụ thể. Curb trang trọng, hợp văn học thuật.",
+   "punishment vs penalty. Punishment là khái niệm trừng phạt chung, ở nghĩa trừu tượng không đếm được. Penalty là hình phạt cụ thể cho một vi phạm, đếm được, a heavy penalty, the death penalty. Capital punishment là cụm cố định.",
+   "sentence vs conviction. Conviction là việc bị kết tội, tuyên có tội. Sentence là bản án hình phạt đi kèm sau khi kết tội, a five-year sentence. Bị convicted trước rồi mới bị sentenced."
+  ],
+  "samples": [
+   "Proponents of capital punishment claim it acts as a powerful deterrent, yet the evidence for this is far from conclusive.",
+   "Rather than relying solely on custodial sentences, many experts argue that prisons should do more to rehabilitate offenders.",
+   "Unless governments address the root causes of crime, such as poverty and unemployment, harsher penalties are unlikely to reduce reoffending.",
+   "Widespread surveillance may help curb crime, but it raises serious concerns about individual privacy."
+  ]
+ },
+ {
+  "n": 6,
+  "topic": "Work & Careers",
+  "collocations": [
+   {
+    "term": "job satisfaction",
+    "vi": "sự hài lòng với công việc"
+   },
+   {
+    "term": "career progression",
+    "vi": "sự thăng tiến nghề nghiệp"
+   },
+   {
+    "term": "work-life balance",
+    "vi": "cân bằng công việc cuộc sống"
+   },
+   {
+    "term": "job security",
+    "vi": "sự ổn định công việc"
+   },
+   {
+    "term": "remote working",
+    "vi": "làm việc từ xa"
+   },
+   {
+    "term": "professional development",
+    "vi": "phát triển chuyên môn"
+   },
+   {
+    "term": "transferable skills",
+    "vi": "kỹ năng chuyển đổi được"
+   },
+   {
+    "term": "the gig economy",
+    "vi": "nền kinh tế việc tự do"
+   },
+   {
+    "term": "workplace burnout",
+    "vi": "kiệt sức nơi làm việc"
+   },
+   {
+    "term": "vocational training",
+    "vi": "đào tạo nghề"
+   },
+   {
+    "term": "a competitive salary",
+    "vi": "mức lương cạnh tranh"
+   },
+   {
+    "term": "staff turnover",
+    "vi": "tỷ lệ nhân viên nghỉ việc"
+   },
+   {
+    "term": "career prospects",
+    "vi": "triển vọng nghề nghiệp"
+   },
+   {
+    "term": "a fulfilling career",
+    "vi": "sự nghiệp ý nghĩa, trọn vẹn"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "pursue",
+    "vi": "theo đuổi, chủ động và tích cực",
+    "with": "a career, a profession",
+    "eg": "Many graduates pursue a career abroad for better prospects."
+   },
+   {
+    "verb": "hone",
+    "vi": "mài giũa kỹ năng cho tinh",
+    "with": "skills, expertise",
+    "eg": "Internships allow students to hone practical skills."
+   },
+   {
+    "verb": "foster",
+    "vi": "nuôi dưỡng, thúc đẩy dần, sắc thái ấm",
+    "with": "loyalty, collaboration",
+    "eg": "Flexible policies foster employee loyalty."
+   },
+   {
+    "verb": "retain",
+    "vi": "giữ chân người giỏi",
+    "with": "staff, talent",
+    "eg": "Competitive pay helps firms retain skilled staff."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm suy yếu ngầm",
+    "with": "morale, productivity",
+    "eg": "Excessive overtime can undermine staff morale."
+   },
+   {
+    "verb": "alleviate",
+    "vi": "làm giảm nhẹ áp lực",
+    "with": "stress, pressure",
+    "eg": "Remote working may alleviate commuting stress."
+   },
+   {
+    "verb": "secure",
+    "vi": "giành được cái ổn định",
+    "with": "a position, employment",
+    "eg": "Strong references help candidates secure a position."
+   },
+   {
+    "verb": "delegate",
+    "vi": "giao phó công việc",
+    "with": "tasks, responsibility",
+    "eg": "Effective managers delegate tasks to their teams."
+   }
+  ],
+  "synonyms": [
+   "job vs work (countability). work không đếm được, không nói a work. Việc cụ thể dùng a job. Nói find a job, không nói find a work.",
+   "career vs job. career là cả quá trình nghề nghiệp dài hạn, job là một công việc cụ thể. Nói career progression, không nói job progression.",
+   "salary vs wage vs income. salary trả theo tháng hoặc năm cho nhân viên chính thức, wage trả theo giờ hoặc ngày cho lao động chân tay, income là tổng thu nhập từ mọi nguồn.",
+   "foster vs promote (semantic prosody). foster nghe ấm áp, nuôi dưỡng dần loyalty hay talent. promote trung tính hơn và còn nghĩa quảng bá hoặc thăng chức. Văn hoá công ty tích cực nên chọn foster.",
+   "unemployment vs redundancy. unemployment là tình trạng thất nghiệp chung, không đếm được. redundancy là bị cho nghỉ do vị trí bị cắt, be made redundant. Khác với bị đuổi vì lỗi là be fired hoặc dismissed."
+  ],
+  "samples": [
+   "While a competitive salary undoubtedly matters, many employees now prioritise work-life balance and a sense of purpose over pay alone.",
+   "Remote working arguably boosts productivity, yet it may also blur the boundary between professional and personal life.",
+   "Investing in professional development tends to reduce staff turnover, since employees who see clear career prospects are less likely to leave.",
+   "The rise of the gig economy has offered greater flexibility, though this has often come at the expense of job security."
+  ]
+ },
+ {
+  "n": 7,
+  "topic": "Business & Money",
+  "collocations": [
+   {
+    "term": "economic growth",
+    "vi": "tăng trưởng kinh tế"
+   },
+   {
+    "term": "disposable income",
+    "vi": "thu nhập khả dụng"
+   },
+   {
+    "term": "financial security",
+    "vi": "an toàn tài chính"
+   },
+   {
+    "term": "consumer spending",
+    "vi": "chi tiêu tiêu dùng"
+   },
+   {
+    "term": "market competition",
+    "vi": "cạnh tranh thị trường"
+   },
+   {
+    "term": "a thriving economy",
+    "vi": "nền kinh tế phát đạt"
+   },
+   {
+    "term": "entrepreneurship / a start-up",
+    "vi": "tinh thần khởi nghiệp"
+   },
+   {
+    "term": "corporate social responsibility",
+    "vi": "trách nhiệm xã hội của doanh nghiệp"
+   },
+   {
+    "term": "the cost of living",
+    "vi": "chi phí sinh hoạt"
+   },
+   {
+    "term": "the wealth gap / wealth inequality",
+    "vi": "khoảng cách giàu nghèo"
+   },
+   {
+    "term": "job creation",
+    "vi": "tạo việc làm"
+   },
+   {
+    "term": "multinational corporations",
+    "vi": "tập đoàn đa quốc gia"
+   },
+   {
+    "term": "an economic downturn / recession",
+    "vi": "suy thoái kinh tế"
+   },
+   {
+    "term": "profit margin",
+    "vi": "biên lợi nhuận"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "stimulate",
+    "vi": "châm cho hoạt động lên",
+    "with": "the economy, demand, growth",
+    "eg": "Tax cuts stimulate consumer demand."
+   },
+   {
+    "verb": "boost",
+    "vi": "làm tăng (chung, tích cực)",
+    "with": "revenue, spending, growth",
+    "eg": "Tourism boosts local revenue."
+   },
+   {
+    "verb": "bolster",
+    "vi": "chống đỡ cái có thể yếu đi",
+    "with": "confidence, the economy",
+    "eg": "Stimulus packages bolster a fragile economy."
+   },
+   {
+    "verb": "generate",
+    "vi": "tạo ra",
+    "with": "jobs, revenue, profit",
+    "eg": "New factories generate thousands of jobs."
+   },
+   {
+    "verb": "diversify",
+    "vi": "đa dạng hóa",
+    "with": "an economy, income sources",
+    "eg": "Oil states must diversify their economies."
+   },
+   {
+    "verb": "widen",
+    "vi": "nới rộng (khoảng cách)",
+    "with": "the wealth gap, inequality",
+    "eg": "Automation may widen the wealth gap."
+   },
+   {
+    "verb": "outsource",
+    "vi": "thuê ngoài, chuyển ra ngoài",
+    "with": "labour, production",
+    "eg": "Firms outsource production to cut costs."
+   },
+   {
+    "verb": "cut",
+    "vi": "cắt giảm (trung tính)",
+    "with": "costs, prices, jobs",
+    "eg": "Companies cut costs during a recession."
+   }
+  ],
+  "synonyms": [
+   "boost vs bolster vs stimulate. boost tăng chung (boost revenue). bolster chống đỡ cái đang yếu (bolster confidence). stimulate châm ngòi hoạt động, hợp economy/demand (stimulate demand). Không viết \"bolster demand\".",
+   "cut vs slash vs curb. cut trung tính, an toàn Task 2. slash rất mạnh và mang giọng báo chí, dễ lạc register trong essay học thuật. curb là kìm lại chứ không phải giảm số lượng (curb spending nghĩa siết, không phải cắt).",
+   "recession vs downturn vs slump. downturn nhẹ và chung nhất. recession là suy thoái chính thức (thường hai quý âm). slump là sụt sâu, đột ngột, hơi báo chí. Task 2 an toàn dùng downturn hoặc recession.",
+   "income vs salary vs wage. income là mọi nguồn thu. salary trả cố định theo tháng/năm (nhân viên). wage trả theo giờ/tuần (lao động chân tay). \"disposable income\" là chuẩn, không nói \"disposable salary\".",
+   "earn vs make vs gain. earn a salary / a living / a reputation (do công sức). make money (chung). gain thiên \"đạt được\" phi tiền, gain experience. Đừng viết \"earn money\" khi ý là \"make money\" chung chung."
+  ],
+  "samples": [
+   "Rising disposable income allows households to increase consumer spending, which in turn stimulates economic growth.",
+   "Although multinational corporations generate thousands of jobs, critics argue that they widen the wealth gap by concentrating profits abroad.",
+   "Governments often bolster a fragile economy through tax cuts, though such measures can deepen public debt.",
+   "Whether higher pay genuinely improves wellbeing beyond a certain income level is still debated by economists."
+  ]
+ },
+ {
+  "n": 8,
+  "topic": "Consumerism & Advertising",
+  "collocations": [
+   {
+    "term": "consumer culture",
+    "vi": "văn hoá tiêu dùng"
+   },
+   {
+    "term": "brand loyalty",
+    "vi": "lòng trung thành thương hiệu"
+   },
+   {
+    "term": "disposable income",
+    "vi": "thu nhập khả dụng"
+   },
+   {
+    "term": "impulse buying",
+    "vi": "mua sắm bốc đồng"
+   },
+   {
+    "term": "targeted advertising",
+    "vi": "quảng cáo nhắm đối tượng"
+   },
+   {
+    "term": "planned obsolescence",
+    "vi": "sự lỗi thời có chủ đích"
+   },
+   {
+    "term": "peer pressure",
+    "vi": "áp lực đồng trang lứa"
+   },
+   {
+    "term": "materialistic values",
+    "vi": "giá trị vật chất, ham vật chất"
+   },
+   {
+    "term": "a throwaway culture",
+    "vi": "văn hoá dùng một lần rồi bỏ"
+   },
+   {
+    "term": "false advertising",
+    "vi": "quảng cáo sai sự thật"
+   },
+   {
+    "term": "conspicuous consumption",
+    "vi": "tiêu dùng phô trương"
+   },
+   {
+    "term": "market saturation",
+    "vi": "sự bão hoà thị trường"
+   },
+   {
+    "term": "purchasing power",
+    "vi": "sức mua"
+   },
+   {
+    "term": "subliminal messaging",
+    "vi": "thông điệp tác động tiềm thức"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "lure",
+    "vi": "dụ dỗ, có ý đồ xấu",
+    "with": "customers, buyers",
+    "eg": "Deep discounts lure customers into overspending."
+   },
+   {
+    "verb": "manipulate",
+    "vi": "thao túng, điều khiển ngầm",
+    "with": "consumers, emotions",
+    "eg": "Advertisements often manipulate consumers' emotions."
+   },
+   {
+    "verb": "exploit",
+    "vi": "lợi dụng điểm yếu",
+    "with": "insecurities, fears",
+    "eg": "Some campaigns exploit teenagers' insecurities."
+   },
+   {
+    "verb": "cultivate",
+    "vi": "gây dựng dần, tích cực",
+    "with": "loyalty, an image",
+    "eg": "Brands cultivate loyalty through storytelling."
+   },
+   {
+    "verb": "saturate",
+    "vi": "làm bão hoà",
+    "with": "the market",
+    "eg": "Cheap imports have saturated the market."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế, kìm lại",
+    "with": "spending, consumption",
+    "eg": "Governments may curb excessive consumption through taxes."
+   },
+   {
+    "verb": "endorse",
+    "vi": "chứng thực, quảng bá tên tuổi",
+    "with": "a product, a brand",
+    "eg": "Celebrities are paid to endorse products."
+   },
+   {
+    "verb": "fuel",
+    "vi": "thổi bùng, thúc đẩy mạnh",
+    "with": "demand, consumption",
+    "eg": "Aggressive marketing fuels consumer demand."
+   }
+  ],
+  "synonyms": [
+   "advertising vs advertisement (countability). advertising không đếm được, chỉ hoạt động quảng cáo nói chung. an advertisement hoặc an advert hoặc an ad đếm được, là một mẩu quảng cáo cụ thể.",
+   "lure vs attract (semantic prosody). lure mang nghĩa xấu, dụ dỗ có ý đồ. attract trung tính, thu hút. Nói về chiêu trò tiếp thị chọn lure, nói chung chọn attract.",
+   "consumer vs customer. consumer là người tiêu dùng nói chung trong nền kinh tế, customer là khách hàng của một cửa hàng cụ thể. Bài xã hội tiêu dùng dùng consumer culture, không dùng customer culture.",
+   "materialistic vs material. materialistic mang nghĩa xấu, ham vật chất. material là tính từ trung tính, thuộc về vật chất. Nói giá trị lệch lạc chọn materialistic values.",
+   "exploit (semantic prosody). exploit đi với người hay cảm xúc thì nghĩa xấu, lợi dụng. exploit đi với resources hay an opportunity thì trung tính, khai thác, tận dụng. Chú ý ngữ cảnh."
+  ],
+  "samples": [
+   "Advertising undeniably drives economic growth, but it can also foster a throwaway culture in which goods are discarded far too quickly.",
+   "Although targeted advertising makes marketing more efficient, many argue that it exploits personal data and manipulates vulnerable consumers.",
+   "Rising disposable income has fuelled conspicuous consumption, yet greater wealth does not necessarily translate into greater happiness.",
+   "Rather than banning advertising outright, governments could curb its worst excesses by regulating misleading claims aimed at children."
+  ]
+ },
+ {
+  "n": 9,
+  "topic": "Education",
+  "collocations": [
+   {
+    "term": "academic performance",
+    "vi": "kết quả học tập"
+   },
+   {
+    "term": "critical thinking",
+    "vi": "tư duy phản biện"
+   },
+   {
+    "term": "rote learning",
+    "vi": "học vẹt, học thuộc lòng"
+   },
+   {
+    "term": "student-centred learning",
+    "vi": "học lấy người học làm trung tâm"
+   },
+   {
+    "term": "lifelong learning",
+    "vi": "học tập suốt đời"
+   },
+   {
+    "term": "the curriculum",
+    "vi": "chương trình học"
+   },
+   {
+    "term": "higher education",
+    "vi": "giáo dục đại học"
+   },
+   {
+    "term": "academic pressure",
+    "vi": "áp lực học hành"
+   },
+   {
+    "term": "mixed-ability classes",
+    "vi": "lớp học trình độ hỗn hợp"
+   },
+   {
+    "term": "tuition fees",
+    "vi": "học phí"
+   },
+   {
+    "term": "vocational qualifications",
+    "vi": "bằng cấp nghề"
+   },
+   {
+    "term": "intellectual curiosity",
+    "vi": "sự tò mò trí tuệ"
+   },
+   {
+    "term": "the achievement gap",
+    "vi": "khoảng cách thành tích"
+   },
+   {
+    "term": "extracurricular activities",
+    "vi": "hoạt động ngoại khoá"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "cultivate",
+    "vi": "nuôi dưỡng dần",
+    "with": "curiosity, talent",
+    "eg": "Good schools cultivate intellectual curiosity."
+   },
+   {
+    "verb": "broaden",
+    "vi": "mở rộng",
+    "with": "horizons, knowledge",
+    "eg": "Studying abroad broadens students' horizons."
+   },
+   {
+    "verb": "stifle",
+    "vi": "bóp nghẹt, dập tắt",
+    "with": "creativity, curiosity",
+    "eg": "Rigid syllabuses can stifle creativity."
+   },
+   {
+    "verb": "equip",
+    "vi": "trang bị cho ai",
+    "with": "students with skills",
+    "eg": "Schools should equip students with practical skills."
+   },
+   {
+    "verb": "instil",
+    "vi": "gieo dần vào ai",
+    "with": "discipline, values",
+    "eg": "Teachers instil discipline in young learners."
+   },
+   {
+    "verb": "assess",
+    "vi": "đánh giá",
+    "with": "progress, performance",
+    "eg": "Exams assess students' progress."
+   },
+   {
+    "verb": "tailor",
+    "vi": "điều chỉnh cho vừa",
+    "with": "teaching to needs",
+    "eg": "Teachers tailor lessons to individual needs."
+   },
+   {
+    "verb": "reinforce",
+    "vi": "củng cố",
+    "with": "learning, concepts",
+    "eg": "Homework reinforces classroom learning."
+   }
+  ],
+  "synonyms": [
+   "teach vs educate. teach nhấn vào truyền đạt kiến thức cụ thể, educate nhấn vào phát triển con người toàn diện và lâu dài. Nói giáo dục nhân cách chọn educate.",
+   "learning vs education (countability). learning luôn không đếm được. education không đếm được, trừ khi có tính từ mô tả thì được, ví dụ a good education hoặc a university education.",
+   "stifle vs limit (semantic prosody). stifle nghĩa xấu, bóp nghẹt gần như hoàn toàn sự sáng tạo. limit trung tính, giới hạn. Nói sáng tạo bị dập tắt chọn stifle.",
+   "pupil vs student. pupil thường chỉ học sinh nhỏ ở trường phổ thông theo Anh-Anh, student chỉ sinh viên hoặc học sinh lớn hơn. Bài IELTS học thuật thường dùng student.",
+   "curriculum vs syllabus. curriculum là toàn bộ chương trình các môn của một cấp học, syllabus là đề cương chi tiết của một môn cụ thể. Số nhiều của curriculum là curricula."
+  ],
+  "samples": [
+   "Rather than relying on rote learning, schools should cultivate critical thinking so that students can evaluate information independently.",
+   "While academic performance matters, an overemphasis on exams can stifle creativity and fuel unhealthy academic pressure.",
+   "A well-designed curriculum ought to equip young people not only with knowledge but also with the transferable skills the job market demands.",
+   "Although higher education broadens opportunities, rising tuition fees may deter students from disadvantaged backgrounds."
+  ]
+ },
+ {
+  "n": 10,
+  "topic": "Language & Communication",
+  "collocations": [
+   {
+    "term": "mother tongue",
+    "vi": "tiếng mẹ đẻ"
+   },
+   {
+    "term": "a lingua franca",
+    "vi": "ngôn ngữ chung làm cầu nối"
+   },
+   {
+    "term": "language barriers",
+    "vi": "rào cản ngôn ngữ"
+   },
+   {
+    "term": "non-verbal communication",
+    "vi": "giao tiếp phi ngôn ngữ"
+   },
+   {
+    "term": "cultural nuances",
+    "vi": "sắc thái văn hoá tinh tế"
+   },
+   {
+    "term": "fluency",
+    "vi": "sự trôi chảy khi nói"
+   },
+   {
+    "term": "bilingualism",
+    "vi": "tình trạng song ngữ"
+   },
+   {
+    "term": "language acquisition",
+    "vi": "sự tiếp thu ngôn ngữ"
+   },
+   {
+    "term": "dialects",
+    "vi": "các phương ngữ"
+   },
+   {
+    "term": "a global language",
+    "vi": "ngôn ngữ toàn cầu"
+   },
+   {
+    "term": "endangered languages",
+    "vi": "ngôn ngữ có nguy cơ biến mất"
+   },
+   {
+    "term": "communication skills",
+    "vi": "kỹ năng giao tiếp"
+   },
+   {
+    "term": "slang",
+    "vi": "tiếng lóng"
+   },
+   {
+    "term": "a native speaker",
+    "vi": "người bản ngữ"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "convey",
+    "vi": "truyền đạt ý nghĩa",
+    "with": "meaning, a message",
+    "eg": "Tone of voice helps convey meaning."
+   },
+   {
+    "verb": "grasp",
+    "vi": "nắm bắt được",
+    "with": "a concept, nuances",
+    "eg": "Learners often struggle to grasp cultural nuances."
+   },
+   {
+    "verb": "acquire",
+    "vi": "tiếp thu tự nhiên, dần dần",
+    "with": "a language, fluency",
+    "eg": "Young children acquire language effortlessly."
+   },
+   {
+    "verb": "hinder",
+    "vi": "cản trở, làm chậm lại",
+    "with": "communication, understanding",
+    "eg": "Poor pronunciation can hinder communication."
+   },
+   {
+    "verb": "preserve",
+    "vi": "bảo tồn",
+    "with": "a language, heritage",
+    "eg": "Communities strive to preserve endangered languages."
+   },
+   {
+    "verb": "articulate",
+    "vi": "diễn đạt mạch lạc",
+    "with": "ideas, thoughts",
+    "eg": "Skilled speakers articulate ideas clearly."
+   },
+   {
+    "verb": "bridge",
+    "vi": "bắc cầu, thu hẹp khoảng cách",
+    "with": "a gap, divides",
+    "eg": "A common language can bridge cultural divides."
+   },
+   {
+    "verb": "master",
+    "vi": "thành thạo hoàn toàn",
+    "with": "a language, grammar",
+    "eg": "It takes years to master a foreign language."
+   }
+  ],
+  "synonyms": [
+   "acquire vs learn (register). acquire ngụ ý tiếp thu tự nhiên, ít nỗ lực có ý thức, hay dùng cho trẻ em và trong văn học thuật. learn trung tính, có nỗ lực học. Thuật ngữ chuẩn là language acquisition.",
+   "language vs tongue. tongue trang trọng và văn chương, chỉ dùng trong cụm cố định như mother tongue hoặc native tongue. Bình thường dùng language. Không nói the English tongue.",
+   "fluency vs accuracy. fluency là nói trôi chảy tự nhiên, accuracy là dùng đúng ngữ pháp và từ vựng. Đây là hai tiêu chí khác nhau, band cao cần cả hai.",
+   "hinder vs prevent (mức độ). hinder là cản trở, làm chậm nhưng việc vẫn có thể xảy ra. prevent là ngăn hoàn toàn không cho xảy ra. Rào cản ngôn ngữ thường hinder chứ ít khi prevent.",
+   "bilingual vs multilingual. bilingual là nói được hai ngôn ngữ, multilingual là nói được nhiều hơn hai. Dùng chính xác theo số lượng ngôn ngữ."
+  ],
+  "samples": [
+   "English has become a lingua franca, enabling people from very different backgrounds to communicate despite persistent language barriers.",
+   "While fluency allows speakers to converse naturally, genuine proficiency also requires an awareness of subtle cultural nuances.",
+   "As globalisation spreads, many minority dialects are becoming endangered, and considerable effort is needed to preserve them.",
+   "Learning a second language arguably does more than aid communication; it can also broaden one's understanding of other cultures."
+  ]
+ },
+ {
+  "n": 11,
+  "topic": "Science & Research",
+  "collocations": [
+   {
+    "term": "a scientific breakthrough",
+    "vi": "đột phá khoa học"
+   },
+   {
+    "term": "empirical evidence",
+    "vi": "bằng chứng thực nghiệm"
+   },
+   {
+    "term": "a peer-reviewed study",
+    "vi": "nghiên cứu bình duyệt"
+   },
+   {
+    "term": "research and development (R&D)",
+    "vi": "nghiên cứu và phát triển"
+   },
+   {
+    "term": "clinical trials",
+    "vi": "thử nghiệm lâm sàng"
+   },
+   {
+    "term": "ethical concerns",
+    "vi": "quan ngại đạo đức"
+   },
+   {
+    "term": "a research grant / funding",
+    "vi": "tài trợ nghiên cứu"
+   },
+   {
+    "term": "pure vs applied research",
+    "vi": "nghiên cứu cơ bản vs ứng dụng"
+   },
+   {
+    "term": "scientific consensus",
+    "vi": "đồng thuận khoa học"
+   },
+   {
+    "term": "unintended consequences",
+    "vi": "hệ quả ngoài ý muốn"
+   },
+   {
+    "term": "reproducibility / replicate a study",
+    "vi": "khả năng tái lập"
+   },
+   {
+    "term": "cutting-edge research",
+    "vi": "nghiên cứu tiên phong"
+   },
+   {
+    "term": "the scientific method",
+    "vi": "phương pháp khoa học"
+   },
+   {
+    "term": "correlation vs causation",
+    "vi": "tương quan vs nhân quả"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "conduct",
+    "vi": "tiến hành",
+    "with": "research, an experiment, a trial",
+    "eg": "The team conducted a five-year trial."
+   },
+   {
+    "verb": "fund / finance",
+    "vi": "tài trợ",
+    "with": "research, a project",
+    "eg": "Governments fund basic research."
+   },
+   {
+    "verb": "accelerate",
+    "vi": "đẩy nhanh",
+    "with": "progress, discovery",
+    "eg": "AI is accelerating drug discovery."
+   },
+   {
+    "verb": "corroborate",
+    "vi": "củng cố bằng bằng chứng thêm",
+    "with": "findings, a hypothesis",
+    "eg": "Later studies corroborated the findings."
+   },
+   {
+    "verb": "refute / debunk",
+    "vi": "bác bỏ bằng bằng chứng",
+    "with": "a claim, a myth, a theory",
+    "eg": "New data refuted the earlier claim."
+   },
+   {
+    "verb": "yield",
+    "vi": "cho ra (kết quả)",
+    "with": "results, data, insights",
+    "eg": "The survey yielded surprising results."
+   },
+   {
+    "verb": "allocate",
+    "vi": "phân bổ",
+    "with": "funding, resources",
+    "eg": "The state allocated more funding to R&D."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm lung lay",
+    "with": "a theory, confidence in",
+    "eg": "The scandal undermined trust in the study."
+   }
+  ],
+  "synonyms": [
+   "corroborate vs confirm vs prove. corroborate thêm bằng chứng ủng hộ, chưa chắc chắn tuyệt đối. confirm xác nhận là đúng. prove rất mạnh, khoa học hiếm khi \"prove\"; lạm dụng prove nghe ngây thơ. Band cao ưu tiên \"support / corroborate / suggest\".",
+   "refute vs deny vs debunk. refute bác bỏ BẰNG bằng chứng. deny chỉ phủ nhận, không cần chứng cứ. debunk vạch trần một lầm tưởng, hơi thân mật. Trong essay dùng refute hoặc disprove.",
+   "theory vs hypothesis. hypothesis là giả thuyết chưa kiểm, có thể sai. theory là giải thích đã được nhiều bằng chứng chống lưng. Học viên hay dùng \"theory\" khi ý là \"hypothesis\", đó là lỗi nghĩa.",
+   "evidence (không đếm được). evidence luôn số ít, không có \"evidences\" và không \"an evidence\". Muốn đếm dùng \"a piece of evidence\". Tương tự \"research\" không đếm, nói \"a study\" hoặc \"a piece of research\", không \"a research\".",
+   "discover vs invent. discover tìm ra cái đã tồn tại (discover a planet, a cause). invent tạo ra cái mới (invent a device). \"Scientists invented gravity\" là sai nghĩa."
+  ],
+  "samples": [
+   "Before a new drug is approved, it must undergo years of clinical trials to yield reliable data on its safety.",
+   "A single study rarely settles a debate; its findings must be replicated before they gain scientific consensus.",
+   "Governments that fund pure research often see no immediate return, yet such work frequently paves the way for later breakthroughs.",
+   "Emerging evidence suggests a link between the two, but researchers caution that correlation does not establish causation."
+  ]
+ },
+ {
+  "n": 12,
+  "topic": "Technology",
+  "collocations": [
+   {
+    "term": "automation",
+    "vi": "tự động hóa"
+   },
+   {
+    "term": "artificial intelligence",
+    "vi": "trí tuệ nhân tạo"
+   },
+   {
+    "term": "digital literacy",
+    "vi": "kỹ năng số"
+   },
+   {
+    "term": "technological advances",
+    "vi": "tiến bộ công nghệ"
+   },
+   {
+    "term": "innovation",
+    "vi": "sự đổi mới sáng tạo"
+   },
+   {
+    "term": "surveillance",
+    "vi": "sự giám sát"
+   },
+   {
+    "term": "data privacy",
+    "vi": "quyền riêng tư dữ liệu"
+   },
+   {
+    "term": "algorithm",
+    "vi": "thuật toán"
+   },
+   {
+    "term": "connectivity",
+    "vi": "khả năng kết nối"
+   },
+   {
+    "term": "obsolescence",
+    "vi": "sự lỗi thời"
+   },
+   {
+    "term": "productivity",
+    "vi": "năng suất"
+   },
+   {
+    "term": "infrastructure",
+    "vi": "hạ tầng"
+   },
+   {
+    "term": "dependence on technology",
+    "vi": "sự phụ thuộc công nghệ"
+   },
+   {
+    "term": "cutting-edge technology",
+    "vi": "công nghệ tiên tiến nhất"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "automate",
+    "vi": "thay quy trình bằng phần mềm, thường hàm ý mất việc",
+    "with": "tasks, jobs, processes",
+    "eg": "Firms are racing to automate routine tasks to cut costs."
+   },
+   {
+    "verb": "streamline",
+    "vi": "làm gọn và hiệu quả hơn, tích cực",
+    "with": "processes, operations, workflow",
+    "eg": "Digital tools streamline administrative processes across departments."
+   },
+   {
+    "verb": "harness",
+    "vi": "khai thác sức mạnh theo hướng tích cực",
+    "with": "potential, power, technology",
+    "eg": "Universities are learning to harness the potential of AI in teaching."
+   },
+   {
+    "verb": "disrupt",
+    "vi": "làm đảo lộn ngành hoặc thị trường",
+    "with": "industries, markets, the status quo",
+    "eg": "Streaming platforms have disrupted traditional broadcasting."
+   },
+   {
+    "verb": "accelerate",
+    "vi": "đẩy nhanh",
+    "with": "progress, innovation, adoption",
+    "eg": "The pandemic accelerated the adoption of remote-working tools."
+   },
+   {
+    "verb": "render",
+    "vi": "khiến trở thành, hay đi với obsolete",
+    "with": "skills obsolete, jobs redundant",
+    "eg": "Automation may render many manual skills obsolete."
+   },
+   {
+    "verb": "safeguard",
+    "vi": "bảo vệ dữ liệu và quyền riêng tư",
+    "with": "privacy, data, information",
+    "eg": "Governments must safeguard citizens' personal data."
+   },
+   {
+    "verb": "outpace",
+    "vi": "tiến nhanh vượt qua",
+    "with": "regulation, understanding",
+    "eg": "Technological change is outpacing regulation."
+   }
+  ],
+  "synonyms": [
+   "automate vs mechanise. automate là dùng phần mềm hoặc AI thay quy trình. mechanise thiên về thay bằng máy móc cơ khí. Văn cảnh hiện đại dùng automate phổ biến hơn.",
+   "harness vs exploit. harness có prosody tích cực, khai thác tiềm năng tốt. exploit trung tính với tài nguyên nhưng tiêu cực khi nói về con người. Với công nghệ nên dùng harness.",
+   "technology không đếm vs technologies. technology số ít không đếm khi nói chung. technologies số nhiều chỉ các loại công nghệ cụ thể. Không nói a technology theo nghĩa chung chung.",
+   "cutting-edge vs advanced. cutting-edge mạnh hơn, tiên phong nhất. advanced chỉ trình độ cao nói chung. cutting-edge hay đi với technology và research.",
+   "prosody của disrupt. trong kinh doanh disrupt nay mang nghĩa tích cực là đổi mới cả ngành. Nhưng nghĩa gốc là gây gián đoạn tiêu cực. Phải xét ngữ cảnh, disrupt đi thẳng với tân ngữ không cần giới từ."
+  ],
+  "samples": [
+   "While automation undoubtedly boosts productivity, it may also render a significant proportion of low-skilled jobs redundant.",
+   "There is growing concern that technological change is outpacing our ability to regulate it effectively.",
+   "If harnessed responsibly, artificial intelligence could transform healthcare, though its benefits are unlikely to be evenly distributed.",
+   "Critics argue that the relentless drive to automate risks eroding the value of human judgement in the workplace."
+  ]
+ },
+ {
+  "n": 13,
+  "topic": "Media & the Internet",
+  "collocations": [
+   {
+    "term": "mass media",
+    "vi": "truyền thông đại chúng"
+   },
+   {
+    "term": "social media",
+    "vi": "mạng xã hội"
+   },
+   {
+    "term": "misinformation",
+    "vi": "thông tin sai không cố ý"
+   },
+   {
+    "term": "disinformation",
+    "vi": "thông tin sai cố ý"
+   },
+   {
+    "term": "echo chamber",
+    "vi": "buồng vọng âm"
+   },
+   {
+    "term": "clickbait",
+    "vi": "tiêu đề giật gân câu view"
+   },
+   {
+    "term": "censorship",
+    "vi": "sự kiểm duyệt"
+   },
+   {
+    "term": "press freedom",
+    "vi": "tự do báo chí"
+   },
+   {
+    "term": "news outlet",
+    "vi": "cơ quan báo chí"
+   },
+   {
+    "term": "online anonymity",
+    "vi": "sự ẩn danh trực tuyến"
+   },
+   {
+    "term": "filter bubble",
+    "vi": "bong bóng lọc thông tin"
+   },
+   {
+    "term": "digital footprint",
+    "vi": "dấu chân số"
+   },
+   {
+    "term": "public discourse",
+    "vi": "diễn ngôn công cộng"
+   },
+   {
+    "term": "screen time",
+    "vi": "thời gian dùng màn hình"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "disseminate",
+    "vi": "phát tán thông tin, trang trọng và trung tính",
+    "with": "information, news, propaganda",
+    "eg": "Social platforms disseminate news faster than traditional outlets."
+   },
+   {
+    "verb": "amplify",
+    "vi": "khuếch đại, thường đi với nội dung tiêu cực",
+    "with": "voices, rumours, misinformation",
+    "eg": "Recommendation algorithms tend to amplify sensational content."
+   },
+   {
+    "verb": "distort",
+    "vi": "bóp méo làm sai bản chất",
+    "with": "facts, the truth, reality",
+    "eg": "Selective reporting can distort public understanding of events."
+   },
+   {
+    "verb": "manipulate",
+    "vi": "thao túng",
+    "with": "public opinion, emotions, users",
+    "eg": "Political actors use bots to manipulate public opinion."
+   },
+   {
+    "verb": "verify",
+    "vi": "kiểm chứng",
+    "with": "sources, claims, facts",
+    "eg": "Readers should verify claims before sharing them."
+   },
+   {
+    "verb": "curate",
+    "vi": "tuyển chọn và biên tập nội dung",
+    "with": "content, a feed, information",
+    "eg": "Editors carefully curate content to suit their audience."
+   },
+   {
+    "verb": "sensationalise",
+    "vi": "giật gân hóa",
+    "with": "stories, events, crime",
+    "eg": "Tabloids often sensationalise minor incidents."
+   },
+   {
+    "verb": "moderate",
+    "vi": "kiểm duyệt và điều tiết nội dung",
+    "with": "content, comments, forums",
+    "eg": "Platforms struggle to moderate harmful content at scale."
+   }
+  ],
+  "synonyms": [
+   "misinformation vs disinformation. misinformation là tin sai lan truyền không cố ý. disinformation là cố ý bịa đặt để lừa. Band 8 phân biệt rõ chủ đích.",
+   "media vs medium. the media trong báo chí có thể đi với động từ số ít hoặc số nhiều. Về gốc media là số nhiều của medium. Không nói a media, dùng a medium hoặc a media outlet.",
+   "prosody của amplify. trên mạng xã hội amplify hay đi với nội dung tiêu cực như rumours hoặc hate. Không dùng amplify để khen theo nghĩa trung tính như increase.",
+   "censorship không đếm được. censorship là danh từ không đếm. censor có thể là động từ hoặc danh từ chỉ người kiểm duyệt. Không nói a censorship.",
+   "distort vs exaggerate. distort là bóp méo làm sai bản chất. exaggerate chỉ phóng đại mức độ. distort nặng hơn về tính sai lệch."
+  ],
+  "samples": [
+   "The proliferation of social media has arguably made it far harder to distinguish reliable reporting from misinformation.",
+   "While the internet has democratised access to information, it has also allowed harmful content to be amplified on an unprecedented scale.",
+   "Critics contend that news outlets increasingly sensationalise stories in a bid to capture dwindling audiences.",
+   "There is a compelling case for teaching young people to verify sources, though media literacy alone is unlikely to eliminate the problem."
+  ]
+ },
+ {
+  "n": 14,
+  "topic": "Space & Exploration",
+  "collocations": [
+   {
+    "term": "space exploration",
+    "vi": "thám hiểm không gian"
+   },
+   {
+    "term": "outer space",
+    "vi": "không gian vũ trụ"
+   },
+   {
+    "term": "spacecraft",
+    "vi": "tàu vũ trụ"
+   },
+   {
+    "term": "satellite",
+    "vi": "vệ tinh"
+   },
+   {
+    "term": "orbit",
+    "vi": "quỹ đạo"
+   },
+   {
+    "term": "astronaut",
+    "vi": "phi hành gia"
+   },
+   {
+    "term": "space agency",
+    "vi": "cơ quan vũ trụ"
+   },
+   {
+    "term": "launch",
+    "vi": "vụ phóng"
+   },
+   {
+    "term": "celestial body",
+    "vi": "thiên thể"
+   },
+   {
+    "term": "colonisation",
+    "vi": "sự định cư chiếm cứ"
+   },
+   {
+    "term": "the space race",
+    "vi": "cuộc đua vũ trụ"
+   },
+   {
+    "term": "extraterrestrial life",
+    "vi": "sự sống ngoài Trái Đất"
+   },
+   {
+    "term": "space debris",
+    "vi": "rác vũ trụ"
+   },
+   {
+    "term": "planetary exploration",
+    "vi": "thám hiểm hành tinh"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "launch",
+    "vi": "phóng tàu hoặc vệ tinh",
+    "with": "a rocket, a satellite, a mission",
+    "eg": "The agency launched a probe to study the outer planets."
+   },
+   {
+    "verb": "orbit",
+    "vi": "quay quanh",
+    "with": "the Earth, a planet, the Sun",
+    "eg": "Thousands of satellites now orbit the Earth."
+   },
+   {
+    "verb": "explore",
+    "vi": "thám hiểm khảo sát",
+    "with": "space, a planet, the universe",
+    "eg": "Robotic rovers explore terrain too dangerous for humans."
+   },
+   {
+    "verb": "colonise",
+    "vi": "định cư hoặc chiếm cứ",
+    "with": "Mars, other planets, space",
+    "eg": "Some entrepreneurs dream of colonising Mars within decades."
+   },
+   {
+    "verb": "fund",
+    "vi": "cấp vốn",
+    "with": "a mission, research, a programme",
+    "eg": "Governments are increasingly reluctant to fund costly space programmes."
+   },
+   {
+    "verb": "deploy",
+    "vi": "triển khai thiết bị hoặc vệ tinh",
+    "with": "a satellite, instruments, a telescope",
+    "eg": "The crew deployed a new telescope into orbit."
+   },
+   {
+    "verb": "divert",
+    "vi": "chuyển hướng nguồn lực",
+    "with": "funds, resources, money",
+    "eg": "Critics argue that space budgets divert funds from pressing needs."
+   },
+   {
+    "verb": "propel",
+    "vi": "đẩy đi hoặc thúc đẩy",
+    "with": "a rocket, progress, innovation",
+    "eg": "Fierce competition propelled rapid progress during the space race."
+   }
+  ],
+  "synonyms": [
+   "space không đếm và không mạo từ. khi nói vũ trụ dùng space không mạo từ như in space hoặc explore space. a space nghĩa khoảng trống, khác hẳn.",
+   "explore vs discover. explore là quá trình khảo sát. discover là khoảnh khắc phát hiện ra. explore không đảm bảo tìm thấy điều gì.",
+   "prosody của colonise. colonise mang hàm ý lịch sử tiêu cực gắn với thực dân. Khi nói định cư sao Hỏa nhiều người thích settle vì trung tính hơn. Band 8 ý thức sắc thái này.",
+   "launch động từ và danh từ. launch vừa là động từ vừa là danh từ đếm được như a launch hoặc two launches. Đi với rocket, satellite, mission. Không nói do a launch.",
+   "extraterrestrial vs alien. extraterrestrial trang trọng và khoa học. alien đời thường và văn hóa đại chúng. Trong bài luận dùng extraterrestrial life chuẩn hơn."
+  ],
+  "samples": [
+   "Proponents maintain that space exploration drives technological innovation that ultimately benefits everyday life on Earth.",
+   "Sceptics question whether it is justifiable to fund ambitious missions to Mars while urgent problems remain unsolved at home.",
+   "Although colonising other planets remains largely speculative, the research it inspires may prove valuable in its own right.",
+   "The growing accumulation of space debris poses a genuine threat to the satellites on which modern communication depends."
+  ]
+ },
+ {
+  "n": 15,
+  "topic": "Environment & Climate",
+  "collocations": [
+   {
+    "term": "climate change",
+    "vi": "biến đổi khí hậu"
+   },
+   {
+    "term": "global warming",
+    "vi": "sự nóng lên toàn cầu"
+   },
+   {
+    "term": "greenhouse gas emissions",
+    "vi": "khí thải nhà kính"
+   },
+   {
+    "term": "carbon footprint",
+    "vi": "dấu chân carbon"
+   },
+   {
+    "term": "renewable energy",
+    "vi": "năng lượng tái tạo"
+   },
+   {
+    "term": "fossil fuels",
+    "vi": "nhiên liệu hóa thạch"
+   },
+   {
+    "term": "deforestation",
+    "vi": "nạn phá rừng"
+   },
+   {
+    "term": "biodiversity",
+    "vi": "đa dạng sinh học"
+   },
+   {
+    "term": "sustainability",
+    "vi": "tính bền vững"
+   },
+   {
+    "term": "conservation",
+    "vi": "sự bảo tồn"
+   },
+   {
+    "term": "pollution",
+    "vi": "ô nhiễm"
+   },
+   {
+    "term": "natural resources",
+    "vi": "tài nguyên thiên nhiên"
+   },
+   {
+    "term": "extreme weather",
+    "vi": "thời tiết cực đoan"
+   },
+   {
+    "term": "ecosystem",
+    "vi": "hệ sinh thái"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "mitigate",
+    "vi": "giảm nhẹ tác động xấu",
+    "with": "climate change, the effects, risks",
+    "eg": "Large-scale reforestation can help mitigate the effects of climate change."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế cái đang tăng quá mức",
+    "with": "emissions, pollution, consumption",
+    "eg": "Stricter laws are needed to curb carbon emissions."
+   },
+   {
+    "verb": "deplete",
+    "vi": "làm cạn kiệt",
+    "with": "resources, reserves, stocks",
+    "eg": "Overfishing rapidly depletes marine stocks."
+   },
+   {
+    "verb": "offset",
+    "vi": "bù trừ lượng carbon",
+    "with": "emissions, carbon, the impact",
+    "eg": "Companies plant trees to offset their carbon emissions."
+   },
+   {
+    "verb": "degrade",
+    "vi": "làm suy thoái",
+    "with": "the environment, habitats, soil",
+    "eg": "Intensive farming gradually degrades the soil."
+   },
+   {
+    "verb": "conserve",
+    "vi": "bảo tồn hoặc tiết kiệm",
+    "with": "energy, water, biodiversity",
+    "eg": "Simple habits can help households conserve energy."
+   },
+   {
+    "verb": "emit",
+    "vi": "thải ra",
+    "with": "carbon dioxide, gases, pollutants",
+    "eg": "Coal-fired plants emit vast quantities of carbon dioxide."
+   },
+   {
+    "verb": "exacerbate",
+    "vi": "làm trầm trọng thêm",
+    "with": "the problem, warming, drought",
+    "eg": "Deforestation exacerbates the effects of global warming."
+   }
+  ],
+  "synonyms": [
+   "mitigate vs prevent. mitigate là giảm nhẹ khi vấn đề đã hoặc đang xảy ra, không loại bỏ hẳn. prevent là ngăn từ đầu. Với biến đổi khí hậu thường dùng mitigate vì đã diễn ra.",
+   "curb vs reduce. curb hàm ý kiểm soát cái đang tăng quá mức như emissions hoặc spending. reduce trung tính chung. curb trang trọng hơn và có prosody kiểm soát cái tiêu cực.",
+   "emissions thường số nhiều. trong ngữ cảnh khí hậu luôn dùng số nhiều emissions như carbon emissions hoặc greenhouse gas emissions. Đừng viết emission số ít.",
+   "deplete vs exhaust. cả hai nghĩa là cạn kiệt tài nguyên. deplete phổ biến và học thuật. exhaust mạnh hơn là cạn hoàn toàn và còn nghĩa kiệt sức. deplete an toàn với resources.",
+   "impact on. impact đi với giới từ on như impact on the environment. Là danh từ đếm được như a serious impact và cũng là động từ. Tránh impact to."
+  ],
+  "samples": [
+   "Unless governments act decisively to curb emissions, the most catastrophic effects of climate change may become irreversible.",
+   "While renewable energy offers a promising alternative, the transition away from fossil fuels is likely to be neither cheap nor straightforward.",
+   "There is broad scientific consensus that human activity has significantly exacerbated global warming.",
+   "Protecting biodiversity is arguably as urgent as reducing emissions, though it tends to receive far less attention."
+  ]
+ },
+ {
+  "n": 16,
+  "topic": "Energy & Resources",
+  "collocations": [
+   {
+    "term": "renewable energy",
+    "vi": "năng lượng tái tạo"
+   },
+   {
+    "term": "fossil fuels",
+    "vi": "nhiên liệu hóa thạch"
+   },
+   {
+    "term": "carbon emissions",
+    "vi": "khí thải carbon"
+   },
+   {
+    "term": "energy consumption",
+    "vi": "mức tiêu thụ năng lượng"
+   },
+   {
+    "term": "depletion",
+    "vi": "sự cạn kiệt"
+   },
+   {
+    "term": "power grid",
+    "vi": "lưới điện"
+   },
+   {
+    "term": "subsidies",
+    "vi": "khoản trợ cấp"
+   },
+   {
+    "term": "infrastructure",
+    "vi": "cơ sở hạ tầng"
+   },
+   {
+    "term": "carbon footprint",
+    "vi": "dấu chân carbon"
+   },
+   {
+    "term": "energy security",
+    "vi": "an ninh năng lượng"
+   },
+   {
+    "term": "finite resources",
+    "vi": "tài nguyên hữu hạn"
+   },
+   {
+    "term": "nuclear power",
+    "vi": "điện hạt nhân"
+   },
+   {
+    "term": "reliance",
+    "vi": "sự phụ thuộc"
+   },
+   {
+    "term": "transition",
+    "vi": "sự chuyển đổi"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "deplete",
+    "vi": "làm cạn kiệt dần tới mức nguy hiểm",
+    "with": "reserves, resources",
+    "eg": "Intensive extraction depletes natural reserves within a few decades."
+   },
+   {
+    "verb": "harness",
+    "vi": "khai thác tận dụng nguồn sẵn có",
+    "with": "energy, wind, potential",
+    "eg": "Countries are racing to harness solar and wind energy."
+   },
+   {
+    "verb": "phase out",
+    "vi": "loại bỏ dần theo lộ trình",
+    "with": "coal, subsidies",
+    "eg": "Several governments have pledged to phase out coal-fired plants by 2035."
+   },
+   {
+    "verb": "curb",
+    "vi": "kìm hãm cái đang tăng và gây hại",
+    "with": "emissions, consumption",
+    "eg": "Carbon taxes are designed to curb industrial emissions."
+   },
+   {
+    "verb": "offset",
+    "vi": "bù trừ trung hòa",
+    "with": "emissions, carbon",
+    "eg": "Airlines let passengers offset their carbon emissions by funding reforestation."
+   },
+   {
+    "verb": "ramp up",
+    "vi": "đẩy mạnh tăng nhanh",
+    "with": "production, capacity",
+    "eg": "Manufacturers have ramped up battery production sharply."
+   },
+   {
+    "verb": "subsidise",
+    "vi": "trợ cấp bằng tiền nhà nước",
+    "with": "industry, producers",
+    "eg": "Many states still heavily subsidise fossil fuels."
+   },
+   {
+    "verb": "conserve",
+    "vi": "giữ gìn dùng tiết kiệm",
+    "with": "energy, water, resources",
+    "eg": "Simple habits can help households conserve energy."
+   }
+  ],
+  "synonyms": [
+   "deplete vs consume. consume trung tính chỉ việc dùng, deplete mang prosody tiêu cực, hàm ý làm cạn tới mức nguy hiểm.",
+   "renewable vs sustainable. renewable nói nguồn tự tái tạo được, sustainable nói cách khai thác duy trì lâu dài, hai từ không đồng nghĩa.",
+   "reliance on. giới từ chuẩn là reliance on hoặc dependence on, tuyệt đối không dùng reliance in.",
+   "curb vs reduce. reduce trung tính chỉ giảm, curb hàm ý kiểm soát cái đang tăng và gây hại như emissions.",
+   "energy không đếm được. energy là danh từ không đếm nghĩa chung, không nói an energy, dạng energies mang nghĩa khác."
+  ],
+  "samples": [
+   "There is growing consensus that governments must phase out fossil fuels, yet the pace of this transition remains fiercely contested.",
+   "While renewable energy has become markedly cheaper, critics point out that it cannot yet fully replace conventional sources on demand.",
+   "Curbing carbon emissions arguably requires not only new technology but a fundamental shift in how societies consume energy.",
+   "Heavily subsidising fossil fuels, some economists contend, undermines the very incentives needed to harness cleaner alternatives."
+  ]
+ },
+ {
+  "n": 17,
+  "topic": "Food & Agriculture",
+  "collocations": [
+   {
+    "term": "food security",
+    "vi": "an ninh lương thực"
+   },
+   {
+    "term": "crop yields",
+    "vi": "sản lượng mùa vụ"
+   },
+   {
+    "term": "arable land",
+    "vi": "đất canh tác"
+   },
+   {
+    "term": "pesticides",
+    "vi": "thuốc trừ sâu"
+   },
+   {
+    "term": "livestock",
+    "vi": "gia súc"
+   },
+   {
+    "term": "malnutrition",
+    "vi": "suy dinh dưỡng"
+   },
+   {
+    "term": "famine",
+    "vi": "nạn đói diện rộng"
+   },
+   {
+    "term": "subsistence farming",
+    "vi": "canh tác tự cung tự cấp"
+   },
+   {
+    "term": "soil degradation",
+    "vi": "sự suy thoái đất"
+   },
+   {
+    "term": "genetically modified crops",
+    "vi": "cây trồng biến đổi gen"
+   },
+   {
+    "term": "irrigation",
+    "vi": "tưới tiêu"
+   },
+   {
+    "term": "self-sufficiency",
+    "vi": "khả năng tự chủ lương thực"
+   },
+   {
+    "term": "monoculture",
+    "vi": "canh tác độc canh"
+   },
+   {
+    "term": "supply chain",
+    "vi": "chuỗi cung ứng"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "cultivate",
+    "vi": "canh tác trồng trọt",
+    "with": "crops, land",
+    "eg": "Farmers cultivate rice on terraced hillsides."
+   },
+   {
+    "verb": "boost",
+    "vi": "thúc đẩy tăng mạnh",
+    "with": "yields, output, productivity",
+    "eg": "Fertilisers can boost crop yields substantially."
+   },
+   {
+    "verb": "deplete",
+    "vi": "làm bạc màu cạn dinh dưỡng",
+    "with": "soil, nutrients",
+    "eg": "Intensive farming rapidly depletes the soil of nutrients."
+   },
+   {
+    "verb": "feed",
+    "vi": "nuôi cung cấp lương thực cho",
+    "with": "population",
+    "eg": "Feeding a growing population is a mounting challenge."
+   },
+   {
+    "verb": "import",
+    "vi": "nhập khẩu",
+    "with": "grain, food",
+    "eg": "The nation imports most of its wheat from abroad."
+   },
+   {
+    "verb": "ration",
+    "vi": "phân phối định lượng khi khan hiếm",
+    "with": "food, supplies",
+    "eg": "During the war, governments rationed basic foods."
+   },
+   {
+    "verb": "preserve",
+    "vi": "bảo quản chống hư hỏng",
+    "with": "produce, meat",
+    "eg": "Salting was traditionally used to preserve meat."
+   },
+   {
+    "verb": "intensify",
+    "vi": "thâm canh đẩy cường độ cao",
+    "with": "production, farming",
+    "eg": "Pressure to intensify production has degraded much farmland."
+   }
+  ],
+  "synonyms": [
+   "livestock luôn số nhiều. livestock là danh từ tập hợp, đi với động từ số nhiều, không có dạng livestocks.",
+   "deplete something of something. cấu trúc chuẩn là deplete the soil of nutrients, giới từ đi kèm là of chứ không phải from.",
+   "crop vs harvest. crop là cây trồng đang ở ngoài đồng, harvest là vụ thu hoạch hoặc sản lượng đã thu, không thay thế tùy tiện.",
+   "famine vs starvation. famine chỉ nạn đói trên diện rộng của một vùng, starvation chỉ tình trạng đói ăn của cá nhân, phạm vi nghĩa khác nhau.",
+   "feed vs nourish. feed trung tính chỉ cho ăn, nourish mang prosody tích cực, hàm ý cung cấp dưỡng chất tốt cho phát triển."
+  ],
+  "samples": [
+   "Feeding a rapidly growing population without further depleting the soil is likely to be one of the defining challenges of this century.",
+   "Although genetically modified crops can boost yields dramatically, their long-term effects remain a matter of considerable debate.",
+   "It could be argued that heavy reliance on imported grain leaves a nation dangerously exposed to global price shocks.",
+   "Intensifying production may raise output in the short term, but it often degrades the arable land on which farming ultimately depends."
+  ]
+ },
+ {
+  "n": 18,
+  "topic": "Culture & Globalisation",
+  "collocations": [
+   {
+    "term": "cultural identity",
+    "vi": "bản sắc văn hóa"
+   },
+   {
+    "term": "globalisation",
+    "vi": "toàn cầu hóa"
+   },
+   {
+    "term": "cultural heritage",
+    "vi": "di sản văn hóa"
+   },
+   {
+    "term": "homogenisation",
+    "vi": "sự đồng nhất hóa"
+   },
+   {
+    "term": "diversity",
+    "vi": "sự đa dạng"
+   },
+   {
+    "term": "assimilation",
+    "vi": "sự hòa nhập đồng hóa"
+   },
+   {
+    "term": "indigenous cultures",
+    "vi": "văn hóa bản địa"
+   },
+   {
+    "term": "multinational corporations",
+    "vi": "tập đoàn đa quốc gia"
+   },
+   {
+    "term": "cultural exchange",
+    "vi": "giao lưu văn hóa"
+   },
+   {
+    "term": "customs",
+    "vi": "phong tục"
+   },
+   {
+    "term": "Westernisation",
+    "vi": "sự Tây hóa"
+   },
+   {
+    "term": "national identity",
+    "vi": "bản sắc dân tộc"
+   },
+   {
+    "term": "cross-cultural communication",
+    "vi": "giao tiếp liên văn hóa"
+   },
+   {
+    "term": "consumerism",
+    "vi": "chủ nghĩa tiêu dùng"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "erode",
+    "vi": "bào mòn dần theo thời gian",
+    "with": "identity, traditions",
+    "eg": "Globalisation can slowly erode local traditions."
+   },
+   {
+    "verb": "preserve",
+    "vi": "gìn giữ bảo tồn",
+    "with": "heritage, customs",
+    "eg": "Museums help preserve fragile cultural heritage."
+   },
+   {
+    "verb": "assimilate",
+    "vi": "hòa nhập đồng hóa vào",
+    "with": "immigrants, minorities",
+    "eg": "Immigrants often feel pressure to assimilate into the mainstream."
+   },
+   {
+    "verb": "foster",
+    "vi": "nuôi dưỡng thúc đẩy",
+    "with": "understanding, tolerance",
+    "eg": "Exchange programmes foster mutual understanding."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm suy yếu ngầm nền tảng",
+    "with": "values, identity",
+    "eg": "Mass media can quietly undermine traditional values."
+   },
+   {
+    "verb": "homogenise",
+    "vi": "đồng nhất hóa xóa khác biệt",
+    "with": "culture, tastes",
+    "eg": "Global brands tend to homogenise consumer tastes."
+   },
+   {
+    "verb": "embrace",
+    "vi": "đón nhận cởi mở",
+    "with": "diversity, change",
+    "eg": "Younger generations tend to embrace cultural diversity."
+   },
+   {
+    "verb": "dilute",
+    "vi": "làm loãng nhạt bớt bản sắc",
+    "with": "identity, meaning",
+    "eg": "Commercialisation can dilute the meaning of traditional festivals."
+   }
+  ],
+  "synonyms": [
+   "assimilate into. cấu trúc chuẩn là assimilate into a society, giới từ đi kèm là into, không dùng assimilate to.",
+   "homogenise vs standardise. standardise trung tính làm theo một chuẩn chung, homogenise mang prosody tiêu cực với văn hóa vì hàm ý xóa khác biệt.",
+   "heritage không đếm được. cultural heritage là danh từ không đếm, không nói a heritage hay heritages.",
+   "dilute vs weaken. dilute là ẩn dụ pha loãng làm mất độ đậm đặc của bản sắc, weaken trung tính và chung chung hơn.",
+   "custom vs costume. custom là phong tục tập quán, costume là trang phục, hai từ gần âm nhưng nghĩa khác hẳn nhau."
+  ],
+  "samples": [
+   "Globalisation, its critics warn, tends to homogenise local cultures, gradually eroding the traditions that give communities their identity.",
+   "While cultural exchange can foster mutual understanding, it may also pressure minorities to assimilate at the expense of their heritage.",
+   "There is a persuasive case that governments should actively preserve cultural heritage rather than leave it entirely to market forces.",
+   "Whether the spread of global brands genuinely dilutes national identity, or simply broadens people's choices, remains open to debate."
+  ]
+ },
+ {
+  "n": 19,
+  "topic": "Art & Creativity",
+  "collocations": [
+   {
+    "term": "creativity",
+    "vi": "sự sáng tạo"
+   },
+   {
+    "term": "self-expression",
+    "vi": "sự thể hiện bản thân"
+   },
+   {
+    "term": "imagination",
+    "vi": "trí tưởng tượng"
+   },
+   {
+    "term": "masterpiece",
+    "vi": "kiệt tác"
+   },
+   {
+    "term": "aesthetic value",
+    "vi": "giá trị thẩm mỹ"
+   },
+   {
+    "term": "artistic freedom",
+    "vi": "tự do nghệ thuật"
+   },
+   {
+    "term": "arts funding",
+    "vi": "tài trợ cho nghệ thuật"
+   },
+   {
+    "term": "cultural enrichment",
+    "vi": "sự làm giàu đời sống văn hóa"
+   },
+   {
+    "term": "innovation",
+    "vi": "sự đổi mới"
+   },
+   {
+    "term": "patronage",
+    "vi": "sự bảo trợ nghệ thuật"
+   },
+   {
+    "term": "craftsmanship",
+    "vi": "tay nghề thủ công"
+   },
+   {
+    "term": "subject matter",
+    "vi": "đề tài chủ đề"
+   },
+   {
+    "term": "commercialisation",
+    "vi": "sự thương mại hóa"
+   },
+   {
+    "term": "inspiration",
+    "vi": "nguồn cảm hứng"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "foster",
+    "vi": "nuôi dưỡng khơi dậy",
+    "with": "creativity, talent",
+    "eg": "Art education fosters creativity in young minds."
+   },
+   {
+    "verb": "stifle",
+    "vi": "bóp nghẹt kìm hãm hoàn toàn",
+    "with": "creativity, expression",
+    "eg": "Rigid rote learning can stifle creativity."
+   },
+   {
+    "verb": "convey",
+    "vi": "truyền tải tới người xem người đọc",
+    "with": "emotion, message, meaning",
+    "eg": "A painting can convey emotions that words cannot."
+   },
+   {
+    "verb": "evoke",
+    "vi": "gợi lên khơi gợi cảm xúc ký ức",
+    "with": "emotion, memories, response",
+    "eg": "The mural evokes a deep sense of nostalgia."
+   },
+   {
+    "verb": "nurture",
+    "vi": "bồi dưỡng ươm mầm",
+    "with": "talent, imagination",
+    "eg": "Good mentors nurture young talent patiently."
+   },
+   {
+    "verb": "fund",
+    "vi": "tài trợ bằng tiền",
+    "with": "projects, the arts",
+    "eg": "The state should adequately fund the arts."
+   },
+   {
+    "verb": "commercialise",
+    "vi": "thương mại hóa",
+    "with": "art, culture, music",
+    "eg": "Streaming has heavily commercialised music."
+   },
+   {
+    "verb": "inspire",
+    "vi": "truyền cảm hứng",
+    "with": "generations, artists",
+    "eg": "Her work has inspired a whole generation of designers."
+   }
+  ],
+  "synonyms": [
+   "stifle vs discourage. discourage nhẹ, chỉ làm nản lòng, stifle rất mạnh với prosody tiêu cực, hàm ý bóp nghẹt hoàn toàn.",
+   "evoke vs provoke. evoke gợi cảm xúc ký ức êm dịu, provoke mang prosody tiêu cực, hàm ý khơi ra phản ứng mạnh thường khó chịu.",
+   "creativity không đếm được. creativity là danh từ không đếm, không nói a creativity hay creativities.",
+   "convey vs express. express là chủ thể tự bộc lộ, convey nhấn vào việc truyền thông điệp tới người nhận, hướng đi khác nhau.",
+   "artistic vs artificial. artistic thuộc về nghệ thuật, artificial là nhân tạo hoặc giả tạo, hai từ gần âm nhưng nghĩa khác hẳn."
+  ],
+  "samples": [
+   "A rigid, exam-driven education system, many argue, risks stifling the very creativity that societies increasingly claim to value.",
+   "Public funding for the arts is often the first casualty of budget cuts, even though its cultural benefits are arguably immeasurable.",
+   "Art can convey emotions and ideas that ordinary language struggles to capture, which may explain its enduring social value.",
+   "While commercialisation has made art more accessible, some fear it also erodes the artistic freedom on which genuine innovation depends."
+  ]
+ },
+ {
+  "n": 20,
+  "topic": "Travel & Tourism",
+  "collocations": [
+   {
+    "term": "mass tourism",
+    "vi": "du lịch đại trà"
+   },
+   {
+    "term": "tourist destination",
+    "vi": "điểm đến du lịch"
+   },
+   {
+    "term": "cultural heritage",
+    "vi": "di sản văn hóa"
+   },
+   {
+    "term": "local economy",
+    "vi": "kinh tế địa phương"
+   },
+   {
+    "term": "ecotourism",
+    "vi": "du lịch sinh thái"
+   },
+   {
+    "term": "carbon footprint",
+    "vi": "lượng khí thải carbon để lại"
+   },
+   {
+    "term": "seasonal employment",
+    "vi": "việc làm theo mùa"
+   },
+   {
+    "term": "overtourism",
+    "vi": "tình trạng quá tải du lịch"
+   },
+   {
+    "term": "hospitality industry",
+    "vi": "ngành khách sạn nhà hàng"
+   },
+   {
+    "term": "foreign exchange earnings",
+    "vi": "nguồn thu ngoại tệ"
+   },
+   {
+    "term": "authenticity",
+    "vi": "tính chân thực, bản sắc gốc"
+   },
+   {
+    "term": "infrastructure",
+    "vi": "hạ tầng"
+   },
+   {
+    "term": "tourist hotspot",
+    "vi": "điểm nóng du lịch"
+   },
+   {
+    "term": "environmental degradation",
+    "vi": "suy thoái môi trường"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "boost",
+    "vi": "thúc đẩy mạnh, tích cực",
+    "with": "the local economy, revenue",
+    "eg": "Well-managed tourism can boost the local economy by creating jobs."
+   },
+   {
+    "verb": "generate",
+    "vi": "tạo ra (thu nhập, việc làm)",
+    "with": "revenue, income, employment",
+    "eg": "Tourism generates substantial revenue for host communities."
+   },
+   {
+    "verb": "preserve",
+    "vi": "bảo tồn nguyên trạng",
+    "with": "cultural heritage, traditions",
+    "eg": "Governments should preserve cultural heritage rather than exploit it."
+   },
+   {
+    "verb": "erode",
+    "vi": "bào mòn dần, tiêu cực",
+    "with": "authenticity, traditions",
+    "eg": "Mass tourism can gradually erode the authenticity of a place."
+   },
+   {
+    "verb": "strain",
+    "vi": "gây quá tải",
+    "with": "infrastructure, resources",
+    "eg": "A sudden influx of visitors strains local infrastructure."
+   },
+   {
+    "verb": "attract",
+    "vi": "thu hút",
+    "with": "visitors, investment",
+    "eg": "Historic sites attract millions of visitors each year."
+   },
+   {
+    "verb": "commodify",
+    "vi": "biến thành hàng hóa, tiêu cực",
+    "with": "culture, traditions",
+    "eg": "Tourism tends to commodify local cultures, reducing rituals to spectacle."
+   },
+   {
+    "verb": "revitalise",
+    "vi": "làm hồi sinh",
+    "with": "rural areas, declining towns",
+    "eg": "Tourism can revitalise declining rural communities."
+   }
+  ],
+  "synonyms": [
+   "travel vs journey vs trip. travel không đếm được, là khái niệm chung, không nói a travel. a journey là một chặng đi cụ thể. a trip nhấn mạnh đi và quay về. Số nhiều travels mang màu văn chương như hồi ký.",
+   "tourism (uncountable). tourism không đếm được, không có a tourism. Muốn nói ngành thì dùng the tourism industry hoặc the hospitality industry.",
+   "boost vs promote. boost là tăng mạnh về lượng và luôn tích cực. promote là quảng bá, xúc tiến, không đảm bảo tăng ngay. Nói promote a destination abroad, boost revenue.",
+   "erode vs damage. erode luôn là quá trình từ từ và mang nghĩa xấu. damage có thể là một sự cố đơn lẻ và tức thời.",
+   "semantic prosody tiêu cực. overtourism và commodify luôn mang sắc thái xấu, không dùng để khen. Ngược lại ecotourism trung tính đến tích cực."
+  ],
+  "samples": [
+   "While tourism undeniably boosts local economies, its long-term value depends heavily on how sustainably it is managed.",
+   "There is growing evidence that overtourism can erode the very authenticity that draws visitors in the first place.",
+   "Ecotourism is often presented as a panacea, yet critics argue that it can still strain fragile ecosystems if poorly regulated.",
+   "Rather than commodifying local traditions, responsible tourism should seek to preserve and celebrate cultural heritage."
+  ]
+ },
+ {
+  "n": 21,
+  "topic": "Sport & Leisure",
+  "collocations": [
+   {
+    "term": "physical activity",
+    "vi": "hoạt động thể chất"
+   },
+   {
+    "term": "competitive sport",
+    "vi": "thể thao thi đấu"
+   },
+   {
+    "term": "team spirit",
+    "vi": "tinh thần đồng đội"
+   },
+   {
+    "term": "sedentary lifestyle",
+    "vi": "lối sống ít vận động"
+   },
+   {
+    "term": "grassroots sport",
+    "vi": "thể thao phong trào"
+   },
+   {
+    "term": "sporting event",
+    "vi": "sự kiện thể thao"
+   },
+   {
+    "term": "leisure time",
+    "vi": "thời gian rảnh rỗi"
+   },
+   {
+    "term": "physical fitness",
+    "vi": "thể lực"
+   },
+   {
+    "term": "peak performance",
+    "vi": "phong độ đỉnh cao"
+   },
+   {
+    "term": "spectator",
+    "vi": "khán giả xem trực tiếp"
+   },
+   {
+    "term": "sportsmanship",
+    "vi": "tinh thần thượng võ"
+   },
+   {
+    "term": "recreational facilities",
+    "vi": "cơ sở giải trí thể thao"
+   },
+   {
+    "term": "discipline",
+    "vi": "tính kỷ luật"
+   },
+   {
+    "term": "burnout",
+    "vi": "tình trạng kiệt sức"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "promote",
+    "vi": "khuyến khích, cổ vũ",
+    "with": "physical activity, healthy habits",
+    "eg": "Schools should promote physical activity from an early age."
+   },
+   {
+    "verb": "instil",
+    "vi": "gieo, rèn giá trị dần dần",
+    "with": "discipline, teamwork",
+    "eg": "Team sports can instil discipline and cooperation in children."
+   },
+   {
+    "verb": "enhance",
+    "vi": "nâng cao",
+    "with": "fitness, wellbeing",
+    "eg": "Regular exercise enhances both physical and mental wellbeing."
+   },
+   {
+    "verb": "foster",
+    "vi": "nuôi dưỡng",
+    "with": "team spirit, camaraderie",
+    "eg": "Playing in a team fosters a strong sense of camaraderie."
+   },
+   {
+    "verb": "counteract",
+    "vi": "chống lại, bù đắp",
+    "with": "a sedentary lifestyle",
+    "eg": "Daily walking can counteract the effects of a sedentary lifestyle."
+   },
+   {
+    "verb": "sustain",
+    "vi": "duy trì lâu dài",
+    "with": "motivation, interest",
+    "eg": "Few amateurs can sustain their motivation without visible progress."
+   },
+   {
+    "verb": "host",
+    "vi": "đăng cai",
+    "with": "a tournament, the Olympics",
+    "eg": "Cities compete fiercely to host major sporting events."
+   },
+   {
+    "verb": "hone",
+    "vi": "mài giũa",
+    "with": "skills, technique",
+    "eg": "Elite athletes spend years honing their technique."
+   }
+  ],
+  "synonyms": [
+   "sport vs sports. Anh Anh dùng sport không đếm cho khái niệm chung, do sport. Anh Mỹ dùng sports. a sport khi nói một môn cụ thể như tennis is a demanding sport.",
+   "exercise vs practice. exercise không đếm được, là vận động rèn thể lực, do exercise. practice là luyện tập kỹ năng lặp lại, có practice, football practice.",
+   "instil vs teach. instil đi với giá trị trừu tượng như discipline, values và là quá trình dần dần, đi với giới từ in. teach cụ thể hơn về kiến thức, kỹ năng.",
+   "athlete vs sportsman. athlete trung tính, dùng rộng và học thuật. sportsman hơi cũ và ám chỉ giới tính nam, nên tránh trong bài trang trọng.",
+   "competitive prosody. competitive có thể tích cực trong competitive spirit nhưng tiêu cực khi overly competitive. Ngữ cảnh quyết định sắc thái."
+  ],
+  "samples": [
+   "While competitive sport can instil valuable discipline, an excessive emphasis on winning may foster anxiety rather than enjoyment.",
+   "Regular physical activity is widely regarded as one of the most effective ways to counteract the health risks of a sedentary lifestyle.",
+   "Hosting a major sporting event can enhance a nation's global profile, though the economic benefits are frequently overstated.",
+   "Grassroots sport arguably does more to foster lifelong participation than the elite competitions that dominate media coverage."
+  ]
+ },
+ {
+  "n": 22,
+  "topic": "Health & Medicine",
+  "collocations": [
+   {
+    "term": "public health",
+    "vi": "y tế công cộng"
+   },
+   {
+    "term": "healthcare system",
+    "vi": "hệ thống chăm sóc sức khỏe"
+   },
+   {
+    "term": "preventive medicine",
+    "vi": "y học dự phòng"
+   },
+   {
+    "term": "life expectancy",
+    "vi": "tuổi thọ trung bình"
+   },
+   {
+    "term": "chronic illness",
+    "vi": "bệnh mãn tính"
+   },
+   {
+    "term": "mental health",
+    "vi": "sức khỏe tâm thần"
+   },
+   {
+    "term": "medical breakthrough",
+    "vi": "bước đột phá y học"
+   },
+   {
+    "term": "obesity epidemic",
+    "vi": "đại dịch béo phì"
+   },
+   {
+    "term": "healthcare provider",
+    "vi": "đơn vị cung cấp dịch vụ y tế"
+   },
+   {
+    "term": "immune system",
+    "vi": "hệ miễn dịch"
+   },
+   {
+    "term": "sedentary habits",
+    "vi": "thói quen ít vận động"
+   },
+   {
+    "term": "medical resources",
+    "vi": "nguồn lực y tế"
+   },
+   {
+    "term": "wellbeing",
+    "vi": "sự khỏe mạnh toàn diện"
+   },
+   {
+    "term": "vaccination programme",
+    "vi": "chương trình tiêm chủng"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "alleviate",
+    "vi": "làm dịu, giảm nhẹ",
+    "with": "symptoms, suffering, pressure",
+    "eg": "Preventive care can alleviate pressure on hospitals."
+   },
+   {
+    "verb": "combat",
+    "vi": "chống lại",
+    "with": "disease, obesity",
+    "eg": "Governments are struggling to combat the obesity epidemic."
+   },
+   {
+    "verb": "prevent",
+    "vi": "ngăn ngừa",
+    "with": "illness, complications",
+    "eg": "A balanced diet helps prevent chronic illness."
+   },
+   {
+    "verb": "exacerbate",
+    "vi": "làm trầm trọng thêm, tiêu cực",
+    "with": "conditions, symptoms",
+    "eg": "Chronic stress can exacerbate existing health conditions."
+   },
+   {
+    "verb": "allocate",
+    "vi": "phân bổ",
+    "with": "funding, resources",
+    "eg": "Ministers must decide how to allocate limited healthcare resources."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm suy yếu dần",
+    "with": "health, wellbeing",
+    "eg": "Chronic sleep deprivation gradually undermines mental health."
+   },
+   {
+    "verb": "strain",
+    "vi": "gây quá tải",
+    "with": "the healthcare system, services",
+    "eg": "An ageing population is straining healthcare systems worldwide."
+   },
+   {
+    "verb": "eradicate",
+    "vi": "xóa sổ hoàn toàn",
+    "with": "a disease, smallpox",
+    "eg": "Vaccination has helped eradicate several deadly diseases."
+   }
+  ],
+  "synonyms": [
+   "cure vs treat vs heal. cure là chữa khỏi hẳn, bệnh biến mất. treat là điều trị, không đảm bảo khỏi. heal thường cho vết thương hoặc mô tự lành.",
+   "illness vs disease vs sickness. disease cụ thể, có tên, thường bệnh lý hoặc lây. illness là trạng thái ốm nói chung. sickness thân mật hơn và hay chỉ buồn nôn trong Anh Anh.",
+   "alleviate không đi với disease. alleviate chỉ giảm nhẹ triệu chứng nên nói alleviate symptoms, không nói alleviate a disease. Muốn nói khỏi thì dùng cure hoặc treat.",
+   "eradicate vs reduce. eradicate là xóa hoàn toàn, sắc thái tuyệt đối, dùng cho dịch bệnh. reduce chỉ giảm bớt, không triệt để.",
+   "exacerbate prosody. exacerbate luôn tiêu cực và đi với vấn đề hoặc bệnh. Trang trọng hơn cụm make worse nên hợp bài học thuật."
+  ],
+  "samples": [
+   "Investing in preventive medicine is often more cost-effective than treating chronic illnesses once they have developed.",
+   "An ageing population is placing unprecedented strain on healthcare systems that were never designed for such demand.",
+   "While medical breakthroughs capture headlines, the greatest gains in life expectancy have come from basic public health measures.",
+   "Mental health, long overshadowed by physical illness, is increasingly recognised as central to overall wellbeing."
+  ]
+ },
+ {
+  "n": 23,
+  "topic": "Government & Policy",
+  "collocations": [
+   {
+    "term": "public policy",
+    "vi": "chính sách công"
+   },
+   {
+    "term": "legislation",
+    "vi": "luật pháp, đạo luật"
+   },
+   {
+    "term": "taxpayer",
+    "vi": "người đóng thuế"
+   },
+   {
+    "term": "public spending",
+    "vi": "chi tiêu công"
+   },
+   {
+    "term": "welfare state",
+    "vi": "nhà nước phúc lợi"
+   },
+   {
+    "term": "accountability",
+    "vi": "trách nhiệm giải trình"
+   },
+   {
+    "term": "bureaucracy",
+    "vi": "bộ máy quan liêu"
+   },
+   {
+    "term": "subsidy",
+    "vi": "khoản trợ cấp"
+   },
+   {
+    "term": "regulation",
+    "vi": "quy định, sự điều tiết"
+   },
+   {
+    "term": "governance",
+    "vi": "chất lượng quản trị nhà nước"
+   },
+   {
+    "term": "civil servant",
+    "vi": "công chức"
+   },
+   {
+    "term": "political will",
+    "vi": "ý chí chính trị"
+   },
+   {
+    "term": "public sector",
+    "vi": "khu vực công"
+   },
+   {
+    "term": "vested interests",
+    "vi": "nhóm lợi ích cố hữu"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "implement",
+    "vi": "triển khai vào thực tế",
+    "with": "a policy, reforms",
+    "eg": "It is far easier to announce a policy than to implement it effectively."
+   },
+   {
+    "verb": "enforce",
+    "vi": "thực thi bằng chế tài",
+    "with": "laws, regulations",
+    "eg": "Without adequate resources, governments cannot enforce these regulations."
+   },
+   {
+    "verb": "allocate",
+    "vi": "phân bổ",
+    "with": "funds, budgets",
+    "eg": "The government allocates a large share of its budget to education."
+   },
+   {
+    "verb": "subsidise",
+    "vi": "trợ cấp",
+    "with": "farmers, industries",
+    "eg": "Many states subsidise renewable energy to encourage adoption."
+   },
+   {
+    "verb": "regulate",
+    "vi": "điều tiết, quản lý",
+    "with": "markets, industries",
+    "eg": "Central banks are expected to regulate the financial sector."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế, hạn chế",
+    "with": "spending, corruption",
+    "eg": "New rules are intended to curb public spending."
+   },
+   {
+    "verb": "levy",
+    "vi": "đánh (thuế), trang trọng",
+    "with": "a tax, duties",
+    "eg": "The government plans to levy a tax on sugary drinks."
+   },
+   {
+    "verb": "undermine",
+    "vi": "làm xói mòn",
+    "with": "public trust, institutions",
+    "eg": "Corruption scandals undermine public trust in institutions."
+   }
+  ],
+  "synonyms": [
+   "policy vs politics. policy là đường lối cụ thể và đếm được, a housing policy. politics là hoạt động hoặc lĩnh vực chính trị, hình thức số nhiều nhưng chia động từ số ít, politics is dirty.",
+   "government vs governance. government là bộ máy hoặc chính phủ cụ thể. governance là cách thức và chất lượng điều hành, luôn không đếm được, good governance.",
+   "enforce vs implement. implement là đưa vào thực hiện. enforce là bắt tuân thủ bằng chế tài. enforce đi tự nhiên với law, còn policy thì dùng implement.",
+   "levy vs impose vs charge. levy trang trọng và đi với tax hoặc duty. impose rộng hơn, impose a ban, impose a fine. charge là tính phí dịch vụ cho khách.",
+   "curb prosody. curb trang trọng và đi với thứ tiêu cực như curb corruption, curb inflation, curb spending. Không dùng curb cho thứ tốt mà ta muốn giữ."
+  ],
+  "samples": [
+   "Ambitious policies often fail not because they are poorly designed, but because governments lack the capacity to implement them.",
+   "Subsidising fossil fuels while claiming to fight climate change reveals a troubling contradiction in public policy.",
+   "Genuine reform requires the political will to confront the vested interests that benefit from the status quo.",
+   "Heavy-handed regulation may curb certain abuses, yet it risks stifling the very innovation it seeks to guide."
+  ]
+ },
+ {
+  "n": 24,
+  "topic": "Urbanisation & Housing",
+  "collocations": [
+   {
+    "term": "urban sprawl",
+    "vi": "sự lan rộng lộn xộn của đô thị"
+   },
+   {
+    "term": "affordable housing",
+    "vi": "nhà ở giá phải chăng"
+   },
+   {
+    "term": "overcrowding",
+    "vi": "tình trạng chen chúc"
+   },
+   {
+    "term": "slum",
+    "vi": "khu ổ chuột"
+   },
+   {
+    "term": "rural-to-urban migration",
+    "vi": "di cư nông thôn ra thành thị"
+   },
+   {
+    "term": "housing shortage",
+    "vi": "tình trạng thiếu nhà"
+   },
+   {
+    "term": "gentrification",
+    "vi": "sự thượng lưu hóa khu phố"
+   },
+   {
+    "term": "green space",
+    "vi": "không gian xanh"
+   },
+   {
+    "term": "cost of living",
+    "vi": "chi phí sinh hoạt"
+   },
+   {
+    "term": "urban planning",
+    "vi": "quy hoạch đô thị"
+   },
+   {
+    "term": "population density",
+    "vi": "mật độ dân số"
+   },
+   {
+    "term": "infrastructure",
+    "vi": "hạ tầng"
+   },
+   {
+    "term": "social cohesion",
+    "vi": "sự gắn kết xã hội"
+   },
+   {
+    "term": "high-rise development",
+    "vi": "dự án nhà cao tầng"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "accommodate",
+    "vi": "đáp ứng chỗ ở, nhu cầu",
+    "with": "a growing population",
+    "eg": "Cities must build upwards to accommodate a growing population."
+   },
+   {
+    "verb": "exacerbate",
+    "vi": "làm trầm trọng, tiêu cực",
+    "with": "overcrowding, shortages",
+    "eg": "Unchecked migration can exacerbate housing shortages."
+   },
+   {
+    "verb": "displace",
+    "vi": "làm phải di dời",
+    "with": "residents, communities",
+    "eg": "Gentrification often displaces long-standing residents."
+   },
+   {
+    "verb": "alleviate",
+    "vi": "giảm bớt",
+    "with": "overcrowding, pressure",
+    "eg": "Building satellite towns can alleviate pressure on the city centre."
+   },
+   {
+    "verb": "regenerate",
+    "vi": "tái thiết, hồi sinh",
+    "with": "a district, neighbourhoods",
+    "eg": "The council plans to regenerate the derelict waterfront."
+   },
+   {
+    "verb": "sprawl",
+    "vi": "lan rộng lộn xộn",
+    "with": "outward, across land",
+    "eg": "The city has sprawled outward across former farmland."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế",
+    "with": "sprawl, congestion",
+    "eg": "Green belts are intended to curb urban sprawl."
+   },
+   {
+    "verb": "strain",
+    "vi": "gây quá tải",
+    "with": "services, infrastructure",
+    "eg": "Rapid growth strains public services such as schools and clinics."
+   }
+  ],
+  "synonyms": [
+   "house vs home vs housing. house là tòa nhà cụ thể và đếm được. home là nơi ở gắn cảm xúc. housing là nhà ở nói chung, không đếm được, hay dùng trong chính sách, affordable housing.",
+   "accommodate vs contain. accommodate là có chỗ hoặc đáp ứng cho người và nhu cầu, sắc thái tích cực. contain là chứa hoặc kiềm giữ. Nói accommodate residents chứ không contain residents.",
+   "gentrification prosody. gentrification thường mang sắc thái tiêu cực vì đẩy người nghèo đi. regeneration trung tính đến tích cực. Cẩn thận khi muốn khen thì dùng regeneration.",
+   "migrant vs immigrant vs emigrant. migrant là từ chung. immigrant là người nhập cư vào một nước. emigrant là người rời đi. Di cư trong nước dùng internal migrants hoặc rural-to-urban migrants.",
+   "urban sprawl countability. urban sprawl không đếm được và mang nghĩa xấu về sự lộn xộn thiếu quy hoạch. Không nói a sprawl theo nghĩa này."
+  ],
+  "samples": [
+   "As millions move to cities in search of work, governments face the daunting task of providing affordable housing at scale.",
+   "Unregulated urban sprawl consumes farmland and lengthens commutes, undermining the very efficiency that cities promise.",
+   "Regeneration schemes can revive neglected districts, but they risk accelerating gentrification and displacing the poor.",
+   "Preserving green space within dense cities is no luxury but increasingly seen as essential to residents' wellbeing."
+  ]
+ },
+ {
+  "n": 25,
+  "topic": "Transport & Infrastructure",
+  "collocations": [
+   {
+    "term": "public transport",
+    "vi": "giao thông công cộng"
+   },
+   {
+    "term": "traffic congestion",
+    "vi": "tắc nghẽn giao thông"
+   },
+   {
+    "term": "road network",
+    "vi": "mạng lưới đường bộ"
+   },
+   {
+    "term": "commuter",
+    "vi": "người đi làm hằng ngày"
+   },
+   {
+    "term": "carbon emissions",
+    "vi": "khí thải carbon"
+   },
+   {
+    "term": "infrastructure",
+    "vi": "hạ tầng"
+   },
+   {
+    "term": "rush hour",
+    "vi": "giờ cao điểm"
+   },
+   {
+    "term": "private vehicle",
+    "vi": "phương tiện cá nhân"
+   },
+   {
+    "term": "fuel efficiency",
+    "vi": "hiệu suất nhiên liệu"
+   },
+   {
+    "term": "rail network",
+    "vi": "mạng lưới đường sắt"
+   },
+   {
+    "term": "gridlock",
+    "vi": "tình trạng kẹt cứng"
+   },
+   {
+    "term": "urban mobility",
+    "vi": "khả năng di chuyển trong đô thị"
+   },
+   {
+    "term": "subsidy",
+    "vi": "khoản trợ cấp"
+   },
+   {
+    "term": "sustainable transport",
+    "vi": "giao thông bền vững"
+   }
+  ],
+  "verbs": [
+   {
+    "verb": "ease",
+    "vi": "làm giảm, giải tỏa",
+    "with": "congestion, pressure",
+    "eg": "Investing in metro lines can ease traffic congestion."
+   },
+   {
+    "verb": "upgrade",
+    "vi": "nâng cấp",
+    "with": "infrastructure, the network",
+    "eg": "The government plans to upgrade the ageing rail network."
+   },
+   {
+    "verb": "commute",
+    "vi": "đi làm về đều đặn",
+    "with": "to work, into the city",
+    "eg": "Millions commute into the capital every morning."
+   },
+   {
+    "verb": "discourage",
+    "vi": "làm nản, hạn chế",
+    "with": "car use, driving",
+    "eg": "Congestion charges are designed to discourage car use."
+   },
+   {
+    "verb": "invest",
+    "vi": "đầu tư",
+    "with": "in infrastructure, in transport",
+    "eg": "Countries that invest heavily in public transport tend to have cleaner air."
+   },
+   {
+    "verb": "connect",
+    "vi": "kết nối",
+    "with": "regions, communities",
+    "eg": "High-speed rail connects previously isolated regions."
+   },
+   {
+    "verb": "relieve",
+    "vi": "giảm nhẹ",
+    "with": "pressure, bottlenecks",
+    "eg": "A new bypass would relieve pressure on the town centre."
+   },
+   {
+    "verb": "curb",
+    "vi": "kiềm chế",
+    "with": "emissions, traffic",
+    "eg": "Low-emission zones aim to curb harmful emissions."
+   }
+  ],
+  "synonyms": [
+   "transport vs traffic. transport trong Anh Anh là phương tiện hoặc vận tải và không đếm được, public transport. traffic là luồng xe cộ, không đếm được, không nói a traffic. Anh Mỹ dùng transportation.",
+   "ease vs solve. ease là giảm bớt chứ không dứt điểm nên ease congestion nghe tự nhiên. solve hàm ý giải quyết triệt để, ít khi hợp với congestion vì khó xóa hẳn.",
+   "commute vs journey. commute là chặng đi làm và về đều đặn hằng ngày, dùng cả danh từ và động từ, a long commute. journey là một chuyến đi bất kỳ, không mang nghĩa lặp lại.",
+   "infrastructure countability. infrastructure không đếm được nên không có an infrastructure hay infrastructures. Muốn đếm thì nói a piece of infrastructure.",
+   "discourage cấu trúc. discourage đi với discourage somebody from doing something. Cụm discourage car use cũng đúng. Sắc thái là can ngăn, giảm bớt."
+  ],
+  "samples": [
+   "Expanding public transport is widely seen as the most effective way to ease the chronic congestion that plagues large cities.",
+   "Unless governments invest in infrastructure ahead of demand, rapid growth quickly outpaces the roads and railways it relies on.",
+   "Discouraging private car use through congestion charging is politically unpopular, yet few alternatives are as effective.",
+   "High-speed rail can connect isolated regions to economic centres, though the enormous upfront costs are hard to justify."
+  ]
+ }
+]

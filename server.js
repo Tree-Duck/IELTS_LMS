@@ -861,116 +861,229 @@ app.post('/api/translate-prompt', authenticate, async (req, res) => {
   }
 });
 
-// ─── Essay Outline (mechanism chain) ─────────────────────────────────────────
-// Builds a 4-paragraph plan whose body paragraphs follow the mechanism chain
-// (F → A → B → C → D → D+ → optional N → E) rather than listing flat reasons.
-// Returns strict JSON so the client can render checkable steps and a mind map.
-const CHAIN_STEPS = `MECHANISM CHAIN — the causal spine every body paragraph must follow:
-F (FRAME)  – the prompt mixes two different questions (e.g. what something IS worth vs what it SHOULD be worth); name the split and state which criterion you judge by. Goes in the intro.
-A (CLAIM)  – the paragraph's main claim, no detail yet.
-B (ACTOR)  – a class of people (or institutions) doing a camera-recordable action. MUST be written as "When <plural actors> ...", never "A student..." and never "people/society". Anchor it in a concrete situation ("In a lecture hall where laptops are allowed, ...").
-C (RESOURCE) – what measurably rises or falls because of that action: money, hours, health, skill, trust.
-D (SHIFT)  – a DIFFERENT actor who now absorbs the consequence. Must not be the same group as B.
-D+ (WHERE-SEEN) – the form the consequence takes in the real world: a budget line, a countable indicator, a visible phenomenon. Never invent statistics ("a fall in recruitment spending" is fine, "a 12% fall" is not).
-N (OPTIONAL) – exactly one of: a secondary idea, a concession, or a scope limit. Omit unless it genuinely helps.
-E (BACK-TO-PROMPT) – answer the exact question using the prompt's own evaluative word.`;
+// ─── Essay planning: pick-your-ideas, then a mechanism-chain outline ─────────
+// Two stages so students commit to a position and to their own arguments
+// before they get any scaffolding:
+//   POST /api/outline/options  -> multiple-choice stance + body-idea options
+//   POST /api/outline          -> the chain outline built from those choices
+// Outlines give INSTRUCTIONS plus target vocabulary, never model sentences to copy.
 
-const ENGINES = `ENGINES (what is finite in this prompt?): MONEY, TIME, HABIT, INCENTIVE, NORM, INFORMATION, IDENTITY_TRUST, SCALE (how many people one unit of output reaches), SKILL (atrophies when unused).`;
+let VOCAB_BANK = [];
+try {
+  VOCAB_BANK = JSON.parse(fs.readFileSync(path.join(__dirname, 'vocab-bank.json'), 'utf8'));
+  console.log(`Vocab bank loaded: ${VOCAB_BANK.length} units`);
+} catch (e) {
+  console.warn('Vocab bank not loaded:', e.message);
+}
 
-app.post('/api/outline', authenticate, async (req, res) => {
-  const { task_type, prompt, level, student_ideas } = req.body;
+const STOPWORDS = new Set(['the','a','an','and','or','but','of','to','in','on','for','with','that','this','these','those','some','people','think','believe','others','their','they','it','is','are','be','should','do','you','your','more','than','have','has','can','will','what','why','how','extent','agree','disagree','discuss','views','opinion','give','reasons','answer','include','relevant','examples','own','knowledge','experience','write','least','words']);
+
+// Pick the vocabulary units whose topic words best overlap the prompt.
+function pickVocabUnits(prompt, n = 2) {
+  if (!VOCAB_BANK.length) return [];
+  const words = new Set(String(prompt).toLowerCase().match(/[a-z]{4,}/g) || []);
+  for (const w of STOPWORDS) words.delete(w);
+  const scored = VOCAB_BANK.map(u => {
+    const hay = (u.topic + ' ' + u.collocations.map(c => c.term).join(' ') + ' ' + u.verbs.map(v => v.verb + ' ' + v.with).join(' ')).toLowerCase();
+    let score = 0;
+    for (const w of words) if (hay.includes(w)) score += 1;
+    for (const t of u.topic.toLowerCase().split(/[^a-z]+/)) if (t.length > 3 && words.has(t)) score += 4;
+    return { u, score };
+  }).sort((a, b) => b.score - a.score);
+  return scored.filter(s => s.score > 0).slice(0, n).map(s => s.u);
+}
+
+function vocabPromptBlock(units) {
+  if (!units.length) return '';
+  return `\nTARGET VOCABULARY — choose only from these lists (they come from the student's own course book). Never invent vocabulary that is not here:\n` +
+    units.map(u => `[${u.topic}]\n` +
+      `collocations: ${u.collocations.map(c => c.term).join('; ')}\n` +
+      `precision verbs: ${u.verbs.map(v => `${v.verb} (+ ${v.with})`).join('; ')}`
+    ).join('\n') + '\n';
+}
+
+const CHAIN_RULES = `MECHANISM CHAIN — the causal spine a body paragraph must follow:
+CLAIM   – the paragraph's main claim.
+ACTOR   – a class of people or institutions doing a camera-recordable action. Must read "When <plural actors> ..." or an anchoring phrase ("In a lecture hall where laptops are allowed, ..."). Never "A student..."; never "people"/"society".
+CHANGE  – what measurably rises or falls: money, hours, health, skill, trust.
+KNOCK-ON – a DIFFERENT actor who absorbs the consequence (must not be the actor above).
+EVIDENCE – the form the consequence takes in the real world: a budget line, a countable indicator, a visible phenomenon. Never invent statistics.
+LINK    – answer the prompt using its own evaluative word.
+
+ENGINES (what is finite here?): MONEY, TIME, HABIT, INCENTIVE, NORM, INFORMATION, IDENTITY_TRUST, SCALE (how many people one unit of output reaches), SKILL (atrophies when unused).
+For two-sided prompts use ONE engine and one pivot variable: run it forward in body 1 and in reverse in body 2. Never use two engines.`;
+
+const LEVEL_NOTE = {
+  basic: 'Student level Band 5.5-6.5: keep every instruction to one short, plain sentence.',
+  intermediate: 'Student level Band 6.5-7.0: instructions may name a specific setting or country.',
+  advanced: 'Student level Band 7.0+: expect precise collocations and a full chain.',
+};
+
+// ── Stage 1: multiple-choice planning ────────────────────────────────────────
+app.post('/api/outline/options', authenticate, async (req, res) => {
+  const { task_type, prompt, level } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
 
-  const LEVEL_NOTE = {
-    basic: 'Target Band 5.5–6.5: keep sentences short and plain, prefer everyday-life examples, and keep each step to one clear sentence.',
-    intermediate: 'Target Band 6.5–7.0: use precise collocations and a short cause–effect chain; examples may name a specific country or setting.',
-    advanced: 'Target Band 7.0+: use precise academic collocations, run the full chain, and include the optional N step where it sharpens the argument.',
-  }[level] || 'Target Band 5.5–6.5: keep sentences short and plain, prefer everyday-life examples.';
-
   const isTask1 = task_type === 'task1';
-
-  const task1Prompt = `You are an IELTS Writing Task 1 coach. Build a 4-part writing plan for this chart/diagram task.
+  const userPrompt = isTask1
+    ? `You are an IELTS Writing Task 1 examiner. For the task below, offer the student choices about how to organise their report.
 
 Task 1 prompt:
 ${prompt}
 
-Return ONLY this JSON (no markdown, no commentary):
+Return ONLY this JSON:
 {
- "task": "task1",
- "paragraphs": [
-  {"kind":"intro","title":"Mở bài","model":"<1-2 model sentences in English paraphrasing the prompt>","steps":[{"code":"PARA","label":"<short Vietnamese action, e.g. 'Diễn đạt lại đề bằng từ của mình'>"},{"code":"COVER","label":"<what the chart covers: period, categories>"}]},
-  {"kind":"overview","title":"Overview","model":"<model overview sentence(s), NO specific figures>","steps":[{"code":"TREND","label":"<the single most striking trend>"},{"code":"CONTRAST","label":"<the clearest contrast or exception>"}]},
-  {"kind":"body","title":"Thân bài 1","model":"<model sentences describing the main group of data with figures>","steps":[{"code":"GROUP","label":"<which data belongs together and why>"},{"code":"FIGURE","label":"<which 2-3 figures to quote>"},{"code":"COMPARE","label":"<the comparison to make>"}]},
-  {"kind":"body","title":"Thân bài 2","model":"<model sentences describing the remaining data>","steps":[{"code":"GROUP","label":"..."},{"code":"FIGURE","label":"..."},{"code":"COMPARE","label":"..."}]}
+ "task":"task1",
+ "questions":[
+  {"id":"overview","q":"Which overall trend will you put in your overview?","options":["<distinct, specific option>","<option>","<option>"]},
+  {"id":"grouping","q":"How will you split the data across your two body paragraphs?","options":["<option>","<option>","<option>"]}
  ]
 }
-
-RULES: every "model" sentence must reference the actual categories/periods in THIS task. Task 1 has no conclusion — the overview does that job. Do not invent numbers that are not implied by the prompt wording. ${LEVEL_NOTE} Write "model" in English; write "label" in Vietnamese.`;
-
-  const task2Prompt = `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
-
-${CHAIN_STEPS}
-
-${ENGINES}
-
-TWO-SIDED PROMPTS (discuss both views / agree-disagree): use ONE engine only. Identify the pivot variable on which the two sides sit at opposite ends, then run the chain forward in body 1 and in reverse in body 2. Do NOT use two different engines.
+Each option must be a full, concrete choice about THIS chart (8-20 words), and the options must be genuinely different from each other. English only.`
+    : `You are an IELTS Writing Task 2 examiner. Before the student writes, make them commit to a position and to their own arguments.
 
 Task 2 prompt:
 ${prompt}
-${student_ideas && student_ideas.trim() ? `\nThe student's own position and rough ideas (BUILD ON THESE, do not replace them):\n${student_ideas.trim()}\n` : ''}
-Return ONLY this JSON (no markdown, no commentary):
+
+Return ONLY this JSON:
 {
- "task": "task2",
- "engine": "<one of MONEY|TIME|HABIT|INCENTIVE|NORM|INFORMATION|IDENTITY_TRUST|SCALE|SKILL>",
- "engine_why": "<1 short Vietnamese sentence: what is finite in this prompt>",
- "pivot": "<the pivot variable in Vietnamese, or empty string if the prompt is one-sided>",
- "frame": "<step F in Vietnamese: which two questions the prompt mixes, and the criterion you judge by>",
- "paragraphs": [
-  {"kind":"intro","title":"Mở bài","model":"<model intro in English: general statement + the F sentence + a clear thesis>","steps":[
-    {"code":"F","label":"<Vietnamese: name the two questions being mixed>"},
-    {"code":"A","label":"<Vietnamese: state the thesis>"}]},
-  {"kind":"body","title":"Thân bài 1","model":"<model body paragraph in English following A→B→C→D→D+→E>","steps":[
-    {"code":"A","label":"<Vietnamese: the claim>"},
-    {"code":"B","label":"<Vietnamese: which class of actors does what camera-recordable action>"},
-    {"code":"C","label":"<Vietnamese: what rises or falls>"},
-    {"code":"D","label":"<Vietnamese: which NEW actor absorbs it>"},
-    {"code":"D+","label":"<Vietnamese: the form the consequence takes>"},
-    {"code":"E","label":"<Vietnamese: link back to the prompt's wording>"}]},
-  {"kind":"body","title":"Thân bài 2","model":"<model body paragraph running the SAME engine in the opposite direction>","steps":[ same six codes ]},
-  {"kind":"conclusion","title":"Kết bài","model":"<model conclusion in English: restate the position + the scope-limit sentence from F>","steps":[
-    {"code":"E","label":"<Vietnamese: restate the position>"},
-    {"code":"F","label":"<Vietnamese: the scope limit>"}]}
+ "task":"task2",
+ "questions":[
+  {"id":"position","q":"What is your position?","options":["<a defensible stance in 10-20 words>","<a different stance>","<a third stance>"]},
+  {"id":"body1","q":"Which argument will you develop in body paragraph 1?","options":["<argument>","<argument>","<argument>"]},
+  {"id":"body2","q":"Which argument will you develop in body paragraph 2?","options":["<argument>","<argument>","<argument>"]}
  ]
 }
-
-RULES:
-- Step B must start with "When <plural actors>" or an anchoring phrase like "In a lecture hall where...". Never "A student..."; never "people"/"society".
-- Step D must move to a DIFFERENT actor than step B.
-- Never invent statistics or studies.
-- "model" text in English (ready to adapt); "label" text in Vietnamese (what the student must do).
-- Keep sentences straight: advanced vocabulary, simple sentence architecture. No mid-sentence interruptions.
-- ${LEVEL_NOTE}`;
+RULES: stances must be genuinely arguable and different (not "agree"/"disagree"/"partly" restated). Arguments must be causal claims a student could actually prove, not topic labels. English only. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
 
   try {
     const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 3000,
+      model: MODEL, max_tokens: 1200,
+      system: 'You are an expert IELTS examiner. Respond with valid JSON only — no markdown fences, no commentary.',
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('outline-options', calculateCost(i, o), i + o);
+    res.json(parseGradingJson(text));
+  } catch (err) {
+    console.error('Outline options error:', err.message || err);
+    res.status(500).json({ error: 'Could not build the planning choices. Try again.' });
+  }
+});
+
+// ── Stage 2: the outline itself ──────────────────────────────────────────────
+app.post('/api/outline', authenticate, async (req, res) => {
+  const { task_type, prompt, level, choices, student_ideas } = req.body;
+  if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const isTask1 = task_type === 'task1';
+  const units = pickVocabUnits(prompt);
+  const chosen = choices && typeof choices === 'object'
+    ? Object.entries(choices).map(([k, v]) => `- ${k}: ${v}`).join('\n') : '';
+  const chosenBlock = chosen ? `\nThe student has already chosen:\n${chosen}\nBuild the outline around exactly these choices — do not substitute your own.\n` : '';
+  const ideasBlock = student_ideas && student_ideas.trim()
+    ? `\nThe student's own rough notes (develop these, do not replace them):\n${student_ideas.trim()}\n` : '';
+
+  const task1Prompt = `You are an IELTS Writing Task 1 coach. Build a paragraph-by-paragraph plan.
+${chosenBlock}${ideasBlock}
+Task 1 prompt:
+${prompt}
+${vocabPromptBlock(units)}
+Return ONLY this JSON:
+{
+ "task":"task1",
+ "topic":"<2-4 word topic label>",
+ "paragraphs":[
+  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"PARAPHRASE","do":"<what to paraphrase and how, referencing this chart>"},
+     {"code":"SCOPE","do":"<the period / categories to name>"}],
+   "vocab":["<term from the list>","<term>"]},
+  {"kind":"overview","title":"Overview","steps":[
+     {"code":"TREND","do":"<the dominant trend to state, no figures>"},
+     {"code":"CONTRAST","do":"<the clearest exception or contrast>"}],
+   "vocab":["<term>","<term>"]},
+  {"kind":"body","title":"Body 1","steps":[
+     {"code":"GROUP","do":"<which data goes here and why>"},
+     {"code":"FIGURES","do":"<which 2-3 figures to quote>"},
+     {"code":"COMPARE","do":"<the comparison to draw>"}],
+   "vocab":["<term>","<term>","<term>"]},
+  {"kind":"body","title":"Body 2","steps":[ same three codes ],"vocab":["<term>","<term>","<term>"]}
+ ]
+}
+RULES: "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Reference the actual categories and periods in THIS task. Task 1 has no conclusion. Do not invent figures. English only. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+
+  const task2Prompt = `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
+
+${CHAIN_RULES}
+${chosenBlock}${ideasBlock}
+Task 2 prompt:
+${prompt}
+${vocabPromptBlock(units)}
+Return ONLY this JSON:
+{
+ "task":"task2",
+ "topic":"<2-4 word topic label>",
+ "engine":"<MONEY|TIME|HABIT|INCENTIVE|NORM|INFORMATION|IDENTITY_TRUST|SCALE|SKILL>",
+ "engine_note":"<max 12 words: what is finite in this prompt>",
+ "pivot":"<the pivot variable, or \\"\\" if the prompt is one-sided>",
+ "paragraphs":[
+  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<which two questions the prompt mixes, and the criterion to judge by>"},
+     {"code":"THESIS","do":"<how to state the chosen position>"}],
+   "vocab":["<term from the list>","<term>"]},
+  {"kind":"body","title":"Body 1","steps":[
+     {"code":"CLAIM","do":"<the claim to open with>"},
+     {"code":"ACTOR","do":"<which plural actors do what recordable action>"},
+     {"code":"CHANGE","do":"<what rises or falls>"},
+     {"code":"KNOCK-ON","do":"<which NEW actor absorbs it>"},
+     {"code":"EVIDENCE","do":"<the form the consequence takes>"}],
+   "vocab":["<term>","<term>","<term>"]},
+  {"kind":"body","title":"Body 2","steps":[ same five codes, same engine running in reverse ],"vocab":["<term>","<term>","<term>"]},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"RESTATE","do":"<how to restate the position>"},
+     {"code":"SCOPE","do":"<the limit of the argument>"}],
+   "vocab":["<term>","<term>"]}
+ ]
+}
+RULES:
+- "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Start each with a verb ("Name...", "Show...", "Trace...").
+- Keep each "do" under 22 words.
+- "vocab" items must be copied verbatim from the target vocabulary lists above.
+- ACTOR must be a plural class; KNOCK-ON must be a different actor.
+- Never invent statistics or studies.
+- English only.
+- ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL, max_tokens: 2500,
       system: 'You are an expert IELTS writing coach. Respond with valid JSON only — no markdown fences, no commentary.',
       messages: [{ role: 'user', content: isTask1 ? task1Prompt : task2Prompt }],
     });
-    let text = (response.content?.[0]?.text || '').trim()
-      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const outline = parseGradingJson(text); // tolerant of truncation
+    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const outline = parseGradingJson(text);
 
-    const inputTokens = response.usage?.input_tokens || 0;
-    const outputTokens = response.usage?.output_tokens || 0;
-    db.logUsage('outline', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+    // attach the Vietnamese gloss for each vocabulary item from the bank
+    const gloss = {};
+    for (const u of units) {
+      for (const c of u.collocations) gloss[c.term.toLowerCase()] = c.vi;
+      for (const v of u.verbs) gloss[v.verb.toLowerCase()] = v.vi;
+    }
+    for (const p of outline.paragraphs || []) {
+      if (Array.isArray(p.vocab)) {
+        p.vocab = p.vocab.map(t => ({ term: t, vi: gloss[String(t).toLowerCase()] || '' }));
+      }
+    }
 
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('outline', calculateCost(i, o), i + o);
     res.json(outline);
   } catch (err) {
     console.error('Outline error:', err.message || err);
-    res.status(500).json({ error: 'Không tạo được dàn ý. Thử lại.', detail: err.message });
+    res.status(500).json({ error: 'Could not build the outline. Try again.', detail: err.message });
   }
 });
 

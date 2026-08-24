@@ -2111,8 +2111,8 @@
               <div class="wp-outline-section" id="wp-outline-section">
                 <div class="wp-outline-head">
                   <div>
-                    <div class="wp-outline-title">🗂️ Dàn ý</div>
-                    <div class="wp-outline-sub">Chọn các ý sẽ dùng — tick tới đâu, tiến độ chạy tới đó.</div>
+                    <div class="wp-outline-title">🗂️ Essay planner</div>
+                    <div class="wp-outline-sub">Pick your position and arguments, then get a step-by-step outline.</div>
                   </div>
                   <span class="wp-outline-progress" id="wp-outline-progress">0/0</span>
                 </div>
@@ -2122,33 +2122,17 @@
                     <option value="intermediate">Trung cấp (Band 6.5–7.0)</option>
                     <option value="advanced">Nâng cao (Band 7.0+)</option>
                   </select>
-                  <button class="btn btn-primary btn-sm" id="wp-outline-btn" onclick="wpBuildOutline()">✨ Tạo dàn ý</button>
+                  <button class="btn btn-primary btn-sm" id="wp-outline-btn" onclick="wpBuildOutline()">✨ Plan my essay</button>
                 </div>
                 <textarea id="wp-ideas-input" class="wp-ideas-input" rows="2"
-                  placeholder="Quan điểm + 1-2 ý thô của em (tuỳ chọn) — AI sẽ phát triển ý CỦA EM."></textarea>
+                  placeholder="Optional: your own rough ideas — the outline will build on them."></textarea>
                 <div class="wp-engine-badge hidden" id="wp-engine-badge"></div>
                 <div id="wp-outline-body" class="wp-outline-body">
-                  <div class="wp-outline-empty">Nhấn <strong>Tạo dàn ý</strong> để AI dựng khung 4 đoạn theo chuỗi cơ chế (engine → actor → resource → hệ quả).</div>
+                  <div class="wp-outline-empty">Press <strong>Plan my essay</strong>: choose your position and arguments first, then get the outline.</div>
                 </div>
-                <button type="button" class="wp-socratic-btn hidden" id="wp-socratic-btn" onclick="wpSocraticFollowUp()">🔍 Hỏi sâu hơn</button>
+                <button type="button" class="wp-socratic-btn hidden" id="wp-socratic-btn" onclick="wpSocraticFollowUp()">🔍 Push me harder</button>
               </div>
 
-              <!-- AI Writing Tools (Language Toolkit) -->
-              <div class="wp-tools-section" id="wp-tools-section">
-                <button class="wp-tools-toggle" onclick="toggleWpTools()">
-                  <span>✨ Hỗ trợ viết AI</span>
-                  <span id="wp-tools-icon">▸</span>
-                </button>
-                <div class="wp-tools-body hidden" id="wp-tools-body">
-                  <div class="hint-card">
-                    <div class="hint-card-header">📝 Bộ công cụ ngôn ngữ
-                      <button type="button" class="hint-generate-btn" id="wp-phrases-btn" onclick="wpRequestHint('phrases')">Tạo ✨</button>
-                    </div>
-                    <div class="hint-card-body" id="wp-phrases-body"><span class="hint-empty">Nhấp "Tạo ✨" để nhận cụm từ theo chủ đề + bài tập tự đặt câu.</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div class="wp-editor-col">
               <div class="wp-editor-topbar">
                 <span class="wp-editor-label">✍️ Bài viết của bạn</span>
