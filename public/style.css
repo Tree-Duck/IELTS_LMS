@@ -5819,6 +5819,104 @@ input:focus, textarea:focus, select:focus {
 .settings-card:has(.theme-swatches),
 .theme-modal-overlay { display: none !important; }
 
+/* ─── OUTLINE BUILDER (mechanism chain) ──────────────────────────────────── */
+.wp-outline-section {
+  margin-top: 14px; background: var(--surface);
+  border: 2px solid var(--forest-deep); border-radius: 16px; padding: 14px 16px 16px;
+}
+.wp-outline-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.wp-outline-title { font-weight: 700; font-size: 15px; color: var(--forest-deep); }
+.wp-outline-sub { font-size: 12px; color: var(--moss); margin-top: 2px; }
+.wp-outline-progress {
+  flex-shrink: 0; background: var(--forest-deep); color: var(--lime);
+  border-radius: var(--radius-pill); padding: 3px 12px; font-size: 12.5px; font-weight: 700;
+}
+.wp-outline-progress.full { background: var(--lime); color: var(--forest); }
+.wp-outline-controls { display: flex; gap: 8px; margin: 12px 0 8px; }
+.wp-outline-controls .wp-hint-level-select { flex: 1; margin: 0; }
+.wp-outline-empty { font-size: 13px; color: var(--moss); line-height: 1.6; padding: 14px 2px; }
+
+.wp-engine-badge { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.wp-engine-tag {
+  background: var(--forest); color: var(--lime); border-radius: var(--radius-pill);
+  padding: 3px 12px; font-size: 12px; font-weight: 700;
+}
+.wp-engine-why, .wp-engine-pivot {
+  background: var(--gray-100); color: var(--gray-700); border-radius: var(--radius-pill);
+  padding: 3px 12px; font-size: 12px;
+}
+.wp-engine-pivot { background: var(--lime); color: var(--forest); font-weight: 600; }
+
+.wp-outline-body { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.wp-para-card {
+  border: 1.5px solid var(--gray-200); border-left: 4px solid var(--forest);
+  border-radius: 12px; padding: 12px 14px; background: var(--cream);
+  transition: border-color .18s, box-shadow .18s;
+}
+.wp-para-card.para-done { border-left-color: var(--lime); box-shadow: 3px 4px 0 var(--lime); }
+.wp-para-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.wp-para-num {
+  width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%;
+  background: var(--forest); color: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.wp-para-title { font-weight: 700; font-size: 14px; color: var(--forest-deep); }
+.wp-para-kind {
+  margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  color: var(--moss); text-transform: uppercase;
+}
+.wp-para-model {
+  font-size: 13px; line-height: 1.65; color: var(--gray-800);
+  background: var(--surface); border-radius: 8px; padding: 9px 11px; margin-bottom: 10px;
+}
+.wp-step-list { display: flex; flex-direction: column; gap: 6px; }
+.wp-step {
+  display: flex; align-items: flex-start; gap: 8px; cursor: pointer;
+  border: 1px solid var(--gray-200); border-radius: 10px; padding: 8px 10px;
+  background: var(--surface); transition: all .15s;
+}
+.wp-step:hover { border-color: var(--forest); }
+.wp-step.done { background: var(--success-light); border-color: var(--success); }
+.wp-step input { margin-top: 2px; accent-color: var(--forest); flex-shrink: 0; }
+.wp-step-code {
+  flex-shrink: 0; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  background: var(--forest-deep); color: var(--lime);
+  border-radius: 5px; padding: 2px 6px; margin-top: 1px;
+}
+.wp-step.done .wp-step-code { background: var(--success); color: #fff; }
+.wp-step-label { font-size: 13px; line-height: 1.5; color: var(--gray-800); }
+.wp-step.done .wp-step-label { text-decoration: line-through; opacity: .7; }
+
+/* Prompt translation box */
+.wp-translate-box {
+  margin-top: 10px; background: var(--gray-50);
+  border: 1px dashed var(--line); border-radius: 12px;
+  padding: 11px 13px; font-size: 13.5px; line-height: 1.65; color: var(--gray-800);
+}
+.wp-translate-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--moss); margin-bottom: 5px;
+}
+
+/* Editor toolbar + word progress */
+.wp-editor-label { font-weight: 700; font-size: 14px; color: var(--forest-deep); }
+.wp-editor-tools { display: flex; gap: 4px; margin-left: 8px; }
+.wp-tool-btn {
+  background: transparent; border: 1px solid var(--gray-200); border-radius: 8px;
+  width: 30px; height: 30px; cursor: pointer; font-size: 14px; line-height: 1;
+  transition: all .15s;
+}
+.wp-tool-btn:hover { border-color: var(--forest); background: var(--gray-50); }
+.wp-word-bar { height: 4px; background: var(--track); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
+.wp-word-bar-fill { height: 100%; width: 0%; background: var(--coral); border-radius: 99px; transition: width .25s ease; }
+.wp-word-bar-fill.reached { background: var(--forest); }
+
+/* Focus mode: collapse the prompt column */
+#wp-session-panel.wp-focus .wp-prompt-col { display: none; }
+#wp-session-panel.wp-focus .wp-session-body { grid-template-columns: 1fr; }
+#wp-session-panel.wp-focus .wp-essay-textarea { min-height: 60vh; }
+
 /* ─── DICTATION PRACTICE ─────────────────────────────────────────────────── */
 .dict-yt-wrap { position: relative; width: 260px; height: 148px; margin-bottom: 12px; border-radius: 12px; overflow: hidden; border: 2px solid var(--forest-deep); background: var(--forest); }
 .dict-yt-wrap iframe, .dict-yt-wrap > div { width: 100%; height: 100%; border: 0; }

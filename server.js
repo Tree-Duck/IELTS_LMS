@@ -839,6 +839,141 @@ app.post('/api/hint', authenticate, async (req, res) => {
 });
 
 // ─── Essay Rewrite ────────────────────────────────────────────────────────────
+// Translate a task prompt into Vietnamese (client caches the result per question)
+app.post('/api/translate-prompt', authenticate, async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 500,
+      system: 'Dịch đề IELTS Writing sang tiếng Việt tự nhiên, giữ nguyên thuật ngữ IELTS. Chỉ trả về bản dịch, không thêm lời dẫn.',
+      messages: [{ role: 'user', content: prompt.trim() }],
+    });
+    const translation = (response.content?.[0]?.text || '').trim();
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('translate-prompt', calculateCost(i, o), i + o);
+    res.json({ translation });
+  } catch (err) {
+    console.error('Translate error:', err.message || err);
+    res.status(500).json({ error: 'Không dịch được đề. Thử lại.' });
+  }
+});
+
+// ─── Essay Outline (mechanism chain) ─────────────────────────────────────────
+// Builds a 4-paragraph plan whose body paragraphs follow the mechanism chain
+// (F → A → B → C → D → D+ → optional N → E) rather than listing flat reasons.
+// Returns strict JSON so the client can render checkable steps and a mind map.
+const CHAIN_STEPS = `MECHANISM CHAIN — the causal spine every body paragraph must follow:
+F (FRAME)  – the prompt mixes two different questions (e.g. what something IS worth vs what it SHOULD be worth); name the split and state which criterion you judge by. Goes in the intro.
+A (CLAIM)  – the paragraph's main claim, no detail yet.
+B (ACTOR)  – a class of people (or institutions) doing a camera-recordable action. MUST be written as "When <plural actors> ...", never "A student..." and never "people/society". Anchor it in a concrete situation ("In a lecture hall where laptops are allowed, ...").
+C (RESOURCE) – what measurably rises or falls because of that action: money, hours, health, skill, trust.
+D (SHIFT)  – a DIFFERENT actor who now absorbs the consequence. Must not be the same group as B.
+D+ (WHERE-SEEN) – the form the consequence takes in the real world: a budget line, a countable indicator, a visible phenomenon. Never invent statistics ("a fall in recruitment spending" is fine, "a 12% fall" is not).
+N (OPTIONAL) – exactly one of: a secondary idea, a concession, or a scope limit. Omit unless it genuinely helps.
+E (BACK-TO-PROMPT) – answer the exact question using the prompt's own evaluative word.`;
+
+const ENGINES = `ENGINES (what is finite in this prompt?): MONEY, TIME, HABIT, INCENTIVE, NORM, INFORMATION, IDENTITY_TRUST, SCALE (how many people one unit of output reaches), SKILL (atrophies when unused).`;
+
+app.post('/api/outline', authenticate, async (req, res) => {
+  const { task_type, prompt, level, student_ideas } = req.body;
+  if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const LEVEL_NOTE = {
+    basic: 'Target Band 5.5–6.5: keep sentences short and plain, prefer everyday-life examples, and keep each step to one clear sentence.',
+    intermediate: 'Target Band 6.5–7.0: use precise collocations and a short cause–effect chain; examples may name a specific country or setting.',
+    advanced: 'Target Band 7.0+: use precise academic collocations, run the full chain, and include the optional N step where it sharpens the argument.',
+  }[level] || 'Target Band 5.5–6.5: keep sentences short and plain, prefer everyday-life examples.';
+
+  const isTask1 = task_type === 'task1';
+
+  const task1Prompt = `You are an IELTS Writing Task 1 coach. Build a 4-part writing plan for this chart/diagram task.
+
+Task 1 prompt:
+${prompt}
+
+Return ONLY this JSON (no markdown, no commentary):
+{
+ "task": "task1",
+ "paragraphs": [
+  {"kind":"intro","title":"Mở bài","model":"<1-2 model sentences in English paraphrasing the prompt>","steps":[{"code":"PARA","label":"<short Vietnamese action, e.g. 'Diễn đạt lại đề bằng từ của mình'>"},{"code":"COVER","label":"<what the chart covers: period, categories>"}]},
+  {"kind":"overview","title":"Overview","model":"<model overview sentence(s), NO specific figures>","steps":[{"code":"TREND","label":"<the single most striking trend>"},{"code":"CONTRAST","label":"<the clearest contrast or exception>"}]},
+  {"kind":"body","title":"Thân bài 1","model":"<model sentences describing the main group of data with figures>","steps":[{"code":"GROUP","label":"<which data belongs together and why>"},{"code":"FIGURE","label":"<which 2-3 figures to quote>"},{"code":"COMPARE","label":"<the comparison to make>"}]},
+  {"kind":"body","title":"Thân bài 2","model":"<model sentences describing the remaining data>","steps":[{"code":"GROUP","label":"..."},{"code":"FIGURE","label":"..."},{"code":"COMPARE","label":"..."}]}
+ ]
+}
+
+RULES: every "model" sentence must reference the actual categories/periods in THIS task. Task 1 has no conclusion — the overview does that job. Do not invent numbers that are not implied by the prompt wording. ${LEVEL_NOTE} Write "model" in English; write "label" in Vietnamese.`;
+
+  const task2Prompt = `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
+
+${CHAIN_STEPS}
+
+${ENGINES}
+
+TWO-SIDED PROMPTS (discuss both views / agree-disagree): use ONE engine only. Identify the pivot variable on which the two sides sit at opposite ends, then run the chain forward in body 1 and in reverse in body 2. Do NOT use two different engines.
+
+Task 2 prompt:
+${prompt}
+${student_ideas && student_ideas.trim() ? `\nThe student's own position and rough ideas (BUILD ON THESE, do not replace them):\n${student_ideas.trim()}\n` : ''}
+Return ONLY this JSON (no markdown, no commentary):
+{
+ "task": "task2",
+ "engine": "<one of MONEY|TIME|HABIT|INCENTIVE|NORM|INFORMATION|IDENTITY_TRUST|SCALE|SKILL>",
+ "engine_why": "<1 short Vietnamese sentence: what is finite in this prompt>",
+ "pivot": "<the pivot variable in Vietnamese, or empty string if the prompt is one-sided>",
+ "frame": "<step F in Vietnamese: which two questions the prompt mixes, and the criterion you judge by>",
+ "paragraphs": [
+  {"kind":"intro","title":"Mở bài","model":"<model intro in English: general statement + the F sentence + a clear thesis>","steps":[
+    {"code":"F","label":"<Vietnamese: name the two questions being mixed>"},
+    {"code":"A","label":"<Vietnamese: state the thesis>"}]},
+  {"kind":"body","title":"Thân bài 1","model":"<model body paragraph in English following A→B→C→D→D+→E>","steps":[
+    {"code":"A","label":"<Vietnamese: the claim>"},
+    {"code":"B","label":"<Vietnamese: which class of actors does what camera-recordable action>"},
+    {"code":"C","label":"<Vietnamese: what rises or falls>"},
+    {"code":"D","label":"<Vietnamese: which NEW actor absorbs it>"},
+    {"code":"D+","label":"<Vietnamese: the form the consequence takes>"},
+    {"code":"E","label":"<Vietnamese: link back to the prompt's wording>"}]},
+  {"kind":"body","title":"Thân bài 2","model":"<model body paragraph running the SAME engine in the opposite direction>","steps":[ same six codes ]},
+  {"kind":"conclusion","title":"Kết bài","model":"<model conclusion in English: restate the position + the scope-limit sentence from F>","steps":[
+    {"code":"E","label":"<Vietnamese: restate the position>"},
+    {"code":"F","label":"<Vietnamese: the scope limit>"}]}
+ ]
+}
+
+RULES:
+- Step B must start with "When <plural actors>" or an anchoring phrase like "In a lecture hall where...". Never "A student..."; never "people"/"society".
+- Step D must move to a DIFFERENT actor than step B.
+- Never invent statistics or studies.
+- "model" text in English (ready to adapt); "label" text in Vietnamese (what the student must do).
+- Keep sentences straight: advanced vocabulary, simple sentence architecture. No mid-sentence interruptions.
+- ${LEVEL_NOTE}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 3000,
+      system: 'You are an expert IELTS writing coach. Respond with valid JSON only — no markdown fences, no commentary.',
+      messages: [{ role: 'user', content: isTask1 ? task1Prompt : task2Prompt }],
+    });
+    let text = (response.content?.[0]?.text || '').trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const outline = parseGradingJson(text); // tolerant of truncation
+
+    const inputTokens = response.usage?.input_tokens || 0;
+    const outputTokens = response.usage?.output_tokens || 0;
+    db.logUsage('outline', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
+
+    res.json(outline);
+  } catch (err) {
+    console.error('Outline error:', err.message || err);
+    res.status(500).json({ error: 'Không tạo được dàn ý. Thử lại.', detail: err.message });
+  }
+});
+
 app.post('/api/rewrite', authenticate, async (req, res) => {
   const { submission_id } = req.body;
   if (!submission_id) return res.status(400).json({ error: 'submission_id is required' });

@@ -2104,31 +2104,42 @@
             <div class="wp-prompt-col">
               <div class="wp-prompt-label">📋 Đề bài</div>
               <div class="wp-prompt-text" id="wp-prompt-text"></div>
+              <div class="wp-translate-box hidden" id="wp-translate-box"></div>
               <div id="wp-chart-area" class="wp-chart-area hidden"></div>
-              <!-- AI Writing Tools (Idea Generator + Language Toolkit) -->
+
+              <!-- Outline builder (mechanism chain) -->
+              <div class="wp-outline-section" id="wp-outline-section">
+                <div class="wp-outline-head">
+                  <div>
+                    <div class="wp-outline-title">🗂️ Dàn ý</div>
+                    <div class="wp-outline-sub">Chọn các ý sẽ dùng — tick tới đâu, tiến độ chạy tới đó.</div>
+                  </div>
+                  <span class="wp-outline-progress" id="wp-outline-progress">0/0</span>
+                </div>
+                <div class="wp-outline-controls">
+                  <select id="wp-hint-level" class="wp-hint-level-select">
+                    <option value="basic">Cơ bản (Band 5.5–6.5)</option>
+                    <option value="intermediate">Trung cấp (Band 6.5–7.0)</option>
+                    <option value="advanced">Nâng cao (Band 7.0+)</option>
+                  </select>
+                  <button class="btn btn-primary btn-sm" id="wp-outline-btn" onclick="wpBuildOutline()">✨ Tạo dàn ý</button>
+                </div>
+                <textarea id="wp-ideas-input" class="wp-ideas-input" rows="2"
+                  placeholder="Quan điểm + 1-2 ý thô của em (tuỳ chọn) — AI sẽ phát triển ý CỦA EM."></textarea>
+                <div class="wp-engine-badge hidden" id="wp-engine-badge"></div>
+                <div id="wp-outline-body" class="wp-outline-body">
+                  <div class="wp-outline-empty">Nhấn <strong>Tạo dàn ý</strong> để AI dựng khung 4 đoạn theo chuỗi cơ chế (engine → actor → resource → hệ quả).</div>
+                </div>
+                <button type="button" class="wp-socratic-btn hidden" id="wp-socratic-btn" onclick="wpSocraticFollowUp()">🔍 Hỏi sâu hơn</button>
+              </div>
+
+              <!-- AI Writing Tools (Language Toolkit) -->
               <div class="wp-tools-section" id="wp-tools-section">
                 <button class="wp-tools-toggle" onclick="toggleWpTools()">
                   <span>✨ Hỗ trợ viết AI</span>
                   <span id="wp-tools-icon">▸</span>
                 </button>
                 <div class="wp-tools-body hidden" id="wp-tools-body">
-                  <div class="wp-hint-level">
-                    <label for="wp-hint-level">🎯 Trình độ của em</label>
-                    <select id="wp-hint-level" class="wp-hint-level-select">
-                      <option value="basic">Cơ bản (Band 5.5–6.5)</option>
-                      <option value="intermediate">Trung cấp (Band 6.5–7.0)</option>
-                      <option value="advanced">Nâng cao (Band 7.0+)</option>
-                    </select>
-                  </div>
-                  <div class="hint-card">
-                    <div class="hint-card-header">💡 Ý kiến đoạn thân
-                      <button type="button" class="hint-generate-btn" id="wp-ideas-btn" onclick="wpRequestHint('ideas')">Tạo ✨</button>
-                    </div>
-                    <textarea id="wp-ideas-input" class="wp-ideas-input" rows="2"
-                      placeholder="Nhập quan điểm + 1-2 ý thô của em trước. AI sẽ phát triển ý CỦA EM, không thay bằng ý khác."></textarea>
-                    <div class="hint-card-body" id="wp-ideas-body"><span class="hint-empty">Nhập ý của em rồi nhấp "Tạo ✨". AI nhận dạng đề + cho khung để em tự triển khai.</span></div>
-                    <button type="button" class="wp-socratic-btn hidden" id="wp-socratic-btn" onclick="wpSocraticFollowUp()">🔍 Hỏi sâu hơn</button>
-                  </div>
                   <div class="hint-card">
                     <div class="hint-card-header">📝 Bộ công cụ ngôn ngữ
                       <button type="button" class="hint-generate-btn" id="wp-phrases-btn" onclick="wpRequestHint('phrases')">Tạo ✨</button>
@@ -2140,10 +2151,16 @@
             </div>
             <div class="wp-editor-col">
               <div class="wp-editor-topbar">
+                <span class="wp-editor-label">✍️ Bài viết của bạn</span>
+                <div class="wp-editor-tools">
+                  <button class="wp-tool-btn" onclick="wpTranslatePrompt()" title="Dịch đề sang tiếng Việt">🌐</button>
+                  <button class="wp-tool-btn" onclick="wpToggleFocus()" id="wp-focus-btn" title="Phóng to khung viết">⛶</button>
+                </div>
                 <span class="wp-word-counter" id="wp-word-counter">0 từ</span>
                 <span class="wp-draft-status" id="wp-draft-status"></span>
                 <span class="wp-word-target" id="wp-word-target"></span>
               </div>
+              <div class="wp-word-bar"><div class="wp-word-bar-fill" id="wp-word-bar-fill"></div></div>
               <textarea id="wp-essay-input" class="wp-essay-textarea"
                 placeholder="Bắt đầu viết bài của bạn ở đây…"
                 oninput="updateWordCount()"></textarea>
@@ -2431,7 +2448,7 @@
   </div>
 
   <script src="app.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
   <!-- Theme Modal -->

@@ -9699,6 +9699,12 @@ function updateWordCount() {
   counter.textContent = `${count} từ`;
   if (_wpCurrentQuestion) {
     counter.style.color = count >= _wpCurrentQuestion.minWords ? '#16a34a' : '#dc2626';
+    const fill = document.getElementById('wp-word-bar-fill');
+    if (fill) {
+      const pct = Math.min(100, Math.round((count / _wpCurrentQuestion.minWords) * 100));
+      fill.style.width = pct + '%';
+      fill.classList.toggle('reached', count >= _wpCurrentQuestion.minWords);
+    }
     // Autosave draft for this question
     try { localStorage.setItem('wp_draft_' + _wpCurrentQuestion.id, document.getElementById('wp-essay-input').value); } catch (e) {}
     const st = document.getElementById('wp-draft-status');
@@ -9737,6 +9743,19 @@ function resetWpTools() {
   if (ideasInput) ideasInput.value = '';
   const sb = document.getElementById('wp-socratic-btn');
   if (sb) sb.classList.add('hidden');
+  // Outline builder resets with the question
+  _wpOutline = null;
+  _wpChecked = new Set();
+  const ob = document.getElementById('wp-outline-body');
+  if (ob) ob.innerHTML = '<div class="wp-outline-empty">Nhấn <strong>Tạo dàn ý</strong> để AI dựng khung 4 đoạn theo chuỗi cơ chế (engine → actor → resource → hệ quả).</div>';
+  const eb = document.getElementById('wp-engine-badge');
+  if (eb) eb.classList.add('hidden');
+  const op = document.getElementById('wp-outline-progress');
+  if (op) { op.textContent = '0/0'; op.classList.remove('full'); }
+  const tb = document.getElementById('wp-translate-box');
+  if (tb) tb.classList.add('hidden');
+  const panel = document.getElementById('wp-session-panel');
+  if (panel) panel.classList.remove('wp-focus');
   // collapse tools panel
   const body = document.getElementById('wp-tools-body');
   const icon = document.getElementById('wp-tools-icon');
@@ -9882,6 +9901,159 @@ async function improveWritingEssay() {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '📈 Xem bản viết mẫu Band 8+'; }
   }
+}
+
+/* ─── Outline builder (mechanism chain) ──────────────────────────────────── */
+let _wpOutline = null;          // last generated outline JSON
+let _wpChecked = new Set();     // "p<i>s<j>" keys the student has ticked
+
+// Chain step codes → short Vietnamese chips shown next to each step
+const CHAIN_LABELS = {
+  F:    { t: 'KHUNG',    hint: 'Đề trộn hai câu hỏi nào — và mình chấm theo tiêu chí nào' },
+  A:    { t: 'LUẬN ĐIỂM', hint: 'Ý chính của đoạn, chưa cần chi tiết' },
+  B:    { t: 'AI LÀM GÌ', hint: 'Lớp người cụ thể + hành động camera quay được' },
+  C:    { t: 'TĂNG/GIẢM', hint: 'Tiền, giờ, sức khoẻ, lòng tin… cái gì đổi lượng' },
+  D:    { t: 'AI HỨNG',   hint: 'Một actor MỚI hứng hệ quả (khác nhóm ở bước B)' },
+  'D+': { t: 'THẤY Ở ĐÂU', hint: 'Hệ quả nổi lên dạng gì: ngân sách, chỉ dấu đếm được…' },
+  N:    { t: 'Ý PHỤ',     hint: 'Ý phụ / nhượng bộ / khoanh phạm vi (chọn 1)' },
+  E:    { t: 'VỀ ĐỀ',     hint: 'Trả lời đúng chữ mà đề dùng' },
+  // Task 1 codes
+  PARA:    { t: 'PARAPHRASE', hint: 'Diễn đạt lại đề bằng từ của mình' },
+  COVER:   { t: 'PHẠM VI',    hint: 'Biểu đồ bao gồm gì: mốc thời gian, nhóm dữ liệu' },
+  TREND:   { t: 'XU HƯỚNG',   hint: 'Xu hướng nổi bật nhất — không kèm số' },
+  CONTRAST:{ t: 'TƯƠNG PHẢN', hint: 'Khác biệt / ngoại lệ rõ nhất' },
+  GROUP:   { t: 'NHÓM',       hint: 'Dữ liệu nào gom chung một đoạn' },
+  FIGURE:  { t: 'SỐ LIỆU',    hint: 'Chọn 2–3 số đáng trích' },
+  COMPARE: { t: 'SO SÁNH',    hint: 'So sánh giữa các mục' },
+};
+const ENGINE_VI = {
+  MONEY: 'TIỀN', TIME: 'THỜI GIAN', HABIT: 'THÓI QUEN', INCENTIVE: 'THƯỞNG/PHẠT',
+  NORM: 'SỐ ĐÔNG', INFORMATION: 'THÔNG TIN', IDENTITY_TRUST: 'BẢN SẮC/LÒNG TIN',
+  SCALE: 'QUY MÔ', SKILL: 'KỸ NĂNG',
+};
+
+async function wpBuildOutline() {
+  if (!_wpCurrentQuestion) return;
+  const btn = document.getElementById('wp-outline-btn');
+  const body = document.getElementById('wp-outline-body');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang dựng…'; }
+  body.innerHTML = '<div class="loading">AI đang tìm engine và dựng chuỗi cơ chế…</div>';
+  try {
+    _wpOutline = await api('/api/outline', {
+      method: 'POST',
+      body: JSON.stringify({
+        task_type: _wpCurrentQuestion.type,
+        prompt: _wpCurrentQuestion.prompt,
+        level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
+        student_ideas: (document.getElementById('wp-ideas-input') || {}).value || '',
+      }),
+    });
+    _wpChecked = new Set();
+    wpRenderOutline();
+    const sb = document.getElementById('wp-socratic-btn');
+    if (sb) sb.classList.remove('hidden');
+  } catch (e) {
+    body.innerHTML = `<div class="wp-outline-empty" style="color:var(--danger)">${escHtml(e.message || 'Lỗi tạo dàn ý')}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Tạo dàn ý'; }
+  }
+}
+
+function wpRenderOutline() {
+  const o = _wpOutline;
+  const body = document.getElementById('wp-outline-body');
+  const badge = document.getElementById('wp-engine-badge');
+  if (!o || !Array.isArray(o.paragraphs)) { body.innerHTML = '<div class="wp-outline-empty">Dàn ý trống — thử tạo lại.</div>'; return; }
+
+  if (o.engine && badge) {
+    badge.classList.remove('hidden');
+    badge.innerHTML = `<span class="wp-engine-tag">⚙️ ENGINE: ${escHtml(ENGINE_VI[o.engine] || o.engine)}</span>` +
+      (o.engine_why ? `<span class="wp-engine-why">${escHtml(o.engine_why)}</span>` : '') +
+      (o.pivot ? `<span class="wp-engine-pivot">🔄 Biến trục: ${escHtml(o.pivot)}</span>` : '');
+  } else if (badge) { badge.classList.add('hidden'); }
+
+  body.innerHTML = o.paragraphs.map((p, i) => {
+    const steps = Array.isArray(p.steps) ? p.steps : [];
+    return `
+    <div class="wp-para-card" data-kind="${escHtml(p.kind || '')}">
+      <div class="wp-para-head">
+        <span class="wp-para-num">${i + 1}</span>
+        <span class="wp-para-title">${escHtml(p.title || '')}</span>
+        <span class="wp-para-kind">${escHtml((p.kind || '').toUpperCase())}</span>
+      </div>
+      ${p.model ? `<div class="wp-para-model">${escHtml(p.model)}</div>` : ''}
+      <div class="wp-step-list">
+        ${steps.map((s, j) => {
+          const meta = CHAIN_LABELS[s.code] || { t: s.code || '•', hint: '' };
+          const key = `p${i}s${j}`;
+          return `
+          <label class="wp-step ${_wpChecked.has(key) ? 'done' : ''}" data-key="${key}" title="${escHtml(meta.hint)}">
+            <input type="checkbox" ${_wpChecked.has(key) ? 'checked' : ''} onchange="wpToggleStep('${key}', this)">
+            <span class="wp-step-code">${escHtml(meta.t)}</span>
+            <span class="wp-step-label">${escHtml(s.label || '')}</span>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  wpUpdateOutlineProgress();
+}
+
+function wpToggleStep(key, el) {
+  if (el.checked) _wpChecked.add(key); else _wpChecked.delete(key);
+  const wrap = el.closest('.wp-step');
+  if (wrap) wrap.classList.toggle('done', el.checked);
+  wpUpdateOutlineProgress();
+}
+
+function wpUpdateOutlineProgress() {
+  const total = document.querySelectorAll('#wp-outline-body .wp-step').length;
+  const done = _wpChecked.size;
+  const el = document.getElementById('wp-outline-progress');
+  if (el) {
+    el.textContent = `${done}/${total}`;
+    el.classList.toggle('full', total > 0 && done === total);
+  }
+  // A paragraph card gets a done state when all of its steps are ticked
+  document.querySelectorAll('#wp-outline-body .wp-para-card').forEach(card => {
+    const boxes = card.querySelectorAll('.wp-step');
+    const ticked = card.querySelectorAll('.wp-step.done');
+    card.classList.toggle('para-done', boxes.length > 0 && boxes.length === ticked.length);
+  });
+}
+
+/* ─── Prompt translation (cached per question) ───────────────────────────── */
+async function wpTranslatePrompt() {
+  if (!_wpCurrentQuestion) return;
+  const box = document.getElementById('wp-translate-box');
+  if (!box) return;
+  if (!box.classList.contains('hidden') && box.dataset.for === _wpCurrentQuestion.id) {
+    box.classList.add('hidden'); return;                       // toggle off
+  }
+  const cacheKey = 'wp_tr_' + _wpCurrentQuestion.id;
+  const cached = localStorage.getItem(cacheKey);
+  box.classList.remove('hidden');
+  box.dataset.for = _wpCurrentQuestion.id;
+  if (cached) { box.innerHTML = `<div class="wp-translate-label">Bản dịch tiếng Việt</div>${escHtml(cached)}`; return; }
+  box.innerHTML = '<div class="loading">Đang dịch…</div>';
+  try {
+    const r = await api('/api/translate-prompt', {
+      method: 'POST', body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt }),
+    });
+    try { localStorage.setItem(cacheKey, r.translation); } catch (e) {}
+    box.innerHTML = `<div class="wp-translate-label">Bản dịch tiếng Việt</div>${escHtml(r.translation)}`;
+  } catch (e) {
+    box.innerHTML = `<span style="color:var(--danger)">${escHtml(e.message || 'Không dịch được')}</span>`;
+  }
+}
+
+/* ─── Focus mode: hide the prompt column, widen the editor ───────────────── */
+function wpToggleFocus() {
+  const panel = document.getElementById('wp-session-panel');
+  if (!panel) return;
+  const on = panel.classList.toggle('wp-focus');
+  const btn = document.getElementById('wp-focus-btn');
+  if (btn) { btn.textContent = on ? '⤡' : '⛶'; btn.title = on ? 'Thu nhỏ khung viết' : 'Phóng to khung viết'; }
 }
 
 /* ─── Dictation practice ─────────────────────────────────────────────────── */
