@@ -5977,6 +5977,9 @@ input:focus, textarea:focus, select:focus {
 /* Vietnamese lines are hidden until the VI toggle is on */
 .wp-vi { display: none; font-size: 12px; color: var(--moss); font-style: italic; line-height: 1.5; }
 .wp-outline-section.bilingual .wp-vi { display: block; }
+/* the full wording — in either language — stays hidden until the option is picked */
+.wp-outline-section.bilingual .wp-opt-full.wp-vi { display: none; }
+.wp-outline-section.bilingual .wp-plan-opt.picked .wp-opt-full.wp-vi { display: block; }
 .wp-step-label .wp-vi { margin-top: 2px; }
 
 /* ─── DICTATION PRACTICE ─────────────────────────────────────────────────── */

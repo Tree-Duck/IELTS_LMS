@@ -848,8 +848,12 @@ app.post('/api/translate-prompt', authenticate, async (req, res) => {
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 500,
-      system: 'Dịch đề IELTS Writing sang tiếng Việt tự nhiên, giữ nguyên thuật ngữ IELTS. Chỉ trả về bản dịch, không thêm lời dẫn.',
-      messages: [{ role: 'user', content: prompt.trim() }],
+      system: 'You are a translator. You translate IELTS Writing prompts into natural Vietnamese. You NEVER answer the prompt, never plan it, never write an essay — you only translate. Keep IELTS terminology (Task 1, Task 2, band) in English. Return the translation alone, with no preamble.',
+      messages: [{ role: 'user', content: `Translate the text between the markers into Vietnamese. It is an exam question — translate it, do not answer it.
+
+<<<PROMPT
+${prompt.trim()}
+PROMPT>>>` }],
     });
     const translation = (response.content?.[0]?.text || '').trim();
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
