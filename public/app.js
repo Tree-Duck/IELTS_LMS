@@ -9945,6 +9945,7 @@ async function wpBuildOutline() {
         task_type: _wpCurrentQuestion.type,
         prompt: _wpCurrentQuestion.prompt,
         chart_type: _wpCurrentQuestion.chartType || '',
+        question_type: _wpCurrentQuestion.questionType || '',
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
       }),
     });
@@ -10171,6 +10172,7 @@ async function wpConfirmPlan() {
         task_type: _wpCurrentQuestion.type,
         prompt: _wpCurrentQuestion.prompt,
         chart_type: _wpCurrentQuestion.chartType || '',
+        question_type: _wpCurrentQuestion.questionType || '',
         level: (document.getElementById('wp-hint-level') || {}).value || 'basic',
         choices: _wpChoices,
         student_ideas: (document.getElementById('wp-own-text') || {}).value || '',

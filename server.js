@@ -977,6 +977,140 @@ LINK    – answer the prompt using its own evaluative word.
 ENGINES (what is finite here?): MONEY, TIME, HABIT, INCENTIVE, NORM, INFORMATION, IDENTITY_TRUST, SCALE (how many people one unit of output reaches), SKILL (atrophies when unused).
 For two-sided prompts use ONE engine and one pivot variable: run it forward in body 1 and in reverse in body 2. Never use two engines.`;
 
+// ── Task 2 question types ────────────────────────────────────────────────────
+// Each type asks the student to do a different job, and planning them all as
+// "state your position, then argue it twice" is how a discussion or a
+// problem-solution essay quietly loses Task Response. The type resolved here
+// drives both the planning questions and the outline skeleton.
+const CHAIN_STEPS = `CHAIN STEPS = exactly these five objects, in this order:
+ {"code":"CLAIM","do":"<the claim to open with>","do_vi":"<Vietnamese>"},
+ {"code":"ACTOR","do":"<which plural actors do what recordable action>","do_vi":"<Vietnamese>"},
+ {"code":"CHANGE","do":"<what measurably rises or falls>","do_vi":"<Vietnamese>"},
+ {"code":"KNOCK-ON","do":"<which DIFFERENT actor absorbs it>","do_vi":"<Vietnamese>"},
+ {"code":"EVIDENCE","do":"<the form the consequence takes in the real world>","do_vi":"<Vietnamese>"}`;
+
+const INTRO_VOCAB = '"vocab":["<term from the list>","<term>"]';
+const BODY_VOCAB = '"vocab":["<term>","<term>","<term>"]';
+
+const TASK2_TYPES = {
+  opinion: {
+    label: 'Opinion — agree/disagree, "to what extent", or positive/negative development',
+    structure: 'The whole essay defends ONE position. Both bodies argue the SAME side. They must never become a for/against pair.',
+    body2Rule: 'The prompt is one-sided, so run the engine FORWARD in both bodies on two different pivot values. Do not reverse it — reversing would argue against the thesis.',
+    questions: `  {"id":"position","q":"What is your position?","q_vi":"<Vietnamese>","options":[<3 stances that are genuinely arguable and different — never "agree"/"disagree"/"partly" restated>]},
+  {"id":"body1","q":"Your strongest reason?","q_vi":"<Vietnamese>","options":[<3 causal reasons that SUPPORT that position>]},
+  {"id":"body2","q":"Your second reason?","q_vi":"<Vietnamese>","options":[<3 further reasons supporting the SAME position — not the other side>]}`,
+    blueprint: `  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<how to restate the issue and name the criterion to judge it by>","do_vi":"<Vietnamese>"},
+     {"code":"THESIS","do":"<how to state the position the student chose>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}},
+  {"kind":"body","title":"Body 1 — first reason","steps":[<CHAIN STEPS, proving the student's first reason>],${BODY_VOCAB}},
+  {"kind":"body","title":"Body 2 — second reason","steps":[<CHAIN STEPS, proving the second reason, same engine forward on a different pivot value>],${BODY_VOCAB}},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"RESTATE","do":"<how to restate the position in new words>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<the limit or condition of the argument>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}}`,
+  },
+
+  discussion: {
+    label: 'Discuss both views and give your own opinion',
+    structure: 'Body 1 presents the view the student does NOT hold, fairly and at full strength — no straw man. Body 2 presents the view they DO hold and shows why it wins. The intro must name both views and then state the opinion; an essay that only argues one side cannot pass Task Response here.',
+    body2Rule: 'This is a two-sided prompt: use ONE engine and one pivot variable, run it forward in Body 1 (the other view) and in REVERSE in Body 2 (the student\'s view). Never use two engines.',
+    questions: `  {"id":"stance","q":"Which view do you side with?","q_vi":"<Vietnamese>","options":[<3 options: view A, view B, or a defensible middle position that still commits>]},
+  {"id":"body1","q":"Body 1 — how do you put the OTHER view at its strongest?","q_vi":"<Vietnamese>","options":[<3 fair, non-straw-man statements of the opposing view, each a causal claim>]},
+  {"id":"body2","q":"Body 2 — why is your side stronger?","q_vi":"<Vietnamese>","options":[<3 causal reasons the student's own side outweighs the other — not a repeat of body 1 negated>]}`,
+    blueprint: `  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<how to name BOTH views in one sentence, neither dismissed>","do_vi":"<Vietnamese>"},
+     {"code":"THESIS","do":"<how to state which view the student backs and on what criterion>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}},
+  {"kind":"body","title":"Body 1 — the other view","steps":[<CHAIN STEPS, building the OPPOSING view at full strength>, then {"code":"LIMIT","do":"<the one sentence that concedes this view holds, but only so far>","do_vi":"<Vietnamese>"}],${BODY_VOCAB}},
+  {"kind":"body","title":"Body 2 — your view","steps":[<CHAIN STEPS, same engine in REVERSE, proving the student's own view>],${BODY_VOCAB}},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"WEIGH","do":"<how to say why one view outweighs the other, not just repeat both>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<the condition under which the other view would win instead>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}}`,
+  },
+
+  advantage_disadvantage: {
+    label: 'Advantages and disadvantages',
+    structure: 'Body 1 is the benefit, Body 2 is the cost. IMPORTANT: if the prompt asks whether the advantages OUTWEIGH the disadvantages, a verdict is required in the intro and the conclusion must justify it. If the prompt only says "discuss the advantages and disadvantages", stay balanced and give no verdict in the intro.',
+    body2Rule: 'Two-sided prompt: use ONE engine and one pivot variable, forward in Body 1 (the benefit) and in REVERSE in Body 2 (the cost). Never use two engines.',
+    questions: `  {"id":"verdict","q":"Do the benefits win, or the costs?","q_vi":"<Vietnamese>","options":[<3 options; if the prompt does NOT use "outweigh", make these three ways of framing the trade-off rather than a verdict>]},
+  {"id":"body1","q":"Body 1 — the main advantage?","q_vi":"<Vietnamese>","options":[<3 advantages, each a causal claim with a beneficiary>]},
+  {"id":"body2","q":"Body 2 — the main disadvantage?","q_vi":"<Vietnamese>","options":[<3 disadvantages, each naming who bears the cost>]}`,
+    blueprint: `  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<how to restate the development and name the trade-off it creates>","do_vi":"<Vietnamese>"},
+     {"code":"THESIS","do":"<if the prompt says OUTWEIGH, how to state the verdict; otherwise how to signal both sides will be weighed>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}},
+  {"kind":"body","title":"Body 1 — the advantage","steps":[<CHAIN STEPS, tracing the benefit to whoever gains>],${BODY_VOCAB}},
+  {"kind":"body","title":"Body 2 — the disadvantage","steps":[<CHAIN STEPS, same engine in REVERSE, tracing the cost to whoever bears it>],${BODY_VOCAB}},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"WEIGH","do":"<how to state which side is heavier and on what criterion>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<who or what would change the balance>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}}`,
+  },
+
+  problem_solution: {
+    label: 'Problems / causes and solutions',
+    structure: 'Body 1 explains the cause or the problem. Body 2 gives a solution that TARGETS THAT EXACT CAUSE — a solution aimed at a different cause is the classic Task Response failure here. There is no "position" to take.',
+    body2Rule: 'Do not reverse the engine. Body 1 runs the engine forward to show how the problem is produced; Body 2 INTERVENES on that same engine and shows what changes as a result.',
+    questions: `  {"id":"cause","q":"Body 1 — what is the root cause?","q_vi":"<Vietnamese>","options":[<3 root causes, each a mechanism rather than a label>]},
+  {"id":"solution","q":"Body 2 — which fix targets that cause?","q_vi":"<Vietnamese>","options":[<3 measures, each one that acts on the cause above, not on the symptom>]},
+  {"id":"agent","q":"Who has the power to do it?","q_vi":"<Vietnamese>","options":[<3 concrete bodies or groups — a ministry, employers, schools, platforms — never "the government" alone>]}`,
+    blueprint: `  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<how to restate the problem and say who it lands on>","do_vi":"<Vietnamese>"},
+     {"code":"MAP","do":"<how to signal that one cause will be traced and one matching fix proposed>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}},
+  {"kind":"body","title":"Body 1 — the cause","steps":[<CHAIN STEPS, showing how the problem is actually produced>],${BODY_VOCAB}},
+  {"kind":"body","title":"Body 2 — the solution","steps":[
+     {"code":"SOLUTION","do":"<the measure, named precisely enough to picture>","do_vi":"<Vietnamese>"},
+     {"code":"AGENT","do":"<which body or group has the power to carry it out>","do_vi":"<Vietnamese>"},
+     {"code":"MECHANISM","do":"<how it changes the incentive or constraint identified in Body 1>","do_vi":"<Vietnamese>"},
+     {"code":"KNOCK-ON","do":"<who benefits, and who absorbs the cost of the fix>","do_vi":"<Vietnamese>"},
+     {"code":"FEASIBILITY","do":"<the condition the fix depends on>","do_vi":"<Vietnamese>"}],
+   ${BODY_VOCAB}},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"RESTATE","do":"<how to tie the fix back to the cause in new words>","do_vi":"<Vietnamese>"},
+     {"code":"CONDITION","do":"<what has to be true for the fix to work>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}}`,
+  },
+
+  two_part: {
+    label: 'Two-part (direct) question',
+    structure: 'The prompt asks two separate questions. Body 1 answers the FIRST, Body 2 answers the SECOND. Both must be answered or Task Response is capped — and neither body may drift into arguing a position the prompt never asked for.',
+    body2Rule: 'The two questions may need different engines. Pick the engine that fits each question rather than forcing one engine across both, and say so in engine_note.',
+    questions: `  {"id":"q1","q":"<restate the prompt's FIRST question in 6-10 words>","q_vi":"<Vietnamese>","options":[<3 answers to that first question, each a causal claim>]},
+  {"id":"q2","q":"<restate the prompt's SECOND question in 6-10 words>","q_vi":"<Vietnamese>","options":[<3 answers to that second question>]}`,
+    blueprint: `  {"kind":"intro","title":"Introduction","steps":[
+     {"code":"FRAME","do":"<how to restate the situation the two questions sit in>","do_vi":"<Vietnamese>"},
+     {"code":"ANSWER","do":"<how to answer BOTH questions in one short sentence each>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}},
+  {"kind":"body","title":"Body 1 — answer to question 1","steps":[<CHAIN STEPS, proving the answer to the FIRST question>],${BODY_VOCAB}},
+  {"kind":"body","title":"Body 2 — answer to question 2","steps":[<CHAIN STEPS, proving the answer to the SECOND question>],${BODY_VOCAB}},
+  {"kind":"conclusion","title":"Conclusion","steps":[
+     {"code":"RESTATE","do":"<how to restate both answers, not just the second>","do_vi":"<Vietnamese>"},
+     {"code":"SCOPE","do":"<the limit or condition on those answers>","do_vi":"<Vietnamese>"}],
+   ${INTRO_VOCAB}}`,
+  },
+};
+
+// Unclassifiable prompts fall back to the opinion shape, but the model is told
+// to read the prompt's own instruction words first rather than assume.
+TASK2_TYPES.other = {
+  ...TASK2_TYPES.opinion,
+  label: 'Unclassified — read the prompt\'s own instruction words',
+  structure: 'The type was not recognised. FIRST work out what the prompt actually demands from its instruction words, then plan exactly that. Do not default to agree/disagree unless the prompt really asks for an opinion.',
+};
+
+function resolveTask2Type(question_type, prompt) {
+  if (question_type && TASK2_TYPES[question_type] && question_type !== 'other') return question_type;
+  try {
+    const guessed = db.classifyTask2Type(prompt);
+    if (guessed && TASK2_TYPES[guessed]) return guessed;
+  } catch (e) { /* classifier unavailable — fall through */ }
+  return 'other';
+}
+
 const LEVEL_NOTE = {
   basic: 'Student level Band 5.5-6.5: keep every instruction to one short, plain sentence.',
   intermediate: 'Student level Band 6.5-7.0: instructions may name a specific setting or country.',
@@ -985,7 +1119,7 @@ const LEVEL_NOTE = {
 
 // ── Stage 1: multiple-choice planning ────────────────────────────────────────
 app.post('/api/outline/options', authenticate, async (req, res) => {
-  const { task_type, prompt, level, chart_type } = req.body;
+  const { task_type, prompt, level, chart_type, question_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
 
@@ -1010,7 +1144,13 @@ Return ONLY this JSON:
  ]
 }
 RULES: "short" is a scannable label the student reads first — 3-7 words, no full sentence, no trailing full stop. "full" carries the detail. Options must be genuinely different and specific to THIS chart.`
-    : `You are an IELTS Writing Task 2 examiner. Before the student writes, make them commit to a position and to their own arguments.
+    : (() => {
+      const t2type = resolveTask2Type(question_type, prompt);
+      const T = TASK2_TYPES[t2type];
+      return `You are an IELTS Writing Task 2 examiner. Before the student writes, make them commit to the decisions THIS question type actually requires.
+
+QUESTION TYPE: ${T.label}
+THE STRUCTURE THIS TYPE FORCES: ${T.structure}
 
 Task 2 prompt:
 ${prompt}
@@ -1018,21 +1158,19 @@ ${prompt}
 Return ONLY this JSON:
 {
  "task":"task2",
+ "type":"${t2type}",
  "questions":[
-  {"id":"position","q":"What is your position?","q_vi":"<Vietnamese>",
-   "options":[{"short":"<3-7 words>","full":"<the stance in 12-22 words>","short_vi":"<Vietnamese, 3-7 words>","full_vi":"<Vietnamese>"},{...},{...}]},
-  {"id":"body1","q":"Argument for body paragraph 1?","q_vi":"<Vietnamese>",
-   "options":[{"short":"...","full":"...","short_vi":"...","full_vi":"..."},{...},{...}]},
-  {"id":"body2","q":"Argument for body paragraph 2?","q_vi":"<Vietnamese>",
-   "options":[{"short":"...","full":"...","short_vi":"...","full_vi":"..."},{...},{...}]}
+${T.questions}
  ]
 }
+Every option is an object {"short":"<3-7 words>","full":"<12-22 words>","short_vi":"<Vietnamese, 3-7 words>","full_vi":"<Vietnamese>"} and every question needs exactly 3 of them.
 RULES:
 - "short" is the label the student scans first: 3-7 words, a noun phrase or clipped clause, no trailing full stop (e.g. "Fees deter poorer applicants").
 - "full" spells the same choice out in 12-22 words.
-- Stances must be genuinely arguable and different — not "agree"/"disagree"/"partly" restated.
-- Arguments must be causal claims a student could prove, not topic labels.
+- Options must be causal claims a student could prove, not topic labels, and must be genuinely different from each other.
+- Ask only what THIS prompt asks. Never turn a two-sided or two-part question into agree/disagree, and never ask for a position the prompt did not request.
 - Vietnamese must read like a Vietnamese teacher wrote it, not a literal gloss. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
+    })();
 
   try {
     const response = await client.messages.create({
@@ -1111,7 +1249,7 @@ RULES: never rewrite the idea for them, never hand them a replacement argument, 
 
 // ── Stage 2: the outline itself ──────────────────────────────────────────────
 app.post('/api/outline', authenticate, async (req, res) => {
-  const { task_type, prompt, level, choices, student_ideas, chart_type } = req.body;
+  const { task_type, prompt, level, choices, student_ideas, chart_type, question_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
 
@@ -1156,42 +1294,38 @@ Return ONLY this JSON:
 }
 RULES: "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Reference the actual categories and periods in THIS task. Pick the variant FIRST, then follow that variant's template exactly - a map plan must never talk about trends, a process plan must never quote figures, a static plan must never say increase/decrease. Task 1 has no conclusion. Do not invent figures. Add "do_vi" for every step: the same instruction in natural Vietnamese. ${LEVEL_NOTE[level] || LEVEL_NOTE.basic}`;
 
-  const task2Prompt = `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
+  const t2type = isTask1 ? null : resolveTask2Type(question_type, prompt);
+  const T2 = t2type ? TASK2_TYPES[t2type] : null;
+
+  const task2Prompt = !T2 ? '' : `You are an expert IELTS Writing Task 2 coach who teaches the MECHANISM CHAIN method.
 
 ${CHAIN_RULES}
+
+QUESTION TYPE: ${T2.label}
+THE STRUCTURE THIS TYPE FORCES: ${T2.structure}
+HOW BODY 2 RELATES TO BODY 1: ${T2.body2Rule}
 ${chosenBlock}${ideasBlock}
 Task 2 prompt:
 ${prompt}
 ${vocabPromptBlock(units)}
+${CHAIN_STEPS}
+
 Return ONLY this JSON:
 {
  "task":"task2",
+ "type":"${t2type}",
  "topic":"<2-4 word topic label>",
  "engine":"<MONEY|TIME|HABIT|INCENTIVE|NORM|INFORMATION|IDENTITY_TRUST|SCALE|SKILL>",
  "engine_note":"<max 12 words: what is finite in this prompt>",
  "pivot":"<the pivot variable, or \\"\\" if the prompt is one-sided>",
  "paragraphs":[
-  {"kind":"intro","title":"Introduction","steps":[
-     {"code":"FRAME","do":"<which two questions the prompt mixes, and the criterion to judge by>","do_vi":"<Vietnamese>"},
-     {"code":"THESIS","do":"<how to state the chosen position>","do_vi":"<Vietnamese>"}],
-   "vocab":["<term from the list>","<term>"]},
-  {"kind":"body","title":"Body 1","steps":[
-     {"code":"CLAIM","do":"<the claim to open with>","do_vi":"<Vietnamese>"},
-     {"code":"ACTOR","do":"<which plural actors do what recordable action>","do_vi":"<Vietnamese>"},
-     {"code":"CHANGE","do":"<what rises or falls>","do_vi":"<Vietnamese>"},
-     {"code":"KNOCK-ON","do":"<which NEW actor absorbs it>","do_vi":"<Vietnamese>"},
-     {"code":"EVIDENCE","do":"<the form the consequence takes>","do_vi":"<Vietnamese>"}],
-   "vocab":["<term>","<term>","<term>"]},
-  {"kind":"body","title":"Body 2","steps":[ same five codes, same engine running in reverse ],"vocab":["<term>","<term>","<term>"]},
-  {"kind":"conclusion","title":"Conclusion","steps":[
-     {"code":"RESTATE","do":"<how to restate the position>","do_vi":"<Vietnamese>"},
-     {"code":"SCOPE","do":"<the limit of the argument>","do_vi":"<Vietnamese>"}],
-   "vocab":["<term>","<term>"]}
+${T2.blueprint}
  ]
 }
 RULES:
+- Follow the paragraph skeleton above exactly: the same titles, the same codes, in the same order. Every "<CHAIN STEPS...>" placeholder expands to the five chain objects, tuned to the job that paragraph's title names.
 - "do" is an INSTRUCTION telling the student what to write — never a model sentence they could copy. Start each with a verb ("Name...", "Show...", "Trace...").
-- Keep each "do" under 16 words and start it with a verb.
+- Keep each "do" under 16 words.
 - "do_vi" is the same instruction in natural Vietnamese a teacher would say — not a literal gloss.
 - "vocab" items must be copied verbatim from the target vocabulary lists above.
 - ACTOR must be a plural class; KNOCK-ON must be a different actor.

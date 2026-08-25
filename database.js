@@ -1047,7 +1047,8 @@ const db = {
     if (!data.task2_prompts_custom) return false;
     const p = data.task2_prompts_custom.find(x => String(x.id) === String(id));
     if (!p) return false;
-    if (fields.question_type !== undefined && fields.question_type !== '') p.question_type = fields.question_type;
+    if (fields.question_type !== undefined && fields.question_type !== '') p.question_type = fields.question_type;    // A type set by hand outranks the classifier from here on.
+    if (fields.question_type !== undefined && fields.question_type !== '') p.type_locked = true;
     if (fields.difficulty !== undefined && fields.difficulty !== '') p.difficulty = fields.difficulty;
     if (fields.q !== undefined) p.q = fields.q;
     save(data);
@@ -1314,14 +1315,53 @@ const db = {
 // give your opinion" contains "opinion" but is a discussion-type task.
 function classifyTask2Type(q) {
   const s = (q || '').toLowerCase();
+
+  // "Discuss both views" and the advantages/disadvantages pair name themselves.
   if (/discuss both (views|sides|these views|of these)|discuss both/.test(s)) return 'discussion';
   if (/advantages?\s+and\s+disadvantages?|disadvantages?\s+and\s+advantages?|\boutweigh\b|benefits?\s+and\s+drawbacks?|\bdrawbacks?\b/.test(s)) return 'advantage_disadvantage';
-  if (/\bproblems?\b.*\b(solutions?|solved|solve|addressed|tackled|prevent|reduce)\b|\bcauses?\b.*\b(solutions?|solved|solve|addressed|tackled|effects?|problems?)\b|what\s+(problems|solutions|measures|steps)|how\s+(can|could|might)\b.*\b(problem|issue|situation|solved|solve|prevent|reduce|address|tackle)\b|reasons?.*solutions?/.test(s)) return 'problem_solution';
-  if (/to what extent do you agree|agree or disagree|do you agree|positive or negative (development|trend)|a positive or (a )?negative/.test(s)) return 'opinion';
+
+  // An explicit instruction to agree settles it, even when the prompt is full of
+  // problem vocabulary: "congestion is a problem ... to what extent do you agree"
+  // is an opinion essay, not a problem-solution one.
+  if (/to what extent do you (agree|disagree)|agree or disagree|do you agree/.test(s)) return 'opinion';
+
+  // Solution verbs students actually meet. "deal with" and "tackle" are as common
+  // in real papers as "solve", and leaving them out sent causes-then-fix prompts
+  // to the two-part blueprint.
+  const FIX = '(?:solutions?|solve[ds]?|address(?:ed)?|tackle[ds]?|dealt? with|cope with|combat(?:ed)?|overcome|counter|curb|mitigate|alleviate|remedy|prevent|reduce|minimi[sz]e|stop)';
+  const CAUSE = '(?:problems?|causes?|reasons?|issues?)';
+  if (new RegExp(`\\b${CAUSE}\\b[\\s\\S]*\\b${FIX}\\b`).test(s)) return 'problem_solution';
+  if (new RegExp(`\\b${FIX}\\b[\\s\\S]*\\b${CAUSE}\\b`).test(s)) return 'problem_solution';
+  if (/what\s+(?:problems|solutions|measures|steps|actions)|what\s+(?:can|could|should)\s+be\s+done|how\s+(?:can|could|should|might)\b[\s\S]*\b(?:problem|issue|situation|trend)/.test(s)) return 'problem_solution';
+
+  // "Why is this happening? Is it a positive or negative development?" asks two
+  // different jobs of the two bodies, so it is a two-part question — planning it
+  // as an opinion essay makes both bodies argue the same side and drops the "why".
+  const asksWhy = /\bwhy\b|what\s+(?:are|is)\s+the\s+(?:reasons?|causes?)|what\s+(?:do|does)\b[\s\S]*\bthink\b|who\s+should|how\s+(?:can|could|do|does)\b/.test(s);
+  const asksVerdict = /positive or negative|negative or positive|good\s+(?:thing|or\s+bad)|bad\s+or\s+good|beneficial or harmful|is this a (?:good|bad|positive|negative)/.test(s);
+  if (asksWhy && asksVerdict) return 'two_part';
+
+  if (/positive or negative (development|trend)|a positive or (a )?negative/.test(s)) return 'opinion';
+
   const qmarks = (s.match(/\?/g) || []).length;
   if (qmarks >= 2) return 'two_part';
   return 'other';
 }
+
+// Migration: the Task 2 classifier used to miss "deal with"/"tackle" fixes and
+// typed "why ...? positive or negative?" as an opinion, so those prompts were
+// planned with the wrong blueprint. Re-tag anything an admin has not set by hand.
+(function reclassifyTask2Types() {
+  const data = load();
+  const rows = data.task2_prompts_custom || [];
+  let changed = 0;
+  for (const p of rows) {
+    if (p.type_locked) continue;
+    const fresh = classifyTask2Type(p.q);
+    if (fresh !== p.question_type) { p.question_type = fresh; changed++; }
+  }
+  if (changed) { save(data); console.log(`[migration] re-typed ${changed} Task 2 prompt(s)`); }
+})();
 
 // Migration: ensure new collections exist in existing databases
 (function migrateCollections() {
@@ -1397,5 +1437,8 @@ function classifyTask2Type(q) {
   });
   if (changed) save(data);
 })();
+
+// The Task 2 planner needs the same typing rule when a prompt arrives untagged.
+db.classifyTask2Type = classifyTask2Type;
 
 module.exports = db;
