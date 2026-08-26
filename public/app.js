@@ -1729,6 +1729,8 @@ function showView(name) {
   else if (name === 'vocab') loadVocabNotebook();
   else if (name === 'vocab-learn') loadVocabLearn();
   else if (name === 'speaking') loadSpeakingTopicGen();
+  else if (name === 'truc') loadTrucList();
+  else if (name === 'truc-ch0') loadTrucChapter0();
   else if (name === 'practice-sentences') loadPracticeSentences();
   else if (name === 'practice-paragraphs') loadPracticeParagraphs();
   else if (name === 'practice-grammar') loadPracticeGrammar();
@@ -3748,9 +3750,9 @@ function renderFeedback(s) {
               ${errs.map((a, i) => errorCardHtml(a, i)).join('')}
             </div>
             ${goods.length ? `
-              <div class="err-panel-good">
-                <h4>✅ Chỗ em làm tốt</h4>
-                ${goods.map((a, i) => errorCardHtml(a, i)).join('')}
+              <div class="err-panel-good collapsed">
+                <h4 onclick="this.parentElement.classList.toggle('collapsed')">✅ Chỗ em làm tốt <span class="epg-count">${goods.length}</span></h4>
+                <div class="err-panel-good-body">${goods.map((a, i) => errorCardHtml(a, i)).join('')}</div>
               </div>` : ''}
           </aside>
         </div>
@@ -6345,7 +6347,7 @@ function errorCardHtml(ann, i, opts = {}) {
       <div class="ec-head">
         <span class="ec-num">${i + 1}</span>
         <span class="ec-type ann-type ${type}">${ANN_TYPE_LABELS[type] || type}</span>
-        <span class="ec-err">${escHtml(p.err || (isStrength ? 'Điểm tốt' : 'Cần sửa'))}</span>
+        ${isStrength && (!p.err || p.err === ANN_TYPE_LABELS.strength) ? '' : `<span class="ec-err">${escHtml(p.err || 'Cần sửa')}</span>`}
         ${repeat}
       </div>
       ${original ? `<div class="ec-line ec-orig"><span class="ec-tag">${isStrength ? 'Trong bài' : 'Em viết'}</span><span class="ec-text">${escHtml(original)}</span></div>` : ''}
@@ -8723,6 +8725,236 @@ let _psMode  = 'fib';
 let _psWords = [];
 let _psIdx   = 0;
 let _psScore = 0;
+
+/* ─── 14 trục lập luận ────────────────────────────────────────────────────
+   The teacher's own material: 100 recent exam prompts collapsed onto 14
+   reusable argument machines. A student who works through prompts one at a
+   time never notices that three of them are the same argument; the axis is the
+   unit that transfers. */
+
+let _trucCache = null;
+let _trucCurrent = null;
+
+async function loadTrucList() {
+  const box = document.getElementById('truc-list');
+  if (!box) return;
+  box.innerHTML = '<div class="loading">Đang tải 14 trục…</div>';
+  try {
+    _trucCache = await api('/api/truc');
+  } catch (err) {
+    box.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`;
+    return;
+  }
+  const axes = _trucCache.axes || [];
+  const total = axes.reduce((n, a) => n + (a.count || 0), 0);
+  // The file's own advice: four axes cover 42% of the set, so mark them.
+  const shortlist = new Set([10, 1, 4, 11]);
+
+  box.innerHTML = `
+    <button class="truc-ch0-card" onclick="showView('truc-ch0')">
+      <div class="tc0-icon">📘</div>
+      <div class="tc0-body">
+        <h3>Chương 0 · Ngôn ngữ mọi đề đều cần</h3>
+        <p>Hedging, cách cân đề outweigh, động từ nhân quả, ba mức cụ thể, bắc cầu quy mô, nhượng bộ</p>
+      </div>
+      <span class="tc0-count">${(_trucCache.chapter0 || []).length} mục</span>
+    </button>
+
+    <div class="truc-note">
+      <strong>Còn một tuần trước ngày thi?</strong> Đọc Chương 0, rồi Trục 10, Trục 1, Trục 4 và Trục 11. Bốn trục đó phủ 42% bộ đề.
+    </div>
+
+    <div class="truc-grid">
+      ${axes.map(a => `
+        <button class="truc-card${shortlist.has(a.n) ? ' priority' : ''}" onclick="openTruc(${a.n})">
+          <div class="tr-head">
+            <span class="tr-n">${a.n}</span>
+            <span class="tr-count">${a.count} đề</span>
+          </div>
+          <h3 class="tr-title">${escHtml(a.title)}</h3>
+          <p class="tr-core">${escHtml(a.core || '')}</p>
+          <div class="tr-foot">
+            <span class="tr-engine">⚙ ${escHtml(a.engine || '')}</span>
+            <span class="tr-vocab">${a.vocab_count} cụm từ</span>
+          </div>
+        </button>`).join('')}
+    </div>
+    <div class="truc-total">${axes.length} trục · ${total} đề</div>`;
+}
+
+async function openTruc(n) {
+  showView('truc-detail');
+  const body = document.getElementById('truc-detail-body');
+  document.getElementById('truc-detail-title').textContent = 'Trục ' + n;
+  document.getElementById('truc-detail-core').textContent = '';
+  body.innerHTML = '<div class="loading">Đang tải trục…</div>';
+  let a;
+  try { a = await api('/api/truc/' + n); }
+  catch (err) { body.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`; return; }
+  _trucCurrent = a;
+
+  document.getElementById('truc-detail-title').textContent = `Trục ${a.n}. ${a.title}`;
+  document.getElementById('truc-detail-core').textContent = a.core || '';
+
+  const r = a.recognise || {};
+  const chain = (a.model_chain || {}).steps || {};
+  const g = a.gapped_chain || { steps: {} };
+  const CHAIN_LABEL = {
+    A: 'Câu luận điểm', B: 'Ai làm gì, quay được',
+    C: 'Cái gì tăng giảm', D: 'Ai khác gánh hệ quả',
+    'D+': 'Hệ quả nổi ở đâu', E: 'Chốt về đề',
+  };
+
+  body.innerHTML = `
+    <div class="truc-recog">
+      <h3>Nhận diện nhanh trục này</h3>
+      <div class="tr-recog-grid">
+        ${[['ENGINE', r.engine], ['AI', r.actors], ['LÀM GÌ QUAY ĐƯỢC', r.actions], ['CÁI GÌ TĂNG GIẢM', r.change], ['BẮC CẦU QUY MÔ', r.bridge]]
+          .filter(([, v]) => v).map(([k, v]) => `<div class="tr-recog-row"><span class="tr-recog-k">${k}</span><span class="tr-recog-v">${escHtml(v)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="truc-block">
+      <h3>Chain mẫu</h3>
+      ${(a.model_chain || {}).prompt ? `<div class="tr-prompt">${escHtml(a.model_chain.prompt)}</div>` : ''}
+      <div class="tr-chain">
+        ${['A', 'B', 'C', 'D', 'D+', 'E'].filter(k => chain[k]).map(k => `
+          <div class="tr-link">
+            <span class="tr-link-k">${k}</span>
+            <div class="tr-link-body">
+              <span class="tr-link-label">${CHAIN_LABEL[k]}</span>
+              <span class="tr-link-text">${escHtml(chain[k])}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="truc-block truc-exercise">
+      <h3>Chain khuyết — tới lượt em</h3>
+      ${g.prompt ? `<div class="tr-prompt">${escHtml(g.prompt)}</div>` : ''}
+      <p class="tr-ex-note">A và E cho sẵn. Dựng bốn mắt xích ở giữa. Ba ô đầu cần một hành động camera quay được, viết dạng <em>when</em> cộng danh từ số nhiều — đừng dựng một nhân vật.</p>
+      <div class="tr-chain">
+        ${g.steps.A ? `<div class="tr-link given"><span class="tr-link-k">A</span><div class="tr-link-body"><span class="tr-link-label">${CHAIN_LABEL.A} · cho sẵn</span><span class="tr-link-text">${escHtml(g.steps.A)}</span></div></div>` : ''}
+        ${['B', 'C', 'D', 'D+'].map(k => `
+          <div class="tr-link blank">
+            <span class="tr-link-k">${k}</span>
+            <div class="tr-link-body">
+              <span class="tr-link-label">${CHAIN_LABEL[k]}</span>
+              <textarea class="tr-input" id="tr-in-${k.replace('+', 'plus')}" rows="2" placeholder="Viết mắt xích ${k}…"></textarea>
+            </div>
+          </div>`).join('')}
+        ${g.steps.E ? `<div class="tr-link given"><span class="tr-link-k">E</span><div class="tr-link-body"><span class="tr-link-label">${CHAIN_LABEL.E} · cho sẵn</span><span class="tr-link-text">${escHtml(g.steps.E)}</span></div></div>` : ''}
+      </div>
+      ${g.hints ? `<details class="tr-hints"><summary>Gợi ý cho các ô trống</summary><p>${escHtml(g.hints)}</p></details>` : ''}
+      <button class="btn btn-primary" id="tr-check-btn" onclick="trucCheckChain()">Nhờ AI soi chain →</button>
+      <div id="tr-check-out"></div>
+    </div>
+
+    <div class="truc-block">
+      <h3>Ví dụ an toàn, không bịa số liệu</h3>
+      <div class="tr-examples">
+        ${(a.examples || []).map(e => `<div class="tr-eg"><span class="tr-eg-tier">Hạng ${e.tier}</span><span>${escHtml(e.text)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="truc-block">
+      <h3>Từ vựng của trục <span class="fs-sub">— dùng đúng 4-5 cụm trong cả bài, không nhồi</span></h3>
+      <div class="tr-vocab">
+        ${(a.vocab || []).map(v => `<div class="tr-v"><span class="tr-v-term">${escHtml(v.term)}</span><span class="tr-v-when">${escHtml(v.when)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    ${(a.traps || []).length ? `
+      <div class="truc-block truc-traps">
+        <h3>⚠ Bẫy của trục này</h3>
+        ${a.traps.map(t => `<p>${escHtml(t)}</p>`).join('')}
+      </div>` : ''}
+
+    <div class="truc-block">
+      <h3>Câu luận điểm mẫu, theo dạng đề</h3>
+      <div class="tr-thesis">
+        ${(a.thesis || []).map(t => `<div class="tr-th"><span class="tr-th-form">${escHtml(t.form)}</span><span class="tr-th-text">${escHtml(t.text)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="truc-block">
+      <h3>${(a.prompts || []).length} đề chạy trục này</h3>
+      <div class="tr-prompts">
+        ${(a.prompts || []).map((p, i) => `
+          <div class="tr-p">
+            <div class="tr-p-head"><span class="tr-p-n">${i + 1}</span><span class="tr-p-group">${escHtml((p.group || '').split('·')[1] || p.group || '')}</span></div>
+            <div class="tr-p-q">${escHtml(p.q)}</div>
+            ${p.thesis ? `<details class="tr-p-thesis"><summary>Câu luận điểm mẫu</summary><p>${escHtml(p.thesis)}</p></details>` : ''}
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+async function trucCheckChain() {
+  if (!_trucCurrent) return;
+  const btn = document.getElementById('tr-check-btn');
+  const out = document.getElementById('tr-check-out');
+  const answers = {};
+  for (const k of ['B', 'C', 'D', 'D+']) {
+    const el = document.getElementById('tr-in-' + k.replace('+', 'plus'));
+    answers[k] = el ? el.value.trim() : '';
+  }
+  const written = Object.values(answers).filter(v => v.split(/\s+/).filter(Boolean).length >= 5).length;
+  if (!written) { showToast('Viết ít nhất một mắt xích rồi tôi soi cho.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Đang soi…';
+  out.innerHTML = '<div class="loading">Đang soi từng mắt xích…</div>';
+  try {
+    const r = await api('/api/truc/check-chain', {
+      method: 'POST',
+      body: JSON.stringify({ axis_n: _trucCurrent.n, answers, level: 'basic' }),
+    });
+    const V = { pass: ['✅', 'Được'], weak: ['⚠️', 'Còn hụt'], fail: ['❌', 'Chưa đạt'] };
+    out.innerHTML = `
+      <div class="tr-check">
+        ${(r.links || []).map(l => {
+          const v = V[l.verdict] || V.weak;
+          return `
+            <div class="tr-check-row v-${l.verdict || 'weak'}">
+              <span class="tr-check-k">${escHtml(l.step)}</span>
+              <div class="tr-check-body">
+                <span class="tr-check-verdict">${v[0]} ${v[1]}</span>
+                <span class="tr-check-why">${escHtml(l.why || '')}</span>
+                ${l.fix ? `<span class="tr-check-fix">${escHtml(l.fix)}</span>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+        ${r.overall ? `<div class="tr-check-overall">${escHtml(r.overall)}</div>` : ''}
+      </div>`;
+  } catch (err) {
+    out.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Nhờ AI soi chain →';
+  }
+}
+
+async function loadTrucChapter0() {
+  const box = document.getElementById('truc-ch0-body');
+  if (!box) return;
+  box.innerHTML = '<div class="loading">Đang tải…</div>';
+  let secs;
+  try { secs = await api('/api/truc/chapter0'); }
+  catch (err) { box.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`; return; }
+
+  box.innerHTML = (secs || []).map(sec => `
+    <div class="truc-block ch0-block">
+      <h3><span class="ch0-n">${sec.n}</span> ${escHtml(sec.title)}</h3>
+      ${(sec.body || []).map(p => `<p class="ch0-p">${escHtml(p)}</p>`).join('')}
+      ${(sec.tables || []).map(t => `
+        <div class="ch0-table-wrap">
+          <table class="ch0-table">
+            ${t.head && t.head.length ? `<thead><tr>${t.head.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>` : ''}
+            <tbody>${(t.rows || []).map(row => `<tr>${row.map(c => `<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>`).join('')}
+      ${(sec.notes || []).map(n => `<div class="ch0-note">${escHtml(n)}</div>`).join('')}
+    </div>`).join('');
+}
 
 function loadPracticeSentences() {
   // Topic chips
