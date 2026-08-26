@@ -8719,608 +8719,508 @@ function exportVocabToExcel() {
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Sentence Exercises ─────────────────────────────────────────────────── */
-let _psTopic = Object.keys(VOCAB_BANK)[0];
-let _psLevel = 'B2';
-let _psMode  = 'fib';
-let _psWords = [];
-let _psIdx   = 0;
-let _psScore = 0;
+/* ─── Luyện câu · 25 unit từ vựng của lớp ─────────────────────────────────
+   These screens used to run on a separate generic word list living in this
+   file, so a student met "automation, digital, device" here and the teacher's
+   own collocations everywhere else. One source now feeds the planner, these
+   drills, and the band-raising suggestions in marking. */
 
-/* ─── 14 trục lập luận ────────────────────────────────────────────────────
-   The teacher's own material: 100 recent exam prompts collapsed onto 14
-   reusable argument machines. A student who works through prompts one at a
-   time never notices that three of them are the same argument; the axis is the
-   unit that transfers. */
+// Escape a term for use inside a RegExp without listing the metacharacters —
+// anything that is not a word character or space gets a backslash.
+const reEscape = t => String(t || '').replace(/[^\w\s]/g, c => '\\' + c);
 
-let _trucCache = null;
-let _trucCurrent = null;
+let _vocabUnits = null;
+let _psUnit = 0;
+let _psMode = 'fib';
+let _psItems = [];
+let _psIdx = 0;
+let _psScore = { right: 0, total: 0 };
 
-async function loadTrucList() {
-  const box = document.getElementById('truc-list');
-  if (!box) return;
-  box.innerHTML = '<div class="loading">Đang tải 14 trục…</div>';
-  try {
-    _trucCache = await api('/api/truc');
-  } catch (err) {
-    box.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`;
-    return;
-  }
-  const axes = _trucCache.axes || [];
-  const total = axes.reduce((n, a) => n + (a.count || 0), 0);
-  // The file's own advice: four axes cover 42% of the set, so mark them.
-  const shortlist = new Set([10, 1, 4, 11]);
-
-  box.innerHTML = `
-    <button class="truc-ch0-card" onclick="showView('truc-ch0')">
-      <div class="tc0-icon">📘</div>
-      <div class="tc0-body">
-        <h3>Chương 0 · Ngôn ngữ mọi đề đều cần</h3>
-        <p>Hedging, cách cân đề outweigh, động từ nhân quả, ba mức cụ thể, bắc cầu quy mô, nhượng bộ</p>
-      </div>
-      <span class="tc0-count">${(_trucCache.chapter0 || []).length} mục</span>
-    </button>
-
-    <div class="truc-note">
-      <strong>Còn một tuần trước ngày thi?</strong> Đọc Chương 0, rồi Trục 10, Trục 1, Trục 4 và Trục 11. Bốn trục đó phủ 42% bộ đề.
-    </div>
-
-    <div class="truc-grid">
-      ${axes.map(a => `
-        <button class="truc-card${shortlist.has(a.n) ? ' priority' : ''}" onclick="openTruc(${a.n})">
-          <div class="tr-head">
-            <span class="tr-n">${a.n}</span>
-            <span class="tr-count">${a.count} đề</span>
-          </div>
-          <h3 class="tr-title">${escHtml(a.title)}</h3>
-          <p class="tr-core">${escHtml(a.core || '')}</p>
-          <div class="tr-foot">
-            <span class="tr-engine">⚙ ${escHtml(a.engine || '')}</span>
-            <span class="tr-vocab">${a.vocab_count} cụm từ</span>
-          </div>
-        </button>`).join('')}
-    </div>
-    <div class="truc-total">${axes.length} trục · ${total} đề</div>`;
+async function ensureVocabUnits() {
+  if (_vocabUnits) return _vocabUnits;
+  _vocabUnits = await api('/api/vocab-units');
+  return _vocabUnits;
 }
 
-async function openTruc(n) {
-  showView('truc-detail');
-  const body = document.getElementById('truc-detail-body');
-  document.getElementById('truc-detail-title').textContent = 'Trục ' + n;
-  document.getElementById('truc-detail-core').textContent = '';
-  body.innerHTML = '<div class="loading">Đang tải trục…</div>';
-  let a;
-  try { a = await api('/api/truc/' + n); }
-  catch (err) { body.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`; return; }
-  _trucCurrent = a;
-
-  document.getElementById('truc-detail-title').textContent = `Trục ${a.n}. ${a.title}`;
-  document.getElementById('truc-detail-core').textContent = a.core || '';
-
-  const r = a.recognise || {};
-  const chain = (a.model_chain || {}).steps || {};
-  const g = a.gapped_chain || { steps: {} };
-  const CHAIN_LABEL = {
-    A: 'Câu luận điểm', B: 'Ai làm gì, quay được',
-    C: 'Cái gì tăng giảm', D: 'Ai khác gánh hệ quả',
-    'D+': 'Hệ quả nổi ở đâu', E: 'Chốt về đề',
-  };
-
-  body.innerHTML = `
-    <div class="truc-recog">
-      <h3>Nhận diện nhanh trục này</h3>
-      <div class="tr-recog-grid">
-        ${[['ENGINE', r.engine], ['AI', r.actors], ['LÀM GÌ QUAY ĐƯỢC', r.actions], ['CÁI GÌ TĂNG GIẢM', r.change], ['BẮC CẦU QUY MÔ', r.bridge]]
-          .filter(([, v]) => v).map(([k, v]) => `<div class="tr-recog-row"><span class="tr-recog-k">${k}</span><span class="tr-recog-v">${escHtml(v)}</span></div>`).join('')}
-      </div>
-    </div>
-
-    <div class="truc-block">
-      <h3>Chain mẫu</h3>
-      ${(a.model_chain || {}).prompt ? `<div class="tr-prompt">${escHtml(a.model_chain.prompt)}</div>` : ''}
-      <div class="tr-chain">
-        ${['A', 'B', 'C', 'D', 'D+', 'E'].filter(k => chain[k]).map(k => `
-          <div class="tr-link">
-            <span class="tr-link-k">${k}</span>
-            <div class="tr-link-body">
-              <span class="tr-link-label">${CHAIN_LABEL[k]}</span>
-              <span class="tr-link-text">${escHtml(chain[k])}</span>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <div class="truc-block truc-exercise">
-      <h3>Chain khuyết — tới lượt em</h3>
-      ${g.prompt ? `<div class="tr-prompt">${escHtml(g.prompt)}</div>` : ''}
-      <p class="tr-ex-note">A và E cho sẵn. Dựng bốn mắt xích ở giữa. Ba ô đầu cần một hành động camera quay được, viết dạng <em>when</em> cộng danh từ số nhiều — đừng dựng một nhân vật.</p>
-      <div class="tr-chain">
-        ${g.steps.A ? `<div class="tr-link given"><span class="tr-link-k">A</span><div class="tr-link-body"><span class="tr-link-label">${CHAIN_LABEL.A} · cho sẵn</span><span class="tr-link-text">${escHtml(g.steps.A)}</span></div></div>` : ''}
-        ${['B', 'C', 'D', 'D+'].map(k => `
-          <div class="tr-link blank">
-            <span class="tr-link-k">${k}</span>
-            <div class="tr-link-body">
-              <span class="tr-link-label">${CHAIN_LABEL[k]}</span>
-              <textarea class="tr-input" id="tr-in-${k.replace('+', 'plus')}" rows="2" placeholder="Viết mắt xích ${k}…"></textarea>
-            </div>
-          </div>`).join('')}
-        ${g.steps.E ? `<div class="tr-link given"><span class="tr-link-k">E</span><div class="tr-link-body"><span class="tr-link-label">${CHAIN_LABEL.E} · cho sẵn</span><span class="tr-link-text">${escHtml(g.steps.E)}</span></div></div>` : ''}
-      </div>
-      ${g.hints ? `<details class="tr-hints"><summary>Gợi ý cho các ô trống</summary><p>${escHtml(g.hints)}</p></details>` : ''}
-      <button class="btn btn-primary" id="tr-check-btn" onclick="trucCheckChain()">Nhờ AI soi chain →</button>
-      <div id="tr-check-out"></div>
-    </div>
-
-    <div class="truc-block">
-      <h3>Ví dụ an toàn, không bịa số liệu</h3>
-      <div class="tr-examples">
-        ${(a.examples || []).map(e => `<div class="tr-eg"><span class="tr-eg-tier">Hạng ${e.tier}</span><span>${escHtml(e.text)}</span></div>`).join('')}
-      </div>
-    </div>
-
-    <div class="truc-block">
-      <h3>Từ vựng của trục <span class="fs-sub">— dùng đúng 4-5 cụm trong cả bài, không nhồi</span></h3>
-      <div class="tr-vocab">
-        ${(a.vocab || []).map(v => `<div class="tr-v"><span class="tr-v-term">${escHtml(v.term)}</span><span class="tr-v-when">${escHtml(v.when)}</span></div>`).join('')}
-      </div>
-    </div>
-
-    ${(a.traps || []).length ? `
-      <div class="truc-block truc-traps">
-        <h3>⚠ Bẫy của trục này</h3>
-        ${a.traps.map(t => `<p>${escHtml(t)}</p>`).join('')}
-      </div>` : ''}
-
-    <div class="truc-block">
-      <h3>Câu luận điểm mẫu, theo dạng đề</h3>
-      <div class="tr-thesis">
-        ${(a.thesis || []).map(t => `<div class="tr-th"><span class="tr-th-form">${escHtml(t.form)}</span><span class="tr-th-text">${escHtml(t.text)}</span></div>`).join('')}
-      </div>
-    </div>
-
-    <div class="truc-block">
-      <h3>${(a.prompts || []).length} đề chạy trục này</h3>
-      <div class="tr-prompts">
-        ${(a.prompts || []).map((p, i) => `
-          <div class="tr-p">
-            <div class="tr-p-head"><span class="tr-p-n">${i + 1}</span><span class="tr-p-group">${escHtml((p.group || '').split('·')[1] || p.group || '')}</span></div>
-            <div class="tr-p-q">${escHtml(p.q)}</div>
-            ${p.thesis ? `<details class="tr-p-thesis"><summary>Câu luận điểm mẫu</summary><p>${escHtml(p.thesis)}</p></details>` : ''}
-          </div>`).join('')}
-      </div>
-    </div>`;
-}
-
-async function trucCheckChain() {
-  if (!_trucCurrent) return;
-  const btn = document.getElementById('tr-check-btn');
-  const out = document.getElementById('tr-check-out');
-  const answers = {};
-  for (const k of ['B', 'C', 'D', 'D+']) {
-    const el = document.getElementById('tr-in-' + k.replace('+', 'plus'));
-    answers[k] = el ? el.value.trim() : '';
-  }
-  const written = Object.values(answers).filter(v => v.split(/\s+/).filter(Boolean).length >= 5).length;
-  if (!written) { showToast('Viết ít nhất một mắt xích rồi tôi soi cho.'); return; }
-
-  btn.disabled = true; btn.textContent = 'Đang soi…';
-  out.innerHTML = '<div class="loading">Đang soi từng mắt xích…</div>';
-  try {
-    const r = await api('/api/truc/check-chain', {
-      method: 'POST',
-      body: JSON.stringify({ axis_n: _trucCurrent.n, answers, level: 'basic' }),
-    });
-    const V = { pass: ['✅', 'Được'], weak: ['⚠️', 'Còn hụt'], fail: ['❌', 'Chưa đạt'] };
-    out.innerHTML = `
-      <div class="tr-check">
-        ${(r.links || []).map(l => {
-          const v = V[l.verdict] || V.weak;
-          return `
-            <div class="tr-check-row v-${l.verdict || 'weak'}">
-              <span class="tr-check-k">${escHtml(l.step)}</span>
-              <div class="tr-check-body">
-                <span class="tr-check-verdict">${v[0]} ${v[1]}</span>
-                <span class="tr-check-why">${escHtml(l.why || '')}</span>
-                ${l.fix ? `<span class="tr-check-fix">${escHtml(l.fix)}</span>` : ''}
-              </div>
-            </div>`;
-        }).join('')}
-        ${r.overall ? `<div class="tr-check-overall">${escHtml(r.overall)}</div>` : ''}
-      </div>`;
-  } catch (err) {
-    out.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Nhờ AI soi chain →';
-  }
-}
-
-async function loadTrucChapter0() {
-  const box = document.getElementById('truc-ch0-body');
-  if (!box) return;
-  box.innerHTML = '<div class="loading">Đang tải…</div>';
-  let secs;
-  try { secs = await api('/api/truc/chapter0'); }
-  catch (err) { box.innerHTML = `<div class="error-msg" style="display:block">${escHtml(err.message)}</div>`; return; }
-
-  box.innerHTML = (secs || []).map(sec => `
-    <div class="truc-block ch0-block">
-      <h3><span class="ch0-n">${sec.n}</span> ${escHtml(sec.title)}</h3>
-      ${(sec.body || []).map(p => `<p class="ch0-p">${escHtml(p)}</p>`).join('')}
-      ${(sec.tables || []).map(t => `
-        <div class="ch0-table-wrap">
-          <table class="ch0-table">
-            ${t.head && t.head.length ? `<thead><tr>${t.head.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>` : ''}
-            <tbody>${(t.rows || []).map(row => `<tr>${row.map(c => `<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody>
-          </table>
-        </div>`).join('')}
-      ${(sec.notes || []).map(n => `<div class="ch0-note">${escHtml(n)}</div>`).join('')}
-    </div>`).join('');
-}
-
-function loadPracticeSentences() {
-  // Topic chips
+async function loadPracticeSentences() {
   const chips = document.getElementById('pse-topic-chips');
-  if (chips) {
-    chips.innerHTML = Object.keys(VOCAB_BANK).map(t =>
-      `<button class="vl-chip${t === _psTopic ? ' active' : ''}" onclick="psSelectTopic('${t}')">${t}</button>`
-    ).join('');
-  }
-  // Level chips
-  document.querySelectorAll('#view-practice-sentences .vl-level-chip').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.level === _psLevel);
-  });
+  const area = document.getElementById('pse-exercise-area');
+  if (!chips || !area) return;
+  area.innerHTML = '<div class="loading">Đang tải 25 unit…</div>';
+  try { await ensureVocabUnits(); }
+  catch (err) { area.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>'; return; }
+
+  chips.innerHTML = _vocabUnits.map((u, i) =>
+    '<button class="vl-chip' + (i === _psUnit ? ' active' : '') + '" onclick="psSelectUnit(' + i + ')">' +
+    u.n + '. ' + escHtml(u.topic) + '</button>').join('');
   psLoadExercise();
 }
 
-function psSelectTopic(t) {
-  _psTopic = t;
-  document.querySelectorAll('#pse-topic-chips .vl-chip').forEach(b =>
-    b.classList.toggle('active', b.textContent.trim() === t));
-  psLoadExercise();
-}
-
-function psSelectLevel(l) {
-  _psLevel = l;
-  document.querySelectorAll('#view-practice-sentences .vl-level-chip').forEach(b =>
-    b.classList.toggle('active', b.dataset.level === l));
+function psSelectUnit(i) {
+  _psUnit = i;
+  _psScore = { right: 0, total: 0 };
+  document.querySelectorAll('#pse-topic-chips .vl-chip').forEach((b, j) => b.classList.toggle('active', j === i));
   psLoadExercise();
 }
 
 function psSwitchMode(mode) {
   _psMode = mode;
-  ['fib', 'write', 'unscramble'].forEach(m => {
-    document.getElementById(`pse-tab-${m}`)?.classList.toggle('active', m === mode);
+  _psScore = { right: 0, total: 0 };
+  ['fib', 'write', 'unscramble', 'nuance'].forEach(m => {
+    const t = document.getElementById('pse-tab-' + m);
+    if (t) t.classList.toggle('active', m === mode);
   });
   psLoadExercise();
 }
 
-function psLoadExercise() {
-  _psWords = (VOCAB_BANK[_psTopic]?.[_psLevel] || []).filter(w => w.example && w.word);
-  _psIdx = 0; _psScore = 0;
-  psRenderExercise();
+// Build the item list for the current unit and mode. Each mode uses whichever
+// part of the unit actually supports it: 95% of the precision verbs ship with
+// an example containing the verb, so blanks come from those plus the third of
+// collocations that appear in a sample sentence.
+function psBuildItems(u) {
+  const items = [];
+  if (_psMode === 'fib') {
+    for (const v of u.verbs || []) {
+      if (!v.eg || !v.verb) continue;
+      const re = new RegExp('\\b' + reEscape(v.verb) + '\\w*\\b', 'i');
+      if (!re.test(v.eg)) continue;
+      const m = v.eg.match(re);
+      items.push({ kind: 'verb', answer: m[0], sentence: v.eg.replace(re, '____'), hint: v.vi, with: v.with });
+    }
+    for (const c of u.collocations || []) {
+      const hit = (u.samples || []).find(sm => sm.toLowerCase().includes(c.term.toLowerCase()));
+      if (!hit) continue;
+      const i = hit.toLowerCase().indexOf(c.term.toLowerCase());
+      items.push({ kind: 'colloc', answer: hit.slice(i, i + c.term.length), sentence: hit.slice(0, i) + '____' + hit.slice(i + c.term.length), hint: c.vi });
+    }
+  } else if (_psMode === 'write') {
+    for (const c of u.collocations || []) items.push({ kind: 'colloc', term: c.term, hint: c.vi });
+    for (const v of u.verbs || []) items.push({ kind: 'verb', term: v.verb, hint: v.vi, with: v.with });
+  } else if (_psMode === 'unscramble') {
+    for (const sm of u.samples || []) {
+      const words = sm.replace(/\s+/g, ' ').trim().split(' ');
+      if (words.length < 6 || words.length > 26) continue;
+      items.push({ sentence: sm, words });
+    }
+  } else if (_psMode === 'nuance') {
+    // The notes are a distinction reference, not a quiz bank: only 6 of 125 say
+    // outright which word wins, so a "pick the right one" question would mean
+    // inventing the answer. What the notes DO carry is an explanation attached
+    // to each named word, so the question becomes: this gloss belongs to which
+    // of these words? The answer comes from the teacher's own text.
+    for (const raw of u.synonyms || []) {
+      const m = String(raw).match(/^\s*([^.]+?)\.\s*([\s\S]+)$/);
+      if (!m) continue;
+      const words = m[1].split(/\s+vs\.?\s+/i).map(w => w.trim()).filter(Boolean);
+      if (words.length < 2 || words.length > 4) continue;
+      const body = m[2];
+      const segs = [];
+      for (const w of words) {
+        const hit = body.match(new RegExp('(?:^|[.\\s(])' + reEscape(w) + '\\b([^.]*)\\.', 'i'));
+        if (hit && hit[1].trim().length > 12) segs.push({ w, clue: hit[1].trim() });
+      }
+      if (segs.length < 2) continue;
+      for (const sg of segs) {
+        // The gloss often repeats the word inside a bracketed example, which
+        // would hand the answer over; blank every occurrence.
+        let clue = sg.clue;
+        for (const w of words) clue = clue.replace(new RegExp('\\b' + reEscape(w) + '\\b', 'gi'), '___');
+        if (clue.replace(/[^A-Za-zÀ-ỹ]/g, '').length < 10) continue;
+        items.push({ clue, answer: sg.w.toLowerCase(), options: words, whole: raw });
+      }
+    }
+  }
+  // Shuffle so the same unit is not drilled in the same order twice.
+  for (let i = items.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [items[i], items[j]] = [items[j], items[i]]; }
+  return items;
 }
 
-function psRenderExercise() {
+function psLoadExercise() {
   const area = document.getElementById('pse-exercise-area');
-  if (!area) return;
-  if (!_psWords.length) {
-    area.innerHTML = '<p class="practice-empty">No words with examples for this topic/level. Try another combination.</p>';
+  if (!area || !_vocabUnits) return;
+  const u = _vocabUnits[_psUnit];
+  _psItems = psBuildItems(u);
+  _psIdx = 0;
+  if (!_psItems.length) {
+    area.innerHTML = '<div class="empty-state">Unit này chưa đủ dữ liệu cho dạng bài đó. Thử dạng khác hoặc chủ đề khác.</div>';
     return;
   }
-  const w = _psWords[_psIdx];
-  const total = _psWords.length;
+  psRenderItem();
+}
+
+function psScoreLine() {
+  return '<div class="ps-score">Đúng ' + _psScore.right + '/' + _psScore.total + ' · câu ' + (_psIdx + 1) + '/' + _psItems.length + '</div>';
+}
+
+function psRenderItem() {
+  const area = document.getElementById('pse-exercise-area');
+  const it = _psItems[_psIdx];
+  if (!it) { area.innerHTML = '<div class="empty-state">Hết bài của unit này. Đúng ' + _psScore.right + '/' + _psScore.total + '.</div>'; return; }
+  const u = _vocabUnits[_psUnit];
 
   if (_psMode === 'fib') {
-    const blank = w.example.replace(new RegExp(`\\b${w.word}\\b`, 'gi'), '___');
-    area.innerHTML = `
-      <div class="practice-card">
-        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
-        <div class="practice-word-def">
-          <strong>Definition:</strong> ${escapeHtml(w.definition)}
-          <span class="practice-vn">${escapeHtml(w.vietnamese)}</span>
-        </div>
-        <div class="practice-sentence">${escapeHtml(blank)}</div>
-        <input type="text" id="pse-input" class="practice-input" placeholder="Type the missing word…" onkeydown="if(event.key==='Enter')psCheckFib()">
-        <div class="practice-actions">
-          <button class="btn btn-primary" onclick="psCheckFib()">Check</button>
-          <button class="btn btn-ghost btn-sm" onclick="psReveal()">Show answer</button>
-        </div>
-        <div id="pse-feedback" class="practice-feedback"></div>
-        <div class="practice-score">Score: ${_psScore} / ${_psIdx}</div>
-      </div>`;
-    document.getElementById('pse-input')?.focus();
+    area.innerHTML =
+      '<div class="ps-card">' + psScoreLine() +
+      '<div class="ps-hint">Nghĩa: <b>' + escHtml(it.hint || '') + '</b>' + (it.with ? ' <span class="ps-with">đi với ' + escHtml(it.with) + '</span>' : '') + '</div>' +
+      '<div class="ps-sentence">' + escHtml(it.sentence) + '</div>' +
+      '<input class="ps-input" id="ps-answer" placeholder="Điền từ còn thiếu…" onkeydown="if(event.key===\'Enter\')psCheck()">' +
+      '<div class="ps-actions"><button class="btn btn-primary" onclick="psCheck()">Kiểm tra</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="psReveal()">Xem đáp án</button></div>' +
+      '<div id="ps-result"></div></div>';
+    setTimeout(() => { const el = document.getElementById('ps-answer'); if (el) el.focus(); }, 40);
 
   } else if (_psMode === 'write') {
-    area.innerHTML = `
-      <div class="practice-card">
-        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
-        <div class="practice-word-big">${escapeHtml(w.word)}</div>
-        <div class="practice-word-def">${escapeHtml(w.definition)} — <em>${escapeHtml(w.vietnamese)}</em></div>
-        <div class="practice-collocs">Collocations: ${(Array.isArray(w.collocations) ? w.collocations : []).map(c => `<span class="colloc-chip">${escapeHtml(c)}</span>`).join(' ')}</div>
-        <textarea id="pse-write-input" class="practice-textarea" placeholder="Write your own sentence using '${w.word}'…" rows="3"></textarea>
-        <div class="practice-actions">
-          <button class="btn btn-primary" onclick="psCheckWrite()">Done — show model</button>
-        </div>
-        <div id="pse-feedback" class="practice-feedback"></div>
-      </div>`;
+    area.innerHTML =
+      '<div class="ps-card">' + psScoreLine() +
+      '<div class="ps-term">' + escHtml(it.term) + '</div>' +
+      '<div class="ps-hint">' + escHtml(it.hint || '') + (it.with ? ' <span class="ps-with">đi với ' + escHtml(it.with) + '</span>' : '') + '</div>' +
+      '<textarea class="ps-input ps-textarea" id="ps-answer" rows="2" placeholder="Viết một câu dùng cụm này…"></textarea>' +
+      '<div class="ps-actions"><button class="btn btn-primary" id="ps-write-btn" onclick="psCheckWritten()">Nhờ AI soi câu</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="psNext()">Bỏ qua →</button></div>' +
+      '<div id="ps-result"></div>' +
+      '<details class="ps-samples"><summary>Câu mẫu của unit này</summary><ul>' +
+      (u.samples || []).map(x => '<li>' + escHtml(x) + '</li>').join('') + '</ul></details></div>';
 
   } else if (_psMode === 'unscramble') {
-    const words = w.example.split(/\s+/);
-    const shuffled = [...words].sort(() => Math.random() - 0.5);
-    // Store correct order in data
-    area.innerHTML = `
-      <div class="practice-card">
-        <div class="practice-progress">${_psIdx + 1} / ${total}</div>
-        <div class="practice-word-def"><strong>${escapeHtml(w.word)}</strong> — ${escapeHtml(w.definition)}</div>
-        <p class="practice-hint">Tap words in the correct order:</p>
-        <div id="pse-selected-words" class="unscramble-selected" onclick="psUnselectWord(event)"></div>
-        <div id="pse-word-bank" class="unscramble-bank">
-          ${shuffled.map((wd, i) => `<button class="unscramble-word" data-word="${escapeHtml(wd)}" data-idx="${i}" onclick="psSelectWord(this)">${escapeHtml(wd)}</button>`).join('')}
-        </div>
-        <div class="practice-actions">
-          <button class="btn btn-primary" onclick="psCheckUnscramble('${escapeHtml(w.example)}')">Check</button>
-          <button class="btn btn-ghost btn-sm" onclick="psClearUnscramble()">Clear</button>
-        </div>
-        <div id="pse-feedback" class="practice-feedback"></div>
-      </div>`;
+    const shuffled = [...it.words];
+    for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+    area.innerHTML =
+      '<div class="ps-card">' + psScoreLine() +
+      '<div class="ps-hint">Sắp lại thành một câu đúng.</div>' +
+      '<div class="ps-words">' + shuffled.map(w => '<span class="ps-word">' + escHtml(w) + '</span>').join('') + '</div>' +
+      '<textarea class="ps-input ps-textarea" id="ps-answer" rows="2" placeholder="Viết câu đã sắp lại…"></textarea>' +
+      '<div class="ps-actions"><button class="btn btn-primary" onclick="psCheck()">Kiểm tra</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="psReveal()">Xem đáp án</button></div>' +
+      '<div id="ps-result"></div></div>';
+
+  } else if (_psMode === 'nuance') {
+    area.innerHTML =
+      '<div class="ps-card">' + psScoreLine() +
+      '<div class="ps-hint">Sắc thái này thuộc về từ nào?</div>' +
+      '<div class="ps-sentence">' + escHtml(it.clue) + '</div>' +
+      '<div class="ps-pair">' +
+      it.options.map(o => '<button class="ps-opt" onclick="psPickNuance(this,\'' + escAttr(o.toLowerCase()) + '\')">' + escHtml(o) + '</button>').join('') +
+      '</div><div id="ps-result"></div></div>';
   }
 }
 
-function psCheckFib() {
-  const input = document.getElementById('pse-input');
-  const fb = document.getElementById('pse-feedback');
-  if (!input || !fb) return;
-  const answer = input.value.trim().toLowerCase();
-  const correct = (_psWords[_psIdx].word || '').toLowerCase();
-  const isRight = answer === correct;
-  if (isRight) _psScore++;
-  fb.className = 'practice-feedback ' + (isRight ? 'correct' : 'incorrect');
-  fb.innerHTML = isRight
-    ? `✅ Correct! <em>${escapeHtml(_psWords[_psIdx].example)}</em>`
-    : `❌ The word was <strong>${escapeHtml(_psWords[_psIdx].word)}</strong>. <em>${escapeHtml(_psWords[_psIdx].example)}</em>`;
-  setTimeout(() => psNext(), 2000);
+function psFeedback(ok, html) {
+  const box = document.getElementById('ps-result');
+  if (box) box.innerHTML = '<div class="ps-fb ' + (ok ? 'ok' : 'no') + '">' + html +
+    '<button class="btn btn-primary btn-sm" onclick="psNext()">Câu tiếp →</button></div>';
+}
+
+const _psNorm = t => String(t || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+
+function psCheck() {
+  const it = _psItems[_psIdx];
+  const el = document.getElementById('ps-answer');
+  if (!el || !el.value.trim()) { showToast('Viết đáp án đã.'); return; }
+  const given = _psNorm(el.value);
+  const want = _psNorm(_psMode === 'unscramble' ? it.sentence : it.answer);
+  const ok = given === want;
+  _psScore.total++;
+  if (ok) _psScore.right++;
+  psFeedback(ok, ok
+    ? '<b>✅ Đúng.</b>'
+    : '<b>❌ Chưa đúng.</b><div class="ps-answer-line">Đáp án: <b>' + escHtml(_psMode === 'unscramble' ? it.sentence : it.answer) + '</b></div>');
 }
 
 function psReveal() {
-  const fb = document.getElementById('pse-feedback');
-  if (fb) {
-    fb.className = 'practice-feedback neutral';
-    fb.innerHTML = `Word: <strong>${escapeHtml(_psWords[_psIdx].word)}</strong> — <em>${escapeHtml(_psWords[_psIdx].example)}</em>`;
+  const it = _psItems[_psIdx];
+  _psScore.total++;
+  psFeedback(false, '<div class="ps-answer-line">Đáp án: <b>' + escHtml(_psMode === 'unscramble' ? it.sentence : it.answer) + '</b></div>');
+}
+
+function psPickNuance(btn, choice) {
+  const it = _psItems[_psIdx];
+  const ok = choice === it.answer;
+  _psScore.total++;
+  if (ok) _psScore.right++;
+  document.querySelectorAll('.ps-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent.toLowerCase() === it.answer) b.classList.add('right');
+  });
+  if (!ok) btn.classList.add('wrong');
+  psFeedback(ok, (ok ? '<b>✅ Đúng.</b>' : '<b>❌ Chưa đúng — đáp án là <i>' + escHtml(it.answer) + '</i>.</b>') +
+    '<div class="ps-nuance-why">' + escHtml(it.whole) + '</div>');
+}
+
+// One short sentence is cheap to mark, so this reuses the paragraph endpoint's
+// card shape rather than adding another prompt to maintain.
+async function psCheckWritten() {
+  const it = _psItems[_psIdx];
+  const el = document.getElementById('ps-answer');
+  const btn = document.getElementById('ps-write-btn');
+  if (!el || el.value.trim().split(/\s+/).filter(Boolean).length < 5) { showToast('Viết một câu đủ dài đã.'); return; }
+  if (!_psNorm(el.value).includes(_psNorm(it.term))) {
+    psFeedback(false, '<b>Câu này chưa dùng cụm <i>' + escHtml(it.term) + '</i>.</b><div class="ps-answer-line">Viết lại sao cho cụm đó nằm trong câu.</div>');
+    return;
   }
-  setTimeout(() => psNext(), 2500);
-}
-
-function psCheckWrite() {
-  const input = document.getElementById('pse-write-input');
-  const fb = document.getElementById('pse-feedback');
-  if (!input || !fb) return;
-  const student = input.value.trim();
-  const w = _psWords[_psIdx];
-  const hasWord = student.toLowerCase().includes(w.word.toLowerCase());
-  fb.className = 'practice-feedback ' + (hasWord ? 'correct' : 'neutral');
-  fb.innerHTML = hasWord
-    ? `✅ Good — you used the word! Model sentence: <em>${escapeHtml(w.example)}</em>`
-    : `💡 Try to include <strong>${escapeHtml(w.word)}</strong>. Model: <em>${escapeHtml(w.example)}</em>`;
-  setTimeout(() => psNext(), 3000);
-}
-
-function psSelectWord(btn) {
-  const selected = document.getElementById('pse-selected-words');
-  if (!selected) return;
-  btn.classList.add('used');
-  btn.disabled = true;
-  const span = document.createElement('span');
-  span.className = 'unscramble-selected-word';
-  span.textContent = btn.dataset.word;
-  span.dataset.sourceIdx = btn.dataset.idx;
-  selected.appendChild(span);
-}
-
-function psUnselectWord(e) {
-  if (!e.target.classList.contains('unscramble-selected-word')) return;
-  const idx = e.target.dataset.sourceIdx;
-  const bank = document.querySelector(`#pse-word-bank [data-idx="${idx}"]`);
-  if (bank) { bank.classList.remove('used'); bank.disabled = false; }
-  e.target.remove();
-}
-
-function psClearUnscramble() {
-  const selected = document.getElementById('pse-selected-words');
-  if (selected) {
-    [...selected.querySelectorAll('.unscramble-selected-word')].forEach(s => {
-      const bank = document.querySelector(`#pse-word-bank [data-idx="${s.dataset.sourceIdx}"]`);
-      if (bank) { bank.classList.remove('used'); bank.disabled = false; }
-      s.remove();
+  btn.disabled = true; btn.textContent = 'Đang soi…';
+  try {
+    const r = await api('/api/practice/paragraph-feedback', {
+      method: 'POST',
+      body: JSON.stringify({ paragraph: el.value.trim(), topic: _vocabUnits[_psUnit].topic }),
     });
+    const errs = Array.isArray(r.errors) ? r.errors : [];
+    _psScore.total++;
+    if (!errs.length) _psScore.right++;
+    psFeedback(!errs.length,
+      (errs.length
+        ? '<b>Có ' + errs.length + ' chỗ cần sửa.</b><div class="pp-err-list">' + errs.map((e, i) => errorCardHtml({ ...e, id: '' }, i, { original: e.quote })).join('') + '</div>'
+        : '<b>✅ Câu này ổn.</b>') +
+      (r.tip ? '<div class="ps-nuance-why">' + escHtml(r.tip) + '</div>' : ''));
+  } catch (err) {
+    showToast('Chưa soi được: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Nhờ AI soi câu';
   }
-}
-
-function psCheckUnscramble(correct) {
-  const selected = document.getElementById('pse-selected-words');
-  const fb = document.getElementById('pse-feedback');
-  if (!selected || !fb) return;
-  const answer = [...selected.querySelectorAll('.unscramble-selected-word')].map(s => s.textContent).join(' ');
-  const isRight = answer.trim() === correct.trim();
-  if (isRight) _psScore++;
-  fb.className = 'practice-feedback ' + (isRight ? 'correct' : 'incorrect');
-  fb.innerHTML = isRight
-    ? `✅ Correct!`
-    : `❌ Correct order: <em>${escapeHtml(correct)}</em>`;
-  setTimeout(() => psNext(), 2500);
 }
 
 function psNext() {
   _psIdx++;
-  if (_psIdx >= _psWords.length) {
-    const area = document.getElementById('pse-exercise-area');
-    if (area) area.innerHTML = `
-      <div class="practice-card practice-complete">
-        <div class="practice-complete-icon">🎉</div>
-        <h3>All done!</h3>
-        <p>Score: <strong>${_psScore} / ${_psWords.length}</strong></p>
-        <button class="btn btn-primary" onclick="psLoadExercise()">Practice again</button>
-      </div>`;
-  } else {
-    psRenderExercise();
+  psRenderItem();
+}
+
+/* ─── Luyện đoạn văn · câu luận điểm cho sẵn, ý phải mở khoá ──────────────
+   The claim and a safe example are given; the student writes the paragraph
+   that connects them. The chain the teacher's file supplies for this axis is
+   the crutch, and it stays locked until they pass a vocabulary check on the
+   topic — you do not get handed the ideas until you have the words to write
+   them with. */
+
+let _ppAxes = null;
+let _ppAxis = 1;
+let _ppSide = 0;
+let _ppTask = null;
+let _ppQuiz = null;
+
+async function loadPracticeParagraphs() {
+  const chips = document.getElementById('pp-axis-chips');
+  if (!chips) return;
+  if (!_ppAxes) {
+    chips.innerHTML = '<div class="loading">Đang tải trục…</div>';
+    try { _ppAxes = (await api('/api/truc')).axes || []; }
+    catch (err) { chips.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>'; return; }
   }
+  chips.innerHTML = _ppAxes.map(a =>
+    '<button class="vl-chip' + (a.n === _ppAxis ? ' active' : '') + '" title="' + escAttr(a.title) + '" onclick="ppSelectAxis(' + a.n + ')">' +
+    a.n + '. ' + escHtml(a.title.slice(0, 26)) + (a.title.length > 26 ? '…' : '') + '</button>').join('');
+  ppLoadTask();
 }
 
-/* ─── Paragraph Writing ──────────────────────────────────────────────────── */
-const PARAGRAPH_STARTERS = {
-  'Technology': [
-    'One significant impact of technology on modern society is',
-    'While technology has undoubtedly improved our lives, it has also',
-    'The rapid development of artificial intelligence means that',
-    'Many experts argue that our dependence on digital devices has',
-  ],
-  'Environment': [
-    'One of the most pressing environmental challenges today is',
-    'Although governments have introduced policies to reduce pollution,',
-    'The consequences of climate change are already evident in',
-    'It is widely accepted that human activity has significantly contributed to',
-  ],
-  'Education': [
-    'A well-rounded education system should not only focus on academic skills but also',
-    'Critics of standardised testing argue that it fails to',
-    'The growing availability of online learning has fundamentally changed the way',
-    'One key challenge facing modern education systems is',
-  ],
-  'Health': [
-    'A sedentary lifestyle has been directly linked to',
-    'Despite advances in medicine, many preventable diseases continue to',
-    'Governments have a responsibility to promote public health by',
-    'The rising rates of obesity in developed nations suggest that',
-  ],
-  'Society': [
-    'Social inequality remains one of the most persistent problems in',
-    'The rapid pace of urbanisation has led to',
-    'While migration brings numerous benefits, it can also',
-    'An ageing population poses significant challenges for',
-  ],
-  'Work & Career': [
-    'The rise of remote working has transformed the way many people',
-    'Automation threatens to displace millions of workers, particularly in',
-    'A healthy work-life balance is essential because',
-    'The gig economy offers flexibility, but it also',
-  ],
-  'Crime & Law': [
-    'Rehabilitation, rather than punishment, should be the primary goal of',
-    'Stricter legislation alone is unlikely to deter criminal behaviour because',
-    'Surveillance technology has become increasingly common, yet',
-    'Poverty and lack of education are often cited as root causes of',
-  ],
-};
+function ppSelectAxis(n) {
+  _ppAxis = n; _ppSide = 0;
+  document.querySelectorAll('#pp-axis-chips .vl-chip').forEach(b => b.classList.toggle('active', b.textContent.startsWith(n + '.')));
+  ppLoadTask();
+}
 
-let _ppTopic = Object.keys(PARAGRAPH_STARTERS)[0];
-let _ppStarterIdx = 0;
+function ppFlipSide() { _ppSide = _ppSide ? 0 : 1; ppLoadTask(); }
 
-function loadPracticeParagraphs() {
-  const chips = document.getElementById('pp-topic-chips');
-  if (chips) {
-    chips.innerHTML = Object.keys(PARAGRAPH_STARTERS).map(t =>
-      `<button class="vl-chip${t === _ppTopic ? ' active' : ''}" onclick="ppSelectTopic('${t}')">${t}</button>`
-    ).join('');
+async function ppLoadTask() {
+  const box = document.getElementById('pp-task');
+  const write = document.getElementById('pp-write-area');
+  const gate = document.getElementById('pp-gate');
+  const fb = document.getElementById('pp-feedback-area');
+  if (!box) return;
+  box.classList.remove('hidden');
+  box.innerHTML = '<div class="loading">Đang lấy đề…</div>';
+  fb.classList.add('hidden'); fb.innerHTML = '';
+  write.classList.add('hidden');
+  gate.classList.add('hidden'); gate.innerHTML = '';
+  try {
+    _ppTask = await api('/api/practice/paragraph-task?axis=' + _ppAxis + '&side=' + (_ppSide ? 'b' : 'a'));
+  } catch (err) {
+    box.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>';
+    return;
   }
-  ppShowPrompt();
-}
-
-function ppSelectTopic(t) {
-  _ppTopic = t;
-  _ppStarterIdx = 0;
-  document.querySelectorAll('#pp-topic-chips .vl-chip').forEach(b =>
-    b.classList.toggle('active', b.textContent.trim() === t));
-  ppShowPrompt();
-  ppReset();
-}
-
-function ppShowPrompt() {
-  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
-  const starter = starters[_ppStarterIdx % starters.length];
-  const box = document.getElementById('pp-prompt-box');
-  const txt = document.getElementById('pp-starter-text');
-  const writeArea = document.getElementById('pp-write-area');
-  if (box) box.classList.remove('hidden');
-  if (txt) txt.textContent = starter + '…';
-  if (writeArea) writeArea.classList.remove('hidden');
+  const t = _ppTask;
+  const unlocked = ppIdeasUnlocked();
+  box.innerHTML =
+    '<div class="pp-task-card">' +
+      '<div class="pp-task-head"><span class="pp-task-axis">Trục ' + t.axis.n + ' · ' + escHtml(t.axis.title) + '</span>' +
+      (t.sides.length > 1 ? '<button class="btn btn-ghost btn-sm" onclick="ppFlipSide()">↔ Chiều ' + escHtml(_ppSide ? 'ủng hộ' : 'phản đối') + '</button>' : '') + '</div>' +
+      (t.prompt ? '<div class="pp-task-prompt">' + escHtml(t.prompt) + '</div>' : '') +
+      '<div class="pp-claim"><span class="pp-claim-label">Câu luận điểm · chiều ' + escHtml(t.side) + '</span>' + escHtml(t.claim) + '</div>' +
+      (t.examples && t.examples.length
+        ? '<div class="pp-egs"><span class="pp-egs-label">Ví dụ an toàn — dùng một cái, đừng bịa số liệu</span>' +
+          t.examples.map(e => '<div class="pp-eg"><span class="pp-eg-tier">Hạng ' + e.tier + '</span>' + escHtml(e.text) + '</div>').join('') + '</div>'
+        : '') +
+      '<div class="pp-targets"><span class="pp-targets-label">Từ vựng nên dùng</span>' +
+        (t.axis_vocab || []).map(v => '<span class="pp-target" title="' + escAttr(v.when) + '">' + escHtml(v.term) + '</span>').join('') +
+        (t.unit_vocab ? (t.unit_vocab.terms || []).map(v => '<span class="pp-target unit" title="' + escAttr(v.vi) + '">' + escHtml(v.term) + '</span>').join('') : '') +
+      '</div>' +
+      '<div class="pp-task-foot">' +
+        '<span class="pp-task-note">Viết một đoạn nối câu luận điểm tới một hệ quả đo được. 80–120 từ.</span>' +
+        '<button class="btn btn-ghost btn-sm" onclick="ppOpenIdeas()">' + (unlocked ? '💡 Xem cách đi ý' : '🔒 Xem cách đi ý') + '</button>' +
+      '</div>' +
+    '</div>';
+  write.classList.remove('hidden');
   const ta = document.getElementById('pp-textarea');
-  if (ta) {
-    ta.value = '';
-    ta.oninput = () => {
-      const wc = ta.value.trim().split(/\s+/).filter(Boolean).length;
-      const wcel = document.getElementById('pp-word-count');
-      if (wcel) wcel.textContent = `${wc} words`;
-    };
+  if (ta) { ta.value = ''; ta.oninput = ppCountWords; }
+  ppCountWords();
+}
+
+function ppCountWords() {
+  const ta = document.getElementById('pp-textarea');
+  const wc = document.getElementById('pp-word-count');
+  if (!ta || !wc) return;
+  const n = ta.value.trim() ? ta.value.trim().split(/\s+/).filter(Boolean).length : 0;
+  wc.textContent = n + ' từ';
+  wc.classList.toggle('in-range', n >= 80 && n <= 120);
+}
+
+function ppIdeasKey() { return 'pp_ideas_unlocked_' + _ppAxis; }
+function ppIdeasUnlocked() { try { return localStorage.getItem(ppIdeasKey()) === '1'; } catch (e) { return false; } }
+
+// The gate: five questions drawn from the topic unit closest to this axis.
+// Four right unlocks the chain. Getting the ideas handed over before you can
+// write them is how a student ends up borrowing an argument they cannot phrase.
+async function ppOpenIdeas() {
+  const gate = document.getElementById('pp-gate');
+  if (!gate || !_ppTask) return;
+  gate.classList.remove('hidden');
+  if (ppIdeasUnlocked()) { ppShowIdeas(); return; }
+
+  gate.innerHTML = '<div class="loading">Đang dựng bài kiểm tra từ vựng…</div>';
+  try { await ensureVocabUnits(); }
+  catch (err) { gate.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>'; return; }
+
+  const topic = _ppTask.unit_vocab && _ppTask.unit_vocab.topic;
+  const unit = _vocabUnits.find(u => u.topic === topic) || _vocabUnits[0];
+  const pool = (unit.collocations || []).filter(c => c.term && c.vi);
+  if (pool.length < 6) { ppUnlockIdeas('Unit này chưa đủ từ để kiểm tra.'); return; }
+
+  const pick = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
+  _ppQuiz = { unit: unit.topic, qs: pick.map(c => {
+    const wrong = pool.filter(x => x.term !== c.term).sort(() => Math.random() - 0.5).slice(0, 3);
+    const opts = [c, ...wrong].sort(() => Math.random() - 0.5);
+    return { vi: c.vi, answer: c.term, options: opts.map(o => o.term) };
+  }), answers: {} };
+
+  gate.innerHTML =
+    '<div class="pp-quiz">' +
+      '<h4>🔒 Qua bài từ vựng đã</h4>' +
+      '<p class="pp-quiz-note">Chọn đúng <b>4/5</b> cụm của chủ đề <b>' + escHtml(unit.topic) + '</b> thì mở được phần đi ý. Có chữ rồi mới mượn ý.</p>' +
+      _ppQuiz.qs.map((q, i) =>
+        '<div class="pp-q" id="pp-q-' + i + '"><div class="pp-q-vi"><b>' + (i + 1) + '.</b> ' + escHtml(q.vi) + '</div>' +
+        '<div class="pp-q-opts">' + q.options.map(o =>
+          '<button class="pp-q-opt" onclick="ppQuizPick(' + i + ',this,\'' + escAttr(o) + '\')">' + escHtml(o) + '</button>').join('') +
+        '</div></div>').join('') +
+      '<button class="btn btn-primary" id="pp-quiz-submit" onclick="ppQuizSubmit()">Nộp bài</button>' +
+      '<div id="pp-quiz-out"></div>' +
+    '</div>';
+  gate.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function ppQuizPick(i, btn, val) {
+  _ppQuiz.answers[i] = val;
+  const row = document.getElementById('pp-q-' + i);
+  row.querySelectorAll('.pp-q-opt').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+}
+
+function ppQuizSubmit() {
+  if (!_ppQuiz) return;
+  const out = document.getElementById('pp-quiz-out');
+  const answered = Object.keys(_ppQuiz.answers).length;
+  if (answered < _ppQuiz.qs.length) { showToast('Còn ' + (_ppQuiz.qs.length - answered) + ' câu chưa chọn.'); return; }
+  let right = 0;
+  _ppQuiz.qs.forEach((q, i) => {
+    const row = document.getElementById('pp-q-' + i);
+    const ok = _ppQuiz.answers[i] === q.answer;
+    if (ok) right++;
+    row.classList.add(ok ? 'right' : 'wrong');
+    row.querySelectorAll('.pp-q-opt').forEach(b => {
+      b.disabled = true;
+      if (b.textContent === q.answer) b.classList.add('is-answer');
+    });
+  });
+  if (right >= 4) {
+    out.innerHTML = '<div class="pp-quiz-pass">✅ Đúng ' + right + '/5. Mở khoá phần đi ý.</div>';
+    ppUnlockIdeas();
+  } else {
+    out.innerHTML = '<div class="pp-quiz-fail">Mới đúng ' + right + '/5. Xem lại các cụm bên trên rồi thử lại — hoặc cứ tự viết đoạn trước, thường vẫn ra được.</div>' +
+      '<button class="btn btn-ghost btn-sm" onclick="ppOpenIdeas()">Thử lại</button>';
   }
 }
 
-function ppNewStarter() {
-  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
-  _ppStarterIdx = (_ppStarterIdx + 1) % starters.length;
-  ppShowPrompt();
-  document.getElementById('pp-feedback-area')?.classList.add('hidden');
-  document.getElementById('pp-try-again-btn').style.display = 'none';
+function ppUnlockIdeas(note) {
+  try { localStorage.setItem(ppIdeasKey(), '1'); } catch (e) {}
+  setTimeout(() => ppShowIdeas(note), note ? 0 : 700);
+}
+
+function ppShowIdeas(note) {
+  const gate = document.getElementById('pp-gate');
+  if (!gate || !_ppTask) return;
+  const st = (_ppTask.chain || {}).steps || {};
+  const LABEL = { A: 'Câu luận điểm', B: 'Ai làm gì, quay được', C: 'Cái gì tăng giảm', D: 'Ai khác gánh hệ quả', 'D+': 'Hệ quả nổi ở đâu', E: 'Chốt về đề' };
+  gate.classList.remove('hidden');
+  gate.innerHTML =
+    '<div class="pp-ideas">' +
+      '<h4>💡 Cách đi ý cho trục này</h4>' +
+      (note ? '<p class="pp-quiz-note">' + escHtml(note) + '</p>' : '') +
+      '<p class="pp-quiz-note">Đây là chain mẫu, không phải bài mẫu để chép. Đọc để thấy mắt xích, rồi viết bằng chữ của em.</p>' +
+      '<div class="tr-chain">' +
+        ['A', 'B', 'C', 'D', 'D+', 'E'].filter(k => st[k]).map(k =>
+          '<div class="tr-link"><span class="tr-link-k">' + k + '</span><div class="tr-link-body">' +
+          '<span class="tr-link-label">' + LABEL[k] + '</span>' +
+          '<span class="tr-link-text">' + escHtml(st[k]) + '</span></div></div>').join('') +
+      '</div>' +
+      ((_ppTask.chain || {}).hints ? '<div class="pp-ideas-hints">' + escHtml(_ppTask.chain.hints) + '</div>' : '') +
+    '</div>';
 }
 
 async function ppSubmitFeedback() {
   const ta = document.getElementById('pp-textarea');
   const btn = document.getElementById('pp-submit-btn');
-  if (!ta || !ta.value.trim()) { showToast('Write something first!'); return; }
-  const starters = PARAGRAPH_STARTERS[_ppTopic] || [];
-  const starter = starters[_ppStarterIdx % starters.length];
-  const full = starter + ' ' + ta.value.trim();
-
-  btn.disabled = true;
-  btn.textContent = 'Getting feedback…';
+  if (!ta || ta.value.trim().split(/\s+/).filter(Boolean).length < 25) { showToast('Viết ít nhất 25 từ đã.'); return; }
+  btn.disabled = true; btn.textContent = 'Đang chữa…';
+  const fb = document.getElementById('pp-feedback-area');
+  fb.classList.remove('hidden');
+  fb.innerHTML = '<div class="loading">Đang chữa từng câu…</div>';
   try {
+    const full = ta.value.trim();
     const result = await api('/api/practice/paragraph-feedback', {
       method: 'POST',
-      body: JSON.stringify({ paragraph: full, topic: _ppTopic, starter })
+      body: JSON.stringify({ paragraph: full, topic: _ppTask ? _ppTask.axis.title : '', starter: _ppTask ? _ppTask.claim : '' }),
     });
-    const fb = document.getElementById('pp-feedback-area');
-    if (fb) {
-      const errs = Array.isArray(result.errors) ? result.errors : [];
-      // Strike the marked span inside the paragraph so the student sees where
-      // each card lives, rather than hunting for the quote by eye.
-      let marked = escHtml(full);
-      for (const e of errs) {
-        const q = escHtml(String(e.quote || '').trim());
-        if (q && marked.includes(q)) marked = marked.replace(q, `<mark class="ann-mark ann-${e.type || 'grammar'}">${q}</mark>`);
-      }
-      fb.classList.remove('hidden');
-      fb.innerHTML = `
-        <div class="pp-feedback-card">
-          <div class="pp-fb-top">
-            <h4>Chữa đoạn văn</h4>
-            ${result.level ? `<span class="pp-level" title="${escAttr(result.level_note || '')}">Mức ${escHtml(result.level)}</span>` : ''}
-          </div>
-          ${result.level_note ? `<div class="pp-level-note">${escHtml(result.level_note)}</div>` : ''}
-          <div class="pp-para-marked">${marked}</div>
-          ${errs.length
-            ? `<div class="pp-err-list">${errs.map((e, i) => errorCardHtml({ ...e, id: '' }, i, { original: e.quote })).join('')}</div>`
-            : '<div class="pp-clean">Đoạn này không có lỗi nào đáng kể. Viết đoạn khó hơn thử xem.</div>'}
-          ${result.good && result.good.quote
-            ? `<div class="pp-good"><span class="pp-good-label">✅ Câu tốt nhất</span><span class="pp-good-quote">${escHtml(result.good.quote)}</span><span class="pp-good-why">${escHtml(result.good.why || '')}</span></div>` : ''}
-          ${result.tip ? `<div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Lần sau</span><p>${escHtml(result.tip)}</p></div>` : ''}
-        </div>`;
+    const errs = Array.isArray(result.errors) ? result.errors : [];
+    let marked = escHtml(full);
+    for (const e of errs) {
+      const q = escHtml(String(e.quote || '').trim());
+      if (q && marked.includes(q)) marked = marked.replace(q, '<mark class="ann-mark ann-' + (e.type || 'grammar') + '">' + q + '</mark>');
     }
-    const tryBtn = document.getElementById('pp-try-again-btn');
-    if (tryBtn) tryBtn.style.display = 'inline-block';
+    fb.innerHTML =
+      '<div class="pp-feedback-card">' +
+        '<div class="pp-fb-top"><h4>Chữa đoạn văn</h4>' +
+        (result.level ? '<span class="pp-level" title="' + escAttr(result.level_note || '') + '">Mức ' + escHtml(result.level) + '</span>' : '') + '</div>' +
+        (result.level_note ? '<div class="pp-level-note">' + escHtml(result.level_note) + '</div>' : '') +
+        '<div class="pp-para-marked">' + marked + '</div>' +
+        (errs.length
+          ? '<div class="pp-err-list">' + errs.map((e, i) => errorCardHtml({ ...e, id: '' }, i, { original: e.quote })).join('') + '</div>'
+          : '<div class="pp-clean">Đoạn này không có lỗi nào đáng kể. Đổi sang chiều còn lại thử xem.</div>') +
+        (result.good && result.good.quote
+          ? '<div class="pp-good"><span class="pp-good-label">✅ Câu tốt nhất</span><span class="pp-good-quote">' + escHtml(result.good.quote) + '</span><span class="pp-good-why">' + escHtml(result.good.why || '') + '</span></div>' : '') +
+        (result.tip ? '<div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Lần sau</span><p>' + escHtml(result.tip) + '</p></div>' : '') +
+      '</div>';
   } catch (err) {
-    showToast('Feedback failed: ' + err.message);
+    fb.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>';
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Get AI Feedback ✨';
+    btn.disabled = false; btn.textContent = 'Nhờ AI chữa đoạn ✨';
   }
 }
 
+
+// Clear the editor and pull a fresh claim for the same axis.
 function ppReset() {
   const ta = document.getElementById('pp-textarea');
   if (ta) ta.value = '';
-  const wc = document.getElementById('pp-word-count');
-  if (wc) wc.textContent = '0 words';
-  document.getElementById('pp-feedback-area')?.classList.add('hidden');
-  const tryBtn = document.getElementById('pp-try-again-btn');
-  if (tryBtn) tryBtn.style.display = 'none';
-  ppNewStarter();
+  const fb = document.getElementById('pp-feedback-area');
+  if (fb) { fb.classList.add('hidden'); fb.innerHTML = ''; }
+  ppCountWords();
+  ppLoadTask();
 }
 
 /* ─── Grammar Guide ──────────────────────────────────────────────────────── */

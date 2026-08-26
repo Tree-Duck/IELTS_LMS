@@ -512,6 +512,65 @@ app.post('/api/admin/truc/classify', authenticate, teacherOrAdmin, async (req, r
   }
 });
 
+// The teacher's 25 vocabulary units, served to the practice screens. Sentence
+// practice used to run on a separate hard-coded word list bolted into app.js,
+// so a student met one set of words in the planner and a different, more
+// generic set when practising. One source now feeds planner, practice and the
+// band-raising suggestions in marking.
+app.get('/api/vocab-units', authenticate, (req, res) => {
+  res.json((VOCAB_BANK || []).map(u => ({
+    n: u.n, topic: u.topic,
+    collocations: u.collocations || [],
+    verbs: u.verbs || [],
+    synonyms: u.synonyms || [],
+    samples: u.samples || [],
+  })));
+});
+
+// One paragraph task: the claim and a safe example, nothing else. The student
+// writes the paragraph that connects them. The chain that the teacher's file
+// gives for this axis is what sits behind the vocabulary gate on the client —
+// handing it over first turns the exercise into copying.
+app.get('/api/practice/paragraph-task', authenticate, (req, res) => {
+  const axes = TRUC_BANK.axes || [];
+  if (!axes.length) return res.status(503).json({ error: 'Chưa nạp được trục' });
+  const n = parseInt(req.query.axis, 10);
+  const axis = axes.find(a => a.n === n) || axes[Math.floor(Math.random() * axes.length)];
+
+  // Each axis carries two claims: the model chain argues one way, the gapped
+  // chain the other. Offering both means the same axis can be practised twice
+  // without repeating the argument.
+  const sides = [];
+  if (axis.model_chain && axis.model_chain.steps && axis.model_chain.steps.A) {
+    sides.push({ side: 'ủng hộ', claim: axis.model_chain.steps.A, prompt: axis.model_chain.prompt || '' });
+  }
+  if (axis.gapped_chain && axis.gapped_chain.steps && axis.gapped_chain.steps.A) {
+    sides.push({ side: 'phản đối', claim: axis.gapped_chain.steps.A, prompt: axis.gapped_chain.prompt || '' });
+  }
+  const wanted = req.query.side === 'b' ? 1 : 0;
+  const pick = sides[Math.min(wanted, sides.length - 1)] || sides[0];
+  if (!pick) return res.status(503).json({ error: 'Trục này chưa có câu luận điểm' });
+
+  // Target vocabulary: the axis has its own ten collocations; add the closest
+  // of the 25 topic units so the student also meets the words they are learning.
+  const units = pickVocabUnits(`${axis.title} ${axis.core || ''} ${pick.claim}`, 1);
+  res.json({
+    axis: { n: axis.n, title: axis.title, core: axis.core, engine: (axis.recognise || {}).engine || '' },
+    sides: sides.map((x, i) => ({ i, side: x.side })),
+    side: pick.side,
+    prompt: pick.prompt,
+    claim: pick.claim,
+    examples: axis.examples || [],
+    axis_vocab: (axis.vocab || []).slice(0, 6),
+    unit_vocab: units.length ? { topic: units[0].topic, terms: (units[0].collocations || []).slice(0, 8) } : null,
+    // Held back until the student passes the vocabulary check on the client.
+    chain: {
+      steps: (axis.model_chain || {}).steps || {},
+      hints: (axis.gapped_chain || {}).hints || '',
+    },
+  });
+});
+
 app.get('/api/truc', authenticate, (req, res) => {
   res.json({
     chapter0: (TRUC_BANK.chapter0 || []).map(c => ({ n: c.n, title: c.title })),

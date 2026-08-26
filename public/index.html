@@ -1783,26 +1783,18 @@
       <div id="view-practice-sentences" class="view hidden">
         <div class="page-header">
           <h2>✏️ Luyện câu</h2>
-          <p>Luyện sử dụng từ vựng IELTS trong ngữ cảnh</p>
+          <p>25 unit từ vựng của lớp — collocation, precision verb, và phân biệt từ gần nghĩa</p>
         </div>
         <div class="practice-controls">
           <div class="vl-picker-row">
             <label>Chủ đề</label>
             <div id="pse-topic-chips" class="vl-topic-chips"></div>
           </div>
-          <div class="vl-picker-row">
-            <label>Cấp độ</label>
-            <div class="vl-level-chips">
-              <button class="vl-chip vl-level-chip" data-level="B1" onclick="psSelectLevel('B1')">B1</button>
-              <button class="vl-chip vl-level-chip" data-level="B2" onclick="psSelectLevel('B2')">B2</button>
-              <button class="vl-chip vl-level-chip" data-level="C1" onclick="psSelectLevel('C1')">C1</button>
-              <button class="vl-chip vl-level-chip" data-level="C2" onclick="psSelectLevel('C2')">C2</button>
-            </div>
-          </div>
           <div class="practice-mode-tabs">
             <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Điền vào chỗ trống</button>
             <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Viết một câu</button>
             <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Sắp xếp lại</button>
+            <button class="practice-mode-tab" id="pse-tab-nuance" onclick="psSwitchMode('nuance')">Phân biệt từ gần nghĩa</button>
           </div>
         </div>
         <div id="pse-exercise-area"></div>
@@ -1812,26 +1804,24 @@
       <div id="view-practice-paragraphs" class="view hidden">
         <div class="page-header">
           <h2>📝 Luyện đoạn văn</h2>
-          <p>Viết đoạn văn và nhận phản hồi AI ngay lập tức</p>
+          <p>Cho sẵn câu luận điểm và ví dụ an toàn. Việc của em là viết đoạn nối hai thứ đó lại.</p>
         </div>
         <div class="practice-controls">
           <div class="vl-picker-row">
-            <label>Chủ đề</label>
-            <div id="pp-topic-chips" class="vl-topic-chips"></div>
+            <label>Trục lập luận</label>
+            <div id="pp-axis-chips" class="vl-topic-chips"></div>
           </div>
         </div>
-        <div id="pp-prompt-box" class="pp-prompt-box hidden">
-          <div class="pp-starter-label">Bắt đầu đoạn văn của bạn bằng:</div>
-          <div id="pp-starter-text" class="pp-starter-text"></div>
-          <button class="btn btn-ghost btn-sm" onclick="ppNewStarter()">🔀 Cách bắt đầu mới</button>
-        </div>
+        <div id="pp-task" class="hidden"></div>
         <div id="pp-write-area" class="hidden">
-          <textarea id="pp-textarea" class="pp-textarea" placeholder="Tiếp tục viết đoạn văn của bạn ở đây... (hướng tới 80–120 từ)"></textarea>
-          <div id="pp-word-count" class="pp-word-count">0 từ</div>
-          <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Lấy phản hồi AI ✨</button>
+          <textarea id="pp-textarea" class="pp-textarea" placeholder="Viết đoạn văn của em ở đây… (hướng tới 80–120 từ)"></textarea>
+          <div class="pp-actions">
+            <div id="pp-word-count" class="pp-word-count">0 từ</div>
+            <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Nhờ AI chữa đoạn ✨</button>
+          </div>
         </div>
         <div id="pp-feedback-area" class="hidden"></div>
-        <button class="btn btn-outline btn-sm" id="pp-try-again-btn" onclick="ppReset()" style="margin-top:16px;display:none">Thử đoạn văn khác →</button>
+        <div id="pp-gate" class="hidden"></div>
       </div>
 
       <!-- Grammar Guide View -->
