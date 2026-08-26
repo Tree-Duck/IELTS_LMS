@@ -3710,21 +3710,50 @@ function renderFeedback(s) {
     }
   }
 
-  // Original essay (with inline annotations if any)
+  // Original essay, with every mark also spelled out in a panel beside it.
+  // Hover-only tooltips meant the corrections were effectively invisible: a
+  // student could not review them, print them, or work through them in order.
   const feedbackAnnotations = s.annotations && Array.isArray(s.annotations) && s.annotations.length > 0 ? s.annotations : null;
   if (feedbackAnnotations) {
-    // Render annotated essay with colored marks (read-only)
+    const errs = feedbackAnnotations.filter(a => a.type !== 'strength');
+    const goods = feedbackAnnotations.filter(a => a.type === 'strength');
+    const counts = { grammar: 0, vocabulary: 0, structure: 0, argument: 0 };
+    for (const a of errs) if (counts[a.type] !== undefined) counts[a.type]++;
+    const filterBtn = (k, label) => counts[k]
+      ? `<button class="ec-filter-btn" onclick="ecFilter('${k}',this)">${label} <b>${counts[k]}</b></button>` : '';
+
     html += `
       <div class="feedback-section">
-        <h3>Bài của bạn <span style="font-size:.75rem;font-weight:400;color:var(--gray-500)">— các lỗi được đánh dấu, rê chuột để xem cách sửa</span></h3>
-        <div class="annotation-legend">
-          <span class="ann-type grammar">Ngữ pháp</span>
-          <span class="ann-type vocabulary">Từ vựng</span>
-          <span class="ann-type argument">Lập luận</span>
-          <span class="ann-type structure">Cấu trúc</span>
-          <span class="ann-type strength">Điểm tốt</span>
+        <h3>Chữa bài <span class="fs-sub">— bấm vào thẻ lỗi để nhảy tới chỗ đó trong bài</span></h3>
+        <div class="essay-review-grid">
+          <div class="erg-essay">
+            <div class="annotation-legend">
+              <span class="ann-type grammar">Ngữ pháp</span>
+              <span class="ann-type vocabulary">Từ vựng</span>
+              <span class="ann-type argument">Lập luận</span>
+              <span class="ann-type structure">Cấu trúc</span>
+              <span class="ann-type strength">Điểm tốt</span>
+            </div>
+            <div class="essay-box annotated-essay-view" id="annotated-essay-view"></div>
+          </div>
+          <aside class="erg-panel">
+            <div class="err-panel-head">
+              <h4>🩹 ${errs.length} chỗ cần sửa</h4>
+              <div class="ec-filters">
+                <button class="ec-filter-btn active" onclick="ecFilter('all',this)">Tất cả</button>
+                ${filterBtn('grammar', 'Ngữ pháp')}${filterBtn('vocabulary', 'Từ vựng')}${filterBtn('structure', 'Cấu trúc')}${filterBtn('argument', 'Lập luận')}
+              </div>
+            </div>
+            <div class="err-panel-list" id="err-panel-list">
+              ${errs.map((a, i) => errorCardHtml(a, i)).join('')}
+            </div>
+            ${goods.length ? `
+              <div class="err-panel-good">
+                <h4>✅ Chỗ em làm tốt</h4>
+                ${goods.map((a, i) => errorCardHtml(a, i)).join('')}
+              </div>` : ''}
+          </aside>
         </div>
-        <div class="essay-box annotated-essay-view" id="annotated-essay-view"></div>
       </div>`;
   } else {
     html += `
@@ -3733,6 +3762,9 @@ function renderFeedback(s) {
         <div class="essay-box">${escHtml(s.essay)}</div>
       </div>`;
   }
+
+  // Recurring-mistake profile, filled in after the page renders.
+  html += `<div class="feedback-section" id="err-profile-section" style="display:none"></div>`;
 
   // Teacher comments (visible to student)
   const comments = Array.isArray(s.comments) ? s.comments : [];
@@ -3772,6 +3804,8 @@ function renderFeedback(s) {
     const annViewEl = document.getElementById('annotated-essay-view');
     if (annViewEl) renderAnnotatedEssay(annViewEl, s.essay, feedbackAnnotations, true);
   }
+
+  loadErrorProfile();
 
   // Draw radar chart after DOM update
   if (s.status === 'graded' && s.overall_band != null) {
@@ -6274,6 +6308,86 @@ function initAnnotationPanel(subId, essayText, existingAnnotations) {
   });
 }
 
+const ANN_TYPE_LABELS = {
+  grammar: 'Ngữ pháp', vocabulary: 'Từ vựng',
+  structure: 'Cấu trúc', argument: 'Lập luận', strength: 'Điểm tốt',
+};
+
+// Essays graded before the structured fields existed packed everything into one
+// string: 'Lỗi: <tên> → Sửa: "<câu đúng>" — <giải thích>'. Both shapes have to
+// render, so old feedback stays readable instead of going blank.
+function annParts(ann) {
+  if (!ann) return { err: '', fix: '', why: '', up: '' };
+  if (ann.err || ann.fix) {
+    return { err: ann.err || '', fix: ann.fix || '', why: ann.why || '', up: ann.up || '' };
+  }
+  const c = (ann.comment || '').trim();
+  if (!c) return { err: '', fix: '', why: '', up: '' };
+  const m = c.match(/^L\u1ed7i:\s*(.+?)\s*\u2192\s*S\u1eeda:\s*["\u201c]?(.+?)["\u201d]?\s*(?:\u2014|-)\s*(.*)$/s);
+  if (m) return { err: m[1].trim(), fix: m[2].trim(), why: (m[3] || '').trim(), up: '' };
+  const g = c.match(/^\u0110i\u1ec3m t\u1ed1t:\s*(.*)$/s);
+  if (g) return { err: 'Điểm tốt', fix: '', why: g[1].trim(), up: '' };
+  return { err: '', fix: '', why: c, up: '' };
+}
+
+// One error, laid out so the student can act without reading a paragraph:
+// what is wrong, the sentence they can paste straight back in, why, and what
+// would lift that same sentence further.
+function errorCardHtml(ann, i, opts = {}) {
+  const p = annParts(ann);
+  const type = ann.type || 'grammar';
+  const original = ann.quote || opts.original || '';
+  const isStrength = type === 'strength';
+  const repeat = opts.repeatCount && opts.repeatCount > 1
+    ? `<span class="ec-repeat" title="Em đã mắc lỗi này ở ${opts.repeatCount} bài">🔁 lặp ×${opts.repeatCount}</span>` : '';
+  return `
+    <div class="err-card ec-${type}" data-ann-id="${ann.id || ''}" ${ann.id ? `onclick="jumpToAnnotation('${ann.id}')"` : ''}>
+      <div class="ec-head">
+        <span class="ec-num">${i + 1}</span>
+        <span class="ec-type ann-type ${type}">${ANN_TYPE_LABELS[type] || type}</span>
+        <span class="ec-err">${escHtml(p.err || (isStrength ? 'Điểm tốt' : 'Cần sửa'))}</span>
+        ${repeat}
+      </div>
+      ${original ? `<div class="ec-line ec-orig"><span class="ec-tag">${isStrength ? 'Trong bài' : 'Em viết'}</span><span class="ec-text">${escHtml(original)}</span></div>` : ''}
+      ${p.fix && !isStrength ? `<div class="ec-line ec-fix"><span class="ec-tag">Sửa thành</span><span class="ec-text">${escHtml(p.fix)}</span><button class="ec-copy" title="Chép câu đúng" onclick="event.stopPropagation();ecCopy(this,'${escAttr(p.fix)}')">⧉</button></div>` : ''}
+      ${p.why ? `<div class="ec-why">${escHtml(p.why)}</div>` : ''}
+      ${p.up ? `<div class="ec-up"><span class="ec-up-label">Muốn cao điểm hơn</span>${escHtml(p.up)}</div>` : ''}
+    </div>`;
+}
+
+function escAttr(t) {
+  return String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
+}
+
+function ecCopy(btn, text) {
+  const t = String(text).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+  navigator.clipboard.writeText(t).then(() => {
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = '⧉'; }, 1200);
+  }).catch(() => showToast('Không chép được'));
+}
+
+// Clicking a card scrolls the essay to the mark and flashes it, so the card and
+// the sentence it is about are never more than one click apart.
+function jumpToAnnotation(annId) {
+  const mark = document.querySelector(`.ann-mark[data-ann-id="${annId}"]`);
+  if (!mark) return;
+  mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  mark.classList.add('ann-flash');
+  setTimeout(() => mark.classList.remove('ann-flash'), 1600);
+  document.querySelectorAll('.err-card.active').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.err-card[data-ann-id="${annId}"]`);
+  if (card) card.classList.add('active');
+}
+
+function ecFilter(type, btn) {
+  document.querySelectorAll('.ec-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#err-panel-list .err-card').forEach(c => {
+    c.classList.toggle('hidden', type !== 'all' && !c.classList.contains('ec-' + type));
+  });
+}
+
 function renderAnnotatedEssay(container, essayText, annotations, readOnly = false) {
   if (!annotations || !annotations.length) {
     container.textContent = essayText;
@@ -6287,7 +6401,8 @@ function renderAnnotatedEssay(container, essayText, annotations, readOnly = fals
     if (ann.start_offset > pos) {
       html += escHtml(essayText.slice(pos, ann.start_offset));
     }
-    const safeComment = escHtml(ann.comment || '');
+    const _p = annParts(ann);
+    const safeComment = escHtml(ann.comment || [_p.err, _p.fix ? `→ "${_p.fix}"` : '', _p.why].filter(Boolean).join(' '));
     html += `<mark class="ann-mark ann-${ann.type}" data-ann-id="${ann.id}" data-comment="${safeComment}" data-type="${ann.type}">${escHtml(essayText.slice(ann.start_offset, ann.end_offset))}</mark>`;
     pos = ann.end_offset;
   }
@@ -6308,6 +6423,54 @@ function renderAnnotatedEssay(container, essayText, annotations, readOnly = fals
     mark.addEventListener('mouseenter', (e) => showAnnTooltip(e, mark));
     mark.addEventListener('mouseleave', hideAnnTooltip);
   });
+}
+
+// What this student keeps getting wrong across every essay they have written.
+// Counted from marks already stored on graded essays, so opening it costs
+// nothing and it sharpens with each new submission.
+async function loadErrorProfile() {
+  const box = document.getElementById('err-profile-section');
+  if (!box) return;
+  let p;
+  try { p = await api('/api/error-profile'); } catch (e) { return; }
+  if (!p || !Array.isArray(p.recurring) || !p.recurring.length) return;
+
+  // Mark the cards on this page that are part of a longer-running habit.
+  const byLabel = {};
+  for (const r of p.recurring) byLabel[r.label.toLowerCase().replace(/[.,;:!?]+$/, '')] = r;
+  document.querySelectorAll('#err-panel-list .err-card').forEach(card => {
+    const label = (card.querySelector('.ec-err') || {}).textContent || '';
+    const hit = byLabel[label.trim().toLowerCase().replace(/[.,;:!?]+$/, '')];
+    if (hit && hit.essays > 1 && !card.querySelector('.ec-repeat')) {
+      const head = card.querySelector('.ec-head');
+      if (head) head.insertAdjacentHTML('beforeend',
+        `<span class="ec-repeat" title="Lỗi này xuất hiện ở ${hit.essays} bài của em">🔁 lặp ×${hit.essays}</span>`);
+    }
+  });
+
+  box.style.display = '';
+  box.innerHTML = `
+    <h3>🔁 Lỗi em hay lặp lại <span class="fs-sub">— tổng hợp từ ${p.essays_analysed} bài đã chấm</span></h3>
+    <div class="err-profile-list">
+      ${p.recurring.map(r => `
+        <div class="epf-row ec-${r.type}">
+          <div class="epf-main">
+            <span class="ann-type ${r.type}">${ANN_TYPE_LABELS[r.type] || r.type}</span>
+            <span class="epf-label">${escHtml(r.label)}</span>
+          </div>
+          <div class="epf-count"><b>${r.essays}</b> bài · <b>${r.count}</b> lần</div>
+          ${r.examples && r.examples.length ? `
+            <div class="epf-examples">
+              ${r.examples.map(ex => `
+                <div class="epf-ex">
+                  <span class="epf-ex-bad">${escHtml(ex.quote)}</span>
+                  <span class="epf-ex-arrow">→</span>
+                  <span class="epf-ex-good">${escHtml(ex.fix)}</span>
+                </div>`).join('')}
+            </div>` : ''}
+        </div>`).join('')}
+    </div>
+    <div class="err-profile-note">Sửa được nhóm trên cùng là kéo được nhiều điểm nhất, vì nó lặp ở nhiều bài.</div>`;
 }
 
 function showAnnotationPopup(subId, start, end, selectedText, clientX, clientY) {
@@ -8882,15 +9045,29 @@ async function ppSubmitFeedback() {
     });
     const fb = document.getElementById('pp-feedback-area');
     if (fb) {
+      const errs = Array.isArray(result.errors) ? result.errors : [];
+      // Strike the marked span inside the paragraph so the student sees where
+      // each card lives, rather than hunting for the quote by eye.
+      let marked = escHtml(full);
+      for (const e of errs) {
+        const q = escHtml(String(e.quote || '').trim());
+        if (q && marked.includes(q)) marked = marked.replace(q, `<mark class="ann-mark ann-${e.type || 'grammar'}">${q}</mark>`);
+      }
       fb.classList.remove('hidden');
       fb.innerHTML = `
         <div class="pp-feedback-card">
-          <h4>AI Feedback</h4>
-          <div class="pp-feedback-row"><span class="pp-fb-label">📝 Vocabulary</span><p>${escapeHtml(result.vocabulary || '')}</p></div>
-          <div class="pp-feedback-row"><span class="pp-fb-label">🔗 Sentences</span><p>${escapeHtml(result.sentences || '')}</p></div>
-          <div class="pp-feedback-row"><span class="pp-fb-label">💡 Coherence</span><p>${escapeHtml(result.coherence || '')}</p></div>
-          <div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Top Tip</span><p>${escapeHtml(result.tip || '')}</p></div>
-          <div class="pp-your-para"><strong>Your paragraph:</strong><p>${escapeHtml(full)}</p></div>
+          <div class="pp-fb-top">
+            <h4>Chữa đoạn văn</h4>
+            ${result.level ? `<span class="pp-level" title="${escAttr(result.level_note || '')}">Mức ${escHtml(result.level)}</span>` : ''}
+          </div>
+          ${result.level_note ? `<div class="pp-level-note">${escHtml(result.level_note)}</div>` : ''}
+          <div class="pp-para-marked">${marked}</div>
+          ${errs.length
+            ? `<div class="pp-err-list">${errs.map((e, i) => errorCardHtml({ ...e, id: '' }, i, { original: e.quote })).join('')}</div>`
+            : '<div class="pp-clean">Đoạn này không có lỗi nào đáng kể. Viết đoạn khó hơn thử xem.</div>'}
+          ${result.good && result.good.quote
+            ? `<div class="pp-good"><span class="pp-good-label">✅ Câu tốt nhất</span><span class="pp-good-quote">${escHtml(result.good.quote)}</span><span class="pp-good-why">${escHtml(result.good.why || '')}</span></div>` : ''}
+          ${result.tip ? `<div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Lần sau</span><p>${escHtml(result.tip)}</p></div>` : ''}
         </div>`;
     }
     const tryBtn = document.getElementById('pp-try-again-btn');

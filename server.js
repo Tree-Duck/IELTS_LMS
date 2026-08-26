@@ -436,6 +436,52 @@ app.get('/api/submissions', authenticate, (req, res) => {
   res.json(submissions);
 });
 
+// The recurring-mistake profile, built by counting the error labels already
+// stored on graded essays. No model call: a student who has written ten essays
+// has already paid for this analysis once per essay.
+app.get('/api/error-profile', authenticate, (req, res) => {
+  try {
+    const rows = db.getAnnotationsByUser(req.user.id);
+    const byLabel = new Map();
+    const byType = { grammar: 0, vocabulary: 0, structure: 0, argument: 0 };
+    let essays = 0, marked = 0;
+
+    for (const row of rows) {
+      essays++;
+      const seenHere = new Set();
+      for (const a of row.annotations) {
+        if (a.type === 'strength') continue;
+        marked++;
+        if (byType[a.type] !== undefined) byType[a.type]++;
+
+        // Group by the Vietnamese error label, normalised, so "Sai thì quá khứ"
+        // and "sai thì quá khứ." land in the same bucket.
+        const label = (a.err || (typeof a.comment === 'string' ? (a.comment.match(/^L\u1ed7i:\s*([^\u2192\n]+?)\s*(?:\u2192|$)/) || [])[1] : '') || '').trim();
+        if (!label) continue;
+        const key = label.toLowerCase().replace(/[.,;:!?]+$/, '').replace(/\s+/g, ' ');
+        if (!byLabel.has(key)) byLabel.set(key, { label, count: 0, essays: 0, type: a.type, examples: [] });
+        const e = byLabel.get(key);
+        e.count++;
+        if (!seenHere.has(key)) { e.essays++; seenHere.add(key); }
+        if (e.examples.length < 3 && a.quote && a.fix) {
+          e.examples.push({ quote: a.quote, fix: a.fix, up: a.up || null, submission_id: row.submission_id });
+        }
+      }
+    }
+
+    // A one-off slip is not a pattern; only labels seen in 2+ essays qualify.
+    const recurring = [...byLabel.values()]
+      .filter(e => e.essays >= 2)
+      .sort((a, b) => b.count - a.count || b.essays - a.essays)
+      .slice(0, 8);
+
+    res.json({ essays_analysed: essays, errors_marked: marked, by_type: byType, recurring });
+  } catch (err) {
+    console.error('Error profile error:', err.message || err);
+    res.status(500).json({ error: 'Chưa dựng được hồ sơ lỗi.' });
+  }
+});
+
 app.get('/api/submissions/:id', authenticate, (req, res) => {
   const submission = db.getSubmissionById(parseInt(req.params.id), req.user.id);
   if (!submission) return res.status(404).json({ error: 'Submission not found' });
@@ -458,7 +504,8 @@ function mapQuotesToAnnotations(essay, rawAnnotations) {
   const validTypes = ['grammar', 'vocabulary', 'argument', 'structure', 'strength'];
   const found = [];
   for (const a of rawAnnotations) {
-    if (!a || typeof a.quote !== 'string' || !a.quote.trim() || typeof a.comment !== 'string') continue;
+    if (!a || typeof a.quote !== 'string' || !a.quote.trim()) continue;
+    if (typeof a.comment !== 'string' && typeof a.err !== 'string' && typeof a.fix !== 'string') continue;
     const type = validTypes.includes(a.type) ? a.type : 'grammar';
     let quote = a.quote.trim();
     let idx = essay.indexOf(quote);
@@ -469,7 +516,16 @@ function mapQuotesToAnnotations(essay, rawAnnotations) {
       if (m) { idx = m.index; quote = m[0]; }
     }
     if (idx === -1) continue;
-    found.push({ start_offset: idx, end_offset: idx + quote.length, type, comment: a.comment.slice(0, 500) });
+    // err/fix/why/up are the structured replacement for the packed "comment"
+    // string. Older graded essays only have comment, so both shapes are kept and
+    // the client renders whichever is present.
+    const cut = (v, n) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, n) : undefined);
+    found.push({
+      start_offset: idx, end_offset: idx + quote.length, type,
+      quote,
+      err: cut(a.err, 80), fix: cut(a.fix, 320), why: cut(a.why, 240), up: cut(a.up, 260),
+      comment: cut(a.comment, 500),
+    });
   }
   // Sort and drop overlaps
   found.sort((x, y) => x.start_offset - y.start_offset);
@@ -596,11 +652,16 @@ Respond ONLY with this exact JSON structure:
   "strengths": ["<strength quoting specific essay text>", "<strength quoting specific essay text>", "<strength quoting specific essay text>"],
   "improvements": ["<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>", "<improvement quoting specific essay text + how to fix it>"],
   "annotations": [
-    {"quote": "<EXACT substring copied VERBATIM from the student's essay, 2-12 words — character-for-character identical including typos>", "type": "grammar", "comment": "Lỗi: <tên lỗi ngắn bằng tiếng Việt> → Sửa: \"<corrected English text>\" — <giải thích ngắn tiếng Việt>"}
+    {"quote": "<EXACT substring copied VERBATIM from the student's essay, 2-12 words — character-for-character identical including typos>",
+     "type": "grammar",
+     "err": "<tên lỗi ngắn bằng tiếng Việt, tối đa 6 từ, ví dụ \"Sai thì quá khứ\" hoặc \"Collocation không tự nhiên\">",
+     "fix": "<the SAME span rewritten correctly, in English — the student must be able to paste it straight back in>",
+     "why": "<tối đa 20 từ tiếng Việt: vì sao chỗ đó sai>",
+     "up": "<tối đa 22 từ tiếng Việt: muốn ăn điểm cao hơn ở CHÍNH câu này thì dùng từ/cấu trúc nào — nêu cụm tiếng Anh cụ thể trong ngoặc kép>"}
   ]
 }
 
-For annotations: mark 8-14 SPECIFIC errors in the essay, prioritising the mistakes that cost the most band points. COVERAGE RULE — do NOT mark only grammar. Sweep the essay once per lens and mark what you find in EACH: "grammar" (verb tense, agreement, articles, sentence structure), "vocabulary" (wrong word choice, unnatural collocation, repetition — mark AT LEAST 2 if any exist), "structure" (weak/missing topic sentence, missing or mechanical linking — mark AT LEAST 1 if any exist), "argument" (unsupported, vague or contradictory claim — mark AT LEAST 1 if any exist). Also include 1-2 "strength" annotations marking genuinely good phrases (comment: "Điểm tốt: <vì sao>"). Comments BẰNG TIẾNG VIỆT theo mẫu: "Lỗi: <tên lỗi> → Sửa: \"<corrected English>\" — <giải thích ngắn>". CRITICAL: each "quote" MUST be copied character-for-character from the student's essay (including their typos and errors) so it can be located — do NOT paraphrase or fix the quote. Every comment must give the corrected version.
+For annotations: mark 8-14 SPECIFIC errors in the essay, prioritising the mistakes that cost the most band points. COVERAGE RULE — do NOT mark only grammar. Sweep the essay once per lens and mark what you find in EACH: "grammar" (verb tense, agreement, articles, sentence structure), "vocabulary" (wrong word choice, unnatural collocation, repetition — mark AT LEAST 2 if any exist), "structure" (weak/missing topic sentence, missing or mechanical linking — mark AT LEAST 1 if any exist), "argument" (unsupported, vague or contradictory claim — mark AT LEAST 1 if any exist). Also include 1-2 "strength" annotations marking genuinely good phrases — for these set "err" to "Điểm tốt", put the phrase itself in "fix", and use "why" to say what works; "up" may be omitted. CRITICAL: each "quote" MUST be copied character-for-character from the student's essay (including their typos and errors) so it can be located — do NOT paraphrase or fix the quote. "fix" must be the corrected version of that exact span and nothing more, so it can be swapped in directly. "up" is the band-raising suggestion for that same sentence — name a precise word, collocation or structure, never generic advice like "dùng từ hay hơn". Keep "why" and "up" short: this is a card the student scans, not a paragraph. Do NOT also emit a "comment" field.
 
 For sentence_analysis: include one entry per sentence in order. Types are: simple, compound, complex, compound-complex, uncertain.`;
 
@@ -3144,24 +3205,37 @@ app.post('/api/practice/paragraph-feedback', authenticate, async (req, res) => {
     if (!paragraph || paragraph.trim().length < 20) {
       return res.status(400).json({ error: 'Paragraph too short.' });
     }
-    const prompt = `You are an IELTS writing coach. A student wrote this paragraph on the topic: "${topic || 'general'}".
-${starter ? `The paragraph starter was: "${starter}"\n` : ''}
+    // Same card shape as full-essay grading: every mistake gets the corrected
+    // span the student can paste back in, plus what would lift that exact
+    // sentence. Prose paragraphs told them nothing they could act on.
+    const prompt = `You are an IELTS writing coach marking one short paragraph on the topic: "${topic || 'general'}".
+${starter ? `The paragraph opens with a given starter: "${starter}" — do not mark the starter itself.\n` : ''}
 Student's paragraph:
 """
 ${paragraph.trim().slice(0, 800)}
 """
 
-Give brief, specific, encouraging feedback. Return ONLY this JSON:
+Return ONLY this JSON:
 {
-  "vocabulary": "1-2 sentences on word choice — highlight 1 strong word they used or suggest a better word for a weak one",
-  "sentences": "1 sentence on sentence variety and structure",
-  "coherence": "1 sentence on how logically the ideas flow",
-  "tip": "1 actionable tip to improve this paragraph for IELTS Band 6+"
-}`;
+  "level": "<one of: A2|B1|B2|C1 — the vocabulary and grammar level this paragraph actually shows>",
+  "level_note": "<tối đa 16 từ tiếng Việt: vì sao ở mức đó>",
+  "errors": [
+    {"quote": "<EXACT substring copied VERBATIM from the paragraph, 2-12 words, character-for-character including typos>",
+     "type": "<grammar|vocabulary|structure>",
+     "err": "<tên lỗi ngắn bằng tiếng Việt, tối đa 6 từ>",
+     "fix": "<that same span rewritten correctly in English, nothing more>",
+     "why": "<tối đa 18 từ tiếng Việt: vì sao sai>",
+     "up": "<tối đa 20 từ tiếng Việt: muốn ăn điểm cao hơn ở chính câu này thì dùng từ/cấu trúc nào — nêu cụm tiếng Anh trong ngoặc kép>"}
+  ],
+  "good": {"quote": "<the strongest phrase they actually wrote>", "why": "<tối đa 16 từ tiếng Việt: vì sao nó tốt>"},
+  "tip": "<tối đa 24 từ tiếng Việt: một việc duy nhất làm ở lần viết sau>"
+}
+RULES: mark 3-6 errors, whichever cost the most marks. "quote" must be copyable from the paragraph verbatim or it cannot be located. "fix" must be the corrected version of that exact span so it can be swapped straight in. "up" names a precise word, collocation or structure — never "dùng từ hay hơn". If the paragraph is genuinely clean, return fewer errors rather than inventing them. Never invent statistics.`;
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 300,
+      max_tokens: 1400,
+      system: 'You are an IELTS writing coach. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: prompt }],
     });
     const inputTokens = response.usage?.input_tokens || 0;
@@ -3169,8 +3243,14 @@ Give brief, specific, encouraging feedback. Return ONLY this JSON:
     db.logUsage('practice-paragraph', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
 
     let raw = response.content[0].text.trim()
-      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    res.json(JSON.parse(raw));
+      .replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '').trim();
+    const parsed = parseGradingJson(raw);
+    // Drop marks whose quote cannot be located — the card shows the original
+    // span struck through, so an unlocatable quote would render a lie.
+    if (Array.isArray(parsed.errors)) {
+      parsed.errors = parsed.errors.filter(e => e && typeof e.quote === 'string' && paragraph.includes(e.quote.trim()));
+    }
+    res.json(parsed);
   } catch (err) {
     console.error('Paragraph feedback error:', err);
     res.status(500).json({ error: 'Failed to get feedback' });

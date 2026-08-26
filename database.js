@@ -113,6 +113,17 @@ const db = {
     if (s) { s.status = status; save(data); }
   },
 
+  // Every annotation the student has ever been given, newest essay first, so the
+  // recurring-mistake profile can be counted without a model call.
+  getAnnotationsByUser(user_id) {
+    const data = load();
+    const mine = new Set(data.submissions.filter(s => s.user_id === user_id).map(s => s.id));
+    return data.feedback
+      .filter(f => mine.has(f.submission_id) && Array.isArray(f.annotations) && f.annotations.length)
+      .sort((a, b) => b.submission_id - a.submission_id)
+      .map(f => ({ submission_id: f.submission_id, annotations: f.annotations }));
+  },
+
   getSubmissionsByUser(user_id) {
     const data = load();
     return data.submissions
