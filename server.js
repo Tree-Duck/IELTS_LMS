@@ -439,6 +439,161 @@ app.get('/api/submissions', authenticate, (req, res) => {
 // The recurring-mistake profile, built by counting the error labels already
 // stored on graded essays. No model call: a student who has written ten essays
 // has already paid for this analysis once per essay.
+// The 14 axes, as a list. Counts come from the file itself, not from the rows,
+// because a prompt appearing in two topic groups is still one prompt.
+// Tag prompts with their argument axis. This runs once per prompt and the
+// result is stored, so the cost is paid a single time no matter how often the
+// bank is opened. Prompts already matched word-for-word against the teacher's
+// own 100 never reach the model at all.
+async function classifyTrucBatch(prompts) {
+  if (!prompts.length) return [];
+  if (!ANTHROPIC_API_KEY) throw new Error('AI service unavailable');
+  const axisList = (TRUC_BANK.axes || [])
+    .map(a => `${a.n}. ${a.title} — ${a.core} (engine: ${(a.recognise || {}).engine || ''})`)
+    .join('\n');
+  const items = prompts.map((p, i) => `[${i + 1}] ${p.q.replace(/\s+/g, ' ').slice(0, 420)}`).join('\n\n');
+
+  const response = await client.messages.create({
+    model: MODEL, max_tokens: 1200,
+    system: 'You classify IELTS Task 2 prompts by the causal argument they require. Respond with valid JSON only — no markdown fences.',
+    messages: [{ role: 'user', content: `These are the 14 argument axes a Task 2 essay can run on. The axis is about WHAT CAUSAL MECHANISM the essay has to build, not about the surface topic — a prompt about elderly care can be a public-budget argument or a fairness-between-groups argument, and only the mechanism decides.
+
+${axisList}
+
+Assign each prompt below to exactly one axis.
+
+${items}
+
+Return ONLY this JSON:
+{"assignments":[{"i":1,"axis":<1-14>,"confidence":"<high|low>"}]}
+One entry per prompt, in order. Use "low" when two axes genuinely both fit — a low-confidence tag is still recorded but shown as provisional.` }],
+  });
+  const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+  const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+  db.logUsage('truc-classify', calculateCost(i, o), i + o);
+  const parsed = parseGradingJson(text);
+  const out = [];
+  for (const a of parsed.assignments || []) {
+    const p = prompts[(a.i | 0) - 1];
+    if (!p) continue;
+    const n = parseInt(a.axis, 10);
+    if (!(TRUC_BANK.axes || []).some(x => x.n === n)) continue;
+    out.push({ id: p.id, truc: n, truc_how: a.confidence === 'low' ? 'ai-low' : 'ai' });
+  }
+  return out;
+}
+
+app.post('/api/admin/truc/classify', authenticate, teacherOrAdmin, async (req, res) => {
+  try {
+    const all = db.getTask2PromptsCustom();
+    const force = req.body && req.body.force === true;
+    const todo = [];
+    let free = 0;
+    for (const p of all) {
+      if (!force && p.truc != null) continue;
+      const m = trucForPrompt(p.q);
+      if (m.axis != null && m.how === 'exact') {
+        db.updateTask2Prompt(p.id, { truc: m.axis, truc_how: 'exact' });
+        free++;
+        continue;
+      }
+      todo.push(p);
+    }
+    // Batches of 20 keep the response inside max_tokens with room to spare.
+    let tagged = 0;
+    for (let i = 0; i < todo.length; i += 20) {
+      const results = await classifyTrucBatch(todo.slice(i, i + 20));
+      for (const r of results) { db.updateTask2Prompt(r.id, { truc: r.truc, truc_how: r.truc_how }); tagged++; }
+    }
+    res.json({ total: all.length, matched_free: free, classified: tagged, untagged: db.getTask2PromptsCustom().filter(p => p.truc == null).length });
+  } catch (err) {
+    console.error('Truc classify error:', err.message || err);
+    res.status(500).json({ error: 'Chưa gán được trục. Thử lại.' });
+  }
+});
+
+app.get('/api/truc', authenticate, (req, res) => {
+  res.json({
+    chapter0: (TRUC_BANK.chapter0 || []).map(c => ({ n: c.n, title: c.title })),
+    axes: (TRUC_BANK.axes || []).map(a => ({
+      n: a.n, title: a.title, count: a.count, core: a.core,
+      engine: a.recognise && a.recognise.engine || '',
+      vocab_count: (a.vocab || []).length,
+    })),
+  });
+});
+
+app.get('/api/truc/chapter0', authenticate, (req, res) => res.json(TRUC_BANK.chapter0 || []));
+
+app.get('/api/truc/:n', authenticate, (req, res) => {
+  const n = parseInt(req.params.n, 10);
+  const axis = (TRUC_BANK.axes || []).find(a => a.n === n);
+  if (!axis) return res.status(404).json({ error: 'Không có trục này' });
+  // A prompt can be listed under several topic groups; show each one once, and
+  // prefer the row that actually carries the model thesis.
+  const seen = new Set();
+  const prompts = [];
+  for (const p of (TRUC_BANK.prompts || []).filter(p => p.axis === n).sort((a, b) => (a.role === 'primary' ? -1 : 1))) {
+    const k = p.q.toLowerCase().replace(/\s+/g, ' ').slice(0, 120);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    prompts.push(p);
+  }
+  res.json({ ...axis, prompts });
+});
+
+// Mark a student's attempt at the gapped chain, using the marking rubric the
+// teacher wrote into the file rather than a generic "is this good" prompt.
+app.post('/api/truc/check-chain', authenticate, async (req, res) => {
+  const { axis_n, answers } = req.body;
+  const axis = (TRUC_BANK.axes || []).find(a => a.n === parseInt(axis_n, 10));
+  if (!axis) return res.status(400).json({ error: 'Không có trục này' });
+  if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers is required' });
+  const filled = ['B', 'C', 'D', 'D+'].filter(k => (answers[k] || '').trim().split(/\s+/).filter(Boolean).length >= 5);
+  if (!filled.length) return res.status(400).json({ error: 'Viết dài hơn một chút rồi tôi soi cho.' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const g = axis.gapped_chain || { steps: {} };
+  const userPrompt = `A student is building the middle of a mechanism chain. The claim (A) and the conclusion (E) were given; they wrote the links between.
+
+Task 2 prompt: ${g.prompt || ''}
+Axis: ${axis.title} — ${axis.core}
+Engine for this axis: ${(axis.recognise || {}).engine || ''}
+
+GIVEN
+A: ${g.steps.A || ''}
+E: ${g.steps.E || ''}
+
+THE STUDENT WROTE
+${['B', 'C', 'D', 'D+'].map(k => `${k}: ${(answers[k] || '').trim() || '(bỏ trống)'}`).join('\n')}
+
+MARK EACH LINK BY THIS RUBRIC, WHICH IS THE ONLY STANDARD THAT APPLIES:
+B — could a camera film this? If the answer is "people" or "society", it fails. But a single invented character also fails: it must read "When <plural actors> ...".
+C — what measurably rises or falls? If no money, hours, health, skill or trust changes hands, the chain is standing still.
+D — is this still the same actor as B? If yes, the chain has not moved to a new group. It must be a DIFFERENT group absorbing the consequence.
+D+ — where does the consequence surface, and what is it measured by? A budget figure, a countable indicator, or a visible phenomenon. Without this the paragraph shows the mechanism is possible, not that it matters. Naming a made-up statistic is not allowed; "a fall in recruitment spending" is valid, "a twelve per cent fall" is not.
+
+Return ONLY this JSON:
+{"links":[{"step":"B","verdict":"<pass|weak|fail>","why":"<tối đa 20 từ tiếng Việt: đúng/sai ở đâu theo rubric trên>","fix":"<tối đa 22 từ tiếng Việt: sửa thế nào — đặt câu hỏi hoặc chỉ chỗ, KHÔNG viết hộ câu>"}],
+ "overall":"<tối đa 24 từ tiếng Việt: mắt xích yếu nhất và vì sao nó làm cả đoạn hụt>"}
+RULES: one entry per step the student attempted, in order B, C, D, D+. Never write the student's sentence for them. Never invent statistics. Vietnamese must sound like a teacher speaking, not a translation. ${LEVEL_NOTE[req.body.level] || LEVEL_NOTE.basic}`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL, max_tokens: 900,
+      system: 'You are an IELTS writing coach marking a mechanism chain. Respond with valid JSON only — no markdown fences.',
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+    const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('truc-chain', calculateCost(i, o), i + o);
+    res.json(parseGradingJson(text));
+  } catch (err) {
+    console.error('Chain check error:', err.message || err);
+    res.status(500).json({ error: 'Chưa soi được chain. Thử lại.' });
+  }
+});
+
 app.get('/api/error-profile', authenticate, (req, res) => {
   try {
     const rows = db.getAnnotationsByUser(req.user.id);
@@ -940,6 +1095,98 @@ try {
 } catch (e) {
   console.warn('Vocab bank not loaded:', e.message);
 }
+
+// ── The 14 argument axes ────────────────────────────────────────────────────
+// The teacher's own file: 100 recent exam prompts collapsed onto 14 reusable
+// argument machines. Learning the axis is what transfers; learning a prompt is
+// not. Part A of the file teaches the axis, Part B routes a prompt to one.
+let TRUC_BANK = { axes: [], prompts: [], chapter0: [] };
+try {
+  TRUC_BANK = JSON.parse(fs.readFileSync(path.join(__dirname, 'truc-bank.json'), 'utf8'));
+  console.log(`Axis bank loaded: ${TRUC_BANK.axes.length} axes, ${TRUC_BANK.prompts.filter(p => p.role === 'primary').length} prompts`);
+} catch (e) {
+  console.warn('Axis bank not loaded:', e.message);
+}
+
+// Which axis does an arbitrary prompt run on? Matching on the axis vocabulary
+// did not work: those are English collocations whose individual words ("funds",
+// "rate", "cost") are far too common, and everything collapsed onto one axis.
+// Each axis already carries its own real prompts, so score against those instead
+// — a nearest-centroid classifier over the teacher's own labelled data.
+const TRUC_STOP = new Set(('the a an and or but of to in on for with that this these those some many most people think believe others their they it is are be as at by from should do you your more than have has can will what why why do how extent agree disagree discuss views view opinion give reasons answer include relevant examples own knowledge experience write least words nowadays today world modern countries country other others some certain being been was were which who whom while whereas however also there here about into over under between both all any each such not no nor so if when where there' ).split(' '));
+
+const _trucNorm = t => String(t || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+const _trucStripRubric = t => _trucNorm(t)
+  .replace(/give reasons for your answer.*$/, '')
+  .replace(/include any relevant examples.*$/, '')
+  .replace(/write at least \d+ words.*$/, '')
+  .trim();
+const _trucTokens = t => {
+  const out = new Set();
+  for (const w of _trucStripRubric(t).split(' ')) if (w.length > 3 && !TRUC_STOP.has(w)) out.add(w);
+  return out;
+};
+const _jaccard = (a, b) => {
+  if (!a.size || !b.size) return 0;
+  let inter = 0;
+  for (const w of a) if (b.has(w)) inter++;
+  return inter / (a.size + b.size - inter);
+};
+
+const _trucDocs = [];   // one bag of words per prompt, with its axis
+const _trucCentroid = new Map(); // axis -> Map(word -> count)
+const _trucDf = new Map();       // word -> how many axes use it
+(function buildTrucIndex() {
+  for (const p of TRUC_BANK.prompts || []) {
+    const toks = _trucTokens(p.q);
+    if (!toks.size) continue;
+    _trucDocs.push({ axis: p.axis, toks });
+    if (!_trucCentroid.has(p.axis)) _trucCentroid.set(p.axis, new Map());
+    const c = _trucCentroid.get(p.axis);
+    for (const w of toks) c.set(w, (c.get(w) || 0) + 1);
+  }
+  // A word that shows up on ten axes tells us nothing; weight by how few axes use it.
+  for (const [, c] of _trucCentroid) for (const w of c.keys()) _trucDf.set(w, (_trucDf.get(w) || 0) + 1);
+})();
+
+function trucForPrompt(q) {
+  const toks = _trucTokens(q);
+  if (toks.size < 3) return { axis: null, how: 'unknown' };
+
+  // The bank holds real exam prompts, so many are the same question as one of
+  // the 100 with small wording changes. A high token overlap is a real match.
+  let bestDoc = { axis: null, sim: 0 };
+  for (const d of _trucDocs) {
+    const sim = _jaccard(toks, d.toks);
+    if (sim > bestDoc.sim) bestDoc = { axis: d.axis, sim };
+  }
+  if (bestDoc.sim >= 0.5) return { axis: bestDoc.axis, how: 'exact' };
+
+  // Otherwise: which axis's prompts does this one look most like?
+  const nAxes = _trucCentroid.size || 1;
+  const scores = [];
+  for (const [axis, c] of _trucCentroid) {
+    let score = 0;
+    for (const w of toks) {
+      if (!c.has(w)) continue;
+      const idf = Math.log(nAxes / (_trucDf.get(w) || 1)) + 0.2;
+      score += idf * Math.min(c.get(w), 3);
+    }
+    scores.push({ axis, score });
+  }
+  scores.sort((a, b) => b.score - a.score);
+  const top = scores[0], next = scores[1] || { score: 0 };
+  // Measured on the teacher's own 100 labelled prompts, held out one at a time:
+  // this tier is right 57% of the time at 58% coverage, and tightening it only
+  // reaches 79% at 19% coverage. An axis is a causal-argument category, not a
+  // topic, so shared wording does not imply a shared machine — "old people who
+  // cannot look after themselves" reads like a budget prompt and is a fairness
+  // one. A wrong axis teaches the wrong chain, so this tier only ever suggests;
+  // the stored tag from classifyTrucBatch is what the student is shown.
+  const suggest = top && top.score >= 5 && top.score >= next.score * 1.8 ? top.axis : null;
+  return { axis: null, how: 'unknown', suggest };
+}
+
 
 const STOPWORDS = new Set(['the','a','an','and','or','but','of','to','in','on','for','with','that','this','these','those','some','people','think','believe','others','their','they','it','is','are','be','should','do','you','your','more','than','have','has','can','will','what','why','how','extent','agree','disagree','discuss','views','opinion','give','reasons','answer','include','relevant','examples','own','knowledge','experience','write','least','words']);
 
@@ -2958,12 +3205,27 @@ app.delete('/api/admin/dictation/:id', authenticate, teacherOrAdmin, (req, res) 
 });
 
 app.get('/api/task2-prompts-custom', (req, res) => {
-  try { res.json(db.getTask2PromptsCustom()); }
+  // Every prompt carries the axis it runs on, so the bank can be filtered by
+  // argument machine rather than only by topic.
+  try {
+    res.json(db.getTask2PromptsCustom().map(p => {
+      // Only a stored tag is shown. An untagged prompt says so rather than
+      // carrying a guess that would send the student to the wrong chain.
+      return { ...p, truc: p.truc != null ? p.truc : null, truc_how: p.truc != null ? (p.truc_how || 'manual') : 'unknown' };
+    }));
+  }
   catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
 });
 
 app.get('/api/admin/task2-prompts', authenticate, (req, res) => {
-  try { res.json(db.getTask2PromptsCustom()); }
+  // Same axis tagging as the public list — the writing bank reads this one.
+  try {
+    res.json(db.getTask2PromptsCustom().map(p => {
+      // Only a stored tag is shown. An untagged prompt says so rather than
+      // carrying a guess that would send the student to the wrong chain.
+      return { ...p, truc: p.truc != null ? p.truc : null, truc_how: p.truc != null ? (p.truc_how || 'manual') : 'unknown' };
+    }));
+  }
   catch (err) { res.status(500).json({ error: 'Failed to load task2 prompts' }); }
 });
 

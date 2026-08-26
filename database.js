@@ -1062,6 +1062,10 @@ const db = {
     if (fields.question_type !== undefined && fields.question_type !== '') p.type_locked = true;
     if (fields.difficulty !== undefined && fields.difficulty !== '') p.difficulty = fields.difficulty;
     if (fields.q !== undefined) p.q = fields.q;
+    // The argument axis is stored once and reused; recomputing it per request
+    // would either cost a model call every page load or fall back to guessing.
+    if (fields.truc !== undefined) p.truc = fields.truc;
+    if (fields.truc_how !== undefined) p.truc_how = fields.truc_how;
     save(data);
     return true;
   },

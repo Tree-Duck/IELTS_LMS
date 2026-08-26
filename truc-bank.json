@@ -1,0 +1,4160 @@
+{
+ "source": "100 ĐỀ GẦN ĐÂY, 14 TRỤC LẬP LUẬN",
+ "chapter0": [
+  {
+   "n": "0.1",
+   "title": "Hedging, tránh câu tuyệt đối",
+   "body": [
+    "Câu tuyệt đối chỉ cần một phản ví dụ là đổ. Nhưng hedge quá tay thì mất luôn quan điểm. Một lớp hedge mỗi câu là đủ."
+   ],
+   "tables": [
+    {
+     "head": [
+      "ĐỪNG VIẾT",
+      "THAY BẰNG"
+     ],
+     "rows": [
+      [
+       "all, every, everyone",
+       "most, the majority of, in most cases, by and large"
+      ],
+      [
+       "always, never",
+       "typically, as a rule, more often than not, rarely"
+      ],
+      [
+       "proves that",
+       "suggests, points to, indicates, is consistent with"
+      ],
+      [
+       "will definitely",
+       "is likely to, tends to, may well, stands a good chance of"
+      ],
+      [
+       "completely, totally",
+       "largely, substantially, to a great extent"
+      ]
+     ]
+    },
+    {
+     "head": [
+      "CHƯA ĂN ĐIỂM \"Advertising completely controls what people buy and everyone is affected by it.\" Một người kể ra được một lần họ không mua theo quảng cáo là câu này đổ.",
+      "ĂN ĐIỂM \"Advertising shapes what most shoppers consider normal, even where it does not decide any single purchase.\" Vẫn là một quan điểm rõ, nhưng không thể bị bác bằng một trường hợp lẻ."
+     ],
+     "rows": []
+    }
+   ],
+   "notes": [
+    "▲ Hedge quá tay còn tệ hơn không hedge Câu kiểu it may possibly be somewhat true to a certain extent that là mất Task Response, vì người chấm không tìm ra ta đang đứng ở đâu. Một câu chỉ cần một từ hedge."
+   ]
+  },
+  {
+   "n": "0.2",
+   "title": "So sánh mức độ, chỗ ăn điểm của đề outweigh",
+   "body": [
+    "Đây là lỗi hay gặp nhất ở đề dạng do the advantages outweigh the disadvantages. Học viên viết một đoạn A tốt, một đoạn B xấu, rồi kết luận. Nhưng đề không hỏi A tốt hay B xấu, đề hỏi cái nào NẶNG HƠN. Muốn cân được thì phải có thước.",
+    "### Ba thước để cân, nhớ ba chữ này"
+   ],
+   "tables": [
+    {
+     "head": [
+      "THƯỚC",
+      "HỎI GÌ",
+      "CÂU MẪU"
+     ],
+     "rows": [
+      [
+       "Bao nhiêu người",
+       "Lợi ích tới một nhóm hay tới tất cả",
+       "\"The benefit reaches a self-selected minority, whereas the cost is spread across every household.\""
+      ],
+      [
+       "Kéo dài bao lâu",
+       "Được vài năm hay được một thế hệ",
+       "\"The saving lasts a budget cycle, while the shortage of trained staff lasts a decade.\""
+      ],
+      [
+       "Sửa lại được không",
+       "Quyết định sai thì có làm lại được không",
+       "\"A tax can be reversed in a single budget, a cleared forest cannot.\""
+      ]
+     ]
+    },
+    {
+     "head": [
+      "CỤM TỪ",
+      "DÙNG KHI NÀO"
+     ],
+     "rows": [
+      [
+       "outweigh, be outweighed by",
+       "nên có một lần ở kết bài, nhưng đừng chép lại nguyên chữ của đề, band descriptor thưởng cho paraphrase"
+      ],
+      [
+       "carry more weight than",
+       "thay cho is more important than, nghe học thuật hơn"
+      ],
+      [
+       "a marginal gain set against a lasting cost",
+       "lợi nhỏ đổi lấy thiệt lâu dài, câu cân sẵn"
+      ],
+      [
+       "the benefit is short-term whereas the cost is permanent",
+       "cân theo thước thời gian"
+      ],
+      [
+       "reversible, irreversible",
+       "cân theo thước sửa lại được, mạnh nhất ở đề môi trường"
+      ],
+      [
+       "affects a minority whereas X affects everyone",
+       "cân theo thước quy mô"
+      ],
+      [
+       "on balance",
+       "dùng mở câu kết luận sau khi đã cân"
+      ],
+      [
+       "the decisive consideration is",
+       "nêu rõ tiêu chí dùng để cân, đây mới là thứ Task Response đang đo"
+      ]
+     ]
+    }
+   ],
+   "notes": []
+  },
+  {
+   "n": "0.3",
+   "title": "Nhân quả có sắc thái, bỏ bớt cause và lead to",
+   "body": [
+    "Lặp leads to ba lần trong một đoạn làm bài nghèo hẳn đi ở Lexical Resource, và tệ hơn là ta đang gộp nhiều loại nhân quả rất khác nhau vào cùng một từ. Chọn đúng động từ là đã nói thêm được một thông tin."
+   ],
+   "tables": [
+    {
+     "head": [
+      "CỤM TỪ",
+      "DÙNG KHI NÀO"
+     ],
+     "rows": [
+      [
+       "trigger",
+       "gây ra đột ngột, một cú, dùng cho khủng hoảng hoặc tái phát"
+      ],
+      [
+       "erode",
+       "bào mòn dần, luôn là quá trình, đi với trust, confidence, identity"
+      ],
+      [
+       "reinforce",
+       "củng cố cái đã có sẵn, không tạo ra cái mới"
+      ],
+      [
+       "compound",
+       "làm nặng thêm một vấn đề đang có"
+      ],
+      [
+       "accelerate",
+       "làm nhanh hơn một xu hướng vốn đang diễn ra"
+      ],
+      [
+       "undermine",
+       "làm suy yếu, có thể một lần hoặc dần"
+      ],
+      [
+       "give rise to",
+       "làm nảy sinh, trang trọng, thay cho cause"
+      ],
+      [
+       "be a symptom of rather than a cause of",
+       "là biểu hiện chứ không phải nguyên nhân, câu này một mình đã là một luận điểm"
+      ],
+      [
+       "set in motion",
+       "khởi động một chuỗi, hợp với mechanism chain"
+      ],
+      [
+       "feed on itself, be self-reinforcing",
+       "tự nhân lên thành vòng lặp, dùng khi chain quay vòng"
+      ]
+     ]
+    }
+   ],
+   "notes": [
+    "★ Một chỗ đổi là thấy khác ngay Thay Social media causes low self-esteem bằng Constant comparison erodes self-esteem. Cùng độ dài, nhưng erode đã nói thêm rằng đây là quá trình dần, và constant comparison đã nói rõ cơ chế thay vì đổ lỗi cho cả nền tảng."
+   ]
+  },
+  {
+   "n": "0.4",
+   "title": "Ba mức cụ thể, và mức nào mới đúng cho Task 2",
+   "body": [
+    "Đây là chỗ nhiều tài liệu dạy sai thành lựa chọn nhị phân, hoặc nói chung chung, hoặc dựng một nhân vật. Thật ra có mức thứ ba nằm giữa, và đó mới là mức của văn học thuật.",
+    "Khác biệt gần như chỉ là bỏ mạo từ a và chuyển sang when cộng danh từ số nhiều. Độ cụ thể không giảm, vì cái tạo ra độ cụ thể là hành động chứ không phải mạo từ."
+   ],
+   "tables": [
+    {
+     "head": [
+      "MỨC",
+      "VÍ DỤ",
+      "VẤN ĐỀ"
+     ],
+     "rows": [
+      [
+       "RỖNG",
+       "\"Students today do not write by hand, which affects their learning.\"",
+       "Camera không quay được. Đây là band 6."
+      ],
+      [
+       "NHÂN VẬT",
+       "\"A student who once copied lecture notes by hand now types them.\"",
+       "Quay được, nhưng đọc như truyện ngắn. Register lệch khỏi văn học thuật."
+      ],
+      [
+       "LỚP NGƯỜI",
+       "\"When students type their notes instead of copying them, they can transcribe a whole lecture without deciding what mattered in it.\"",
+       "Quay được, không có nhân vật, và đúng giọng học thuật. Dùng mức này."
+      ]
+     ]
+    }
+   ],
+   "notes": [
+    "▲ Bẫy khi chuyển sang số nhiều Số nhiều dễ trượt thành khẳng định thực nghiệm không nguồn. Students who type keep fewer notes là một claim về toàn bộ sinh viên, cần dẫn chứng mới viết được. Cách thoát là dùng mệnh đề điều kiện. When students type instead of copying mô tả một cơ chế chứ không thống kê ai cả. An toàn như số ít, mà không có nhân vật."
+   ]
+  },
+  {
+   "n": "0.5",
+   "title": "Bắc cầu quy mô, chỗ tách minh hoạ khỏi chứng minh",
+   "body": [
+    "Ngay cả khi bước B đã viết ở dạng lớp người, chain vẫn dừng ở hành vi. Nó chưa nói hệ quả nổi lên ở đâu. Bước D cộng làm đúng việc đó, thêm một vế chỉ ra hệ quả xuất hiện dưới dạng một con số hoặc một hiện tượng ai cũng thấy được."
+   ],
+   "tables": [
+    {
+     "head": [
+      "CHƯA ĂN ĐIỂM \"…so their fuel spending falls and the buses keep to the timetable.\" Dừng ở hành vi. Người chấm chưa thấy chuyện này hiện ra ở đâu ngoài đời.",
+      "ĂN ĐIỂM \"…and the change registers as a traffic count and a fare-box figure rather than as a set of private decisions, which is the level a fuel charge is designed to reach.\" Hệ quả có chỗ đậu, có thứ đo được. Đây là chỗ Task Response chuyển từ có ý sang triển khai ý."
+     ],
+     "rows": []
+    }
+   ],
+   "notes": [
+    "★ Ba loại chỗ đậu hay dùng Một con số ngân sách hoặc chi phí, ví dụ a fall in recruitment spending. Một chỉ dấu đếm được, ví dụ a traffic count, a clinic caseload, prison places never filled. Một hiện tượng nhìn thấy được, ví dụ a shop closing, a training route that no longer exists.",
+    "▲ Đừng bắc cầu bằng số liệu bịa Nói hệ quả nổi lên ở dạng gì thì được. Gán cho nó một con số cụ thể thì thành bịa. Viết a fall in recruitment spending là hợp lệ. Viết a twelve per cent fall là không."
+   ]
+  },
+  {
+   "n": "0.6",
+   "title": "Nhượng bộ, cách viết đoạn phản biện mà không đổi phe",
+   "body": [
+    "Task Response band 7 đòi quan điểm rõ và giữ nguyên xuyên suốt bài. Cách viết yếu là nêu however rồi bỏ hẳn vế kia. Cách viết mạnh là nói rõ vế kia đúng trong điều kiện nào, rồi chỉ ra điều kiện đó hiếm khi xảy ra."
+   ],
+   "tables": [
+    {
+     "head": [
+      "BƯỚC",
+      "LÀM GÌ"
+     ],
+     "rows": [
+      [
+       "Thừa nhận",
+       "\"There is real force in the argument that ...\""
+      ],
+      [
+       "Nêu điều kiện",
+       "\"This holds where a legal alternative is already available.\""
+      ],
+      [
+       "Chỉ ra điều kiện không đủ",
+       "\"In most cities that condition is met for the centre and nowhere else.\""
+      ],
+      [
+       "Quay về quan điểm",
+       "\"Which is why the objection narrows the policy rather than defeating it.\""
+      ]
+     ]
+    },
+    {
+     "head": [
+      "CHƯA ĂN ĐIỂM \"Some people say a ban is unfair. However, I think a ban is necessary because pollution is a serious problem.\" Nêu vế kia rồi bỏ luôn, không xử lý gì. Đoạn này chưa tranh luận, chỉ mới liệt kê.",
+      "ĂN ĐIỂM \"There is real force in the objection that the charge lands hardest on rural drivers. That holds wherever no bus route exists, which is why the revenue should fund those routes first rather than the general budget.\" Thừa nhận, nêu điều kiện, rồi biến phản biện thành một điều chỉnh cho chính đề xuất của mình."
+     ],
+     "rows": []
+    }
+   ],
+   "notes": [
+    "◆ Ranh giới cần nhớ Nhượng bộ mà không quay lại bác thì thành đổi phe giữa bài. Đề nào cũng vậy, sau đoạn nhượng bộ phải có một câu kéo về quan điểm ban đầu, nếu không Task Response bị hạ vì lập trường không nhất quán."
+   ]
+  }
+ ],
+ "axes": [
+  {
+   "n": 1,
+   "title": "NGUỒN LỰC CÔNG VÀ AI CHỊU TRÁCH NHIỆM",
+   "count": 11,
+   "core": "Câu hỏi lõi là ngân sách có hạn, chi cho A thì khoản nào bị cắt, và ai gánh phần bị cắt đó.",
+   "recognise": {
+    "engine": "money, đôi khi kèm incentive",
+    "actors": "người nộp thuế, hội đồng thành phố, nhóm bị cắt ngân sách, gia đình thu nhập thấp. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "cắt một khoản chi, xếp hàng chờ dịch vụ, đóng cửa một trung tâm, nộp đơn xin hỗ trợ",
+    "change": "ngân sách và thời gian chờ",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "In some countries students pay their own university fees, in others the government pays. Do the advantages outweigh the disadvantages?",
+    "steps": {
+     "A": "If the state covers tuition, students from low-income families apply to courses they would otherwise rule out on cost alone.",
+     "B": "When the state covers tuition, students from low-income families apply to courses they would otherwise rule out on cost alone.",
+     "C": "Households that would have carried a loan repayment worth a fifth of a graduate salary for a decade carry none.",
+     "D": "Four years later hospitals and schools in the same region fill vacancies they had advertised twice, and stop running wards and classrooms on overtime.",
+     "D+": "The effect shows up as a fall in recruitment spending rather than as a set of individual careers, and that is the level at which the policy has to be judged.",
+     "E": "The money returns as staff the state would otherwise recruit from abroad, and that return is larger than the transfer the same policy makes to students who would have paid anyway."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Free tuition shifts the cost onto taxpayers, most of whom never attend university.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "Universal free tuition ends up moving money from people with less towards people who will earn more, and means-tested support avoids that without abandoning the aim."
+    },
+    "hints": "B, một người nộp thuế cụ thể, thu nhập trung bình, chưa từng học đại học C, khoản chi công nào bị cắt để bù vào chỗ học phí D, nhóm nào dùng dịch vụ vừa bị cắt đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A city library that stops opening on Sundays after its budget moves to a new sports centre."
+    },
+    {
+     "tier": 2,
+     "text": "Parents on low incomes who cannot cover a school trip fee that the school no longer subsidises."
+    },
+    {
+     "tier": 3,
+     "text": "If a council has to choose between resurfacing the roads and keeping a public pool open, one group loses either way."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "divert funds from X to Y",
+     "when": "chuyển ngân sách từ chỗ này sang chỗ khác, dùng thay cho spend money on"
+    },
+    {
+     "term": "at the expense of",
+     "when": "đánh đổi, câu nào cũng nên có một cụm kiểu này ở đề outweigh"
+    },
+    {
+     "term": "a competing claim on the budget",
+     "when": "khoản chi khác đang tranh cùng số tiền đó"
+    },
+    {
+     "term": "a finite pot of money",
+     "when": "nói ngân sách có hạn mà không phải viết limited money"
+    },
+    {
+     "term": "ring-fence a budget",
+     "when": "khoanh riêng một khoản, không cho tiêu sang việc khác"
+    },
+    {
+     "term": "means-tested support",
+     "when": "hỗ trợ theo thu nhập, đối lập với universal"
+    },
+    {
+     "term": "the taxpayer foots the bill",
+     "when": "người nộp thuế trả, cụm gọn để nêu actor"
+    },
+    {
+     "term": "a poor return on public money",
+     "when": "chi mà không thu lại được gì tương xứng"
+    },
+    {
+     "term": "crowd out other spending",
+     "when": "chiếm chỗ của các khoản chi khác"
+    },
+    {
+     "term": "deliver value for money",
+     "when": "đáng đồng tiền, dùng ở câu kết luận"
+    }
+   ],
+   "traps": [
+    "Đề hỏi advantages outweigh disadvantages mà ta chỉ liệt kê lợi ích của khoản chi, quên hẳn khoản bị cắt. Không có phần mất gì là Task Response tụt ngay. Viết the government should invest more mà không nói tiền lấy từ đâu. Camera không quay được câu đó."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "While the social case for public funding here is real, the money has to come out of a budget that is already committed, and on balance I believe the competing claim is stronger."
+    },
+    {
+     "form": "Adv outweigh disadv",
+     "text": "The advantages outweigh the disadvantages, but only where the support is means-tested rather than given to every applicant regardless of income."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "Both sides are arguing about who should carry the cost rather than whether the service is worth having, and my own view is that the burden belongs with those who can absorb it."
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "title": "CẤM VÀ HẠN CHẾ CÓ HIỆU QUẢ KHÔNG",
+   "count": 8,
+   "core": "Câu hỏi lõi là lệnh cấm đổi giá của một hành vi, người ta bỏ hẳn hành vi đó hay chỉ chuyển nó sang chỗ khác.",
+   "recognise": {
+    "engine": "incentive, thường kèm money",
+    "actors": "người bị cấm, doanh nghiệp bị quản, cơ quan thi hành. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "chuyển sang lựa chọn thay thế, mua ở chợ đen, lách quy định, tăng người đi kiểm tra",
+    "change": "chi phí thi hành, và giá phải trả cho hành vi bị cấm",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "The best way to solve the world's environmental problems is to increase the cost of fuel for cars and other vehicles.",
+    "steps": {
+     "A": "Raising fuel duty makes every kilometre driven visibly more expensive at the moment of paying.",
+     "B": "When fuel duty rises, commuters who drove alone start sharing the trip or moving part of the week onto the bus.",
+     "C": "Their fuel spending falls sharply, and three cars become one on the same stretch of road.",
+     "D": "With fewer cars queuing, buses keep to the timetable, which pulls in the drivers who had been hesitating.",
+     "D+": "The change registers as a traffic count and a fare-box figure rather than as a set of private decisions, and that is the level a fuel charge is designed to reach.",
+     "E": "Price works here because it reaches every driver on every trip, and no awareness campaign does that."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Fuel is a cost that many people cannot avoid, so the charge lands hardest on those with no alternative route to work.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So a fuel charge only changes behaviour where a usable alternative already exists, and imposing it before that point simply taxes the people with the fewest options."
+    },
+    "hints": "B, một người lái xe ở vùng không có tuyến buýt nào C, khoản chi nào trong gia đình bị cắt để bù tiền xăng D, ai khác trong nhà chịu hệ quả của việc cắt đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A driver who checks the pump price on Monday and takes the bus for the rest of the week."
+    },
+    {
+     "tier": 2,
+     "text": "Small delivery firms that pass the extra cost straight on to the customer."
+    },
+    {
+     "tier": 3,
+     "text": "If a city raises parking charges in the centre before adding a single new bus route, drivers park in the residential streets outside the zone."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "a blanket ban",
+     "when": "lệnh cấm áp dụng cho tất cả, không phân biệt trường hợp"
+    },
+    {
+     "term": "a deterrent effect",
+     "when": "tác dụng răn đe, dùng cho cả đề giao thông và tội phạm"
+    },
+    {
+     "term": "drive something underground",
+     "when": "đẩy hành vi vào bí mật thay vì xoá được nó"
+    },
+    {
+     "term": "enforcement costs",
+     "when": "chi phí thi hành, phải nêu khi bàn một lệnh cấm có khả thi không"
+    },
+    {
+     "term": "a black market springs up",
+     "when": "chợ đen mọc lên, hệ quả kinh điển của lệnh cấm"
+    },
+    {
+     "term": "a price signal",
+     "when": "tín hiệu giá, cách nói gọn cho công cụ thuế phí"
+    },
+    {
+     "term": "a disproportionate impact on",
+     "when": "tác động nặng bất cân xứng lên một nhóm"
+    },
+    {
+     "term": "loopholes that are easy to exploit",
+     "when": "kẽ hở dễ lách"
+    },
+    {
+     "term": "unintended consequences",
+     "when": "hệ quả ngoài ý muốn, dùng ở đoạn phản biện"
+    },
+    {
+     "term": "a phased restriction",
+     "when": "hạn chế theo lộ trình, giải pháp trung dung an toàn"
+    }
+   ],
+   "traps": [
+    "Viết the government should ban it and educate people mà không nói ai thi hành và bằng tiền nào. Đó là câu camera không quay được. Quên hẳn nhóm không có lựa chọn thay thế. Mọi lệnh cấm đều có nhóm này, và đó là ý phản biện mạnh nhất."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "A restriction changes behaviour only where a legal alternative is already in place, and for this activity that condition is not yet met in most places."
+    },
+    {
+     "form": "To what extent",
+     "text": "I agree that restriction is necessary, though the case for pricing the behaviour is stronger than the case for prohibiting it outright."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "Supporters are describing what a ban is meant to achieve while opponents are describing what it does in practice, and the practical objection carries more weight here."
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "title": "TRUYỀN THỐNG SO VỚI HIỆN ĐẠI, VÀ BẢN SẮC",
+   "count": 6,
+   "core": "Câu hỏi lõi là cái vô hình đang mất, và ta chứng minh nó mất bằng hành vi cụ thể nào.",
+   "recognise": {
+    "engine": "norm, identity",
+    "actors": "một gia đình, một người trẻ trong cộng đồng, người còn giữ nghề. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "bỏ một tập tục, không dạy con tiếng địa phương, đóng cửa một hàng ăn gia truyền",
+    "change": "bản sắc và sự gắn kết, và đây là chỗ bắt buộc phải cho khuôn mặt quay được ngay câu sau",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Many customs and traditional ways of behaviour are no longer relevant to modern life and not worth keeping.",
+    "steps": {
+     "A": "A custom survives only while someone still performs it in front of the next generation.",
+     "B": "When families stop cooking the New Year dishes together and order them in, the children watch a delivery arrive instead of learning the steps.",
+     "C": "Within one generation nobody in those households can make the dish without a recipe written by a stranger.",
+     "D": "The neighbourhood shops that supplied the ingredients lose their regular orders and close, so even the families who still cook lose their source.",
+     "D+": "The loss surfaces as a shop closing and a dish nobody can name, which is the only form in which cultural erosion is ever visible.",
+     "E": "Customs disappear through disuse long before anyone decides to drop them, and that is why keeping one takes deliberate effort."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Some customs carry obligations that a working family today cannot meet.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "A custom that costs a family more than it returns has already turned into a duty, and dropping it is no loss."
+    },
+    "hints": "B, một người phụ nữ được kỳ vọng nghỉ việc sau khi lấy chồng, hoặc một lễ mất trọn ba ngày công C, số giờ hoặc số tiền mất đi D, ai trong nhà được số giờ đó và họ dùng vào việc gì D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A grandmother teaching a grandchild to wrap something by hand while the rest of the family watches on a phone."
+    },
+    {
+     "tier": 2,
+     "text": "Young people who understand their grandparents' dialect but answer in the national language."
+    },
+    {
+     "tier": 3,
+     "text": "If a village festival loses its volunteers one year, there is nobody who knows how to organise it the next."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "pass something down",
+     "when": "truyền lại cho đời sau, dùng thay cho keep"
+    },
+    {
+     "term": "fall into disuse",
+     "when": "mai một dần vì không ai dùng nữa"
+    },
+    {
+     "term": "a living tradition",
+     "when": "truyền thống còn được thực hành, khác với thứ chỉ nằm trong bảo tàng"
+    },
+    {
+     "term": "rituals that have outlived their purpose",
+     "when": "nghi thức đã hết lý do tồn tại, dùng cho chiều phản đối"
+    },
+    {
+     "term": "a sense of belonging",
+     "when": "cảm giác thuộc về, phải kèm hành vi ngay câu sau"
+    },
+    {
+     "term": "take root",
+     "when": "bén rễ, dùng cho thói quen mới du nhập"
+    },
+    {
+     "term": "be steeped in",
+     "when": "thấm đẫm, đi với history, tradition"
+    },
+    {
+     "term": "homogenise",
+     "when": "làm cho mọi nơi giống nhau"
+    },
+    {
+     "term": "dilute a local identity",
+     "when": "làm loãng bản sắc địa phương"
+    },
+    {
+     "term": "adapt rather than abandon",
+     "when": "cải biên thay vì bỏ hẳn, cụm mở đường cho thesis trung dung"
+    }
+   ],
+   "traps": [
+    "Bẫy lớn nhất của trục này Gọi tên cultural identity rồi lặp lại nó suốt bài mà không có ai làm gì. Đây là chỗ áp dụng quy tắc vàng, gọi tên xong thì câu ngay sau phải có một người và một hành động quay được. Viết we should preserve our traditions ở câu kết mà cả bài chưa nêu một tập tục cụ thể nào."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "Some customs deserve to be dropped, but the ones that carry practical knowledge disappear through disuse rather than debate, and those are worth the effort of keeping."
+    },
+    {
+     "form": "Pos neg development",
+     "text": "This is a positive development where it revives interest in a practice, and a negative one where it turns that practice into a performance for outsiders."
+    },
+    {
+     "form": "To what extent",
+     "text": "I agree only in part, since relevance is not the right test for something whose value shows up a generation after it is lost."
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "title": "CÔNG NGHỆ THAY THẾ CÁI CŨ, LỢI ÍCH KHÔNG ĐỀU",
+   "count": 10,
+   "core": "Câu hỏi lõi là công nghệ giải phóng hoặc chiếm mất thứ gì, và ai không tiếp cận được phần lợi ích.",
+   "recognise": {
+    "engine": "habit và time, đôi khi money",
+    "actors": "người dùng lặp lại, nhóm không tiếp cận được, nghề bị thay thế. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "mở điện thoại theo phản xạ, không mở nổi một dịch vụ chỉ có trên ứng dụng, mất khách",
+    "change": "giờ, kỹ năng bị chiếm chỗ, và khoảng cách tiếp cận",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Nowadays fewer people are writing by hand due to computers and digital technology. Do the advantages outweigh the disadvantages?",
+    "steps": {
+     "A": "Typing replaces handwriting because it is faster for nearly every task a student has.",
+     "B": "When students type their notes instead of copying them, they can transcribe a whole lecture without deciding what mattered in it.",
+     "C": "They keep more words and retain fewer, because the slower method had been forcing them to select.",
+     "D": "Tutors mark longer answers with weaker structure across a whole cohort, and start setting handwritten practice again.",
+     "D+": "The effect shows up in the shape of exam answers rather than in anyone's handwriting, and that is where the real cost sits.",
+     "E": "The hours typing gives back are real and the case against the shift rests only on the filtering it removed, which is why the advantages still come out ahead."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Handwriting is now a skill most adults use for a signature and very little else.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So the hours freed by typing are only wasted if nothing better takes their place, and in a school timetable something better usually does."
+    },
+    "hints": "B, một giáo viên dùng bốn mươi phút vừa được giải phóng để dạy việc gì C, kỹ năng nào được dạy thay vào chỗ đó D, ai hưởng lợi từ kỹ năng mới đó về sau D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "An older neighbour who cannot book a hospital appointment because the booking form only exists inside an app."
+    },
+    {
+     "tier": 2,
+     "text": "Shop owners whose customers now compare prices on a phone while standing in the aisle."
+    },
+    {
+     "tier": 3,
+     "text": "If a school replaces every textbook with a tablet and the network fails for a week, the lesson stops rather than slows."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "render something obsolete",
+     "when": "làm cho một thứ thành lỗi thời"
+    },
+    {
+     "term": "a digital divide",
+     "when": "khoảng cách số, dùng khi đề hỏi ai không hưởng lợi"
+    },
+    {
+     "term": "be locked out of a service",
+     "when": "bị chặn khỏi một dịch vụ vì không có thiết bị hoặc kỹ năng"
+    },
+    {
+     "term": "crowd out",
+     "when": "chiếm chỗ của hoạt động khác"
+    },
+    {
+     "term": "lower the barrier to entry",
+     "when": "hạ rào cản tham gia, dùng cho chiều tích cực"
+    },
+    {
+     "term": "automate a routine task",
+     "when": "tự động hoá việc lặp lại"
+    },
+    {
+     "term": "displace low-skilled labour",
+     "when": "đẩy lao động phổ thông ra khỏi việc làm"
+    },
+    {
+     "term": "become second nature",
+     "when": "thành phản xạ, dùng cho engine habit"
+    },
+    {
+     "term": "offload a task onto a device",
+     "when": "giao việc cho thiết bị làm thay"
+    },
+    {
+     "term": "at the cost of",
+     "when": "đánh đổi bằng, cụm nối sang mặt mất"
+    }
+   ],
+   "traps": [
+    "Đề hỏi some groups benefit and some do not mà ta viết cả bài về lợi ích chung của công nghệ. Phải gọi tên đích danh nhóm không hưởng lợi và nói vì sao họ bị bỏ lại. Dùng technology như một khối duy nhất. Một ứng dụng, một thiết bị, một dịch vụ cụ thể mới quay được bằng camera."
+   ],
+   "thesis": [
+    {
+     "form": "Adv outweigh disadv",
+     "text": "The advantages outweigh the disadvantages for those who already have the device and the skill, and the whole question turns on how large that remaining group is."
+    },
+    {
+     "form": "Pos neg development",
+     "text": "This is a positive development in aggregate and a negative one for a shrinking minority, and policy should be written for that minority since the majority needs no help."
+    },
+    {
+     "form": "Agree disagree",
+     "text": "I agree that the technology has cost us something specific, though the loss is a habit of selection rather than the skill itself."
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "title": "RĂN ĐE SO VỚI CẢI TẠO",
+   "count": 5,
+   "core": "Câu hỏi lõi là hình phạt và giáo dục đổi được lựa chọn của người phạm tội ở điểm nào, và điểm đó nằm trong tù hay ngoài tù.",
+   "recognise": {
+    "engine": "incentive, kèm money",
+    "actors": "người vừa ra tù, nhà tuyển dụng, thẩm phán, gia đình nạn nhân. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "nộp đơn xin việc rồi bị từ chối, quay lại nhóm cũ, ghi tiền án vào hồ sơ",
+    "change": "cơ hội có thu nhập hợp pháp",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Providing criminals with education will reduce the recidivism rate.",
+    "steps": {
+     "A": "A prison course reduces reoffending only when it ends in a qualification an employer will actually accept.",
+     "B": "Prisoners released with a recognised qualification apply for work holding a licence rather than an empty record.",
+     "C": "They earn a legal wage in the first month out, so they do not need the income their old contacts are offering.",
+     "D": "Employers who have had no trouble take more people from the same scheme the following year.",
+     "D+": "The saving appears as prison places that are never filled, which is a figure a treasury can actually check.",
+     "E": "So the training pays for itself through the prison places it avoids, provided the course leads to a certificate the labour market recognises."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Education inside prison cannot change what a person returns to outside it.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "A course works only alongside housing and a first employer willing to look past the record, and without those two it changes nothing."
+    },
+    "hints": "B, nơi anh ta quay về, ai đang đợi ở đó C, nhà tuyển dụng nhìn thấy gì khi tra hồ sơ D, ai chịu hệ quả khi anh ta không tìm được việc trong tháng đầu D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "An employer running a background check the day before an interview."
+    },
+    {
+     "tier": 2,
+     "text": "Former inmates released with no fixed address to put on an application form."
+    },
+    {
+     "tier": 3,
+     "text": "If a prison teaches a trade that the area around the prison has no demand for, the certificate is worth nothing on release."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "the reoffending rate",
+     "when": "tỉ lệ tái phạm, dùng xen kẽ với recidivism cho khỏi lặp"
+    },
+    {
+     "term": "rehabilitate offenders",
+     "when": "cải tạo người phạm tội"
+    },
+    {
+     "term": "a custodial sentence",
+     "when": "án tù giam, đối lập với phạt cộng đồng"
+    },
+    {
+     "term": "act as a deterrent",
+     "when": "có tác dụng răn đe"
+    },
+    {
+     "term": "reintegrate into society",
+     "when": "tái hoà nhập"
+    },
+    {
+     "term": "a criminal record follows someone",
+     "when": "tiền án đeo bám, cách nói có actor thay vì nói trừu tượng"
+    },
+    {
+     "term": "break the cycle of offending",
+     "when": "phá vòng lặp phạm tội"
+    },
+    {
+     "term": "proportionate sentencing",
+     "when": "mức án tương xứng, dùng cho đề trẻ vị thành niên"
+    },
+    {
+     "term": "the root causes of crime",
+     "when": "nguyên nhân gốc, cẩn thận đừng dừng ở đây mà không nói tiếp"
+    },
+    {
+     "term": "release on licence",
+     "when": "ra tù có điều kiện giám sát"
+    }
+   ],
+   "traps": [
+    "Đề dạng cause and solution mà giải pháp không nối được với nguyên nhân ta vừa viết. Chain phải quay ngược lại đúng cái nguyên nhân đó, nếu không giám khảo đọc ra ngay là hai đoạn rời nhau. Viết prison should educate prisoners rồi dừng. Phải đi tiếp tới nhà tuyển dụng, vì đó mới là chỗ quyết định người đó có tái phạm hay không."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "Education reduces reoffending only where it ends in a recognised qualification and a first employer, and I agree with the claim under those two conditions rather than in general."
+    },
+    {
+     "form": "Cause and solution",
+     "text": "The main driver is the absence of legal income in the first months after release, so the solution has to reach the employer as well as the prisoner."
+    },
+    {
+     "form": "To what extent",
+     "text": "I agree to a limited extent, since the decisive moment happens outside the prison gates rather than inside the classroom."
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "title": "TUỔI THƠ, HỌC SO VỚI CHƠI, VÀ AI ĐỊNH HÌNH ĐỨA TRẺ",
+   "count": 8,
+   "core": "Câu hỏi lõi là một ngày của đứa trẻ chỉ có chừng ấy giờ, thêm giờ học thì giờ đó lấy từ đâu ra.",
+   "recognise": {
+    "engine": "time, kèm incentive",
+    "actors": "một học sinh cụ thể, phụ huynh, giáo viên chủ nhiệm. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "thêm một buổi học thêm, bỏ buổi tập bóng, ngủ muộn hơn một tiếng",
+    "change": "giờ trong ngày của đứa trẻ, và giấc ngủ",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Many parents suggest children should spend less time studying and more time on physical activities.",
+    "steps": {
+     "A": "A child's day holds a fixed number of hours, so extra study has to be taken out of something else.",
+     "B": "When parents add two evening classes a week, children give up the sports session that used to sit in that slot.",
+     "C": "They finish homework forty minutes later each night and arrive the next morning unable to hold attention through the first two lessons.",
+     "D": "Teachers read the drop in attention as a discipline problem and contact parents, who respond by adding a third class.",
+     "D+": "The result appears as a year group that underperforms in morning lessons, which schools then mistake for a standards problem.",
+     "E": "The extra hours cost more attention than they buy, and that is the case for treating physical activity as part of the timetable."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "In a competitive school system, marks are what open the next door.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So the pressure is a rational response to how places are allocated, and telling parents to relax without changing the allocation asks them to gamble with their child."
+    },
+    "hints": "B, một phụ huynh đăng ký cho con lớp luyện thi nào, vào tháng nào C, suất học hoặc học bổng mà đứa trẻ giành được D, gia đình được gì từ suất đó trong mười năm sau D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A child who falls asleep during the first lesson on the morning after an evening class."
+    },
+    {
+     "tier": 2,
+     "text": "Parents who compare their child's marks with a cousin's at every family gathering."
+    },
+    {
+     "tier": 3,
+     "text": "If a school moves PE to the last slot of an eight-hour day, attendance at it quietly collapses."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "a packed timetable",
+     "when": "lịch học kín, dùng thay cho study too much"
+    },
+    {
+     "term": "extracurricular activities",
+     "when": "hoạt động ngoài giờ chính khoá"
+    },
+    {
+     "term": "burn out",
+     "when": "kiệt sức, dùng cho cả học sinh và người đi làm"
+    },
+    {
+     "term": "intrinsic motivation",
+     "when": "động lực từ bên trong, đối lập với chạy theo điểm"
+    },
+    {
+     "term": "rote learning",
+     "when": "học vẹt"
+    },
+    {
+     "term": "fall behind their peers",
+     "when": "tụt lại so với bạn cùng lứa, đây là nỗi sợ của phụ huynh"
+    },
+    {
+     "term": "well-rounded development",
+     "when": "phát triển toàn diện, chỉ dùng khi có ví dụ đi kèm"
+    },
+    {
+     "term": "unstructured play",
+     "when": "chơi tự do không có người lớn sắp đặt"
+    },
+    {
+     "term": "parental expectations",
+     "when": "kỳ vọng của cha mẹ"
+    },
+    {
+     "term": "academic attainment",
+     "when": "thành tích học tập, trang trọng hơn good marks"
+    }
+   ],
+   "traps": [
+    "Viết children need balance rồi dừng lại. Camera không quay được chữ balance. Phải nói rõ giờ nào bị lấy đi, ai lấy, và đứa trẻ mất gì trong tuần đó. Bênh học sinh mà không hiểu vì sao phụ huynh làm vậy. Đoạn phản biện mạnh nhất của trục này là chỉ ra áp lực đó hợp lý trong một hệ thống phân bổ suất học bằng điểm."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "I agree, though the argument has to rest on what the extra hours cost in attention the next day rather than on a general appeal to childhood."
+    },
+    {
+     "form": "Cause and solution",
+     "text": "The pressure comes from how school places are allocated, so any solution that speaks only to parents leaves the cause untouched."
+    },
+    {
+     "form": "Pos neg development",
+     "text": "It is a negative development for the child and a rational one for the family, and that gap is the real subject of the question."
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "title": "ĐỘNG LỰC LÀM VIỆC, TIỀN SO VỚI PHI TIỀN",
+   "count": 5,
+   "core": "Câu hỏi lõi là tiền mua được hành vi nào của người lao động, và hành vi nào nó không mua được.",
+   "recognise": {
+    "engine": "money và time, hai thứ này thường đánh đổi nhau",
+    "actors": "một nhân viên, người quản lý, người vừa nghỉ việc. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "nhận thêm ca, từ chối thăng chức, xin nghỉ phép, đổi công ty",
+    "change": "tiền và giờ",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Money is the primary factor in motivating employees in the workplace.",
+    "steps": {
+     "A": "Pay stops working as a motivator once it comfortably covers what someone needs.",
+     "B": "When pay already covers what a household needs, a further rise stops changing what employees do, and some move to a smaller firm for the same salary.",
+     "C": "What they gain is a say in which projects they run, which the rise had not offered.",
+     "D": "The firms they leave refill those roles twice in a year and spend more on recruitment than the rise would have cost.",
+     "D+": "The pattern shows up as a retention figure that does not move when the salary budget does, and that is the test of whether pay is doing the work.",
+     "E": "Pay stops people leaving for more pay and does little beyond that, and a manager who has only that lever has almost no lever at all."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "For most workers the wage is the reason the job exists at all.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "Talk of purpose and recognition describes a workforce that is already paid enough, and below that line money remains the primary factor."
+    },
+    "hints": "B, một người nhận thêm ca cuối tuần C, khoản chi cụ thể mà số tiền thêm đó dùng để trả D, ai khác trong nhà được lợi từ khoản đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A colleague who takes weekend shifts until one specific bill is cleared, then stops."
+    },
+    {
+     "tier": 2,
+     "text": "Nurses moving from a public hospital to a private one in the same city."
+    },
+    {
+     "tier": 3,
+     "text": "If a company replaces its annual bonus with two extra weeks of leave, the staff who resign that quarter are the ones who were counting on the bonus."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "a competitive salary",
+     "when": "mức lương cạnh tranh"
+    },
+    {
+     "term": "job satisfaction",
+     "when": "sự hài lòng với công việc"
+    },
+    {
+     "term": "a sense of purpose",
+     "when": "cảm giác công việc có ý nghĩa, phải kèm hành vi cụ thể"
+    },
+    {
+     "term": "staff retention and turnover",
+     "when": "giữ người và tỉ lệ nghỉ việc, dùng ở bước D khi hệ quả chuyển sang công ty"
+    },
+    {
+     "term": "work-life balance",
+     "when": "quen thuộc nhưng vẫn dùng được nếu có ví dụ đi kèm"
+    },
+    {
+     "term": "diminishing returns",
+     "when": "lợi ích giảm dần, đúng chỗ để nói tiền mất tác dụng"
+    },
+    {
+     "term": "a financial incentive",
+     "when": "khuyến khích bằng tiền"
+    },
+    {
+     "term": "autonomy over one's workload",
+     "when": "quyền tự quyết khối lượng công việc"
+    },
+    {
+     "term": "recognition from managers",
+     "when": "sự ghi nhận từ cấp trên"
+    },
+    {
+     "term": "a living wage",
+     "when": "mức lương đủ sống, dùng để vẽ ranh giới giữa hai chiều lập luận"
+    }
+   ],
+   "traps": [
+    "Đề có chữ only, ví dụ the only reason people work hard is to earn money. Chữ only gần như buộc ta bác bỏ. Đồng ý hoàn toàn là tự đặt mình vào chỗ chỉ cần một phản ví dụ là đổ. Nói money is not everything mà không vẽ được ranh giới. Ranh giới đó là mức lương đủ sống, dưới ngưỡng thì tiền là chính, trên ngưỡng thì không."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "Pay is decisive up to the point where it covers what a household needs, and above that line it holds people in a job without making them work harder in it."
+    },
+    {
+     "form": "To what extent",
+     "text": "I agree only for workers earning below a living wage, and the question is really about which of those two groups the writer has in mind."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "Both sides are describing different halves of the same workforce, and the useful answer names the income level at which the two accounts swap places."
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "title": "CÔNG BẰNG GIỮA CÁC NHÓM VÀ GIỮA CÁC THẾ HỆ",
+   "count": 7,
+   "core": "Câu hỏi lõi là ai được ưu tiên, ai gánh phần thiệt, và cái chuẩn dùng để phân loại có đo đúng thứ nó tưởng là đang đo không.",
+   "recognise": {
+    "engine": "money và identity",
+    "actors": "người ra quyết định tuyển chọn, nhóm được ưu tiên, nhóm bị loại. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "loại một hồ sơ, xếp một học sinh vào lớp thấp, con cái trả viện phí cho cha mẹ",
+    "change": "tiền, cơ hội, và gánh nặng chăm sóc",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Some think schools should select students according to academic ability, others believe students with different abilities should study together.",
+    "steps": {
+     "A": "Sorting children by one examination fixes an outcome that is still moving.",
+     "B": "Pupils placed in a lower stream are taught a narrower syllabus, so the gap the test measured widens each term.",
+     "C": "Three years later they sit an easier paper with a lower maximum grade, which closes off the courses they might otherwise have taken.",
+     "D": "Employers reading those grades never see the test taken years earlier, only the ceiling it set.",
+     "D+": "The effect appears as a gap between two schools in one town, and the test is then used to explain the gap it produced.",
+     "E": "Selection ends up producing the difference it claims to be measuring, and that is the strongest case against sorting children this early."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Teaching one lesson to a class with a very wide range of ability means pitching it to the middle.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So mixed classes protect the weakest pupil at a cost that lands on the strongest, and a fair system has to state that trade openly."
+    },
+    "hints": "B, một giáo viên quyết định giảng ở mức nào trong một tiết cụ thể C, ai ngồi chán và ai ngồi không theo kịp D, học sinh giỏi nhất lớp làm gì với số giờ đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A teacher deciding, in one lesson, which third of the class to pitch the explanation at."
+    },
+    {
+     "tier": 2,
+     "text": "Families who pay for a year of tutoring before an entrance test that is meant to measure raw ability."
+    },
+    {
+     "tier": 3,
+     "text": "If two schools in one town take opposite halves of the same cohort, the difference between them ten years later was created by the split rather than found by it."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "a level playing field",
+     "when": "sân chơi bình đẳng"
+    },
+    {
+     "term": "equality of opportunity and equality of outcome",
+     "when": "cặp khái niệm nên phân biệt rõ, phần lớn đề công bằng nằm ở khoảng giữa hai cái này"
+    },
+    {
+     "term": "streaming or setting by ability",
+     "when": "phân lớp theo năng lực, thuật ngữ đúng cho đề trường học"
+    },
+    {
+     "term": "entrench existing advantage",
+     "when": "củng cố lợi thế vốn có"
+    },
+    {
+     "term": "the pay gap",
+     "when": "khoảng cách thu nhập"
+    },
+    {
+     "term": "merit-based selection",
+     "when": "tuyển chọn theo năng lực"
+    },
+    {
+     "term": "a disproportionate share of",
+     "when": "một phần lớn hơn mức đáng lẽ phải gánh, dùng cho gánh nặng chăm sóc"
+    },
+    {
+     "term": "intergenerational fairness",
+     "when": "công bằng giữa các thế hệ, dùng cho đề già hoá và đề nghĩa vụ con cháu"
+    },
+    {
+     "term": "the care burden falls on",
+     "when": "gánh nặng chăm sóc rơi vào ai, luôn nêu đích danh"
+    },
+    {
+     "term": "undervalued work",
+     "when": "công việc bị định giá thấp hơn giá trị thật"
+    }
+   ],
+   "traps": [
+    "Đề về giới hay bị viết bằng những khẳng định chung về thái độ xã hội. Phải có một quyết định tuyển dụng cụ thể, một hồ sơ bị loại, thì camera mới quay được. Đề về người già hay bị viết thành bài về đạo hiếu. Đề hỏi nghĩa vụ pháp lý, nên phải trả lời bằng ai trả tiền và ai bị buộc phải nghỉ việc để chăm."
+   ],
+   "thesis": [
+    {
+     "form": "Discuss both views",
+     "text": "Both systems distribute the same shortage of teaching attention, and the argument is really about which group should absorb it."
+    },
+    {
+     "form": "Agree disagree",
+     "text": "I disagree, because the measure being used to sort people records their circumstances at least as much as their ability."
+    },
+    {
+     "form": "Problems and reasons",
+     "text": "The problems land on households and on pension budgets alike, and the reason for the trend itself is that earlier medical care and safer work now let people live decades past the age those systems were designed around."
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "title": "TĂNG TRƯỞNG ĐÁNH ĐỔI MÔI TRƯỜNG",
+   "count": 4,
+   "core": "Câu hỏi lõi là ô nhiễm đi theo mức thu nhập của một nước, hay đi theo bộ quy tắc mà nước đó đặt ra.",
+   "recognise": {
+    "engine": "money và incentive",
+    "actors": "một nhà máy, hộ dân sống gần đó, cơ quan cấp phép. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "mở rộng sản xuất, xả thải, cấp phép khai thác, đóng cửa cơ sở",
+    "change": "tiền, và chất lượng không khí hoặc nước",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Pollution and environmental damage are inevitable as a country becomes richer and more developed.",
+    "steps": {
+     "A": "Emissions rise with growth only while the cheapest way to produce is also the dirtiest.",
+     "B": "When a charge per tonne of emissions applies to every producer, firms install the filters they had already costed and shelved.",
+     "C": "Their running costs rise slightly and their output holds, because every competitor is paying the same charge.",
+     "D": "Households downwind stop keeping windows shut in summer, and local clinics see fewer children with breathing complaints.",
+     "D+": "The change registers as an air quality reading and a clinic caseload, which is why regulation moves an industry where an appeal to conscience moves one firm.",
+     "E": "The damage tracks the rules a country writes more closely than the income it reaches."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "A country that is still poor cannot afford to make the clean option the legal one.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "The trade is real at low incomes and fades at high ones, which makes this a question about sequence, not about inevitability."
+    },
+    "hints": "B, một doanh nghiệp chọn giữa hai loại máy C, chênh lệch chi phí vận hành giữa hai loại D, ai mất việc nếu doanh nghiệp đó không cạnh tranh nổi về giá D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A household choosing between a cheap stove and a cleaner one that costs three months of savings."
+    },
+    {
+     "tier": 2,
+     "text": "Factories relocating to countries where the same process is legal."
+    },
+    {
+     "tier": 3,
+     "text": "If a government raises the standard before any domestic firm can meet it, the work simply moves across the border and the air does not improve."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "environmental degradation",
+     "when": "suy thoái môi trường"
+    },
+    {
+     "term": "a trade-off between growth and X",
+     "when": "sự đánh đổi, dùng ở câu mở đoạn thân bài"
+    },
+    {
+     "term": "the polluter pays principle",
+     "when": "nguyên tắc người gây ô nhiễm phải trả, dùng khi đề xuất giải pháp"
+    },
+    {
+     "term": "deplete natural resources",
+     "when": "làm cạn kiệt tài nguyên"
+    },
+    {
+     "term": "at an unsustainable rate",
+     "when": "với tốc độ không bền vững"
+    },
+    {
+     "term": "leapfrog dirty technology",
+     "when": "đi tắt bỏ qua giai đoạn công nghệ bẩn"
+    },
+    {
+     "term": "externalise the cost",
+     "when": "đẩy chi phí ra ngoài cho xã hội gánh"
+    },
+    {
+     "term": "an ecological footprint",
+     "when": "dấu chân sinh thái"
+    },
+    {
+     "term": "regulatory standards",
+     "when": "tiêu chuẩn quản lý"
+    },
+    {
+     "term": "finite reserves",
+     "when": "trữ lượng hữu hạn"
+    }
+   ],
+   "traps": [
+    "Đề dạng problems and solutions mà giải pháp toàn là raise awareness và educate people. Không có ai thi hành, không có tiền, camera không quay được. Ít nhất một giải pháp phải có người trả tiền và người kiểm tra. Viết we must protect the environment for future generations ở kết bài. Câu đó không nói thêm gì so với đề."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "I disagree, since the damage follows the rules a country enforces rather than the income it reaches, and countries at similar income levels differ widely on exactly this."
+    },
+    {
+     "form": "Problems and solutions",
+     "text": "The core problem is that the cost of pollution sits outside the price of the product, so the solution has to put it back inside the price."
+    },
+    {
+     "form": "Adv outweigh disadv",
+     "text": "The disadvantages outweigh the advantages here because the damage is irreversible on any human timescale while the gain is a finite quantity of fuel."
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "title": "TRUYỀN THÔNG ĐỊNH HÌNH NHẬN THỨC VÀ HÀNH VI",
+   "count": 12,
+   "core": "Câu hỏi lõi là cái người ta nhìn thấy nhiều nhất trở thành cái họ tin là phổ biến nhất, rồi họ đổi hành vi theo niềm tin đó. Đây là trục lớn nhất trong bộ đề.",
+   "recognise": {
+    "engine": "information, norm, habit",
+    "actors": "một người xem cụ thể, biên tập viên, nhà quảng cáo, người bị đưa tin. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "bấm vào một tiêu đề, đổi một quyết định mua, tránh đi một con đường buổi tối",
+    "change": "thời lượng chú ý, và cảm giác về cái gì là bình thường",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Media coverage of violent crime frightens people and encourages criminals. Some say it should be banned from newspapers and TV.",
+    "steps": {
+     "A": "What a newsroom covers most becomes what its audience believes happens most.",
+     "B": "When a newsroom runs three reports of street robbery in a week, viewers stop walking home after dark, although the number of robberies has not moved.",
+     "C": "They drive instead, so the street is emptier at nine in the evening.",
+     "D": "Thieves who had avoided the street when it was busy now work it, the newsroom reports the robbery, and the coverage that began the cycle has its evidence.",
+     "D+": "The effect appears as a rise in the very figure the coverage was describing, which is why reporting and crime rates stop being independent of each other.",
+     "E": "Reporting can produce the conditions it describes, and that is the strongest argument for regulating how crime is reported rather than whether it is reported."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "People have a right to know what is happening on the streets where they live.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So the answer is a rule about how the reporting is framed, since removing it leaves people acting on rumour instead."
+    },
+    "hints": "B, một cư dân đọc bản tin và làm một việc cụ thể sau đó C, thông tin đó giúp họ tránh được cái gì D, ai khác trong khu phố hành động theo D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A shopper who switches brand after seeing the same advertisement every evening for a fortnight."
+    },
+    {
+     "tier": 2,
+     "text": "Parents who let their children out alone far less than their own parents did, in a city that is no more dangerous than it was."
+    },
+    {
+     "tier": 3,
+     "text": "If a channel commits to positive stories only, the first thing it stops reporting is the story that would embarrass someone."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "sensationalise",
+     "when": "giật gân hoá, động từ chính xác thay cho exaggerate"
+    },
+    {
+     "term": "distort public perception",
+     "when": "bóp méo nhận thức công chúng"
+    },
+    {
+     "term": "a moral panic",
+     "when": "cơn hoảng loạn đạo đức tập thể, chỉ dùng khi đã tả được cơ chế"
+    },
+    {
+     "term": "set the agenda",
+     "when": "quyết định chuyện gì được bàn"
+    },
+    {
+     "term": "an echo chamber",
+     "when": "buồng vọng, nơi chỉ nghe lại ý mình"
+    },
+    {
+     "term": "clickbait headlines",
+     "when": "tiêu đề câu bấm"
+    },
+    {
+     "term": "editorial independence",
+     "when": "độc lập biên tập, dùng cho đề kiểm duyệt"
+    },
+    {
+     "term": "brand loyalty",
+     "when": "sự trung thành thương hiệu"
+    },
+    {
+     "term": "manufacture demand",
+     "when": "tạo ra nhu cầu vốn không có"
+    },
+    {
+     "term": "desensitise viewers to",
+     "when": "làm người xem chai lì với"
+    }
+   ],
+   "traps": [
+    "Viết the media như một khối duy nhất suốt cả bài. Một tờ báo, một kênh, một biên tập viên, một quảng cáo cụ thể mới quay được bằng camera. Đề hỏi what children watch so với how much time they watch. Đây là đề so sánh hai biến số. Viết chung về tác hại của TV là lạc đề dù ý hay tới đâu."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "I disagree with a ban but agree with the diagnosis behind it, since coverage shapes what people believe is common and they then act on that belief."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "The two sides disagree about whether audiences absorb what they are shown or select from it, and the evidence of everyday behaviour points to the first."
+    },
+    {
+     "form": "Pos neg development",
+     "text": "It is a negative development in its current form, though the fault lies in what earns attention rather than in the medium itself."
+    }
+   ]
+  },
+  {
+   "n": 11,
+   "title": "TOÀN CẦU SO VỚI ĐỊA PHƯƠNG",
+   "count": 9,
+   "core": "Câu hỏi lõi là khi hàng hoá, phim ảnh, tiền hoặc con người đi qua biên giới thì ai ở lại được và ai biến mất.",
+   "recognise": {
+    "engine": "money và identity",
+    "actors": "nhà sản xuất trong nước, người tiêu dùng, chính phủ hai bên, người đi làm xa. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "nhập hàng rẻ hơn, đóng xưởng, gửi tiền về nhà, ký một thoả thuận",
+    "change": "tiền chảy đi đâu, và cảm giác thuộc về",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "Some believe it is better to import foreign films and TV programmes, others argue countries should produce their own shows.",
+    "steps": {
+     "A": "A broadcaster buys a finished foreign series because it costs a fraction of commissioning one.",
+     "B": "When broadcasters buy finished foreign series instead of commissioning, local production companies lose the slot and their writers move into advertising.",
+     "C": "Five years on the few remaining drama writers earn their income from advertising copy, so a funded commission has to outbid the agencies or hire from abroad.",
+     "D": "Audiences who wanted a story set where they live have nowhere to find one, and broadcasters read the low ratings as proof that no demand exists.",
+     "D+": "The loss shows up as a missing training route rather than as one closed company, which is what makes it hard to reverse.",
+     "E": "The cheaper option is cheap only in the first few years, and the case for a domestic quota rests on that gap."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "Audiences should be free to watch the best programmes made anywhere.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "Protection buys a domestic industry at the price of an audience that stops watching it, and a quota with no investment in quality delivers neither."
+    },
+    "hints": "B, một gia đình chọn xem gì vào tối thứ bảy C, một ngành được bảo hộ lâu năm làm ra sản phẩm thế nào D, ai trả tiền cho hạn ngạch đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A family watching a subtitled foreign series over dinner and recognising nothing on screen."
+    },
+    {
+     "tier": 2,
+     "text": "Tailors in a town where imported ready-made clothing arrived within a single decade."
+    },
+    {
+     "tier": 3,
+     "text": "If a country funds only domestic films for ten years, the question is whether the tenth year is better than the first."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "cultural exchange",
+     "when": "giao lưu văn hoá"
+    },
+    {
+     "term": "erode a national identity",
+     "when": "bào mòn bản sắc dân tộc, nhớ cho khuôn mặt quay được ngay sau"
+    },
+    {
+     "term": "a degree of self-sufficiency",
+     "when": "mức độ tự chủ"
+    },
+    {
+     "term": "outsource production",
+     "when": "chuyển sản xuất ra ngoài"
+    },
+    {
+     "term": "a protectionist measure",
+     "when": "biện pháp bảo hộ"
+    },
+    {
+     "term": "cross-border cooperation",
+     "when": "hợp tác xuyên biên giới, thay cho countries work together"
+    },
+    {
+     "term": "remittances sent home",
+     "when": "kiều hối, dùng cho đề đi làm nước ngoài"
+    },
+    {
+     "term": "cultural homogenisation",
+     "when": "sự đồng nhất hoá văn hoá"
+    },
+    {
+     "term": "a domestic industry",
+     "when": "ngành sản xuất trong nước"
+    },
+    {
+     "term": "aid that is conditional on",
+     "when": "viện trợ có điều kiện, dùng cho đề từ thiện"
+    }
+   ],
+   "traps": [
+    "Viết cả bài về globalisation nói chung trong khi đề hỏi đúng một thứ, ví dụ phim truyền hình hoặc thực phẩm. Mọi đoạn phải quay về đúng thứ đề hỏi. Đề hợp tác quốc tế hay bị viết thành danh sách các vấn đề toàn cầu. Phải có ít nhất một cơ chế cụ thể, ai ngồi vào bàn, ai trả tiền, ai kiểm tra ai."
+   ],
+   "thesis": [
+    {
+     "form": "Discuss both views",
+     "text": "One side is describing what audiences want this year and the other what will be available to them in ten, and the second consideration should carry more weight in a policy decision."
+    },
+    {
+     "form": "Agree disagree",
+     "text": "I agree that cross-border cooperation is necessary, though only for problems where no single country can capture the benefit of acting alone."
+    },
+    {
+     "form": "Pos neg development",
+     "text": "It is a positive development for consumers and a negative one for producers, and where a country lands depends on which of the two it has more of."
+    }
+   ]
+  },
+  {
+   "n": 12,
+   "title": "QUY HOẠCH ĐÔ THỊ VÀ KHOẢNG CÁCH VẬT LÝ",
+   "count": 5,
+   "core": "Câu hỏi lõi là khoảng cách giữa nhà, chỗ làm và chỗ mua đồ quyết định người ta mất bao nhiêu giờ mỗi ngày, và ai không đủ tiền để rút ngắn khoảng cách đó.",
+   "recognise": {
+    "engine": "time và money",
+    "actors": "người đi làm, chủ cửa hàng nhỏ, hội đồng quy hoạch. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "đi thêm bốn mươi phút mỗi chiều, đóng cửa hàng, mua chiếc xe thứ hai",
+    "change": "giờ đi lại và tiền xăng",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "The use of bicycles as the main form of transport has declined in many places. Why, and what can be done to encourage people to cycle more?",
+    "steps": {
+     "A": "People cycle on the routes where they feel safe from traffic, and stop where they do not.",
+     "B": "Where a route crosses junctions with cars turning across the bike lane, parents who would otherwise cycle with their children drive instead.",
+     "C": "Each of those drives adds a car to the queue and minutes to the wait at the junction the next family has to cross.",
+     "D": "Within a few years the lane carries so few cyclists that the council sees no case for protecting it, and removes it at the next resurfacing.",
+     "D+": "The decline appears as a cycling count falling street by street, which is then read as proof that nobody wants to cycle.",
+     "E": "The decline feeds on itself, and separated infrastructure is the one intervention that breaks the loop instead of appealing to the people caught in it."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "In a city that is hot, hilly or subject to heavy rain, cycling will remain a minority choice however good the lane is.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So infrastructure removes the fear and does nothing about the climate, and a city like this gains more from a bus network than from a bike lane."
+    },
+    "hints": "B, một người đến chỗ làm sau hai mươi phút đạp xe dưới nắng C, người đó mất thêm bao nhiêu phút và bao nhiêu tiền trước khi vào ca D, đồng nghiệp đứng cạnh nhìn thấy gì và quyết định đi bằng gì D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A worker timing two routes to the same office over one week and then never trying the slower one again."
+    },
+    {
+     "tier": 2,
+     "text": "Shopkeepers in a district where the housing was rezoned and the customers moved four kilometres away."
+    },
+    {
+     "tier": 3,
+     "text": "If a new housing estate is finished two years before the bus route reaches it, every household buys a car in the meantime and keeps it afterwards."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "urban sprawl",
+     "when": "đô thị lan rộng thiếu kiểm soát"
+    },
+    {
+     "term": "zoning regulations",
+     "when": "quy định phân khu chức năng, thuật ngữ đúng cho đề tách khu"
+    },
+    {
+     "term": "a mixed-use development",
+     "when": "khu phức hợp có cả nhà ở, cửa hàng và văn phòng"
+    },
+    {
+     "term": "commuting time",
+     "when": "thời gian đi lại đi làm"
+    },
+    {
+     "term": "car dependency",
+     "when": "sự lệ thuộc vào ô tô"
+    },
+    {
+     "term": "green space",
+     "when": "không gian xanh"
+    },
+    {
+     "term": "a residential district",
+     "when": "khu dân cư"
+    },
+    {
+     "term": "infrastructure investment",
+     "when": "đầu tư hạ tầng"
+    },
+    {
+     "term": "traffic congestion",
+     "when": "ùn tắc"
+    },
+    {
+     "term": "within walking distance of",
+     "when": "đi bộ tới được, cụm gọn để nói tiện lợi"
+    }
+   ],
+   "traps": [
+    "Đề tách khu chức năng có hai dạng câu hỏi, một dạng hỏi lợi hơn hại và một dạng hỏi nguyên nhân cộng tích cực hay tiêu cực. Dùng nhầm dạng là mất Task Response dù ý rất hay. Đọc kỹ vế cuối của đề trước khi viết một chữ nào. Viết the government should build more public transport rồi dừng. Phải nói tuyến nào, ai đi, và họ đang đi bằng gì."
+   ],
+   "thesis": [
+    {
+     "form": "Adv outweigh disadv",
+     "text": "The disadvantages outweigh the advantages, because separating these functions locks in a daily journey that every household then has to pay for in either time or fares."
+    },
+    {
+     "form": "Causes and pos neg",
+     "text": "The separation grew out of a planning logic that treated noise and housing as incompatible, and it has turned out negative because the cost falls on the residents rather than on the planners."
+    },
+    {
+     "form": "Why and solutions",
+     "text": "The decline follows the perceived danger of the route rather than any change in willingness, so the answer has to be physical separation rather than persuasion."
+    }
+   ]
+  },
+  {
+   "n": 13,
+   "title": "GIÁ TRỊ CỦA THỨ KHÔNG SINH LỜI",
+   "count": 4,
+   "core": "Bên phản đối luôn nói thứ này không tạo ra giá trị đo được. Bên ủng hộ phải chứng minh giá trị gián tiếp bằng một hành vi cụ thể, không bằng tính từ.",
+   "recognise": {
+    "engine": "identity và information",
+    "actors": "người quyết ngân sách, người tiếp xúc với thứ đó, thế hệ sau. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "cắt một khoản, đóng cửa một bảo tàng, một đứa trẻ nhìn thấy thứ gì đó lần đầu",
+    "change": "thứ không đo được bằng tiền, nên phải cho khuôn mặt quay được ngay câu sau",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "In a world of advanced science and technology we still greatly value artists. What can the arts tell us about life that science and technology cannot?",
+    "steps": {
+     "A": "Science explains what happens to people, and art records what it is like while it is happening to you.",
+     "B": "Readers who have never lost a parent follow a character through it for two hundred pages.",
+     "C": "They recognise the same reaction later in a colleague and give him twenty minutes, instead of avoiding the subject for a month.",
+     "D": "Managers keep staff they had already begun to replace, and those teams lose nobody that quarter.",
+     "D+": "The effect appears as a stock of shared reference points a society can draw on, which stays invisible until it is missing.",
+     "E": "The arts carry the part of experience that data has to leave out, and that is what a technical age is still paying them for."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "Đề khác, cùng trục. Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. A và E cho sẵn, ta tự dựng B, C, D và D cộng.",
+    "steps": {
+     "A": "Conservation budgets are finite, so some species will be funded and others will not.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "The real question is who sets the ranking and on what published criteria, since a budget decision made without one follows whichever species is easiest to photograph."
+    },
+    "hints": "B, một hội đồng bảo tồn chọn tài trợ loài nào trong năm nay C, số tiền chuyển sang loài được chọn và số loài bị bỏ lại D, một cộng đồng sống dựa vào hệ sinh thái có loài bị bỏ lại D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A child seeing a real skeleton in a museum and asking the first question nobody at home could answer."
+    },
+    {
+     "tier": 2,
+     "text": "Towns whose largest employer is a heritage site rather than a factory."
+    },
+    {
+     "tier": 3,
+     "text": "If a council closes a museum to fund a car park, the car park is full within a year and the museum has no figure to put against it."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "intrinsic worth",
+     "when": "giá trị tự thân, không cần biện minh bằng lợi ích khác"
+    },
+    {
+     "term": "cannot be reduced to",
+     "when": "không quy về được, dùng khi bác cách đo bằng tiền"
+    },
+    {
+     "term": "a yardstick that fails to capture",
+     "when": "thước đo bỏ sót mất điều gì"
+    },
+    {
+     "term": "instrumental value",
+     "when": "giá trị công cụ, đối lập với intrinsic"
+    },
+    {
+     "term": "cultural capital",
+     "when": "vốn văn hoá"
+    },
+    {
+     "term": "civic pride",
+     "when": "niềm tự hào của cư dân một nơi"
+    },
+    {
+     "term": "a shared reference point",
+     "when": "điểm quy chiếu chung, thứ mọi người trong một cộng đồng đều biết"
+    },
+    {
+     "term": "ecosystem services",
+     "when": "dịch vụ hệ sinh thái, dùng cho đề bảo vệ động vật"
+    },
+    {
+     "term": "irreplaceable once lost",
+     "when": "mất là không lấy lại được"
+    },
+    {
+     "term": "enrich public life",
+     "when": "làm giàu đời sống chung"
+    }
+   ],
+   "traps": [
+    "Tên trục trừu tượng, nhưng bài viết thì không được phép trừu tượng. Mọi câu bảo vệ giá trị phi lợi nhuận đều phải có một người làm một việc, nếu không cả đoạn thành lời tán tụng. Đề hỏi arts tell us what science cannot mà ta viết arts are important. Đề đang hỏi một sự khác biệt cụ thể giữa hai cách hiểu thế giới, phải trả lời đúng chỗ đó."
+   ],
+   "thesis": [
+    {
+     "form": "Agree disagree",
+     "text": "I disagree, because usefulness to humans is a measure taken at one moment and applied to something whose loss is permanent."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "One side is asking what a thing produces and the other what disappears with it, and for anything irreplaceable the second question is the more serious one."
+    },
+    {
+     "form": "Open question",
+     "text": "The arts hold the first-person side of an experience, which is exactly the part a scientific account has to strip out in order to be general."
+    }
+   ]
+  },
+  {
+   "n": 14,
+   "title": "ÁP LỰC ĐỒNG DẠNG VÀ KỲ VỌNG XÃ HỘI",
+   "count": 6,
+   "core": "Câu hỏi lõi là cái gì đang được coi là bình thường, ai đặt ra cái chuẩn đó, và một người phải làm gì để không bị lệch khỏi nó.",
+   "recognise": {
+    "engine": "norm và habit",
+    "actors": "một cá nhân trong nhóm, người bán hàng, người đặt chuẩn. Viết ở dạng lớp người, không dựng một nhân vật",
+    "actions": "mua theo bạn, đặt lịch một thủ thuật, vứt một món còn dùng được, huỷ đơn vì giao chậm",
+    "change": "cảm giác về cái gì là bình thường, và đây là resource vô hình nên phải cho khuôn mặt quay được",
+    "bridge": "sau bước D, nói rõ hệ quả nổi lên ở đâu, dưới dạng một con số hoặc một hiện tượng đo được. Không có vế đó thì chain mới chỉ minh hoạ, chưa chứng minh."
+   },
+   "model_chain": {
+    "prompt": "An increasing number of people choose cosmetic surgery to improve their appearance. Why do people have these operations, and is this a positive or negative development?",
+    "steps": {
+     "A": "What counts as an ordinary face is set by the faces a person sees most often.",
+     "B": "When people spend an hour a day scrolling through edited photographs, they compare their own faces against versions of other faces that do not exist.",
+     "C": "The number of unedited faces they have seen that week is close to zero, and some book a procedure for a feature they had not noticed two years earlier.",
+     "D": "Their friends see the result, and the range of faces the group measures itself against narrows again.",
+     "D+": "The shift appears as a moving standard rather than as any individual decision, which is why demand grows instead of settling.",
+     "E": "The pressure is generated by the comparison itself, which is what makes this a negative development rather than a neutral one, since it grows instead of settling once people have what they wanted."
+    }
+   },
+   "gapped_chain": {
+    "prompt": "",
+    "steps": {
+     "A": "How a person chooses to look is a decision that harms nobody else.",
+     "B": null,
+     "C": null,
+     "D": null,
+     "D+": null,
+     "E": "So the objection belongs to the industry that shapes the preference, not to the individual acting on it, and those two need different answers."
+    },
+    "hints": "B, một người sau thủ thuật làm được việc gì mà trước đó tránh C, điều gì thay đổi trong công việc hoặc quan hệ của họ D, ai khác được lợi từ thay đổi đó D cộng, hệ quả nổi lên ở đâu. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy được. |"
+   },
+   "examples": [
+    {
+     "tier": 1,
+     "text": "A teenager who changes trainers within a month of three classmates buying the same pair."
+    },
+    {
+     "tier": 2,
+     "text": "Shoppers replacing a phone that still works because a new model was announced."
+    },
+    {
+     "tier": 3,
+     "text": "If a delivery app promises thirty minutes, a sixty-minute wait starts to feel like a fault rather than a normal wait."
+    }
+   ],
+   "vocab": [
+    {
+     "term": "conform to a norm",
+     "when": "làm theo chuẩn chung"
+    },
+    {
+     "term": "keep up with one's peers",
+     "when": "theo kịp bạn bè cùng nhóm"
+    },
+    {
+     "term": "social comparison",
+     "when": "sự so sánh xã hội, dùng ở bước B khi mô tả hành vi"
+    },
+    {
+     "term": "planned obsolescence",
+     "when": "thiết kế để sản phẩm sớm hỏng hoặc sớm lỗi thời"
+    },
+    {
+     "term": "a throwaway culture",
+     "when": "văn hoá dùng một lần rồi bỏ"
+    },
+    {
+     "term": "instant gratification",
+     "when": "thoả mãn tức thì"
+    },
+    {
+     "term": "a status symbol",
+     "when": "món đồ dùng để thể hiện vị thế"
+    },
+    {
+     "term": "fit in rather than stand out",
+     "when": "hoà vào đám đông thay vì nổi bật"
+    },
+    {
+     "term": "fuel demand for",
+     "when": "thổi bùng nhu cầu"
+    },
+    {
+     "term": "unrealistic standards",
+     "when": "chuẩn mực phi thực tế"
+    }
+   ],
+   "traps": [
+    "Đề về tiêu dùng nhanh và văn hoá vứt bỏ rất dễ bị viết thành bài giảng đạo đức. Phải có một lần mua cụ thể, một món bị vứt cụ thể, thì mới thành lập luận. Viết people are influenced by social media rồi dừng. Ai, xem bao lâu, rồi làm gì khác đi. Ba thứ đó mới là bước B."
+   ],
+   "thesis": [
+    {
+     "form": "Why and pos neg",
+     "text": "People act on a standard set by the images they see most, and the development is negative because the standard moves each time somebody meets it."
+    },
+    {
+     "form": "Agree disagree",
+     "text": "I agree, though imitation is a symptom of how goods are marketed rather than a fixed feature of human character."
+    },
+    {
+     "form": "Discuss both views",
+     "text": "One side is describing a free choice and the other the conditions under which the choice is made, and both are accurate about different parts of the same act."
+    }
+   ]
+  }
+ ],
+ "prompts": [
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 1,
+   "role": "primary",
+   "axis": 3,
+   "q": "Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?",
+   "thesis": "I disagree, because relevance is the wrong test, and customs that carry practical knowledge fall out of use long before anyone decides they are obsolete.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 2,
+   "role": "primary",
+   "axis": 11,
+   "q": "Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.",
+   "thesis": "Contact adds far more than it removes, and what does disappear tends to be the local practice that nobody was ever paid to keep going.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 3,
+   "role": "secondary",
+   "axis": 3,
+   "q": "In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree with this belief?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 3",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 4,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Du lịch số 2",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 5,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 5",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 6,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people believe it is better to import foreign films and TV programs, while others argue that countries should produce their own shows. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 8",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 7,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Chính phủ, chính trị và ngoại giao số 6",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 8,
+   "role": "secondary",
+   "axis": 14,
+   "q": "An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 4",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 9,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Some groups of people have benefited from modern communications technology, but some people do not benefit at all. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 1",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 10,
+   "role": "secondary",
+   "axis": 9,
+   "q": "Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Kinh tế, tiền bạc và thương mại số 9",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 11,
+   "role": "primary",
+   "axis": 11,
+   "q": "Some people say that the increasing business and cultural contact between countries has positive effects. Others say it would lead to the loss of national identities. Discuss both views and give your opinion.",
+   "thesis": "Contact adds far more than it removes, and what does disappear tends to be the local practice that nobody was ever paid to keep going.",
+   "thesis_at": null,
+   "note": "Trùng với đề Văn hóa xã hội số 2. Chỉ khác chữ think và say."
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 12,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Some people think that the rapid development of smart mobile devices, e.g. smartphones, tablets and other mobile devices, are disadvantageous to human. Agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 2",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 13,
+   "role": "primary",
+   "axis": 14,
+   "q": "The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?",
+   "thesis": "I agree, though the imitation here is largely manufactured by how goods are marketed, and is not a fixed feature of human character.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 14,
+   "role": "primary",
+   "axis": 3,
+   "q": "In some parts of the world it is becoming increasingly popular to try to find out one's own family history. Why do you think people do this? Do you think it is a positive or negative development?",
+   "thesis": "People look for a fixed point when the places their families came from have changed beyond recognition, and the development stays positive so long as it remains curiosity rather than becoming a claim.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 15,
+   "role": "primary",
+   "axis": 3,
+   "q": "If people go to live in another country, they should follow the local customs and traditions. To what extent do you agree or disagree?",
+   "thesis": "Newcomers owe compliance with the local rules that affect other people, and nothing beyond that, and the difficulty is that most societies disagree about where that line falls.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 16,
+   "role": "primary",
+   "axis": 13,
+   "q": "Some believe that history has little to teach us about today while others think that the study of the past helps us to understand the present. Discuss both views and give your own opinion.",
+   "thesis": "History rarely predicts what will happen, yet it reliably shows which arrangements are recent, and that is what stops people treating the present as inevitable, so the second view is the stronger one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 17,
+   "role": "primary",
+   "axis": 10,
+   "q": "Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?",
+   "thesis": "I agree that the example is a poor one, though it is set by whatever earns attention rather than by any one person, so blaming the celebrity changes nothing.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 18,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.",
+   "thesis": null,
+   "thesis_at": "Đạo đức số 7",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 19,
+   "role": "secondary",
+   "axis": 3,
+   "q": "Museums and art galleries should concentrate on works that show history and culture of their own country rather than works of the other parts in the world. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 4",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 20,
+   "role": "secondary",
+   "axis": 3,
+   "q": "To what extent do you agree or disagree that international fast food is replacing traditional food and negatively affecting families and society?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 8",
+   "note": "Trùng nội dung với đề Thực phẩm và sức khỏe số 3. Cùng kho ý, chỉ khác cách diễn đạt."
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 21,
+   "role": "secondary",
+   "axis": 13,
+   "q": "Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Giải trí, thể thao và sở thích số 5",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 22,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?",
+   "thesis": null,
+   "thesis_at": "Công việc số 11",
+   "note": null
+  },
+  {
+   "group": "Socio-cultural and global issues · Văn hóa xã hội và toàn cầu · 23 đề",
+   "group_code": "B.1",
+   "n": 23,
+   "role": "secondary",
+   "axis": 14,
+   "q": "More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Lối sống số 4",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 1,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 3",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 2,
+   "role": "primary",
+   "axis": 8,
+   "q": "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+   "thesis": "A legal duty places the cost on whichever relative has the least bargaining power, most often a daughter, so the obligation belongs with a state that can spread it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 3,
+   "role": "secondary",
+   "axis": 1,
+   "q": "In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 2",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 4,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.",
+   "thesis": null,
+   "thesis_at": "Giải trí, thể thao và sở thích số 1",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 5,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 2",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 6,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 3",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 7,
+   "role": "secondary",
+   "axis": 1,
+   "q": "To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Phát triển đô thị số 1",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 8,
+   "role": "secondary",
+   "axis": 5,
+   "q": "Nowadays, a growing number of children are committing crimes. What are the reasons for this, and what punishments should be imposed?",
+   "thesis": null,
+   "thesis_at": "Tội phạm, hình phạt và pháp luật số 2",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 9,
+   "role": "primary",
+   "axis": 8,
+   "q": "Some people believe that women should play an equal role as men in a country's police force or military force, while others think women are not suitable for these kinds of jobs. Discuss both views and give opinion.",
+   "thesis": "Those who doubt suitability are pointing at a job description, and that description was written when only one group was applying, so I side with equal access and with rewriting the description around what the work now needs.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 10,
+   "role": "primary",
+   "axis": 14,
+   "q": "People's shopping habits depend more on the age group they belong to than other factors. To what extent do you agree or disagree?",
+   "thesis": "Age tends to predict less than income does, and what looks like a generational habit is usually the price bracket a person can reach.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 11,
+   "role": "secondary",
+   "axis": 6,
+   "q": "In recent years, an increasing number of parents are choosing to educate their children at home rather than sending them to school. Do the advantages of home education outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 8",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 12,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giao thông số 6",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 13,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 17",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 14,
+   "role": "primary",
+   "axis": 6,
+   "q": "Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?",
+   "thesis": "Parents apply pressure because school places are rationed by marks, so the development is negative for the child while remaining rational for the family.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 15,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 14",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 16,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 15",
+   "note": "Trùng nội dung với đề Giáo dục số 2. Chỉ khác cách mở câu."
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 17,
+   "role": "primary",
+   "axis": 8,
+   "q": "In many countries, life expectancy is increasing, leading to a growing proportion of elderly people. What problems does this cause for individuals and society, and what are the reasons for this trend?",
+   "thesis": "Longer lives are the product of earlier medical care and safer work, while pensions and care systems were designed around a shorter one, and it is that mismatch which strains households and budgets alike.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 18,
+   "role": "primary",
+   "axis": 14,
+   "q": "Many children face pressure from their peers to conform to certain behaviors. Do the disadvantages of peer pressure outweigh the advantages?",
+   "thesis": "The disadvantages outweigh the advantages in adolescence specifically, because the mechanism that teaches a child to cooperate is the same one that stops them leaving a group that is harming them.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 19,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 18",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 20,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?",
+   "thesis": null,
+   "thesis_at": "Công việc số 11",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 21,
+   "role": "primary",
+   "axis": 10,
+   "q": "Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?",
+   "thesis": "Admiration is normal and useful, and the negative part is that the range of people young audiences are shown has narrowed.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 22,
+   "role": "primary",
+   "axis": 6,
+   "q": "The values that we learn from our parents and family have a greater influence on our future success than knowledge and skills we learn at school. To what extent do you agree or disagree?",
+   "thesis": "Family shapes whether a child keeps going after a setback and school supplies what they keep going at, and for the kind of success most people have in mind the family influence is the greater of the two.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 23,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Some people say that what children watch on television influences their behavior, others say that the amount of time children watch on television influences their behavior most. Discuss both views.",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 19",
+   "note": null
+  },
+  {
+   "group": "Age, generation and gender · Tuổi tác, thế hệ và giới tính · 24 đề",
+   "group_code": "B.2",
+   "n": 24,
+   "role": "secondary",
+   "axis": 5,
+   "q": "Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Tội phạm, hình phạt và pháp luật số 9",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 1,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Some people say that news is a good medium to learn, while others argue that other media are more effective. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 1",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 2,
+   "role": "primary",
+   "axis": 6,
+   "q": "Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?",
+   "thesis": "I agree, because the hours added to study are taken from sleep and attention rather than from idleness.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 3,
+   "role": "primary",
+   "axis": 6,
+   "q": "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?",
+   "thesis": "Attention has not fallen so much as competition for it has risen, so the workable solutions concern the hours around school rather than the lesson itself.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 4,
+   "role": "primary",
+   "axis": 1,
+   "q": "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?",
+   "thesis": "The advantages outweigh the disadvantages only where the support is means-tested, since universal funding moves money towards students who will later out-earn the taxpayers paying for it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 5,
+   "role": "secondary",
+   "axis": 1,
+   "q": "To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Phát triển đô thị số 1",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 6,
+   "role": "secondary",
+   "axis": 7,
+   "q": "Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?",
+   "thesis": null,
+   "thesis_at": "Công việc số 3",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 7,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Some people argue that language learning is only effective in small classes, while others believe that class size does not matter. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Ngôn ngữ số 1",
+   "note": "Đề mồ côi. Engine của nó là TIME, giờ giáo viên chia cho bao nhiêu học sinh, chứ không phải engine chính của Trục 6."
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 8,
+   "role": "primary",
+   "axis": 6,
+   "q": "In recent years, an increasing number of parents are choosing to educate their children at home rather than sending them to school. Do the advantages of home education outweigh the disadvantages?",
+   "thesis": "The disadvantages outweigh the advantages for most families, since home education needs one adult with both the free hours and the subject range, and few households have either.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 9,
+   "role": "secondary",
+   "axis": 5,
+   "q": "Some people believe that providing criminals with education will reduce the recidivism rate. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Tội phạm, hình phạt và pháp luật số 4",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 10,
+   "role": "primary",
+   "axis": 1,
+   "q": "Some people think secondary school students should study international news as one of their subjects, while others believe that this is a waste of valuable school time. Discuss both these views and give your own opinion.",
+   "thesis": "Both sides are arguing about what the timetable should give up, and international news earns a place only if it replaces a weaker subject rather than being added on top.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 11,
+   "role": "primary",
+   "axis": 4,
+   "q": "Many people say that schools are no longer necessary as a lot of information is available on the internet, so children can study at home. To what extent do you agree or disagree?",
+   "thesis": "Schools supply supervision, sequencing and peers rather than information, and no search engine provides any of the three.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 12,
+   "role": "secondary",
+   "axis": 13,
+   "q": "Some believe that history has little to teach us about today while others think that the study of the past helps us to understand the present. Discuss both views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 16",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 13,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 14",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 14,
+   "role": "primary",
+   "axis": 6,
+   "q": "Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?",
+   "thesis": "Focusing all their time on education produces students who do well in examinations and have practised nothing that examinations leave out.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 15,
+   "role": "primary",
+   "axis": 6,
+   "q": "Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?",
+   "thesis": "I agree, because the hours added to study are taken from sleep and attention rather than from idleness.",
+   "thesis_at": null,
+   "note": "Trùng nội dung với đề Giáo dục số 2. Chỉ khác cách mở câu."
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 16,
+   "role": "secondary",
+   "axis": 14,
+   "q": "Many children face pressure from their peers to conform to certain behaviors. Do the disadvantages of peer pressure outweigh the advantages?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 18",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 17,
+   "role": "secondary",
+   "axis": 5,
+   "q": "Research shows that most criminals have low levels of education. Therefore, some believe that the best way to reduce crime is to educate prisoners while in prison so they can secure employment upon release. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Tội phạm, hình phạt và pháp luật số 7",
+   "note": "Gần trùng với đề Tội phạm số 4. Cùng luận điểm, bản này nói rõ thêm mắt xích việc làm."
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 18,
+   "role": "primary",
+   "axis": 1,
+   "q": "Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?",
+   "thesis": "Funded activities help only if they replace paid tutoring rather than sitting on top of it, since what harms the child is the total number of hours worked.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 19,
+   "role": "primary",
+   "axis": 8,
+   "q": "Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and state your own opinion.",
+   "thesis": "Selecting by ability lets a teacher pitch one lesson at one level, yet the measure used records a family's circumstances as much as a child's, which is why I favour mixed classes with setting only in the exam years.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 20,
+   "role": "secondary",
+   "axis": 6,
+   "q": "The values that we learn from our parents and family have a greater influence on our future success than knowledge and skills we learn at school. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 22",
+   "note": null
+  },
+  {
+   "group": "Education · Giáo dục · 21 đề",
+   "group_code": "B.3",
+   "n": 21,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Nowadays, fewer people are writing by hand due to the widespread use of computers and digital technology. Do the advantages of this development outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 9",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 1,
+   "role": "secondary",
+   "axis": 1,
+   "q": "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 1",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 2,
+   "role": "secondary",
+   "axis": 10,
+   "q": "These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 2",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 3,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 2",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 4,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.",
+   "thesis": null,
+   "thesis_at": "Giải trí, thể thao và sở thích số 1",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 5,
+   "role": "secondary",
+   "axis": 1,
+   "q": "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 4",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 6,
+   "role": "secondary",
+   "axis": 8,
+   "q": "Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Công việc số 2",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 7,
+   "role": "secondary",
+   "axis": 8,
+   "q": "The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Công việc số 5",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 8,
+   "role": "secondary",
+   "axis": 14,
+   "q": "In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.",
+   "thesis": null,
+   "thesis_at": "Lối sống số 3",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 9,
+   "role": "primary",
+   "axis": 9,
+   "q": "Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?",
+   "thesis": "The advantages outweigh the disadvantages where growth funds the services that hold a community together, and not where it merely raises average income.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 10,
+   "role": "secondary",
+   "axis": 14,
+   "q": "People's shopping habits depend more on the age group they belong to than other factors. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 10",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 11,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Some people believe that the sole purpose of advertising is to encourage consumers to buy products they do not actually need. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 10",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 12,
+   "role": "secondary",
+   "axis": 7,
+   "q": "Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Công việc số 7",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 13,
+   "role": "secondary",
+   "axis": 12,
+   "q": "Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Phát triển đô thị số 5",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 14,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people say that the increasing business and cultural contact between countries has positive effects. Others say it would lead to the loss of national identities. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 11",
+   "note": "Trùng với đề Văn hóa xã hội số 2. Chỉ khác chữ think và say."
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 15,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 6",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 16,
+   "role": "secondary",
+   "axis": 14,
+   "q": "The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 13",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 17,
+   "role": "secondary",
+   "axis": 9,
+   "q": "Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 6",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 18,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 8",
+   "note": null
+  },
+  {
+   "group": "Economy, money and trade · Kinh tế, tiền bạc và thương mại · 19 đề",
+   "group_code": "B.4",
+   "n": 19,
+   "role": "secondary",
+   "axis": 9,
+   "q": "As demand for oil and gas increases, some people advocate searching for these energy sources in untouched natural areas. Do the advantages of this trend outweigh its disadvantages?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 10",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 1,
+   "role": "primary",
+   "axis": 10,
+   "q": "Some people say that news is a good medium to learn, while others argue that other media are more effective. Discuss both views and give your opinion.",
+   "thesis": "News reports what is happening and rarely why, so it works as a supplement to structured material rather than a substitute for it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 2,
+   "role": "primary",
+   "axis": 10,
+   "q": "These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?",
+   "thesis": "Advertising rarely decides a single purchase yet steadily shapes what a shopper treats as normal, so protection should govern what may be advertised to whom rather than how much.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 3,
+   "role": "primary",
+   "axis": 10,
+   "q": "Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.",
+   "thesis": "The positive case concerns what a child takes from a programme and the negative one what the hour replaces, and the second effect is the larger of the two.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 4,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.",
+   "thesis": null,
+   "thesis_at": "Du lịch số 2",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 5,
+   "role": "primary",
+   "axis": 4,
+   "q": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+   "thesis": "The technology raised the number of contacts a person has and lowered the cost of ending any one of them, and it is the second change that does the damage.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 6,
+   "role": "primary",
+   "axis": 10,
+   "q": "In some countries, celebrities complain about the way the media publicize their private lives. Some people say that they should accept it as part of their fame. Do you agree or disagree?",
+   "thesis": "Fame is not consent to unlimited coverage, since the trade on offer was publicity for the work rather than access to a household.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 7,
+   "role": "primary",
+   "axis": 10,
+   "q": "News plays an important part in most people's lives and news media has become more influential in people's lives. Why do you think this is the case? Is it a positive or negative development?",
+   "thesis": "Influence grew because the supply of news became continuous while the day did not get any longer, and the development is negative because attention became the thing being sold.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 8,
+   "role": "primary",
+   "axis": 11,
+   "q": "Some people believe it is better to import foreign films and TV programs, while others argue that countries should produce their own shows. Discuss both views and give your opinion.",
+   "thesis": "Importing is cheaper only in the first years, since a country that stops commissioning soon has nobody left who can write a full season.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 9,
+   "role": "primary",
+   "axis": 10,
+   "q": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+   "thesis": "Coverage can produce the conditions it reports, which argues for rules on how crime is reported rather than a ban on reporting it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 10,
+   "role": "primary",
+   "axis": 10,
+   "q": "Some people believe that the sole purpose of advertising is to encourage consumers to buy products they do not actually need. To what extent do you agree or disagree?",
+   "thesis": "The word sole is what makes this too strong, since advertising also carries the information that a product exists at all.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 11,
+   "role": "primary",
+   "axis": 10,
+   "q": "Some people believe that news media should focus more on reporting positive news rather than negative stories. To what extent do you agree or disagree?",
+   "thesis": "A commitment to positive coverage removes first the story that would embarrass somebody, and that is the reporting a public most needs.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 12,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Some people think secondary school students should study international news as one of their subjects, while others believe that this is a waste of valuable school time. Discuss both these views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 10",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 13,
+   "role": "secondary",
+   "axis": 4,
+   "q": "More people today put their personal and private information online (address, telephone number, credit card number) to do everyday activities such as banking, shopping, and socializing. Is this a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 3",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 14,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 17",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 15,
+   "role": "primary",
+   "axis": 4,
+   "q": "More and more people no longer read newspapers or watch TV programs to get news. They get news about the world through the Internet. Is this a positive or negative development?",
+   "thesis": "This is negative in its current form because the shift removed the editor without replacing the function the editor was performing.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 16,
+   "role": "primary",
+   "axis": 2,
+   "q": "Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.",
+   "thesis": "Neither description fits, since the effect appears negligible for most players and concentrated in a small minority, which argues for enforced age limits rather than prohibition.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 17,
+   "role": "primary",
+   "axis": 10,
+   "q": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+   "thesis": "Coverage can produce the conditions it reports, which argues for rules on how crime is reported rather than a ban on reporting it.",
+   "thesis_at": null,
+   "note": "Trùng từng chữ với đề Truyền thông số 9. Danh sách gốc lặp lại đề này bốn lần."
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 18,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 21",
+   "note": null
+  },
+  {
+   "group": "Media and communication · Truyền thông và giao tiếp · 19 đề",
+   "group_code": "B.5",
+   "n": 19,
+   "role": "primary",
+   "axis": 10,
+   "q": "Some people say that what children watch on television influences their behavior, others say that the amount of time children watch on television influences their behavior most. Discuss both views.",
+   "thesis": "Content changes what a child copies and duration changes what the child never learned to do instead, and the second effect is the larger one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 1,
+   "role": "secondary",
+   "axis": 1,
+   "q": "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 1",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 2,
+   "role": "secondary",
+   "axis": 10,
+   "q": "These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 2",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 3,
+   "role": "secondary",
+   "axis": 8,
+   "q": "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 2",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 4,
+   "role": "secondary",
+   "axis": 1,
+   "q": "In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 2",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 5,
+   "role": "secondary",
+   "axis": 1,
+   "q": "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 4",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 6,
+   "role": "primary",
+   "axis": 11,
+   "q": "Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?",
+   "thesis": "Cooperation works on problems where no single country can capture the benefit of acting alone, and stalls on every problem where one can.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 7,
+   "role": "secondary",
+   "axis": 8,
+   "q": "Some people believe that women should play an equal role as men in a country's police force or military force, while others think women are not suitable for these kinds of jobs. Discuss both views and give opinion.",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 9",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 8,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 5",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 9,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 1",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 10,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 7",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 11,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Công việc số 9",
+   "note": null
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 12,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 3",
+   "note": "Gần trùng với đề Nghệ thuật số 1. Cùng kho ý, khác mỗi loại hình nghệ thuật."
+  },
+  {
+   "group": "Government, politics and diplomacy · Chính phủ, chính trị và ngoại giao · 13 đề",
+   "group_code": "B.6",
+   "n": 13,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 18",
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 1,
+   "role": "primary",
+   "axis": 8,
+   "q": "Interviews are one of the ways to recruit employees in many companies. Some people believe that interviews are an unreliable way of choosing employees, while other people believe that there are better methods. Discuss both views and give your opinion.",
+   "thesis": "An interview measures how comfortable a candidate is in an interview, which is why it belongs alongside a work sample rather than in place of one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 2,
+   "role": "primary",
+   "axis": 8,
+   "q": "Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?",
+   "thesis": "Contribution and pay are set by different mechanisms, so this works as a case for raising public salaries rather than for lowering private ones.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 3,
+   "role": "primary",
+   "axis": 7,
+   "q": "Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?",
+   "thesis": "Work teaches what a workplace expects and travel teaches what to do when nothing is familiar, and only the first of those is tested in the year after graduation.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 4,
+   "role": "primary",
+   "axis": 7,
+   "q": "Remote work benefits employees more than employers. Agree or disagree?",
+   "thesis": "Employees gain hours and employers gain floor space and retention, so the claim holds mainly in the first year, before firms adjust what they expect in return.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 5,
+   "role": "primary",
+   "axis": 8,
+   "q": "The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.",
+   "thesis": "The gap is defensible where it tracks a decision only one person can make, and indefensible where it survives several years of poor decisions.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 6,
+   "role": "primary",
+   "axis": 7,
+   "q": "Employers should give their staff at least 4-week holiday a year to help employees perform better in their jobs. To what extent do you agree or disagree?",
+   "thesis": "Longer leave raises output in roles where fatigue is the limiting factor and does very little in roles where it is not.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 7,
+   "role": "primary",
+   "axis": 7,
+   "q": "Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?",
+   "thesis": "Pay is decisive up to the point where it covers what a household needs, and above that line it retains people without making them work any harder.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 8,
+   "role": "primary",
+   "axis": 7,
+   "q": "The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?",
+   "thesis": "The word only makes this indefensible, since the same person will often work hardest on the unpaid task they chose for themselves.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 9,
+   "role": "primary",
+   "axis": 2,
+   "q": "Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?",
+   "thesis": "These laws exist because an individual worker cannot refuse extra hours without cost, and they are positive precisely because they take that choice away from the individual.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 10,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 6",
+   "note": null
+  },
+  {
+   "group": "Work · Công việc · 11 đề",
+   "group_code": "B.7",
+   "n": 11,
+   "role": "primary",
+   "axis": 11,
+   "q": "Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?",
+   "thesis": "The advantages outweigh the disadvantages for the parents and are far less clear for a child moved partway through secondary school.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 1,
+   "role": "primary",
+   "axis": 2,
+   "q": "Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?",
+   "thesis": "Flights are the easier target and the smaller prize, since car use is daily and universal while long-haul flying is occasional and concentrated among a few travellers.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 2,
+   "role": "secondary",
+   "axis": 14,
+   "q": "In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.",
+   "thesis": null,
+   "thesis_at": "Lối sống số 3",
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 3,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Giao thông số 4",
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 4,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 6",
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 5,
+   "role": "primary",
+   "axis": 9,
+   "q": "The natural resources such as oil, forests and fresh water are being consumed at an alarming rate. What problems does it cause? How can we solve these problems?",
+   "thesis": "The central problem is that the cost of depletion sits outside the price of the product, so the workable solutions put it back inside the price.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 6,
+   "role": "primary",
+   "axis": 9,
+   "q": "Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?",
+   "thesis": "I disagree, since countries at similar income levels differ widely on exactly this, which points to regulation rather than wealth as the deciding factor.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 7,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Thực phẩm và sức khỏe số 7",
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 8,
+   "role": "primary",
+   "axis": 2,
+   "q": "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?",
+   "thesis": "Pricing fuel changes behaviour faster than persuasion does, though calling it the best way overstates the case while millions have no alternative route to work.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 9,
+   "role": "secondary",
+   "axis": 12,
+   "q": "The use of bicycles as the main form of transport has declined in many places. Why and what can be done to encourage people to use bicycles more?",
+   "thesis": null,
+   "thesis_at": "Giao thông số 8",
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 10,
+   "role": "primary",
+   "axis": 9,
+   "q": "As demand for oil and gas increases, some people advocate searching for these energy sources in untouched natural areas. Do the advantages of this trend outweigh its disadvantages?",
+   "thesis": "The disadvantages outweigh the advantages, because the gain is a finite quantity of fuel and the damage is permanent on any human timescale.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Environment · Môi trường · 11 đề",
+   "group_code": "B.8",
+   "n": 11,
+   "role": "secondary",
+   "axis": 1,
+   "q": "A significant amount of time and resources is dedicated to protecting wild animals. To what extent do you agree or disagree that these resources should be spent elsewhere?",
+   "thesis": null,
+   "thesis_at": "Động vật số 2",
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 1,
+   "role": "primary",
+   "axis": 4,
+   "q": "Some groups of people have benefited from modern communications technology, but some people do not benefit at all. To what extent do you agree or disagree?",
+   "thesis": "I agree, and the group that gains least is defined by which services have withdrawn their offline alternative rather than by age.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 2,
+   "role": "primary",
+   "axis": 4,
+   "q": "Some people think that the rapid development of smart mobile devices, e.g. smartphones, tablets and other mobile devices, are disadvantageous to human. Agree or disagree?",
+   "thesis": "The devices themselves are neutral, whereas the design choices that make them hard to put down are a commercial decision rather than a technical necessity.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 3,
+   "role": "primary",
+   "axis": 4,
+   "q": "More people today put their personal and private information online (address, telephone number, credit card number) to do everyday activities such as banking, shopping, and socializing. Is this a positive or negative development?",
+   "thesis": "This remains a negative development while the person who supplies the data carries the loss when it leaks, since nothing else pushes the holder to protect it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 4,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Many people say that schools are no longer necessary as a lot of information is available on the internet, so children can study at home. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 11",
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 5,
+   "role": "secondary",
+   "axis": 4,
+   "q": "More and more people no longer read newspapers or watch TV programs to get news. They get news about the world through the Internet. Is this a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 15",
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 6,
+   "role": "primary",
+   "axis": 4,
+   "q": "Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.",
+   "thesis": "Both views describe the same machine under different labour rules, and since the saving currently goes to the owner rather than the displaced worker, I share the second concern.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 7,
+   "role": "primary",
+   "axis": 4,
+   "q": "Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.",
+   "thesis": "Technology appears to have relocated crime more than reduced it, moving it from a street where it was visible to a network where much of it is neither reported nor counted.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 8,
+   "role": "primary",
+   "axis": 4,
+   "q": "There have been many inventions in human history, such as the wheel. Some people think the most important thing is the internet. To what extent do you agree or disagree with this opinion?",
+   "thesis": "The internet changed how fast we exchange what is already known, which is a narrower claim than calling it the most important invention, and a defensible one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 9,
+   "role": "primary",
+   "axis": 4,
+   "q": "Nowadays, fewer people are writing by hand due to the widespread use of computers and digital technology. Do the advantages of this development outweigh the disadvantages?",
+   "thesis": "The advantages outweigh the disadvantages, though what we give up is the selection that slow writing forced rather than the skill of forming letters.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Science, technology and innovation · Khoa học, công nghệ và đổi mới · 10 đề",
+   "group_code": "B.9",
+   "n": 10,
+   "role": "secondary",
+   "axis": 13,
+   "q": "In today's world of advanced science and technology, we still greatly value our artists such as musicians, painters and writers. What can the arts tell us about life that science and technology cannot?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 5",
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 1,
+   "role": "secondary",
+   "axis": 2,
+   "q": "The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giao thông số 1",
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 2,
+   "role": "primary",
+   "axis": 5,
+   "q": "Nowadays, a growing number of children are committing crimes. What are the reasons for this, and what punishments should be imposed?",
+   "thesis": "Many of these offences follow an absent adult more than any criminal disposition, so punishment should stay supervised and proportionate, and has to arrive alongside an intervention in the household.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 3,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 9",
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 4,
+   "role": "primary",
+   "axis": 5,
+   "q": "Some people believe that providing criminals with education will reduce the recidivism rate. To what extent do you agree or disagree?",
+   "thesis": "Education reduces reoffending where it ends in a qualification an employer will accept, and changes nothing where it does not.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 5,
+   "role": "primary",
+   "axis": 5,
+   "q": "Research shows that many criminals continue to commit crimes after being released from prison. What is the cause and solution?",
+   "thesis": "The cause is the absence of legal income in the first weeks after release, so any solution has to reach the employer and the landlord rather than the prison alone.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 6,
+   "role": "secondary",
+   "axis": 4,
+   "q": "Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Khoa học, công nghệ và đổi mới số 7",
+   "note": null
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 7,
+   "role": "primary",
+   "axis": 5,
+   "q": "Research shows that most criminals have low levels of education. Therefore, some believe that the best way to reduce crime is to educate prisoners while in prison so they can secure employment upon release. To what extent do you agree or disagree?",
+   "thesis": "Low education signals the same disadvantage that produced the offence, so training only works when it is paired with an employer prepared to read past the record.",
+   "thesis_at": null,
+   "note": "Gần trùng với đề Tội phạm số 4. Cùng luận điểm, bản này nói rõ thêm mắt xích việc làm."
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 8,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 17",
+   "note": "Trùng từng chữ với đề Truyền thông số 9. Danh sách gốc lặp lại đề này bốn lần."
+  },
+  {
+   "group": "Crime, punishment and law · Tội phạm, hình phạt và pháp luật · 9 đề",
+   "group_code": "B.10",
+   "n": 9,
+   "role": "primary",
+   "axis": 5,
+   "q": "Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?",
+   "thesis": "Identical punishment assumes identical judgement, and the reason almost every legal system sets an age of majority is that it does not believe that.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 1,
+   "role": "primary",
+   "axis": 1,
+   "q": "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+   "thesis": "Prevention tends to deliver more health per unit of spending, yet it cannot be funded by cutting treatment, because the people already ill have no alternative provider.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 2,
+   "role": "primary",
+   "axis": 1,
+   "q": "In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?",
+   "thesis": "Government carries the part of this that families cannot reach alone, namely what is sold at the school gate and what a healthy meal costs relative to an unhealthy one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 3,
+   "role": "primary",
+   "axis": 3,
+   "q": "In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree with this belief?",
+   "thesis": "I agree in part, since what disappears is the shared meal rather than the recipe, and the loss is an hour families used to spend together rather than a cuisine.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 4,
+   "role": "primary",
+   "axis": 14,
+   "q": "An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?",
+   "thesis": "People act on a standard set by the faces they see most often, and the development is negative because that standard shifts again each time somebody meets it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 5,
+   "role": "primary",
+   "axis": 2,
+   "q": "Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?",
+   "thesis": "A sales ban relocates the purchase rather than preventing it, so the stronger measure is to change what is cheapest and most visible on the shelf.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 6,
+   "role": "primary",
+   "axis": 11,
+   "q": "Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?",
+   "thesis": "Distance is a symptom of a price that leaves transport out, and the development is negative mainly because local producers are made to compete against a price that leaves out a cost somebody else is carrying.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 7,
+   "role": "primary",
+   "axis": 1,
+   "q": "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+   "thesis": "Air quality and housing reach every resident of a district at once, which makes them a better use of a health budget than campaigns that reach only those already paying attention.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Food and health · Thực phẩm và sức khỏe · 8 đề",
+   "group_code": "B.11",
+   "n": 8,
+   "role": "primary",
+   "axis": 3,
+   "q": "To what extent do you agree or disagree that international fast food is replacing traditional food and negatively affecting families and society?",
+   "thesis": "I agree in part, since what disappears is the shared meal rather than the recipe, and the loss is an hour families used to spend together rather than a cuisine.",
+   "thesis_at": null,
+   "note": "Trùng nội dung với đề Thực phẩm và sức khỏe số 3. Cùng kho ý, chỉ khác cách diễn đạt."
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 1,
+   "role": "primary",
+   "axis": 2,
+   "q": "The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?",
+   "thesis": "Harsher penalties work only when drivers expect to be caught, which makes enforcement rather than severity the binding constraint.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 2,
+   "role": "secondary",
+   "axis": 12,
+   "q": "In many cities, governments have located shops, office, schools far from each other. Do you think the advantages of this policy outweigh the disadvantages?",
+   "thesis": null,
+   "thesis_at": "Phát triển đô thị số 2",
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 3,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 1",
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 4,
+   "role": "primary",
+   "axis": 2,
+   "q": "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+   "thesis": "The gain is a day of clean air and a visible proof of concept, the cost is a disruption that local businesses absorb each time, and the balance turns on whether the city builds anything permanent afterwards.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 5,
+   "role": "secondary",
+   "axis": 12,
+   "q": "In many modern cities, urban planners locate shops, schools, and housing in separate, distinct areas. What are the causes of this development, and is it a positive or negative trend?",
+   "thesis": null,
+   "thesis_at": "Phát triển đô thị số 4",
+   "note": "Cùng hiện tượng với đề Giao thông số 2 và Đô thị số 2, nhưng khác dạng câu hỏi. Bản này hỏi thêm nguyên nhân, nên bố cục bài khác hẳn."
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 6,
+   "role": "primary",
+   "axis": 2,
+   "q": "Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike. To what extent do you agree or disagree?",
+   "thesis": "Raising the age only postpones the risk, since accident rates appear to track inexperience more closely than youth.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 7,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 8",
+   "note": null
+  },
+  {
+   "group": "Traffic · Giao thông · 8 đề",
+   "group_code": "B.12",
+   "n": 8,
+   "role": "primary",
+   "axis": 12,
+   "q": "The use of bicycles as the main form of transport has declined in many places. Why and what can be done to encourage people to use bicycles more?",
+   "thesis": "The decline follows how dangerous a route feels rather than any change in willingness, so separated infrastructure is the answer rather than persuasion.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 1,
+   "role": "secondary",
+   "axis": 8,
+   "q": "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 2",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 2,
+   "role": "secondary",
+   "axis": 10,
+   "q": "In some countries, celebrities complain about the way the media publicize their private lives. Some people say that they should accept it as part of their fame. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 6",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 3,
+   "role": "secondary",
+   "axis": 11,
+   "q": "Important historical objects should be returned to their country of original. Agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 2",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 4,
+   "role": "secondary",
+   "axis": 3,
+   "q": "If people go to live in another country, they should follow the local customs and traditions. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 15",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 5,
+   "role": "secondary",
+   "axis": 7,
+   "q": "The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Công việc số 8",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 6,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Truyền thông và giao tiếp số 16",
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 7,
+   "role": "primary",
+   "axis": 11,
+   "q": "Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.",
+   "thesis": "Need rather than nationality is the more defensible test for an organisation funded by voluntary giving.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Ethics · Đạo đức · 8 đề",
+   "group_code": "B.13",
+   "n": 8,
+   "role": "secondary",
+   "axis": 13,
+   "q": "Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Động vật số 1",
+   "note": null
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 1,
+   "role": "primary",
+   "axis": 1,
+   "q": "To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?",
+   "thesis": "Investment in young people pays back over a longer horizon than most council budgets run, and that mismatch is the real obstacle rather than any disagreement about the value.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 2,
+   "role": "primary",
+   "axis": 12,
+   "q": "In many cities, governments have located shops, office, schools far from each other. Do you think the advantages of this policy outweigh the disadvantages?",
+   "thesis": "The disadvantages outweigh the advantages, because separating these functions creates a daily journey that every household then pays for in time or in fares.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 3,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+   "thesis": null,
+   "thesis_at": "Giao thông số 4",
+   "note": null
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 4,
+   "role": "primary",
+   "axis": 12,
+   "q": "In many modern cities, urban planners locate shops, schools, and housing in separate, distinct areas. What are the causes of this development, and is it a positive or negative trend?",
+   "thesis": "The separation grew out of a planning logic that treated housing and noise as incompatible, and it has proved negative because the cost lands on residents rather than on planners.",
+   "thesis_at": null,
+   "note": "Cùng hiện tượng với đề Giao thông số 2 và Đô thị số 2, nhưng khác dạng câu hỏi. Bản này hỏi thêm nguyên nhân, nên bố cục bài khác hẳn."
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 5,
+   "role": "primary",
+   "axis": 12,
+   "q": "Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?",
+   "thesis": "Moving the factory moves the pollution and the commute rather than removing either, unless the housing moves with it.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 6,
+   "role": "secondary",
+   "axis": 1,
+   "q": "Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Nghệ thuật và bảo tàng số 3",
+   "note": "Gần trùng với đề Nghệ thuật số 1. Cùng kho ý, khác mỗi loại hình nghệ thuật."
+  },
+  {
+   "group": "City development · Phát triển đô thị · 7 đề",
+   "group_code": "B.14",
+   "n": 7,
+   "role": "primary",
+   "axis": 12,
+   "q": "It is important for all towns and cities to have large public outdoor places like squares and parks. To what extent do you agree or disagree with this statement?",
+   "thesis": "Public outdoor space is the only ground in a city that people who would never otherwise meet have to share, and that is what the land is buying.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 1,
+   "role": "primary",
+   "axis": 1,
+   "q": "Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.",
+   "thesis": "Elite funding buys visibility and participation funding buys health, and since the second reaches far more people the case for redirecting the money is stronger.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 2,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 2",
+   "note": null
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 3,
+   "role": "secondary",
+   "axis": 8,
+   "q": "Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Công việc số 2",
+   "note": null
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 4,
+   "role": "secondary",
+   "axis": 6,
+   "q": "Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Giáo dục số 15",
+   "note": "Trùng nội dung với đề Giáo dục số 2. Chỉ khác cách mở câu."
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 5,
+   "role": "primary",
+   "axis": 13,
+   "q": "Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.",
+   "thesis": "Sport is one of the few settings where people who share nothing else follow the same rules, and that is a civic function rather than a leisure one.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Leisure, sports and hobbies · Giải trí, thể thao và sở thích · 6 đề",
+   "group_code": "B.15",
+   "n": 6,
+   "role": "secondary",
+   "axis": 10,
+   "q": "Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 21",
+   "note": null
+  },
+  {
+   "group": "Art and museums · Nghệ thuật và bảo tàng · 5 đề",
+   "group_code": "B.16",
+   "n": 1,
+   "role": "primary",
+   "axis": 1,
+   "q": "Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?",
+   "thesis": "Outdoor art is worth public money where people pass it without choosing to, and hard to justify where the same sum would keep a library open.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Art and museums · Nghệ thuật và bảo tàng · 5 đề",
+   "group_code": "B.16",
+   "n": 2,
+   "role": "primary",
+   "axis": 11,
+   "q": "Important historical objects should be returned to their country of original. Agree or disagree?",
+   "thesis": "I agree, since the argument for keeping them rests on access rather than ownership, and access can be arranged by loan.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Art and museums · Nghệ thuật và bảo tàng · 5 đề",
+   "group_code": "B.16",
+   "n": 3,
+   "role": "primary",
+   "axis": 1,
+   "q": "Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?",
+   "thesis": "Art improves a street that already works and cannot rescue one that does not, so it belongs after the pavement and the lighting rather than before them.",
+   "thesis_at": null,
+   "note": "Gần trùng với đề Nghệ thuật số 1. Cùng kho ý, khác mỗi loại hình nghệ thuật."
+  },
+  {
+   "group": "Art and museums · Nghệ thuật và bảo tàng · 5 đề",
+   "group_code": "B.16",
+   "n": 4,
+   "role": "primary",
+   "axis": 3,
+   "q": "Museums and art galleries should concentrate on works that show history and culture of their own country rather than works of the other parts in the world. To what extent do you agree or disagree?",
+   "thesis": "A collection that shows only its own country teaches visitors nothing about where that country sits, which defeats the purpose of putting the objects side by side.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Art and museums · Nghệ thuật và bảo tàng · 5 đề",
+   "group_code": "B.16",
+   "n": 5,
+   "role": "primary",
+   "axis": 13,
+   "q": "In today's world of advanced science and technology, we still greatly value our artists such as musicians, painters and writers. What can the arts tell us about life that science and technology cannot?",
+   "thesis": "The arts hold the first-person side of an experience, which is exactly the part a scientific account has to remove in order to be general.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Lifestyle · Lối sống · 4 đề",
+   "group_code": "B.17",
+   "n": 1,
+   "role": "secondary",
+   "axis": 3,
+   "q": "Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Văn hóa xã hội và toàn cầu số 1",
+   "note": null
+  },
+  {
+   "group": "Lifestyle · Lối sống · 4 đề",
+   "group_code": "B.17",
+   "n": 2,
+   "role": "secondary",
+   "axis": 7,
+   "q": "Employers should give their staff at least 4-week holiday a year to help employees perform better in their jobs. To what extent do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Công việc số 6",
+   "note": null
+  },
+  {
+   "group": "Lifestyle · Lối sống · 4 đề",
+   "group_code": "B.17",
+   "n": 3,
+   "role": "primary",
+   "axis": 14,
+   "q": "In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.",
+   "thesis": "Repair disappeared once it became more expensive than replacement, which makes this a pricing outcome rather than a change in attitude.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Lifestyle · Lối sống · 4 đề",
+   "group_code": "B.17",
+   "n": 4,
+   "role": "primary",
+   "axis": 14,
+   "q": "More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?",
+   "thesis": "Expectations follow whatever the fastest available service has trained people to accept, and the development is negative mainly because the skills that need a slow start are the first to be dropped.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Travelling and tourism · Du lịch · 3 đề",
+   "group_code": "B.18",
+   "n": 1,
+   "role": "secondary",
+   "axis": 7,
+   "q": "Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?",
+   "thesis": null,
+   "thesis_at": "Công việc số 3",
+   "note": null
+  },
+  {
+   "group": "Travelling and tourism · Du lịch · 3 đề",
+   "group_code": "B.18",
+   "n": 2,
+   "role": "primary",
+   "axis": 11,
+   "q": "Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.",
+   "thesis": "Screens teach the facts about a place and travel teaches what it feels like to be the one who does not know the rules, and only the second changes how somebody thinks.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Travelling and tourism · Du lịch · 3 đề",
+   "group_code": "B.18",
+   "n": 3,
+   "role": "secondary",
+   "axis": 2,
+   "q": "Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?",
+   "thesis": null,
+   "thesis_at": "Môi trường số 1",
+   "note": null
+  },
+  {
+   "group": "Animals · Động vật · 2 đề",
+   "group_code": "B.19",
+   "n": 1,
+   "role": "primary",
+   "axis": 13,
+   "q": "Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?",
+   "thesis": "Usefulness is judged at one moment and applied to a loss that no later judgement can undo, which makes it the wrong test.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Animals · Động vật · 2 đề",
+   "group_code": "B.19",
+   "n": 2,
+   "role": "primary",
+   "axis": 1,
+   "q": "A significant amount of time and resources is dedicated to protecting wild animals. To what extent do you agree or disagree that these resources should be spent elsewhere?",
+   "thesis": "I disagree, because extinction is the one outcome on the list of competing claims that no later budget can reverse.",
+   "thesis_at": null,
+   "note": null
+  },
+  {
+   "group": "Language · Ngôn ngữ · 1 đề",
+   "group_code": "B.20",
+   "n": 1,
+   "role": "primary",
+   "axis": 6,
+   "q": "Some people argue that language learning is only effective in small classes, while others believe that class size does not matter. Discuss both views and give your opinion.",
+   "thesis": "Those who say size does not matter are describing what a teacher explains, while the other side is describing how many minutes of speaking each learner gets, and for a language it is the second that decides progress.",
+   "thesis_at": null,
+   "note": "Đề mồ côi. Engine của nó là TIME, giờ giáo viên chia cho bao nhiêu học sinh, chứ không phải engine chính của Trục 6."
+  },
+  {
+   "group": "Population · Dân số · 1 đề",
+   "group_code": "B.21",
+   "n": 1,
+   "role": "secondary",
+   "axis": 8,
+   "q": "In many countries, life expectancy is increasing, leading to a growing proportion of elderly people. What problems does this cause for individuals and society, and what are the reasons for this trend?",
+   "thesis": null,
+   "thesis_at": "Tuổi tác, thế hệ và giới tính số 17",
+   "note": null
+  }
+ ]
+}
