@@ -3637,42 +3637,197 @@ app.delete('/api/drafts/:id', authenticate, (req, res) => {
 });
 
 // ─── Practice: Paragraph Feedback ────────────────────────────────────────────
+// Turn quote-based marks into offsets. Unlike essay annotations these are
+// allowed to overlap: the whole point is that one span can be wrong in several
+// ways at once. The client paints them by offset rather than by string replace,
+// which is what makes overlapping marks render instead of corrupting each other.
+// Mark the rewrite against the marks that produced it. A checkbox only records
+// that the student believes they fixed something; this is what tells them
+// whether they actually did — and catches the errors a rewrite introduces,
+// which is the usual way a "corrected" paragraph ends up worse.
+app.post('/api/practice/paragraph-revise', authenticate, async (req, res) => {
+  const { original, revised, errors, topic, claim, checked } = req.body || {};
+  if (!original || !revised) return res.status(400).json({ error: 'Thiếu bản gốc hoặc bản sửa' });
+  if (revised.trim() === original.trim()) return res.status(400).json({ error: 'Bản sửa chưa khác gì bản cũ.' });
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
+
+  const list = (Array.isArray(errors) ? errors : []).slice(0, 40);
+  const listed = list.map((e, i) =>
+    `[${i + 1}] (${e.severity || 'must'}/${e.type || 'grammar'}) ${e.err || ''} — họ viết "${e.quote}", đáng lẽ "${e.fix}"`).join('\n');
+
+  const userPrompt = `An IELTS student was given a marked paragraph and rewrote it. Judge the rewrite.
+
+ORIGINAL
+"""
+${String(original).trim().slice(0, 1200)}
+"""
+
+WHAT WAS MARKED IN IT
+${listed || '(không có)'}
+
+THEIR REWRITE
+"""
+${String(revised).trim().slice(0, 1200)}
+"""
+
+For each numbered mark, decide what happened to it in the rewrite. Then look at the
+rewrite on its own and report any NEW fault it introduced that was not in the original —
+a rewrite that fixes one thing and breaks another is the usual outcome and the student
+needs to see it.
+
+Return ONLY this JSON:
+{"resolved":[{"i":<the number above>,"verdict":"<fixed|partly|still|worse>","note":"<tối đa 16 từ tiếng Việt: cụ thể ở đâu>"}],
+ "new_errors":[{"quote":"<EXACT substring from the REWRITE>","type":"<grammar|vocabulary|structure|argument>","severity":"<must|upgrade>","err":"<tên lỗi ngắn tiếng Việt>","fix":"<span đó viết đúng>","why":"<tối đa 16 từ tiếng Việt>","up":""}],
+ "level":"<A2|B1|B2|C1 — mức bản sửa thể hiện>",
+ "verdict":"<tối đa 26 từ tiếng Việt: bản sửa khá hơn ở đâu, còn hụt ở đâu>"}
+RULES: one entry in "resolved" per numbered mark, in order. "quote" in new_errors must be
+copyable from the REWRITE verbatim. Never rewrite the paragraph for them. Never invent
+statistics.`;
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL, max_tokens: 3000,
+      system: 'You are an IELTS writing coach comparing a draft with its rewrite. Respond with valid JSON only — no markdown fences.',
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+    const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+    const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+    db.logUsage('paragraph-revise', calculateCost(i, o), i + o);
+    const parsed = parseGradingJson(text);
+    parsed.new_errors = locateParagraphErrors(revised, parsed.new_errors);
+
+    // Kept in the submission list so the student can find it again, with no band:
+    // a 100-word paragraph has no defensible band, and every band statistic on the
+    // dashboard already filters on overall_band != null, so this cannot skew them.
+    let saved = null;
+    try {
+      saved = db.addParagraphAttempt({
+        user_id: req.user.id,
+        topic: topic || '',
+        claim: claim || '',
+        original: String(original).trim(),
+        revised: String(revised).trim(),
+        errors: list,
+        checked: Array.isArray(checked) ? checked : [],
+        resolved: parsed.resolved || [],
+        new_errors: parsed.new_errors || [],
+        level: parsed.level || null,
+        verdict: parsed.verdict || '',
+      });
+    } catch (e) { console.error('Paragraph attempt save failed:', e.message || e); }
+
+    res.json({ ...parsed, submission_id: saved ? saved.id : null });
+  } catch (err) {
+    console.error('Paragraph revise error:', err.message || err);
+    res.status(500).json({ error: 'Chưa chấm được bản sửa. Thử lại.' });
+  }
+});
+
+app.get('/api/practice/paragraph-attempts', authenticate, (req, res) => {
+  try { res.json(db.getParagraphAttempts(req.user.id)); }
+  catch (err) { res.status(500).json({ error: 'Chưa tải được lịch sử.' }); }
+});
+
+app.get('/api/practice/paragraph-attempts/:id', authenticate, (req, res) => {
+  const a = db.getParagraphAttemptById(req.params.id, req.user.id);
+  if (!a) return res.status(404).json({ error: 'Không có bài này' });
+  res.json(a);
+});
+
+function locateParagraphErrors(paragraph, rawErrors) {
+  if (!Array.isArray(rawErrors)) return [];
+  const validTypes = ['grammar', 'vocabulary', 'structure', 'argument'];
+  const out = [];
+  // Count how many identical quotes we have seen so repeated wording maps to
+  // successive occurrences rather than all landing on the first one.
+  const used = new Map();
+  for (const e of rawErrors) {
+    if (!e || typeof e.quote !== 'string' || !e.quote.trim() || typeof e.fix !== 'string') continue;
+    let quote = e.quote.trim();
+    const key = quote.toLowerCase();
+    const seen = used.get(key) || 0;
+    let idx = paragraph.indexOf(quote, seen ? (used.get(key + ':at') || 0) + 1 : 0);
+    if (idx === -1) {
+      const pattern = quote.replace(/[^\w\s]/g, c => '\\' + c).replace(/\s+/g, '\\s+');
+      const m = paragraph.match(new RegExp(pattern));
+      if (m) { idx = m.index; quote = m[0]; }
+    }
+    if (idx === -1) continue;
+    used.set(key, seen + 1);
+    used.set(key + ':at', idx);
+    out.push({
+      id: 'p' + out.length,
+      s: Number.isInteger(e.s) ? e.s : null,
+      start: idx, end: idx + quote.length, quote,
+      type: validTypes.includes(e.type) ? e.type : 'grammar',
+      severity: e.severity === 'upgrade' ? 'upgrade' : 'must',
+      err: String(e.err || '').slice(0, 80),
+      fix: e.fix.slice(0, 320),
+      why: String(e.why || '').slice(0, 240),
+      up: String(e.up || '').slice(0, 260),
+    });
+  }
+  return out.sort((a, b) => a.start - b.start || a.end - b.end);
+}
+
 app.post('/api/practice/paragraph-feedback', authenticate, async (req, res) => {
   try {
     const { paragraph, topic, starter } = req.body;
     if (!paragraph || paragraph.trim().length < 20) {
       return res.status(400).json({ error: 'Paragraph too short.' });
     }
-    // Same card shape as full-essay grading: every mistake gets the corrected
-    // span the student can paste back in, plus what would lift that exact
-    // sentence. Prose paragraphs told them nothing they could act on.
+    // Every fault, not a top-6 selection. A sentence can carry four at once —
+    // a tense error, a wrong collocation, a mechanical linker and an unsupported
+    // claim — and picking the "most important" of those leaves the student
+    // rewriting a sentence that is still wrong in three other ways.
+    // Two tiers: what is actually wrong, and what would merely score higher.
+    // Twenty red marks all shouting equally makes a student quit.
     const prompt = `You are an IELTS writing coach marking one short paragraph on the topic: "${topic || 'general'}".
-${starter ? `The paragraph opens with a given starter: "${starter}" — do not mark the starter itself.\n` : ''}
+${starter ? `The paragraph opens with a given claim: "${starter}" — do not mark the claim itself.\n` : ''}
 Student's paragraph:
 """
-${paragraph.trim().slice(0, 800)}
+${paragraph.trim().slice(0, 1200)}
 """
+
+Mark EVERY fault you can find. Do not select the most important ones — list them all.
+The same sentence may carry several, and the same words may be wrong in more than one
+way (a phrase can be both a tense error and an unnatural collocation); report each as
+its own entry. Sweep the paragraph once per lens: grammar, vocabulary, structure,
+argument.
+
+Sort each entry into one of two severities:
+  "must"    — it is wrong. A reader would call it an error.
+  "upgrade" — it is not wrong, but a stronger choice exists and the band depends on it.
 
 Return ONLY this JSON:
 {
-  "level": "<one of: A2|B1|B2|C1 — the vocabulary and grammar level this paragraph actually shows>",
+  "level": "<one of: A2|B1|B2|C1 — the level this paragraph actually shows>",
   "level_note": "<tối đa 16 từ tiếng Việt: vì sao ở mức đó>",
+  "sentences": ["<each sentence of the paragraph, in order, copied verbatim>"],
   "errors": [
-    {"quote": "<EXACT substring copied VERBATIM from the paragraph, 2-12 words, character-for-character including typos>",
-     "type": "<grammar|vocabulary|structure>",
+    {"s": <0-based index into "sentences" of the sentence this belongs to>,
+     "quote": "<EXACT substring copied VERBATIM from the paragraph, character-for-character including typos>",
+     "type": "<grammar|vocabulary|structure|argument>",
+     "severity": "<must|upgrade>",
      "err": "<tên lỗi ngắn bằng tiếng Việt, tối đa 6 từ>",
      "fix": "<that same span rewritten correctly in English, nothing more>",
      "why": "<tối đa 18 từ tiếng Việt: vì sao sai>",
-     "up": "<tối đa 20 từ tiếng Việt: muốn ăn điểm cao hơn ở chính câu này thì dùng từ/cấu trúc nào — nêu cụm tiếng Anh trong ngoặc kép>"}
+     "up": "<tối đa 20 từ tiếng Việt: từ/cấu trúc nào ăn điểm hơn ở CHÍNH chỗ này — cụm tiếng Anh trong ngoặc kép. Bỏ trống nếu không có gì thêm>"}
   ],
-  "good": {"quote": "<the strongest phrase they actually wrote>", "why": "<tối đa 16 từ tiếng Việt: vì sao nó tốt>"},
+  "good": {"quote": "<the strongest phrase they actually wrote>", "why": "<tối đa 16 từ tiếng Việt>"},
   "tip": "<tối đa 24 từ tiếng Việt: một việc duy nhất làm ở lần viết sau>"
 }
-RULES: mark 3-6 errors, whichever cost the most marks. "quote" must be copyable from the paragraph verbatim or it cannot be located. "fix" must be the corrected version of that exact span so it can be swapped straight in. "up" names a precise word, collocation or structure — never "dùng từ hay hơn". If the paragraph is genuinely clean, return fewer errors rather than inventing them. Never invent statistics.`;
+RULES: "quote" must be copyable from the paragraph verbatim or it cannot be located, and
+"fix" must be the corrected version of that exact span so it can be swapped straight in.
+"up" names a precise word, collocation or structure — never "dùng từ hay hơn". If the
+paragraph really is clean, return fewer entries rather than inventing them. Never invent
+statistics.`;
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 1400,
+      model: MODEL,
+      // "Every fault" on a weak 120-word paragraph runs long; the recovery in
+      // parseGradingJson still salvages the entries that did land if it truncates.
+      max_tokens: 5000,
       system: 'You are an IELTS writing coach. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: prompt }],
     });
@@ -3683,11 +3838,7 @@ RULES: mark 3-6 errors, whichever cost the most marks. "quote" must be copyable 
     let raw = response.content[0].text.trim()
       .replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '').trim();
     const parsed = parseGradingJson(raw);
-    // Drop marks whose quote cannot be located — the card shows the original
-    // span struck through, so an unlocatable quote would render a lie.
-    if (Array.isArray(parsed.errors)) {
-      parsed.errors = parsed.errors.filter(e => e && typeof e.quote === 'string' && paragraph.includes(e.quote.trim()));
-    }
+    parsed.errors = locateParagraphErrors(paragraph, parsed.errors);
     res.json(parsed);
   } catch (err) {
     console.error('Paragraph feedback error:', err);

@@ -113,6 +113,60 @@ const db = {
     if (s) { s.status = status; save(data); }
   },
 
+  // ── Paragraph practice attempts ─────────────────────────────────────────
+  // Stored in the submissions list so a student can find the work again, but
+  // with overall_band left null: a 100-word paragraph has no defensible band,
+  // and every band statistic filters on overall_band != null.
+
+  addParagraphAttempt(entry) {
+    const data = load();
+    data._ids.submissions = (data._ids.submissions || 0) + 1;
+    const item = {
+      id: data._ids.submissions,
+      user_id: entry.user_id,
+      task_type: 'paragraph',
+      prompt: entry.claim || entry.topic || 'Luyện đoạn văn',
+      essay: entry.revised,
+      word_count: entry.revised.trim().split(/s+/).filter(Boolean).length,
+      status: 'graded',
+      overall_band: null,
+      grading_mode: 'ai',
+      comments: [],
+      paragraph: {
+        topic: entry.topic, claim: entry.claim,
+        original: entry.original, revised: entry.revised,
+        errors: entry.errors, checked: entry.checked,
+        resolved: entry.resolved, new_errors: entry.new_errors,
+        level: entry.level, verdict: entry.verdict,
+      },
+      created_at: new Date().toISOString(),
+    };
+    data.submissions.push(item);
+    save(data);
+    return item;
+  },
+
+  getParagraphAttempts(user_id) {
+    const data = load();
+    return data.submissions
+      .filter(s => s.user_id === user_id && s.task_type === 'paragraph')
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .map(s => ({
+        id: s.id, created_at: s.created_at, word_count: s.word_count,
+        topic: (s.paragraph || {}).topic || '',
+        level: (s.paragraph || {}).level || null,
+        error_count: ((s.paragraph || {}).errors || []).length,
+        fixed_count: ((s.paragraph || {}).resolved || []).filter(r => r.verdict === 'fixed').length,
+        new_count: ((s.paragraph || {}).new_errors || []).length,
+      }));
+  },
+
+  getParagraphAttemptById(id, user_id) {
+    const data = load();
+    return data.submissions.find(s =>
+      String(s.id) === String(id) && s.user_id === user_id && s.task_type === 'paragraph') || null;
+  },
+
   // ── Micro tasks ─────────────────────────────────────────────────────────
   // A drill built from one mistake the student actually made. Reading a
   // correction changes nothing on its own; the task is what makes them produce

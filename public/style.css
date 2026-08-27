@@ -6758,3 +6758,82 @@ input:focus, textarea:focus, select:focus {
   .mr-actions { margin-left: 0; width: 100%; }
   .mr-foot { align-items: flex-start; }
 }
+
+/* ─── Paragraph practice: every fault, in two tiers ──────────────────────────
+   A sentence can be wrong in four ways at once. Marks overlap, so they are
+   painted by offset; the heaviest one colours the span and a second underline
+   says there is more than one. */
+
+.pp-multi { box-shadow: inset 0 -3px 0 var(--coral); }
+.pp-upgrade { opacity: .78; }
+
+.pe-tally { display: flex; gap: .5rem; flex-wrap: wrap; margin: .7rem 0; }
+.pe-tally span { font-size: .74rem; font-weight: 800; padding: .25rem .65rem; border-radius: var(--radius-pill); border: 1.5px solid; }
+.pe-tally-must { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.pe-tally-up { background: var(--surface-2); color: var(--gray-600); border-color: var(--gray-300); }
+
+.pe-groups { display: flex; flex-direction: column; gap: .8rem; }
+.pe-group { border: 1.5px solid var(--gray-200); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.pe-group-head { display: flex; align-items: center; gap: .5rem; padding: .5rem .7rem; background: var(--surface-2); }
+.pe-group-n { font-size: .78rem; font-weight: 800; color: var(--gray-900); }
+.pe-group-count { margin-left: auto; font-size: .7rem; color: var(--gray-500); }
+.pe-group-text { padding: .5rem .7rem; font-size: .84rem; line-height: 1.65; color: var(--gray-700); font-style: italic; border-bottom: 1px dashed var(--gray-200); }
+
+.pe-row { display: flex; gap: .55rem; align-items: flex-start; padding: .55rem .7rem; border-top: 1px solid var(--gray-100); cursor: pointer; }
+.pe-row:first-of-type { border-top: 0; }
+.pe-row:hover { background: var(--gray-50); }
+.pe-row.checked { background: var(--success-light); }
+.pe-row.checked .pe-body { opacity: .6; }
+.pe-row.pe-upgrade { background: rgba(200, 241, 105, .1); }
+.pe-row.pe-upgrade.checked { background: var(--success-light); }
+.pe-box { flex: none; width: 17px; height: 17px; margin-top: .2rem; accent-color: var(--success); cursor: pointer; }
+.pe-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .2rem; }
+.pe-head { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.pe-err { font-size: .82rem; font-weight: 800; color: var(--gray-900); }
+.pe-fixline { display: flex; gap: .35rem; flex-wrap: wrap; align-items: baseline; font-size: .8rem; line-height: 1.5; }
+.pe-bad { color: var(--gray-500); text-decoration: line-through; text-decoration-color: rgba(214,69,51,.5); }
+.pe-arrow { color: var(--gray-400); }
+.pe-good { color: var(--gray-900); font-weight: 600; }
+.pe-why { font-size: .76rem; color: var(--gray-600); line-height: 1.5; }
+.pe-up { font-size: .76rem; color: var(--gray-800); line-height: 1.5; background: rgba(200,241,105,.22); border: 1px dashed var(--primary-mid); border-radius: 7px; padding: .3rem .45rem; }
+
+.pe-revise { margin-top: 1rem; padding-top: .9rem; border-top: 2px dashed var(--gray-200); }
+.pe-revise h4 { font-size: .95rem; color: var(--gray-900); margin-bottom: .3rem; }
+.pe-revise-note { font-size: .8rem; line-height: 1.6; color: var(--gray-600); margin-bottom: .6rem; }
+.pe-gate-note { font-size: .76rem; color: var(--gray-500); }
+
+/* ── Old vs revised ── */
+.pc-wrap { margin-top: 1rem; }
+.pc-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+.pc-head h4 { font-size: .95rem; color: var(--gray-900); }
+.pc-verdict { font-size: .84rem; line-height: 1.6; color: var(--gray-800); background: var(--surface-2); border-radius: 9px; padding: .5rem .65rem; margin-bottom: .6rem; }
+.pc-tally { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .7rem; }
+.pc-tally span { font-size: .73rem; font-weight: 800; padding: .22rem .6rem; border-radius: var(--radius-pill); border: 1.5px solid; }
+.v-fixed  { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.v-partly { background: var(--warning-light); color: var(--warning); border-color: var(--warning); }
+.v-still  { background: var(--danger-light);  color: var(--danger);  border-color: var(--danger); }
+.v-worse  { background: #f3e8ff; color: #7c3aed; border-color: #7c3aed; }
+
+.pc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; align-items: start; }
+@media (max-width: 800px) { .pc-cols { grid-template-columns: 1fr; } }
+.pc-col-label { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--gray-500); margin-bottom: .25rem; }
+.pc-text { font-size: .86rem; line-height: 1.75; padding: .6rem .7rem; border-radius: 10px; border: 1.5px solid var(--gray-200); }
+.pc-old { background: var(--danger-light); }
+.pc-new { background: var(--success-light); }
+
+.pc-table { display: flex; flex-direction: column; gap: .45rem; margin-top: .9rem; }
+.pc-row { display: flex; gap: .55rem; align-items: flex-start; padding: .5rem .65rem; border-radius: 10px; border: 1.5px solid var(--gray-200); border-left-width: 4px; background: var(--surface); }
+.pc-row.v-fixed  { border-left-color: var(--success); background: var(--surface); }
+.pc-row.v-partly { border-left-color: var(--warning); background: var(--surface); }
+.pc-row.v-still  { border-left-color: var(--danger);  background: var(--surface); }
+.pc-row.v-worse  { border-left-color: #7c3aed;        background: var(--surface); }
+.pc-mark { flex: none; font-size: .95rem; line-height: 1.3; }
+.pc-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .2rem; }
+.pc-row-head { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.pc-status { font-size: .72rem; font-weight: 800; color: var(--gray-600); }
+.pc-opt { font-size: .64rem; font-weight: 700; padding: .1rem .4rem; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--gray-500); }
+.pc-new-errors { margin-top: .9rem; }
+.pc-new-errors h5 { font-size: .84rem; color: #7c3aed; margin-bottom: .45rem; }
+.pc-saved { margin-top: .8rem; font-size: .78rem; color: var(--gray-500); font-style: italic; }
+
+.badge-para { background: var(--primary-mid); color: var(--cream); }

@@ -1898,7 +1898,7 @@ async function viewStudentHistory(userId, userName) {
       return;
     }
     contentEl.innerHTML = subs.map(s => {
-      const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
+      const taskLabel = s.task_type === 'paragraph' ? 'Đoạn văn' : s.task_type === 'task1' ? 'Task 1' : 'Task 2';
       const bandColor = s.overall_band >= 7 ? '#16a34a' : s.overall_band >= 5.5 ? '#d97706' : s.overall_band ? '#dc2626' : '#6b7280';
 
       // Paste analysis badge
@@ -2473,14 +2473,20 @@ async function loadHistory() {
 }
 
 function renderSubmissionCard(s) {
-  const taskLabel = s.task_type === 'task1' ? 'Task 1' : 'Task 2';
-  const badgeClass = s.task_type === 'task1' ? 'badge-t1' : 'badge-t2';
-  const scoreHtml = s.status === 'graded' && s.overall_band != null
+  // A practised paragraph lives in the same list but is not an essay: it has no
+  // band, and opening it shows the old-vs-revised comparison instead of the
+  // criterion breakdown, which would be blank.
+  const isPara = s.task_type === 'paragraph';
+  const taskLabel = isPara ? 'Đoạn văn' : s.task_type === 'task1' ? 'Task 1' : 'Task 2';
+  const badgeClass = isPara ? 'badge-para' : s.task_type === 'task1' ? 'badge-t1' : 'badge-t2';
+  const scoreHtml = isPara
+    ? '<div class="band-label">Đã sửa lại</div>'
+    : s.status === 'graded' && s.overall_band != null
     ? `<div class="band-score ${bandColor(s.overall_band)}">${s.overall_band}</div><div class="band-label">Band Score</div>`
     : statusChip(s.status);
 
   return `
-    <div class="submission-card" onclick="viewFeedback(${s.id})">
+    <div class="submission-card" onclick="${isPara ? `openParagraphAttempt(${s.id})` : `viewFeedback(${s.id})`}">
       <div class="submission-badge ${badgeClass}">${taskLabel}</div>
       <div class="submission-info">
         <div class="submission-prompt">${escHtml(s.prompt)}</div>
@@ -9392,45 +9398,272 @@ function ppShowIdeas(note) {
     '</div>';
 }
 
+// Paint every mark by offset. String replacement cannot do this: two marks on
+// the same words would have the second one match inside the <mark> tag the
+// first one just inserted. Overlaps are the point here — a phrase can be a
+// tense error and a bad collocation at once — so the text is walked once and
+// each character is wrapped with whatever marks cover it.
+function ppPaintErrors(text, errors) {
+  if (!errors || !errors.length) return escHtml(text);
+  const points = new Set([0, text.length]);
+  for (const e of errors) { points.add(e.start); points.add(e.end); }
+  const cuts = [...points].filter(p => p >= 0 && p <= text.length).sort((a, b) => a - b);
+  let html = '';
+  for (let i = 0; i < cuts.length - 1; i++) {
+    const a = cuts[i], b = cuts[i + 1];
+    if (b <= a) continue;
+    const here = errors.filter(e => e.start <= a && e.end >= b);
+    const chunk = escHtml(text.slice(a, b));
+    if (!here.length) { html += chunk; continue; }
+    // The heaviest mark colours the span; the rest stack as an underline count.
+    const lead = here.find(e => e.severity === 'must') || here[0];
+    const ids = here.map(e => e.id).join(' ');
+    html += '<mark class="ann-mark ann-' + lead.type + (here.length > 1 ? ' pp-multi' : '') +
+      (lead.severity === 'upgrade' ? ' pp-upgrade' : '') + '" data-err="' + escAttr(ids) +
+      '" title="' + escAttr(here.map(e => e.err).join(' · ')) + '">' + chunk + '</mark>';
+  }
+  return html;
+}
+
+let _ppResult = null;
+let _ppChecked = new Set();
+
 async function ppSubmitFeedback() {
   const ta = document.getElementById('pp-textarea');
   const btn = document.getElementById('pp-submit-btn');
   if (!ta || ta.value.trim().split(/\s+/).filter(Boolean).length < 25) { showToast('Viết ít nhất 25 từ đã.'); return; }
-  btn.disabled = true; btn.textContent = 'Đang chữa…';
+  btn.disabled = true; btn.textContent = 'Đang soi từng câu…';
   const fb = document.getElementById('pp-feedback-area');
   fb.classList.remove('hidden');
-  fb.innerHTML = '<div class="loading">Đang chữa từng câu…</div>';
+  fb.innerHTML = '<div class="loading">Đang bắt hết lỗi — bản này soi kỹ nên hơi lâu…</div>';
   try {
     const full = ta.value.trim();
-    const result = await api('/api/practice/paragraph-feedback', {
+    const r = await api('/api/practice/paragraph-feedback', {
       method: 'POST',
       body: JSON.stringify({ paragraph: full, topic: _ppTask ? _ppTask.axis.title : '', starter: _ppTask ? _ppTask.claim : '' }),
     });
-    const errs = Array.isArray(result.errors) ? result.errors : [];
-    let marked = escHtml(full);
-    for (const e of errs) {
-      const q = escHtml(String(e.quote || '').trim());
-      if (q && marked.includes(q)) marked = marked.replace(q, '<mark class="ann-mark ann-' + (e.type || 'grammar') + '">' + q + '</mark>');
-    }
-    fb.innerHTML =
-      '<div class="pp-feedback-card">' +
-        '<div class="pp-fb-top"><h4>Chữa đoạn văn</h4>' +
-        (result.level ? '<span class="pp-level" title="' + escAttr(result.level_note || '') + '">Mức ' + escHtml(result.level) + '</span>' : '') + '</div>' +
-        (result.level_note ? '<div class="pp-level-note">' + escHtml(result.level_note) + '</div>' : '') +
-        '<div class="pp-para-marked">' + marked + '</div>' +
-        (errs.length
-          ? '<div class="pp-err-list">' + errs.map((e, i) => errorCardHtml({ ...e, id: '' }, i, { original: e.quote })).join('') + '</div>'
-          : '<div class="pp-clean">Đoạn này không có lỗi nào đáng kể. Đổi sang chiều còn lại thử xem.</div>') +
-        (result.good && result.good.quote
-          ? '<div class="pp-good"><span class="pp-good-label">✅ Câu tốt nhất</span><span class="pp-good-quote">' + escHtml(result.good.quote) + '</span><span class="pp-good-why">' + escHtml(result.good.why || '') + '</span></div>' : '') +
-        (result.tip ? '<div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Lần sau</span><p>' + escHtml(result.tip) + '</p></div>' : '') +
-      '</div>';
+    _ppResult = { original: full, ...r };
+    _ppChecked = new Set();
+    ppRenderFeedback();
   } catch (err) {
     fb.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(err.message) + '</div>';
   } finally {
     btn.disabled = false; btn.textContent = 'Nhờ AI chữa đoạn ✨';
   }
 }
+
+function ppRenderFeedback() {
+  const fb = document.getElementById('pp-feedback-area');
+  const r = _ppResult;
+  const errs = r.errors || [];
+  const must = errs.filter(e => e.severity === 'must');
+  const up = errs.filter(e => e.severity === 'upgrade');
+
+  // Group by sentence so a sentence carrying four faults is fixed once.
+  const sentences = r.sentences && r.sentences.length ? r.sentences : [r.original];
+  const bySentence = new Map();
+  for (const e of errs) {
+    const k = Number.isInteger(e.s) && e.s >= 0 && e.s < sentences.length ? e.s : -1;
+    if (!bySentence.has(k)) bySentence.set(k, []);
+    bySentence.get(k).push(e);
+  }
+  const order = [...bySentence.keys()].sort((a, b) => a - b);
+
+  const rowHtml = e => {
+    const checked = _ppChecked.has(e.id);
+    return '' +
+      '<label class="pe-row pe-' + e.severity + ' ec-' + e.type + (checked ? ' checked' : '') + '" for="pe-' + e.id + '">' +
+        '<input type="checkbox" class="pe-box" id="pe-' + e.id + '" data-err="' + e.id + '"' + (checked ? ' checked' : '') + ' onchange="ppToggleCheck(this)">' +
+        '<div class="pe-body">' +
+          '<div class="pe-head">' +
+            '<span class="ann-type ' + e.type + '">' + escHtml(ANN_TYPE_LABELS[e.type] || e.type) + '</span>' +
+            '<span class="pe-err">' + escHtml(e.err) + '</span>' +
+          '</div>' +
+          '<div class="pe-fixline"><span class="pe-bad">' + escHtml(e.quote) + '</span><span class="pe-arrow">→</span><span class="pe-good">' + escHtml(e.fix) + '</span></div>' +
+          (e.why ? '<div class="pe-why">' + escHtml(e.why) + '</div>' : '') +
+          (e.up ? '<div class="pe-up">' + escHtml(e.up) + '</div>' : '') +
+        '</div>' +
+      '</label>';
+  };
+
+  fb.innerHTML =
+    '<div class="pp-feedback-card">' +
+      '<div class="pp-fb-top"><h4>Chữa đoạn văn</h4>' +
+        (r.level ? '<span class="pp-level" title="' + escAttr(r.level_note || '') + '">Mức ' + escHtml(r.level) + '</span>' : '') +
+      '</div>' +
+      (r.level_note ? '<div class="pp-level-note">' + escHtml(r.level_note) + '</div>' : '') +
+      '<div class="pp-para-marked">' + ppPaintErrors(r.original, errs) + '</div>' +
+      '<div class="pe-tally">' +
+        '<span class="pe-tally-must">' + must.length + ' chỗ sai</span>' +
+        '<span class="pe-tally-up">' + up.length + ' chỗ nâng cấp được</span>' +
+      '</div>' +
+      (errs.length
+        ? '<div class="pe-groups">' + order.map(k => {
+            const list = bySentence.get(k);
+            const m = list.filter(e => e.severity === 'must').length;
+            return '<div class="pe-group">' +
+              '<div class="pe-group-head">' +
+                '<span class="pe-group-n">' + (k >= 0 ? 'Câu ' + (k + 1) : 'Cả đoạn') + '</span>' +
+                '<span class="pe-group-count">' + list.length + ' lỗi' + (m && m !== list.length ? ' · ' + m + ' phải sửa' : '') + '</span>' +
+              '</div>' +
+              (k >= 0 ? '<div class="pe-group-text">' + escHtml(sentences[k]) + '</div>' : '') +
+              list.map(rowHtml).join('') +
+            '</div>';
+          }).join('') + '</div>'
+        : '<div class="pp-clean">Đoạn này không có lỗi nào đáng kể.</div>') +
+      (r.good && r.good.quote
+        ? '<div class="pp-good"><span class="pp-good-label">✅ Câu tốt nhất</span><span class="pp-good-quote">' + escHtml(r.good.quote) + '</span><span class="pp-good-why">' + escHtml(r.good.why || '') + '</span></div>' : '') +
+      (r.tip ? '<div class="pp-feedback-row pp-tip"><span class="pp-fb-label">🎯 Lần sau</span><p>' + escHtml(r.tip) + '</p></div>' : '') +
+      (must.length ? ppReviseBlockHtml() : '') +
+    '</div>';
+  ppUpdateGate();
+}
+
+function ppReviseBlockHtml() {
+  return '' +
+    '<div class="pe-revise">' +
+      '<h4>Viết lại đoạn</h4>' +
+      '<p class="pe-revise-note">Tích vào từng lỗi khi em đã sửa nó trong đoạn dưới. Tích hết các lỗi <b>phải sửa</b> thì mới chấm lại được — để em rà từng chỗ chứ không viết lại đại.</p>' +
+      '<textarea id="pp-revise" class="pp-textarea" rows="7"></textarea>' +
+      '<div class="pp-actions">' +
+        '<div id="pe-gate-note" class="pe-gate-note"></div>' +
+        '<button class="btn btn-primary" id="pe-revise-btn" onclick="ppSubmitRevision()" disabled>Chấm lại bản sửa</button>' +
+      '</div>' +
+      '<div id="pe-compare"></div>' +
+    '</div>';
+}
+
+function ppToggleCheck(box) {
+  const id = box.dataset.err;
+  if (box.checked) _ppChecked.add(id); else _ppChecked.delete(id);
+  const row = box.closest('.pe-row');
+  if (row) row.classList.toggle('checked', box.checked);
+  ppUpdateGate();
+}
+
+function ppUpdateGate() {
+  const btn = document.getElementById('pe-revise-btn');
+  const note = document.getElementById('pe-gate-note');
+  if (!btn || !_ppResult) return;
+  const must = (_ppResult.errors || []).filter(e => e.severity === 'must');
+  const left = must.filter(e => !_ppChecked.has(e.id)).length;
+  const ta = document.getElementById('pp-revise');
+  if (ta && !ta.value) ta.value = _ppResult.original;
+  const changed = ta && ta.value.trim() !== _ppResult.original.trim();
+  btn.disabled = left > 0 || !changed;
+  note.textContent = left > 0
+    ? 'Còn ' + left + ' lỗi phải sửa chưa tích.'
+    : (changed ? 'Sẵn sàng chấm lại.' : 'Sửa đoạn văn ở trên rồi mới chấm lại được.');
+  if (ta && !ta.oninput) ta.oninput = ppUpdateGate;
+}
+
+async function ppSubmitRevision() {
+  const ta = document.getElementById('pp-revise');
+  const btn = document.getElementById('pe-revise-btn');
+  const out = document.getElementById('pe-compare');
+  if (!ta || !_ppResult) return;
+  btn.disabled = true; btn.textContent = 'Đang đối chiếu…';
+  out.innerHTML = '<div class="loading">Đang so bản cũ với bản mới…</div>';
+  try {
+    const r = await api('/api/practice/paragraph-revise', {
+      method: 'POST',
+      body: JSON.stringify({
+        original: _ppResult.original, revised: ta.value.trim(),
+        errors: _ppResult.errors || [], checked: [..._ppChecked],
+        topic: _ppTask ? _ppTask.axis.title : '', claim: _ppTask ? _ppTask.claim : '',
+      }),
+    });
+    out.innerHTML = ppCompareHtml(_ppResult.original, ta.value.trim(), _ppResult.errors || [], r);
+  } catch (e) {
+    out.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(e.message) + '</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Chấm lại bản sửa';
+  }
+}
+
+const PP_VERDICT = {
+  fixed: ['✅', 'Đã sửa', 'v-fixed'],
+  partly: ['🟡', 'Sửa một nửa', 'v-partly'],
+  still: ['❌', 'Vẫn còn', 'v-still'],
+  worse: ['🔻', 'Tệ hơn', 'v-worse'],
+};
+
+function ppCompareHtml(original, revised, errors, r) {
+  const resolved = r.resolved || [];
+  const newErrs = r.new_errors || [];
+  const byIndex = new Map(resolved.map(x => [x.i, x]));
+  const counts = { fixed: 0, partly: 0, still: 0, worse: 0 };
+  for (const x of resolved) if (counts[x.verdict] !== undefined) counts[x.verdict]++;
+
+  return '' +
+    '<div class="pc-wrap">' +
+      '<div class="pc-head">' +
+        '<h4>So bản cũ và bản sửa</h4>' +
+        (r.level ? '<span class="pp-level">Mức ' + escHtml(r.level) + '</span>' : '') +
+      '</div>' +
+      (r.verdict ? '<div class="pc-verdict">' + escHtml(r.verdict) + '</div>' : '') +
+      '<div class="pc-tally">' +
+        '<span class="v-fixed">' + counts.fixed + ' đã sửa</span>' +
+        '<span class="v-partly">' + counts.partly + ' nửa vời</span>' +
+        '<span class="v-still">' + counts.still + ' vẫn còn</span>' +
+        (newErrs.length ? '<span class="v-worse">' + newErrs.length + ' lỗi mới</span>' : '') +
+      '</div>' +
+      '<div class="pc-cols">' +
+        '<div class="pc-col"><div class="pc-col-label">Bản cũ</div>' +
+          '<div class="pc-text pc-old">' + ppPaintErrors(original, errors) + '</div></div>' +
+        '<div class="pc-col"><div class="pc-col-label">Bản sửa</div>' +
+          '<div class="pc-text pc-new">' + ppPaintErrors(revised, newErrs) + '</div></div>' +
+      '</div>' +
+      '<div class="pc-table">' +
+        errors.map((e, i) => {
+          const v = byIndex.get(i + 1) || { verdict: 'still', note: '' };
+          const V = PP_VERDICT[v.verdict] || PP_VERDICT.still;
+          return '<div class="pc-row ' + V[2] + '">' +
+            '<span class="pc-mark">' + V[0] + '</span>' +
+            '<div class="pc-row-body">' +
+              '<div class="pc-row-head"><span class="pc-status">' + V[1] + '</span><span class="pe-err">' + escHtml(e.err) + '</span>' +
+                (e.severity === 'upgrade' ? '<span class="pc-opt">nâng cấp</span>' : '') + '</div>' +
+              '<div class="pe-fixline"><span class="pe-bad">' + escHtml(e.quote) + '</span><span class="pe-arrow">→</span><span class="pe-good">' + escHtml(e.fix) + '</span></div>' +
+              (v.note ? '<div class="pe-why">' + escHtml(v.note) + '</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      (newErrs.length
+        ? '<div class="pc-new-errors"><h5>⚠ Lỗi mới phát sinh trong bản sửa</h5>' +
+          newErrs.map(e =>
+            '<div class="pc-row v-worse"><span class="pc-mark">🔻</span><div class="pc-row-body">' +
+              '<div class="pc-row-head"><span class="ann-type ' + e.type + '">' + escHtml(ANN_TYPE_LABELS[e.type] || e.type) + '</span><span class="pe-err">' + escHtml(e.err) + '</span></div>' +
+              '<div class="pe-fixline"><span class="pe-bad">' + escHtml(e.quote) + '</span><span class="pe-arrow">→</span><span class="pe-good">' + escHtml(e.fix) + '</span></div>' +
+              (e.why ? '<div class="pe-why">' + escHtml(e.why) + '</div>' : '') +
+            '</div></div>').join('') +
+          '</div>'
+        : '') +
+      (r.submission_id ? '<div class="pc-saved">Đã lưu vào <b>Bài nộp của tôi</b> để xem lại sau.</div>' : '') +
+    '</div>';
+}
+
+// Opening a saved paragraph attempt shows the same comparison rather than the
+// essay feedback page, which expects band scores it does not have.
+async function openParagraphAttempt(id) {
+  showView('feedback');
+  const el = document.getElementById('feedback-content');
+  el.innerHTML = '<div class="loading">Đang tải…</div>';
+  let a;
+  try { a = await api('/api/practice/paragraph-attempts/' + id); }
+  catch (e) { el.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(e.message) + '</div>'; return; }
+  const p = a.paragraph || {};
+  el.innerHTML =
+    '<div class="feedback-section">' +
+      '<h3>📝 Luyện đoạn văn <span class="fs-sub">— ' + escHtml(p.topic || '') + ' · ' + formatDate(a.created_at) + '</span></h3>' +
+      (p.claim ? '<div class="pp-claim"><span class="pp-claim-label">Câu luận điểm</span>' + escHtml(p.claim) + '</div>' : '') +
+      ppCompareHtml(p.original || '', p.revised || '', p.errors || [], {
+        resolved: p.resolved || [], new_errors: p.new_errors || [],
+        level: p.level, verdict: p.verdict, submission_id: null,
+      }) +
+    '</div>';
+}
+
 
 
 // Clear the editor and pull a fresh claim for the same axis.
