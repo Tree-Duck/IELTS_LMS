@@ -770,6 +770,59 @@ app.delete('/api/micro-tasks/:id', authenticate, (req, res) => {
   res.json({ ok: true });
 });
 
+// Is the AI actually reachable right now, and if not, why? One tiny call plus
+// a count of how submissions have been failing. Without this, "Lỗi chấm bài"
+// means reading Railway logs to tell an expired key from exhausted credit.
+app.get('/api/admin/ai-health', authenticate, teacherOrAdmin, async (req, res) => {
+  const out = {
+    key_present: !!ANTHROPIC_API_KEY,
+    key_tail: ANTHROPIC_API_KEY ? '…' + ANTHROPIC_API_KEY.slice(-6) : null,
+    model: MODEL,
+  };
+
+  // Recent failures, grouped by the reason recorded when they failed.
+  try {
+    const since = Date.now() - 24 * 60 * 60 * 1000;
+    const subs = db.getAllSubmissionsRaw ? db.getAllSubmissionsRaw() : [];
+    const recent = subs.filter(x => new Date(x.created_at).getTime() >= since);
+    const byStatus = {};
+    const byReason = {};
+    for (const x of recent) {
+      byStatus[x.status] = (byStatus[x.status] || 0) + 1;
+      if (x.status === 'error') byReason[x.error_reason || 'unrecorded'] = (byReason[x.error_reason || 'unrecorded'] || 0) + 1;
+    }
+    out.last_24h = { total: recent.length, by_status: byStatus, by_error_reason: byReason };
+  } catch (e) { out.last_24h = { error: e.message }; }
+
+  // The live probe: cheapest possible call, so checking costs nothing that matters.
+  if (!ANTHROPIC_API_KEY) {
+    out.probe = { ok: false, reason: 'no_api_key' };
+    return res.json(out);
+  }
+  try {
+    const t0 = Date.now();
+    const r = await client.messages.create({
+      model: MODEL, max_tokens: 4,
+      messages: [{ role: 'user', content: 'Reply with the single word OK.' }],
+    });
+    out.probe = {
+      ok: true,
+      ms: Date.now() - t0,
+      reply: (r.content?.[0]?.text || '').trim().slice(0, 20),
+      input_tokens: r.usage?.input_tokens || 0,
+      output_tokens: r.usage?.output_tokens || 0,
+    };
+  } catch (err) {
+    out.probe = {
+      ok: false,
+      reason: classifyAiFailure(err),
+      status: err && (err.status || err.statusCode) || null,
+      message: String((err && err.message) || err).slice(0, 300),
+    };
+  }
+  res.json(out);
+});
+
 app.get('/api/error-profile', authenticate, (req, res) => {
   try {
     const rows = db.getAnnotationsByUser(req.user.id);
@@ -910,6 +963,23 @@ function parseGradingJson(text) {
     if (r) return r;
   }
   return JSON.parse(text); // give up → caller marks status 'error'
+}
+
+// Name the failure so "Lỗi chấm bài" stops meaning four different things. The
+// Anthropic SDK puts an HTTP status on the error; the message carries the rest.
+function classifyAiFailure(err) {
+  if (!ANTHROPIC_API_KEY) return 'no_api_key';
+  const status = err && (err.status || err.statusCode);
+  const msg = String((err && (err.message || err.error)) || '').toLowerCase();
+  if (status === 401 || /invalid x-api-key|authentication/.test(msg)) return 'bad_api_key';
+  if (status === 403 || /organization has been disabled|permission/.test(msg)) return 'account_disabled';
+  if (status === 429 || /rate limit/.test(msg)) return 'rate_limited';
+  if (/credit balance|insufficient|billing|quota/.test(msg)) return 'out_of_credit';
+  if (status === 529 || status === 503 || /overloaded/.test(msg)) return 'api_overloaded';
+  if (status && status >= 500) return 'api_error_' + status;
+  if (err instanceof SyntaxError || /json|unexpected token/.test(msg)) return 'bad_model_output';
+  if (/timeout|aborted|econnreset|fetch failed/.test(msg)) return 'network';
+  return 'unknown';
 }
 
 async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords, imageData) {
@@ -1072,8 +1142,9 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
     // Update study streak for the student
     try { db.updateStreak(userId); } catch (e) { console.error('Streak update error:', e); }
   } catch (err) {
-    console.error('Grading error for submission', submissionId, err);
-    db.updateSubmissionStatus(submissionId, 'error');
+    const reason = classifyAiFailure(err);
+    console.error('Grading error for submission', submissionId, '[' + reason + ']', err && err.message ? err.message : err);
+    db.updateSubmissionStatus(submissionId, 'error', reason);
   }
 }
 

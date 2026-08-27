@@ -6837,3 +6837,7 @@ input:focus, textarea:focus, select:focus {
 .pc-saved { margin-top: .8rem; font-size: .78rem; color: var(--gray-500); font-style: italic; }
 
 .badge-para { background: var(--primary-mid); color: var(--cream); }
+
+/* A failed grading now says which failure it was, and whether retrying helps. */
+.grade-error-code { margin-top: .35rem; font-size: .68rem; opacity: .7; font-family: ui-monospace, monospace; }
+.retry-hint { font-size: .76rem; color: var(--gray-500); align-self: center; }

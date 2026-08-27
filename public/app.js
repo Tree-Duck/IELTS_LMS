@@ -1328,6 +1328,20 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+// Bài của học sinh không mất — chỉ phần chấm hỏng — nên câu chữ phải nói rõ
+// điều đó, và nói luôn có nên bấm chấm lại không.
+const GRADE_ERROR_REASONS = {
+  out_of_credit:   { title: 'Hết hạn mức AI', text: 'Tài khoản AI của trung tâm đã hết hạn mức. Bài của em vẫn còn nguyên, nạp xong chấm lại được.', retry: false },
+  bad_api_key:     { title: 'Khoá AI không hợp lệ', text: 'Khoá kết nối AI sai hoặc đã bị thu hồi. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  account_disabled:{ title: 'Tài khoản AI bị khoá', text: 'Nhà cung cấp AI đã khoá tài khoản này. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  no_api_key:      { title: 'Chưa cấu hình AI', text: 'Máy chủ chưa có khoá AI. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  rate_limited:    { title: 'Quá nhiều bài cùng lúc', text: 'Đang có quá nhiều bài chấm một lúc. Đợi một hai phút rồi bấm chấm lại.', retry: true },
+  api_overloaded:  { title: 'AI đang quá tải', text: 'Phía AI đang quá tải. Đợi một chút rồi bấm chấm lại.', retry: true },
+  bad_model_output:{ title: 'Kết quả chấm bị lỗi định dạng', text: 'AI trả về kết quả không đọc được. Bấm chấm lại thường là xong.', retry: true },
+  network:         { title: 'Mất kết nối', text: 'Không gọi được tới AI. Bấm chấm lại giúp thầy.', retry: true },
+  unknown:         { title: 'Lỗi chấm bài', text: 'Có trục trặc khi chấm bài này. Bài của em vẫn còn nguyên.', retry: true },
+};
+
 function statusChip(status) {
   const map = { graded: 'Graded', grading: 'Grading…', pending: 'Pending', error: 'Error', pending_review: 'Awaiting Review' };
   const cssClass = status === 'pending_review' ? 'pending-review' : status;
@@ -3445,13 +3459,19 @@ function renderFeedback(s) {
         Thường mất 15–30 giây. Trang này sẽ tự cập nhật.
       </div>`;
   } else if (s.status === 'error') {
+    // "Có trục trặc" told the student nothing and told the teacher nothing. The
+    // reason is recorded on the submission now, so say which of these it was and
+    // whether trying again is worth it.
+    const R = GRADE_ERROR_REASONS[s.error_reason] || GRADE_ERROR_REASONS.unknown;
     html += `
       <div class="grading-notice" style="background:var(--danger-light);border-color:#fecaca;color:var(--danger);">
-        <strong>Lỗi chấm bài</strong>
-        Có trục trặc khi chấm bài này.
+        <strong>${R.title}</strong>
+        ${R.text}
+        ${s.error_reason ? `<div class="grade-error-code">mã lỗi: ${escHtml(s.error_reason)}</div>` : ''}
       </div>
       <div class="retry-grade-bar">
         <button class="btn btn-primary btn-sm" onclick="retryGrading(${s.id})">🔄 Chấm lại</button>
+        ${R.retry ? '' : '<span class="retry-hint">Bấm lại cũng chưa được đâu — báo giáo viên trước.</span>'}
       </div>`;
   } else if (s.status === 'graded' && s.overall_band != null) {
     // Show graded-by badge

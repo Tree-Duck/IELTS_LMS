@@ -107,10 +107,28 @@ const db = {
     return true;
   },
 
-  updateSubmissionStatus(id, status) {
+  // A failed grading used to leave nothing behind but a log line on the server,
+  // so "Lỗi chấm bài" could mean an expired key, exhausted credit, a rate limit
+  // or a malformed answer, and telling them apart meant reading Railway logs.
+  // Every submission, unshaped — the health check needs status and error_reason,
+  // which the per-user mapper deliberately drops.
+  getAllSubmissionsRaw() {
+    return load().submissions || [];
+  },
+
+  updateSubmissionStatus(id, status, error_reason) {
     const data = load();
     const s = data.submissions.find(s => s.id === id);
-    if (s) { s.status = status; save(data); }
+    if (!s) return;
+    s.status = status;
+    if (status === 'error') {
+      s.error_reason = error_reason || 'unknown';
+      s.error_at = new Date().toISOString();
+    } else if (s.error_reason) {
+      delete s.error_reason;
+      delete s.error_at;
+    }
+    save(data);
   },
 
   // ── Paragraph practice attempts ─────────────────────────────────────────
@@ -285,7 +303,8 @@ const db = {
           task_achievement: f.task_achievement ?? null,
           coherence_cohesion: f.coherence_cohesion ?? null,
           lexical_resource: f.lexical_resource ?? null,
-          grammatical_range: f.grammatical_range ?? null
+          grammatical_range: f.grammatical_range ?? null,
+          error_reason: s.error_reason ?? null
         };
       });
   },
