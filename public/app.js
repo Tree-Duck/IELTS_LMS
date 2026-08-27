@@ -6352,19 +6352,24 @@ function errorCardHtml(ann, i, opts = {}) {
         ${repeat}
       </div>
       ${original ? `<div class="ec-line ec-orig"><span class="ec-tag">${isStrength ? 'Trong bài' : 'Em viết'}</span><span class="ec-text">${escHtml(original)}</span></div>` : ''}
-      ${p.fix && !isStrength ? `<div class="ec-line ec-fix"><span class="ec-tag">Sửa thành</span><span class="ec-text">${escHtml(p.fix)}</span><button class="ec-copy" title="Chép câu đúng" onclick="event.stopPropagation();ecCopy(this,'${escAttr(p.fix)}')">⧉</button></div>` : ''}
+      ${p.fix && !isStrength ? `<div class="ec-line ec-fix"><span class="ec-tag">Sửa thành</span><span class="ec-text">${escHtml(p.fix)}</span><button class="ec-copy" title="Chép câu đúng" data-fix="${escAttr(p.fix)}" onclick="event.stopPropagation();ecCopy(this)">⧉</button></div>` : ''}
       ${p.why ? `<div class="ec-why">${escHtml(p.why)}</div>` : ''}
       ${p.up ? `<div class="ec-up"><span class="ec-up-label">Muốn cao điểm hơn</span>${escHtml(p.up)}</div>` : ''}
-      ${!isStrength && p.fix && opts.micro !== false ? `<button class="ec-micro" onclick="event.stopPropagation();makeMicroTask(this,'${escAttr(type)}','${escAttr(p.err)}','${escAttr(original)}','${escAttr(p.fix)}','${escAttr(p.why)}','${escAttr(p.up)}')">🎯 Luyện lỗi này</button>` : ''}
+      ${!isStrength && p.fix && opts.micro !== false ? `<button class="ec-micro" data-ec="${escAttr(JSON.stringify({ type, err: p.err, quote: original, fix: p.fix, why: p.why, up: p.up }))}" onclick="event.stopPropagation();makeMicroTask(this)">🎯 Luyện lỗi này</button>` : ''}
     </div>`;
 }
 
+// Escapes a value for an HTML *attribute*. It is NOT safe for building a JS
+// string literal inside an onclick: the browser decodes &#39; back to an
+// apostrophe before the JS is parsed, so any value containing one silently
+// breaks the handler — the click throws a SyntaxError and nothing happens.
+// Pass data through data-* attributes and read it off the element instead.
 function escAttr(t) {
   return String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 }
 
-function ecCopy(btn, text) {
-  const t = String(text).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+function ecCopy(btn) {
+  const t = btn.dataset.fix || '';
   navigator.clipboard.writeText(t).then(() => {
     btn.textContent = '✓';
     setTimeout(() => { btn.textContent = '⧉'; }, 1200);
@@ -6444,8 +6449,11 @@ const MICRO_STATUS = {
   done: ['Đã sửa được', 'st-done'],
 };
 
-async function makeMicroTask(btn, type, err, quote, fix, why, up) {
-  const unesc = t => String(t || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+async function makeMicroTask(btn) {
+  // The payload rides on the element, not in the onclick — see escAttr.
+  let d;
+  try { d = JSON.parse(btn.dataset.ec || '{}'); } catch (e) { d = {}; }
+  if (!d.quote || !d.fix) { showToast('Thẻ lỗi này thiếu dữ liệu để dựng bài luyện.'); return; }
   btn.disabled = true;
   const label = btn.textContent;
   btn.textContent = 'Đang dựng bài…';
@@ -6453,8 +6461,8 @@ async function makeMicroTask(btn, type, err, quote, fix, why, up) {
     const r = await api('/api/micro-tasks', {
       method: 'POST',
       body: JSON.stringify({
-        type: unesc(type), err: unesc(err), quote: unesc(quote),
-        fix: unesc(fix), why: unesc(why), up: unesc(up),
+        type: d.type, err: d.err, quote: d.quote,
+        fix: d.fix, why: d.why, up: d.up,
       }),
     });
     btn.textContent = r.reused ? '✓ Đã có trong danh sách' : '✓ Đã thêm vào Luyện lỗi';
@@ -9111,7 +9119,7 @@ function psRenderItem() {
       '<div class="ps-hint">Sắc thái này thuộc về từ nào?</div>' +
       '<div class="ps-sentence">' + escHtml(it.clue) + '</div>' +
       '<div class="ps-pair">' +
-      it.options.map(o => '<button class="ps-opt" onclick="psPickNuance(this,\'' + escAttr(o.toLowerCase()) + '\')">' + escHtml(o) + '</button>').join('') +
+      it.options.map(o => '<button class="ps-opt" data-pick="' + escAttr(o.toLowerCase()) + '" onclick="psPickNuance(this)">' + escHtml(o) + '</button>').join('') +
       '</div><div id="ps-result"></div></div>';
   }
 }
@@ -9144,9 +9152,9 @@ function psReveal() {
   psFeedback(false, '<div class="ps-answer-line">Đáp án: <b>' + escHtml(_psMode === 'unscramble' ? it.sentence : it.answer) + '</b></div>');
 }
 
-function psPickNuance(btn, choice) {
+function psPickNuance(btn) {
   const it = _psItems[_psIdx];
-  const ok = choice === it.answer;
+  const ok = (btn.dataset.pick || '') === it.answer;
   _psScore.total++;
   if (ok) _psScore.right++;
   document.querySelectorAll('.ps-opt').forEach(b => {
@@ -9318,7 +9326,7 @@ async function ppOpenIdeas() {
       _ppQuiz.qs.map((q, i) =>
         '<div class="pp-q" id="pp-q-' + i + '"><div class="pp-q-vi"><b>' + (i + 1) + '.</b> ' + escHtml(q.vi) + '</div>' +
         '<div class="pp-q-opts">' + q.options.map(o =>
-          '<button class="pp-q-opt" onclick="ppQuizPick(' + i + ',this,\'' + escAttr(o) + '\')">' + escHtml(o) + '</button>').join('') +
+          '<button class="pp-q-opt" data-pick="' + escAttr(o) + '" onclick="ppQuizPick(' + i + ',this)">' + escHtml(o) + '</button>').join('') +
         '</div></div>').join('') +
       '<button class="btn btn-primary" id="pp-quiz-submit" onclick="ppQuizSubmit()">Nộp bài</button>' +
       '<div id="pp-quiz-out"></div>' +
@@ -9326,8 +9334,8 @@ async function ppOpenIdeas() {
   gate.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function ppQuizPick(i, btn, val) {
-  _ppQuiz.answers[i] = val;
+function ppQuizPick(i, btn) {
+  _ppQuiz.answers[i] = btn.dataset.pick || '';
   const row = document.getElementById('pp-q-' + i);
   row.querySelectorAll('.pp-q-opt').forEach(b => b.classList.remove('picked'));
   btn.classList.add('picked');
