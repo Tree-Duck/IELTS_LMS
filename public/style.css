@@ -6672,3 +6672,89 @@ input:focus, textarea:focus, select:focus {
   .pp-task-head .btn, .pp-task-foot .btn, .pp-actions .btn { margin-left: 0; }
   .ps-opt { flex-basis: 100%; }
 }
+
+/* ─── Micro tasks ────────────────────────────────────────────────────────────
+   A drill built from one mistake the student actually made. Reading a
+   correction changes nothing; producing the right form on new sentences does. */
+
+.ec-micro {
+  margin-top: .5rem; font: inherit; font-size: .72rem; font-weight: 700;
+  padding: .28rem .6rem; border-radius: var(--radius-pill); cursor: pointer;
+  border: 1.5px solid var(--gray-800); background: var(--surface); color: var(--gray-800);
+}
+.ec-micro:hover { background: var(--gray-900); color: var(--cream); }
+.ec-micro.added { border-color: var(--success); color: var(--success); background: var(--success-light); cursor: default; }
+.ec-micro:disabled { opacity: .8; }
+
+.micro-summary { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.ms-chip { font-size: .74rem; font-weight: 800; padding: .28rem .7rem; border-radius: var(--radius-pill); border: 1.5px solid; }
+.ms-chip.st-pending  { background: var(--surface-2);     color: var(--gray-600); border-color: var(--gray-300); }
+.ms-chip.st-learning { background: var(--warning-light); color: var(--warning); border-color: var(--warning); }
+.ms-chip.st-done     { background: var(--success-light); color: var(--success); border-color: var(--success); }
+
+.micro-empty-hint { font-size: .84rem; color: var(--gray-500); margin-top: .5rem; line-height: 1.6; }
+.micro-list { display: flex; flex-direction: column; gap: .8rem; }
+
+.micro-row {
+  background: var(--surface); border: 2px solid var(--gray-900);
+  border-radius: var(--radius); padding: .85rem 1rem;
+  box-shadow: 4px 4px 0 var(--gray-900);
+}
+.micro-row.st-learning { box-shadow: 4px 4px 0 var(--warning); }
+.micro-row.st-done { box-shadow: 4px 4px 0 var(--success); opacity: .82; }
+
+.mr-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.mr-skill { font-size: .9rem; font-weight: 800; color: var(--gray-900); }
+.mr-status { margin-left: auto; font-size: .68rem; font-weight: 800; padding: .15rem .5rem; border-radius: var(--radius-pill); }
+.mr-status.st-pending  { background: var(--surface-2);     color: var(--gray-600); }
+.mr-status.st-learning { background: var(--warning-light); color: var(--warning); }
+.mr-status.st-done     { background: var(--success-light); color: var(--success); }
+
+.mr-rule { font-size: .8rem; line-height: 1.6; color: var(--gray-600); margin-bottom: .5rem; }
+.mr-origin {
+  display: flex; gap: .4rem; flex-wrap: wrap; align-items: baseline;
+  background: var(--surface-2); border-radius: 9px; padding: .45rem .6rem;
+  font-size: .79rem; line-height: 1.5;
+}
+.mr-origin-label { flex-basis: 100%; font-size: .6rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--gray-500); }
+.mr-bad { color: var(--gray-500); text-decoration: line-through; text-decoration-color: rgba(214,69,51,.5); }
+.mr-arrow { color: var(--gray-400); }
+.mr-good { color: var(--gray-900); font-weight: 600; }
+
+.mr-foot { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .55rem; }
+.mr-stats { font-size: .72rem; color: var(--gray-500); }
+.mr-actions { margin-left: auto; display: flex; gap: .35rem; }
+
+.md-card { margin-top: .8rem; border-top: 2px dashed var(--gray-200); padding-top: .8rem; }
+.md-progress { font-size: .72rem; font-weight: 700; color: var(--gray-500); margin-bottom: .45rem; }
+.md-task { font-size: .8rem; font-weight: 700; color: var(--gray-800); margin-bottom: .4rem; }
+.md-bad {
+  font-size: .9rem; line-height: 1.65; color: var(--gray-900);
+  background: var(--danger-light); border-left: 4px solid var(--danger);
+  border-radius: 9px; padding: .55rem .7rem;
+}
+.md-hint { font-size: .78rem; color: var(--gray-600); margin-top: .4rem; }
+.md-input {
+  width: 100%; margin-top: .5rem; font: inherit; font-size: .88rem; line-height: 1.6;
+  padding: .55rem .65rem; border: 1.5px solid var(--gray-300); border-radius: 9px;
+  background: var(--surface); color: var(--gray-900); resize: vertical;
+}
+.md-input:focus { outline: none; border-color: var(--gray-900); box-shadow: 0 0 0 3px var(--primary-glow); }
+.md-actions { display: flex; gap: .4rem; margin-top: .5rem; }
+
+.md-fb { margin-top: .6rem; padding: .55rem .7rem; border-radius: 9px; font-size: .84rem; line-height: 1.6; }
+.md-fb.ok { background: var(--success-light); color: var(--success); }
+.md-fb.no { background: var(--warning-light); color: var(--gray-800); }
+.md-answer-line { margin: .3rem 0 .45rem; font-weight: 600; color: var(--gray-900); }
+.md-fb .btn { margin-top: .2rem; }
+
+.md-done { text-align: left; }
+.md-summary { font-size: .95rem; font-weight: 800; margin-bottom: .3rem; }
+.md-summary.ok { color: var(--success); }
+.md-summary.no { color: var(--warning); }
+.md-next { font-size: .82rem; line-height: 1.6; color: var(--gray-600); margin-bottom: .6rem; }
+
+@media (max-width: 700px) {
+  .mr-actions { margin-left: 0; width: 100%; }
+  .mr-foot { align-items: flex-start; }
+}

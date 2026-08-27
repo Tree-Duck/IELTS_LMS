@@ -113,6 +113,99 @@ const db = {
     if (s) { s.status = status; save(data); }
   },
 
+  // ── Micro tasks ─────────────────────────────────────────────────────────
+  // A drill built from one mistake the student actually made. Reading a
+  // correction changes nothing on its own; the task is what makes them produce
+  // the right form again, on new sentences, days later.
+
+  getMicroTasks(user_id) {
+    const data = load();
+    return (data.micro_tasks || [])
+      .filter(t => t.user_id === user_id)
+      .sort((a, b) => {
+        // Due work first, then whatever was made most recently.
+        const rank = t => (t.status === 'done' ? 2 : 0) + (t.correct_streak > 0 ? 0.5 : 0);
+        return rank(a) - rank(b) || b.id - a.id;
+      });
+  },
+
+  getMicroTaskById(id, user_id) {
+    const data = load();
+    return (data.micro_tasks || []).find(t => String(t.id) === String(id) && t.user_id === user_id) || null;
+  },
+
+  // One task per mistake: re-marking the same error in a later essay should not
+  // pile up duplicates the student has to dismiss one by one.
+  findMicroTaskByError(user_id, err, quote) {
+    const data = load();
+    const k = x => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    return (data.micro_tasks || []).find(t =>
+      t.user_id === user_id && k(t.err) === k(err) && k(t.quote) === k(quote)) || null;
+  },
+
+  addMicroTask(entry) {
+    const data = load();
+    if (!data.micro_tasks) data.micro_tasks = [];
+    if (!data._ids.micro_tasks) data._ids.micro_tasks = 0;
+    data._ids.micro_tasks++;
+    const item = {
+      id: data._ids.micro_tasks,
+      status: 'pending',
+      attempts: 0,
+      correct: 0,
+      correct_streak: 0,
+      last_attempt_at: null,
+      completed_at: null,
+      created_at: new Date().toISOString(),
+      ...entry,
+    };
+    data.micro_tasks.push(item);
+    save(data);
+    return item;
+  },
+
+  // Two correct runs in a row retires the task. One is a coin flip; two on
+  // different sittings is closer to having learned it.
+  recordMicroAttempt(id, user_id, correct) {
+    const data = load();
+    const t = (data.micro_tasks || []).find(x => String(x.id) === String(id) && x.user_id === user_id);
+    if (!t) return null;
+    t.attempts = (t.attempts || 0) + 1;
+    t.last_attempt_at = new Date().toISOString();
+    if (correct) {
+      t.correct = (t.correct || 0) + 1;
+      t.correct_streak = (t.correct_streak || 0) + 1;
+      if (t.correct_streak >= 2 && t.status !== 'done') {
+        t.status = 'done';
+        t.completed_at = new Date().toISOString();
+      } else if (t.status === 'pending') {
+        t.status = 'learning';
+      }
+    } else {
+      t.correct_streak = 0;
+      if (t.status !== 'pending') t.status = 'learning';
+    }
+    save(data);
+    return t;
+  },
+
+  resetMicroTask(id, user_id) {
+    const data = load();
+    const t = (data.micro_tasks || []).find(x => String(x.id) === String(id) && x.user_id === user_id);
+    if (!t) return null;
+    t.status = 'pending'; t.correct_streak = 0; t.completed_at = null;
+    save(data);
+    return t;
+  },
+
+  deleteMicroTask(id, user_id) {
+    const data = load();
+    const before = (data.micro_tasks || []).length;
+    data.micro_tasks = (data.micro_tasks || []).filter(t => !(String(t.id) === String(id) && t.user_id === user_id));
+    if (data.micro_tasks.length < before) { save(data); return true; }
+    return false;
+  },
+
   // Every annotation the student has ever been given, newest essay first, so the
   // recurring-mistake profile can be counted without a model call.
   getAnnotationsByUser(user_id) {
@@ -1402,6 +1495,8 @@ function classifyTask2Type(q) {
   if (!data._ids.attendance_sessions) { data._ids.attendance_sessions = 0; changed = true; }
   if (!data._ids.attendance_records) { data._ids.attendance_records = 0; changed = true; }
   if (!data.speaking_bank_custom) { data.speaking_bank_custom = []; changed = true; }
+  if (!data.micro_tasks) { data.micro_tasks = []; changed = true; }
+  if (!data._ids.micro_tasks) { data._ids.micro_tasks = 0; changed = true; }
   if (!data._ids.speaking_bank_custom) { data._ids.speaking_bank_custom = 0; changed = true; }
   if (!data.task2_prompts_custom) { data.task2_prompts_custom = []; changed = true; }
   if (!data._ids.task2_prompts_custom) { data._ids.task2_prompts_custom = 0; changed = true; }

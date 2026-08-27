@@ -653,6 +653,123 @@ RULES: one entry per step the student attempted, in order B, C, D, D+. Never wri
   }
 });
 
+// ── Micro tasks ─────────────────────────────────────────────────────────────
+// Reading a correction changes nothing. A micro task takes one mistake the
+// student actually made and turns it into three fresh sentences carrying the
+// same fault, so they have to produce the right form again rather than
+// recognise it. Generated once and stored: opening the drill later is free.
+
+const MICRO_TYPE_NOTE = {
+  grammar: 'Keep the same grammatical fault. Change the topic, the tense frame and the vocabulary so it cannot be solved from memory.',
+  vocabulary: 'Keep the same wrong-word or unnatural-collocation fault. Use different words each time.',
+  structure: 'Keep the same paragraph-level fault (a weak topic sentence, a mechanical linker, a missing signpost) inside a single sentence or a two-sentence pair.',
+  argument: 'Keep the same reasoning fault: a claim with no actor, no measurable change, or no group absorbing the consequence.',
+};
+
+async function buildMicroItems({ type, err, quote, fix, why, up }) {
+  if (!ANTHROPIC_API_KEY) throw new Error('AI service unavailable');
+  const response = await client.messages.create({
+    model: MODEL, max_tokens: 1000,
+    system: 'You build short, targeted IELTS writing drills. Respond with valid JSON only — no markdown fences.',
+    messages: [{ role: 'user', content: `An IELTS student made this mistake in their own essay.
+
+Error type: ${type}
+Error name (Vietnamese): ${err}
+What they wrote: "${quote}"
+The correction: "${fix}"
+Why it was wrong: ${why || ''}
+${up ? `What would score higher here: ${up}` : ''}
+
+Write THREE new practice sentences that contain the SAME fault, on three different
+topics, none of them about the topic above. ${MICRO_TYPE_NOTE[type] || MICRO_TYPE_NOTE.grammar}
+
+Return ONLY this JSON:
+{"skill":"<tối đa 8 từ tiếng Việt: kỹ năng đang luyện, ví dụ \"Chia động từ theo chủ ngữ số ít\">",
+ "rule":"<tối đa 26 từ tiếng Việt: quy tắc cần nhớ, nói như giáo viên nói>",
+ "items":[
+   {"bad":"<a sentence containing the fault, 8-20 words, natural IELTS register>",
+    "good":"<the same sentence with ONLY that fault corrected — change nothing else>",
+    "hint":"<tối đa 12 từ tiếng Việt: chỉ chỗ cần sửa, không đưa đáp án>"}
+ ]}
+RULES: exactly three items. "good" must differ from "bad" only by the fault being fixed,
+so a string comparison can mark it. Both must be plausible IELTS Task 2 sentences.
+Never invent statistics. Do not reuse the student's original sentence.` }],
+  });
+  const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+  const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
+  db.logUsage('micro-task', calculateCost(i, o), i + o);
+  const parsed = parseGradingJson(text);
+  const items = (parsed.items || [])
+    .filter(x => x && typeof x.bad === 'string' && typeof x.good === 'string' && x.bad.trim() && x.good.trim())
+    // A drill whose "wrong" and "right" are identical cannot be marked or learned from.
+    .filter(x => x.bad.trim() !== x.good.trim())
+    .slice(0, 3);
+  return { skill: parsed.skill || err, rule: parsed.rule || why || '', items };
+}
+
+app.get('/api/micro-tasks', authenticate, (req, res) => {
+  try {
+    const tasks = db.getMicroTasks(req.user.id);
+    res.json({
+      tasks,
+      counts: {
+        pending: tasks.filter(t => t.status === 'pending').length,
+        learning: tasks.filter(t => t.status === 'learning').length,
+        done: tasks.filter(t => t.status === 'done').length,
+      },
+    });
+  } catch (err) {
+    console.error('Micro tasks list error:', err.message || err);
+    res.status(500).json({ error: 'Chưa tải được danh sách.' });
+  }
+});
+
+app.post('/api/micro-tasks', authenticate, async (req, res) => {
+  const { type, err, quote, fix, why, up, submission_id } = req.body || {};
+  if (!quote || !fix) return res.status(400).json({ error: 'quote và fix là bắt buộc' });
+  try {
+    // The same mistake marked again in a later essay reuses the existing drill.
+    const existing = db.findMicroTaskByError(req.user.id, err, quote);
+    if (existing) return res.json({ task: existing, reused: true });
+
+    const built = await buildMicroItems({ type: type || 'grammar', err, quote, fix, why, up });
+    if (!built.items.length) return res.status(502).json({ error: 'Chưa dựng được bài luyện. Thử lại.' });
+
+    const task = db.addMicroTask({
+      user_id: req.user.id,
+      submission_id: submission_id || null,
+      type: type || 'grammar',
+      err: err || built.skill,
+      quote, fix, why: why || '', up: up || '',
+      skill: built.skill, rule: built.rule, items: built.items,
+    });
+    res.json({ task, reused: false });
+  } catch (e) {
+    console.error('Micro task create error:', e.message || e);
+    res.status(500).json({ error: 'Chưa dựng được bài luyện. Thử lại.' });
+  }
+});
+
+// The client marks each sentence locally (it has the answer); this records the
+// run so the task can retire itself and so progress survives a new device.
+app.post('/api/micro-tasks/:id/attempt', authenticate, (req, res) => {
+  const { correct } = req.body || {};
+  const t = db.recordMicroAttempt(req.params.id, req.user.id, !!correct);
+  if (!t) return res.status(404).json({ error: 'Không có bài luyện này' });
+  res.json(t);
+});
+
+app.post('/api/micro-tasks/:id/reset', authenticate, (req, res) => {
+  const t = db.resetMicroTask(req.params.id, req.user.id);
+  if (!t) return res.status(404).json({ error: 'Không có bài luyện này' });
+  res.json(t);
+});
+
+app.delete('/api/micro-tasks/:id', authenticate, (req, res) => {
+  if (!db.deleteMicroTask(req.params.id, req.user.id)) return res.status(404).json({ error: 'Không có bài luyện này' });
+  res.json({ ok: true });
+});
+
 app.get('/api/error-profile', authenticate, (req, res) => {
   try {
     const rows = db.getAnnotationsByUser(req.user.id);

@@ -1729,6 +1729,7 @@ function showView(name) {
   else if (name === 'vocab') loadVocabNotebook();
   else if (name === 'vocab-learn') loadVocabLearn();
   else if (name === 'speaking') loadSpeakingTopicGen();
+  else if (name === 'micro') loadMicroTasks();
   else if (name === 'truc') loadTrucList();
   else if (name === 'truc-ch0') loadTrucChapter0();
   else if (name === 'practice-sentences') loadPracticeSentences();
@@ -6354,6 +6355,7 @@ function errorCardHtml(ann, i, opts = {}) {
       ${p.fix && !isStrength ? `<div class="ec-line ec-fix"><span class="ec-tag">Sửa thành</span><span class="ec-text">${escHtml(p.fix)}</span><button class="ec-copy" title="Chép câu đúng" onclick="event.stopPropagation();ecCopy(this,'${escAttr(p.fix)}')">⧉</button></div>` : ''}
       ${p.why ? `<div class="ec-why">${escHtml(p.why)}</div>` : ''}
       ${p.up ? `<div class="ec-up"><span class="ec-up-label">Muốn cao điểm hơn</span>${escHtml(p.up)}</div>` : ''}
+      ${!isStrength && p.fix && opts.micro !== false ? `<button class="ec-micro" onclick="event.stopPropagation();makeMicroTask(this,'${escAttr(type)}','${escAttr(p.err)}','${escAttr(original)}','${escAttr(p.fix)}','${escAttr(p.why)}','${escAttr(p.up)}')">🎯 Luyện lỗi này</button>` : ''}
     </div>`;
 }
 
@@ -6430,6 +6432,216 @@ function renderAnnotatedEssay(container, essayText, annotations, readOnly = fals
 // What this student keeps getting wrong across every essay they have written.
 // Counted from marks already stored on graded essays, so opening it costs
 // nothing and it sharpens with each new submission.
+/* ─── Micro tasks ─────────────────────────────────────────────────────────
+   Reading a correction changes nothing on its own. A micro task takes one
+   mistake the student actually made and gives them three fresh sentences with
+   the same fault to fix, so they have to produce the right form rather than
+   recognise it. Built once by the model and stored, so coming back is free. */
+
+const MICRO_STATUS = {
+  pending: ['Chưa luyện', 'st-pending'],
+  learning: ['Đang luyện', 'st-learning'],
+  done: ['Đã sửa được', 'st-done'],
+};
+
+async function makeMicroTask(btn, type, err, quote, fix, why, up) {
+  const unesc = t => String(t || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+  btn.disabled = true;
+  const label = btn.textContent;
+  btn.textContent = 'Đang dựng bài…';
+  try {
+    const r = await api('/api/micro-tasks', {
+      method: 'POST',
+      body: JSON.stringify({
+        type: unesc(type), err: unesc(err), quote: unesc(quote),
+        fix: unesc(fix), why: unesc(why), up: unesc(up),
+      }),
+    });
+    btn.textContent = r.reused ? '✓ Đã có trong danh sách' : '✓ Đã thêm vào Luyện lỗi';
+    btn.classList.add('added');
+    showToast(r.reused ? 'Lỗi này đã có bài luyện rồi.' : 'Đã thêm. Vào "Luyện lỗi của tôi" để làm.');
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = label;
+    showToast('Chưa dựng được: ' + e.message);
+  }
+}
+
+let _microTasks = [];
+let _microOpen = null;
+let _microIdx = 0;
+let _microRun = { right: 0, total: 0 };
+
+async function loadMicroTasks() {
+  const box = document.getElementById('micro-body');
+  if (!box) return;
+  box.innerHTML = '<div class="loading">Đang tải bài luyện…</div>';
+  let d;
+  try { d = await api('/api/micro-tasks'); }
+  catch (e) { box.innerHTML = '<div class="error-msg" style="display:block">' + escHtml(e.message) + '</div>'; return; }
+  _microTasks = d.tasks || [];
+  _microOpen = null;
+
+  if (!_microTasks.length) {
+    box.innerHTML =
+      '<div class="empty-state">' +
+      '<p>Chưa có bài luyện nào.</p>' +
+      '<p class="micro-empty-hint">Mở một bài đã chấm, bấm <b>🎯 Luyện lỗi này</b> trên thẻ lỗi bất kỳ, nó sẽ hiện ở đây.</p>' +
+      '</div>';
+    return;
+  }
+
+  const c = d.counts || {};
+  box.innerHTML =
+    '<div class="micro-summary">' +
+      '<span class="ms-chip st-pending">' + (c.pending || 0) + ' chưa luyện</span>' +
+      '<span class="ms-chip st-learning">' + (c.learning || 0) + ' đang luyện</span>' +
+      '<span class="ms-chip st-done">' + (c.done || 0) + ' đã sửa được</span>' +
+    '</div>' +
+    '<div class="micro-list">' + _microTasks.map(t => microRowHtml(t)).join('') + '</div>';
+}
+
+function microRowHtml(t) {
+  const st = MICRO_STATUS[t.status] || MICRO_STATUS.pending;
+  return '' +
+    '<div class="micro-row ' + st[1] + '" id="micro-row-' + t.id + '">' +
+      '<div class="mr-head">' +
+        '<span class="ann-type ' + escHtml(t.type) + '">' + escHtml(ANN_TYPE_LABELS[t.type] || t.type) + '</span>' +
+        '<span class="mr-skill">' + escHtml(t.skill || t.err) + '</span>' +
+        '<span class="mr-status ' + st[1] + '">' + st[0] + '</span>' +
+      '</div>' +
+      (t.rule ? '<div class="mr-rule">' + escHtml(t.rule) + '</div>' : '') +
+      '<div class="mr-origin">' +
+        '<span class="mr-origin-label">Từ bài của em</span>' +
+        '<span class="mr-bad">' + escHtml(t.quote) + '</span>' +
+        '<span class="mr-arrow">→</span>' +
+        '<span class="mr-good">' + escHtml(t.fix) + '</span>' +
+      '</div>' +
+      '<div class="mr-foot">' +
+        '<span class="mr-stats">' + (t.items || []).length + ' câu · đã làm ' + (t.attempts || 0) + ' lần' +
+          (t.correct_streak ? ' · đang đúng liên tiếp ' + t.correct_streak : '') + '</span>' +
+        '<div class="mr-actions">' +
+          (t.status === 'done'
+            ? '<button class="btn btn-ghost btn-sm" onclick="microReset(' + t.id + ')">Luyện lại</button>'
+            : '<button class="btn btn-primary btn-sm" onclick="microStart(' + t.id + ')">Làm ngay →</button>') +
+          '<button class="btn btn-ghost btn-sm" onclick="microDelete(' + t.id + ')" title="Bỏ bài luyện này">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mr-drill" id="micro-drill-' + t.id + '"></div>' +
+    '</div>';
+}
+
+function microStart(id) {
+  const t = _microTasks.find(x => x.id === id);
+  if (!t || !(t.items || []).length) { showToast('Bài luyện này chưa có câu nào.'); return; }
+  _microOpen = t; _microIdx = 0; _microRun = { right: 0, total: 0 };
+  document.querySelectorAll('.mr-drill').forEach(d => { if (d.id !== 'micro-drill-' + id) d.innerHTML = ''; });
+  microRenderItem();
+}
+
+function microRenderItem() {
+  const t = _microOpen;
+  if (!t) return;
+  const box = document.getElementById('micro-drill-' + t.id);
+  const it = (t.items || [])[_microIdx];
+  if (!it) return microFinish();
+  box.innerHTML =
+    '<div class="md-card">' +
+      '<div class="md-progress">Câu ' + (_microIdx + 1) + '/' + t.items.length + ' · đúng ' + _microRun.right + '/' + _microRun.total + '</div>' +
+      '<div class="md-task">Viết lại câu dưới cho đúng.</div>' +
+      '<div class="md-bad">' + escHtml(it.bad) + '</div>' +
+      (it.hint ? '<div class="md-hint">💡 ' + escHtml(it.hint) + '</div>' : '') +
+      '<textarea class="md-input" id="md-answer" rows="2" placeholder="Viết lại cả câu…"></textarea>' +
+      '<div class="md-actions">' +
+        '<button class="btn btn-primary btn-sm" onclick="microCheck()">Kiểm tra</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="microReveal()">Xem đáp án</button>' +
+      '</div>' +
+      '<div id="md-result"></div>' +
+    '</div>';
+  const el = document.getElementById('md-answer');
+  if (el) { el.focus(); el.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) microCheck(); }; }
+}
+
+// Marked here rather than on the server: the client already holds the answer,
+// and a round trip per keystroke-length answer buys nothing. The server is told
+// the outcome so the task can retire itself and progress survives a new device.
+const _mdNorm = t => String(t || '').toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
+  .replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+function microCheck() {
+  const t = _microOpen;
+  const it = (t.items || [])[_microIdx];
+  const el = document.getElementById('md-answer');
+  if (!el || !el.value.trim()) { showToast('Viết câu đã.'); return; }
+  const ok = _mdNorm(el.value) === _mdNorm(it.good);
+  _microRun.total++;
+  if (ok) _microRun.right++;
+  microShowResult(ok, it);
+}
+
+function microReveal() {
+  const it = (_microOpen.items || [])[_microIdx];
+  _microRun.total++;
+  microShowResult(false, it, true);
+}
+
+function microShowResult(ok, it, revealed) {
+  const box = document.getElementById('md-result');
+  box.innerHTML =
+    '<div class="md-fb ' + (ok ? 'ok' : 'no') + '">' +
+      '<b>' + (ok ? '✅ Đúng.' : (revealed ? 'Đáp án:' : '❌ Chưa đúng.')) + '</b>' +
+      (ok ? '' : '<div class="md-answer-line">' + escHtml(it.good) + '</div>') +
+      '<button class="btn btn-primary btn-sm" onclick="microNext()">' +
+        (_microIdx + 1 < (_microOpen.items || []).length ? 'Câu tiếp →' : 'Xong →') +
+      '</button>' +
+    '</div>';
+}
+
+function microNext() { _microIdx++; microRenderItem(); }
+
+// A run counts as correct only if every sentence was right. Getting two of
+// three right and having the task retire itself would be teaching the wrong
+// thing about what "sửa được" means.
+async function microFinish() {
+  const t = _microOpen;
+  const box = document.getElementById('micro-drill-' + t.id);
+  const perfect = _microRun.total > 0 && _microRun.right === _microRun.total;
+  let updated = null;
+  try { updated = await api('/api/micro-tasks/' + t.id + '/attempt', { method: 'POST', body: JSON.stringify({ correct: perfect }) }); }
+  catch (e) { /* the run still counts locally */ }
+
+  const retired = updated && updated.status === 'done';
+  box.innerHTML =
+    '<div class="md-card md-done">' +
+      '<div class="md-summary ' + (perfect ? 'ok' : 'no') + '">' +
+        (perfect ? '✅ Đúng cả ' + _microRun.total + '/' + _microRun.total + '.' : 'Đúng ' + _microRun.right + '/' + _microRun.total + '.') +
+      '</div>' +
+      '<div class="md-next">' +
+        (retired
+          ? 'Đúng hai lượt liên tiếp — lỗi này coi như đã sửa được.'
+          : perfect
+            ? 'Đúng thêm một lượt nữa là lỗi này được cho là đã sửa.'
+            : 'Chưa đúng hết. Làm lại lượt nữa khi nào rảnh.') +
+      '</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="loadMicroTasks()">Về danh sách</button>' +
+    '</div>';
+  if (updated) {
+    const i = _microTasks.findIndex(x => x.id === t.id);
+    if (i >= 0) _microTasks[i] = updated;
+  }
+}
+
+async function microReset(id) {
+  try { await api('/api/micro-tasks/' + id + '/reset', { method: 'POST' }); loadMicroTasks(); }
+  catch (e) { showToast(e.message); }
+}
+
+async function microDelete(id) {
+  if (!confirm('Bỏ bài luyện này?')) return;
+  try { await api('/api/micro-tasks/' + id, { method: 'DELETE' }); loadMicroTasks(); }
+  catch (e) { showToast(e.message); }
+}
+
 async function loadErrorProfile() {
   const box = document.getElementById('err-profile-section');
   if (!box) return;

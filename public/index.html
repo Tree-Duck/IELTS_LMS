@@ -226,6 +226,7 @@
             <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">🔤 Luyện câu</button>
             <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
             <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🌐 Dịch câu</button>
+            <button class="tnav-nav-link" data-view="micro" onclick="showView('micro')">🎯 Luyện lỗi của tôi</button>
             <button class="tnav-nav-link" data-view="truc" onclick="showView('truc')">🧭 14 trục lập luận</button>
             <button class="tnav-nav-link" data-view="model-essays" onclick="showView('model-essays')">📄 Bài viết mẫu</button>
           </div>
@@ -2066,6 +2067,16 @@
             <div class="whc-tags"><span class="tag-badge tag-steps">Bước 1 → 5</span></div>
           </button>
         </div>
+      </div>
+
+      <!-- Micro tasks: drills built from the student.s own mistakes -->
+      <div id="view-micro" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
+          <h2>🎯 Luyện lỗi của tôi</h2>
+          <p>Mỗi lỗi trong bài đã chấm thành một bài luyện ngắn. Đúng hai lần liên tiếp thì lỗi đó được cho là đã sửa.</p>
+        </div>
+        <div id="micro-body"><div class="loading">Đang tải…</div></div>
       </div>
 
       <!-- Argument Axes: the list -->
