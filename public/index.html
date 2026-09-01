@@ -223,8 +223,7 @@
           <div class="tnav-dropdown">
             <button class="tnav-nav-link" data-view="writing-practice" onclick="showView('writing-practice')">✍️ Luyện viết</button>
             <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Nộp bài chấm điểm</button>
-            <button class="tnav-nav-link" data-view="practice-sentences" onclick="showView('practice-sentences')">🔤 Luyện câu</button>
-            <button class="tnav-nav-link" data-view="practice-paragraphs" onclick="showView('practice-paragraphs')">📝 Luyện đoạn văn</button>
+            <button class="tnav-nav-link" data-view="luyen" onclick="showView('luyen')">✍️ Luyện viết</button>
             <button class="tnav-nav-link" data-view="translation" onclick="showView('translation')">🌐 Dịch câu</button>
             <button class="tnav-nav-link" data-view="micro" onclick="showView('micro')">🎯 Luyện lỗi của tôi</button>
             <button class="tnav-nav-link" data-view="truc" onclick="showView('truc')">🧭 14 trục lập luận</button>
@@ -1781,48 +1780,69 @@
       <!-- ═══════════════════ PRACTICE VIEWS ═══════════════════ -->
 
       <!-- Sentence Exercises View -->
-      <div id="view-practice-sentences" class="view hidden">
+      <!-- Luyện viết: one place, three rungs — word, sentence, paragraph -->
+      <div id="view-luyen" class="view hidden">
         <div class="page-header">
-          <h2>✏️ Luyện câu</h2>
-          <p>25 unit từ vựng của lớp — collocation, precision verb, và phân biệt từ gần nghĩa</p>
+          <h2>✍️ Luyện viết</h2>
+          <p>Ba bậc, đi từ nhỏ tới lớn. Chắc từ rồi mới tới câu, chắc câu rồi mới tới đoạn.</p>
         </div>
-        <div class="practice-controls">
-          <div class="vl-picker-row">
-            <label>Chủ đề</label>
-            <div id="pse-topic-chips" class="vl-topic-chips"></div>
-          </div>
-          <div class="practice-mode-tabs">
-            <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Điền vào chỗ trống</button>
-            <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Viết một câu</button>
-            <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Sắp xếp lại</button>
-            <button class="practice-mode-tab" id="pse-tab-nuance" onclick="psSwitchMode('nuance')">Phân biệt từ gần nghĩa</button>
-          </div>
-        </div>
-        <div id="pse-exercise-area"></div>
-      </div>
 
-      <!-- Paragraph Writing View -->
-      <div id="view-practice-paragraphs" class="view hidden">
-        <div class="page-header">
-          <h2>📝 Luyện đoạn văn</h2>
-          <p>Cho sẵn câu luận điểm và ví dụ an toàn. Việc của em là viết đoạn nối hai thứ đó lại.</p>
+        <div class="luyen-tabs" role="tablist">
+          <button class="luyen-tab active" id="luyen-tab-vocab" role="tab" onclick="luyenTab('vocab')">
+            <span class="lt-n">1</span><span class="lt-label">Từ vựng</span>
+            <span class="lt-sub">25 unit của lớp</span>
+          </button>
+          <button class="luyen-tab" id="luyen-tab-sentence" role="tab" onclick="luyenTab('sentence')">
+            <span class="lt-n">2</span><span class="lt-label">Câu</span>
+            <span class="lt-sub">sửa lỗi, dịch, nối ý</span>
+          </button>
+          <button class="luyen-tab" id="luyen-tab-para" role="tab" onclick="luyenTab('para')">
+            <span class="lt-n">3</span><span class="lt-label">Đoạn</span>
+            <span class="lt-sub">viết trọn một đoạn</span>
+          </button>
         </div>
-        <div class="practice-controls">
-          <div class="vl-picker-row">
-            <label>Trục lập luận</label>
-            <div id="pp-axis-chips" class="vl-topic-chips"></div>
+
+        <!-- Bậc 1 · Từ vựng -->
+        <div class="luyen-panel" id="luyen-panel-vocab">
+          <div class="practice-controls">
+            <div class="vl-picker-row">
+              <label>Chủ đề</label>
+              <div id="pse-topic-chips" class="vl-topic-chips"></div>
+            </div>
+            <div class="practice-mode-tabs">
+              <button class="practice-mode-tab active" id="pse-tab-fib" onclick="psSwitchMode('fib')">Điền vào chỗ trống</button>
+              <button class="practice-mode-tab" id="pse-tab-write" onclick="psSwitchMode('write')">Viết một câu</button>
+              <button class="practice-mode-tab" id="pse-tab-unscramble" onclick="psSwitchMode('unscramble')">Sắp xếp lại</button>
+              <button class="practice-mode-tab" id="pse-tab-nuance" onclick="psSwitchMode('nuance')">Phân biệt từ gần nghĩa</button>
+            </div>
           </div>
+          <div id="pse-exercise-area"></div>
         </div>
-        <div id="pp-task" class="hidden"></div>
-        <div id="pp-write-area" class="hidden">
-          <textarea id="pp-textarea" class="pp-textarea" placeholder="Viết đoạn văn của em ở đây… (hướng tới 80–120 từ)"></textarea>
-          <div class="pp-actions">
-            <div id="pp-word-count" class="pp-word-count">0 từ</div>
-            <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Nhờ AI chữa đoạn ✨</button>
+
+        <!-- Bậc 2 · Câu -->
+        <div class="luyen-panel hidden" id="luyen-panel-sentence">
+          <div id="luyen-sentence-body"></div>
+        </div>
+
+        <!-- Bậc 3 · Đoạn -->
+        <div class="luyen-panel hidden" id="luyen-panel-para">
+          <div class="practice-controls">
+            <div class="vl-picker-row">
+              <label>Trục lập luận</label>
+              <div id="pp-axis-chips" class="vl-topic-chips"></div>
+            </div>
           </div>
+          <div id="pp-task" class="hidden"></div>
+          <div id="pp-write-area" class="hidden">
+            <textarea id="pp-textarea" class="pp-textarea" placeholder="Viết đoạn văn ở đây… (hướng tới 80–120 từ)"></textarea>
+            <div class="pp-actions">
+              <div id="pp-word-count" class="pp-word-count">0 từ</div>
+              <button class="btn btn-primary" onclick="ppSubmitFeedback()" id="pp-submit-btn">Nhờ AI chữa đoạn ✨</button>
+            </div>
+          </div>
+          <div id="pp-feedback-area" class="hidden"></div>
+          <div id="pp-gate" class="hidden"></div>
         </div>
-        <div id="pp-feedback-area" class="hidden"></div>
-        <div id="pp-gate" class="hidden"></div>
       </div>
 
       <!-- Grammar Guide View -->

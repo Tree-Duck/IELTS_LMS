@@ -6841,3 +6841,47 @@ input:focus, textarea:focus, select:focus {
 /* A failed grading now says which failure it was, and whether retrying helps. */
 .grade-error-code { margin-top: .35rem; font-size: .68rem; opacity: .7; font-family: ui-monospace, monospace; }
 .retry-hint { font-size: .76rem; color: var(--gray-500); align-self: center; }
+
+/* ─── Luyện viết · ba bậc ────────────────────────────────────────────────────
+   Word, sentence, paragraph were three menu entries, so nothing said they were
+   one ladder or which rung came first. The number on each tab does that. */
+
+.luyen-tabs {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem;
+  margin-bottom: 1.25rem;
+}
+.luyen-tab {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .1rem;
+  text-align: left; font: inherit; cursor: pointer;
+  background: var(--surface); color: var(--gray-900);
+  border: 2px solid var(--gray-900); border-radius: var(--radius);
+  padding: .7rem .85rem;
+  box-shadow: 3px 3px 0 var(--gray-900);
+  transition: transform .12s, box-shadow .12s, background .12s;
+}
+.luyen-tab:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--gray-900); }
+.luyen-tab.active {
+  background: var(--forest); color: var(--cream);
+  box-shadow: 4px 4px 0 var(--lime);
+}
+.lt-n {
+  width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--gray-600);
+  font-size: .72rem; font-weight: 800; margin-bottom: .15rem;
+}
+.luyen-tab.active .lt-n { background: var(--lime); color: var(--forest-deep); }
+.lt-label { font-size: .95rem; font-weight: 800; }
+.lt-sub { font-size: .7rem; color: var(--gray-500); line-height: 1.35; }
+.luyen-tab.active .lt-sub { color: var(--mist); }
+
+.luyen-soon { padding: 2rem 1rem; }
+.luyen-soon h3 { font-size: 1rem; color: var(--gray-900); margin-bottom: .5rem; }
+.luyen-soon p { font-size: .86rem; line-height: 1.65; color: var(--gray-600); max-width: 46ch; margin: 0 auto .5rem; }
+.luyen-soon-hint { color: var(--gray-500); font-style: italic; }
+
+@media (max-width: 640px) {
+  .luyen-tabs { grid-template-columns: 1fr; gap: .45rem; }
+  .luyen-tab { flex-direction: row; align-items: center; gap: .5rem; }
+  .lt-n { margin-bottom: 0; flex: none; }
+  .lt-sub { margin-left: auto; text-align: right; }
+}

@@ -1746,8 +1746,7 @@ function showView(name) {
   else if (name === 'micro') loadMicroTasks();
   else if (name === 'truc') loadTrucList();
   else if (name === 'truc-ch0') loadTrucChapter0();
-  else if (name === 'practice-sentences') loadPracticeSentences();
-  else if (name === 'practice-paragraphs') loadPracticeParagraphs();
+  else if (name === 'luyen') loadLuyen();
   else if (name === 'practice-grammar') loadPracticeGrammar();
   else if (name === 'grammar-hub') loadGrammarHub();
   else if (name === 'writing') loadWritingHub();
@@ -8986,6 +8985,53 @@ async function ensureVocabUnits() {
   if (_vocabUnits) return _vocabUnits;
   _vocabUnits = await api('/api/vocab-units');
   return _vocabUnits;
+}
+
+/* ─── Luyện viết · ba bậc trong một mục ───────────────────────────────────
+   Từ vựng, câu, đoạn used to be separate menu entries, so nothing told a
+   student which to do first or that they were the same ladder. Each rung
+   loads only when it is opened, so switching tabs costs nothing. */
+
+const LUYEN_TABS = ['vocab', 'sentence', 'para'];
+// A stored value from an older build, or a hand-edited one, would otherwise
+// hide every panel and leave the section looking broken.
+let _luyenTab = (() => {
+  try {
+    const t = localStorage.getItem('luyen_tab');
+    return LUYEN_TABS.includes(t) ? t : null;
+  } catch (e) { return null; }
+})();
+
+function loadLuyen() {
+  luyenTab(_luyenTab || 'vocab');
+}
+
+function luyenTab(name) {
+  _luyenTab = name;
+  for (const t of LUYEN_TABS) {
+    const tab = document.getElementById('luyen-tab-' + t);
+    const panel = document.getElementById('luyen-panel-' + t);
+    if (tab) tab.classList.toggle('active', t === name);
+    if (panel) panel.classList.toggle('hidden', t !== name);
+  }
+  try { localStorage.setItem('luyen_tab', name); } catch (e) {}
+  if (name === 'vocab') loadPracticeSentences();
+  else if (name === 'para') loadPracticeParagraphs();
+  else if (name === 'sentence') loadLuyenSentence();
+}
+
+// The sentence rung runs on the 99-prompt grammar bank, which is still being
+// written. Saying so beats an empty panel that reads as a bug.
+function loadLuyenSentence() {
+  const box = document.getElementById('luyen-sentence-body');
+  if (!box || box.dataset.filled) return;
+  box.dataset.filled = '1';
+  box.innerHTML =
+    '<div class="empty-state luyen-soon">' +
+      '<h3>Bậc này đang dựng</h3>' +
+      '<p>Kho bài câu lấy từ 99 đề Task 2 của lớp. Mỗi đề chín bài, đi từ sửa lỗi tới nối ý rồi tới dịch câu.</p>' +
+      '<p class="luyen-soon-hint">Trong lúc chờ, làm bậc <b>Từ vựng</b> để chắc chữ, rồi qua bậc <b>Đoạn</b> để ráp thành đoạn.</p>' +
+    '</div>';
 }
 
 async function loadPracticeSentences() {
