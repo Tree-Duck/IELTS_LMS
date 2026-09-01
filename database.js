@@ -112,6 +112,9 @@ const db = {
   // or a malformed answer, and telling them apart meant reading Railway logs.
   // Every submission, unshaped — the health check needs status and error_reason,
   // which the per-user mapper deliberately drops.
+  dbFilePath() { return DB_FILE; },
+  countUsers() { return (load().users || []).length; },
+
   getAllSubmissionsRaw() {
     return load().submissions || [];
   },

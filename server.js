@@ -21,7 +21,10 @@ if (!process.env.JWT_SECRET) {
 }
 const JWT_SECRET = process.env.JWT_SECRET;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const MODEL = 'claude-haiku-4-5';
+// Sonnet 5 for grading quality. It accepts no temperature/top_p/budget_tokens
+// and no assistant prefill — this codebase uses none of those, so the swap is
+// a one-line change. Roughly 2x Haiku's per-token price.
+const MODEL = 'claude-sonnet-5';
 // Public Google OAuth client id (falls back to the project's id so it works
 // without a Railway env var; override with GOOGLE_CLIENT_ID if it ever changes).
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '703041029920-q4lroi649gohg7gp3hvsg256o2ijbc3j.apps.googleusercontent.com';
@@ -39,8 +42,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Cost Calculation ──────────────────────────────────────────────────────────
 function calculateCost(inputTokens, outputTokens) {
-  const inputPrice = parseFloat(process.env.INPUT_PRICE_PER_M || '0.80');
-  const outputPrice = parseFloat(process.env.OUTPUT_PRICE_PER_M || '4.00');
+  // Defaults track MODEL. Sonnet 5 is 2.00 in / 10.00 out per million tokens;
+  // the old 0.80/4.00 defaults were Haiku pricing, so leaving them would
+  // under-report every call by roughly 2x and make the usage log say the class
+  // costs half what it actually does.
+  const inputPrice = parseFloat(process.env.INPUT_PRICE_PER_M || '2.00');
+  const outputPrice = parseFloat(process.env.OUTPUT_PRICE_PER_M || '10.00');
   return (inputTokens / 1_000_000) * inputPrice + (outputTokens / 1_000_000) * outputPrice;
 }
 
@@ -780,6 +787,24 @@ app.get('/api/admin/ai-health', authenticate, teacherOrAdmin, async (req, res) =
     model: MODEL,
   };
 
+  // Is the database actually surviving deploys? lms-data.json is gitignored, so
+  // if DB_FILE does not point at a mounted volume it lives in the container
+  // filesystem and every deploy wipes every account and submission. A row count
+  // far below what the class has written, or an "oldest" date that matches the
+  // last deploy, is that failure.
+  try {
+    const all = db.getAllSubmissionsRaw ? db.getAllSubmissionsRaw() : [];
+    const dates = all.map(x => x.created_at).filter(Boolean).sort();
+    out.db = {
+      file: db.dbFilePath ? db.dbFilePath() : '(unknown)',
+      on_volume_env: !!process.env.DB_FILE,
+      total_submissions: all.length,
+      total_users: db.countUsers ? db.countUsers() : null,
+      oldest_submission: dates[0] || null,
+      newest_submission: dates[dates.length - 1] || null,
+    };
+  } catch (e) { out.db = { error: e.message }; }
+
   // Recent failures, grouped by the reason recorded when they failed.
   try {
     const since = Date.now() - 24 * 60 * 60 * 1000;
@@ -982,6 +1007,31 @@ function classifyAiFailure(err) {
   return 'unknown';
 }
 
+// One grading attempt, then one degraded retry. The retry drops the annotation
+// and sentence-analysis sections — they are the longest part of the answer and
+// the part that pushes a long essay past the token ceiling — so a student gets
+// bands and written feedback rather than an error screen.
+const GRADE_TIMEOUT_MS = 180_000;
+
+async function gradeWithRetry(messageContent, systemPrompt) {
+  const call = (system, maxTokens) => client.messages.create(
+    { model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: messageContent }] },
+    { timeout: GRADE_TIMEOUT_MS, maxRetries: 1 },
+  );
+  try {
+    return await call(systemPrompt, 16000);
+  } catch (err) {
+    const reason = classifyAiFailure(err);
+    // Only worth a second attempt if the first one ran out of room or time.
+    if (!['bad_model_output', 'network', 'api_overloaded', 'rate_limited'].includes(reason)) throw err;
+    console.warn('Grading attempt 1 failed (' + reason + '); retrying without annotations');
+    const leaner = systemPrompt +
+      ' IMPORTANT FOR THIS ATTEMPT: omit the "annotations" and "sentence_analysis" fields entirely. ' +
+      'Return every other field in the schema as normal.';
+    return await call(leaner, 16000);
+  }
+}
+
 async function gradeSubmission(submissionId, userId, taskType, prompt, essay, wordCount, minWords, imageData) {
   db.updateSubmissionStatus(submissionId, 'grading');
 
@@ -1081,12 +1131,7 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
       messageContent = userPrompt;
     }
 
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 8000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: messageContent }],
-    });
+    const response = await gradeWithRetry(messageContent, systemPrompt);
 
     let jsonText = '';
     for (const block of response.content) {
@@ -1097,6 +1142,11 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
     const result = parseGradingJson(jsonText);
 
     const normalize = (v) => Math.round(parseFloat(v) * 2) / 2;
+    for (const k of ['task_achievement', 'coherence_cohesion', 'lexical_resource', 'grammatical_range']) {
+      if (!Number.isFinite(normalize(result[k]))) {
+        throw new SyntaxError('Grading JSON recovered without a ' + k + ' band');
+      }
+    }
     const ta = normalize(result.task_achievement);
     const cc = normalize(result.coherence_cohesion);
     const lr = normalize(result.lexical_resource);
@@ -2887,7 +2937,7 @@ Return this exact JSON structure (band scores must be 0–9 in 0.5 steps):
 }`;
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: 400,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
@@ -3974,7 +4024,7 @@ Return ONLY valid JSON, no markdown:
 }`;
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: 250,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -4081,7 +4131,7 @@ Be encouraging but honest. Keep total response under 350 words.`;
 
   try {
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: 600,
       system,
       messages: [{ role: 'user', content: userMsg }],
@@ -4146,7 +4196,7 @@ Bản dịch của học viên: ${userEn}`;
 
   try {
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: 400,
       system,
       messages: [{ role: 'user', content: userMsg }],
