@@ -6912,3 +6912,101 @@ input:focus, textarea:focus, select:focus {
   font-variant-numeric: tabular-nums; margin-left: .15rem;
 }
 .wp-type-chips.hidden { display: none; }
+
+/* ─── Bậc 2 · Câu ────────────────────────────────────────────────────────────
+   Nothing here is machine-marked. The student writes, reveals the model answer,
+   and ticks a checklist they can verify by eye — so the answer must stay out of
+   the DOM until they ask for it. */
+
+.ls-intro { font-size: .9rem; color: var(--gray-600); line-height: 1.65; max-width: 60ch; margin: 0 0 .9rem; }
+.ls-themes { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.ls-theme {
+  font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
+  padding: .3rem .7rem; border-radius: var(--radius-pill);
+  border: 1.5px solid var(--gray-300); background: var(--surface); color: var(--gray-600);
+}
+.ls-theme.active { background: var(--forest); color: var(--cream); border-color: var(--gray-900); }
+
+.ls-grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.ls-card {
+  text-align: left; font: inherit; cursor: pointer;
+  background: var(--surface); border: 2px solid var(--gray-900);
+  border-radius: var(--r-md); padding: .9rem;
+  box-shadow: var(--lift); transition: transform .12s, box-shadow .12s;
+}
+.ls-card:hover { transform: translate(-2px, -2px); box-shadow: var(--lift-hover); }
+.ls-card-top { display: flex; align-items: center; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap; }
+.ls-truc { font-size: .68rem; font-weight: 800; padding: .15rem .5rem; border-radius: var(--radius-pill); background: var(--forest); color: var(--cream); }
+.ls-theme-tag { font-size: .68rem; color: var(--gray-500); }
+.ls-count { margin-left: auto; font-size: .72rem; font-weight: 800; color: var(--gray-500); font-variant-numeric: tabular-nums; }
+.ls-count.full { color: var(--success); }
+.ls-card-q { font-size: .9rem; line-height: 1.5; color: var(--gray-900); font-weight: 600; margin-bottom: .3rem; }
+.ls-card-en { font-size: .78rem; line-height: 1.5; color: var(--gray-500); }
+.ls-reset { margin-top: 1.2rem; }
+
+.ls-prompt { background: var(--forest); color: var(--cream); border-radius: var(--r-md); padding: 1rem 1.1rem; margin: .9rem 0 1.1rem; }
+.ls-prompt-vi { font-size: 1rem; font-weight: 600; line-height: 1.5; margin-bottom: .4rem; }
+.ls-prompt-en { font-size: .86rem; line-height: 1.6; color: var(--mist); font-style: italic; }
+.ls-prompt-meta { font-size: .72rem; color: var(--lime); margin-top: .5rem; font-weight: 700; }
+
+.ls-vocab { border: 2px solid var(--gray-900); border-radius: var(--r-md); background: var(--surface); padding: .9rem 1rem; margin-bottom: 1.3rem; }
+.ls-vocab h4 { font-size: .95rem; margin-bottom: .6rem; color: var(--gray-900); }
+.ls-vocab-head, .ls-vocab-row { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: .6rem; padding: .35rem 0; }
+.ls-vocab-head { font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-500); border-bottom: 1.5px solid var(--gray-200); }
+.ls-vocab-row { font-size: .84rem; border-bottom: 1px dashed var(--gray-200); }
+.ls-vocab-row:last-child { border-bottom: 0; }
+.ls-v-basic { color: var(--gray-500); text-decoration: line-through; text-decoration-color: rgba(214,69,51,.4); }
+.ls-v-acad { color: var(--gray-900); font-weight: 700; }
+.ls-v-vi { color: var(--gray-600); }
+@media (max-width: 640px) {
+  .ls-vocab-head { display: none; }
+  .ls-vocab-row { grid-template-columns: 1fr; gap: .1rem; padding: .5rem 0; }
+}
+
+.ls-group { margin-bottom: 1.6rem; }
+.ls-group-title { font-size: 1rem; color: var(--gray-900); margin-bottom: .7rem; display: flex; align-items: baseline; gap: .5rem; }
+.ls-group-n { font-size: .72rem; font-weight: 600; color: var(--gray-500); }
+
+.ls-ex { border: 1.5px solid var(--gray-200); border-left: 4px solid var(--coral); border-radius: var(--r-md); padding: .9rem 1rem; margin-bottom: .7rem; background: var(--surface); }
+.ls-ex.done { border-left-color: var(--success); }
+.ls-ex-head { display: flex; align-items: baseline; gap: .5rem; margin-bottom: .6rem; flex-wrap: wrap; }
+.ls-ex-order { flex: none; width: 20px; height: 20px; border-radius: var(--r-sm); background: var(--gray-900); color: var(--cream); font-size: .68rem; font-weight: 800; display: grid; place-items: center; }
+.ls-ex-instr { font-size: .88rem; font-weight: 600; color: var(--gray-900); }
+.ls-ex-done { margin-left: auto; font-size: .66rem; font-weight: 800; color: var(--success); }
+
+.ls-stim { background: var(--surface-2); border-radius: var(--r-sm); padding: .55rem .7rem; font-size: .92rem; line-height: 1.6; color: var(--gray-900); }
+.ls-stim-bad { background: var(--danger-light); border-left: 3px solid var(--danger); }
+.ls-hint, .ls-req { font-size: .78rem; color: var(--gray-600); margin-top: .35rem; }
+.ls-req { color: var(--primary-mid); font-weight: 700; }
+
+.ls-chain { display: flex; flex-direction: column; gap: .3rem; }
+.ls-chain-row { display: grid; grid-template-columns: 4.5rem 1fr; gap: .6rem; font-size: .88rem; line-height: 1.55; align-items: baseline; }
+.ls-chain-k { font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); }
+.ls-chain-gap .ls-chain-blank { color: var(--coral); font-style: italic; border-bottom: 2px dashed var(--coral); }
+
+.ls-para-frame { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .6rem; }
+.ls-frame-row { display: grid; grid-template-columns: 1.4rem 1fr; gap: .5rem; font-size: .8rem; line-height: 1.45; }
+.ls-frame-n { width: 1.4rem; height: 1.4rem; border-radius: var(--r-sm); background: var(--surface-2); color: var(--gray-600); font-size: .66rem; font-weight: 800; display: grid; place-items: center; }
+.ls-frame-fn { color: var(--gray-800); font-weight: 600; }
+.ls-frame-st { grid-column: 2; color: var(--gray-500); font-style: italic; font-size: .75rem; }
+.ls-constraints { background: rgba(200,241,105,.2); border: 1px dashed var(--primary-mid); border-radius: var(--r-sm); padding: .5rem .65rem; font-size: .8rem; line-height: 1.6; color: var(--gray-800); }
+.ls-constraints div { padding-left: .8rem; text-indent: -.8rem; }
+.ls-constraints div::before { content: '· '; color: var(--primary-mid); font-weight: 800; }
+.ls-sides { display: flex; align-items: baseline; gap: .4rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.ls-sides-k { font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); }
+.ls-side { font-size: .8rem; font-weight: 600; color: var(--gray-800); background: var(--surface-2); border: 1px solid var(--gray-300); border-radius: var(--radius-pill); padding: .15rem .6rem; }
+
+.ls-input { width: 100%; margin-top: .6rem; font: inherit; font-size: .9rem; line-height: 1.6; padding: .55rem .65rem; border: 1.5px solid var(--gray-300); border-radius: var(--r-sm); background: var(--surface); color: var(--gray-900); resize: vertical; }
+.ls-input:focus { outline: none; border-color: var(--gray-900); box-shadow: 0 0 0 3px var(--primary-glow); }
+.ls-para-count { display: flex; gap: .6rem; flex-wrap: wrap; font-size: .74rem; color: var(--gray-500); margin: .35rem 0 .1rem; font-variant-numeric: tabular-nums; }
+.ls-para-count .ok { color: var(--success); font-weight: 700; }
+.ls-ex .btn { margin-top: .55rem; }
+
+.ls-ans-box { margin-top: .7rem; border-top: 2px dashed var(--gray-200); padding-top: .7rem; }
+.ls-ans-label { font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-500); margin-bottom: .25rem; }
+.ls-ans-text { font-size: .92rem; line-height: 1.6; color: var(--gray-900); font-weight: 600; background: var(--success-light); border-radius: var(--r-sm); padding: .5rem .65rem; margin-bottom: .7rem; }
+.ls-ans-alt { font-size: .86rem; line-height: 1.55; color: var(--gray-700); padding: .3rem .65rem; border-left: 2px solid var(--gray-300); margin-bottom: .3rem; }
+.ls-checks { display: flex; flex-direction: column; gap: .3rem; margin: .3rem 0 .7rem; }
+.ls-check { display: flex; gap: .45rem; align-items: flex-start; font-size: .84rem; line-height: 1.5; color: var(--gray-700); cursor: pointer; }
+.ls-check input { margin-top: .2rem; width: 16px; height: 16px; accent-color: var(--success); flex: none; }
+.ls-why { font-size: .82rem; line-height: 1.6; color: var(--gray-600); font-style: italic; }

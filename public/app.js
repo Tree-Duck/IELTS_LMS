@@ -8920,18 +8920,265 @@ function luyenTab(name) {
   else if (name === 'sentence') loadLuyenSentence();
 }
 
-// The sentence rung runs on the 99-prompt grammar bank, which is still being
-// written. Saying so beats an empty panel that reads as a bug.
-function loadLuyenSentence() {
+/* ─── Bậc 2 · Câu ─────────────────────────────────────────────────────────
+   Nine exercises per prompt, from fixing one fault to writing a whole
+   paragraph. Nothing is machine-marked here: the student writes, then reveals
+   the model answer and a checklist they can verify with their own eyes. That
+   is the teacher's design, and it keeps the rung free to use. */
+
+let _lsTopics = null;
+let _lsTopic = null;
+let _lsExercises = null;
+let _lsFilterTheme = 'all';
+
+const LS_TYPE_LABEL = {
+  fix_error: 'Sửa lỗi',
+  causal_link: 'Nối ý',
+  translate: 'Dịch câu',
+  paragraph: 'Viết đoạn',
+};
+const LS_TYPE_ORDER = ['fix_error', 'causal_link', 'translate', 'paragraph'];
+
+// Theme keys live in the bank in English. The screen does not.
+const LS_THEME_LABEL = {
+  government: 'Nhà nước', technology: 'Công nghệ', media: 'Truyền thông',
+  education: 'Giáo dục', environment: 'Môi trường', health: 'Sức khoẻ',
+  work: 'Việc làm', society: 'Xã hội', culture: 'Văn hoá', crime: 'Tội phạm',
+  globalisation: 'Toàn cầu hoá', family: 'Gia đình', transport: 'Giao thông',
+  economy: 'Kinh tế', urban: 'Đô thị',
+};
+const lsTheme = k => LS_THEME_LABEL[k] || k;
+
+// Progress is per exercise and lives in the browser, so a student can leave and
+// come back. Every read and write is wrapped: a blocked localStorage must not
+// stop the page rendering.
+function lsDone() {
+  try { return JSON.parse(localStorage.getItem('ls_done') || '{}'); } catch (e) { return {}; }
+}
+function lsMarkDone(id) {
+  try { const d = lsDone(); d[id] = 1; localStorage.setItem('ls_done', JSON.stringify(d)); } catch (e) {}
+}
+function lsDraft(id, v) {
+  try {
+    if (v === undefined) return localStorage.getItem('ls_draft_' + id) || '';
+    localStorage.setItem('ls_draft_' + id, v);
+  } catch (e) { return ''; }
+}
+function lsResetProgress() {
+  if (!confirm('Xoá toàn bộ tiến độ của bậc Câu?')) return;
+  try {
+    Object.keys(localStorage).filter(k => k === 'ls_done' || k.startsWith('ls_draft_'))
+      .forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+  loadLuyenSentence(true);
+}
+
+async function loadLuyenSentence(force) {
   const box = document.getElementById('luyen-sentence-body');
-  if (!box || box.dataset.filled) return;
-  box.dataset.filled = '1';
+  if (!box) return;
+  if (_lsTopic) return lsRenderTopic(_lsTopic);
+  if (_lsTopics && !force) return lsRenderList();
+
+  box.innerHTML = '<div class="loading">Đang tải kho đề…</div>';
+  try {
+    const r = await fetch('data/grammar/topics.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    _lsTopics = await r.json();
+  } catch (e) {
+    box.innerHTML = '<div class="error-msg" style="display:block">Chưa tải được kho đề. ' + escHtml(e.message) + '</div>';
+    return;
+  }
+  lsRenderList();
+}
+
+function lsRenderList() {
+  const box = document.getElementById('luyen-sentence-body');
+  const done = lsDone();
+  // Only prompts that actually have exercises written are offered. The rest of
+  // the 99 are in the file but have no set yet, and a card that opens an empty
+  // screen is worse than no card.
+  const ready = _lsTopics.filter(t => t.key_vocab);
+  const themes = ['all', ...new Set(ready.map(t => t.theme))];
+  const shown = _lsFilterTheme === 'all' ? ready : ready.filter(t => t.theme === _lsFilterTheme);
+
+  // Exercise ids are all prefixed with the topic id, so progress can be
+  // counted without loading the set.
+  const countFor = t => Object.keys(done).filter(k => k.startsWith(t.id + '-')).length;
+
   box.innerHTML =
-    '<div class="empty-state luyen-soon">' +
-      '<h3>Bậc này đang dựng</h3>' +
-      '<p>Kho bài câu lấy từ 99 đề Task 2 của lớp. Mỗi đề chín bài, đi từ sửa lỗi tới nối ý rồi tới dịch câu.</p>' +
-      '<p class="luyen-soon-hint">Trong lúc chờ, làm bậc <b>Từ vựng</b> để chắc chữ, rồi qua bậc <b>Đoạn</b> để ráp thành đoạn.</p>' +
+    '<div class="ls-head">' +
+      '<p class="ls-intro">Mỗi đề chín bài, đi từ sửa một lỗi tới viết trọn một đoạn. Viết xong thì mở đáp án mẫu ra tự đối chiếu.</p>' +
+      (themes.length > 2
+        ? '<div class="ls-themes">' + themes.map(th =>
+            '<button class="ls-theme' + (_lsFilterTheme === th ? ' active' : '') + '" onclick="lsSetTheme(\'' + th + '\')">' +
+            (th === 'all' ? 'Tất cả' : escHtml(lsTheme(th))) + '</button>').join('') + '</div>'
+        : '') +
+    '</div>' +
+    '<div class="ls-grid">' +
+      shown.map(t => {
+        const n = countFor(t);
+        return '<button class="ls-card" onclick="lsOpen(\'' + t.id + '\')">' +
+          '<div class="ls-card-top">' +
+            '<span class="ls-truc">Trục ' + t.truc + '</span>' +
+            '<span class="ls-theme-tag">' + escHtml(lsTheme(t.theme)) + '</span>' +
+            '<span class="ls-count' + (n >= 9 ? ' full' : '') + '">' + n + '/9</span>' +
+          '</div>' +
+          '<div class="ls-card-q">' + escHtml(t.prompt_vi || t.prompt_en) + '</div>' +
+          '<div class="ls-card-en">' + escHtml(t.prompt_en.slice(0, 110)) + (t.prompt_en.length > 110 ? '…' : '') + '</div>' +
+        '</button>';
+      }).join('') +
+    '</div>' +
+    (Object.keys(done).length ? '<button class="btn btn-ghost btn-sm ls-reset" onclick="lsResetProgress()">Xoá tiến độ</button>' : '');
+}
+
+function lsSetTheme(th) { _lsFilterTheme = th; lsRenderList(); }
+
+async function lsOpen(id) {
+  const box = document.getElementById('luyen-sentence-body');
+  box.innerHTML = '<div class="loading">Đang tải bài…</div>';
+  try {
+    const r = await fetch('data/grammar/exercises/' + id + '.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    _lsExercises = await r.json();
+    _lsTopic = _lsTopics.find(t => t.id === id);
+  } catch (e) {
+    box.innerHTML = '<div class="error-msg" style="display:block">Chưa tải được bài. ' + escHtml(e.message) + '</div>';
+    return;
+  }
+  lsRenderTopic(_lsTopic);
+}
+
+function lsBack() { _lsTopic = null; _lsExercises = null; lsRenderList(); }
+
+function lsRenderTopic(t) {
+  const box = document.getElementById('luyen-sentence-body');
+  const done = lsDone();
+  const byType = {};
+  for (const ex of _lsExercises) (byType[ex.type] = byType[ex.type] || []).push(ex);
+
+  box.innerHTML =
+    '<button class="btn-back-plain" onclick="lsBack()">← Tất cả đề</button>' +
+    '<div class="ls-prompt">' +
+      '<div class="ls-prompt-vi">' + escHtml(t.prompt_vi || '') + '</div>' +
+      '<div class="ls-prompt-en">' + escHtml(t.prompt_en) + '</div>' +
+      '<div class="ls-prompt-meta">Trục ' + t.truc + ' · ' + escHtml(t.truc_name) + '</div>' +
+    '</div>' +
+    '<div class="ls-vocab">' +
+      '<h4>Bảng từ của đề</h4>' +
+      '<div class="ls-vocab-head"><span>Hay dùng</span><span>Thay bằng</span><span>Nghĩa</span></div>' +
+      (t.key_vocab || []).map(v =>
+        '<div class="ls-vocab-row">' +
+          '<span class="ls-v-basic">' + escHtml(v.basic) + '</span>' +
+          '<span class="ls-v-acad">' + escHtml(v.academic) + '</span>' +
+          '<span class="ls-v-vi">' + escHtml(v.vi) + '</span>' +
+        '</div>').join('') +
+    '</div>' +
+    LS_TYPE_ORDER.filter(k => byType[k]).map(k =>
+      '<div class="ls-group">' +
+        '<h4 class="ls-group-title">' + LS_TYPE_LABEL[k] + ' <span class="ls-group-n">' + byType[k].length + ' bài</span></h4>' +
+        byType[k].map(ex => lsExerciseHtml(ex, !!done[ex.id])).join('') +
+      '</div>').join('');
+
+  // Restore any half-written answers.
+  for (const ex of _lsExercises) {
+    const ta = document.getElementById('ls-in-' + ex.id);
+    if (ta) { ta.value = lsDraft(ex.id); ta.oninput = () => { lsDraft(ex.id, ta.value); if (ex.type === 'paragraph') lsCountPara(ex.id); }; }
+    if (ex.type === 'paragraph') lsCountPara(ex.id);
+  }
+}
+
+function lsExerciseHtml(ex, isDone) {
+  const s = ex.stimulus || {};
+  let body = '';
+  if (ex.type === 'fix_error') {
+    body = '<div class="ls-stim ls-stim-bad">' + escHtml(s.sentence) + '</div>' +
+           '<div class="ls-hint">Loại lỗi, ' + escHtml(s.error_type) + '</div>';
+  } else if (ex.type === 'translate') {
+    body = '<div class="ls-stim">' + escHtml(s.vi) + '</div>' +
+           '<div class="ls-req">Bắt buộc, ' + escHtml(s.requirement_vi) + '</div>' +
+           ((s.hint_words || []).length ? '<div class="ls-hint">Dùng, ' + s.hint_words.map(w => '<em>' + escHtml(w) + '</em>').join(', ') + '</div>' : '');
+  } else if (ex.type === 'causal_link') {
+    body = '<div class="ls-chain">' +
+             '<div class="ls-chain-row"><span class="ls-chain-k">Lý do</span><span>' + escHtml(s.cause) + '</span></div>' +
+             '<div class="ls-chain-row ls-chain-gap"><span class="ls-chain-k">Ta viết</span><span class="ls-chain-blank">một câu nối</span></div>' +
+             '<div class="ls-chain-row"><span class="ls-chain-k">Kết quả</span><span>' + escHtml(s.result) + '</span></div>' +
+           '</div>';
+  } else if (ex.type === 'paragraph') {
+    body = ((s.side_options || []).length
+             ? '<div class="ls-sides"><span class="ls-sides-k">Chọn một phía</span>' +
+               s.side_options.map(o => '<span class="ls-side">' + escHtml(o) + '</span>').join('') + '</div>'
+             : '') +
+           '<div class="ls-para-frame">' +
+             (s.frame || []).map(f => '<div class="ls-frame-row"><span class="ls-frame-n">' + f.n + '</span>' +
+               '<span class="ls-frame-fn">' + escHtml(f.function) + '</span>' +
+               '<span class="ls-frame-st">' + (f.starters || []).map(x => escHtml(x)).join(' · ') + '</span></div>').join('') +
+           '</div>' +
+           '<div class="ls-constraints">' + (s.constraints || []).map(c => '<div>' + escHtml(c) + '</div>').join('') + '</div>';
+  }
+
+  const rows = ex.type === 'paragraph' ? 8 : 2;
+  return '' +
+    '<div class="ls-ex' + (isDone ? ' done' : '') + '" id="ls-ex-' + ex.id + '">' +
+      '<div class="ls-ex-head">' +
+        '<span class="ls-ex-order">' + ex.order + '</span>' +
+        '<span class="ls-ex-instr">' + escHtml(ex.instruction_vi) + '</span>' +
+        (isDone ? '<span class="ls-ex-done">đã làm</span>' : '') +
+      '</div>' +
+      body +
+      '<textarea class="ls-input" id="ls-in-' + ex.id + '" rows="' + rows + '" placeholder="Viết câu trả lời ở đây…"></textarea>' +
+      (ex.type === 'paragraph' ? '<div class="ls-para-count" id="ls-count-' + ex.id + '"></div>' : '') +
+      '<button class="btn btn-primary btn-sm" onclick="lsReveal(\'' + ex.id + '\')" id="ls-btn-' + ex.id + '">Xem đáp án mẫu</button>' +
+      '<div class="ls-answer" id="ls-ans-' + ex.id + '"></div>' +
     '</div>';
+}
+
+// Live counters for the paragraph, so the four constraints can be checked while
+// writing rather than after.
+function lsCountPara(id) {
+  const ta = document.getElementById('ls-in-' + id);
+  const out = document.getElementById('ls-count-' + id);
+  if (!ta || !out) return;
+  const text = ta.value.trim();
+  const sents = text ? text.split(/(?<=[.!?])\s+/).filter(Boolean) : [];
+  const longest = sents.reduce((m, s) => Math.max(m, s.trim().split(/\s+/).filter(Boolean).length), 0);
+  const over = sents.filter(s => s.trim().split(/\s+/).filter(Boolean).length > 15).length;
+  out.innerHTML =
+    '<span class="' + (sents.length === 6 ? 'ok' : '') + '">' + sents.length + ' câu</span>' +
+    '<span class="' + (over === 1 ? 'ok' : '') + '">' + over + ' câu trên 15 từ</span>' +
+    '<span>câu dài nhất ' + longest + ' từ</span>';
+}
+
+// The answer is fetched into the DOM only on click, so it cannot be read from
+// the page source before the student has tried.
+function lsReveal(id) {
+  const ex = _lsExercises.find(e => e.id === id);
+  const out = document.getElementById('ls-ans-' + id);
+  const btn = document.getElementById('ls-btn-' + id);
+  if (!ex || !out) return;
+  if (out.innerHTML) { out.innerHTML = ''; btn.textContent = 'Xem đáp án mẫu'; return; }
+
+  out.innerHTML =
+    '<div class="ls-ans-box">' +
+      '<div class="ls-ans-label">Đáp án mẫu</div>' +
+      '<div class="ls-ans-text">' + escHtml(ex.model_answer) + '</div>' +
+      ((ex.accepted_variants || []).length
+        ? '<div class="ls-ans-label">Cách viết khác cũng đúng</div>' +
+          (ex.accepted_variants).map(v => '<div class="ls-ans-alt">' + escHtml(v) + '</div>').join('')
+        : '') +
+      '<div class="ls-ans-label">Tự soát</div>' +
+      '<div class="ls-checks">' +
+        (ex.self_check || []).map((c, i) =>
+          '<label class="ls-check"><input type="checkbox" id="ls-chk-' + ex.id + '-' + i + '"> ' + escHtml(c) + '</label>').join('') +
+      '</div>' +
+      '<div class="ls-why">' + escHtml(ex.explanation_vi) + '</div>' +
+    '</div>';
+  btn.textContent = 'Ẩn đáp án';
+  lsMarkDone(ex.id);
+  const card = document.getElementById('ls-ex-' + ex.id);
+  if (card && !card.classList.contains('done')) {
+    card.classList.add('done');
+    card.querySelector('.ls-ex-head').insertAdjacentHTML('beforeend', '<span class="ls-ex-done">đã làm</span>');
+  }
 }
 
 async function loadPracticeSentences() {
