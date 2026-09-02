@@ -1726,10 +1726,9 @@
             <div class="vl-picker-row">
               <label>CEFR Level</label>
               <div class="vl-level-chips">
-                <button class="vl-chip vl-level-chip" data-level="B1" onclick="selectVocabLevel('B1')">B1</button>
-                <button class="vl-chip vl-level-chip" data-level="B2" onclick="selectVocabLevel('B2')">B2</button>
-                <button class="vl-chip vl-level-chip" data-level="C1" onclick="selectVocabLevel('C1')">C1</button>
-                <button class="vl-chip vl-level-chip" data-level="C2" onclick="selectVocabLevel('C2')">C2</button>
+                <button class="vl-chip vl-level-chip active" data-level="all" onclick="selectVocabLevel('all')">Tất cả</button>
+                <button class="vl-chip vl-level-chip" data-level="colloc" onclick="selectVocabLevel('colloc')">Collocation</button>
+                <button class="vl-chip vl-level-chip" data-level="verb" onclick="selectVocabLevel('verb')">Precision verb</button>
               </div>
             </div>
             <div id="vl-word-preview" class="vl-word-preview"></div>
