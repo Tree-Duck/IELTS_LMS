@@ -1,0 +1,293 @@
+[
+ {
+  "id": "t001-fix-01",
+  "topic_id": "t001",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": [
+   "subject_verb_agreement"
+  ],
+  "instruction_vi": "Câu dưới sai đúng một chỗ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Public funding allow students from low-income households to apply for courses they would otherwise rule out.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Public funding allows students from low-income households to apply for courses they would otherwise rule out.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, funding là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Funding là danh từ không đếm được, đi với động từ số ít nên phải là allows. Phần còn lại của câu đã đúng."
+ },
+ {
+  "id": "t001-fix-02",
+  "topic_id": "t001",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": [
+   "prepositions"
+  ],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Councils often divert funds from adult education for university places.",
+   "error_type": "Sai giới từ trong cụm cố định"
+  },
+  "model_answer": "Councils often divert funds from adult education to university places.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là divert funds from A to B, tìm chữ đứng ngay trước university",
+   "Kiểm chữ from vẫn còn nguyên ở vế đầu"
+  ],
+  "explanation_vi": "Cụm cố định là divert funds from A to B, không dùng for. Chỗ tiền chảy tới luôn đi với to."
+ },
+ {
+  "id": "t001-fix-03",
+  "topic_id": "t001",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": [
+   "passive_present"
+  ],
+  "instruction_vi": "Câu dưới thiếu một chữ trong thể bị động. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "In many countries tuition fees covered by public funding rather than by families.",
+   "error_type": "Bị động thiếu động từ to be"
+  },
+  "model_answer": "In many countries tuition fees are covered by public funding rather than by families.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm động từ to be đứng trước covered, phải có are",
+   "Kiểm covered vẫn ở dạng cột ba, không đổi thành cover"
+  ],
+  "explanation_vi": "Bị động hiện tại đơn cần are cộng phân từ hai vì chủ ngữ số nhiều. Thiếu are thì câu không còn động từ chính."
+ },
+ {
+  "id": "t001-link-01",
+  "topic_id": "t001",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "The state pays tuition for every applicant out of public funding.",
+   "result": "Adults who lose their jobs find the evening retraining courses closed."
+  },
+  "model_answer": "When councils balance the budget, they cut adult education to cover the subsidy.",
+  "accepted_variants": [
+   "When a council funds tuition for all applicants, it trims the evening class budget first.",
+   "Because the subsidy has to come from somewhere, councils close the cheapest courses to pay for it."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là people hay society thì viết lại",
+   "Kiểm có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là hội đồng cắt khoản chi. Không có bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t001-link-02",
+  "topic_id": "t001",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "Means-tested support pays tuition only for households below an income line.",
+   "result": "The same budget also keeps three public libraries open on Sundays."
+  },
+  "model_answer": "Because fewer applicants qualify, the council spends less and keeps the library rota unchanged.",
+  "accepted_variants": [
+   "Since the support reaches a smaller group, the money left over covers the Sunday staffing.",
+   "When only low-income families claim the subsidy, the remaining funds stay with other services."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số tiền còn lại",
+   "Kiểm nhóm hưởng lợi ở kết quả khác nhóm nhận trợ cấp ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là phần ngân sách còn dư. Nêu được thì kết quả mới có chỗ bám."
+ },
+ {
+  "id": "t001-tran-01",
+  "topic_id": "t001",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": [
+   "passive_present"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Ở nhiều nước, học phí đại học được nhà nước trợ giá.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": [
+    "subsidise the cost of"
+   ]
+  },
+  "model_answer": "In many countries, the cost of university tuition is subsidised by the state.",
+  "accepted_variants": [
+   "In many countries, university tuition is subsidised by the government.",
+   "University tuition is subsidised by the state in many countries."
+  ],
+  "self_check": [
+   "Kiểm có is hoặc are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là học phí, không phải nhà nước",
+   "Kiểm cụm subsidise xuất hiện ở dạng subsidised"
+  ],
+  "explanation_vi": "Bị động đặt học phí lên làm chủ ngữ, đúng trọng tâm câu tiếng Việt. Chủ động sẽ đổi trọng tâm sang nhà nước."
+ },
+ {
+  "id": "t001-tran-02",
+  "topic_id": "t001",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy khoản trợ cấp giúp được nhiều gia đình, người nộp thuế vẫn là bên gánh chi phí.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": [
+    "the taxpayer foots the bill"
+   ]
+  },
+  "model_answer": "Although the subsidy helps many families, the taxpayer still foots the bill.",
+  "accepted_variants": [
+   "Although the support reaches many households, it is the taxpayer who foots the bill.",
+   "Although many families benefit from the subsidy, the taxpayer foots the bill."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải Though hay But",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cụm foots the bill có chữ s vì chủ ngữ số ít"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên phải có mệnh đề chính theo sau. Thiếu vế sau thì câu chưa trọn."
+ },
+ {
+  "id": "t001-tran-03",
+  "topic_id": "t001",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": [
+   "relative_clause"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những gia đình chưa từng có ai học đại học vẫn phải trả phần thuế nuôi khoản trợ cấp này.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": [
+    "public funding"
+   ]
+  },
+  "model_answer": "Households who have never sent anyone to university still pay for this public funding.",
+  "accepted_variants": [
+   "Families who have never had a graduate still contribute to this public funding.",
+   "Households who never attended university still pay the taxes behind this public funding."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Đếm chữ s số nhiều ở households"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ gắn thông tin vào đúng danh từ mà không cần tách câu. Bỏ who thì hai ý dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t001-para-01",
+  "topic_id": "t001",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": [
+   "complex_sentence",
+   "passive_present"
+  ],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": [
+    "Nhà nước nên trả học phí",
+    "Nhà nước không nên trả đại trà"
+   ],
+   "frame": [
+    {
+     "n": 1,
+     "function": "Nêu ý kiến, chọn hẳn một phía",
+     "starters": [
+      "In my opinion, ...",
+      "I believe that ..."
+     ]
+    },
+    {
+     "n": 2,
+     "function": "Lý do thứ nhất",
+     "starters": [
+      "The main reason is that ..."
+     ]
+    },
+    {
+     "n": 3,
+     "function": "Hệ quả của lý do thứ nhất, rồi sao nữa",
+     "starters": [
+      "This means that ...",
+      "As a result, ..."
+     ]
+    },
+    {
+     "n": 4,
+     "function": "Lý do thứ hai",
+     "starters": [
+      "Another reason is that ..."
+     ]
+    },
+    {
+     "n": 5,
+     "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3",
+     "starters": [
+      "Consequently, ...",
+      "In turn, ..."
+     ]
+    },
+    {
+     "n": 6,
+     "function": "Ví dụ, kể được ai làm gì",
+     "starters": [
+      "For example, ...",
+      "In my class, ..."
+     ]
+    }
+   ],
+   "required_phrases": [
+    "public funding",
+    "means-tested support",
+    "the taxpayer foots the bill",
+    "crowd out other spending"
+   ],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, public funding should reach low-income families only. The main reason is that universal schemes crowd out other spending. Smaller budgets are cut whenever the taxpayer foots the bill for everyone. Another reason is that means-tested support sends the money where it changes a decision. Consequently, a student who would have dropped out on cost alone stays enrolled, which is exactly what the scheme was built to do. For example, one council closed its evening classes after widening a tuition scheme.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc, nên đoạn không lặp ý. Câu năm dài hơn vì nó vừa nêu hệ quả vừa chốt lại mục đích."
+ }
+]

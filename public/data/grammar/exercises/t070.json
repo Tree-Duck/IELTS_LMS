@@ -1,0 +1,297 @@
+[
+ {
+  "id": "t070-fix-01",
+  "topic_id": "t070",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": [
+   "articles"
+  ],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Public figures keep reasonable expectation of privacy inside their own home.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Public figures keep a reasonable expectation of privacy inside their own home.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là expectation",
+   "Kiểm chữ a đứng ngay trước reasonable"
+  ],
+  "explanation_vi": "Expectation là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t070-fix-02",
+  "topic_id": "t070",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": [
+   "prepositions"
+  ],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Media coverage about a private illness rarely informs anyone.",
+   "error_type": "Sai giới từ trong cụm cố định"
+  },
+  "model_answer": "Media coverage of a private illness rarely informs anyone.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là media coverage of, tìm chữ đứng ngay sau coverage",
+   "Kiểm động từ informs vẫn giữ chữ s"
+  ],
+  "explanation_vi": "Coverage luôn đi với of khi nêu chủ đề được đưa tin. About dùng được với talk hay write, không dùng với coverage."
+ },
+ {
+  "id": "t070-fix-03",
+  "topic_id": "t070",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": [
+   "verb_tense"
+  ],
+  "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "An actor consented to interviews about their professional work last year, so newspapers assume the same today.",
+   "error_type": "Dùng quá khứ đơn cho một sự thật hiện tại"
+  },
+  "model_answer": "An actor consents to interviews about their professional work, so newspapers assume the same today.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm trạng từ chỉ thời gian trong câu, ở đây là today",
+   "Kiểm động từ đầu câu ở hiện tại đơn, có chữ s vì chủ ngữ số ít"
+  ],
+  "explanation_vi": "Vế sau nói chuyện hiện tại nên vế đầu phải cùng thì. Quá khứ đơn ở đây làm hai vế lệch mốc thời gian."
+ },
+ {
+  "id": "t070-link-01",
+  "topic_id": "t070",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "Photographs of a singer at home sell more copies than a concert review.",
+   "result": "Two reporters wait outside a primary school gate every afternoon."
+  },
+  "model_answer": "When editors pay more for private shots, photographers follow public figures home.",
+  "accepted_variants": [
+   "When a home photograph earns twice a stage one, agencies send someone to the house.",
+   "Because the private picture pays better, photographers move from the venue to the street."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là media hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là biên tập trả giá cao hơn. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t070-link-02",
+  "topic_id": "t070",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A newspaper prints the home address of one of the public figures it covers.",
+   "result": "Two neighbouring families move out within the year."
+  },
+  "model_answer": "Once the street is named, strangers gather outside every house on it.",
+  "accepted_variants": [
+   "After the address appears, people arrive at the corner and stay for hours.",
+   "When the road is printed, the whole terrace loses the quiet it had."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì thay đổi, ở đây là số người tụ tập"
+  ],
+  "explanation_vi": "Chuỗi chỉ đủ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là hàng xóm. Nếu vẫn là chính trị gia thì chưa chuyển được actor."
+ },
+ {
+  "id": "t070-tran-01",
+  "topic_id": "t070",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": [
+   "passive_present"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Đời tư của người của công chúng thường bị đem ra đưa tin.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": [
+    "public figures"
+   ]
+  },
+  "model_answer": "The private lives of public figures are often reported in detail.",
+  "accepted_variants": [
+   "The private lives of public figures are frequently reported by newspapers.",
+   "Private matters involving public figures are often reported at length."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước reported",
+   "Kiểm chủ ngữ là đời tư, không phải báo chí",
+   "Kiểm cụm public figures có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ đời tư ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Chủ động sẽ đẩy báo chí lên đầu."
+ },
+ {
+  "id": "t070-tran-02",
+  "topic_id": "t070",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": [
+   "complex_sentence"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy sự tò mò của công chúng là có thật, nó không giống với vấn đề vì lợi ích công.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": [
+    "public curiosity",
+    "a matter of public interest"
+   ]
+  },
+  "model_answer": "Although public curiosity is real, it is not a matter of public interest.",
+  "accepted_variants": [
+   "Although public curiosity exists, it is not the same as a matter of public interest.",
+   "Although public curiosity runs high, that is not a matter of public interest."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này khác nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t070-tran-03",
+  "topic_id": "t070",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": [
+   "relative_clause"
+  ],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những diễn viên chỉ đồng ý cho phỏng vấn về công việc chuyên môn thì không hề đồng ý mở cửa nhà mình.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": [
+    "consent to",
+    "their professional work"
+   ]
+  },
+  "model_answer": "Actors who consent to interviews about their professional work do not consent to home visits.",
+  "accepted_variants": [
+   "Performers who consent to questions about their professional work never agreed to open their homes.",
+   "Actors who consent to publicity for their professional work do not consent to household access."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm consent to xuất hiện đủ hai lần hoặc ít nhất một lần"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm diễn viên đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t070-para-01",
+  "topic_id": "t070",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": [
+   "complex_sentence",
+   "passive_present"
+  ],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": [
+    "Nổi tiếng thì phải chấp nhận",
+    "Nổi tiếng không đồng nghĩa với mất riêng tư"
+   ],
+   "frame": [
+    {
+     "n": 1,
+     "function": "Nêu ý kiến, chọn hẳn một phía",
+     "starters": [
+      "In my opinion, ...",
+      "I believe that ..."
+     ]
+    },
+    {
+     "n": 2,
+     "function": "Lý do thứ nhất",
+     "starters": [
+      "The main reason is that ..."
+     ]
+    },
+    {
+     "n": 3,
+     "function": "Hệ quả của lý do thứ nhất, rồi sao nữa",
+     "starters": [
+      "This means that ...",
+      "As a result, ..."
+     ]
+    },
+    {
+     "n": 4,
+     "function": "Lý do thứ hai",
+     "starters": [
+      "Another reason is that ..."
+     ]
+    },
+    {
+     "n": 5,
+     "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3",
+     "starters": [
+      "Consequently, ...",
+      "In turn, ..."
+     ]
+    },
+    {
+     "n": 6,
+     "function": "Ví dụ, kể được ai làm gì",
+     "starters": [
+      "For example, ...",
+      "In my class, ..."
+     ]
+    }
+   ],
+   "required_phrases": [
+    "public figures",
+    "their professional work",
+    "a reasonable expectation of privacy",
+    "public curiosity",
+    "a matter of public interest",
+    "media coverage of"
+   ],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "I believe that fame is not consent to unlimited coverage. The main reason is that public figures offer access to their professional work, nothing more. As a result, a reasonable expectation of privacy survives at the front door. Another reason is that public curiosity is measured by sales rather than by whether something is a matter of public interest. In turn, media coverage of a private illness informs nobody. For example, one photographer waited outside a school gate for a week.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu bốn dài hơn vì nó phải đặt hai khái niệm cạnh nhau để so."
+ }
+]

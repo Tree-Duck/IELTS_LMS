@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t030-fix-01",
+  "topic_id": "t030",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Many design choice make a notification harder to ignore than a ringing phone.",
+   "error_type": "Thiếu s số nhiều sau many"
+  },
+  "model_answer": "Many design choices make a notification harder to ignore than a ringing phone.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm chữ many, danh từ đứng sau nó phải ở số nhiều",
+   "Đếm chữ s cuối choice, phải có một chữ"
+  ],
+  "explanation_vi": "Many luôn đi với danh từ đếm được số nhiều nên phải là choices. Động từ make đã đúng vì chủ ngữ số nhiều."
+ },
+ {
+  "id": "t030-fix-02",
+  "topic_id": "t030",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Compulsive checking break the long stretches of attention that reading needs.",
+   "error_type": "Chia động từ theo chủ ngữ danh động từ"
+  },
+  "model_answer": "Compulsive checking breaks the long stretches of attention that reading needs.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ là checking, một danh động từ nên coi như số ít",
+   "Đếm chữ s cuối break, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Danh động từ làm chủ ngữ thì luôn đi với động từ số ít nên phải là breaks. Chữ checking dễ bị nhìn nhầm thành số nhiều."
+ },
+ {
+  "id": "t030-fix-03",
+  "topic_id": "t030",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Heavy screen use is common now, few schools have changed their rules.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "Heavy screen use is common now, yet few schools have changed their rules.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy, phải có liên từ hoặc dấu chấm phẩy. Thêm yet là cách gọn nhất."
+ },
+ {
+  "id": "t030-link-01",
+  "topic_id": "t030",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "Apps are built to capture attention for as long as possible.",
+   "result": "Students finish a chapter in twice the time it used to take."
+  },
+  "model_answer": "When students read with the phone face up, they stop at every banner.",
+  "accepted_variants": [
+   "When a notification arrives mid-page, students reread the paragraph they had just started.",
+   "When teenagers study beside an unlocked phone, they break off several times an hour."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là people hay society thì viết lại",
+   "Kiểm câu mở bằng when cộng danh từ số nhiều, không dựng một nhân vật",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải là một hành động quay được, ở đây là dừng lại ở mỗi thông báo. Thiếu bước đó thì kết quả không có chỗ bám."
+ },
+ {
+  "id": "t030-link-02",
+  "topic_id": "t030",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A school collects phones in a box at the start of each lesson.",
+   "result": "Teachers report that class discussions run longer without prompting."
+  },
+  "model_answer": "Without a screen to check, sustained concentration lasts a whole lesson instead of minutes.",
+  "accepted_variants": [
+   "With the phones away, the number of interruptions in an hour falls to almost none.",
+   "Once the box is closed, students hold a single thread of thought far longer."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là độ dài tập trung",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là thời gian tập trung liên tục. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t030-tran-01",
+  "topic_id": "t030",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Các ứng dụng được thiết kế để giữ chân sự chú ý càng lâu càng tốt.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["capture attention"]
+  },
+  "model_answer": "Applications are designed to capture attention for as long as possible.",
+  "accepted_variants": [
+   "Apps are built to capture attention for as long as they can.",
+   "These applications are designed to capture attention over long periods."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước designed",
+   "Kiểm designed ở dạng cột ba, không phải design",
+   "Kiểm cụm capture attention có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động đặt ứng dụng làm chủ ngữ, đúng trọng tâm câu tiếng Việt. Người thiết kế không quan trọng bằng chuyện thiết kế có chủ đích."
+ },
+ {
+  "id": "t030-tran-02",
+  "topic_id": "t030",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy bản thân thiết bị trung tính, cách các ứng dụng được thiết kế lại là một quyết định vì lợi nhuận.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["the device itself is neutral", "a commercial decision"]
+  },
+  "model_answer": "Although the device itself is neutral, the way apps are built is a commercial decision.",
+  "accepted_variants": [
+   "Although the device itself is neutral, how these apps are designed remains a commercial decision.",
+   "Although the device itself is neutral, the design behind it is a commercial decision."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải But",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Thiếu vế sau thì câu chưa trọn."
+ },
+ {
+  "id": "t030-tran-03",
+  "topic_id": "t030",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những học sinh học cạnh một chiếc điện thoại mở khoá thì mất khả năng tập trung lâu.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["sustained concentration"]
+  },
+  "model_answer": "Students who study beside an unlocked phone lose their sustained concentration.",
+  "accepted_variants": [
+   "Students who work next to an unlocked phone give up sustained concentration.",
+   "Learners who revise beside an unlocked screen lose sustained concentration."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Đếm chữ s số nhiều ở students"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ gắn điều kiện vào đúng nhóm người mà không cần tách câu. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t030-para-01",
+  "topic_id": "t030",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Thiết bị di động gây hại", "Thiết bị không có lỗi, cách thiết kế mới có lỗi"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["the device itself is neutral", "design choices", "compulsive checking", "heavy screen use", "sustained concentration"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the device itself is neutral. The main reason is that design choices decide how hard it is to stop. This means that compulsive checking follows the app rather than the person. Another reason is that heavy screen use costs something measurable. In turn, a student who reaches for the phone every few minutes loses the long stretch of attention that difficult reading needs. For example, one class kept phones in a box and finished the set text.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó vừa nêu hệ quả vừa nói rõ cái bị mất."
+ }
+]

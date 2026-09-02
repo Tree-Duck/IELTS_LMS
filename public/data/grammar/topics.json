@@ -1,0 +1,1029 @@
+[
+ {
+  "id": "t001",
+  "prompt_en": "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?",
+  "thesis_en": "The advantages outweigh the disadvantages only where the support is means-tested, since universal funding moves money towards students who will later out-earn the taxpayers paying for it.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "advantage_disadvantage",
+  "prompt_vi": "Ở một số nước sinh viên tự trả học phí đại học, ở nước khác thì nhà nước trả. Việc nhà nước trả có lợi nhiều hơn hại không?",
+  "key_vocab": [
+   {
+    "basic": "pay for",
+    "academic": "subsidise the cost of",
+    "vi": "trợ giá cho"
+   },
+   {
+    "basic": "money from the government",
+    "academic": "public funding",
+    "vi": "ngân sách công"
+   },
+   {
+    "basic": "poor students",
+    "academic": "students from low-income households",
+    "vi": "sinh viên nhà thu nhập thấp"
+   },
+   {
+    "basic": "spend money on",
+    "academic": "divert funds from",
+    "vi": "chuyển ngân sách từ chỗ này sang chỗ khác"
+   },
+   {
+    "basic": "people who pay tax",
+    "academic": "the taxpayer foots the bill",
+    "vi": "người nộp thuế gánh"
+   },
+   {
+    "basic": "help based on income",
+    "academic": "means-tested support",
+    "vi": "hỗ trợ theo thu nhập"
+   },
+   {
+    "basic": "take money from other things",
+    "academic": "crowd out other spending",
+    "vi": "chiếm chỗ khoản chi khác"
+   },
+   {
+    "basic": "worth the money",
+    "academic": "deliver value for money",
+    "vi": "đáng đồng tiền"
+   }
+  ]
+ },
+ {
+  "id": "t002",
+  "prompt_en": "Some people think secondary school students should study international news as one of their subjects, while others believe that this is a waste of valuable school time. Discuss both these views and give your own opinion.",
+  "thesis_en": "Both sides are arguing about what the timetable should give up, and international news earns a place only if it replaces a weaker subject rather than being added on top.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t003",
+  "prompt_en": "Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?",
+  "thesis_en": "Funded activities help only if they replace paid tutoring rather than sitting on top of it, since what harms the child is the total number of hours worked.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t004",
+  "prompt_en": "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+  "thesis_en": "Prevention tends to deliver more health per unit of spending, yet it cannot be funded by cutting treatment, because the people already ill have no alternative provider.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t005",
+  "prompt_en": "In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?",
+  "thesis_en": "Government carries the part of this that families cannot reach alone, namely what is sold at the school gate and what a healthy meal costs relative to an unhealthy one.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t006",
+  "prompt_en": "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+  "thesis_en": "Air quality and housing reach every resident of a district at once, which makes them a better use of a health budget than campaigns that reach only those already paying attention.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t007",
+  "prompt_en": "To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?",
+  "thesis_en": "Investment in young people pays back over a longer horizon than most council budgets run, and that mismatch is the real obstacle rather than any disagreement about the value.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t008",
+  "prompt_en": "Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.",
+  "thesis_en": "Elite funding buys visibility and participation funding buys health, and since the second reaches far more people the case for redirecting the money is stronger.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t009",
+  "prompt_en": "Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?",
+  "thesis_en": "Outdoor art is worth public money where people pass it without choosing to, and hard to justify where the same sum would keep a library open.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t010",
+  "prompt_en": "Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?",
+  "thesis_en": "Art improves a street that already works and cannot rescue one that does not, so it belongs after the pavement and the lighting rather than before them.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree",
+  "note_teacher": "Gần trùng với đề Nghệ thuật số 1. Cùng kho ý, khác mỗi loại hình nghệ thuật."
+ },
+ {
+  "id": "t011",
+  "prompt_en": "A significant amount of time and resources is dedicated to protecting wild animals. To what extent do you agree or disagree that these resources should be spent elsewhere?",
+  "thesis_en": "I disagree, because extinction is the one outcome on the list of competing claims that no later budget can reverse.",
+  "truc": 1,
+  "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t012",
+  "prompt_en": "Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.",
+  "thesis_en": "Neither description fits, since the effect appears negligible for most players and concentrated in a small minority, which argues for enforced age limits rather than prohibition.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t013",
+  "prompt_en": "Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?",
+  "thesis_en": "These laws exist because an individual worker cannot refuse extra hours without cost, and they are positive precisely because they take that choice away from the individual.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t014",
+  "prompt_en": "Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?",
+  "thesis_en": "Flights are the easier target and the smaller prize, since car use is daily and universal while long-haul flying is occasional and concentrated among a few travellers.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t015",
+  "prompt_en": "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?",
+  "thesis_en": "Pricing fuel changes behaviour faster than persuasion does, though calling it the best way overstates the case while millions have no alternative route to work.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t016",
+  "prompt_en": "Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?",
+  "thesis_en": "A sales ban relocates the purchase rather than preventing it, so the stronger measure is to change what is cheapest and most visible on the shelf.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t017",
+  "prompt_en": "The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?",
+  "thesis_en": "Harsher penalties work only when drivers expect to be caught, which makes enforcement rather than severity the binding constraint.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t018",
+  "prompt_en": "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+  "thesis_en": "The gain is a day of clean air and a visible proof of concept, the cost is a disruption that local businesses absorb each time, and the balance turns on whether the city builds anything permanent afterwards.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t019",
+  "prompt_en": "Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike. To what extent do you agree or disagree?",
+  "thesis_en": "Raising the age only postpones the risk, since accident rates appear to track inexperience more closely than youth.",
+  "truc": 2,
+  "truc_name": "Cấm Và Hạn Chế Có Hiệu Quả Không",
+  "theme": "government",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t020",
+  "prompt_en": "Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?",
+  "thesis_en": "I disagree, because relevance is the wrong test, and customs that carry practical knowledge fall out of use long before anyone decides they are obsolete.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t021",
+  "prompt_en": "In some parts of the world it is becoming increasingly popular to try to find out one's own family history. Why do you think people do this? Do you think it is a positive or negative development?",
+  "thesis_en": "People look for a fixed point when the places their families came from have changed beyond recognition, and the development stays positive so long as it remains curiosity rather than becoming a claim.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t022",
+  "prompt_en": "If people go to live in another country, they should follow the local customs and traditions. To what extent do you agree or disagree?",
+  "thesis_en": "Newcomers owe compliance with the local rules that affect other people, and nothing beyond that, and the difficulty is that most societies disagree about where that line falls.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t023",
+  "prompt_en": "In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree with this belief?",
+  "thesis_en": "I agree in part, since what disappears is the shared meal rather than the recipe, and the loss is an hour families used to spend together rather than a cuisine.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t024",
+  "prompt_en": "To what extent do you agree or disagree that international fast food is replacing traditional food and negatively affecting families and society?",
+  "thesis_en": "I agree in part, since what disappears is the shared meal rather than the recipe, and the loss is an hour families used to spend together rather than a cuisine.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "agree_disagree",
+  "note_teacher": "Trùng nội dung với đề Thực phẩm và sức khỏe số 3. Cùng kho ý, chỉ khác cách diễn đạt."
+ },
+ {
+  "id": "t025",
+  "prompt_en": "Museums and art galleries should concentrate on works that show history and culture of their own country rather than works of the other parts in the world. To what extent do you agree or disagree?",
+  "thesis_en": "A collection that shows only its own country teaches visitors nothing about where that country sits, which defeats the purpose of putting the objects side by side.",
+  "truc": 3,
+  "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t026",
+  "prompt_en": "Many people say that schools are no longer necessary as a lot of information is available on the internet, so children can study at home. To what extent do you agree or disagree?",
+  "thesis_en": "Schools supply supervision, sequencing and peers rather than information, and no search engine provides any of the three.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t027",
+  "prompt_en": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+  "thesis_en": "The technology raised the number of contacts a person has and lowered the cost of ending any one of them, and it is the second change that does the damage.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t028",
+  "prompt_en": "More and more people no longer read newspapers or watch TV programs to get news. They get news about the world through the Internet. Is this a positive or negative development?",
+  "thesis_en": "This is negative in its current form because the shift removed the editor without replacing the function the editor was performing.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t029",
+  "prompt_en": "Some groups of people have benefited from modern communications technology, but some people do not benefit at all. To what extent do you agree or disagree?",
+  "thesis_en": "I agree, and the group that gains least is defined by which services have withdrawn their offline alternative rather than by age.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t030",
+  "prompt_en": "Some people think that the rapid development of smart mobile devices, e.g. smartphones, tablets and other mobile devices, are disadvantageous to human. Agree or disagree?",
+  "thesis_en": "The devices themselves are neutral, whereas the design choices that make them hard to put down are a commercial decision rather than a technical necessity.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree",
+  "prompt_vi": "Có ý kiến cho rằng điện thoại thông minh, máy tính bảng và các thiết bị di động phát triển quá nhanh nên gây hại cho con người. Đồng ý hay không đồng ý?",
+  "key_vocab": [
+   {
+    "basic": "use the phone a lot",
+    "academic": "heavy screen use",
+    "vi": "dùng màn hình nhiều"
+   },
+   {
+    "basic": "cannot stop using",
+    "academic": "compulsive checking",
+    "vi": "kiểm tra máy liên tục"
+   },
+   {
+    "basic": "the way apps are made",
+    "academic": "design choices",
+    "vi": "lựa chọn thiết kế"
+   },
+   {
+    "basic": "make people keep looking",
+    "academic": "capture attention",
+    "vi": "giữ chân sự chú ý"
+   },
+   {
+    "basic": "hard to focus",
+    "academic": "sustained concentration",
+    "vi": "khả năng tập trung lâu"
+   },
+   {
+    "basic": "good things about it",
+    "academic": "convey clear benefits",
+    "vi": "mang lại lợi ích rõ"
+   },
+   {
+    "basic": "company wants money",
+    "academic": "a commercial decision",
+    "vi": "quyết định vì lợi nhuận"
+   },
+   {
+    "basic": "not the fault of the phone",
+    "academic": "the device itself is neutral",
+    "vi": "bản thân thiết bị trung tính"
+   }
+  ]
+ },
+ {
+  "id": "t031",
+  "prompt_en": "More people today put their personal and private information online (address, telephone number, credit card number) to do everyday activities such as banking, shopping, and socializing. Is this a positive or negative development?",
+  "thesis_en": "This remains a negative development while the person who supplies the data carries the loss when it leaks, since nothing else pushes the holder to protect it.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t032",
+  "prompt_en": "Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.",
+  "thesis_en": "Both views describe the same machine under different labour rules, and since the saving currently goes to the owner rather than the displaced worker, I share the second concern.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t033",
+  "prompt_en": "Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.",
+  "thesis_en": "Technology appears to have relocated crime more than reduced it, moving it from a street where it was visible to a network where much of it is neither reported nor counted.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t034",
+  "prompt_en": "There have been many inventions in human history, such as the wheel. Some people think the most important thing is the internet. To what extent do you agree or disagree with this opinion?",
+  "thesis_en": "The internet changed how fast we exchange what is already known, which is a narrower claim than calling it the most important invention, and a defensible one.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t035",
+  "prompt_en": "Nowadays, fewer people are writing by hand due to the widespread use of computers and digital technology. Do the advantages of this development outweigh the disadvantages?",
+  "thesis_en": "The advantages outweigh the disadvantages, though what we give up is the selection that slow writing forced rather than the skill of forming letters.",
+  "truc": 4,
+  "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
+  "theme": "technology",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t036",
+  "prompt_en": "Nowadays, a growing number of children are committing crimes. What are the reasons for this, and what punishments should be imposed?",
+  "thesis_en": "Many of these offences follow an absent adult more than any criminal disposition, so punishment should stay supervised and proportionate, and has to arrive alongside an intervention in the household.",
+  "truc": 5,
+  "truc_name": "Răn Đe So Với Cải Tạo",
+  "theme": "crime",
+  "task_type": "problem_solution"
+ },
+ {
+  "id": "t037",
+  "prompt_en": "Some people believe that providing criminals with education will reduce the recidivism rate. To what extent do you agree or disagree?",
+  "thesis_en": "Education reduces reoffending where it ends in a qualification an employer will accept, and changes nothing where it does not.",
+  "truc": 5,
+  "truc_name": "Răn Đe So Với Cải Tạo",
+  "theme": "crime",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t038",
+  "prompt_en": "Research shows that many criminals continue to commit crimes after being released from prison. What is the cause and solution?",
+  "thesis_en": "The cause is the absence of legal income in the first weeks after release, so any solution has to reach the employer and the landlord rather than the prison alone.",
+  "truc": 5,
+  "truc_name": "Răn Đe So Với Cải Tạo",
+  "theme": "crime",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t039",
+  "prompt_en": "Research shows that most criminals have low levels of education. Therefore, some believe that the best way to reduce crime is to educate prisoners while in prison so they can secure employment upon release. To what extent do you agree or disagree?",
+  "thesis_en": "Low education signals the same disadvantage that produced the offence, so training only works when it is paired with an employer prepared to read past the record.",
+  "truc": 5,
+  "truc_name": "Răn Đe So Với Cải Tạo",
+  "theme": "crime",
+  "task_type": "agree_disagree",
+  "note_teacher": "Gần trùng với đề Tội phạm số 4. Cùng luận điểm, bản này nói rõ thêm mắt xích việc làm."
+ },
+ {
+  "id": "t040",
+  "prompt_en": "Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?",
+  "thesis_en": "Identical punishment assumes identical judgement, and the reason almost every legal system sets an age of majority is that it does not believe that.",
+  "truc": 5,
+  "truc_name": "Răn Đe So Với Cải Tạo",
+  "theme": "crime",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t041",
+  "prompt_en": "Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?",
+  "thesis_en": "Parents apply pressure because school places are rationed by marks, so the development is negative for the child while remaining rational for the family.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t042",
+  "prompt_en": "The values that we learn from our parents and family have a greater influence on our future success than knowledge and skills we learn at school. To what extent do you agree or disagree?",
+  "thesis_en": "Family shapes whether a child keeps going after a setback and school supplies what they keep going at, and for the kind of success most people have in mind the family influence is the greater of the two.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t043",
+  "prompt_en": "Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?",
+  "thesis_en": "I agree, because the hours added to study are taken from sleep and attention rather than from idleness.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t044",
+  "prompt_en": "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?",
+  "thesis_en": "Attention has not fallen so much as competition for it has risen, so the workable solutions concern the hours around school rather than the lesson itself.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "problem_solution"
+ },
+ {
+  "id": "t045",
+  "prompt_en": "In recent years, an increasing number of parents are choosing to educate their children at home rather than sending them to school. Do the advantages of home education outweigh the disadvantages?",
+  "thesis_en": "The disadvantages outweigh the advantages for most families, since home education needs one adult with both the free hours and the subject range, and few households have either.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t046",
+  "prompt_en": "Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?",
+  "thesis_en": "Focusing all their time on education produces students who do well in examinations and have practised nothing that examinations leave out.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t047",
+  "prompt_en": "Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?",
+  "thesis_en": "I agree, because the hours added to study are taken from sleep and attention rather than from idleness.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "agree_disagree",
+  "note_teacher": "Trùng nội dung với đề Giáo dục số 2. Chỉ khác cách mở câu."
+ },
+ {
+  "id": "t048",
+  "prompt_en": "Some people argue that language learning is only effective in small classes, while others believe that class size does not matter. Discuss both views and give your opinion.",
+  "thesis_en": "Those who say size does not matter are describing what a teacher explains, while the other side is describing how many minutes of speaking each learner gets, and for a language it is the second that decides progress.",
+  "truc": 6,
+  "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
+  "theme": "education",
+  "task_type": "discuss_both",
+  "note_teacher": "Đề mồ côi. Engine của nó là TIME, giờ giáo viên chia cho bao nhiêu học sinh, chứ không phải engine chính của Trục 6."
+ },
+ {
+  "id": "t049",
+  "prompt_en": "Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?",
+  "thesis_en": "Work teaches what a workplace expects and travel teaches what to do when nothing is familiar, and only the first of those is tested in the year after graduation.",
+  "truc": 7,
+  "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
+  "theme": "work",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t050",
+  "prompt_en": "Remote work benefits employees more than employers. Agree or disagree?",
+  "thesis_en": "Employees gain hours and employers gain floor space and retention, so the claim holds mainly in the first year, before firms adjust what they expect in return.",
+  "truc": 7,
+  "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
+  "theme": "work",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t051",
+  "prompt_en": "Employers should give their staff at least 4-week holiday a year to help employees perform better in their jobs. To what extent do you agree or disagree?",
+  "thesis_en": "Longer leave raises output in roles where fatigue is the limiting factor and does very little in roles where it is not.",
+  "truc": 7,
+  "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
+  "theme": "work",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t052",
+  "prompt_en": "Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?",
+  "thesis_en": "Pay is decisive up to the point where it covers what a household needs, and above that line it retains people without making them work any harder.",
+  "truc": 7,
+  "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
+  "theme": "work",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t053",
+  "prompt_en": "The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?",
+  "thesis_en": "The word only makes this indefensible, since the same person will often work hardest on the unpaid task they chose for themselves.",
+  "truc": 7,
+  "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
+  "theme": "work",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t054",
+  "prompt_en": "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+  "thesis_en": "A legal duty places the cost on whichever relative has the least bargaining power, most often a daughter, so the obligation belongs with a state that can spread it.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t055",
+  "prompt_en": "Some people believe that women should play an equal role as men in a country's police force or military force, while others think women are not suitable for these kinds of jobs. Discuss both views and give opinion.",
+  "thesis_en": "Those who doubt suitability are pointing at a job description, and that description was written when only one group was applying, so I side with equal access and with rewriting the description around what the work now needs.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t056",
+  "prompt_en": "In many countries, life expectancy is increasing, leading to a growing proportion of elderly people. What problems does this cause for individuals and society, and what are the reasons for this trend?",
+  "thesis_en": "Longer lives are the product of earlier medical care and safer work, while pensions and care systems were designed around a shorter one, and it is that mismatch which strains households and budgets alike.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t057",
+  "prompt_en": "Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and state your own opinion.",
+  "thesis_en": "Selecting by ability lets a teacher pitch one lesson at one level, yet the measure used records a family's circumstances as much as a child's, which is why I favour mixed classes with setting only in the exam years.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t058",
+  "prompt_en": "Interviews are one of the ways to recruit employees in many companies. Some people believe that interviews are an unreliable way of choosing employees, while other people believe that there are better methods. Discuss both views and give your opinion.",
+  "thesis_en": "An interview measures how comfortable a candidate is in an interview, which is why it belongs alongside a work sample rather than in place of one.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t059",
+  "prompt_en": "Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?",
+  "thesis_en": "Contribution and pay are set by different mechanisms, so this works as a case for raising public salaries rather than for lowering private ones.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t060",
+  "prompt_en": "The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.",
+  "thesis_en": "The gap is defensible where it tracks a decision only one person can make, and indefensible where it survives several years of poor decisions.",
+  "truc": 8,
+  "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
+  "theme": "society",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t061",
+  "prompt_en": "Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?",
+  "thesis_en": "The advantages outweigh the disadvantages where growth funds the services that hold a community together, and not where it merely raises average income.",
+  "truc": 9,
+  "truc_name": "Tăng Trưởng Đánh Đổi Môi Trường",
+  "theme": "environment",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t062",
+  "prompt_en": "The natural resources such as oil, forests and fresh water are being consumed at an alarming rate. What problems does it cause? How can we solve these problems?",
+  "thesis_en": "The central problem is that the cost of depletion sits outside the price of the product, so the workable solutions put it back inside the price.",
+  "truc": 9,
+  "truc_name": "Tăng Trưởng Đánh Đổi Môi Trường",
+  "theme": "environment",
+  "task_type": "problem_solution"
+ },
+ {
+  "id": "t063",
+  "prompt_en": "Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?",
+  "thesis_en": "I disagree, since countries at similar income levels differ widely on exactly this, which points to regulation rather than wealth as the deciding factor.",
+  "truc": 9,
+  "truc_name": "Tăng Trưởng Đánh Đổi Môi Trường",
+  "theme": "environment",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t064",
+  "prompt_en": "As demand for oil and gas increases, some people advocate searching for these energy sources in untouched natural areas. Do the advantages of this trend outweigh its disadvantages?",
+  "thesis_en": "The disadvantages outweigh the advantages, because the gain is a finite quantity of fuel and the damage is permanent on any human timescale.",
+  "truc": 9,
+  "truc_name": "Tăng Trưởng Đánh Đổi Môi Trường",
+  "theme": "environment",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t065",
+  "prompt_en": "Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?",
+  "thesis_en": "I agree that the example is a poor one, though it is set by whatever earns attention rather than by any one person, so blaming the celebrity changes nothing.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t066",
+  "prompt_en": "Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?",
+  "thesis_en": "Admiration is normal and useful, and the negative part is that the range of people young audiences are shown has narrowed.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t067",
+  "prompt_en": "Some people say that news is a good medium to learn, while others argue that other media are more effective. Discuss both views and give your opinion.",
+  "thesis_en": "News reports what is happening and rarely why, so it works as a supplement to structured material rather than a substitute for it.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t068",
+  "prompt_en": "These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?",
+  "thesis_en": "Advertising rarely decides a single purchase yet steadily shapes what a shopper treats as normal, so protection should govern what may be advertised to whom rather than how much.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "problem_solution"
+ },
+ {
+  "id": "t069",
+  "prompt_en": "Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.",
+  "thesis_en": "The positive case concerns what a child takes from a programme and the negative one what the hour replaces, and the second effect is the larger of the two.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t070",
+  "prompt_en": "In some countries, celebrities complain about the way the media publicize their private lives. Some people say that they should accept it as part of their fame. Do you agree or disagree?",
+  "thesis_en": "Fame is not consent to unlimited coverage, since the trade on offer was publicity for the work rather than access to a household.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree",
+  "prompt_vi": "Ở một số nước, người nổi tiếng phàn nàn về việc báo chí đưa tin đời tư của họ. Có người cho rằng đó là cái giá phải trả của sự nổi tiếng. Đồng ý hay không đồng ý?",
+  "key_vocab": [
+   {
+    "basic": "famous people",
+    "academic": "public figures",
+    "vi": "người của công chúng"
+   },
+   {
+    "basic": "private life",
+    "academic": "a reasonable expectation of privacy",
+    "vi": "quyền riêng tư chính đáng"
+   },
+   {
+    "basic": "newspapers write about",
+    "academic": "media coverage of",
+    "vi": "báo chí đưa tin về"
+   },
+   {
+    "basic": "agree to something",
+    "academic": "consent to",
+    "vi": "đồng ý cho phép"
+   },
+   {
+    "basic": "their job",
+    "academic": "their professional work",
+    "vi": "công việc chuyên môn"
+   },
+   {
+    "basic": "people want to read it",
+    "academic": "public curiosity",
+    "vi": "sự tò mò của công chúng"
+   },
+   {
+    "basic": "important for the public to know",
+    "academic": "a matter of public interest",
+    "vi": "vấn đề vì lợi ích công"
+   },
+   {
+    "basic": "follow someone everywhere",
+    "academic": "intrude on a household",
+    "vi": "xâm phạm vào gia đình"
+   }
+  ]
+ },
+ {
+  "id": "t071",
+  "prompt_en": "News plays an important part in most people's lives and news media has become more influential in people's lives. Why do you think this is the case? Is it a positive or negative development?",
+  "thesis_en": "Influence grew because the supply of news became continuous while the day did not get any longer, and the development is negative because attention became the thing being sold.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t072",
+  "prompt_en": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+  "thesis_en": "Coverage can produce the conditions it reports, which argues for rules on how crime is reported rather than a ban on reporting it.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t073",
+  "prompt_en": "Some people believe that the sole purpose of advertising is to encourage consumers to buy products they do not actually need. To what extent do you agree or disagree?",
+  "thesis_en": "The word sole is what makes this too strong, since advertising also carries the information that a product exists at all.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t074",
+  "prompt_en": "Some people believe that news media should focus more on reporting positive news rather than negative stories. To what extent do you agree or disagree?",
+  "thesis_en": "A commitment to positive coverage removes first the story that would embarrass somebody, and that is the reporting a public most needs.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t075",
+  "prompt_en": "Some people say that what children watch on television influences their behavior, others say that the amount of time children watch on television influences their behavior most. Discuss both views.",
+  "thesis_en": "Content changes what a child copies and duration changes what the child never learned to do instead, and the second effect is the larger one.",
+  "truc": 10,
+  "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
+  "theme": "media",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t076",
+  "prompt_en": "Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.",
+  "thesis_en": "Contact adds far more than it removes, and what does disappear tends to be the local practice that nobody was ever paid to keep going.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t077",
+  "prompt_en": "Some people say that the increasing business and cultural contact between countries has positive effects. Others say it would lead to the loss of national identities. Discuss both views and give your opinion.",
+  "thesis_en": "Contact adds far more than it removes, and what does disappear tends to be the local practice that nobody was ever paid to keep going.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "discuss_both",
+  "note_teacher": "Trùng với đề Văn hóa xã hội số 2. Chỉ khác chữ think và say."
+ },
+ {
+  "id": "t078",
+  "prompt_en": "Some people believe it is better to import foreign films and TV programs, while others argue that countries should produce their own shows. Discuss both views and give your opinion.",
+  "thesis_en": "Importing is cheaper only in the first years, since a country that stops commissioning soon has nobody left who can write a full season.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t079",
+  "prompt_en": "Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?",
+  "thesis_en": "Cooperation works on problems where no single country can capture the benefit of acting alone, and stalls on every problem where one can.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t080",
+  "prompt_en": "Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?",
+  "thesis_en": "The advantages outweigh the disadvantages for the parents and are far less clear for a child moved partway through secondary school.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t081",
+  "prompt_en": "Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?",
+  "thesis_en": "Distance is a symptom of a price that leaves transport out, and the development is negative mainly because local producers are made to compete against a price that leaves out a cost somebody else is carrying.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t082",
+  "prompt_en": "Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.",
+  "thesis_en": "Need rather than nationality is the more defensible test for an organisation funded by voluntary giving.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t083",
+  "prompt_en": "Important historical objects should be returned to their country of original. Agree or disagree?",
+  "thesis_en": "I agree, since the argument for keeping them rests on access rather than ownership, and access can be arranged by loan.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t084",
+  "prompt_en": "Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.",
+  "thesis_en": "Screens teach the facts about a place and travel teaches what it feels like to be the one who does not know the rules, and only the second changes how somebody thinks.",
+  "truc": 11,
+  "truc_name": "Toàn Cầu So Với Địa Phương",
+  "theme": "culture",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t085",
+  "prompt_en": "The use of bicycles as the main form of transport has declined in many places. Why and what can be done to encourage people to use bicycles more?",
+  "thesis_en": "The decline follows how dangerous a route feels rather than any change in willingness, so separated infrastructure is the answer rather than persuasion.",
+  "truc": 12,
+  "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
+  "theme": "transport",
+  "task_type": "problem_solution"
+ },
+ {
+  "id": "t086",
+  "prompt_en": "In many cities, governments have located shops, office, schools far from each other. Do you think the advantages of this policy outweigh the disadvantages?",
+  "thesis_en": "The disadvantages outweigh the advantages, because separating these functions creates a daily journey that every household then pays for in time or in fares.",
+  "truc": 12,
+  "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
+  "theme": "transport",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t087",
+  "prompt_en": "In many modern cities, urban planners locate shops, schools, and housing in separate, distinct areas. What are the causes of this development, and is it a positive or negative trend?",
+  "thesis_en": "The separation grew out of a planning logic that treated housing and noise as incompatible, and it has proved negative because the cost lands on residents rather than on planners.",
+  "truc": 12,
+  "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
+  "theme": "transport",
+  "task_type": "agree_disagree",
+  "note_teacher": "Cùng hiện tượng với đề Giao thông số 2 và Đô thị số 2, nhưng khác dạng câu hỏi. Bản này hỏi thêm nguyên nhân, nên bố cục bài khác hẳn."
+ },
+ {
+  "id": "t088",
+  "prompt_en": "Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?",
+  "thesis_en": "Moving the factory moves the pollution and the commute rather than removing either, unless the housing moves with it.",
+  "truc": 12,
+  "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
+  "theme": "transport",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t089",
+  "prompt_en": "It is important for all towns and cities to have large public outdoor places like squares and parks. To what extent do you agree or disagree with this statement?",
+  "thesis_en": "Public outdoor space is the only ground in a city that people who would never otherwise meet have to share, and that is what the land is buying.",
+  "truc": 12,
+  "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
+  "theme": "transport",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t090",
+  "prompt_en": "Some believe that history has little to teach us about today while others think that the study of the past helps us to understand the present. Discuss both views and give your own opinion.",
+  "thesis_en": "History rarely predicts what will happen, yet it reliably shows which arrangements are recent, and that is what stops people treating the present as inevitable, so the second view is the stronger one.",
+  "truc": 13,
+  "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
+  "theme": "arts",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t091",
+  "prompt_en": "Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.",
+  "thesis_en": "Sport is one of the few settings where people who share nothing else follow the same rules, and that is a civic function rather than a leisure one.",
+  "truc": 13,
+  "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
+  "theme": "arts",
+  "task_type": "discuss_both"
+ },
+ {
+  "id": "t092",
+  "prompt_en": "In today's world of advanced science and technology, we still greatly value our artists such as musicians, painters and writers. What can the arts tell us about life that science and technology cannot?",
+  "thesis_en": "The arts hold the first-person side of an experience, which is exactly the part a scientific account has to remove in order to be general.",
+  "truc": 13,
+  "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
+  "theme": "arts",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t093",
+  "prompt_en": "Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?",
+  "thesis_en": "Usefulness is judged at one moment and applied to a loss that no later judgement can undo, which makes it the wrong test.",
+  "truc": 13,
+  "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
+  "theme": "arts",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t094",
+  "prompt_en": "The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?",
+  "thesis_en": "I agree, though the imitation here is largely manufactured by how goods are marketed, and is not a fixed feature of human character.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t095",
+  "prompt_en": "People's shopping habits depend more on the age group they belong to than other factors. To what extent do you agree or disagree?",
+  "thesis_en": "Age tends to predict less than income does, and what looks like a generational habit is usually the price bracket a person can reach.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t096",
+  "prompt_en": "Many children face pressure from their peers to conform to certain behaviors. Do the disadvantages of peer pressure outweigh the advantages?",
+  "thesis_en": "The disadvantages outweigh the advantages in adolescence specifically, because the mechanism that teaches a child to cooperate is the same one that stops them leaving a group that is harming them.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "advantage_disadvantage"
+ },
+ {
+  "id": "t097",
+  "prompt_en": "An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?",
+  "thesis_en": "People act on a standard set by the faces they see most often, and the development is negative because that standard shifts again each time somebody meets it.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "two_part"
+ },
+ {
+  "id": "t098",
+  "prompt_en": "In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.",
+  "thesis_en": "Repair disappeared once it became more expensive than replacement, which makes this a pricing outcome rather than a change in attitude.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "agree_disagree"
+ },
+ {
+  "id": "t099",
+  "prompt_en": "More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?",
+  "thesis_en": "Expectations follow whatever the fastest available service has trained people to accept, and the development is negative mainly because the skills that need a slow start are the first to be dropped.",
+  "truc": 14,
+  "truc_name": "Áp Lực Đồng Dạng Và Kỳ Vọng Xã Hội",
+  "theme": "society",
+  "task_type": "two_part"
+ }
+]
