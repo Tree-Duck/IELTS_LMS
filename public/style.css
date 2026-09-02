@@ -6015,6 +6015,10 @@ input:focus, textarea:focus, select:focus {
 .tag-badge.tag-done { background: var(--success-light); color: var(--success); }
 .wp-q-card.q-done { opacity: .72; }
 .wp-q-card.q-done:hover { opacity: 1; }
+/* Started but never sent. Not finished, so it keeps full contrast, but it has
+   to be tellable from an untouched prompt at a glance. */
+.tag-badge.tag-wip { background: rgba(255,122,89,.16); color: var(--coral-deep, #C2452A); }
+.wp-q-card.q-wip { border-left: 4px solid var(--coral); }
 
 /* Planner: opt-in "write my own idea first" */
 .wp-own-panel {

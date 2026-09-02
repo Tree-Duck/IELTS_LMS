@@ -1365,7 +1365,7 @@ function showView(name) {
 
   // Warn if navigating away from submit view with unsaved essay content
   if (name !== 'submit' && isOnSubmitWithContent()) {
-    if (!confirm('You have an essay in progress. Leave without saving your draft?')) return;
+    if (!confirm('Ta đang viết dở một bài. Rời khỏi đây mà chưa lưu nháp?')) return;
   }
   // Track navigation history so the Back button returns to the real previous view
   if (!_goingBack && _currentView && _currentView !== name && !_NO_BACK.has(_currentView)) {
@@ -7198,16 +7198,17 @@ function showToast(msg, duration) {
 function manualSaveDraft() {
   const prompt = (document.getElementById('essay-prompt') || {}).value || '';
   const essay  = (document.getElementById('essay-text')   || {}).value || '';
-  if (!prompt && !essay) { showToast('Nothing to save yet.'); return; }
+  if (!prompt && !essay) { showToast('Chưa có gì để lưu.'); return; }
   saveDraft(); // always keep localStorage copy
   if (currentUser) {
     saveServerDraft();
   } else {
-    showToast('✅ Draft saved');
+    showToast('Đã lưu nháp');
   }
 }
 
-async function saveServerDraft() {
+async function saveServerDraft(opts) {
+  const quiet = !!(opts && opts.quiet);
   const prompt   = (document.getElementById('essay-prompt') || {}).value || '';
   const essay    = (document.getElementById('essay-text')   || {}).value || '';
   const taskType = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
@@ -7216,6 +7217,11 @@ async function saveServerDraft() {
   const rawTitle = prompt.slice(0, 50).trim() || essay.slice(0, 50).trim() || 'Untitled draft';
   const title = rawTitle.length < prompt.slice(0, 50).trim().length ? rawTitle + '…' : rawTitle;
   const body = { title, prompt, essay, taskType, wordCount };
+  if (!_currentDraftId && prompt.trim()) {
+    const key = _wpPromptKey(prompt);
+    const match = _serverDrafts.find(d => _wpPromptKey(d.prompt) === key);
+    if (match) _currentDraftId = match.id;
+  }
   try {
     let res;
     if (_currentDraftId) {
@@ -7234,42 +7240,103 @@ async function saveServerDraft() {
     if (res.ok) {
       const draft = await res.json();
       _currentDraftId = draft.id;
-      showToast('✅ Draft saved to server');
+      if (!quiet) showToast('Đã lưu nháp lên máy chủ');
     } else {
-      showToast('✅ Draft saved locally');
+      if (!quiet) showToast('Đã lưu nháp trên máy này');
     }
   } catch {
-    showToast('✅ Draft saved locally');
+    if (!quiet) showToast('Đã lưu nháp trên máy này');
   }
 }
+
+let _serverDraftTimer = null;
+let _lastServerDraft = '';
 
 function onDraftInput() {
   clearTimeout(_draftSaveTimer);
   _draftSaveTimer = setTimeout(saveDraft, 1200); // debounce 1.2s
+  // localStorage alone dies with the machine. Push to the server too, on a
+  // slower clock so typing does not turn into a request per word.
+  clearTimeout(_serverDraftTimer);
+  _serverDraftTimer = setTimeout(autoSaveServerDraft, 8000);
 }
 
-function loadDraftIfExists() {
-  const raw = localStorage.getItem(DRAFT_KEY);
-  if (!raw) return;
-  try {
-    const draft = JSON.parse(raw);
-    if (!draft.prompt && !draft.essay) return;
-    const ageMin = Math.round((Date.now() - (draft.savedAt || 0)) / 60000);
-    const banner = document.getElementById('draft-restore-banner');
-    if (!banner) return;
-    banner.innerHTML = `
-      📝 You have an unsaved draft from ${ageMin < 1 ? 'just now' : ageMin + ' min ago'}.
-      <button class="btn btn-primary btn-sm" onclick="restoreDraft()">Restore Draft</button>
-      <button class="btn btn-secondary btn-sm" onclick="discardDraft()">Discard</button>`;
-    banner.classList.remove('hidden');
-  } catch {}
+async function autoSaveServerDraft() {
+  if (!currentUser) return;
+  const essay = (document.getElementById('essay-text') || {}).value || '';
+  if (essay.trim().length < 40) return; // not yet worth a row
+  const snapshot = essay.trim();
+  if (snapshot === _lastServerDraft) return;
+  _lastServerDraft = snapshot;
+  await saveServerDraft({ quiet: true });
 }
 
-function restoreDraft() {
-  const raw = localStorage.getItem(DRAFT_KEY);
-  if (!raw) return;
+// How long ago, said the way a person would.
+function draftAge(ms) {
+  const min = Math.round((Date.now() - (ms || 0)) / 60000);
+  if (min < 1) return 'vừa nãy';
+  if (min < 60) return min + ' phút trước';
+  const hr = Math.round(min / 60);
+  if (hr < 24) return hr + ' giờ trước';
+  return Math.round(hr / 24) + ' ngày trước';
+}
+
+let _serverDraft = null;
+let _serverDrafts = [];
+
+async function loadDraftIfExists() {
+  const banner = document.getElementById('draft-restore-banner');
+  if (banner) { banner.classList.add('hidden'); banner.innerHTML = ''; }
+  _serverDraft = null;
+  _serverDrafts = [];
+
+  let local = null;
   try {
-    const draft = JSON.parse(raw);
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d.prompt || d.essay) local = d;
+    }
+  } catch (e) {}
+
+  // The server copy is what makes a draft survive a change of machine, so look
+  // there too and prefer whichever copy is newer.
+  if (currentUser) {
+    try {
+      const rows = await api('/api/drafts');
+      const list = (Array.isArray(rows) ? rows : []).filter(d => (d.essay || '').trim());
+      if (list.length) {
+        list.sort((a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+        _serverDrafts = list;
+        _serverDraft = list[0];
+      }
+    } catch (e) {}
+  }
+
+  const localAt = local ? (local.savedAt || 0) : 0;
+  const serverAt = _serverDraft ? new Date(_serverDraft.updated_at || _serverDraft.created_at || 0).getTime() : 0;
+  if (!localAt && !serverAt) return;
+  const useServer = serverAt > localAt;
+  const when = draftAge(useServer ? serverAt : localAt);
+  const where = useServer ? 'trên máy chủ' : 'trên máy này';
+  if (!banner) return;
+  banner.innerHTML =
+    'Ta còn một bài viết dở ' + where + ', lưu ' + when + '. ' +
+    '<button class="btn btn-primary btn-sm" onclick="restoreDraft(' + (useServer ? 'true' : 'false') + ')">Mở lại bài đó</button> ' +
+    '<button class="btn btn-secondary btn-sm" onclick="discardDraft()">Bỏ qua</button>';
+  banner.classList.remove('hidden');
+}
+
+function restoreDraft(fromServer) {
+  let draft;
+  if (fromServer && _serverDraft) {
+    draft = { prompt: _serverDraft.prompt, essay: _serverDraft.essay, taskType: _serverDraft.task_type };
+  } else {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return;
+    try { draft = JSON.parse(raw); } catch (e) { return; }
+  }
+  try {
     // Set task type
     const radios = document.querySelectorAll('input[name="task_type"]');
     radios.forEach(r => { r.checked = r.value === draft.taskType; });
@@ -10468,6 +10535,7 @@ let _wpCurrentQuestion = null;
 let _wpFilter = 'all';
 let _wpTypeFilter = null; // Task 2 question-type sub-filter
 let _wpDonePrompts = new Set();
+let _wpDraftPrompts = new Set();
 // Prompts are stored with the rubric tail appended on submit, so compare the question only.
 const _wpPromptKey = (p) => String(p || '')
   .split(/give reasons for your answer|write at least \d+ words|summarise the information|provide an overview/i)[0]
@@ -10543,7 +10611,19 @@ async function loadWritingPractice() {
       const subs = await api('/api/submissions');
       _wpDonePrompts = new Set((Array.isArray(subs) ? subs : []).map(s => _wpPromptKey(s.prompt)));
     } catch (e) { _wpDonePrompts = new Set(); }
-    _wpQuestions.forEach(q => { q.done = _wpDonePrompts.has(_wpPromptKey(q.prompt)); });
+    // A prompt the student opened and typed into but never submitted is neither
+    // done nor untouched. Drafts live on the server so this survives a new device.
+    try {
+      const drafts = await api('/api/drafts');
+      _wpDraftPrompts = new Set((Array.isArray(drafts) ? drafts : [])
+        .filter(d => (d.essay || '').trim())
+        .map(d => _wpPromptKey(d.prompt)));
+    } catch (e) { _wpDraftPrompts = new Set(); }
+    _wpQuestions.forEach(q => {
+      const k = _wpPromptKey(q.prompt);
+      q.done = _wpDonePrompts.has(k);
+      q.inProgress = !q.done && _wpDraftPrompts.has(k);
+    });
   } catch (e) {
     _wpQuestions = [];
   }
@@ -10562,9 +10642,9 @@ function getFilteredWritingQuestions() {
     const key = _wpFilter === 'task1' ? (q => q.chartType || '') : (q => q.questionType || 'other');
     list = list.filter(q => key(q) === _wpTypeFilter);
   }
-  const showDone = (document.getElementById('wp-show-done') || {}).checked !== false;
-  const showUndone = (document.getElementById('wp-show-undone') || {}).checked !== false;
-  return list.filter(q => (q.done ? showDone : showUndone));
+  const on = id => (document.getElementById(id) || {}).checked !== false;
+  const showDone = on('wp-show-done'), showUndone = on('wp-show-undone'), showWip = on('wp-show-inprogress');
+  return list.filter(q => (q.done ? showDone : q.inProgress ? showWip : showUndone));
 }
 
 function renderWritingQuestionGrid() {
@@ -10582,14 +10662,18 @@ function renderWritingQuestionGrid() {
   else if (_wpFilter === 'all') scope = _wpQuestions;
   else scope = _wpQuestions.filter(q => q.type === _wpFilter);
   const nDone = scope.filter(q => q.done).length;
+  const nWip = scope.filter(q => !q.done && q.inProgress).length;
   const cu = document.getElementById('wp-count-undone'), cd = document.getElementById('wp-count-done');
-  if (cu) cu.textContent = `(${scope.length - nDone})`;
+  const cw = document.getElementById('wp-count-inprogress');
+  if (cu) cu.textContent = `(${scope.length - nDone - nWip})`;
   if (cd) cd.textContent = `(${nDone})`;
+  if (cw) cw.textContent = `(${nWip})`;
 
   grid.innerHTML = questions.map(q => `
-    <div class="wp-q-card ${q.done ? 'q-done' : ''}" onclick="openWritingQuestion('${escHtml(q.id)}')">
+    <div class="wp-q-card ${q.done ? 'q-done' : q.inProgress ? 'q-wip' : ''}" onclick="openWritingQuestion('${escHtml(q.id)}')">
       <div class="wp-q-card-top">
         ${q.done ? '<span class="tag-badge tag-done">✓ Đã làm</span>' : ''}
+        ${!q.done && q.inProgress ? '<span class="tag-badge tag-wip">Chưa xong</span>' : ''}
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
         ${q.type === 'task2' && q.questionType ? `<span class="tag-badge tag-qtype">${escHtml(T2_TYPE_LABELS[q.questionType] || q.questionType)}</span>` : ''}
         ${q.examDate ? `<span class="tag-badge tag-exam">📅 Đề thi ${escHtml(q.examDate)}</span>` : ''}
