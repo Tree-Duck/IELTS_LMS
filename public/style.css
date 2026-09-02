@@ -7020,3 +7020,67 @@ input:focus, textarea:focus, select:focus {
 .assign-pick-list { font-size: .85rem; line-height: 1.5; padding: .3rem; height: auto; }
 .assign-pick-list option { padding: .3rem .4rem; border-radius: var(--r-sm); }
 .assign-pick-note { font-size: .75rem; color: var(--gray-500); min-height: 1.1em; }
+
+/* ─── Chuỗi lập luận, the lesson before any writing ───────────────────────── */
+
+.chain-why, .chain-links, .chain-worked, .chain-drill {
+  border: 2px solid var(--gray-900); border-radius: var(--r-lg);
+  background: var(--surface); padding: 1.1rem 1.2rem; margin-bottom: 1.1rem;
+  box-shadow: var(--lift);
+}
+.chain-why h3, .chain-links h3, .chain-worked h3, .chain-drill h3 { font-size: 1.05rem; margin-bottom: .8rem; color: var(--gray-900); }
+
+.chain-vs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; }
+.chain-vs-bad, .chain-vs-good { border-radius: var(--r-md); padding: .8rem .9rem; }
+.chain-vs-bad { background: var(--danger-light); border: 1px solid rgba(214,69,51,.3); }
+.chain-vs-good { background: var(--success-light); border: 1px solid rgba(30,140,90,.28); }
+.chain-vs-k { display: inline-block; font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .4rem; color: var(--gray-600); }
+.chain-vs p { font-size: .88rem; line-height: 1.6; color: var(--gray-900); margin-bottom: .5rem; }
+.chain-vs-note { display: block; font-size: .78rem; line-height: 1.5; color: var(--gray-600); font-style: italic; }
+
+.chain-link { display: grid; grid-template-columns: 2.2rem 1fr; gap: .7rem; padding: .7rem 0; border-bottom: 1px dashed var(--gray-200); }
+.chain-link:last-child { border-bottom: 0; padding-bottom: 0; }
+.chain-link-k {
+  width: 2.2rem; height: 2.2rem; border-radius: var(--r-sm);
+  background: var(--forest); color: var(--lime);
+  font-size: .8rem; font-weight: 800; display: grid; place-items: center;
+}
+.chain-link-name { font-size: .95rem; font-weight: 800; color: var(--gray-900); margin-bottom: .2rem; }
+.chain-link-must { font-size: .86rem; line-height: 1.55; color: var(--gray-700); margin-bottom: .3rem; }
+.chain-link-fail, .chain-link-ask { font-size: .8rem; line-height: 1.5; margin-top: .18rem; }
+.chain-link-fail { color: var(--danger); }
+.chain-link-ask { color: var(--primary-mid); }
+.chain-link-fail span, .chain-link-ask span {
+  font-size: .62rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--gray-500); margin-right: .3rem;
+}
+
+.chain-prompt {
+  background: var(--forest); color: var(--cream); border-radius: var(--r-md);
+  padding: .7rem .9rem; font-size: .86rem; line-height: 1.55; font-style: italic; margin-bottom: .8rem;
+}
+.chain-run { display: flex; flex-direction: column; gap: .45rem; }
+.chain-step { display: grid; grid-template-columns: 2.2rem 1fr; gap: .7rem; align-items: start; }
+.chain-step-k {
+  width: 2.2rem; height: 2.2rem; border-radius: var(--r-sm);
+  background: var(--surface-2); color: var(--gray-700);
+  font-size: .78rem; font-weight: 800; display: grid; place-items: center;
+}
+.chain-step.given .chain-step-k { background: var(--success-light); color: var(--success); }
+.chain-step.blank .chain-step-k { background: var(--coral); color: #fff; }
+.chain-step-name { display: block; font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); margin-bottom: .15rem; }
+.chain-step-text { display: block; font-size: .88rem; line-height: 1.6; color: var(--gray-900); }
+.chain-step-ask { font-size: .74rem; color: var(--primary-mid); margin-top: .2rem; }
+.chain-source { font-size: .74rem; color: var(--gray-500); margin-top: .7rem; }
+
+.chain-input {
+  width: 100%; font: inherit; font-size: .88rem; line-height: 1.55;
+  padding: .5rem .6rem; border: 1.5px solid var(--gray-300); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--gray-900); resize: vertical;
+}
+.chain-input:focus { outline: none; border-color: var(--gray-900); box-shadow: 0 0 0 3px var(--primary-glow); }
+.chain-drill-note { font-size: .84rem; line-height: 1.6; color: var(--gray-600); margin-bottom: .8rem; }
+.chain-hints { margin-top: .8rem; font-size: .82rem; }
+.chain-hints summary { cursor: pointer; font-weight: 700; color: var(--primary-mid); }
+.chain-hints p { margin-top: .4rem; line-height: 1.6; color: var(--gray-700); }
+.chain-drill-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }

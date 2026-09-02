@@ -1001,15 +1001,15 @@ function formatDate(dateStr) {
 // Bài của học sinh không mất — chỉ phần chấm hỏng — nên câu chữ phải nói rõ
 // điều đó, và nói luôn có nên bấm chấm lại không.
 const GRADE_ERROR_REASONS = {
-  out_of_credit:   { title: 'Hết hạn mức AI', text: 'Tài khoản AI của trung tâm đã hết hạn mức. Bài của em vẫn còn nguyên, nạp xong chấm lại được.', retry: false },
-  bad_api_key:     { title: 'Khoá AI không hợp lệ', text: 'Khoá kết nối AI sai hoặc đã bị thu hồi. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
-  account_disabled:{ title: 'Tài khoản AI bị khoá', text: 'Nhà cung cấp AI đã khoá tài khoản này. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
-  no_api_key:      { title: 'Chưa cấu hình AI', text: 'Máy chủ chưa có khoá AI. Bài của em vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  out_of_credit:   { title: 'Hết hạn mức AI', text: 'Tài khoản AI của trung tâm đã hết hạn mức. Bài của ta vẫn còn nguyên, nạp xong chấm lại được.', retry: false },
+  bad_api_key:     { title: 'Khoá AI không hợp lệ', text: 'Khoá kết nối AI sai hoặc đã bị thu hồi. Bài của ta vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  account_disabled:{ title: 'Tài khoản AI bị khoá', text: 'Nhà cung cấp AI đã khoá tài khoản này. Bài của ta vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
+  no_api_key:      { title: 'Chưa cấu hình AI', text: 'Máy chủ chưa có khoá AI. Bài của ta vẫn còn nguyên. Báo giáo viên nhé.', retry: false },
   rate_limited:    { title: 'Quá nhiều bài cùng lúc', text: 'Đang có quá nhiều bài chấm một lúc. Đợi một hai phút rồi bấm chấm lại.', retry: true },
   api_overloaded:  { title: 'AI đang quá tải', text: 'Phía AI đang quá tải. Đợi một chút rồi bấm chấm lại.', retry: true },
   bad_model_output:{ title: 'Kết quả chấm bị lỗi định dạng', text: 'AI trả về kết quả không đọc được. Bấm chấm lại thường là xong.', retry: true },
   network:         { title: 'Mất kết nối', text: 'Không gọi được tới AI. Bấm chấm lại giúp thầy.', retry: true },
-  unknown:         { title: 'Lỗi chấm bài', text: 'Có trục trặc khi chấm bài này. Bài của em vẫn còn nguyên.', retry: true },
+  unknown:         { title: 'Lỗi chấm bài', text: 'Có trục trặc khi chấm bài này. Bài của ta vẫn còn nguyên.', retry: true },
 };
 
 function statusChip(status) {
@@ -1149,7 +1149,7 @@ async function handleVerify() {
   errEl.classList.add('hidden'); okEl.classList.add('hidden');
   const code = document.getElementById('verify-code').value.trim().replace(/\s/g, '');
   if (code.length !== 6) {
-    errEl.textContent = 'Vui lòng nhập mã 6 chữ số từ email của bạn.';
+    errEl.textContent = 'Nhập mã 6 chữ số trong email.';
     errEl.classList.remove('hidden');
     return;
   }
@@ -1175,7 +1175,7 @@ async function handleResendCode() {
       method: 'POST',
       body: JSON.stringify({ email: pendingVerifyEmail })
     });
-    okEl.textContent = 'Mã mới đã được gửi! Kiểm tra hộp thư đến của bạn (và thư mục spam).';
+    okEl.textContent = 'Đã gửi mã mới. Kiểm tra hộp thư đến và cả thư mục spam.';
     okEl.classList.remove('hidden');
   } catch (err) {
     errEl.textContent = err.message;
@@ -1208,7 +1208,7 @@ async function handleForgotPassword() {
   const okEl = document.getElementById('forgot-success');
   errEl.classList.add('hidden'); okEl.classList.add('hidden');
   const email = document.getElementById('forgot-email').value.trim();
-  if (!email) { errEl.textContent = 'Vui lòng nhập địa chỉ email của bạn.'; errEl.classList.remove('hidden'); return; }
+  if (!email) { errEl.textContent = 'Nhập địa chỉ email.'; errEl.classList.remove('hidden'); return; }
   try {
     const data = await api('/api/forgot-password', {
       method: 'POST',
@@ -1414,6 +1414,7 @@ function showView(name) {
   else if (name === 'vocab-learn') loadVocabLearn();
   else if (name === 'speaking') loadSpeakingTopicGen();
   else if (name === 'micro') loadMicroTasks();
+  else if (name === 'chain') loadChainLesson();
   else if (name === 'truc') loadTrucList();
   else if (name === 'truc-ch0') loadTrucChapter0();
   else if (name === 'luyen') loadLuyen();
@@ -1740,21 +1741,21 @@ async function handleChangePassword() {
 /* ─── Motivational quote of the day (original, bilingual) ────────────────── */
 const QUOTES = [
   { en: 'Every band score starts with one honest sentence.', vi: 'Mỗi band điểm bắt đầu từ một câu viết thật lòng.' },
-  { en: 'You don’t need perfect English — you need brave practice.', vi: 'Bạn không cần tiếng Anh hoàn hảo — bạn cần luyện tập can đảm.' },
+  { en: 'You don’t need perfect English — you need brave practice.', vi: 'Ta không cần tiếng Anh hoàn hảo — ta cần luyện tập can đảm.' },
   { en: 'Small daily reps beat one heroic cram.', vi: 'Luyện đều mỗi ngày hơn cày dồn một bữa.' },
   { en: 'Mistakes are just feedback wearing a costume.', vi: 'Lỗi sai chỉ là phản hồi đang hoá trang thôi.' },
-  { en: 'Read one more passage than you feel like reading.', vi: 'Đọc thêm một bài nữa so với mức bạn muốn dừng.' },
+  { en: 'Read one more passage than you feel like reading.', vi: 'Đọc thêm một bài nữa so với mức ta muốn dừng.' },
   { en: 'Fluency is built one collocation at a time.', vi: 'Sự trôi chảy được xây từng cụm từ một.' },
   { en: 'The examiner rewards clarity, not big words.', vi: 'Giám khảo thưởng cho sự rõ ràng, không phải từ to.' },
   { en: 'Today’s draft is tomorrow’s model answer.', vi: 'Bản nháp hôm nay là bài mẫu của ngày mai.' },
   { en: 'Listen twice, understand once, remember forever.', vi: 'Nghe hai lần, hiểu một lần, nhớ mãi mãi.' },
   { en: 'Progress hides in the boring repetitions.', vi: 'Tiến bộ nấp trong những lần lặp lại nhàm chán.' },
-  { en: 'A timer is your friend, not your enemy.', vi: 'Đồng hồ bấm giờ là bạn, không phải kẻ thù.' },
+  { en: 'A timer is your friend, not your enemy.', vi: 'Đồng hồ bấm giờ là đồng minh, không phải kẻ thù.' },
   { en: 'Speak before you feel ready — readiness comes after.', vi: 'Hãy nói trước khi thấy sẵn sàng — sự sẵn sàng đến sau.' },
-  { en: 'Vocabulary you use beats vocabulary you memorise.', vi: 'Từ vựng bạn dùng hơn từ vựng bạn học thuộc.' },
+  { en: 'Vocabulary you use beats vocabulary you memorise.', vi: 'Từ vựng ta dùng hơn từ vựng ta học thuộc.' },
   { en: 'Band 7 is just band 6 that refused to quit.', vi: 'Band 7 chỉ là band 6 không chịu bỏ cuộc.' },
   { en: 'Plan two minutes, write twenty, check three.', vi: 'Lập dàn ý 2 phút, viết 20 phút, soát lại 3 phút.' },
-  { en: 'Your weakest skill is your biggest opportunity.', vi: 'Kỹ năng yếu nhất là cơ hội lớn nhất của bạn.' },
+  { en: 'Your weakest skill is your biggest opportunity.', vi: 'Kỹ năng yếu nhất là cơ hội lớn nhất của ta.' },
   { en: 'Write to be understood, not to impress.', vi: 'Viết để người ta hiểu, không phải để gây ấn tượng.' },
   { en: 'One topic mastered today, one topic gone tomorrow.', vi: 'Hôm nay nắm một chủ đề, mai bớt một nỗi lo.' },
   { en: 'Consistency is the quiet superpower of high scorers.', vi: 'Sự đều đặn là siêu năng lực thầm lặng của người điểm cao.' },
@@ -1991,7 +1992,7 @@ function renderTargetBandBars(targetBand, writingAvg, readingAvg, listeningAvg) 
   if (!section || !barsEl) return;
 
   if (!targetBand) {
-    barsEl.innerHTML = '<div class="target-band-hint">Chọn band mục tiêu ở trên để theo dõi tiến trình của bạn.</div>';
+    barsEl.innerHTML = '<div class="target-band-hint">Chọn band mục tiêu ở trên để theo dõi tiến trình của ta.</div>';
     return;
   }
 
@@ -3119,7 +3120,7 @@ function renderFeedback(s) {
     html += `
       <div class="grading-notice grading-notice-review">
         <strong>👩‍🏫 Đang chờ giáo viên chấm</strong>
-        Bài của bạn đang trong hàng chờ. Giáo viên sẽ xem và chấm sớm. Trang này tự cập nhật khi chấm xong.
+        Bài của ta đang trong hàng chờ. Giáo viên sẽ xem và chấm sớm. Trang này tự cập nhật khi chấm xong.
       </div>`;
   } else if (s.status === 'grading' || s.status === 'pending') {
     html += `
@@ -3447,7 +3448,7 @@ function renderFeedback(s) {
             </div>
             ${goods.length ? `
               <div class="err-panel-good collapsed">
-                <h4 onclick="this.parentElement.classList.toggle('collapsed')">✅ Chỗ em làm tốt <span class="epg-count">${goods.length}</span></h4>
+                <h4 onclick="this.parentElement.classList.toggle('collapsed')">✅ Chỗ ta làm tốt <span class="epg-count">${goods.length}</span></h4>
                 <div class="err-panel-good-body">${goods.map((a, i) => errorCardHtml(a, i)).join('')}</div>
               </div>` : ''}
           </aside>
@@ -3456,7 +3457,7 @@ function renderFeedback(s) {
   } else {
     html += `
       <div class="feedback-section">
-        <h3>Bài của bạn</h3>
+        <h3>Bài của ta</h3>
         <div class="essay-box">${escHtml(s.essay)}</div>
       </div>`;
   }
@@ -3489,7 +3490,7 @@ function renderFeedback(s) {
       <div class="rewrite-cta">
         <div class="rewrite-cta-text">
           <strong>✨ Muốn xem bản Band 8+?</strong>
-          <span>AI viết lại bài của bạn với từ vựng cao cấp hơn, cấu trúc tốt hơn — kèm giải thích từng thay đổi.</span>
+          <span>AI viết lại bài của ta với từ vựng cao cấp hơn, cấu trúc tốt hơn — kèm giải thích từng thay đổi.</span>
         </div>
         <button class="btn btn-rewrite" onclick="viewRewrite(${s.id})">🔄 AI viết lại Band 8+</button>
       </div>`;
@@ -6084,7 +6085,7 @@ function errorCardHtml(ann, i, opts = {}) {
   const original = ann.quote || opts.original || '';
   const isStrength = type === 'strength';
   const repeat = opts.repeatCount && opts.repeatCount > 1
-    ? `<span class="ec-repeat" title="Em đã mắc lỗi này ở ${opts.repeatCount} bài">🔁 lặp ×${opts.repeatCount}</span>` : '';
+    ? `<span class="ec-repeat" title="Ta đã mắc lỗi này ở ${opts.repeatCount} bài">🔁 lặp ×${opts.repeatCount}</span>` : '';
   return `
     <div class="err-card ec-${type}" data-ann-id="${ann.id || ''}" ${ann.id ? `onclick="jumpToAnnotation('${ann.id}')"` : ''}>
       <div class="ec-head">
@@ -6093,7 +6094,7 @@ function errorCardHtml(ann, i, opts = {}) {
         ${isStrength && (!p.err || p.err === ANN_TYPE_LABELS.strength) ? '' : `<span class="ec-err">${escHtml(p.err || 'Cần sửa')}</span>`}
         ${repeat}
       </div>
-      ${original ? `<div class="ec-line ec-orig"><span class="ec-tag">${isStrength ? 'Trong bài' : 'Em viết'}</span><span class="ec-text">${escHtml(original)}</span></div>` : ''}
+      ${original ? `<div class="ec-line ec-orig"><span class="ec-tag">${isStrength ? 'Trong bài' : 'Ta viết'}</span><span class="ec-text">${escHtml(original)}</span></div>` : ''}
       ${p.fix && !isStrength ? `<div class="ec-line ec-fix"><span class="ec-tag">Sửa thành</span><span class="ec-text">${escHtml(p.fix)}</span><button class="ec-copy" title="Chép câu đúng" data-fix="${escAttr(p.fix)}" onclick="event.stopPropagation();ecCopy(this)">⧉</button></div>` : ''}
       ${p.why ? `<div class="ec-why">${escHtml(p.why)}</div>` : ''}
       ${p.up ? `<div class="ec-up"><span class="ec-up-label">Muốn cao điểm hơn</span>${escHtml(p.up)}</div>` : ''}
@@ -6231,6 +6232,160 @@ let _microRun = { right: 0, total: 0 };
 let _trucCache = null;
 let _trucCurrent = null;
 
+/* ─── Chuỗi lập luận, bài học trước khi viết ──────────────────────────────
+   Every axis in the bank runs the same six links. Teaching them once, in one
+   place, is cheaper than teaching them fourteen times inside the axes. The
+   worked example and the gapped drill both come from the bank so the lesson
+   and the axes never drift apart. */
+
+const CHAIN_LINKS = [
+  {
+    k: 'A', name: 'Câu luận điểm',
+    must: 'Nêu cơ chế, không nêu cảm nghĩ. Dạng nếu X thì Y, chứ không phải X là tốt.',
+    fail: 'Viết một lời khen hoặc chê. Nghe thì mạnh nhưng không có gì để chứng minh tiếp.',
+    ask: 'Câu này nói cái gì dẫn tới cái gì chưa?',
+  },
+  {
+    k: 'B', name: 'Ai làm gì, quay được',
+    must: 'Một lớp người cụ thể làm một việc camera quay được. Viết dạng when cộng danh từ số nhiều.',
+    fail: 'Viết people hoặc society. Không ai quay được cảnh society làm gì.',
+    ask: 'Đặt camera ở đâu thì thấy được cảnh này?',
+  },
+  {
+    k: 'C', name: 'Cái gì tăng giảm',
+    must: 'Một thứ đo được đổi chiều. Tiền, thời gian chờ, số lần, tỉ lệ, số chỗ trống.',
+    fail: 'Viết mọi thứ tệ đi. Không đo được thì không chứng minh được.',
+    ask: 'Cái gì tăng, cái gì giảm, đo bằng đơn vị nào?',
+  },
+  {
+    k: 'D', name: 'Ai khác gánh hệ quả',
+    must: 'Một nhóm khác nhóm ở B. Chuỗi chỉ mạnh khi hệ quả chuyển sang người thứ hai.',
+    fail: 'Vẫn nhóm cũ. Đó là lặp lại B chứ không phải bước tiếp.',
+    ask: 'Nhóm này có xuất hiện ở mắt xích B không? Nếu có thì viết lại.',
+  },
+  {
+    k: 'D+', name: 'Hệ quả nổi ở đâu',
+    must: 'Bắc cầu từ một trường hợp lên quy mô. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy.',
+    fail: 'Nhảy thẳng từ một người sang cả xã hội. Giám khảo gọi đó là khái quát vội.',
+    ask: 'Nếu chuyện này xảy ra hàng loạt thì ta nhìn vào đâu để biết?',
+  },
+  {
+    k: 'E', name: 'Chốt về đề',
+    must: 'Kéo về đúng chữ trong đề. Nói vì sao chuỗi vừa rồi trả lời được câu hỏi.',
+    fail: 'Dừng ở hệ quả rồi sang đoạn mới. Đoạn có nội dung nhưng không ăn điểm Task Response.',
+    ask: 'Câu này có nhắc lại chữ của đề không?',
+  },
+];
+
+let _chainAxis = null;
+let _chainAxes = null;
+
+async function loadChainLesson() {
+  const box = document.getElementById('chain-body');
+  if (!box) return;
+  if (!_chainAxes) {
+    box.innerHTML = '<div class="loading">Đang tải ví dụ từ kho trục…</div>';
+    try {
+      const r = await api('/api/truc');
+      _chainAxes = Array.isArray(r) ? r : (r.axes || []);
+    } catch (e) { _chainAxes = []; }
+  }
+  if (!_chainAxis && _chainAxes.length) {
+    try { _chainAxis = await api('/api/truc/' + _chainAxes[0].n); } catch (e) { _chainAxis = null; }
+  }
+  renderChainLesson();
+}
+
+function renderChainLesson() {
+  const box = document.getElementById('chain-body');
+  const a = _chainAxis;
+  const chain = ((a || {}).model_chain || {}).steps || {};
+  const g = (a || {}).gapped_chain || { steps: {} };
+
+  box.innerHTML =
+    '<div class="chain-why">' +
+      '<h3>Một danh sách lý do không phải một lập luận</h3>' +
+      '<div class="chain-vs">' +
+        '<div class="chain-vs-bad">' +
+          '<span class="chain-vs-k">Danh sách</span>' +
+          '<p>Free tuition is good. It helps poor students. It also helps the economy. Therefore the government should pay.</p>' +
+          '<span class="chain-vs-note">Bốn câu, không câu nào chứng minh câu nào. Giám khảo đọc xong vẫn chưa biết vì sao.</span>' +
+        '</div>' +
+        '<div class="chain-vs-good">' +
+          '<span class="chain-vs-k">Chuỗi</span>' +
+          '<p>If the state covers tuition, students from low-income families apply to courses they would otherwise rule out. Those households carry no loan repayment. Four years later hospitals in the same region fill vacancies they had advertised twice.</p>' +
+          '<span class="chain-vs-note">Mỗi câu là hệ quả của câu trước. Bỏ một câu là đứt.</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="chain-links">' +
+      '<h3>Sáu mắt xích</h3>' +
+      CHAIN_LINKS.map(l =>
+        '<div class="chain-link">' +
+          '<span class="chain-link-k">' + l.k + '</span>' +
+          '<div class="chain-link-body">' +
+            '<div class="chain-link-name">' + escHtml(l.name) + '</div>' +
+            '<div class="chain-link-must">' + escHtml(l.must) + '</div>' +
+            '<div class="chain-link-fail"><span>Hay hỏng ở</span> ' + escHtml(l.fail) + '</div>' +
+            '<div class="chain-link-ask"><span>Tự hỏi</span> ' + escHtml(l.ask) + '</div>' +
+          '</div>' +
+        '</div>').join('') +
+    '</div>' +
+
+    (Object.keys(chain).length
+      ? '<div class="chain-worked">' +
+          '<h3>Chuỗi mẫu, chạy đủ sáu bước</h3>' +
+          (a.model_chain.prompt ? '<div class="chain-prompt">' + escHtml(a.model_chain.prompt) + '</div>' : '') +
+          '<div class="chain-run">' +
+            CHAIN_LINKS.filter(l => chain[l.k]).map(l =>
+              '<div class="chain-step">' +
+                '<span class="chain-step-k">' + l.k + '</span>' +
+                '<div><span class="chain-step-name">' + escHtml(l.name) + '</span>' +
+                '<span class="chain-step-text">' + escHtml(chain[l.k]) + '</span></div>' +
+              '</div>').join('') +
+          '</div>' +
+          '<div class="chain-source">Lấy từ trục ' + a.n + ', ' + escHtml(a.title || '') + '</div>' +
+        '</div>'
+      : '') +
+
+    (g.steps && g.steps.A
+      ? '<div class="chain-drill">' +
+          '<h3>Tới lượt ta</h3>' +
+          '<p class="chain-drill-note">A và E cho sẵn. Dựng bốn mắt xích ở giữa, rồi đối chiếu với phần gợi ý.</p>' +
+          '<div class="chain-run">' +
+            '<div class="chain-step given"><span class="chain-step-k">A</span><div><span class="chain-step-name">Câu luận điểm, cho sẵn</span><span class="chain-step-text">' + escHtml(g.steps.A) + '</span></div></div>' +
+            ['B', 'C', 'D', 'D+'].map(k => {
+              const l = CHAIN_LINKS.find(x => x.k === k);
+              return '<div class="chain-step blank"><span class="chain-step-k">' + k + '</span>' +
+                '<div><span class="chain-step-name">' + escHtml(l.name) + '</span>' +
+                '<textarea class="chain-input" id="chain-in-' + k.replace('+', 'plus') + '" rows="2" placeholder="Viết mắt xích ' + k + '…"></textarea>' +
+                '<div class="chain-step-ask">' + escHtml(l.ask) + '</div></div></div>';
+            }).join('') +
+            (g.steps.E ? '<div class="chain-step given"><span class="chain-step-k">E</span><div><span class="chain-step-name">Chốt về đề, cho sẵn</span><span class="chain-step-text">' + escHtml(g.steps.E) + '</span></div></div>' : '') +
+          '</div>' +
+          (g.hints ? '<details class="chain-hints"><summary>Gợi ý cho các ô trống</summary><p>' + escHtml(g.hints) + '</p></details>' : '') +
+          '<div class="chain-drill-actions">' +
+            '<button class="btn btn-secondary btn-sm" onclick="chainOtherAxis()">Đổi trục khác</button>' +
+            '<button class="btn btn-primary btn-sm" onclick="showView(&quot;writing-practice&quot;)">Đủ rồi, vào viết →</button>' +
+          '</div>' +
+        '</div>'
+      : '<div class="chain-drill-actions"><button class="btn btn-primary btn-sm" onclick="showView(&quot;writing-practice&quot;)">Đủ rồi, vào viết →</button></div>');
+}
+
+// A different axis gives a different engine to practise on, and the whole
+// point of the lesson is that the six links do not change with the topic.
+async function chainOtherAxis() {
+  if (!_chainAxes || !_chainAxes.length) return;
+  const box = document.getElementById('chain-body');
+  const others = _chainAxes.filter(x => !_chainAxis || x.n !== _chainAxis.n);
+  const pick = others[Math.floor(Math.random() * others.length)] || _chainAxes[0];
+  box.innerHTML = '<div class="loading">Đang tải trục ' + pick.n + '…</div>';
+  try { _chainAxis = await api('/api/truc/' + pick.n); } catch (e) {}
+  renderChainLesson();
+}
+
+
 async function loadTrucList() {
   const box = document.getElementById('truc-list');
   if (!box) return;
@@ -6326,7 +6481,7 @@ async function openTruc(n) {
     </div>
 
     <div class="truc-block truc-exercise">
-      <h3>Chain khuyết — tới lượt em</h3>
+      <h3>Chain khuyết — tới lượt ta</h3>
       ${g.prompt ? `<div class="tr-prompt">${escHtml(g.prompt)}</div>` : ''}
       <p class="tr-ex-note">A và E cho sẵn. Dựng bốn mắt xích ở giữa. Ba ô đầu cần một hành động camera quay được, viết dạng <em>when</em> cộng danh từ số nhiều — đừng dựng một nhân vật.</p>
       <div class="tr-chain">
@@ -6492,7 +6647,7 @@ function microRowHtml(t) {
       '</div>' +
       (t.rule ? '<div class="mr-rule">' + escHtml(t.rule) + '</div>' : '') +
       '<div class="mr-origin">' +
-        '<span class="mr-origin-label">Từ bài của em</span>' +
+        '<span class="mr-origin-label">Từ bài của ta</span>' +
         '<span class="mr-bad">' + escHtml(t.quote) + '</span>' +
         '<span class="mr-arrow">→</span>' +
         '<span class="mr-good">' + escHtml(t.fix) + '</span>' +
@@ -6638,13 +6793,13 @@ async function loadErrorProfile() {
     if (hit && hit.essays > 1 && !card.querySelector('.ec-repeat')) {
       const head = card.querySelector('.ec-head');
       if (head) head.insertAdjacentHTML('beforeend',
-        `<span class="ec-repeat" title="Lỗi này xuất hiện ở ${hit.essays} bài của em">🔁 lặp ×${hit.essays}</span>`);
+        `<span class="ec-repeat" title="Lỗi này xuất hiện ở ${hit.essays} bài của ta">🔁 lặp ×${hit.essays}</span>`);
     }
   });
 
   box.style.display = '';
   box.innerHTML = `
-    <h3>🔁 Lỗi em hay lặp lại <span class="fs-sub">— tổng hợp từ ${p.essays_analysed} bài đã chấm</span></h3>
+    <h3>🔁 Lỗi ta hay lặp lại <span class="fs-sub">— tổng hợp từ ${p.essays_analysed} bài đã chấm</span></h3>
     <div class="err-profile-list">
       ${p.recurring.map(r => `
         <div class="epf-row ec-${r.type}">
@@ -9804,7 +9959,7 @@ function ppShowIdeas(note) {
     '<div class="pp-ideas">' +
       '<h4>💡 Cách đi ý cho trục này</h4>' +
       (note ? '<p class="pp-quiz-note">' + escHtml(note) + '</p>' : '') +
-      '<p class="pp-quiz-note">Đây là chain mẫu, không phải bài mẫu để chép. Đọc để thấy mắt xích, rồi viết bằng chữ của em.</p>' +
+      '<p class="pp-quiz-note">Đây là chain mẫu, không phải bài mẫu để chép. Đọc để thấy mắt xích, rồi viết bằng chữ của ta.</p>' +
       '<div class="tr-chain">' +
         ['A', 'B', 'C', 'D', 'D+', 'E'].filter(k => st[k]).map(k =>
           '<div class="tr-link"><span class="tr-link-k">' + k + '</span><div class="tr-link-body">' +
@@ -9940,7 +10095,7 @@ function ppReviseBlockHtml() {
   return '' +
     '<div class="pe-revise">' +
       '<h4>Viết lại đoạn</h4>' +
-      '<p class="pe-revise-note">Tích vào từng lỗi khi em đã sửa nó trong đoạn dưới. Tích hết các lỗi <b>phải sửa</b> thì mới chấm lại được — để em rà từng chỗ chứ không viết lại đại.</p>' +
+      '<p class="pe-revise-note">Tích vào từng lỗi khi ta đã sửa nó trong đoạn dưới. Tích hết các lỗi <b>phải sửa</b> thì mới chấm lại được — để ta rà từng chỗ chứ không viết lại đại.</p>' +
       '<textarea id="pp-revise" class="pp-textarea" rows="7"></textarea>' +
       '<div class="pp-actions">' +
         '<div id="pe-gate-note" class="pe-gate-note"></div>' +
@@ -10632,7 +10787,7 @@ async function submitParagraphTranslation() {
   if (!_activeParagraph || _paraSubmitted) return;
   const inputEl = document.getElementById('para-ex-input');
   const userText = inputEl ? inputEl.value.trim() : '';
-  if (!userText) { alert('Bạn chưa nhập bản dịch!'); return; }
+  if (!userText) { alert('Ta chưa nhập bản dịch!'); return; }
 
   _paraSubmitted = true;
   const submitBtn = document.getElementById('para-ex-submit-btn');
@@ -11128,7 +11283,7 @@ async function improveWritingEssay() {
   const box = document.getElementById('wp-improve-result');
   const btn = document.querySelector('.wp-improve-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang viết lại Band 8+…'; }
-  if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="wp-ai-loading">✨ Đang nâng cấp bài của bạn lên chuẩn Band 8+…</div>'; }
+  if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="wp-ai-loading">✨ Đang nâng cấp bài của ta lên chuẩn Band 8+…</div>'; }
   try {
     const data = await api('/api/ai/improve-writing', {
       method: 'POST',
@@ -11137,7 +11292,7 @@ async function improveWritingEssay() {
     if (data.improved && box) {
       box.innerHTML = `<div class="wp-improve-title">📈 Bản viết mẫu Band 8+</div>
         <div class="wp-improve-body"><p>${escHtml(data.improved).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
-        <p class="wp-improve-note">Bản này nâng cấp từ chính bài của bạn — giữ ý của bạn, cải thiện từ vựng, ngữ pháp và liên kết.</p>`;
+        <p class="wp-improve-note">Bản này nâng cấp từ chính bài của ta — giữ ý của ta, cải thiện từ vựng, ngữ pháp và liên kết.</p>`;
     } else if (box) {
       box.innerHTML = '<div class="wp-ai-error">Không tạo được bản cải thiện. Thử lại.</div>';
     }
@@ -11237,7 +11392,7 @@ function wpRenderPlanner() {
         placeholder="Ví dụ: miễn học phí chỉ đáng nếu sinh viên ở lại làm việc trong nước…"></textarea>
       <div class="wp-own-actions">
         <button class="btn btn-secondary btn-sm" id="wp-own-check" onclick="wpCheckOwnIdea()">Nhờ AI soi ý</button>
-        <button class="btn btn-primary btn-sm hidden" id="wp-own-build" onclick="wpConfirmPlan()">Dựng dàn ý từ ý của em →</button>
+        <button class="btn btn-primary btn-sm hidden" id="wp-own-build" onclick="wpConfirmPlan()">Dựng dàn ý từ ý của ta →</button>
         <span class="wp-own-count" id="wp-own-count"></span>
       </div>
       <div class="wp-own-feedback hidden" id="wp-own-feedback"></div>
@@ -11351,7 +11506,7 @@ async function wpCheckOwnIdea() {
   if (_wpIdeaCache[idea]) { wpRenderIdeaFeedback(_wpIdeaCache[idea]); return; }
   if (btn) { btn.disabled = true; btn.textContent = 'Đang soi…'; }
   box.className = 'wp-own-feedback';
-  box.innerHTML = '<span class="hint-thinking">Đang đọc ý của em…</span>';
+  box.innerHTML = '<span class="hint-thinking">Đang đọc ý của ta…</span>';
   try {
     const r = await api('/api/check-idea', {
       method: 'POST',
@@ -11777,7 +11932,7 @@ function _dictMatchTarget(target, typed) {
 function dictCheck() {
   const sen = _dictEx.sentences[_dictIdx];
   const typedRaw = document.getElementById('dict-input').value.trim();
-  if (!typedRaw) { showToast('Gõ câu bạn nghe được trước đã!'); return; }
+  if (!typedRaw) { showToast('Gõ câu ta nghe được trước đã!'); return; }
   const targetWordsDisplay = sen.text.split(/\s+/).filter(Boolean);
   const target = _dictWords(sen.text);
   const typed = _dictWords(typedRaw);
@@ -11803,7 +11958,7 @@ function dictCheck() {
   resEl.innerHTML = `
     <div class="dict-score ${pct >= 80 ? 'good' : pct >= 50 ? 'mid' : 'low'}">${pct}% <span>(${correct}/${total} từ đúng)</span></div>
     <div class="dict-answer">${marked}</div>
-    <div class="dict-typed">Bạn gõ: <em>${escHtml(typedRaw)}</em></div>`;
+    <div class="dict-typed">Ta gõ: <em>${escHtml(typedRaw)}</em></div>`;
   document.getElementById('dict-input').disabled = true;
   document.getElementById('dict-check-btn').classList.add('hidden');
   document.getElementById('dict-reveal-btn').classList.add('hidden');
@@ -12945,7 +13100,7 @@ let _bcTargetBand = 7;
 let _bcSubmitting = false;
 
 const BC_STAGES = [
-  { key: 'topic_sentence', label: 'Câu chủ đề', color: '#f59e0b', hint: 'Viết câu chủ đề — nêu rõ luận điểm gắn với quan điểm của bạn.' },
+  { key: 'topic_sentence', label: 'Câu chủ đề', color: '#f59e0b', hint: 'Viết câu chủ đề — nêu rõ luận điểm gắn với quan điểm của ta.' },
   { key: 'evidence',       label: 'Dẫn chứng',  color: '#3b82f6', hint: 'Đưa ví dụ/số liệu cụ thể. Thông tin mới — không lặp lại câu chủ đề.' },
   { key: 'analysis',       label: 'Phân tích',  color: '#f97316', hint: 'Giải thích VÌ SAO dẫn chứng chứng minh luận điểm. Tránh lặp ý.' },
   { key: 'link',           label: 'Liên kết',   color: '#10b981', hint: 'Nối lại với đề bài mà không lặp y nguyên từng chữ.' },
@@ -12985,7 +13140,7 @@ function renderBcStart() {
           <button class="bc-reshuffle" onclick="bcReshuffle()">🎲 Đổi đề</button>
         </div>
 
-        <div class="bc-pos-label">Chọn quan điểm của bạn:</div>
+        <div class="bc-pos-label">Chọn quan điểm của ta</div>
         <div class="bc-pos-options">
           <button class="bc-pos-btn" onclick="bcSetPosition('Đồng ý')"><strong>Đồng ý</strong><span>Ủng hộ quan điểm</span></button>
           <button class="bc-pos-btn" onclick="bcSetPosition('Phản đối')"><strong>Phản đối</strong><span>Phản bác quan điểm</span></button>
@@ -13058,7 +13213,7 @@ function renderBcClimb() {
           <div class="bc-stage-card">
             <div class="bc-stage-label" style="color:${meta.color}">${meta.label}</div>
             <div class="bc-stage-hint">${meta.hint}</div>
-            <textarea class="bc-textarea" id="bc-textarea" placeholder="Viết câu của bạn..."
+            <textarea class="bc-textarea" id="bc-textarea" placeholder="Viết câu của ta..."
               oninput="document.getElementById('bc-submit').disabled=this.value.trim().length<5"></textarea>
             <button class="bc-submit" id="bc-submit" disabled onclick="submitBcSentence()">Gửi câu →</button>
           </div>
@@ -13079,7 +13234,7 @@ async function submitBcSentence() {
   const btn = document.getElementById('bc-submit');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang chấm...'; }
   const fb = document.getElementById('bc-feedback');
-  if (fb) { fb.className = 'bc-feedback'; fb.innerHTML = '<div class="bc-fb-loading">AI đang chấm câu của bạn…</div>'; }
+  if (fb) { fb.className = 'bc-feedback'; fb.innerHTML = '<div class="bc-fb-loading">AI đang chấm câu của ta…</div>'; }
 
   try {
     const res = await fetch('/api/game/para-lab', {

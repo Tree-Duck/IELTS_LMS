@@ -127,7 +127,7 @@
       <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
         <div class="form-group">
           <label>Họ và tên</label>
-          <input type="text" id="reg-name" placeholder="Tên của bạn" required />
+          <input type="text" id="reg-name" placeholder="Họ và tên" required />
         </div>
         <div class="form-group">
           <label>Email</label>
@@ -145,7 +145,7 @@
       <div id="forgot-form" class="auth-form hidden">
         <div class="verify-info">
           <div class="verify-icon">🔑</div>
-          <p>Nhập email của bạn và chúng tôi sẽ gửi cho bạn mã đặt lại mật khẩu.</p>
+          <p>Nhập email của ta, hệ thống sẽ gửi mã đặt lại mật khẩu.</p>
         </div>
         <div class="form-group">
           <label>Địa chỉ Email</label>
@@ -162,7 +162,7 @@
         <div class="verify-info">
           <div class="verify-icon">🔒</div>
           <p>Nhập mã được gửi tới</p>
-          <strong id="reset-email-display">email của bạn</strong>
+          <strong id="reset-email-display">email của ta</strong>
         </div>
         <div class="form-group">
           <label>Mã đặt lại</label>
@@ -187,7 +187,7 @@
         <div class="verify-info">
           <div class="verify-icon">📬</div>
           <p>Chúng tôi đã gửi mã 6 chữ số tới</p>
-          <strong id="verify-email-display">email của bạn</strong>
+          <strong id="verify-email-display">email của ta</strong>
         </div>
         <div class="form-group">
           <label>Mã xác thực</label>
@@ -225,6 +225,7 @@
             <button class="tnav-nav-link" data-view="submit" onclick="showView('submit')">✏️ Nộp bài chấm điểm</button>
             <button class="tnav-nav-link" data-view="luyen" onclick="showView('luyen')">🧩 Luyện từ, câu, đoạn</button>
             <button class="tnav-nav-link" data-view="micro" onclick="showView('micro')">🎯 Luyện lỗi của tôi</button>
+            <button class="tnav-nav-link" data-view="chain" onclick="showView('chain')">🔗 Chuỗi lập luận</button>
             <button class="tnav-nav-link" data-view="truc" onclick="showView('truc')">🧭 14 trục lập luận</button>
             <button class="tnav-nav-link" data-view="model-essays" onclick="showView('model-essays')">📄 Bài viết mẫu</button>
           </div>
@@ -637,7 +638,7 @@
                   </button>
                 </label>
                 <textarea id="essay-prompt" rows="4"
-                  placeholder="Dán câu hỏi IELTS của bạn ở đây, hoặc nhấp ✨ Tạo đề bài để tự động tạo..."
+                  placeholder="Dán câu hỏi IELTS của ta ở đây, hoặc nhấp ✨ Tạo đề bài để tự động tạo..."
                   oninput="onPromptInput()" required></textarea>
               </div>
 
@@ -681,10 +682,10 @@
 
               <div class="form-group">
                 <label for="essay-text">
-                  Bài viết của bạn
+                  Bài viết của ta
                   <span class="word-count-badge" id="word-count-badge">0 từ</span>
                 </label>
-                <textarea id="essay-text" rows="18" placeholder="Viết bài của bạn tại đây..." required oninput="updateWordCount(); onDraftInput()"></textarea>
+                <textarea id="essay-text" rows="18" placeholder="Viết bài của ta tại đây..." required oninput="updateWordCount(); onDraftInput()"></textarea>
                 <div class="word-count-bar-wrap">
                   <div class="word-count-bar-track"><div class="word-count-bar-fill" id="word-count-bar-fill"></div></div>
                   <span class="word-count-bar-text" id="word-count-bar-text">0 / 250 từ</span>
@@ -697,19 +698,19 @@
               </div>
 
               <div class="form-group grading-mode-selector">
-                <label>Bạn muốn bài được chấm như thế nào?</label>
+                <label>Ta muốn bài được chấm như thế nào?</label>
                 <div class="grading-mode-options">
                   <label class="grading-mode-option" id="mode-teacher-label">
                     <input type="radio" name="grading_mode" value="teacher" checked>
                     <span class="mode-icon">👩‍🏫</span>
                     <span class="mode-title">Chấm bài của giáo viên</span>
-                    <span class="mode-desc">Giáo viên tự kiểm tra và chấm bài của bạn</span>
+                    <span class="mode-desc">Giáo viên tự kiểm tra và chấm bài của ta</span>
                   </label>
                   <label class="grading-mode-option" id="mode-ai-label">
                     <input type="radio" name="grading_mode" value="ai">
                     <span class="mode-icon">🤖</span>
                     <span class="mode-title">Chấm bài AI</span>
-                    <span class="mode-desc">Tức thời · AI đánh giá bài của bạn</span>
+                    <span class="mode-desc">Tức thời · AI đánh giá bài của ta</span>
                   </label>
                 </div>
               </div>
@@ -738,11 +739,11 @@
                   <!-- Scaffold inputs — Task 2 only, shown by updateTopicOptions() -->
                   <div id="scaffold-toggle-row" class="scaffold-toggle-row hidden">
                     <button type="button" class="scaffold-toggle-btn" id="scaffold-toggle-btn" onclick="toggleScaffoldFields()">
-                      ✏️ Nhập ý tưởng của bạn <span id="scaffold-toggle-icon">▸</span>
+                      ✏️ Nhập ý tưởng của ta <span id="scaffold-toggle-icon">▸</span>
                     </button>
                   </div>
                   <div id="scaffold-fields" class="scaffold-fields hidden">
-                    <p class="scaffold-hint">Nhập ý tưởng của bạn và AI sẽ phát triển chúng — bỏ trống để có đề xuất AI.</p>
+                    <p class="scaffold-hint">Nhập ý tưởng của ta và AI sẽ phát triển chúng — bỏ trống để có đề xuất AI.</p>
                     <div class="scaffold-row">
                       <label class="scaffold-label">Vị trí / luận điểm của tôi</label>
                       <input type="text" id="scaffold-thesis" class="form-input scaffold-input"
@@ -765,7 +766,7 @@
                     </div>
                     <button type="button" class="scaffold-clear-btn" onclick="clearScaffold()">✕ Xóa</button>
                   </div>
-                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Nhập ý tưởng của bạn ở trên hoặc nhấp "Tạo ✨" để có đề xuất AI.</span></div>
+                  <div class="hint-card-body" id="ideas-body"><span class="hint-empty">Nhập ý tưởng của ta ở trên hoặc nhấp "Tạo ✨" để có đề xuất AI.</span></div>
                 </div>
                 <div class="hint-card" id="vocab-card" style="display:none">
                   <div class="hint-card-header">📚 Từ vựng &amp; Collocations<button type="button" class="hint-generate-btn" id="vocab-btn" onclick="requestSingleHint('vocabulary')">Tạo ✨</button></div>
@@ -792,7 +793,7 @@
       <div id="view-history" class="view hidden">
         <div class="page-header">
           <h2>Bài nộp của tôi</h2>
-          <p>Xem lại tất cả các bài nộp essay và phản hồi AI của bạn</p>
+          <p>Xem lại tất cả các bài nộp essay và phản hồi AI của ta</p>
         </div>
         <div id="history-list">
           <div class="loading">Đang tải bài nộp...</div>
@@ -847,12 +848,12 @@
       <div id="view-change-password" class="view hidden">
         <div class="page-header">
           <h2>Đổi mật khẩu</h2>
-          <p>Cập nhật mật khẩu tài khoản của bạn</p>
+          <p>Cập nhật mật khẩu tài khoản</p>
         </div>
         <div class="change-password-card">
           <div class="form-group">
             <label>Mật khẩu hiện tại</label>
-            <input type="password" id="cp-current" placeholder="Mật khẩu hiện tại của bạn" />
+            <input type="password" id="cp-current" placeholder="Mật khẩu hiện tại" />
           </div>
           <div class="form-group">
             <label>Mật khẩu mới</label>
@@ -874,7 +875,7 @@
       <div id="view-settings" class="view hidden">
         <div class="page-header">
           <h2>⚙️ Giao diện & Hồ sơ</h2>
-          <p>Cá nhân hoá ảnh đại diện của bạn</p>
+          <p>Cá nhân hoá ảnh đại diện</p>
         </div>
 
         <div class="settings-card">
@@ -898,7 +899,7 @@
 
         <div class="settings-card">
           <h3 class="settings-section-title">🙂 Ảnh đại diện</h3>
-          <p class="settings-section-hint">Chọn một biểu tượng làm ảnh đại diện của bạn.</p>
+          <p class="settings-section-hint">Chọn một biểu tượng làm ảnh đại diện.</p>
           <div class="avatar-current-row">
             <div class="avatar-current" id="settings-avatar-preview">S</div>
             <span class="settings-section-hint" id="settings-avatar-label">Ảnh đại diện hiện tại</span>
@@ -991,7 +992,7 @@
       <div id="view-test-history" class="view hidden">
         <div class="page-header">
           <h2>🏆 Kết quả kiểm tra</h2>
-          <p>Các nỗ lực Reading và Listening trước đây của bạn</p>
+          <p>Các nỗ lực Reading và Listening trước đây của ta</p>
         </div>
         <div id="test-history-content"><div class="loading">Đang tải…</div></div>
       </div>
@@ -1478,7 +1479,7 @@
       <div id="view-homework" class="view hidden">
         <div class="page-header">
           <h2>📋 Bài tập</h2>
-          <p>Bài tập được đặt bởi giáo viên của bạn — hoàn thành trước hạn cuối cùng</p>
+          <p>Bài tập được đặt bởi giáo viên giao — hoàn thành trước hạn cuối cùng</p>
         </div>
         <div id="homework-content"><div class="loading">Đang tải…</div></div>
       </div>
@@ -1540,7 +1541,7 @@
       <div id="view-admin-assignments" class="view hidden">
         <div class="page-header">
           <h2>📋 Bài tập</h2>
-          <p>Giao bài tập cho học sinh của bạn với hạn chót</p>
+          <p>Giao bài tập cho học sinh, kèm hạn chót</p>
         </div>
 
         <!-- Create form -->
@@ -1630,7 +1631,7 @@
             <button class="btn-back" onclick="goBack()">← Quay lại</button>
             <h2>Viết lại thông minh — Band 8+</h2>
           </div>
-          <p>Viết lại thông minh essay của bạn hướng tới Band 8.0–8.5 với giải thích những gì đã thay đổi</p>
+          <p>Viết lại thông minh essay của ta hướng tới Band 8.0–8.5 với giải thích những gì đã thay đổi</p>
         </div>
         <div id="rewrite-content"></div>
       </div>
@@ -1639,7 +1640,7 @@
       <div id="view-classes" class="view hidden">
         <div class="page-header">
           <h2>🏫 Lớp học</h2>
-          <p>Quản lý lớp học của bạn và theo dõi điểm danh học sinh</p>
+          <p>Quản lý lớp học và theo dõi điểm danh học sinh</p>
         </div>
         <div id="classes-teacher-controls"></div>
         <div id="classes-list-container"><div class="loading">Đang tải lớp học…</div></div>
@@ -1699,7 +1700,7 @@
       <div id="view-my-attendance" class="view hidden">
         <div class="page-header">
           <h2>📅 Điểm danh của tôi</h2>
-          <p>Xem hồ sơ điểm danh của bạn trong tất cả các lớp</p>
+          <p>Xem hồ sơ điểm danh của ta trong tất cả các lớp</p>
         </div>
         <div id="my-attendance-class-selector" style="margin-bottom:16px"></div>
         <div id="my-attendance-calendar"></div>
@@ -1861,7 +1862,7 @@
       <div id="view-vocab" class="view hidden">
         <div class="page-header">
           <h2>📓 Từ vựng của tôi</h2>
-          <p>Các từ được lưu từ flashcard của bạn</p>
+          <p>Các từ được lưu từ flashcard của ta</p>
         </div>
         <div id="vocab-list-container">
           <div class="empty-state">Chưa lưu từ nào. Mở flashcard của bất kỳ essay nào và nhấp 💾 Lưu từ.</div>
@@ -1969,7 +1970,7 @@
             <span class="sp-rec-status" id="sp-rec-status"></span>
           </div>
           <div class="sp-fallback hidden" id="sp-fallback">⚠️ Trình duyệt không hỗ trợ ghi âm bằng giọng nói. Hãy dùng <strong>Chrome/Edge</strong>, hoặc gõ câu trả lời bên dưới rồi bấm Chấm điểm.</div>
-          <textarea id="sp-transcript" class="sp-transcript" rows="5" placeholder="Câu trả lời của bạn sẽ hiện ở đây khi nói (có thể sửa lại trước khi chấm)…"></textarea>
+          <textarea id="sp-transcript" class="sp-transcript" rows="5" placeholder="Câu trả lời của ta sẽ hiện ở đây khi nói (có thể sửa lại trước khi chấm)…"></textarea>
           <div class="sp-actions">
             <button type="button" class="btn btn-primary" id="sp-score-btn" onclick="scoreSpeaking()">✅ Chấm điểm</button>
             <button type="button" class="btn btn-secondary" onclick="clearSpeakingTranscript()">🗑️ Xoá</button>
@@ -2095,6 +2096,16 @@
       </div>
 
       <!-- Argument Axes: the list -->
+      <!-- Mechanism chain: the lesson that comes before any writing -->
+      <div id="view-chain" class="view hidden">
+        <div class="page-header">
+          <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
+          <h2>Chuỗi lập luận sáu mắt xích</h2>
+          <p>Học cái này trước khi viết. Mọi thân bài band 7 trở lên đều chạy đúng chuỗi này.</p>
+        </div>
+        <div id="chain-body"><div class="loading">Đang tải…</div></div>
+      </div>
+
       <div id="view-truc" class="view hidden">
         <div class="page-header">
           <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
@@ -2198,7 +2209,7 @@
 
             <div class="wp-editor-col">
               <div class="wp-editor-topbar">
-                <span class="wp-editor-label">✍️ Bài viết của bạn</span>
+                <span class="wp-editor-label">✍️ Bài viết của ta</span>
                 <div class="wp-editor-tools">
                   <button class="wp-tool-btn" onclick="wpTranslatePrompt()" title="Dịch đề sang tiếng Việt">🌐</button>
                   <button class="wp-tool-btn" onclick="wpToggleFocus()" id="wp-focus-btn" title="Phóng to khung viết">⛶</button>
@@ -2209,7 +2220,7 @@
               </div>
               <div class="wp-word-bar"><div class="wp-word-bar-fill" id="wp-word-bar-fill"></div></div>
               <textarea id="wp-essay-input" class="wp-essay-textarea"
-                placeholder="Bắt đầu viết bài của bạn ở đây…"
+                placeholder="Bắt đầu viết bài của ta ở đây…"
                 oninput="updateWordCount()"></textarea>
               <div class="wp-editor-actions">
                 <button class="btn btn-outline" onclick="clearWritingEssay()">🗑 Xóa</button>
@@ -2261,9 +2272,9 @@
                 <span class="trans-hints-label">💡 Gợi ý từ <span class="trans-hints-sub">(nhấp để hiển thị)</span></span>
                 <div class="trans-hint-chips" id="trans-hint-chips"></div>
               </div>
-              <div class="trans-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
+              <div class="trans-en-label">🇬🇧 Bản dịch tiếng Anh của ta</div>
               <textarea id="trans-en-input" class="form-input trans-en-input" rows="3"
-                placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
+                placeholder="Gõ bản dịch tiếng Anh của ta ở đây…"
                 onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))checkTranslation()"></textarea>
               <div class="trans-actions">
                 <button class="btn btn-primary" id="trans-check-btn" onclick="checkTranslation()">✓ Kiểm tra</button>
@@ -2316,9 +2327,9 @@
             <!-- Right: user input + result -->
             <div class="para-ex-right">
               <div class="para-ex-input-section">
-                <div class="para-ex-en-label">🇬🇧 Bản dịch tiếng Anh của bạn</div>
+                <div class="para-ex-en-label">🇬🇧 Bản dịch tiếng Anh của ta</div>
                 <textarea id="para-ex-input" class="form-input para-ex-textarea" rows="8"
-                  placeholder="Gõ bản dịch tiếng Anh của bạn ở đây…"
+                  placeholder="Gõ bản dịch tiếng Anh của ta ở đây…"
                   oninput="updateParaWordCount()"
                   onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))submitParagraphTranslation()"></textarea>
                 <div class="para-ex-meta">
@@ -2382,7 +2393,7 @@
               <div class="dict-hint" id="dict-hint"></div>
             </div>
             <div class="dict-work">
-              <textarea id="dict-input" class="dict-input" rows="3" placeholder="Gõ lại câu bạn vừa nghe…"></textarea>
+              <textarea id="dict-input" class="dict-input" rows="3" placeholder="Gõ lại câu ta vừa nghe…"></textarea>
               <div class="dict-actions">
                 <button class="btn btn-primary" id="dict-check-btn" onclick="dictCheck()">✔ Kiểm tra</button>
                 <button class="btn btn-ghost" id="dict-reveal-btn" onclick="dictReveal()">👀 Hiện đáp án</button>
@@ -2472,7 +2483,7 @@
   <div class="modal-overlay hidden" id="discard-modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title">Thoát bài kiểm tra?</h3>
-      <p class="modal-desc">Bạn có những câu hỏi chưa trả lời. Bạn muốn làm gì?</p>
+      <p class="modal-desc">Ta còn câu hỏi chưa trả lời. Ta muốn làm gì?</p>
       <div class="modal-actions">
         <button class="btn btn-modal-submit" onclick="handlePartialSubmit()">Nộp những câu đã trả lời</button>
         <button class="btn btn-modal-discard" onclick="handleDiscardTest()">Bỏ &amp; Thoát</button>
