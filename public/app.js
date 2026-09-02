@@ -5631,15 +5631,62 @@ async function startHomeworkWriting(assignmentId, taskType) {
       const promptEl = document.getElementById('essay-prompt');
       if (promptEl) { promptEl.readOnly = false; promptEl.style.background = ''; }
     }
-    // Handle custom image URL for Task 1
+    // Handle custom image URL for Task 1.
+    // Setting the prompt above fires onPromptInput, which calls clearChart and
+    // hides #chart-container. Unhiding only the inner frame left the picture in
+    // a hidden parent, so homework Task 1 arrived with no chart at all. The
+    // image state also has to be refilled or the essay is graded without it.
     if (a && a.custom_image_url && taskType === 'task1') {
-      const imgEl = document.getElementById('chart-topic-image');
-      const frameEl = document.getElementById('chart-image-frame');
-      if (imgEl) imgEl.src = a.custom_image_url;
-      if (frameEl) frameEl.classList.remove('hidden');
+      await showHomeworkChart(a.custom_image_url, a.title);
     }
   } catch (err) {
     // Non-critical — just proceed without pre-fill
+  }
+}
+
+// The chart set by a teacher on a homework assignment. It has to end up in the
+// same two places an admin topic does: on screen, and in the pair of variables
+// the submit handler reads, or the grader never sees the picture.
+async function showHomeworkChart(url, label) {
+  const container = document.getElementById('chart-container');
+  const imgEl = document.getElementById('chart-topic-image');
+  const frameEl = document.getElementById('chart-image-frame');
+  const canvas = document.getElementById('task1-chart');
+  const tableArea = document.getElementById('table-area');
+  const titleEl = document.getElementById('chart-title-label');
+  if (!imgEl) return;
+
+  if (activeChart) { activeChart.destroy(); activeChart = null; }
+  if (canvas) canvas.style.display = 'none';
+  if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
+
+  imgEl.src = url;
+  imgEl.classList.remove('hidden');
+  if (frameEl) frameEl.classList.remove('hidden');
+  if (container) container.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = 'Biểu đồ của bài tập' + (label ? ' — ' + label : '');
+
+  const parts = /^data:([^;,]+);base64,(.+)$/s.exec(url);
+  if (parts) {
+    task1ImageMediaType = parts[1];
+    task1ImageBase64 = parts[2];
+    return;
+  }
+  // A pasted link instead of an upload. Read it back so the grader still gets
+  // the picture; if the host refuses, the student can at least see it.
+  try {
+    const blob = await (await fetch(url)).blob();
+    const dataUrl = await new Promise((ok, no) => {
+      const fr = new FileReader();
+      fr.onload = () => ok(fr.result);
+      fr.onerror = no;
+      fr.readAsDataURL(blob);
+    });
+    const m = /^data:([^;,]+);base64,(.+)$/s.exec(dataUrl);
+    if (m) { task1ImageMediaType = m[1]; task1ImageBase64 = m[2]; }
+  } catch (e) {
+    task1ImageBase64 = null;
+    task1ImageMediaType = null;
   }
 }
 
@@ -6940,8 +6987,98 @@ function updateAssignTestField() {
     const isWriting = type === 'writing_task1' || type === 'writing_task2';
     promptGroup.style.display = isWriting ? 'block' : 'none';
     if (imageUrlGroup) imageUrlGroup.style.display = (type === 'writing_task1') ? 'block' : 'none';
+    if (isWriting) loadAssignPromptBank();
   }
 }
+
+// Teachers were made to retype a prompt the site already holds. The picker
+// lists the bank filtered by the assignment type, so setting homework from an
+// existing prompt is one click. Typing a new one still works.
+let _assignBank = null;
+
+async function loadAssignPromptBank() {
+  if (_assignBank) return renderAssignPickList();
+  const note = document.getElementById('assign-pick-note');
+  if (note) note.textContent = 'Đang tải kho đề…';
+  try {
+    const [t1, t2] = await Promise.all([
+      api('/api/admin/task1-topics').catch(() => []),
+      api('/api/admin/task2-prompts').catch(() => []),
+    ]);
+    _assignBank = [
+      ...(Array.isArray(t1) ? t1 : []).map(t => ({
+        key: 't1:' + t.id,
+        type: 'writing_task1',
+        label: t.label || WP_TYPE_LABEL[t.chart_type] || 'Task 1',
+        text: t.question_preview || t.question || '',
+      })),
+      ...(Array.isArray(t2) ? t2 : []).map(t => ({
+        key: 't2:' + t.id,
+        type: 'writing_task2',
+        label: T2_TYPE_LABELS[t.question_type] || 'Task 2',
+        text: t.q || '',
+      })),
+    ].filter(x => x.text);
+  } catch (e) {
+    _assignBank = [];
+  }
+  renderAssignPickList();
+}
+
+function renderAssignPickList() {
+  const sel = document.getElementById('assign-pick-list');
+  const note = document.getElementById('assign-pick-note');
+  if (!sel) return;
+  const type = (document.getElementById('assign-type') || {}).value;
+  const q = ((document.getElementById('assign-pick-search') || {}).value || '').toLowerCase().trim();
+  const rows = (_assignBank || [])
+    .filter(x => x.type === type)
+    .filter(x => !q || x.text.toLowerCase().includes(q) || x.label.toLowerCase().includes(q));
+  sel.innerHTML = rows.map(x =>
+    '<option value="' + escAttr(x.key) + '">' + escHtml(x.label) + ' — ' +
+    escHtml(x.text.slice(0, 110)) + (x.text.length > 110 ? '…' : '') + '</option>').join('');
+  if (note) {
+    note.textContent = !_assignBank ? ''
+      : rows.length ? rows.length + ' đề khớp. Chọn một đề để điền sẵn.'
+      : 'Không có đề nào khớp. Gõ đề mới ở ô bên dưới.';
+  }
+}
+
+async function pickAssignPrompt(key) {
+  const row = (_assignBank || []).find(x => x.key === key);
+  if (!row) return;
+  const ta = document.getElementById('assign-custom-prompt');
+  if (ta) ta.value = row.text;
+  const title = document.getElementById('assign-title');
+  if (title && !title.value.trim()) title.value = row.label + ' — ' + row.text.slice(0, 60);
+  const note = document.getElementById('assign-pick-note');
+
+  // The list endpoint leaves the picture out, so a Task 1 pick has to fetch the
+  // topic in full before the chart can travel with the assignment.
+  if (row.type === 'writing_task1') {
+    if (note) note.textContent = 'Đang lấy hình của đề…';
+    try {
+      const full = await api('/api/admin/task1-topics/' + key.split(':')[1]);
+      if (full && full.image_base64) {
+        assignImageDataUrl = 'data:' + (full.image_media_type || 'image/png') + ';base64,' + full.image_base64;
+        const preview = document.getElementById('assign-img-preview');
+        if (preview) { preview.src = assignImageDataUrl; preview.style.display = 'block'; }
+        const txt = document.getElementById('assign-img-upload-text');
+        if (txt) txt.textContent = 'Đã lấy hình từ kho đề';
+        switchAssignImgTab('upload');
+        if (note) note.textContent = 'Đã điền đề và hình biểu đồ.';
+        return;
+      }
+      if (note) note.textContent = 'Đề này chưa có hình trong kho.';
+      return;
+    } catch (e) {
+      if (note) note.textContent = 'Chưa lấy được hình của đề.';
+      return;
+    }
+  }
+  if (note) note.textContent = 'Đã điền đề.';
+}
+
 
 async function createAssignment() {
   const errEl = document.getElementById('assign-error');

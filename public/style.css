@@ -7014,3 +7014,9 @@ input:focus, textarea:focus, select:focus {
 .ls-check { display: flex; gap: .45rem; align-items: flex-start; font-size: .84rem; line-height: 1.5; color: var(--gray-700); cursor: pointer; }
 .ls-check input { margin-top: .2rem; width: 16px; height: 16px; accent-color: var(--success); flex: none; }
 .ls-why { font-size: .82rem; line-height: 1.6; color: var(--gray-600); font-style: italic; }
+
+/* Picking an existing prompt for homework, instead of retyping it. */
+.assign-pick { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .6rem; }
+.assign-pick-list { font-size: .85rem; line-height: 1.5; padding: .3rem; height: auto; }
+.assign-pick-list option { padding: .3rem .4rem; border-radius: var(--r-sm); }
+.assign-pick-note { font-size: .75rem; color: var(--gray-500); min-height: 1.1em; }

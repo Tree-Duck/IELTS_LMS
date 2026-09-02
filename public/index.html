@@ -1589,6 +1589,11 @@
           </div>
           <div class="form-group" id="assign-custom-prompt-group" style="display:none">
             <label>Đề bài viết tùy chỉnh <small class="text-muted">(tùy chọn — điền sẵn vào biểu mẫu essay của học sinh)</small></label>
+            <div class="assign-pick">
+              <input type="search" id="assign-pick-search" class="form-input" placeholder="Tìm trong kho đề của web…" oninput="renderAssignPickList()">
+              <select id="assign-pick-list" class="form-input assign-pick-list" size="6" onchange="pickAssignPrompt(this.value)"></select>
+              <div class="assign-pick-note" id="assign-pick-note"></div>
+            </div>
             <textarea id="assign-custom-prompt" class="form-input" rows="4" placeholder="Biểu đồ dưới đây cho thấy… / Một số người cho rằng…"></textarea>
             <div class="form-group" style="margin-top:8px" id="assign-image-url-group">
               <label>Hình ảnh biểu đồ <small class="text-muted">(chỉ Task 1)</small></label>
