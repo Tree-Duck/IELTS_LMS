@@ -73,8 +73,6 @@
 
   /* Two voices: a serif for what the student reads, the existing grotesk for
      what they operate. One face alone carried no meaning. */
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --font-ui: "Space Grotesk", "DM Sans", system-ui, sans-serif;
   --shadow-hard: 10px 12px 0 var(--lime);
   --shadow: 3px 4px 0 rgba(8, 48, 31, 0.10);
   --shadow-md: 4px 5px 0 rgba(8, 48, 31, 0.12);
@@ -357,18 +355,8 @@
 .sp-model-phr { margin-top: .7rem; font-size: .85rem; color: var(--gray-600); }
 @media (max-width: 560px) { .sp-band { width: 76px; height: 76px; font-size: 1.6rem; } .sp-crit-label { width: 92px; } }
 
-/* The display face carries prompts, headings and the student's own thesis —
-   the text they read. Buttons, labels and figures stay on the grotesk. */
-h1, h2, h3,
-.page-header h2,
-.wp-prompt-text,
-.nc-t, .tr-title, .pp-claim, .tr-link-text {
-  font-family: var(--font-display);
-  /* Only opsz and wght are requested from Google; these two custom axes are
-     applied here, and are simply ignored if the face falls back. */
-  font-variation-settings: "SOFT" 0, "WONK" 1;
-  letter-spacing: -.012em;
-}
+/* Headings stay on the same face as the rest of the interface. A second,
+   serif voice was tried and rejected — it read as decoration here. */
 h1, h2 { text-wrap: balance; }
 
 body {
