@@ -10630,14 +10630,21 @@ async function loadWritingPractice() {
   } catch (e) {
     _wpQuestions = [];
   }
+  renderWritingTypeChips();
   renderWritingQuestionGrid();
 }
 
 function getFilteredWritingQuestions() {
   let list;
-  if (_wpTypeFilter) list = _wpQuestions.filter(q => q.type === 'task2' && (q.questionType || 'other') === _wpTypeFilter);
-  else if (_wpFilter === 'all') list = _wpQuestions;
+  // The sub-filter reads a different field per task: Task 1 sorts by chart type,
+  // Task 2 by question type. Hardcoding task2 here meant a Task 1 chip silently
+  // matched nothing and the grid fell back to whatever else was on screen.
+  if (_wpFilter === 'all') list = _wpQuestions;
   else list = _wpQuestions.filter(q => q.type === _wpFilter);
+  if (_wpTypeFilter) {
+    const key = _wpFilter === 'task1' ? (q => q.chartType || '') : (q => q.questionType || 'other');
+    list = list.filter(q => key(q) === _wpTypeFilter);
+  }
   const showDone = (document.getElementById('wp-show-done') || {}).checked !== false;
   const showUndone = (document.getElementById('wp-show-undone') || {}).checked !== false;
   return list.filter(q => (q.done ? showDone : showUndone));
@@ -10669,7 +10676,7 @@ function renderWritingQuestionGrid() {
         <span class="tag-badge ${q.type === 'task1' ? 'tag-t1' : 'tag-t2'}">${q.type === 'task1' ? 'Task 1' : 'Task 2'}</span>
         ${q.type === 'task2' && q.questionType ? `<span class="tag-badge tag-qtype">${escHtml(T2_TYPE_LABELS[q.questionType] || q.questionType)}</span>` : ''}
         ${q.examDate ? `<span class="tag-badge tag-exam">📅 Đề thi ${escHtml(q.examDate)}</span>` : ''}
-        ${q.tags.map(t => `<span class="tag-badge tag-topic">${escHtml(t)}</span>`).join('')}
+        ${q.tags.map(t => `<span class="tag-badge tag-topic">${escHtml(WP_TYPE_LABEL[t] || t)}</span>`).join('')}
       </div>
       <div class="wp-q-card-title">${escHtml(q.topic)}</div>
       <div class="wp-q-card-preview">${escHtml(q.prompt.substring(0, 100))}…</div>
@@ -10685,21 +10692,69 @@ function randomWritingQuestion() {
   openWritingQuestion(q.id);
 }
 
+// Task 1 sorts by what the picture is; Task 2 by what the question asks. Two
+// different taxonomies, so the chip row has to change with the tab rather than
+// always offering Task 2's. On "Tất cả" neither applies, so it hides.
+const WP_TASK1_TYPES = [
+  ['bar_chart', 'Bar chart'],
+  ['line_graph', 'Line graph'],
+  ['pie_chart', 'Pie chart'],
+  ['table', 'Bảng'],
+  ['process_diagram', 'Quy trình'],
+  ['map', 'Bản đồ'],
+];
+const WP_TASK2_TYPES = [
+  ['opinion', 'Opinion'],
+  ['discussion', 'Discuss both'],
+  ['advantage_disadvantage', 'Adv/Disadv'],
+  ['problem_solution', 'Problem/Solution'],
+  ['two_part', 'Two-part'],
+];
+const WP_TYPE_LABEL = Object.fromEntries([...WP_TASK1_TYPES, ...WP_TASK2_TYPES]);
+
+function renderWritingTypeChips() {
+  const box = document.getElementById('wp-type-chips');
+  if (!box) return;
+  if (_wpFilter !== 'task1' && _wpFilter !== 'task2') {
+    box.classList.add('hidden');
+    box.innerHTML = '';
+    return;
+  }
+  const isT1 = _wpFilter === 'task1';
+  const types = isT1 ? WP_TASK1_TYPES : WP_TASK2_TYPES;
+  // Count from the questions actually in the bank so a chip never promises
+  // prompts that are not there.
+  const key = q => (isT1 ? q.chartType : q.questionType) || '';
+  const pool = (_wpQuestions || []).filter(q => q.type === _wpFilter);
+  const counted = types
+    .map(([v, label]) => [v, label, pool.filter(q => key(q) === v).length])
+    .filter(([, , n]) => n > 0);
+  if (!counted.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+
+  box.classList.remove('hidden');
+  box.innerHTML =
+    '<span class="wp-type-chips-label">' + (isT1 ? 'Task 1 theo loại biểu đồ:' : 'Task 2 theo dạng:') + '</span>' +
+    counted.map(([v, label, n]) =>
+      '<button class="wp-type-chip' + (_wpTypeFilter === v ? ' active' : '') + '"' +
+      ' onclick="filterWritingByType(\'' + v + '\',this)">' + escHtml(label) +
+      ' <span class="wp-type-count">' + n + '</span></button>').join('');
+}
+
 function filterWritingQuestions(filter, btn) {
   _wpFilter = filter;
   _wpTypeFilter = null;
   document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.wp-type-chip').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  renderWritingTypeChips();
   renderWritingQuestionGrid();
 }
 
 function filterWritingByType(qt, btn) {
-  _wpTypeFilter = qt;
-  _wpFilter = 'task2';
-  document.querySelectorAll('.wp-filter-btn').forEach(b => b.classList.remove('active'));
+  // Clicking the active chip clears it, so a student can widen the list again
+  // without hunting for the task button.
+  _wpTypeFilter = _wpTypeFilter === qt ? null : qt;
   document.querySelectorAll('.wp-type-chip').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  if (btn && _wpTypeFilter) btn.classList.add('active');
   renderWritingQuestionGrid();
 }
 

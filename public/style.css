@@ -6904,3 +6904,11 @@ input:focus, textarea:focus, select:focus {
   .lt-n { margin-bottom: 0; flex: none; }
   .lt-sub { margin-left: auto; text-align: right; }
 }
+
+/* The chip row belongs to whichever task is selected, so it carries a count
+   and hides entirely on "Tất cả", where neither taxonomy applies. */
+.wp-type-count {
+  font-size: .7rem; font-weight: 700; opacity: .7;
+  font-variant-numeric: tabular-nums; margin-left: .15rem;
+}
+.wp-type-chips.hidden { display: none; }
