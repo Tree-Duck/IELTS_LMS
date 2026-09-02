@@ -364,6 +364,8 @@ h1, h2, h3,
 .wp-prompt-text,
 .nc-t, .tr-title, .pp-claim, .tr-link-text {
   font-family: var(--font-display);
+  /* Only opsz and wght are requested from Google; these two custom axes are
+     applied here, and are simply ignored if the face falls back. */
   font-variation-settings: "SOFT" 0, "WONK" 1;
   letter-spacing: -.012em;
 }
