@@ -7214,3 +7214,9 @@ input:focus, textarea:focus, select:focus {
 }
 .chain-eng-test .chain-root-k { color: var(--gray-500); }
 .chain-eng-test p { font-size: .84rem; line-height: 1.6; color: var(--gray-800); margin-top: .25rem; }
+
+/* The planner, when the AI account itself is the problem. */
+.wp-ai-down { border: 1.5px solid var(--danger); border-radius: var(--r-md); background: var(--danger-light); padding: .9rem 1rem; }
+.wp-ai-down-title { font-size: .95rem; font-weight: 800; color: var(--gray-900); margin-bottom: .3rem; }
+.wp-ai-down-text { font-size: .86rem; line-height: 1.6; color: var(--gray-800); margin-bottom: .5rem; }
+.wp-ai-down-note { font-size: .8rem; line-height: 1.6; color: var(--gray-600); border-top: 1px dashed var(--gray-300); padding-top: .45rem; }

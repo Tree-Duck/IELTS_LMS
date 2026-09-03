@@ -1788,8 +1788,9 @@ RULES:
     db.logUsage('outline-options', calculateCost(i, o), i + o);
     res.json(parseGradingJson(text));
   } catch (err) {
-    console.error('Outline options error:', err.message || err);
-    res.status(500).json({ error: 'Could not build the planning choices. Try again.' });
+    const reason = classifyAiFailure(err);
+    console.error('Outline options error [' + reason + ']:', err.message || err);
+    res.status(500).json({ error: 'Không dựng được các lựa chọn.', reason });
   }
 });
 
@@ -1962,8 +1963,9 @@ RULES:
     db.logUsage('outline', calculateCost(i, o), i + o);
     res.json(outline);
   } catch (err) {
-    console.error('Outline error:', err.message || err);
-    res.status(500).json({ error: 'Could not build the outline. Try again.', detail: err.message });
+    const reason = classifyAiFailure(err);
+    console.error('Outline error [' + reason + ']:', err.message || err);
+    res.status(500).json({ error: 'Không dựng được dàn ý.', reason });
   }
 });
 

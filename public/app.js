@@ -979,7 +979,14 @@ async function api(path, options = {}) {
     show('auth-screen');
     throw new Error('Session expired. Please sign in again.');
   }
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (!res.ok) {
+    // Carry the servers machine readable reason across, so a caller can tell a
+    // transient failure from one that retrying will never fix.
+    const err = new Error(data.error || 'Request failed');
+    if (data.reason) err.reason = data.reason;
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
@@ -11758,6 +11765,20 @@ const ENGINE_LABEL = {
   INFORMATION: 'INFORMATION', IDENTITY_TRUST: 'IDENTITY / TRUST', SCALE: 'SCALE', SKILL: 'SKILL',
 };
 
+// The planner and the grader fail for the same reasons, so they say the same
+// thing. A reason that retrying cannot fix does not offer a retry.
+function wpAiErrorHtml(e) {
+  const reason = (e && e.reason) || 'unknown';
+  const m = GRADE_ERROR_REASONS[reason] || GRADE_ERROR_REASONS.unknown;
+  return '<div class="wp-ai-down">' +
+    '<div class="wp-ai-down-title">' + escHtml(m.title) + '</div>' +
+    '<div class="wp-ai-down-text">' + escHtml(m.text.replace(/Bài của ta vẫn còn nguyên[,.] ?/, '')) + '</div>' +
+    (m.retry
+      ? '<button class="btn btn-secondary btn-sm" onclick="wpBuildOutline()">Thử lại</button>'
+      : '<div class="wp-ai-down-note">Thử lại cũng không được, phải xử lý ở phía tài khoản AI. Trong lúc chờ, phần Chuỗi lập luận và bậc Câu, bậc Đoạn vẫn chạy bình thường vì chúng không gọi AI.</div>') +
+  '</div>';
+}
+
 /* ── Stage 1: planning questions ─────────────────────────────────────────── */
 async function wpBuildOutline() {
   if (!_wpCurrentQuestion) return;
@@ -11780,7 +11801,7 @@ async function wpBuildOutline() {
     _wpOutline = null;
     wpRenderPlanner();
   } catch (e) {
-    body.innerHTML = `<div class="wp-outline-empty" style="color:var(--danger)">${escHtml(e.message || 'Could not load choices')}</div>`;
+    body.innerHTML = wpAiErrorHtml(e);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✨ Plan my essay'; }
   }
