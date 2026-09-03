@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t042-fix-01",
+  "topic_id": "t042",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Habits formed before school age decides how a child answers a first refusal.",
+   "error_type": "Chia động từ theo chủ ngữ số nhiều"
+  },
+  "model_answer": "Habits formed before school age decide how a child answers a first refusal.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ chính là habits, số nhiều, không phải age",
+   "Kiểm động từ chính không có chữ s"
+  ],
+  "explanation_vi": "Chủ ngữ là habits nên động từ ở số nhiều, không có s. Cụm formed before school age chỉ bổ nghĩa, không đổi được số của chủ ngữ."
+ },
+ {
+  "id": "t042-fix-02",
+  "topic_id": "t042",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Câu dưới thiếu một chữ trong thể bị động. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Knowledge delivered by a syllabus, but persistence is not.",
+   "error_type": "Bị động thiếu động từ to be"
+  },
+  "model_answer": "Knowledge is delivered by a syllabus, but persistence is not.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm động từ to be đứng trước delivered, phải có is",
+   "Kiểm delivered vẫn ở dạng cột ba, không đổi thành deliver"
+  ],
+  "explanation_vi": "Bị động hiện tại đơn cần is cộng phân từ hai vì chủ ngữ không đếm được. Thiếu is thì vế đầu không còn động từ chính."
+ },
+ {
+  "id": "t042-fix-03",
+  "topic_id": "t042",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Children copy that what is done at home long before they can explain it.",
+   "error_type": "Thừa một từ trước mệnh đề what"
+  },
+  "model_answer": "Children copy what is done at home long before they can explain it.",
+  "accepted_variants": [],
+  "self_check": [
+   "Mệnh đề what tự nó làm tân ngữ, không cần that đứng trước",
+   "Kiểm sau copy là what chứ không phải that what"
+  ],
+  "explanation_vi": "What đã bao hàm cả danh từ lẫn liên từ nên không đi kèm that. Viết that what là thừa và sai ngữ pháp."
+ },
+ {
+  "id": "t042-link-01",
+  "topic_id": "t042",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A parent finishes every job in the house before sitting down.",
+   "result": "Their child sits the examination a second time after failing it."
+  },
+  "model_answer": "When children copy what is done at home, they treat a first refusal as a normal step.",
+  "accepted_variants": [
+   "Because nobody at that table walks away half-done, the child fills in the form again.",
+   "When the habit of finishing is watched every evening, retaking the paper needs no persuading."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là family hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là đứa trẻ điền lại tờ đăng ký thi. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t042-link-02",
+  "topic_id": "t042",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A school introduces a strong new science syllabus in the same district.",
+   "result": "Half the class still drops the subject after the first hard term."
+  },
+  "model_answer": "When the syllabus improves but nothing at home changes, the number who keep going stays flat.",
+  "accepted_variants": [
+   "Because a better course still meets the same habit of stopping at the first refusal, the drop-out rate holds.",
+   "When only the teaching changes, the share of pupils who continue after a poor mark barely moves."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là tỉ lệ học sinh học tiếp",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là tỉ lệ bỏ môn. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t042-tran-01",
+  "topic_id": "t042",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Kiến thức được chương trình học truyền đạt, còn tính bền bỉ thì không.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["delivered by a syllabus"]
+  },
+  "model_answer": "Knowledge is delivered by a syllabus, but persistence is not.",
+  "accepted_variants": [
+   "Knowledge is delivered by a syllabus, while persistence has to come from elsewhere.",
+   "Facts are delivered by a syllabus, but the habit of continuing is not."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là kiến thức, không phải nhà trường",
+   "Kiểm cụm delivered by a syllabus có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ kiến thức ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Vế sau lược bớt để làm bật cái mà chương trình không đưa được."
+ },
+ {
+  "id": "t042-tran-02",
+  "topic_id": "t042",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy nhà trường cung cấp thứ để theo đuổi tiếp, gia đình mới quyết được ta có đi tiếp sau một cú vấp hay không.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["the subject to keep going at", "keep going after a setback"]
+  },
+  "model_answer": "Although school supplies the subject to keep going at, the family decides whether we keep going after a setback.",
+  "accepted_variants": [
+   "Although a school gives the subject to keep going at, home decides who will keep going after a setback.",
+   "Although the classroom offers the subject to keep going at, the household settles whether anyone keeps going."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai vế chia đúng phần việc của trường và của nhà."
+ },
+ {
+  "id": "t042-tran-03",
+  "topic_id": "t042",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những đứa trẻ chưa từng thấy ai ở nhà thi lại thì dừng ngay lần bị từ chối đầu.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["sit the examination twice", "stopping at the first refusal"]
+  },
+  "model_answer": "Children who never saw anyone at home sit the examination twice end up stopping at the first refusal.",
+  "accepted_variants": [
+   "Pupils who have never watched an adult sit the examination twice give up at the first refusal.",
+   "Those who never saw a parent sit the examination twice are the ones stopping at the first refusal."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm trẻ đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t042-para-01",
+  "topic_id": "t042",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Gia đình ảnh hưởng nhiều hơn", "Nhà trường ảnh hưởng nhiều hơn"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my family, ..."] }
+   ],
+   "required_phrases": ["keep going after a setback", "the subject to keep going at", "copy what is done at home", "delivered by a syllabus", "stopping at the first refusal"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the family matters more of the two. The main reason is that knowledge is delivered by a syllabus to everyone alike. As a result, what separates two pupils is whether they keep going after a setback. Another reason is that children copy what is done at home. Consequently, a school can offer the subject to keep going at, but it cannot undo the habit of stopping at the first refusal. For example, my sister retook her exam because my mother did.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu cả cái trường làm được lẫn cái trường không làm được."
+ }
+]

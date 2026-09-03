@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t027-fix-01",
+  "topic_id": "t027",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The number of contacts a person has rise every year without effort.",
+   "error_type": "Chia động từ theo chủ ngữ số ít"
+  },
+  "model_answer": "The number of contacts a person has rises every year without effort.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ chính là number, không phải contacts",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "The number of luôn là chủ ngữ số ít nên động từ phải có s. Danh từ số nhiều đứng sau of chỉ bổ nghĩa, không đổi được cách chia."
+ },
+ {
+  "id": "t027-fix-02",
+  "topic_id": "t027",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The cost for ending a friendship has fallen to almost nothing.",
+   "error_type": "Sai giới từ trong cụm cố định"
+  },
+  "model_answer": "The cost of ending a friendship has fallen to almost nothing.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là the cost of doing something, tìm chữ đứng ngay sau cost",
+   "Kiểm chữ to vẫn còn nguyên trước almost"
+  ],
+  "explanation_vi": "Cost luôn đi với of khi nêu cái việc phải trả giá. For dùng được với pay, không dùng với cost ở nghĩa này."
+ },
+ {
+  "id": "t027-fix-03",
+  "topic_id": "t027",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Weak ties are easy to collect, the few who would come at midnight are not.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "Weak ties are easy to collect, but the few who would come at midnight are not.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm but là gọn nhất vì hai vế đang đối nhau."
+ },
+ {
+  "id": "t027-link-01",
+  "topic_id": "t027",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "An argument between two friends happens entirely in written messages.",
+   "result": "Neither of them speaks to the other again after that week."
+  },
+  "model_answer": "When leaving costs one tap, neither of them has to sit through the awkward hour.",
+  "accepted_variants": [
+   "Because nobody has to meet in person, the pair stop answering and move on.",
+   "When the thread can simply be closed, no one is forced to repair a disagreement."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay technology thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là không ai phải ngồi lại giờ đồng hồ khó xử. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t027-link-02",
+  "topic_id": "t027",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A group of neighbours moves its arrangements onto a messaging app.",
+   "result": "Nobody notices for a fortnight that one member has been in hospital."
+  },
+  "model_answer": "When the meeting stops happening, the number of weak ties rises and the close ones thin out.",
+  "accepted_variants": [
+   "Because nobody has to meet in person now, the chances of seeing an empty chair fall to none.",
+   "Once everything is arranged by text, the number of people who would notice an absence drops."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số người đủ gần để nhận ra",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số người đủ thân để nhận ra sự vắng mặt. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t027-tran-01",
+  "topic_id": "t027",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Số mối liên lạc một người có được đo bằng danh sách trên máy, chứ không phải bằng thời gian bỏ ra.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["the number of contacts a person has"]
+  },
+  "model_answer": "The number of contacts a person has is measured by a list, not by time spent.",
+  "accepted_variants": [
+   "The number of contacts a person has is counted from a list rather than from hours together.",
+   "The number of contacts a person has is judged by the phone, not by time given."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là số mối liên lạc, không phải chiếc máy",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ con số ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai đo không quan trọng bằng chuyện đo bằng thước nào."
+ },
+ {
+  "id": "t027-tran-02",
+  "topic_id": "t027",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy công nghệ làm ta quen thêm nhiều người, chính cái giá của việc cắt đứt một mối quan hệ mới gây hại.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["the cost of ending a friendship"]
+  },
+  "model_answer": "Although the technology brings more people within reach, the cost of ending a friendship does the damage.",
+  "accepted_variants": [
+   "Although we now know more people, the cost of ending a friendship is what causes the harm.",
+   "Although contact has never been easier, the cost of ending a friendship has fallen too far."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Vế sau mới là chỗ đề muốn ta chỉ ra."
+ },
+ {
+  "id": "t027-tran-03",
+  "topic_id": "t027",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người từng phải gặp trực tiếp để hàn gắn một bất đồng thì giữ được bạn lâu hơn.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["meet in person", "repair a disagreement"]
+  },
+  "model_answer": "People who have had to meet in person to repair a disagreement keep their friends longer.",
+  "accepted_variants": [
+   "Those who must meet in person to repair a disagreement hold on to friendships longer.",
+   "Friends who meet in person to repair a disagreement stay friends for longer."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t027-para-01",
+  "topic_id": "t027",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Công nghệ làm hỏng quan hệ xã hội", "Cái hại nằm ở chỗ cắt đứt quá dễ"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["the number of contacts a person has", "the cost of ending a friendship", "meet in person", "repair a disagreement", "weak ties"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the harm comes from one change rather than from the technology. The main reason is that the number of contacts a person has went up harmlessly. As a result, most of what we gained was simply more weak ties. Another reason is that the cost of ending a friendship is now paid by nobody. Consequently, two people who would once have had to meet in person to repair a disagreement can just stop answering. For example, my cousin lost a friend of ten years by text.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải dựng lại cảnh cũ rồi mới nói cái mất."
+ }
+]

@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t066-fix-01",
+  "topic_id": "t066",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Admiration for a public figure do no harm on its own.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Admiration for a public figure does no harm on its own.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ chính là admiration, không phải figure",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Admiration là danh từ không đếm được nên đi với động từ số ít. Cụm for a public figure chỉ bổ nghĩa, không đổi được số của chủ ngữ."
+ },
+ {
+  "id": "t066-fix-02",
+  "topic_id": "t066",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Every teenager needs model worth aiming at, not a warning.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Every teenager needs a model worth aiming at, not a warning.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là model",
+   "Kiểm chữ a đứng ngay trước model"
+  ],
+  "explanation_vi": "Model là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t066-fix-03",
+  "topic_id": "t066",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The habit is easy to copy, the years of practice behind it are invisible.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "The habit is easy to copy, but the years of practice behind it are invisible.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm but là gọn nhất vì hai vế đang đối nhau."
+ },
+ {
+  "id": "t066-link-01",
+  "topic_id": "t066",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A feed shows the same twenty performers to a class every evening.",
+   "result": "Not one pupil in that class names an engineer when asked."
+  },
+  "model_answer": "When the screen keeps returning to the same twenty, people whose work is rarely filmed disappear.",
+  "accepted_variants": [
+   "Because what an algorithm puts in front of them repeats, no other trade ever reaches the room.",
+   "When only performers are shown for a year, a child cannot picture any other kind of work."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là media hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là màn hình lặp lại đúng một nhóm người. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t066-link-02",
+  "topic_id": "t066",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A channel films a swimmer at five in the morning for a whole season.",
+   "result": "Membership at the town pool doubles the following September."
+  },
+  "model_answer": "When the years of practice behind it are shown, admiration turns into a timetable a child can copy.",
+  "accepted_variants": [
+   "Because the early mornings are on screen, the number of children at the pool rises sharply.",
+   "Once the training is visible, copying a visible habit becomes something a child can actually do."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số hội viên ở bể bơi",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số trẻ ghi danh. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t066-tran-01",
+  "topic_id": "t066",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Phổ người xuất hiện trên màn hình được quyết bởi thuật toán, chứ không phải bởi người xem.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a narrow range of people on screen"]
+  },
+  "model_answer": "A narrow range of people on screen is decided by an algorithm, not by the audience.",
+  "accepted_variants": [
+   "A narrow range of people on screen is chosen by an algorithm rather than by viewers.",
+   "A narrow range of people on screen is selected by software, not by the people watching."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là phổ người trên màn hình, không phải thuật toán",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ phổ người xuất hiện ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Chủ động sẽ đẩy thuật toán lên đầu."
+ },
+ {
+  "id": "t066-tran-02",
+  "topic_id": "t066",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy sự ngưỡng mộ dành cho người nổi tiếng là bình thường, cái đáng lo là phổ người trên màn hình quá hẹp.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["admiration for a public figure", "a narrow range of people on screen"]
+  },
+  "model_answer": "Although admiration for a public figure is normal, the worry is a narrow range of people on screen.",
+  "accepted_variants": [
+   "Although admiration for a public figure has always existed, a narrow range of people on screen is new.",
+   "Although there is nothing odd in admiration for a public figure, a narrow range of people on screen limits it."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Đề hỏi tích cực hay tiêu cực nên phải tách được cái bình thường khỏi cái đáng lo."
+ },
+ {
+  "id": "t066-tran-03",
+  "topic_id": "t066",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người trẻ chỉ thấy sự nổi tiếng mà không thấy nghề thì bắt chước đúng phần dễ nhất.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["fame without a craft", "copy a visible habit"]
+  },
+  "model_answer": "Young people who are shown fame without a craft copy a visible habit and nothing else.",
+  "accepted_variants": [
+   "Teenagers who only see fame without a craft copy a visible habit rather than the work.",
+   "Those who are given fame without a craft will copy a visible habit and stop there."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người trẻ đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t066-para-01",
+  "topic_id": "t066",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Đây là chuyển biến tiêu cực", "Ngưỡng mộ thì bình thường, cái hẹp mới đáng lo"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["admiration for a public figure", "a narrow range of people on screen", "copy a visible habit", "the years of practice behind it", "people whose work is rarely filmed"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the problem is the range rather than the admiring. The main reason is that admiration for a public figure teaches ambition. As a result, the danger lies in a narrow range of people on screen. Another reason is that editors cut the years of practice behind it. Consequently, a teenager will copy a visible habit and never meet people whose work is rarely filmed at all. For example, nobody in my class could name a surveyor.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu cả cái được bắt chước lẫn cái không bao giờ xuất hiện."
+ }
+]

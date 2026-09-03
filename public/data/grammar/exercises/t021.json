@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t021-fix-01",
+  "topic_id": "t021",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Many family who moved a generation ago now trace a family line online.",
+   "error_type": "Thiếu s số nhiều sau many"
+  },
+  "model_answer": "Many families who moved a generation ago now trace a family line online.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm chữ many, danh từ đứng sau nó phải ở số nhiều",
+   "Kiểm family đổi y thành ies chứ không phải chỉ thêm s"
+  ],
+  "explanation_vi": "Many luôn đi với danh từ đếm được số nhiều nên phải là families. Danh từ kết thúc bằng phụ âm cộng y thì đổi y thành ies."
+ },
+ {
+  "id": "t021-fix-02",
+  "topic_id": "t021",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "People look for fixed point when the town has changed beyond recognition.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "People look for a fixed point when the town has changed beyond recognition.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là point",
+   "Kiểm chữ a đứng ngay trước fixed"
+  ],
+  "explanation_vi": "Point là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t021-fix-03",
+  "topic_id": "t021",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["verb_tense"],
+  "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Ordinary curiosity turned into a claim about who belongs whenever land is involved.",
+   "error_type": "Dùng quá khứ đơn cho một sự thật chung"
+  },
+  "model_answer": "Ordinary curiosity turns into a claim about who belongs whenever land is involved.",
+  "accepted_variants": [],
+  "self_check": [
+   "Vế sau ở hiện tại đơn nên vế đầu phải cùng thì",
+   "Kiểm động từ đầu câu có chữ s vì chủ ngữ không đếm được"
+  ],
+  "explanation_vi": "Whenever mở một sự thật chung nên cả câu ở hiện tại đơn. Quá khứ đơn ở đây làm hai vế lệch mốc thời gian."
+ },
+ {
+  "id": "t021-link-01",
+  "topic_id": "t021",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A shipyard town loses its yard and rebuilds the waterfront as flats.",
+   "result": "Bookings at the local records office triple within five years."
+  },
+  "model_answer": "When the street they grew up on is gone, people go looking for a fixed point instead.",
+  "accepted_variants": [
+   "Because nothing on the waterfront is recognisable, residents start ordering birth certificates.",
+   "When the old names survive only on paper, families queue at the archive to read them."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là culture hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là người ta xếp hàng ở phòng lưu trữ. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t021-link-02",
+  "topic_id": "t021",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A family history is used to argue that one group settled a valley first.",
+   "result": "Two neighbours who farmed side by side stop speaking that autumn."
+  },
+  "model_answer": "When a story turns into a claim about who belongs, the later arrivals become outsiders overnight.",
+  "accepted_variants": [
+   "Because the record is read as proof of ownership, the newer households are told they do not count.",
+   "Once the dates are used to rank people, the family that arrived second loses its standing."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì thay đổi, ở đây là vị thế của người tới sau"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là người tới sau. Nếu vẫn là nhóm dựng lên câu chuyện thì chưa chuyển được actor."
+ },
+ {
+  "id": "t021-tran-01",
+  "topic_id": "t021",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Sổ ghi của giáo xứ được số hoá và đưa lên mạng miễn phí.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a parish record"]
+  },
+  "model_answer": "A parish record is digitised and put online without charge.",
+  "accepted_variants": [
+   "A parish record is scanned and made available online for nothing.",
+   "A parish record is digitised and published online free of charge."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là sổ ghi, không phải cơ quan lưu trữ",
+   "Kiểm cụm a parish record có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ sổ ghi ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai số hoá không quan trọng bằng chuyện tài liệu giờ ai cũng đọc được."
+ },
+ {
+  "id": "t021-tran-02",
+  "topic_id": "t021",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy sự tò mò bình thường là vô hại, nó thành chuyện khác khi biến câu chuyện thành yêu sách.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["ordinary curiosity", "turn a story into a claim"]
+  },
+  "model_answer": "Although ordinary curiosity harms nobody, it changes character when people turn a story into a claim.",
+  "accepted_variants": [
+   "Although ordinary curiosity is harmless, matters alter once families turn a story into a claim.",
+   "Although there is nothing wrong with ordinary curiosity, the danger begins when we turn a story into a claim."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Ranh giới giữa hai cụm này chính là trọng tâm của đề."
+ },
+ {
+  "id": "t021-tran-03",
+  "topic_id": "t021",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những gia đình rời đi từ đời trước là nhóm tìm về dòng họ nhiều nhất.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["families who moved a generation ago", "trace a family line"]
+  },
+  "model_answer": "Families who moved a generation ago are the likeliest to trace a family line.",
+  "accepted_variants": [
+   "Households who moved a generation ago are the group most likely to trace a family line.",
+   "Those who left a generation ago are the ones who trace a family line most often."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm gia đình đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t021-para-01",
+  "topic_id": "t021",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Tìm về dòng họ là chuyển biến tích cực", "Tích cực tới chừng nào còn là tò mò"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my family, ..."] }
+   ],
+   "required_phrases": ["trace a family line", "a fixed point", "changed beyond recognition", "ordinary curiosity", "a claim about who belongs"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the habit is positive within one clear limit. The main reason is that the place itself has changed beyond recognition. As a result, people trace a family line to find a fixed point. Another reason is that ordinary curiosity is shared by almost everyone. Consequently, the practice only turns harmful where the same research becomes a claim about who belongs in a valley. For example, my uncle ordered three certificates last year.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu đúng ranh giới khiến chuyện tốt thành chuyện xấu."
+ }
+]

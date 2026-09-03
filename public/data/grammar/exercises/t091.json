@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t091-fix-01",
+  "topic_id": "t091",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Many people treat sport as leisure activity and nothing more.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Many people treat sport as a leisure activity and nothing more.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là activity",
+   "Kiểm chữ a đứng ngay trước leisure"
+  ],
+  "explanation_vi": "Activity là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t091-fix-02",
+  "topic_id": "t091",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "People who share nothing else follows the same rules on a pitch.",
+   "error_type": "Chia động từ theo chủ ngữ số nhiều"
+  },
+  "model_answer": "People who share nothing else follow the same rules on a pitch.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ chính là people, số nhiều, không phải mệnh đề quan hệ",
+   "Kiểm động từ chính không có chữ s"
+  ],
+  "explanation_vi": "Chủ ngữ là people nên động từ ở số nhiều, không có s. Mệnh đề who share nothing else chỉ bổ nghĩa, không đổi được số của chủ ngữ."
+ },
+ {
+  "id": "t091-fix-03",
+  "topic_id": "t091",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Clubs run by unpaid volunteers cost the city almost nothing, they close every year anyway.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "Clubs run by unpaid volunteers cost the city almost nothing, yet they close every year anyway.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm yet là gọn nhất vì hai vế đang đối nhau."
+ },
+ {
+  "id": "t091-link-01",
+  "topic_id": "t091",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A town league puts two rival estates in the same Sunday division.",
+   "result": "Both sets of parents share a minibus to the away games by spring."
+  },
+  "model_answer": "When people who share nothing else follow the same rules for ninety minutes, they end up talking afterwards.",
+  "accepted_variants": [
+   "Because both sides accept the same referee, the two touchlines stand within a metre of each other.",
+   "When the fixture repeats every week, the same forty adults meet in one car park."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay community thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là hai bên đứng chung một bãi xe. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t091-link-02",
+  "topic_id": "t091",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A council sells the last playing field to a housing developer.",
+   "result": "The youth league in that town folds after forty years."
+  },
+  "model_answer": "When the shared public space is gone, the number of clubs run by unpaid volunteers falls to none.",
+  "accepted_variants": [
+   "Because there is nowhere to play, the volunteers who ran three teams stop turning up.",
+   "Once the pitch is built on, the number of Sunday fixtures drops from twelve to zero."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số câu lạc bộ còn hoạt động",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số câu lạc bộ. Nêu được thì kết quả mới có chỗ bám."
+ },
+ {
+  "id": "t091-tran-01",
+  "topic_id": "t091",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Thể thao thường bị coi là hoạt động giải trí chứ không phải một chức năng công dân.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a leisure activity", "a civic function"]
+  },
+  "model_answer": "Sport is usually treated as a leisure activity rather than as a civic function.",
+  "accepted_variants": [
+   "Sport is often described as a leisure activity instead of a civic function.",
+   "Sport is generally counted as a leisure activity and not as a civic function."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là thể thao, không phải người coi nó",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Bị động giữ thể thao ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai coi như vậy không quan trọng bằng chuyện nó bị xếp nhầm chỗ."
+ },
+ {
+  "id": "t091-tran-02",
+  "topic_id": "t091",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy phần lớn người ta chỉ xem chứ không chơi, sân bãi vẫn là không gian công cộng dùng chung.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["watching rather than playing", "a shared public space"]
+  },
+  "model_answer": "Although most people end up watching rather than playing, the ground remains a shared public space.",
+  "accepted_variants": [
+   "Although the majority are watching rather than playing, the pitch is still a shared public space.",
+   "Although watching rather than playing is now the norm, the field stays a shared public space."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Vế đầu là ý của phía kia, vế sau mới là quan điểm của ta."
+ },
+ {
+  "id": "t091-tran-03",
+  "topic_id": "t091",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những đứa trẻ học được cách chấp nhận phán quyết bất lợi trên sân thì mang thói quen đó ra ngoài đời.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["accept a decision that goes against you"]
+  },
+  "model_answer": "Children who learn to accept a decision that goes against you take that habit off the pitch.",
+  "accepted_variants": [
+   "Players who learn to accept a decision that goes against you carry the habit into adult life.",
+   "Those who must accept a decision that goes against you on a pitch do it elsewhere too."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm trẻ đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t091-para-01",
+  "topic_id": "t091",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Thể thao chỉ là giải trí", "Thể thao giữ một chức năng công dân"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my town, ..."] }
+   ],
+   "required_phrases": ["a leisure activity", "a civic function", "people who share nothing else", "follow the same rules", "clubs run by unpaid volunteers"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, sport is more than a leisure activity. The main reason is that people who share nothing else meet on the same pitch. As a result, the same rules are followed by both sides for an afternoon. Another reason is that clubs run by unpaid volunteers hold a street together cheaply. Consequently, a council that treats the pitch as a civic function rather than as decoration keeps something it cannot rebuild. For example, my town lost its league with its last field.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu cả cách nhìn lẫn cái mất đi nếu nhìn sai."
+ }
+]

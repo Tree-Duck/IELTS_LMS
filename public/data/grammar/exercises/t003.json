@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t003-fix-01",
+  "topic_id": "t003",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Paid tutoring take the evening that a funded club would have used.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Paid tutoring takes the evening that a funded club would have used.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, tutoring là danh động từ nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Danh động từ làm chủ ngữ thì luôn đi với động từ số ít nên phải là takes. Chữ paid đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t003-fix-02",
+  "topic_id": "t003",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "What harms a child is total number of hours worked, not the subject.",
+   "error_type": "Thiếu mạo từ xác định trước danh từ duy nhất"
+  },
+  "model_answer": "What harms a child is the total number of hours worked, not the subject.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ chỉ một thứ duy nhất đã xác định, ở đây là number",
+   "Kiểm chữ the đứng ngay trước total"
+  ],
+  "explanation_vi": "Cụm total number chỉ một con số duy nhất đã xác định nên bắt buộc có the. Bỏ the thì cụm này không đứng được."
+ },
+ {
+  "id": "t003-fix-03",
+  "topic_id": "t003",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Funded after-school activities are free, the tutoring carries on as before.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "Funded after-school activities are free, but the tutoring carries on as before.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm but là gọn nhất vì hai vế đang đối nhau."
+ },
+ {
+  "id": "t003-link-01",
+  "topic_id": "t003",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A city opens free sports clubs from five until seven every weekday.",
+   "result": "The same pupils are still awake over their books at midnight."
+  },
+  "model_answer": "When the club becomes another item on the timetable, the tutoring simply moves to eight.",
+  "accepted_variants": [
+   "Because no family drops a paid class for a free one, the homework starts two hours later.",
+   "When the club ends at seven, parents drive straight from it to the tutoring centre."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay education thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là buổi học thêm bị đẩy lùi giờ. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t003-link-02",
+  "topic_id": "t003",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A school bans homework clubs from running after six in the evening.",
+   "result": "Households that cannot afford tutoring see their results improve first."
+  },
+  "model_answer": "When the paid evening disappears for everybody, the gap that money used to buy closes.",
+  "accepted_variants": [
+   "Because no pupil can pay for extra hours after six, the advantage of a fee vanishes.",
+   "Once the cut-off applies to all, the children with no tutor stop falling behind at night."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là khoảng cách giữa hai nhóm"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là gia đình không kham nổi học thêm. Nếu vẫn là nhà trường thì chưa chuyển được actor."
+ },
+ {
+  "id": "t003-tran-01",
+  "topic_id": "t003",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Hoạt động ngoại khoá được cấp kinh phí từ ngân sách địa phương.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["funded after-school activities"]
+  },
+  "model_answer": "Funded after-school activities are paid for out of the local budget.",
+  "accepted_variants": [
+   "Funded after-school activities are supported by the local budget.",
+   "Funded after-school activities are financed from local taxation."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là các hoạt động, không phải hội đồng",
+   "Kiểm cụm funded after-school activities có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ các hoạt động ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai chi tiền không quan trọng bằng chuyện tiền tới từ đâu."
+ },
+ {
+  "id": "t003-tran-02",
+  "topic_id": "t003",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy câu lạc bộ miễn phí là điều tốt, nó chỉ giúp khi thay thế chứ không cộng thêm.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["replace rather than add to", "paid tutoring"]
+  },
+  "model_answer": "Although a free club is welcome, it helps only if it can replace rather than add to paid tutoring.",
+  "accepted_variants": [
+   "Although the clubs cost nothing, they work only when they replace rather than add to paid tutoring.",
+   "Although free provision sounds generous, it must replace rather than add to paid tutoring."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Điều kiện ở vế sau mới là trọng tâm của đề."
+ },
+ {
+  "id": "t003-tran-03",
+  "topic_id": "t003",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những học sinh không có lấy một buổi tối trống thì mệt mỏi kéo dài, dù buổi nào cũng bổ ích.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["chronic tiredness", "unstructured time"]
+  },
+  "model_answer": "Pupils who never get any unstructured time end up with chronic tiredness, however useful each session is.",
+  "accepted_variants": [
+   "Children who have no unstructured time at all develop chronic tiredness, whatever the club teaches.",
+   "Students who are given no unstructured time suffer chronic tiredness even from good activities."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm học sinh đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t003-para-01",
+  "topic_id": "t003",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Nhà nước nên đầu tư cho ngoại khoá", "Chỉ đầu tư thôi thì chưa giảm được áp lực"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["funded after-school activities", "paid tutoring", "the total number of hours worked", "unstructured time", "households that cannot afford tutoring"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the money helps only under one condition. The main reason is that the harm comes from the total number of hours worked. As a result, funded after-school activities change nothing when a family simply adds them on. Another reason is that paid tutoring goes to whoever can pay. Consequently, a free club helps households that cannot afford tutoring only if the paid evening is capped for everyone at the same hour. For example, my school moved every club before six.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu điều kiện thì khoản đầu tư mới có tác dụng."
+ }
+]

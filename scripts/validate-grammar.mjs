@@ -41,7 +41,7 @@ const words = s => String(s).trim().split(/\s+/).filter(Boolean).length;
 // be + optional adverbs + past participle. Two model paragraphs shipped with
 // zero passives and one with two, all while their own third constraint asked
 // for exactly one, so the check belongs here rather than in a one-off script.
-const PRESENT_PASSIVE = /\b(?:is|are)\s+(?:(?:\w+ly|still|not|never|always|rarely|often|already)\s+)*(?:\w+ed|cut|kept|made|held|built|written|given|taught|driven|paid|left|dealt|spread|shown|sent|put|set|read|lost|won|told|brought|thought|found|felt)\b/i;
+const PRESENT_PASSIVE = /\b(?:is|are)\s+(?:(?:\w+ly|still|not|never|always|rarely|often|already|now|then|just|only|soon|again)\s+)*(?:\w+ed|cut|kept|made|held|built|written|given|taught|driven|paid|left|dealt|spread|shown|sent|put|set|read|lost|won|told|brought|thought|found|felt)\b/i;
 // Sentence split that does not break on the full stop inside "e.g." or a number.
 const sentences = s => String(s)
   .replace(/\b(e\.g|i\.e|etc|Mr|Mrs|Dr)\./gi, '$1<DOT>')

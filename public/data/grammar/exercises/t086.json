@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t086-fix-01",
+  "topic_id": "t086",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Separating these functions create a compulsory daily journey for every household.",
+   "error_type": "Chia động từ theo chủ ngữ danh động từ"
+  },
+  "model_answer": "Separating these functions creates a compulsory daily journey for every household.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ là separating, một danh động từ nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Danh động từ làm chủ ngữ thì luôn đi với động từ số ít nên phải là creates. Chữ functions đứng ngay trước dễ bị nhìn nhầm thành chủ ngữ."
+ },
+ {
+  "id": "t086-fix-02",
+  "topic_id": "t086",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Households without a car spend an hour each way on two bus.",
+   "error_type": "Thiếu s số nhiều sau số đếm"
+  },
+  "model_answer": "Households without a car spend an hour each way on two buses.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm số đếm trong câu, danh từ đứng sau nó phải ở số nhiều",
+   "Kiểm bus thêm es chứ không phải chỉ thêm s"
+  ],
+  "explanation_vi": "Số đếm lớn hơn một luôn đi với danh từ số nhiều nên phải là buses. Danh từ kết thúc bằng s thì thêm es."
+ },
+ {
+  "id": "t086-fix-03",
+  "topic_id": "t086",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The journey is paid in time or on fares by every family.",
+   "error_type": "Sai giới từ trong cấu trúc song song"
+  },
+  "model_answer": "The journey is paid in time or in fares by every family.",
+  "accepted_variants": [],
+  "self_check": [
+   "Hai vế nối bằng or phải dùng cùng một giới từ",
+   "Kiểm chữ in đứng trước cả time và fares"
+  ],
+  "explanation_vi": "Cấu trúc song song bắt hai vế sau or dùng cùng giới từ. Đổi một bên thành on làm câu mất thế cân."
+ },
+ {
+  "id": "t086-link-01",
+  "topic_id": "t086",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A new district places the school four kilometres from the housing.",
+   "result": "Two hundred cars queue at the same gate every morning by eight."
+  },
+  "model_answer": "When no child can walk there alone, every family drives the same four kilometres at once.",
+  "accepted_variants": [
+   "Because the route crosses a dual carriageway, parents refuse to let children go on foot.",
+   "Because the school sits four kilometres out, the trip becomes a compulsory daily journey by car."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay planning thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là cả khu cùng lái xe một lượt. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t086-link-02",
+  "topic_id": "t086",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A council allows shops and homes on one street in a new quarter.",
+   "result": "Older residents there give up their cars within three years."
+  },
+  "model_answer": "When the errands are all within ten minutes on foot, the car stops earning its cost.",
+  "accepted_variants": [
+   "Because the shop is on the corner, households without a car are no longer stranded.",
+   "Once everything sits on one street, the number of trips needing a vehicle falls to almost none."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số chuyến cần tới xe"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là người già trong khu. Nếu vẫn là hội đồng thành phố thì chưa chuyển được actor."
+ },
+ {
+  "id": "t086-tran-01",
+  "topic_id": "t086",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Chuyến đi bắt buộc mỗi ngày được trả bằng thời gian hoặc tiền vé.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a compulsory daily journey", "paid in time or in fares"]
+  },
+  "model_answer": "A compulsory daily journey is paid in time or in fares by every household.",
+  "accepted_variants": [
+   "A compulsory daily journey is paid in time or in fares, never in nothing.",
+   "The cost of a compulsory daily journey is paid in time or in fares."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là chuyến đi, không phải hộ gia đình",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Bị động giữ chuyến đi ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai trả không quan trọng bằng chuyện khoản đó luôn có người trả."
+ },
+ {
+  "id": "t086-tran-02",
+  "topic_id": "t086",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy khu không có xe chạy xuyên qua thì yên tĩnh hơn, cái giá là một chuyến đi mỗi ngày.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["a district with no through traffic", "a compulsory daily journey"]
+  },
+  "model_answer": "Although a district with no through traffic is quieter, the price is a compulsory daily journey.",
+  "accepted_variants": [
+   "Although residents prefer a district with no through traffic, they buy it with a compulsory daily journey.",
+   "Although a district with no through traffic feels safer, it creates a compulsory daily journey."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Đề hỏi lợi có hơn hại không nên phải nêu được cái giá."
+ },
+ {
+  "id": "t086-tran-03",
+  "topic_id": "t086",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những hộ không có ô tô là nhóm trả cái giá cao nhất cho cách quy hoạch này.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["households without a car"]
+  },
+  "model_answer": "Households without a car, who cannot simply drive, pay the highest price for this layout.",
+  "accepted_variants": [
+   "Households without a car, who depend on two buses, carry the highest cost of this layout.",
+   "Those who have no car pay the highest price when these functions are separated."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm households without a car có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ chèn thông tin vào giữa mà không phải tách câu. Hai dấu phẩy giữ cho chủ ngữ và động từ chính vẫn nối được với nhau."
+ },
+ {
+  "id": "t086-para-01",
+  "topic_id": "t086",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Lợi nhiều hơn hại", "Hại nhiều hơn lợi vì sinh ra chuyến đi bắt buộc"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my city, ..."] }
+   ],
+   "required_phrases": ["separating these functions", "a compulsory daily journey", "paid in time or in fares", "households without a car", "a child who can walk there alone"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the disadvantages clearly outweigh the advantages here. The main reason is that separating these functions creates a compulsory daily journey. As a result, that journey is paid in time or in fares every single day. Another reason is that the burden lands hardest on households without a car. Consequently, a district planned this way rarely contains a child who can walk there alone, whatever else it offers. For example, my city moved its clinic three kilometres out.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu một dấu hiệu kiểm chứng được của cách quy hoạch."
+ }
+]

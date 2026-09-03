@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t050-fix-01",
+  "topic_id": "t050",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Staff retention improve in the first year of the arrangement.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Staff retention improves in the first year of the arrangement.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, retention là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Retention là danh từ không đếm được, đi với động từ số ít nên phải là improves. Chữ staff đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t050-fix-02",
+  "topic_id": "t050",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Employees save two hour spent commuting on every working day.",
+   "error_type": "Thiếu s số nhiều sau số đếm"
+  },
+  "model_answer": "Employees save two hours spent commuting on every working day.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm số đếm trong câu, danh từ đứng sau nó phải ở số nhiều",
+   "Đếm chữ s cuối hour, phải có một chữ"
+  ],
+  "explanation_vi": "Số đếm lớn hơn một luôn đi với danh từ số nhiều nên phải là hours. Cụm spent commuting bổ nghĩa cho hours, không đổi được số của nó."
+ },
+ {
+  "id": "t050-fix-03",
+  "topic_id": "t050",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The firm cuts the floor space a firm rents, the worker pays for the room at home.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "The firm cuts the floor space a firm rents, while the worker pays for the room at home.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm while là gọn nhất vì hai vế đang được đặt cạnh nhau để so."
+ },
+ {
+  "id": "t050-link-01",
+  "topic_id": "t050",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A company moves its whole team to working from home permanently.",
+   "result": "The firm gives up two of its three office floors that year."
+  },
+  "model_answer": "When the desks stay empty all week, the landlord is handed back the top two floors.",
+  "accepted_variants": [
+   "Because nobody comes in, the finance team cuts the floor space a firm rents at the next break.",
+   "When attendance falls to a Tuesday, the company lets the lease on two floors expire."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là business hay society thì viết lại",
+   "Kiểm câu có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là công ty trả lại mặt bằng. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t050-link-02",
+  "topic_id": "t050",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A manager starts sending tasks at nine in the evening from home.",
+   "result": "Nobody on that team takes a full lunch break by the second year."
+  },
+  "model_answer": "When answering outside working hours goes unremarked, the number of unpaid evening hours climbs quietly.",
+  "accepted_variants": [
+   "Because the first reply at ten is praised, the working day stretches by an hour each month.",
+   "Once messages arrive after dinner, the gap between work and home shrinks to nothing."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số giờ làm không lương",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số giờ ngoài giờ. Nêu được thì kết quả mới có chỗ bám."
+ },
+ {
+  "id": "t050-tran-01",
+  "topic_id": "t050",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Phòng làm việc ở nhà là do người lao động tự trả, chứ không phải công ty.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a room the worker pays for"]
+  },
+  "model_answer": "The desk at home sits in a room the worker pays for, and it is not reimbursed.",
+  "accepted_variants": [
+   "The home office is a room the worker pays for, and the rent is not covered.",
+   "Work is done in a room the worker pays for, and nothing is repaid by the firm."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là chỗ làm việc, không phải công ty",
+   "Kiểm cụm a room the worker pays for có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động ở vế sau giữ trọng tâm vào khoản tiền không được hoàn, đúng ý câu tiếng Việt. Chủ động sẽ đẩy công ty lên làm chủ ngữ."
+ },
+ {
+  "id": "t050-tran-02",
+  "topic_id": "t050",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy người lao động được lợi trong năm đầu của thoả thuận, doanh nghiệp sẽ điều chỉnh cái đòi hỏi đổi lại.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["the first year of the arrangement", "adjust what is expected in return"]
+  },
+  "model_answer": "Although staff gain in the first year of the arrangement, firms adjust what is expected in return.",
+  "accepted_variants": [
+   "Although the benefit is real in the first year of the arrangement, employers adjust what is expected in return.",
+   "Although workers come out ahead in the first year of the arrangement, companies later adjust what is expected in return."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Mốc thời gian ở vế đầu chính là chỗ đề muốn ta giới hạn."
+ },
+ {
+  "id": "t050-tran-03",
+  "topic_id": "t050",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những nhân viên không bao giờ có mặt ở văn phòng thì mất phần hiện diện lúc xét thăng chức.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["visibility at promotion time"]
+  },
+  "model_answer": "Employees who never appear in the office lose their visibility at promotion time.",
+  "accepted_variants": [
+   "Staff who are never seen in the office give up visibility at promotion time.",
+   "Workers who stay at home every day lose visibility at promotion time."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm visibility at promotion time có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm nhân viên đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t050-para-01",
+  "topic_id": "t050",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Làm từ xa lợi cho người lao động hơn", "Lợi ích nghiêng về doanh nghiệp sau năm đầu"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my office, ..."] }
+   ],
+   "required_phrases": ["hours spent commuting", "floor space a firm rents", "staff retention", "answering outside working hours", "the first year of the arrangement"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the claim holds only at the start. The main reason is that hours spent commuting are saved immediately. As a result, staff retention rises in the first year of the arrangement. Another reason is that firms cut the floor space a firm rents. Consequently, once firms have banked the saving, answering outside working hours quietly becomes the price of keeping the arrangement at all. For example, my office closed a floor and kept the hours.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu cả thời điểm lẫn cái giá phải trả sau đó."
+ }
+]

@@ -110,7 +110,50 @@
   "truc": 1,
   "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
   "theme": "government",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Người trẻ hiện nay chịu áp lực học tập lớn. Có ý kiến cho rằng nhà nước nên đầu tư cho hoạt động ngoại khoá để giảm bớt căng thẳng đó. Ta đồng ý tới mức nào?",
+  "key_vocab": [
+   {
+    "basic": "things to do after school",
+    "academic": "funded after-school activities",
+    "vi": "hoạt động ngoại khoá được cấp kinh phí"
+   },
+   {
+    "basic": "extra classes people pay for",
+    "academic": "paid tutoring",
+    "vi": "học thêm có trả phí"
+   },
+   {
+    "basic": "take the place of",
+    "academic": "replace rather than add to",
+    "vi": "thay thế chứ không cộng thêm"
+   },
+   {
+    "basic": "how many hours in total",
+    "academic": "the total number of hours worked",
+    "vi": "tổng số giờ phải làm"
+   },
+   {
+    "basic": "free time",
+    "academic": "unstructured time",
+    "vi": "khoảng thời gian không bị xếp lịch"
+   },
+   {
+    "basic": "tired all the time",
+    "academic": "chronic tiredness",
+    "vi": "mệt mỏi kéo dài"
+   },
+   {
+    "basic": "one more thing on the list",
+    "academic": "another item on the timetable",
+    "vi": "thêm một mục vào thời khoá biểu"
+   },
+   {
+    "basic": "families with less money",
+    "academic": "households that cannot afford tutoring",
+    "vi": "gia đình không kham nổi học thêm"
+   }
+  ]
  },
  {
   "id": "t004",
@@ -316,7 +359,50 @@
   "truc": 3,
   "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
   "theme": "culture",
-  "task_type": "two_part"
+  "task_type": "two_part",
+  "prompt_vi": "Ở một số nơi, việc tìm hiểu lịch sử dòng họ ngày càng phổ biến. Theo ta người ta làm vậy vì sao, và đây là chuyển biến tích cực hay tiêu cực?",
+  "key_vocab": [
+   {
+    "basic": "where the family came from",
+    "academic": "trace a family line",
+    "vi": "truy lại dòng họ"
+   },
+   {
+    "basic": "something that does not change",
+    "academic": "a fixed point",
+    "vi": "một điểm cố định"
+   },
+   {
+    "basic": "the town is not the same",
+    "academic": "changed beyond recognition",
+    "vi": "đổi tới mức không nhận ra"
+   },
+   {
+    "basic": "just wanting to know",
+    "academic": "ordinary curiosity",
+    "vi": "sự tò mò bình thường"
+   },
+   {
+    "basic": "saying it belongs to them",
+    "academic": "turn a story into a claim",
+    "vi": "biến câu chuyện thành yêu sách"
+   },
+   {
+    "basic": "papers from the past",
+    "academic": "a parish record",
+    "vi": "sổ ghi của giáo xứ"
+   },
+   {
+    "basic": "people who moved away",
+    "academic": "families who moved a generation ago",
+    "vi": "gia đình rời đi từ đời trước"
+   },
+   {
+    "basic": "proof of who you are",
+    "academic": "a claim about who belongs",
+    "vi": "yêu sách về việc ai thuộc về nơi đó"
+   }
+  ]
  },
  {
   "id": "t022",
@@ -414,7 +500,50 @@
   "truc": 4,
   "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
   "theme": "technology",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Nhiều người cho rằng công nghệ liên lạc hiện đại đang gây ra một số tác động xấu tới quan hệ xã hội. Ta đồng ý hay không đồng ý?",
+  "key_vocab": [
+   {
+    "basic": "how many people you know",
+    "academic": "the number of contacts a person has",
+    "vi": "số mối liên lạc một người có"
+   },
+   {
+    "basic": "easy to walk away",
+    "academic": "the cost of ending a friendship",
+    "vi": "cái giá của việc cắt đứt một mối quan hệ"
+   },
+   {
+    "basic": "stop replying",
+    "academic": "stop answering and move on",
+    "vi": "ngưng trả lời rồi đi tiếp"
+   },
+   {
+    "basic": "talk face to face",
+    "academic": "meet in person",
+    "vi": "gặp trực tiếp"
+   },
+   {
+    "basic": "sort out an argument",
+    "academic": "repair a disagreement",
+    "vi": "hàn gắn một bất đồng"
+   },
+   {
+    "basic": "people you barely know",
+    "academic": "weak ties",
+    "vi": "quan hệ hời hợt"
+   },
+   {
+    "basic": "people you can call at night",
+    "academic": "the few who would come at midnight",
+    "vi": "số ít sẽ tới lúc nửa đêm"
+   },
+   {
+    "basic": "blocking someone",
+    "academic": "leaving without an explanation",
+    "vi": "biến mất không giải thích"
+   }
+  ]
  },
  {
   "id": "t028",
@@ -590,7 +719,50 @@
   "truc": 5,
   "truc_name": "Răn Đe So Với Cải Tạo",
   "theme": "crime",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Có người tin rằng cho phạm nhân đi học sẽ làm giảm tỉ lệ tái phạm. Ta đồng ý tới mức nào?",
+  "key_vocab": [
+   {
+    "basic": "a course in prison",
+    "academic": "a prison education programme",
+    "vi": "chương trình học trong trại"
+   },
+   {
+    "basic": "a paper that counts",
+    "academic": "a qualification an employer accepts",
+    "vi": "bằng cấp nhà tuyển dụng chấp nhận"
+   },
+   {
+    "basic": "commit another crime",
+    "academic": "reoffend after release",
+    "vi": "tái phạm sau khi ra tù"
+   },
+   {
+    "basic": "nobody will hire them",
+    "academic": "employers who screen out a record",
+    "vi": "nhà tuyển dụng loại người có tiền án"
+   },
+   {
+    "basic": "a real job offer",
+    "academic": "work that pays a wage",
+    "vi": "công việc trả lương thật"
+   },
+   {
+    "basic": "reading and writing",
+    "academic": "basic literacy",
+    "vi": "khả năng đọc viết cơ bản"
+   },
+   {
+    "basic": "the first month outside",
+    "academic": "the first month after release",
+    "vi": "tháng đầu sau khi ra trại"
+   },
+   {
+    "basic": "a course that leads nowhere",
+    "academic": "a course with no certificate",
+    "vi": "khoá học không có chứng chỉ"
+   }
+  ]
  },
  {
   "id": "t038",
@@ -679,7 +851,50 @@
   "truc": 6,
   "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
   "theme": "education",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Giá trị học được từ cha mẹ và gia đình ảnh hưởng tới thành công sau này nhiều hơn kiến thức và kỹ năng học ở trường. Ta đồng ý tới mức nào?",
+  "key_vocab": [
+   {
+    "basic": "keep going after failing",
+    "academic": "keep going after a setback",
+    "vi": "đi tiếp sau một cú vấp"
+   },
+   {
+    "basic": "what to keep going at",
+    "academic": "the subject to keep going at",
+    "vi": "thứ để mà theo đuổi tiếp"
+   },
+   {
+    "basic": "learn by watching parents",
+    "academic": "copy what is done at home",
+    "vi": "bắt chước điều thấy ở nhà"
+   },
+   {
+    "basic": "taught in class",
+    "academic": "delivered by a syllabus",
+    "vi": "do chương trình học truyền đạt"
+   },
+   {
+    "basic": "try again",
+    "academic": "sit the examination twice",
+    "vi": "thi lại lần hai"
+   },
+   {
+    "basic": "giving up early",
+    "academic": "stopping at the first refusal",
+    "vi": "dừng ngay lần bị từ chối đầu"
+   },
+   {
+    "basic": "being on time",
+    "academic": "habits formed before school age",
+    "vi": "thói quen hình thành trước tuổi đi học"
+   },
+   {
+    "basic": "doing well later",
+    "academic": "the kind of success most people mean",
+    "vi": "kiểu thành công mà phần lớn muốn nói tới"
+   }
+  ]
  },
  {
   "id": "t043",
@@ -796,7 +1011,50 @@
   "truc": 7,
   "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
   "theme": "work",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Làm việc từ xa có lợi cho người lao động nhiều hơn cho doanh nghiệp. Ta đồng ý hay không đồng ý?",
+  "key_vocab": [
+   {
+    "basic": "time getting to work",
+    "academic": "hours spent commuting",
+    "vi": "số giờ đi lại"
+   },
+   {
+    "basic": "office space",
+    "academic": "floor space a firm rents",
+    "vi": "diện tích văn phòng công ty thuê"
+   },
+   {
+    "basic": "people staying in the job",
+    "academic": "staff retention",
+    "vi": "giữ chân nhân sự"
+   },
+   {
+    "basic": "answering at night",
+    "academic": "answering outside working hours",
+    "vi": "trả lời ngoài giờ làm"
+   },
+   {
+    "basic": "changing what they ask for",
+    "academic": "adjust what is expected in return",
+    "vi": "điều chỉnh cái đòi hỏi đổi lại"
+   },
+   {
+    "basic": "the first year",
+    "academic": "the first year of the arrangement",
+    "vi": "năm đầu của thoả thuận"
+   },
+   {
+    "basic": "being noticed for promotion",
+    "academic": "visibility at promotion time",
+    "vi": "sự hiện diện lúc xét thăng chức"
+   },
+   {
+    "basic": "a place to work at home",
+    "academic": "a room the worker pays for",
+    "vi": "phòng làm việc do người lao động tự trả"
+   }
+  ]
  },
  {
   "id": "t051",
@@ -884,7 +1142,50 @@
   "truc": 8,
   "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
   "theme": "society",
-  "task_type": "discuss_both"
+  "task_type": "discuss_both",
+  "prompt_vi": "Có người tin rằng phụ nữ nên giữ vai trò ngang nam giới trong lực lượng cảnh sát hay quân đội, người khác cho rằng phụ nữ không hợp với những việc này. Bàn cả hai phía và nêu quan điểm của ta.",
+  "key_vocab": [
+   {
+    "basic": "what the job asks for",
+    "academic": "the job description",
+    "vi": "bản mô tả công việc"
+   },
+   {
+    "basic": "written a long time ago",
+    "academic": "written when only one group applied",
+    "vi": "viết ra khi chỉ một nhóm nộp đơn"
+   },
+   {
+    "basic": "the same chance to apply",
+    "academic": "equal access to the role",
+    "vi": "cơ hội ứng tuyển ngang nhau"
+   },
+   {
+    "basic": "how strong you are",
+    "academic": "a physical threshold",
+    "vi": "ngưỡng thể lực"
+   },
+   {
+    "basic": "what the work needs now",
+    "academic": "what the work now needs",
+    "vi": "điều công việc hiện đòi hỏi"
+   },
+   {
+    "basic": "calming things down",
+    "academic": "defuse a confrontation",
+    "vi": "hạ nhiệt một vụ đối đầu"
+   },
+   {
+    "basic": "searching a woman",
+    "academic": "search a female suspect",
+    "vi": "khám xét nghi phạm nữ"
+   },
+   {
+    "basic": "a test nobody checked",
+    "academic": "a test never matched to the task",
+    "vi": "bài kiểm tra chưa từng đối chiếu với công việc"
+   }
+  ]
  },
  {
   "id": "t056",
@@ -1026,7 +1327,50 @@
   "truc": 10,
   "truc_name": "Truyền Thông Định Hình Nhận Thức Và Hành Vi",
   "theme": "media",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Ngày nay người trẻ ngưỡng mộ ngôi sao truyền thông và thể thao, dù họ thường không nêu gương tốt. Theo ta đây là chuyển biến tích cực hay tiêu cực?",
+  "key_vocab": [
+   {
+    "basic": "looking up to someone",
+    "academic": "admiration for a public figure",
+    "vi": "sự ngưỡng mộ dành cho người nổi tiếng"
+   },
+   {
+    "basic": "not many kinds of people shown",
+    "academic": "a narrow range of people on screen",
+    "vi": "phổ người xuất hiện trên màn hình quá hẹp"
+   },
+   {
+    "basic": "copy what they do",
+    "academic": "copy a visible habit",
+    "vi": "bắt chước một thói quen nhìn thấy được"
+   },
+   {
+    "basic": "someone to aim at",
+    "academic": "a model worth aiming at",
+    "vi": "hình mẫu đáng hướng tới"
+   },
+   {
+    "basic": "work you cannot see",
+    "academic": "the years of practice behind it",
+    "vi": "những năm luyện tập phía sau"
+   },
+   {
+    "basic": "only famous for being famous",
+    "academic": "fame without a craft",
+    "vi": "nổi tiếng mà không có nghề"
+   },
+   {
+    "basic": "engineers and nurses",
+    "academic": "people whose work is rarely filmed",
+    "vi": "người làm nghề ít được lên hình"
+   },
+   {
+    "basic": "what the feed shows",
+    "academic": "what an algorithm puts in front of them",
+    "vi": "thứ thuật toán đẩy trước mắt"
+   }
+  ]
  },
  {
   "id": "t067",
@@ -1293,7 +1637,50 @@
   "truc": 12,
   "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
   "theme": "transport",
-  "task_type": "advantage_disadvantage"
+  "task_type": "advantage_disadvantage",
+  "prompt_vi": "Ở nhiều thành phố, nhà nước đặt cửa hàng, văn phòng và trường học cách xa nhau. Theo ta lợi có nhiều hơn hại không?",
+  "key_vocab": [
+   {
+    "basic": "keeping them apart",
+    "academic": "separating these functions",
+    "vi": "tách rời các chức năng"
+   },
+   {
+    "basic": "a trip you must make",
+    "academic": "a compulsory daily journey",
+    "vi": "chuyến đi bắt buộc mỗi ngày"
+   },
+   {
+    "basic": "paying in time or money",
+    "academic": "paid in time or in fares",
+    "vi": "trả bằng thời gian hoặc tiền vé"
+   },
+   {
+    "basic": "quiet streets",
+    "academic": "a district with no through traffic",
+    "vi": "khu không có xe chạy xuyên qua"
+   },
+   {
+    "basic": "the poorest households",
+    "academic": "households without a car",
+    "vi": "hộ không có ô tô"
+   },
+   {
+    "basic": "everything in one area",
+    "academic": "shops and homes on one street",
+    "vi": "cửa hàng và nhà trên cùng một phố"
+   },
+   {
+    "basic": "takes an hour each way",
+    "academic": "an hour each way",
+    "vi": "một giờ mỗi lượt"
+   },
+   {
+    "basic": "children going alone",
+    "academic": "a child who can walk there alone",
+    "vi": "đứa trẻ tự đi bộ tới được"
+   }
+  ]
  },
  {
   "id": "t087",
@@ -1382,7 +1769,50 @@
   "truc": 13,
   "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
   "theme": "arts",
-  "task_type": "discuss_both"
+  "task_type": "discuss_both",
+  "prompt_vi": "Có người coi thể thao chỉ là hoạt động giải trí, người khác cho rằng nó giữ vai trò thiết yếu trong xã hội. Bàn cả hai phía và nêu quan điểm của ta.",
+  "key_vocab": [
+   {
+    "basic": "something to do for fun",
+    "academic": "a leisure activity",
+    "vi": "hoạt động giải trí"
+   },
+   {
+    "basic": "follow the same rules",
+    "academic": "follow the same rules",
+    "vi": "theo cùng một luật"
+   },
+   {
+    "basic": "people with nothing in common",
+    "academic": "people who share nothing else",
+    "vi": "những người không có gì chung khác"
+   },
+   {
+    "basic": "a job the city needs done",
+    "academic": "a civic function",
+    "vi": "một chức năng công dân"
+   },
+   {
+    "basic": "accepting you lost",
+    "academic": "accept a decision that goes against you",
+    "vi": "chấp nhận phán quyết bất lợi"
+   },
+   {
+    "basic": "a place to meet",
+    "academic": "a shared public space",
+    "vi": "không gian công cộng dùng chung"
+   },
+   {
+    "basic": "watching on television",
+    "academic": "watching rather than playing",
+    "vi": "xem chứ không chơi"
+   },
+   {
+    "basic": "clubs run by volunteers",
+    "academic": "clubs run by unpaid volunteers",
+    "vi": "câu lạc bộ do người tình nguyện vận hành"
+   }
+  ]
  },
  {
   "id": "t092",

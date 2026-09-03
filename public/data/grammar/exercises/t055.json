@@ -1,0 +1,221 @@
+[
+ {
+  "id": "t055-fix-01",
+  "topic_id": "t055",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Câu dưới thiếu một chữ trong thể bị động. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "The job description written when only one group applied for the work.",
+   "error_type": "Bị động thiếu động từ to be"
+  },
+  "model_answer": "The job description is written when only one group applied for the work.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm động từ to be đứng trước written, phải có is",
+   "Kiểm written vẫn ở dạng cột ba, không đổi thành writes"
+  ],
+  "explanation_vi": "Bị động cần is cộng phân từ hai vì chủ ngữ số ít. Thiếu is thì câu không còn động từ chính."
+ },
+ {
+  "id": "t055-fix-02",
+  "topic_id": "t055",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Every force sets physical threshold before anyone applies.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Every force sets a physical threshold before anyone applies.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là threshold",
+   "Kiểm chữ a đứng ngay trước physical"
+  ],
+  "explanation_vi": "Threshold là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t055-fix-03",
+  "topic_id": "t055",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Equal access to the role mean the same test, not an easier one.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Equal access to the role means the same test, not an easier one.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ chính là access, không phải role",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Access là danh từ không đếm được nên đi với động từ số ít. Cụm to the role chỉ bổ nghĩa, không đổi được số của chủ ngữ."
+ },
+ {
+  "id": "t055-link-01",
+  "topic_id": "t055",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A force keeps an upper-body strength test written for army recruits in 1950.",
+   "result": "Half of the applicants who scored highest on the written paper are rejected."
+  },
+  "model_answer": "When a test never matched to the task decides everything, the interview room empties before it starts.",
+  "accepted_variants": [
+   "Because the threshold was set for a different job, the panel never meets the strongest candidates.",
+   "When the bar is a lift nobody performs on duty, good applicants are sent home at the gate."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay equality thì viết lại",
+   "Kiểm câu có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là ứng viên bị loại ngay tại cổng. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t055-link-02",
+  "topic_id": "t055",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A station has no officer able to search a female suspect after eight at night."
+  ,
+   "result": "Two arrests that week are released without any search being carried out."
+  },
+  "model_answer": "When nobody on the night shift can do it, the sergeant has to let the suspect go.",
+  "accepted_variants": [
+   "Because the rota holds no woman after eight, the search waits until morning or never happens.",
+   "When only one officer in the building may carry it out, her days off decide the outcome."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số vụ khám xét thực hiện được"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là trực ban và người bị bắt. Nếu vẫn là bản mô tả công việc thì chưa chuyển được actor."
+ },
+ {
+  "id": "t055-tran-01",
+  "topic_id": "t055",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Ngưỡng thể lực được đặt ra từ lâu và hiếm khi được đối chiếu lại với công việc thật.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a physical threshold"]
+  },
+  "model_answer": "A physical threshold is set once and is rarely checked against the work itself.",
+  "accepted_variants": [
+   "A physical threshold is fixed early and is seldom compared with the actual duties.",
+   "A physical threshold is written into the rules and is rarely reviewed afterwards."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là ngưỡng thể lực, không phải cơ quan tuyển dụng",
+   "Kiểm cụm a physical threshold có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ ngưỡng thể lực ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai đặt ra không quan trọng bằng chuyện nó không được rà lại."
+ },
+ {
+  "id": "t055-tran-02",
+  "topic_id": "t055",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy bản mô tả công việc nghe có vẻ khách quan, nó được viết ra khi chỉ một nhóm nộp đơn.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["the job description", "written when only one group applied"]
+  },
+  "model_answer": "Although the job description sounds neutral, it was written when only one group applied.",
+  "accepted_variants": [
+   "Although the job description looks objective, it was written when only one group applied.",
+   "Although nothing in the job description names a sex, it was written when only one group applied."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Vế sau mới là chỗ đề muốn ta chỉ ra."
+ },
+ {
+  "id": "t055-tran-03",
+  "topic_id": "t055",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những cảnh sát biết cách hạ nhiệt một vụ đối đầu thì giúp được nhiều hơn người khoẻ nhất trên ca trực.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["defuse a confrontation"]
+  },
+  "model_answer": "Officers who can defuse a confrontation are worth more than the strongest person on the shift.",
+  "accepted_variants": [
+   "Police who defuse a confrontation quickly do more than the strongest officer on duty.",
+   "Those who know how to defuse a confrontation matter more than raw strength on a shift."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm defuse a confrontation có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm cảnh sát đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t055-para-01",
+  "topic_id": "t055",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Phụ nữ nên có vai trò ngang nam giới", "Nên viết lại bản mô tả theo việc thật"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my city, ..."] }
+   ],
+   "required_phrases": ["the job description", "equal access to the role", "a physical threshold", "defuse a confrontation", "what the work now needs"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, both the door and the description need changing. The main reason is that doubts about suitability point at the job description. As a result, equal access to the role settles only half the question. Another reason is that a physical threshold is often set for a task nobody performs. Consequently, a force that asks what the work now needs will value an officer who can defuse a confrontation. For example, my city added a night shift search rota.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nối tiêu chí mới với loại năng lực mà tiêu chí đó chọn được."
+ }
+]
