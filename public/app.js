@@ -6238,6 +6238,20 @@ let _trucCurrent = null;
    worked example and the gapped drill both come from the bank so the lesson
    and the axes never drift apart. */
 
+// v5 section 3.4. Seven of the nine answer a yes or no question; SCALE and
+// SKILL do not, so they carry their own note instead.
+const CHAIN_ENGINES = [
+  { k: 'MONEY', what: 'Giá đổi, người ta chuyển sang cái rẻ hơn, một nhóm được hoặc mất tiền.', actor: 'Người mua, doanh nghiệp, người đi làm', ask: 'Có giá cả hoặc chi phí nào thay đổi không' },
+  { k: 'TIME', what: 'Số giờ được thêm hoặc bị lấy mất, số giờ đó chuyển sang việc khác.', actor: 'Người đi làm, học sinh', ask: 'Có thời gian được thêm hoặc bị lấy mất không' },
+  { k: 'HABIT', what: 'Lặp lại nhiều lần thành tự động, nó chiếm chỗ việc khác.', actor: 'Người dùng lặp lại, thường là người trẻ', ask: 'Có việc gì lặp lại tới mức thành tự động không' },
+  { k: 'INCENTIVE', what: 'Cái gì được lợi bị đổi, người ta chạy theo phần thưởng mới.', actor: 'Bất kỳ ai phản ứng theo phần thưởng', ask: 'Có luật, tiền thưởng, hoặc công nghệ nào đổi cái gì được lợi không' },
+  { k: 'NORM', what: 'Nhiều người làm nên thành bình thường, cá nhân làm theo.', actor: 'Cá nhân trong một nhóm', ask: 'Có chuyện người khác làm gì rồi thành bình thường không' },
+  { k: 'INFORMATION', what: 'Người ta biết một điều trước đó không biết, nên đổi một lựa chọn.', actor: 'Người vừa biết điều gì mới', ask: 'Có thông tin mới nào đến tay người ta không' },
+  { k: 'IDENTITY', what: 'Lòng tin hoặc bản sắc đổi, người ta tham gia hay rút lui.', actor: 'Thành viên một cộng đồng', ask: 'Có lòng tin hoặc bản sắc nào tăng giảm không' },
+  { k: 'SCALE', what: 'Một lần làm phục vụ được rất nhiều người, hoặc chỉ được một người.', actor: 'Người biểu diễn, giáo viên, bác sĩ' },
+  { k: 'SKILL', what: 'Có công cụ làm thay nên không ai luyện nữa, kỹ năng mai một.', actor: 'Người từng phải tự làm việc đó' },
+];
+
 // The eight steps of the v5 handout. F and N are new: F picks the criterion
 // the prompt leaves blank, N is one optional turn and only one.
 const CHAIN_LINKS = [
@@ -6330,6 +6344,31 @@ function renderChainLesson() {
           '<p>If the state covers tuition, students from low-income families apply to courses they would otherwise rule out. Those households carry no loan repayment. Four years later hospitals in the same region fill vacancies they had advertised twice.</p>' +
           '<span class="chain-vs-note">Mỗi câu là hệ quả của câu trước. Bỏ một câu là đứt.</span>' +
         '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="chain-engines">' +
+      '<h3>Chín engine, chỗ bước A mọc ra</h3>' +
+      '<div class="chain-root">' +
+        '<span class="chain-root-k">Câu hỏi gốc</span>' +
+        '<span class="chain-root-q">Trong đề này, cái gì là hữu hạn?</span>' +
+      '</div>' +
+      '<p class="chain-note">Chỗ nào có một thứ hữu hạn thì chỗ đó có người phải chọn, và chỗ nào có người phải chọn thì chỗ đó có engine. Bảng này là bộ khởi động để dễ nhớ, không phải danh sách đóng, và mỗi đoạn ta giữ một engine chính.</p>' +
+      '<div class="chain-eng-head"><span>Engine</span><span>Chuyện gì xảy ra</span><span>Actor thường là ai</span></div>' +
+      CHAIN_ENGINES.map(e =>
+        '<div class="chain-eng">' +
+          '<span class="chain-eng-k">' + e.k + '</span>' +
+          '<span class="chain-eng-w">' + escHtml(e.what) +
+            (e.ask ? '<span class="chain-eng-ask">Hỏi nhanh, ' + escHtml(e.ask) + '</span>' : '') + '</span>' +
+          '<span class="chain-eng-a">' + escHtml(e.actor) + '</span>' +
+        '</div>').join('') +
+      '<div class="chain-eng-pair">' +
+        '<div><b>SCALE khác TIME</b> TIME hỏi ta có bao nhiêu giờ. SCALE hỏi một giờ của ta chạm được tới bao nhiêu người. Một bác sĩ mổ cả buổi sáng không phải chuyện thiếu giờ, đó là chuyện một lần làm chỉ đến được với một người.</div>' +
+        '<div><b>SKILL khác HABIT</b> HABIT là lặp một việc tới mức thành tự động rồi nó chiếm chỗ việc khác. SKILL đi ngược lại, ta mất cơ hội luyện nên kỹ năng teo dần, không cần lặp lại gì cả.</div>' +
+      '</div>' +
+      '<div class="chain-eng-test">' +
+        '<div class="chain-root-k">Kiểm lại engine vừa chọn</div>' +
+        '<p>Điền thử vào câu này. <i>Khi ______ thay đổi, người ta phải chọn lại giữa ______ và ______ .</i> Điền được cả ba chỗ thì engine đúng, không điền được thì chọn sai, quay lại câu hỏi gốc.</p>' +
       '</div>' +
     '</div>' +
 
