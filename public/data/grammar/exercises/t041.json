@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t041-fix-01",
+  "topic_id": "t041",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Câu dưới thiếu một chữ trong thể bị động. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "School places rationed by marks rather than by parental choice.",
+   "error_type": "Bị động thiếu động từ to be"
+  },
+  "model_answer": "School places are rationed by marks rather than by parental choice.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm động từ to be đứng trước rationed, phải có are",
+   "Kiểm rationed vẫn ở dạng cột ba, không đổi thành ration"
+  ],
+  "explanation_vi": "Bị động hiện tại đơn cần are cộng phân từ hai vì chủ ngữ số nhiều. Thiếu are thì câu không còn động từ chính."
+ },
+ {
+  "id": "t041-fix-02",
+  "topic_id": "t041",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Paid tuition after school cost more than most families admit.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Paid tuition after school costs more than most families admit.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, tuition là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Tuition là danh từ không đếm được, đi với động từ số ít nên phải là costs. Cụm after school chỉ bổ nghĩa, không đổi số của chủ ngữ."
+ },
+ {
+  "id": "t041-fix-03",
+  "topic_id": "t041",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["verb_tense"],
+  "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "A single examination decided the place, so parents apply pressure at home today.",
+   "error_type": "Dùng quá khứ đơn cho một sự thật hiện tại"
+  },
+  "model_answer": "A single examination decides the place, so parents apply pressure at home today.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm trạng từ chỉ thời gian trong câu, ở đây là today",
+   "Kiểm động từ đầu câu ở hiện tại đơn, có chữ s vì chủ ngữ số ít"
+  ],
+  "explanation_vi": "Vế sau nói chuyện hiện tại nên vế đầu phải cùng thì. Quá khứ đơn ở đây làm hai vế lệch mốc thời gian."
+ },
+ {
+  "id": "t041-link-01",
+  "topic_id": "t041",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A single examination decides which secondary school a child attends.",
+   "result": "Two evening tutoring centres open on the same road within a year."
+  },
+  "model_answer": "When parents see the cut-off score, they book paid tuition after school for the year before.",
+  "accepted_variants": [
+   "Because the mark decides everything, families sign up for extra classes in the spring.",
+   "Once the score is published, parents queue at the centre on the first evening."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay education thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là cha mẹ đi đăng ký lớp thêm. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t041-link-02",
+  "topic_id": "t041",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A child attends classes from seven in the morning until nine at night.",
+   "result": "The same child reads nothing at all during the summer holiday."
+  },
+  "model_answer": "When every hour is timetabled, children lose hours of sleep a week and stop choosing to read.",
+  "accepted_variants": [
+   "Because no hour is left free, the number of books read for pleasure falls to zero.",
+   "Once the day is full, reading becomes another task and the child drops it first."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là giờ ngủ và số sách đọc",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là giờ ngủ mỗi tuần. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t041-tran-01",
+  "topic_id": "t041",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Suất học được phân theo điểm số nên áp lực dồn xuống đứa trẻ.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["school places rationed by marks"]
+  },
+  "model_answer": "School places are rationed by marks, so the pressure lands on the child.",
+  "accepted_variants": [
+   "School places are allocated by marks, so the pressure falls on the child.",
+   "Places at school are rationed by examination marks, so the child carries the pressure."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là suất học, không phải nhà trường",
+   "Kiểm vế sau vẫn giữ ý là áp lực dồn xuống đứa trẻ"
+  ],
+  "explanation_vi": "Bị động giữ suất học ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai phân không quan trọng bằng chuyện phân theo tiêu chí nào."
+ },
+ {
+  "id": "t041-tran-02",
+  "topic_id": "t041",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy việc gây áp lực là hợp lý với gia đình, nó vẫn thiệt cho đứa trẻ.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["rational for the family", "costly for the child"]
+  },
+  "model_answer": "Although the pressure is rational for the family, it remains costly for the child.",
+  "accepted_variants": [
+   "Although applying pressure is rational for the family, the habit is costly for the child.",
+   "Although the strategy looks rational for the family, it stays costly for the child."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t041-tran-03",
+  "topic_id": "t041",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những đứa trẻ học thêm sáu buổi mỗi tuần thì mất mấy giờ ngủ mỗi tuần.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["lose hours of sleep a week"]
+  },
+  "model_answer": "Children who attend six extra classes a week lose hours of sleep a week.",
+  "accepted_variants": [
+   "Children who sit six evening classes weekly lose hours of sleep a week.",
+   "Pupils who take six extra lessons a week lose hours of sleep a week."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm lose hours of sleep a week có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ gắn điều kiện vào đúng nhóm trẻ mà không cần tách câu. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t041-para-01",
+  "topic_id": "t041",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Áp lực từ cha mẹ là tích cực", "Áp lực từ cha mẹ là tiêu cực với đứa trẻ"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["school places rationed by marks", "apply pressure at home", "rational for the family", "costly for the child", "stop choosing to read"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the development is negative for the child. The main reason is a system of school places rationed by marks. As a result, parents apply pressure at home from the first year. Another reason is that a child is judged by one examination. Consequently, a strategy that is rational for the family turns out costly for the child, who will stop choosing to read. For example, my neighbour gave up her library card at twelve.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải đặt cái lợi của gia đình cạnh cái mất của đứa trẻ."
+ }
+]

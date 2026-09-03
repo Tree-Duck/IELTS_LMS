@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t085-fix-01",
+  "topic_id": "t085",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Separated infrastructure change who is willing to ride to work.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Separated infrastructure changes who is willing to ride to work.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, infrastructure là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Infrastructure là danh từ không đếm được, đi với động từ số ít nên phải là changes. Chữ separated đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t085-fix-02",
+  "topic_id": "t085",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Most journeys under three kilometre are still made by car.",
+   "error_type": "Thiếu s số nhiều sau số đếm"
+  },
+  "model_answer": "Most journeys under three kilometres are still made by car.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm số đếm trong câu, danh từ đứng sau nó phải ở số nhiều",
+   "Đếm chữ s cuối kilometre, phải có một chữ"
+  ],
+  "explanation_vi": "Số đếm lớn hơn một luôn đi với danh từ số nhiều nên phải là kilometres. Động từ are đã đúng vì chủ ngữ là journeys."
+ },
+ {
+  "id": "t085-fix-03",
+  "topic_id": "t085",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Riders will not set out without secure parking at the other end.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Riders will not set out without a secure parking space at the other end.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là chỗ gửi xe",
+   "Kiểm chữ a đứng ngay trước secure"
+  ],
+  "explanation_vi": "Parking space là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t085-link-01",
+  "topic_id": "t085",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A city widens a main road and removes the painted cycle lane.",
+   "result": "The bicycle shop on that road closes the following spring."
+  },
+  "model_answer": "When traffic passes close at speed, parents who will not allow it keep the bikes indoors.",
+  "accepted_variants": [
+   "Because the lane is gone, riders on that road drop from thirty an hour to three.",
+   "When lorries pass within a metre, the school run goes back into the car."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay transport thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là xe chạy sát và cha mẹ cất xe đạp đi. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t085-link-02",
+  "topic_id": "t085",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A council builds a kerb-separated lane along the whole school route.",
+   "result": "Two classes at that school no longer need the morning bus."
+  },
+  "model_answer": "When separated infrastructure runs the full route, the number of daily riders doubles within a term.",
+  "accepted_variants": [
+   "Because no gap is left in the lane, parents let children ride and the bus empties.",
+   "Once the kerb is in place, the school bike rack fills for the first time."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số người đạp xe mỗi ngày",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số người đạp xe. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t085-tran-01",
+  "topic_id": "t085",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Phần lớn chuyến đi dưới ba cây số vẫn được thực hiện bằng ô tô.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["journeys under three kilometres"]
+  },
+  "model_answer": "Most journeys under three kilometres are still made by car.",
+  "accepted_variants": [
+   "Most journeys under three kilometres are still driven rather than ridden.",
+   "The majority of journeys under three kilometres are made by car."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là các chuyến đi, không phải người lái",
+   "Kiểm cụm journeys under three kilometres có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ các chuyến đi ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai lái không quan trọng bằng chuyện đi bằng phương tiện nào."
+ },
+ {
+  "id": "t085-tran-02",
+  "topic_id": "t085",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy chỉ tuyên truyền suông thì rẻ, chỉ hạ tầng tách riêng mới đổi được số người đạp xe.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["persuasion alone", "separated infrastructure"]
+  },
+  "model_answer": "Although persuasion alone is cheap, only separated infrastructure changes the number of riders.",
+  "accepted_variants": [
+   "Although persuasion alone costs little, separated infrastructure is what moves the figures.",
+   "Although councils prefer persuasion alone, separated infrastructure is the thing that works."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t085-tran-03",
+  "topic_id": "t085",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những cha mẹ không cho phép con đạp xe tới trường thì đang phản ứng với tuyến đường chứ không phải với chiếc xe.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["parents who will not allow it"]
+  },
+  "model_answer": "Parents who will not allow it are judging the route rather than the bicycle.",
+  "accepted_variants": [
+   "Parents who will not allow it are reacting to the road, not to cycling itself.",
+   "Those parents who will not allow it have looked at the junction, not the bike."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm parents who will not allow it có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm cha mẹ đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t085-para-01",
+  "topic_id": "t085",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Vận động và tuyên truyền là đủ", "Phải xây hạ tầng tách riêng"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my city, ..."] }
+   ],
+   "required_phrases": ["how dangerous a route feels", "separated infrastructure", "persuasion alone", "parents who will not allow it", "the number of daily riders"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the answer is built rather than argued. The main reason is that the decision follows how dangerous a route feels. As a result, persuasion alone reaches people who were never the problem. Another reason is that parents who will not allow it decide the school run. Consequently, only separated infrastructure moves the number of daily riders, because it changes the one thing those parents are judging. For example, my city added a kerb and the bike rack filled.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nối giải pháp với đúng thứ mà cha mẹ đang cân nhắc."
+ }
+]

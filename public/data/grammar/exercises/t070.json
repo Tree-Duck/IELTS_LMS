@@ -54,7 +54,7 @@
   ],
   "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
   "stimulus": {
-   "sentence": "An actor consented to interviews about their professional work last year, so newspapers assume the same today.",
+   "sentence": "An actor consented to interviews about their professional work, so newspapers assume the same today.",
    "error_type": "Dùng quá khứ đơn cho một sự thật hiện tại"
   },
   "model_answer": "An actor consents to interviews about their professional work, so newspapers assume the same today.",

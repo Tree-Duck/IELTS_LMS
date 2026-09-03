@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t002-fix-01",
+  "topic_id": "t002",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Curriculum time are fixed, so a new subject always removes an old one.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Curriculum time is fixed, so a new subject always removes an old one.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, time là danh từ không đếm được nên coi như số ít",
+   "Kiểm động từ to be, phải là is chứ không phải are"
+  ],
+  "explanation_vi": "Time là danh từ không đếm được nên đi với động từ số ít. Chữ curriculum đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t002-fix-02",
+  "topic_id": "t002",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Students who follow international affairs still need lesson on how to judge a source.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Students who follow international affairs still need a lesson on how to judge a source.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là lesson",
+   "Kiểm chữ a đứng ngay trước lesson"
+  ],
+  "explanation_vi": "Lesson là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t002-fix-03",
+  "topic_id": "t002",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Schools work with an already crowded timetable, one subject has to go.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "Schools work with an already crowded timetable, so one subject has to go.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm so là cách gọn nhất vì vế sau là hệ quả."
+ },
+ {
+  "id": "t002-link-01",
+  "topic_id": "t002",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A school adds a weekly news lesson without removing anything else.",
+   "result": "Fewer students finish the set novels in literature that year."
+  },
+  "model_answer": "When the new subject takes curriculum time from reading, teachers cut two novels from the list.",
+  "accepted_variants": [
+   "When the lesson eats into reading periods, departments shorten the reading list before the exam.",
+   "Because the slot comes out of English, teachers drop the two longest texts."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là education hay society thì viết lại",
+   "Kiểm câu có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải là một hành động quay được, ở đây là giáo viên cắt bớt sách. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t002-link-02",
+  "topic_id": "t002",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "Only subject specialists are allowed to teach the new news lesson.",
+   "result": "Three schools in the district drop the subject within a year."
+  },
+  "model_answer": "When no timetabled teacher holds the qualification, heads hand the slot back to an existing subject.",
+  "accepted_variants": [
+   "Because nobody on the staff can teach it, the period returns to geography.",
+   "Once the one trained teacher leaves, the lesson has no one to run it."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì thay đổi, ở đây là ai đứng lớp"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là ban giám hiệu. Nếu vẫn là giáo viên chuyên môn thì chưa chuyển được actor."
+ },
+ {
+  "id": "t002-tran-01",
+  "topic_id": "t002",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Thời lượng chương trình bị chia lại mỗi khi một môn mới được thêm vào.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["curriculum time"]
+  },
+  "model_answer": "Curriculum time is divided again whenever a new subject is added.",
+  "accepted_variants": [
+   "Curriculum time is redistributed whenever a new subject is introduced.",
+   "Curriculum time is shared out again every time a subject is added."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là thời lượng, không phải nhà trường",
+   "Kiểm cụm curriculum time có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ thời lượng ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Chủ động sẽ đẩy nhà trường lên đầu."
+ },
+ {
+  "id": "t002-tran-02",
+  "topic_id": "t002",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy theo dõi tình hình quốc tế là có ích, thời khoá biểu vốn đã kín.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["follow international affairs", "an already crowded timetable"]
+  },
+  "model_answer": "Although it helps to follow international affairs, schools work with an already crowded timetable.",
+  "accepted_variants": [
+   "Although pupils gain from following international affairs, this is an already crowded timetable.",
+   "Although the habit of following international affairs is useful, the timetable is already crowded."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Thiếu vế sau thì câu chưa trọn."
+ },
+ {
+  "id": "t002-tran-03",
+  "topic_id": "t002",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Nhóm học sinh đọc tốt nhất, vốn xử lý được văn bản dày, hưởng lợi nhiều nhất từ một môn dựa vào đọc.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["the strongest readers"]
+  },
+  "model_answer": "The strongest readers, who already handle dense text, gain most from a subject built on reading.",
+  "accepted_variants": [
+   "The strongest readers, who cope with long articles already, gain most from a reading subject.",
+   "The strongest readers, who read closely without help, benefit most from this kind of subject."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm the strongest readers có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ chèn thông tin vào giữa mà không phải tách câu. Hai dấu phẩy giữ cho chủ ngữ và động từ chính vẫn nối được với nhau."
+ },
+ {
+  "id": "t002-para-01",
+  "topic_id": "t002",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Nên dạy tin quốc tế như một môn riêng", "Không nên thêm môn này vào thời khoá biểu"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["curriculum time", "an already crowded timetable", "judge a source", "subject specialists", "the strongest readers"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the subject earns a place only by replacing a weaker one. The main reason is that curriculum time is fixed. As a result, every addition works against an already crowded timetable. Another reason is that few schools have subject specialists for it. Consequently, a lesson meant to teach pupils how to judge a source goes to whoever has a free period. For example, one school gave the slot back to history.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu cả mục đích của tiết học lẫn chuyện ai thật sự đứng lớp."
+ }
+]

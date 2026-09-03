@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t026-fix-01",
+  "topic_id": "t026",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Adult supervision keep a nine-year-old at the desk after the first difficult page.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Adult supervision keeps a nine-year-old at the desk after the first difficult page.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, supervision là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Supervision là danh từ không đếm được, đi với động từ số ít nên phải là keeps. Chữ adult đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t026-fix-02",
+  "topic_id": "t026",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "A sequenced curriculum tells child what comes next and why.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "A sequenced curriculum tells a child what comes next and why.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là child",
+   "Kiểm chữ a đứng ngay trước child"
+  ],
+  "explanation_vi": "Child là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì câu sai ngữ pháp ngay."
+ },
+ {
+  "id": "t026-fix-03",
+  "topic_id": "t026",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới thiếu một tiểu từ trong cụm động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Children can look information on the internet in seconds.",
+   "error_type": "Thiếu tiểu từ trong cụm động từ"
+  },
+  "model_answer": "Children can look information up on the internet in seconds.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là look something up, tìm chữ đứng ngay sau information",
+   "Kiểm chữ on vẫn còn nguyên trước the internet"
+  ],
+  "explanation_vi": "Look up là cụm động từ có tiểu từ, bỏ up thì nghĩa đổi thành nhìn vào chứ không phải tra cứu. Tân ngữ là danh từ nên đặt trước hoặc sau up đều được."
+ },
+ {
+  "id": "t026-link-01",
+  "topic_id": "t026",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A family replaces school with online lessons at the kitchen table.",
+   "result": "The child finishes the year without ever covering fractions."
+  },
+  "model_answer": "When nobody checks the order of the lessons, easy topics get repeated and hard ones skipped.",
+  "accepted_variants": [
+   "Without a sequenced curriculum behind them, learners meet algebra before they can divide.",
+   "When the child picks the next video, the difficult unit is never the one chosen."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là education hay technology thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là chuyện ai chọn bài tiếp theo. Thiếu bước đó thì kết quả không có chỗ bám."
+ },
+ {
+  "id": "t026-link-02",
+  "topic_id": "t026",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "Only households with a free adult can supervise a full school day at home.",
+   "result": "Two children on the same street reach secondary school three years apart in reading."
+  },
+  "model_answer": "When one home has an adult at the table and the other does not, the gap widens each term.",
+  "accepted_variants": [
+   "Because supervision runs out by midday in one house, the reading hours drift apart quickly.",
+   "When only one child is heard reading aloud daily, the difference grows by a year every year."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là khoảng cách đọc",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là khoảng cách giữa hai đứa trẻ. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t026-tran-01",
+  "topic_id": "t026",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Thông tin được tra trong vài giây, nhưng trình tự học thì không tự có.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["look information up"]
+  },
+  "model_answer": "Information is looked up in seconds, but the order of learning is not given.",
+  "accepted_variants": [
+   "Information is found in seconds, but the order of learning is not supplied.",
+   "Information is retrieved in seconds, while the sequence of learning is not."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là thông tin, không phải người tra",
+   "Kiểm vế sau vẫn giữ ý là trình tự không tự có"
+  ],
+  "explanation_vi": "Bị động giữ thông tin ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai tra không quan trọng bằng chuyện tra thì nhanh mà trình tự thì không."
+ },
+ {
+  "id": "t026-tran-02",
+  "topic_id": "t026",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy trẻ có thể tự học ở nhà không ai kèm, phần lớn bỏ giữa chừng khi gặp chỗ khó.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["study unsupervised at home", "drop the topic halfway"]
+  },
+  "model_answer": "Although children can study unsupervised at home, most drop the topic halfway when it gets hard.",
+  "accepted_variants": [
+   "Although it is possible to study unsupervised at home, many drop the topic halfway.",
+   "Although children study unsupervised at home every day, most drop the topic halfway through."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải But",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t026-tran-03",
+  "topic_id": "t026",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những đứa trẻ ngồi trong một lớp bạn cùng lứa thì so được bài của mình với bài người khác.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["a class of peers"]
+  },
+  "model_answer": "Children who sit in a class of peers can compare their work with someone else's.",
+  "accepted_variants": [
+   "Learners who study in a class of peers can measure their work against others.",
+   "Pupils who belong to a class of peers see what an ordinary answer looks like."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm a class of peers có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ gắn điều kiện vào đúng nhóm trẻ mà không cần tách câu. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t026-para-01",
+  "topic_id": "t026",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Trường học không còn cần thiết", "Trường cung cấp thứ mà mạng không có"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["adult supervision", "a sequenced curriculum", "a class of peers", "study unsupervised at home", "drop the topic halfway"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, schools supply three things the internet does not. The main reason is that a child is kept at the desk by adult supervision. As a result, fewer learners drop the topic halfway through a hard week. Another reason is that a sequenced curriculum decides what comes next. Consequently, children who study unsupervised at home cover whatever looks easy, and a class of peers is what shows them the standard. For example, my cousin studied at home and repeated a year.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó vừa nêu hệ quả vừa nói rõ thứ thay thế."
+ }
+]

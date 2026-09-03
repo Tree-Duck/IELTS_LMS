@@ -58,7 +58,50 @@
   "truc": 1,
   "truc_name": "Nguồn Lực Công Và Ai Chịu Trách Nhiệm",
   "theme": "government",
-  "task_type": "discuss_both"
+  "task_type": "discuss_both",
+  "prompt_vi": "Có ý kiến cho rằng học sinh trung học nên học tin quốc tế như một môn riêng, ý kiến khác cho rằng như vậy là phí thời gian học. Bàn cả hai phía và nêu quan điểm của ta.",
+  "key_vocab": [
+   {
+    "basic": "school time",
+    "academic": "curriculum time",
+    "vi": "thời lượng chương trình"
+   },
+   {
+    "basic": "take out another subject",
+    "academic": "displace a weaker subject",
+    "vi": "đẩy một môn yếu hơn ra"
+   },
+   {
+    "basic": "know about the world",
+    "academic": "follow international affairs",
+    "vi": "theo dõi tình hình quốc tế"
+   },
+   {
+    "basic": "tell true from false",
+    "academic": "judge a source",
+    "vi": "thẩm định nguồn tin"
+   },
+   {
+    "basic": "too much to fit in",
+    "academic": "an already crowded timetable",
+    "vi": "thời khoá biểu vốn đã kín"
+   },
+   {
+    "basic": "teachers trained for it",
+    "academic": "subject specialists",
+    "vi": "giáo viên đúng chuyên môn"
+   },
+   {
+    "basic": "the good readers",
+    "academic": "the strongest readers",
+    "vi": "nhóm học sinh đọc tốt nhất"
+   },
+   {
+    "basic": "useful later",
+    "academic": "transferable to later study",
+    "vi": "dùng được cho bậc học sau"
+   }
+  ]
  },
  {
   "id": "t003",
@@ -221,7 +264,50 @@
   "truc": 3,
   "truc_name": "Truyền Thống So Với Hiện Đại, Và Bản Sắc",
   "theme": "culture",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Nhiều phong tục và lối ứng xử truyền thống không còn phù hợp với đời sống hiện đại và không đáng giữ. Ta đồng ý hay không đồng ý?",
+  "key_vocab": [
+   {
+    "basic": "old ways",
+    "academic": "inherited practices",
+    "vi": "nếp cũ được truyền lại"
+   },
+   {
+    "basic": "still useful",
+    "academic": "still relevant to daily life",
+    "vi": "còn dùng được trong đời sống"
+   },
+   {
+    "basic": "knowledge passed down",
+    "academic": "practical knowledge carried in a custom",
+    "vi": "tri thức thực hành nằm trong phong tục"
+   },
+   {
+    "basic": "stop doing it",
+    "academic": "fall out of use",
+    "vi": "mai một"
+   },
+   {
+    "basic": "do it in front of others",
+    "academic": "perform it in public",
+    "vi": "thực hành trước mặt người khác"
+   },
+   {
+    "basic": "the young people",
+    "academic": "the next generation",
+    "vi": "thế hệ kế tiếp"
+   },
+   {
+    "basic": "nobody decides",
+    "academic": "no one declares it obsolete",
+    "vi": "không ai tuyên bố nó lỗi thời"
+   },
+   {
+    "basic": "a normal day",
+    "academic": "an ordinary working week",
+    "vi": "một tuần làm việc bình thường"
+   }
+  ]
  },
  {
   "id": "t021",
@@ -276,7 +362,50 @@
   "truc": 4,
   "truc_name": "Công Nghệ Thay Thế Cái Cũ, Lợi Ích Không Đều",
   "theme": "technology",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Nhiều người nói trường học không còn cần thiết vì thông tin trên mạng đã rất nhiều, nên trẻ có thể tự học ở nhà. Ta đồng ý tới mức nào?",
+  "key_vocab": [
+   {
+    "basic": "find things out",
+    "academic": "look information up",
+    "vi": "tra thông tin"
+   },
+   {
+    "basic": "someone watching",
+    "academic": "adult supervision",
+    "vi": "sự trông chừng của người lớn"
+   },
+   {
+    "basic": "in the right order",
+    "academic": "a sequenced curriculum",
+    "vi": "chương trình có trình tự"
+   },
+   {
+    "basic": "other children",
+    "academic": "a class of peers",
+    "vi": "một lớp bạn cùng lứa"
+   },
+   {
+    "basic": "work alone at home",
+    "academic": "study unsupervised at home",
+    "vi": "tự học ở nhà không ai kèm"
+   },
+   {
+    "basic": "know what to learn next",
+    "academic": "know what comes next",
+    "vi": "biết bước tiếp theo học gì"
+   },
+   {
+    "basic": "give up halfway",
+    "academic": "drop the topic halfway",
+    "vi": "bỏ giữa chừng"
+   },
+   {
+    "basic": "parents with time",
+    "academic": "households with a free adult",
+    "vi": "nhà có người lớn rảnh"
+   }
+  ]
  },
  {
   "id": "t027",
@@ -409,7 +538,50 @@
   "truc": 5,
   "truc_name": "Răn Đe So Với Cải Tạo",
   "theme": "crime",
-  "task_type": "problem_solution"
+  "task_type": "problem_solution",
+  "prompt_vi": "Ngày càng nhiều trẻ vị thành niên phạm tội. Nguyên nhân là gì, và nên áp dụng hình phạt nào?",
+  "key_vocab": [
+   {
+    "basic": "no adult around",
+    "academic": "an absent adult at home",
+    "vi": "nhà vắng người lớn"
+   },
+   {
+    "basic": "punishment that fits",
+    "academic": "a proportionate punishment",
+    "vi": "hình phạt tương xứng"
+   },
+   {
+    "basic": "watched by someone",
+    "academic": "a supervised order",
+    "vi": "án có giám sát"
+   },
+   {
+    "basic": "do it again",
+    "academic": "reoffend within a year",
+    "vi": "tái phạm trong vòng một năm"
+   },
+   {
+    "basic": "help for the family",
+    "academic": "an intervention in the household",
+    "vi": "can thiệp vào gia đình"
+   },
+   {
+    "basic": "the hours after school",
+    "academic": "the hours between school and dinner",
+    "vi": "khoảng thời gian tan học tới bữa tối"
+   },
+   {
+    "basic": "sent away",
+    "academic": "held in custody",
+    "vi": "bị giam giữ"
+   },
+   {
+    "basic": "older boys nearby",
+    "academic": "an older group on the same street",
+    "vi": "nhóm lớn tuổi hơn ở cùng khu"
+   }
+  ]
  },
  {
   "id": "t037",
@@ -455,7 +627,50 @@
   "truc": 6,
   "truc_name": "Tuổi Thơ, Học So Với Chơi, Và Ai Định Hình Đứa Trẻ",
   "theme": "education",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Ngày nay một số cha mẹ tạo rất nhiều áp lực cho con. Nguyên nhân là gì, và đây là chuyển biến tích cực hay tiêu cực đối với đứa trẻ?",
+  "key_vocab": [
+   {
+    "basic": "not enough places",
+    "academic": "school places rationed by marks",
+    "vi": "suất học phân theo điểm số"
+   },
+   {
+    "basic": "push the child",
+    "academic": "apply pressure at home",
+    "vi": "gây áp lực ở nhà"
+   },
+   {
+    "basic": "extra classes",
+    "academic": "paid tuition after school",
+    "vi": "lớp học thêm có trả phí"
+   },
+   {
+    "basic": "sensible for the family",
+    "academic": "rational for the family",
+    "vi": "hợp lý với gia đình"
+   },
+   {
+    "basic": "bad for the child",
+    "academic": "costly for the child",
+    "vi": "thiệt cho đứa trẻ"
+   },
+   {
+    "basic": "cannot sleep",
+    "academic": "lose hours of sleep a week",
+    "vi": "mất mấy giờ ngủ mỗi tuần"
+   },
+   {
+    "basic": "stop enjoying it",
+    "academic": "stop choosing to read",
+    "vi": "thôi tự tìm sách đọc"
+   },
+   {
+    "basic": "one exam decides",
+    "academic": "a single examination decides",
+    "vi": "một kỳ thi quyết định"
+   }
+  ]
  },
  {
   "id": "t042",
@@ -529,7 +744,50 @@
   "truc": 7,
   "truc_name": "Động Lực Làm Việc, Tiền So Với Phi Tiền",
   "theme": "work",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Một số học sinh chọn đi làm hoặc đi du lịch sau khi rời trường phổ thông, trước khi vào đại học. Nhiều người lại nói kinh nghiệm làm việc hữu ích hơn du lịch trong đời sống trưởng thành. Ta đồng ý hay không?",
+  "key_vocab": [
+   {
+    "basic": "a year off",
+    "academic": "a year between school and university",
+    "vi": "một năm giữa phổ thông và đại học"
+   },
+   {
+    "basic": "what a job wants",
+    "academic": "what a workplace expects",
+    "vi": "điều nơi làm việc đòi hỏi"
+   },
+   {
+    "basic": "nothing is familiar",
+    "academic": "nothing is familiar",
+    "vi": "không có gì quen thuộc"
+   },
+   {
+    "basic": "turn up on time",
+    "academic": "keep to a rota",
+    "vi": "giữ đúng lịch ca"
+   },
+   {
+    "basic": "the first year after",
+    "academic": "the year after graduation",
+    "vi": "năm đầu sau khi tốt nghiệp"
+   },
+   {
+    "basic": "something to write down",
+    "academic": "a reference an employer accepts",
+    "vi": "giấy chứng nhận nhà tuyển dụng chấp nhận"
+   },
+   {
+    "basic": "people who can pay",
+    "academic": "families who can fund it",
+    "vi": "gia đình có tiền chi trả"
+   },
+   {
+    "basic": "work out what to do",
+    "academic": "solve a problem without instructions",
+    "vi": "tự xoay khi không có hướng dẫn"
+   }
+  ]
  },
  {
   "id": "t050",
@@ -574,7 +832,50 @@
   "truc": 8,
   "truc_name": "Công Bằng Giữa Các Nhóm Và Giữa Các Thế Hệ",
   "theme": "society",
-  "task_type": "agree_disagree"
+  "task_type": "agree_disagree",
+  "prompt_vi": "Có những người già không thể tự lo cho mình về tinh thần, thể chất hay tài chính. Con cháu trẻ tuổi có nên bị luật buộc phải chu cấp không? Ta đồng ý tới mức nào?",
+  "key_vocab": [
+   {
+    "basic": "a rule in law",
+    "academic": "a legal duty to support",
+    "vi": "nghĩa vụ chu cấp theo luật"
+   },
+   {
+    "basic": "the one who cannot say no",
+    "academic": "the relative with least bargaining power",
+    "vi": "người thân ít quyền từ chối nhất"
+   },
+   {
+    "basic": "usually the daughter",
+    "academic": "most often a daughter",
+    "vi": "thường là con gái"
+   },
+   {
+    "basic": "stop working",
+    "academic": "leave paid work",
+    "vi": "nghỉ việc có lương"
+   },
+   {
+    "basic": "the state pays",
+    "academic": "a cost the state can spread",
+    "vi": "khoản nhà nước san đều được"
+   },
+   {
+    "basic": "looking after someone",
+    "academic": "unpaid care at home",
+    "vi": "chăm sóc không công tại nhà"
+   },
+   {
+    "basic": "family fights",
+    "academic": "a dispute inside the family",
+    "vi": "tranh chấp trong nhà"
+   },
+   {
+    "basic": "old people living alone",
+    "academic": "older people living alone",
+    "vi": "người già sống một mình"
+   }
+  ]
  },
  {
   "id": "t055",
@@ -637,7 +938,50 @@
   "truc": 9,
   "truc_name": "Tăng Trưởng Đánh Đổi Môi Trường",
   "theme": "environment",
-  "task_type": "advantage_disadvantage"
+  "task_type": "advantage_disadvantage",
+  "prompt_vi": "Phần lớn các nước muốn nâng mức sống bằng phát triển kinh tế, nhưng nhiều giá trị xã hội quan trọng có thể mất đi. Lợi có nhiều hơn hại không?",
+  "key_vocab": [
+   {
+    "basic": "more money for everyone",
+    "academic": "a rise in average income",
+    "vi": "thu nhập bình quân tăng"
+   },
+   {
+    "basic": "things that hold people together",
+    "academic": "the services that hold a community together",
+    "vi": "dịch vụ giữ cộng đồng lại với nhau"
+   },
+   {
+    "basic": "build factories",
+    "academic": "industrial development",
+    "vi": "phát triển công nghiệp"
+   },
+   {
+    "basic": "people move away",
+    "academic": "move to the city for work",
+    "vi": "lên thành phố kiếm việc"
+   },
+   {
+    "basic": "nobody left in the village",
+    "academic": "a village with no working-age adults",
+    "vi": "làng không còn người trong tuổi lao động"
+   },
+   {
+    "basic": "money for hospitals",
+    "academic": "funds a health service",
+    "vi": "cấp tiền cho ngành y tế"
+   },
+   {
+    "basic": "dirty air",
+    "academic": "air quality falls",
+    "vi": "chất lượng không khí giảm"
+   },
+   {
+    "basic": "worth the cost",
+    "academic": "worth what it costs",
+    "vi": "đáng với cái giá phải trả"
+   }
+  ]
  },
  {
   "id": "t062",
@@ -897,7 +1241,50 @@
   "truc": 12,
   "truc_name": "Quy Hoạch Đô Thị Và Khoảng Cách Vật Lý",
   "theme": "transport",
-  "task_type": "problem_solution"
+  "task_type": "problem_solution",
+  "prompt_vi": "Việc dùng xe đạp làm phương tiện chính đã giảm ở nhiều nơi. Vì sao, và làm gì để khuyến khích người ta đạp xe nhiều hơn?",
+  "key_vocab": [
+   {
+    "basic": "feels dangerous",
+    "academic": "how dangerous a route feels",
+    "vi": "mức độ nguy hiểm mà tuyến đường gây cảm giác"
+   },
+   {
+    "basic": "a lane of its own",
+    "academic": "separated infrastructure",
+    "vi": "hạ tầng tách riêng"
+   },
+   {
+    "basic": "telling people to cycle",
+    "academic": "persuasion alone",
+    "vi": "chỉ tuyên truyền suông"
+   },
+   {
+    "basic": "cars go past close",
+    "academic": "traffic passing close at speed",
+    "vi": "xe chạy nhanh sát người"
+   },
+   {
+    "basic": "parents will not let them",
+    "academic": "parents who will not allow it",
+    "vi": "cha mẹ không cho phép"
+   },
+   {
+    "basic": "somewhere to leave it",
+    "academic": "secure parking at the other end",
+    "vi": "chỗ gửi xe an toàn ở điểm đến"
+   },
+   {
+    "basic": "short trips",
+    "academic": "journeys under three kilometres",
+    "vi": "chuyến đi dưới ba cây số"
+   },
+   {
+    "basic": "the number of riders",
+    "academic": "the number of daily riders",
+    "vi": "số người đạp xe mỗi ngày"
+   }
+  ]
  },
  {
   "id": "t086",
@@ -943,7 +1330,50 @@
   "truc": 13,
   "truc_name": "Giá Trị Của Thứ Không Sinh Lời",
   "theme": "arts",
-  "task_type": "discuss_both"
+  "task_type": "discuss_both",
+  "prompt_vi": "Có người cho rằng lịch sử ít dạy được gì cho hôm nay, người khác cho rằng học quá khứ giúp hiểu hiện tại. Bàn cả hai phía và nêu quan điểm của ta.",
+  "key_vocab": [
+   {
+    "basic": "say what will happen",
+    "academic": "predict what will happen",
+    "vi": "dự đoán chuyện sắp tới"
+   },
+   {
+    "basic": "show what is new",
+    "academic": "show which arrangements are recent",
+    "vi": "cho thấy sắp xếp nào mới có gần đây"
+   },
+   {
+    "basic": "think it was always this way",
+    "academic": "treat the present as inevitable",
+    "vi": "coi hiện tại là tất yếu"
+   },
+   {
+    "basic": "learn dates",
+    "academic": "memorise dates and names",
+    "vi": "học thuộc mốc và tên"
+   },
+   {
+    "basic": "read old papers",
+    "academic": "read a primary source",
+    "vi": "đọc tư liệu gốc"
+   },
+   {
+    "basic": "the same thing happens again",
+    "academic": "a pattern that repeats",
+    "vi": "một khuôn lặp lại"
+   },
+   {
+    "basic": "people in charge",
+    "academic": "those who set the rules",
+    "vi": "những người đặt ra luật lệ"
+   },
+   {
+    "basic": "change is possible",
+    "academic": "change remains possible",
+    "vi": "thay đổi vẫn là chuyện làm được"
+   }
+  ]
  },
  {
   "id": "t091",

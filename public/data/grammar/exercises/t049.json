@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t049-fix-01",
+  "topic_id": "t049",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Students take year between school and university to work or travel.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Students take a year between school and university to work or travel.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là year",
+   "Kiểm chữ a đứng ngay trước year"
+  ],
+  "explanation_vi": "Year là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t049-fix-02",
+  "topic_id": "t049",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "What a workplace expects differ from what a classroom rewards.",
+   "error_type": "Chia động từ theo mệnh đề làm chủ ngữ"
+  },
+  "model_answer": "What a workplace expects differs from what a classroom rewards.",
+  "accepted_variants": [],
+  "self_check": [
+   "Chủ ngữ là cả mệnh đề what a workplace expects, coi như số ít",
+   "Đếm chữ s cuối differ, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Mệnh đề what làm chủ ngữ thì luôn đi với động từ số ít nên phải là differs. Chữ expects đứng trước dễ bị nhìn nhầm thành động từ chính."
+ },
+ {
+  "id": "t049-fix-03",
+  "topic_id": "t049",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới thiếu một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "New staff have to keep a rota for the first month.",
+   "error_type": "Thiếu giới từ trong cụm cố định"
+  },
+  "model_answer": "New staff have to keep to a rota for the first month.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là keep to a rota, tìm chữ đứng ngay sau keep",
+   "Kiểm nghĩa, keep a rota là giữ tờ lịch, keep to a rota là làm đúng lịch"
+  ],
+  "explanation_vi": "Keep to nghĩa là tuân theo, còn keep không có to nghĩa là giữ lấy. Thiếu to thì câu nói sang chuyện khác."
+ },
+ {
+  "id": "t049-link-01",
+  "topic_id": "t049",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A school leaver spends the year stacking shelves on an evening rota.",
+   "result": "The same person is offered a graduate job before their classmates."
+  },
+  "model_answer": "When a manager can vouch for their attendance, applications carry a reference an employer accepts.",
+  "accepted_variants": [
+   "Because a supervisor signs the form, the application arrives with something checkable on it.",
+   "When someone has watched them turn up for a year, the reference says more than grades."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay work thì viết lại",
+   "Kiểm câu có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là người quản lý ký giấy xác nhận. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t049-link-02",
+  "topic_id": "t049",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "Only families who can fund it send a child travelling for a year.",
+   "result": "Two applicants with the same grades describe very different years at interview."
+  },
+  "model_answer": "When one year costs money and the other earns it, the choice follows the household budget.",
+  "accepted_variants": [
+   "Because travel is paid for and work is paid, the poorer applicant never had the option.",
+   "When the fare comes out of savings, the student without savings takes the evening shift."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là tiền trong nhà"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là ứng viên không có tiền. Nếu vẫn là gia đình khá giả thì chưa chuyển được actor."
+ },
+ {
+  "id": "t049-tran-01",
+  "topic_id": "t049",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Kinh nghiệm làm việc được đem ra kiểm chứng ngay trong năm đầu sau khi tốt nghiệp.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["the year after graduation"]
+  },
+  "model_answer": "Work experience is tested in the year after graduation.",
+  "accepted_variants": [
+   "Work experience is checked in the year after graduation.",
+   "Experience of work is examined in the year after graduation."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là kinh nghiệm, không phải nhà tuyển dụng",
+   "Kiểm cụm the year after graduation có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ kinh nghiệm ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai kiểm không quan trọng bằng chuyện kiểm vào lúc nào."
+ },
+ {
+  "id": "t049-tran-02",
+  "topic_id": "t049",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy đi xa dạy ta xoay xở khi không có gì quen thuộc, chỉ điều nơi làm việc đòi hỏi mới được đem ra chấm.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["nothing is familiar", "what a workplace expects"]
+  },
+  "model_answer": "Although travel teaches a person to cope when nothing is familiar, only what a workplace expects is graded.",
+  "accepted_variants": [
+   "Although travel builds the habit of coping when nothing is familiar, employers grade what a workplace expects.",
+   "Although a traveller learns to act when nothing is familiar, only what a workplace expects is measured."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t049-tran-03",
+  "topic_id": "t049",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những sinh viên từng phải giữ đúng lịch ca thì tự xoay được khi không có hướng dẫn.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["keep to a rota", "solve a problem without instructions"]
+  },
+  "model_answer": "Students who have had to keep to a rota can solve a problem without instructions.",
+  "accepted_variants": [
+   "Students who learned to keep to a rota can solve a problem without instructions.",
+   "Those who once had to keep to a rota will solve a problem without instructions."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm sinh viên đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t049-para-01",
+  "topic_id": "t049",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Đi làm hữu ích hơn đi xa", "Đi xa dạy được thứ mà công việc không dạy"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my family, ..."] }
+   ],
+   "required_phrases": ["a year between school and university", "what a workplace expects", "keep to a rota", "the year after graduation", "families who can fund it"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, work teaches more in a year between school and university. The main reason is that it shows what a workplace expects. As a result, a school leaver learns to keep to a rota. Another reason is that only this is tested in the year after graduation. Consequently, travel remains the better year only for families who can fund it and for careers that reward an unusual story. For example, my cousin worked a year and started on a higher grade.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nêu điều kiện mà phía kia mới thắng."
+ }
+]

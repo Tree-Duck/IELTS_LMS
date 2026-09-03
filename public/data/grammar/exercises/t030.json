@@ -207,7 +207,7 @@
     "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
    ]
   },
-  "model_answer": "In my opinion, the device itself is neutral. The main reason is that design choices decide how hard it is to stop. This means that compulsive checking follows the app rather than the person. Another reason is that heavy screen use costs something measurable. In turn, a student who reaches for the phone every few minutes loses the long stretch of attention that difficult reading needs. For example, one class kept phones in a box and finished the set text.",
+  "model_answer": "In my opinion, the device itself is neutral. The main reason is that design choices decide how hard it is to stop. This means that compulsive checking is built into the app rather than the person. Another reason is that heavy screen use costs something measurable. In turn, a student who reaches for the phone every few minutes loses the long stretch of attention that difficult reading needs. For example, one class kept phones in a box and finished the set text.",
   "accepted_variants": [],
   "self_check": [
    "Đếm dấu chấm, phải có đúng sáu",

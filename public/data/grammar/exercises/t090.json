@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t090-fix-01",
+  "topic_id": "t090",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "History rarely predict what will happen in the coming decade.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "History rarely predicts what will happen in the coming decade.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, history là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "History là danh từ không đếm được, đi với động từ số ít nên phải là predicts. Trạng từ rarely đứng giữa không đổi được cách chia."
+ },
+ {
+  "id": "t090-fix-02",
+  "topic_id": "t090",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Students who read primary source stop trusting the summary they were given.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Students who read a primary source stop trusting the summary they were given.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là source",
+   "Kiểm chữ a đứng ngay trước primary"
+  ],
+  "explanation_vi": "Source là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t090-fix-03",
+  "topic_id": "t090",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "History can show which arrangements are recent, most people assume they are permanent.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "History can show which arrangements are recent, yet most people assume they are permanent.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm yet là gọn nhất vì hai vế đang đối nhau."
+ },
+ {
+  "id": "t090-link-01",
+  "topic_id": "t090",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A class reads the actual petition that won the eight-hour working day.",
+   "result": "Two students argue with a manager about rest breaks that summer."
+  },
+  "model_answer": "When learners see that someone had to ask for the hours, they no longer treat the present as inevitable.",
+  "accepted_variants": [
+   "Because the document is dated, students notice the rule is younger than their grandparents.",
+   "When a rule turns out to have an author, learners start asking who wrote the current one."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là history hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là học sinh nhìn thấy chữ ký trên tờ đơn. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t090-link-02",
+  "topic_id": "t090",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A syllabus asks pupils to memorise dates and names for the examination.",
+   "result": "None of the class can say why the law was passed at all."
+  },
+  "model_answer": "When only the date is marked, the number of lessons spent on causes falls to none.",
+  "accepted_variants": [
+   "Because the test rewards recall, teachers cut the discussion and drill the list instead.",
+   "Once the mark scheme names dates only, the reasons disappear from the revision notes."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số tiết dành cho nguyên nhân",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số tiết bàn về nguyên nhân. Nêu được thì kết quả mới có chỗ bám."
+ },
+ {
+  "id": "t090-tran-01",
+  "topic_id": "t090",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Ở phần lớn trường học, lịch sử bị dạy thành việc học thuộc mốc và tên.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["memorise dates and names"]
+  },
+  "model_answer": "In most schools, history is taught as an exercise to memorise dates and names.",
+  "accepted_variants": [
+   "In most schools, history is reduced to a task to memorise dates and names.",
+   "History is presented in most schools as a subject where pupils memorise dates and names."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là lịch sử, không phải giáo viên",
+   "Kiểm cụm memorise dates and names có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ lịch sử ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai dạy không quan trọng bằng chuyện môn này bị dạy thành cái gì."
+ },
+ {
+  "id": "t090-tran-02",
+  "topic_id": "t090",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy lịch sử hiếm khi dự đoán được chuyện sắp tới, nó cho thấy sắp xếp nào mới có gần đây.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["predict what will happen", "show which arrangements are recent"]
+  },
+  "model_answer": "Although history rarely predicts what will happen, it does show which arrangements are recent.",
+  "accepted_variants": [
+   "Although it cannot predict what will happen, history will show which arrangements are recent.",
+   "Although historians never predict what will happen, the record shows which arrangements are recent."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai vế đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t090-tran-03",
+  "topic_id": "t090",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người đặt ra luật lệ thì hưởng lợi khi ai cũng coi hiện tại là tất yếu.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["those who set the rules", "treat the present as inevitable"]
+  },
+  "model_answer": "Those who set the rules gain when everyone else treats the present as inevitable.",
+  "accepted_variants": [
+   "People who set the rules benefit when the rest treat the present as inevitable.",
+   "Those who set the rules do best when nobody asks why things are so."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm those who set the rules có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t090-para-01",
+  "topic_id": "t090",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Lịch sử ít dạy được gì cho hôm nay", "Học quá khứ giúp hiểu hiện tại"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my class, ..."] }
+   ],
+   "required_phrases": ["predict what will happen", "show which arrangements are recent", "treat the present as inevitable", "memorise dates and names", "read a primary source"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the second view is the stronger one. The main reason is that history does not predict what will happen. As a result, its value lies elsewhere, in what it shows about now. Another reason is that the record can show which arrangements are recent. Consequently, students who read a primary source stop being able to treat the present as inevitable, which is the whole point. For example, the eight-hour day is dated in our textbook.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nối việc đọc tư liệu gốc với kết quả nhận thức."
+ }
+]

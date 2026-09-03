@@ -9305,6 +9305,7 @@ const LS_THEME_LABEL = {
   work: 'Việc làm', society: 'Xã hội', culture: 'Văn hoá', crime: 'Tội phạm',
   globalisation: 'Toàn cầu hoá', family: 'Gia đình', transport: 'Giao thông',
   economy: 'Kinh tế', urban: 'Đô thị',
+  arts: 'Nghệ thuật',
 };
 const lsTheme = k => LS_THEME_LABEL[k] || k;
 

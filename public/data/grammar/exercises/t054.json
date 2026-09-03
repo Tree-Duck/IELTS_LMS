@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t054-fix-01",
+  "topic_id": "t054",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Parliament cannot create legal duty to support without naming who pays.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Parliament cannot create a legal duty to support without naming who pays.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là duty",
+   "Kiểm chữ a đứng ngay trước legal"
+  ],
+  "explanation_vi": "Duty là danh từ đếm được số ít nên bắt buộc có mạo từ. Không có a thì cụm này không đứng được."
+ },
+ {
+  "id": "t054-fix-02",
+  "topic_id": "t054",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Unpaid care at home fall on the relative with least bargaining power.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Unpaid care at home falls on the relative with least bargaining power.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, care là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Care là danh từ không đếm được, đi với động từ số ít nên phải là falls. Cụm at home chỉ bổ nghĩa, không đổi số của chủ ngữ."
+ },
+ {
+  "id": "t054-fix-03",
+  "topic_id": "t054",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["run_on_comma"],
+  "instruction_vi": "Câu dưới nối hai mệnh đề chỉ bằng dấu phẩy. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "A legal duty to support falls on one relative, the others carry nothing at all.",
+   "error_type": "Nối hai mệnh đề bằng dấu phẩy"
+  },
+  "model_answer": "A legal duty to support falls on one relative, while the others carry nothing at all.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm số mệnh đề có động từ chính, ở đây là hai",
+   "Kiểm có một liên từ đứng ngay sau dấu phẩy"
+  ],
+  "explanation_vi": "Hai mệnh đề độc lập không nối được bằng mỗi dấu phẩy. Thêm while là gọn nhất vì hai vế đang được đặt cạnh nhau để so."
+ },
+ {
+  "id": "t054-link-01",
+  "topic_id": "t054",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A law requires adult children to fund the care of a dependent parent.",
+   "result": "One sibling in the family earns nothing for four years."
+  },
+  "model_answer": "When the bill arrives, the relative living nearest cuts her hours and has to leave paid work.",
+  "accepted_variants": [
+   "Because the duty has no formula, the child who lives closest ends up doing the days.",
+   "When somebody has to be there at nine each morning, one sibling hands in notice."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là family hay society thì viết lại",
+   "Kiểm câu có nêu ai đó làm một việc cụ thể, không phải một xu hướng chung",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là một người con nghỉ việc. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t054-link-02",
+  "topic_id": "t054",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "The state pays a carer allowance out of general taxation instead.",
+   "result": "A dispute inside the family over money never reaches the court."
+  },
+  "model_answer": "When the money comes from outside the household, no relative has to be pushed into paying.",
+  "accepted_variants": [
+   "Because the cost is spread across taxpayers, the number of family disputes over care falls.",
+   "Once the allowance arrives monthly, siblings stop negotiating over who owes what."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số vụ tranh chấp"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là những người con khác trong nhà. Nếu vẫn là nhà nước thì chưa chuyển được actor."
+ },
+ {
+  "id": "t054-tran-01",
+  "topic_id": "t054",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Việc chăm sóc không công tại nhà thường bị đẩy sang một người thân duy nhất.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["unpaid care at home"]
+  },
+  "model_answer": "Unpaid care at home is pushed onto a single relative.",
+  "accepted_variants": [
+   "Unpaid care at home is left to one relative alone.",
+   "Unpaid care at home is handed to a single member of the family."
+  ],
+  "self_check": [
+   "Kiểm có is đứng trước phân từ hai",
+   "Kiểm chủ ngữ là việc chăm sóc, không phải gia đình",
+   "Kiểm cụm unpaid care at home có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ việc chăm sóc ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai đẩy không quan trọng bằng chuyện gánh nặng rơi vào đâu."
+ },
+ {
+  "id": "t054-tran-02",
+  "topic_id": "t054",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy nghĩa vụ chu cấp theo luật nghe có vẻ công bằng, nó rơi vào người thân ít quyền từ chối nhất.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["a legal duty to support", "the relative with least bargaining power"]
+  },
+  "model_answer": "Although a legal duty to support sounds fair, it lands on the relative with least bargaining power.",
+  "accepted_variants": [
+   "Although a legal duty to support treats siblings alike, the relative with least bargaining power pays.",
+   "Although a legal duty to support looks equal on paper, the relative with least bargaining power carries it."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t054-tran-03",
+  "topic_id": "t054",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người con phải nghỉ việc có lương để chăm cha mẹ thì mất luôn khoản lương hưu của chính mình.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["leave paid work"]
+  },
+  "model_answer": "Children who leave paid work to care for a parent lose their own pension years.",
+  "accepted_variants": [
+   "Adults who leave paid work for a parent give up years of their own pension.",
+   "Those who leave paid work to nurse a parent lose the pension they were building."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm leave paid work có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người con đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t054-para-01",
+  "topic_id": "t054",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Luật nên buộc con cháu chu cấp", "Gánh nặng này thuộc về nhà nước"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my family, ..."] }
+   ],
+   "required_phrases": ["a legal duty to support", "the relative with least bargaining power", "leave paid work", "unpaid care at home", "a cost the state can spread"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, this obligation belongs with the state. The main reason is that a legal duty to support names no one in particular. As a result, the burden is carried by the relative with least bargaining power. Another reason is that someone always has to leave paid work. Consequently, unpaid care at home turns into lost pension years for one person, when it could have been a cost the state can spread. For example, my aunt gave up her job for six years.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải đặt cái mất của một người cạnh phương án san đều."
+ }
+]

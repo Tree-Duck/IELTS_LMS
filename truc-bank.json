@@ -300,7 +300,7 @@
    "model_chain": {
     "prompt": "In some countries students pay their own university fees, in others the government pays. Do the advantages outweigh the disadvantages?",
     "steps": {
-     "A": "If the state covers tuition, students from low-income families apply to courses they would otherwise rule out on cost alone.",
+     "A": "Public tuition moves the price of a degree off the student and onto a budget that already has other claims on it.",
      "B": "When the state covers tuition, students from low-income families apply to courses they would otherwise rule out on cost alone.",
      "C": "Households that would have carried a loan repayment worth a fifth of a graduate salary for a decade carry none.",
      "D": "Four years later hospitals and schools in the same region fill vacancies they had advertised twice, and stop running wards and classrooms on overtime.",

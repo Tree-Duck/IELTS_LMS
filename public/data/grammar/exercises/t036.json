@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t036-fix-01",
+  "topic_id": "t036",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Many young offender reoffend within a year of leaving custody.",
+   "error_type": "Thiếu s số nhiều sau many"
+  },
+  "model_answer": "Many young offenders reoffend within a year of leaving custody.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm chữ many, danh từ đứng sau nó phải ở số nhiều",
+   "Đếm chữ s cuối offender, phải có một chữ"
+  ],
+  "explanation_vi": "Many luôn đi với danh từ đếm được số nhiều nên phải là offenders. Động từ reoffend đã đúng vì chủ ngữ số nhiều."
+ },
+ {
+  "id": "t036-fix-02",
+  "topic_id": "t036",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "An absent adult at home explain more of these cases than any criminal disposition.",
+   "error_type": "Chia động từ theo chủ ngữ số ít"
+  },
+  "model_answer": "An absent adult at home explains more of these cases than any criminal disposition.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ chính, ở đây là adult chứ không phải cụm at home",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Chủ ngữ là an absent adult, số ít, nên động từ phải có s. Cụm at home chỉ bổ nghĩa, không đổi được số của chủ ngữ."
+ },
+ {
+  "id": "t036-fix-03",
+  "topic_id": "t036",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Courts should prefer supervised order to a custodial sentence.",
+   "error_type": "Thiếu mạo từ trước danh từ đếm được số ít"
+  },
+  "model_answer": "Courts should prefer a supervised order to a custodial sentence.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ đếm được số ít chưa có mạo từ, ở đây là order",
+   "Kiểm hai vế của prefer A to B đều có mạo từ"
+  ],
+  "explanation_vi": "Order là danh từ đếm được số ít nên bắt buộc có mạo từ. Vế sau đã có a nên vế trước cũng phải có cho cân."
+ },
+ {
+  "id": "t036-link-01",
+  "topic_id": "t036",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "Both parents work shifts that end after seven in the evening.",
+   "result": "A thirteen-year-old is arrested twice in the same school term."
+  },
+  "model_answer": "When the hours between school and dinner are unsupervised, children spend them with an older group on the same street.",
+  "accepted_variants": [
+   "Because nobody is home at four, the child waits outside with whoever is already there.",
+   "When no adult meets them at the gate, the walk home turns into three hours out."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay crime thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là khoảng trống buổi chiều và nhóm lớn tuổi hơn ngoài phố. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t036-link-02",
+  "topic_id": "t036",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "A court replaces a custodial sentence with a supervised order and a curfew.",
+   "result": "The same boy sits his school examinations in June."
+  },
+  "model_answer": "When a child stays in the same school, the timetable keeps him off the street at four.",
+  "accepted_variants": [
+   "Because the order is served at home, the number of missed lessons falls to almost none.",
+   "Once the curfew starts, the free hours that used to be empty shrink to one."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số giờ trống",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số giờ không ai trông. Nêu được thì kết quả mới có chỗ bám."
+ },
+ {
+  "id": "t036-tran-01",
+  "topic_id": "t036",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Nhiều vụ như vậy được xử bằng án có giám sát thay vì đưa đi giam giữ.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["a supervised order", "held in custody"]
+  },
+  "model_answer": "Many such cases are handled by a supervised order rather than by being held in custody.",
+  "accepted_variants": [
+   "Many of these cases are settled with a supervised order instead of custody.",
+   "Such offences are dealt with by a supervised order rather than a custodial sentence."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là các vụ án, không phải toà",
+   "Kiểm cụm a supervised order có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ các vụ án ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai xử không quan trọng bằng chuyện xử theo hướng nào."
+ },
+ {
+  "id": "t036-tran-02",
+  "topic_id": "t036",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy hình phạt tương xứng là cần thiết, nó chỉ có tác dụng khi đi kèm can thiệp vào gia đình.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["a proportionate punishment", "an intervention in the household"]
+  },
+  "model_answer": "Although a proportionate punishment is necessary, it works only alongside an intervention in the household.",
+  "accepted_variants": [
+   "Although courts need a proportionate punishment, nothing changes without an intervention in the household.",
+   "Although a proportionate punishment matters, it has to arrive with an intervention in the household."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này phải đi cùng nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t036-tran-03",
+  "topic_id": "t036",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những đứa trẻ về tới nhà mà không có người lớn nào ở đó là nhóm dễ tái phạm trong vòng một năm nhất.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["reoffend within a year"]
+  },
+  "model_answer": "Children who come home to an empty flat are the most likely to reoffend within a year.",
+  "accepted_variants": [
+   "Children who arrive home with no adult there are the likeliest to reoffend within a year.",
+   "Those who return to an empty house are the group most likely to reoffend within a year."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm reoffend within a year có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm trẻ đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t036-para-01",
+  "topic_id": "t036",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Phạt nặng để răn đe", "Phạt tương xứng kèm can thiệp vào gia đình"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my area, ..."] }
+   ],
+   "required_phrases": ["an absent adult at home", "a proportionate punishment", "a supervised order", "reoffend within a year", "an intervention in the household"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, the cause sits at home more often than in the child. The main reason is that an absent adult at home leaves the afternoon empty. As a result, a proportionate punishment on its own changes nothing. Another reason is that a supervised order is served in the same school. Consequently, an intervention in the household is what decides whether a child will reoffend within a year of the first offence. For example, one court ordered evening classes for the mother too.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nối can thiệp gia đình với kết quả tái phạm."
+ }
+]

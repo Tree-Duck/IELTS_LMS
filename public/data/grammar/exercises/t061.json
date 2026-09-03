@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t061-fix-01",
+  "topic_id": "t061",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["subject_verb_agreement"],
+  "instruction_vi": "Câu dưới sai chia động từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Industrial development bring work to a region that had almost none.",
+   "error_type": "Chia động từ theo chủ ngữ không đếm được"
+  },
+  "model_answer": "Industrial development brings work to a region that had almost none.",
+  "accepted_variants": [],
+  "self_check": [
+   "Nhìn chủ ngữ trước động từ, development ở đây là danh từ không đếm được nên coi như số ít",
+   "Đếm chữ s cuối động từ chính, phải có đúng một chữ"
+  ],
+  "explanation_vi": "Development ở nghĩa chung là danh từ không đếm được nên đi với động từ số ít. Chữ industrial đứng trước không làm nó thành số nhiều."
+ },
+ {
+  "id": "t061-fix-02",
+  "topic_id": "t061",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["prepositions"],
+  "instruction_vi": "Câu dưới sai đúng một giới từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Young adults move at the city for work and do not come back.",
+   "error_type": "Sai giới từ chỉ hướng"
+  },
+  "model_answer": "Young adults move to the city for work and do not come back.",
+  "accepted_variants": [],
+  "self_check": [
+   "Cụm đúng là move to somewhere, tìm chữ đứng ngay sau move",
+   "Kiểm chữ for vẫn còn nguyên trước work"
+  ],
+  "explanation_vi": "Move đi với to khi nói tới nơi đến, còn at chỉ vị trí đứng yên. Dùng at thì câu mất hẳn nghĩa di chuyển."
+ },
+ {
+  "id": "t061-fix-03",
+  "topic_id": "t061",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["verb_tense"],
+  "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Air quality fell every summer now, and the clinic records it.",
+   "error_type": "Dùng quá khứ đơn cho một sự thật hiện tại"
+  },
+  "model_answer": "Air quality falls every summer now, and the clinic records it.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm trạng từ chỉ thời gian trong câu, ở đây là now",
+   "Kiểm hai vế cùng ở hiện tại đơn"
+  ],
+  "explanation_vi": "Vế sau nói chuyện hiện tại nên vế đầu phải cùng thì. Quá khứ đơn ở đây làm hai vế lệch mốc thời gian."
+ },
+ {
+  "id": "t061-link-01",
+  "topic_id": "t061",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "A new plant opens forty kilometres from a farming district.",
+   "result": "The village primary school closes two classrooms in three years."
+  },
+  "model_answer": "When wages at the plant beat farm work, young adults move to the city for work.",
+  "accepted_variants": [
+   "Because the factory pays twice as much, families of working age leave the district first.",
+   "When the bus to the plant runs daily, the households with children take it and stay away."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là society hay economy thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là người trẻ rời làng đi làm. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t061-link-02",
+  "topic_id": "t061",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ cái gì tăng hoặc giảm.",
+  "stimulus": {
+   "cause": "Tax revenue from the new plant funds a health service in the same province.",
+   "result": "Three clinics stay open in villages that had none a decade ago."
+  },
+  "model_answer": "When the revenue reaches the provincial budget, the number of staffed clinics rises each year.",
+  "accepted_variants": [
+   "Because the tax lands locally, waiting times in the district fall from weeks to days.",
+   "Once the money is collected nearby, two nurses are posted to villages that had none."
+  ],
+  "self_check": [
+   "Kiểm câu có nói cái gì tăng hoặc giảm, ở đây là số phòng khám có người trực",
+   "Kiểm nhóm ở kết quả khác nhóm ở lý do"
+  ],
+  "explanation_vi": "Chuỗi chỉ chạy khi có một thứ đo được thay đổi, ở đây là số phòng khám mở cửa. Nêu được thì kết quả mới thuyết phục."
+ },
+ {
+  "id": "t061-tran-01",
+  "topic_id": "t061",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những dịch vụ giữ cộng đồng lại với nhau được cấp tiền từ chính khoản tăng trưởng đó.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["the services that hold a community together"]
+  },
+  "model_answer": "The services that hold a community together are funded by that same growth.",
+  "accepted_variants": [
+   "The services that hold a community together are paid for out of that growth.",
+   "The services that hold a community together are financed by the new revenue."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là các dịch vụ, không phải nhà nước",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ các dịch vụ ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Ai cấp tiền không quan trọng bằng chuyện tiền tới từ đâu."
+ },
+ {
+  "id": "t061-tran-02",
+  "topic_id": "t061",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy thu nhập bình quân tăng, chất lượng không khí giảm ở đúng những nơi đó.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["a rise in average income", "air quality falls"]
+  },
+  "model_answer": "Although there is a rise in average income, air quality falls in the same districts.",
+  "accepted_variants": [
+   "Although a rise in average income follows, air quality falls where the plants are built.",
+   "Although the region records a rise in average income, air quality falls year on year."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cả hai cụm bắt buộc đều có mặt"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Hai cụm này đối nhau và đó là trọng tâm của đề."
+ },
+ {
+  "id": "t061-tran-03",
+  "topic_id": "t061",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người ở lại một ngôi làng không còn ai trong tuổi lao động thì gánh phần chăm sóc cho cả hai thế hệ.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["a village with no working-age adults"]
+  },
+  "model_answer": "Those who stay in a village with no working-age adults care for two generations at once.",
+  "accepted_variants": [
+   "People who remain in a village with no working-age adults look after both generations.",
+   "Grandparents who stay in a village with no working-age adults raise the children as well."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t061-para-01",
+  "topic_id": "t061",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Lợi nhiều hơn hại", "Hại nhiều hơn lợi khi chỉ nâng thu nhập"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my province, ..."] }
+   ],
+   "required_phrases": ["a rise in average income", "the services that hold a community together", "move to the city for work", "a village with no working-age adults", "worth what it costs"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, growth is worth what it costs only on one condition. The main reason is that a rise in average income proves little by itself. As a result, young adults still move to the city for work. Another reason is that the services that hold a community together are funded by tax. Consequently, growth that pays for a clinic leaves a different place behind than growth that leaves a village with no working-age adults. For example, my province built two clinics from factory tax.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải đặt hai kiểu tăng trưởng cạnh nhau để so."
+ }
+]

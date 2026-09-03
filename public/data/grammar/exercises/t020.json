@@ -1,0 +1,220 @@
+[
+ {
+  "id": "t020-fix-01",
+  "topic_id": "t020",
+  "type": "fix_error",
+  "order": 1,
+  "difficulty": 1,
+  "grammar_focus": ["plural_s"],
+  "instruction_vi": "Câu dưới thiếu một chữ s. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Many inherited practice survive only while someone still performs them.",
+   "error_type": "Thiếu s số nhiều sau many"
+  },
+  "model_answer": "Many inherited practices survive only while someone still performs them.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm chữ many, danh từ đứng sau nó phải ở số nhiều",
+   "Đếm chữ s cuối practice, phải có một chữ"
+  ],
+  "explanation_vi": "Many luôn đi với danh từ đếm được số nhiều nên phải là practices. Động từ survive đã đúng vì chủ ngữ số nhiều."
+ },
+ {
+  "id": "t020-fix-02",
+  "topic_id": "t020",
+  "type": "fix_error",
+  "order": 2,
+  "difficulty": 1,
+  "grammar_focus": ["verb_tense"],
+  "instruction_vi": "Câu dưới chia sai thì. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "A custom fell out of use long before no one declares it obsolete.",
+   "error_type": "Dùng quá khứ đơn cho một sự thật hiện tại"
+  },
+  "model_answer": "A custom falls out of use long before anyone declares it obsolete.",
+  "accepted_variants": [],
+  "self_check": [
+   "Hai vế nói cùng một sự thật chung nên phải cùng thì hiện tại đơn",
+   "Kiểm động từ đầu câu có chữ s vì chủ ngữ số ít"
+  ],
+  "explanation_vi": "Vế sau ở hiện tại đơn nên vế đầu phải cùng mốc thời gian. Sau before dùng anyone chứ không dùng no one."
+ },
+ {
+  "id": "t020-fix-03",
+  "topic_id": "t020",
+  "type": "fix_error",
+  "order": 3,
+  "difficulty": 1,
+  "grammar_focus": ["articles"],
+  "instruction_vi": "Câu dưới thiếu một mạo từ. Chép lại cả câu cho đúng.",
+  "stimulus": {
+   "sentence": "Someone has to perform it in public in front of next generation.",
+   "error_type": "Thiếu mạo từ xác định trước danh từ duy nhất"
+  },
+  "model_answer": "Someone has to perform it in public in front of the next generation.",
+  "accepted_variants": [],
+  "self_check": [
+   "Tìm danh từ chỉ một nhóm duy nhất trong câu, ở đây là generation",
+   "Kiểm chữ the đứng ngay trước next"
+  ],
+  "explanation_vi": "Next generation chỉ một nhóm duy nhất đã xác định nên bắt buộc có the. Bỏ the thì cụm này không đứng được."
+ },
+ {
+  "id": "t020-link-01",
+  "topic_id": "t020",
+  "type": "causal_link",
+  "order": 4,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới. Câu đó phải kể được một việc quay được bằng camera.",
+  "stimulus": {
+   "cause": "Families order the New Year dishes from a restaurant instead of cooking them together.",
+   "result": "Ten years later nobody in the household can prepare the dish."
+  },
+  "model_answer": "When children only watch a courier hand over the boxes, they never learn the steps by helping.",
+  "accepted_variants": [
+   "Because the practical knowledge carried in a custom passes by doing, watching a delivery teaches nothing.",
+   "When no one stands at the stove, children have nothing to copy and nothing to ask about."
+  ],
+  "self_check": [
+   "Đọc câu vừa viết, hỏi camera quay được cảnh gì, nếu là culture hay society thì viết lại",
+   "Kiểm câu mở bằng when hoặc because cộng danh từ số nhiều",
+   "Kiểm câu nói thêm chuyện mới, không lặp lại ý câu lý do"
+  ],
+  "explanation_vi": "Mắt xích ở giữa phải nêu một hành động quay được, ở đây là đứa trẻ đứng nhìn thay vì phụ bếp. Thiếu bước đó thì hai câu chỉ đứng cạnh nhau."
+ },
+ {
+  "id": "t020-link-02",
+  "topic_id": "t020",
+  "type": "causal_link",
+  "order": 5,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Viết một câu nối lý do bên trên với kết quả bên dưới, nêu rõ ai chịu tác động.",
+  "stimulus": {
+   "cause": "A village stops holding its annual procession for three years.",
+   "result": "The two families who kept the costumes give them to a museum."
+  },
+  "model_answer": "When nobody is left to perform it in public, the costumes lose their occasion.",
+  "accepted_variants": [
+   "Once the procession stops, the robes sit in a cupboard with no date to come out for.",
+   "When the street is empty on the day, the families who stored the costumes see no reason to keep them."
+  ],
+  "self_check": [
+   "Kiểm nhóm chịu tác động ở kết quả khác nhóm được nhắc ở lý do",
+   "Kiểm câu có nói cái gì thay đổi, ở đây là lý do giữ đồ"
+  ],
+  "explanation_vi": "Chuỗi chỉ mạnh khi hệ quả rơi sang một nhóm khác, ở đây là hai gia đình giữ đồ. Nếu vẫn là cả làng thì chưa chuyển được actor."
+ },
+ {
+  "id": "t020-tran-01",
+  "topic_id": "t020",
+  "type": "translate",
+  "order": 6,
+  "difficulty": 2,
+  "grammar_focus": ["passive_present"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Nếp cũ được truyền lại chỉ được giữ chừng nào còn có người thực hành.",
+   "requirement_vi": "Dùng bị động hiện tại đơn",
+   "hint_words": ["inherited practices"]
+  },
+  "model_answer": "Inherited practices are kept only while someone still performs them.",
+  "accepted_variants": [
+   "Inherited practices are preserved only while people still carry them out.",
+   "Inherited practices are maintained only for as long as someone performs them."
+  ],
+  "self_check": [
+   "Kiểm có are đứng trước phân từ hai",
+   "Kiểm chủ ngữ là nếp cũ, không phải người thực hành",
+   "Kiểm cụm inherited practices có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Bị động giữ nếp cũ ở vị trí chủ ngữ, đúng trọng tâm câu tiếng Việt. Chủ động sẽ đẩy người thực hành lên đầu."
+ },
+ {
+  "id": "t020-tran-02",
+  "topic_id": "t020",
+  "type": "translate",
+  "order": 7,
+  "difficulty": 2,
+  "grammar_focus": ["complex_sentence"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Tuy một phong tục không còn phù hợp với đời sống thường ngày, tri thức thực hành nằm trong nó vẫn còn.",
+   "requirement_vi": "Mở đầu bằng Although",
+   "hint_words": ["practical knowledge carried in a custom"]
+  },
+  "model_answer": "Although a custom is not relevant to daily life, the practical knowledge carried in a custom remains.",
+  "accepted_variants": [
+   "Although the practice no longer fits daily life, the practical knowledge carried in a custom survives.",
+   "Although daily life has moved on, the practical knowledge carried in a custom is still there."
+  ],
+  "self_check": [
+   "Kiểm câu bắt đầu bằng Although, không phải However",
+   "Kiểm có dấu phẩy ngăn hai mệnh đề",
+   "Kiểm cụm bắt buộc có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Although mở mệnh đề nhượng bộ nên bắt buộc có mệnh đề chính theo sau. Thiếu vế sau thì câu chưa trọn."
+ },
+ {
+  "id": "t020-tran-03",
+  "topic_id": "t020",
+  "type": "translate",
+  "order": 8,
+  "difficulty": 3,
+  "grammar_focus": ["relative_clause"],
+  "instruction_vi": "Dịch câu sau sang tiếng Anh, theo đúng yêu cầu ngữ pháp.",
+  "stimulus": {
+   "vi": "Những người vẫn thực hành phong tục trước mặt thế hệ kế tiếp mới là người giữ được nó.",
+   "requirement_vi": "Dùng mệnh đề quan hệ mở đầu bằng who",
+   "hint_words": ["the next generation"]
+  },
+  "model_answer": "The people who perform a custom in front of the next generation are the ones who keep it.",
+  "accepted_variants": [
+   "Those who carry out a custom in front of the next generation are the ones keeping it alive.",
+   "People who still perform a custom before the next generation are the ones who preserve it."
+  ],
+  "self_check": [
+   "Kiểm có chữ who đứng ngay sau danh từ chỉ người",
+   "Kiểm động từ chính của cả câu nằm sau mệnh đề quan hệ",
+   "Kiểm cụm the next generation có mặt nguyên vẹn"
+  ],
+  "explanation_vi": "Mệnh đề quan hệ giới hạn đúng nhóm người đang nói tới. Bỏ who thì hai động từ dính vào nhau thành câu sai."
+ },
+ {
+  "id": "t020-para-01",
+  "topic_id": "t020",
+  "type": "paragraph",
+  "order": 9,
+  "difficulty": 3,
+  "grammar_focus": ["complex_sentence", "passive_present"],
+  "instruction_vi": "Viết một đoạn sáu câu theo khung bên dưới, chọn hẳn một phía.",
+  "stimulus": {
+   "side_options": ["Phong tục cũ không còn đáng giữ", "Phù hợp hay không là thước đo sai"],
+   "frame": [
+    { "n": 1, "function": "Nêu ý kiến, chọn hẳn một phía", "starters": ["In my opinion, ...", "I believe that ..."] },
+    { "n": 2, "function": "Lý do thứ nhất", "starters": ["The main reason is that ..."] },
+    { "n": 3, "function": "Hệ quả của lý do thứ nhất, rồi sao nữa", "starters": ["This means that ...", "As a result, ..."] },
+    { "n": 4, "function": "Lý do thứ hai", "starters": ["Another reason is that ..."] },
+    { "n": 5, "function": "Hệ quả của lý do thứ hai, dùng cụm nối khác câu 3", "starters": ["Consequently, ...", "In turn, ..."] },
+    { "n": 6, "function": "Ví dụ, kể được ai làm gì", "starters": ["For example, ...", "In my family, ..."] }
+   ],
+   "required_phrases": ["inherited practices", "fall out of use", "the next generation", "practical knowledge carried in a custom", "an ordinary working week"],
+   "constraints": [
+    "Đoạn có đúng sáu câu.",
+    "Dùng ít nhất bốn cụm trong bảng từ của đề, và gạch chân từng cụm.",
+    "Có đúng một câu bị động hiện tại đơn.",
+    "Đúng một câu dài hơn mười lăm từ, năm câu còn lại dưới mười lăm từ."
+   ]
+  },
+  "model_answer": "In my opinion, relevance is the wrong test for inherited practices. The main reason is that a custom can fall out of use quietly. As a result, nobody notices until the last person who knew it has died. Another reason is that the practical knowledge carried in a custom is rarely written down. Consequently, the next generation inherits a name for the practice and none of the steps that an ordinary working week once taught them. For example, my grandmother folded the offering trays without measuring anything.",
+  "accepted_variants": [],
+  "self_check": [
+   "Đếm dấu chấm, phải có đúng sáu",
+   "Đếm số cụm gạch chân, phải từ bốn trở lên",
+   "Tìm câu có is hoặc are cộng phân từ hai, phải có đúng một",
+   "Đếm từ của câu dài nhất, chỉ một câu được vượt mười lăm từ"
+  ],
+  "explanation_vi": "Khung sáu câu buộc mỗi câu làm một việc nên đoạn không lặp ý. Câu năm dài hơn vì nó phải nói cả cái còn lại lẫn cái đã mất."
+ }
+]
