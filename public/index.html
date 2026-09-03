@@ -1830,6 +1830,12 @@
 
         <!-- Bậc 3 · Đoạn -->
         <div class="luyen-panel hidden" id="luyen-panel-para">
+          <div class="para-mode-tabs">
+            <button class="para-mode-tab active" id="pmode-tab-drill" onclick="paraMode('drill')">Dựng đoạn theo đề</button>
+            <button class="para-mode-tab" id="pmode-tab-ai" onclick="paraMode('ai')">Viết tự do, AI chữa</button>
+          </div>
+          <div id="pmode-drill"><div id="pd-body"></div></div>
+          <div id="pmode-ai" class="hidden">
           <div class="practice-controls">
             <div class="vl-picker-row">
               <label>Trục lập luận</label>
@@ -1846,6 +1852,7 @@
           </div>
           <div id="pp-feedback-area" class="hidden"></div>
           <div id="pp-gate" class="hidden"></div>
+          </div>
         </div>
       </div>
 
@@ -2100,8 +2107,8 @@
       <div id="view-chain" class="view hidden">
         <div class="page-header">
           <button class="btn-back-plain" onclick="goBack()">← Quay lại</button>
-          <h2>Chuỗi lập luận sáu mắt xích</h2>
-          <p>Học cái này trước khi viết. Mọi thân bài band 7 trở lên đều chạy đúng chuỗi này.</p>
+          <h2>Chuỗi lập luận tám bước</h2>
+          <p>Học cái này trước khi viết. Mọi thân bài band 7 trở lên đều chạy đúng chuỗi này. Bản 5.</p>
         </div>
         <div id="chain-body"><div class="loading">Đang tải…</div></div>
       </div>

@@ -49,7 +49,8 @@
     "academic": "deliver value for money",
     "vi": "đáng đồng tiền"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t002",
@@ -101,7 +102,8 @@
     "academic": "transferable to later study",
     "vi": "dùng được cho bậc học sau"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t003",
@@ -153,7 +155,8 @@
     "academic": "households that cannot afford tutoring",
     "vi": "gia đình không kham nổi học thêm"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t004",
@@ -350,7 +353,8 @@
     "academic": "an ordinary working week",
     "vi": "một tuần làm việc bình thường"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t021",
@@ -402,7 +406,8 @@
     "academic": "a claim about who belongs",
     "vi": "yêu sách về việc ai thuộc về nơi đó"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t022",
@@ -491,7 +496,8 @@
     "academic": "households with a free adult",
     "vi": "nhà có người lớn rảnh"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t027",
@@ -543,7 +549,8 @@
     "academic": "leaving without an explanation",
     "vi": "biến mất không giải thích"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t028",
@@ -613,7 +620,8 @@
     "academic": "the device itself is neutral",
     "vi": "bản thân thiết bị trung tính"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t031",
@@ -710,7 +718,8 @@
     "academic": "an older group on the same street",
     "vi": "nhóm lớn tuổi hơn ở cùng khu"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t037",
@@ -762,7 +771,8 @@
     "academic": "a course with no certificate",
     "vi": "khoá học không có chứng chỉ"
    }
-  ]
+  ],
+  "para_set": true
  },
  {
   "id": "t038",

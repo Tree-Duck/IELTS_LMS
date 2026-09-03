@@ -1,0 +1,72 @@
+{
+ "topic_id": "t001",
+ "engine": "MONEY",
+ "engine_vi": "Ngân sách hữu hạn, chi cho khoản này thì khoản kia bị cắt.",
+ "side_vi": "Lợi hơn hại, nhưng chỉ khi trợ cấp có xét thu nhập",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá trong đề là outweigh. Cân trên bàn cân nào, đề không nói, ta chọn.",
+   "options": [
+    "Cân bằng tiền, ai trả và ai nhận",
+    "Cân bằng số người vào được đại học",
+    "Cân bằng công bằng giữa các nhóm thu nhập"
+   ],
+   "model": "Whether the advantages outweigh the disadvantages depends on where the money ends up, not on how many people enrol.",
+   "why_vi": "Chọn thước đo là dòng tiền thì cả đoạn sau có chỗ bám, vì engine của đề này là MONEY.",
+   "trap_vi": "Chọn thước đo là số người vào đại học thì tới bước C ta không có gì tăng giảm để nói, vì con số đó luôn tăng."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "Universal public funding wins support because it hides who is actually paying for the place.",
+   "why_vi": "Câu này gắn thẳng vào tiền. Riêng chữ hides đã cho biết bước sau sẽ nói ai trả và ai nhận.",
+   "trap_vi": "Viết Free education is a good policy. Không có gì hữu hạn trong câu đó nên bước B không biết đi tiếp thế nào."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Households who have never sent anyone to university pay the same tax rate as those who send two.",
+   "why_vi": "Lớp người có hoàn cảnh, số nhiều, và cảnh đóng thuế thì quay được.",
+   "trap_vi": "Viết Society pays for it. Camera không quay được cảnh society đóng thuế, và society nằm trong mười tám từ cấm làm chủ ngữ."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The share of the budget reaching low-income households falls while total spending rises.",
+   "why_vi": "Một thứ giảm và một thứ tăng trong cùng một câu, đúng chỗ vế outweigh sẽ bám vào.",
+   "trap_vi": "Viết The situation becomes unfair. Không có chữ nào mang nghĩa nhiều hơn hay ít hơn, chuỗi đứng yên."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Adult evening courses lose the grant that used to keep their fees at twenty pounds a term.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B. Chuỗi chỉ tiến khi hệ quả chuyển sang người thứ hai.",
+   "trap_vi": "Viết tiếp về người nộp thuế, chỉ đổi cách nói. Gạch chân chủ ngữ câu B và câu D, thấy giống nhau thì viết lại."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "Two colleges in the same city close their evening timetable.",
+   "why_vi": "Chủ ngữ có thật, động từ thường, và đây là thứ kiểm lại được.",
+   "trap_vi": "Viết This shows up as reduced adult provision. Cụm shows up as đẩy hết nội dung vào một cụm danh từ dài, câu đọc rất cứng."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "Some of this is true of means-tested schemes as well, though on a far smaller scale.",
+   "why_vi": "Đây là nhượng bộ. Nó vô hiệu hoá phản bác mà không đổi phe.",
+   "trap_vi": "Nhét cả nhượng bộ lẫn một ý phụ vào cùng đoạn. Một đoạn chỉ chứa được một khúc rẽ."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "The advantages outweigh the disadvantages only where the support is means-tested.",
+   "why_vi": "Chữ outweigh lấy thẳng từ đề, và vế only where gói lại điều kiện mà cả chuỗi vừa chứng minh.",
+   "trap_vi": "Kết bằng cách nhắc lại chuyện trường đóng cửa. Như vậy là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "Universal public funding wins support because it hides who is actually paying for the place. Households who have never sent anyone to university pay the same tax rate as those who send two. The share of the budget reaching low-income households falls while total spending rises. Adult evening courses lose the grant that used to keep their fees at twenty pounds a term. Two colleges in the same city close their evening timetable. Some of this is true of means-tested schemes as well, though on a far smaller scale. The advantages outweigh the disadvantages only where the support is means-tested.",
+ "note_vi": "Cả đoạn không có chữ For example nào, vì bước B đã làm xong việc của một ví dụ. Cũng gần như không có từ nối, các câu dính nhau nhờ câu sau nhặt đúng cái vừa đổi ở câu trước."
+}

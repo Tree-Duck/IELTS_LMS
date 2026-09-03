@@ -7084,3 +7084,77 @@ input:focus, textarea:focus, select:focus {
 .chain-hints summary { cursor: pointer; font-weight: 700; color: var(--primary-mid); }
 .chain-hints p { margin-top: .4rem; line-height: 1.6; color: var(--gray-700); }
 .chain-drill-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+
+/* v5 additions to the chain lesson: the optional step, and the review pass. */
+.chain-note { font-size: .82rem; line-height: 1.6; color: var(--gray-600); margin-bottom: .8rem; }
+.chain-opt { font-size: .6rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); background: var(--surface-2); border-radius: var(--radius-pill); padding: .1rem .4rem; margin-left: .3rem; vertical-align: middle; }
+.chain-review { border: 2px solid var(--gray-900); border-radius: var(--r-lg); background: var(--surface); padding: 1.1rem 1.2rem; margin-bottom: 1.1rem; box-shadow: var(--lift); }
+.chain-review h3 { font-size: 1.05rem; margin-bottom: .5rem; color: var(--gray-900); }
+.chain-rule { display: grid; grid-template-columns: 4.2rem 1fr; gap: .7rem; padding: .7rem 0; border-bottom: 1px dashed var(--gray-200); }
+.chain-rule:last-child { border-bottom: 0; padding-bottom: 0; }
+.chain-rule-k { font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--cream); background: var(--forest); border-radius: var(--r-sm); padding: .3rem .2rem; text-align: center; height: fit-content; }
+.chain-rule-name { font-size: .95rem; font-weight: 800; color: var(--gray-900); margin-bottom: .25rem; }
+.chain-rule p { font-size: .84rem; line-height: 1.6; color: var(--gray-700); margin-bottom: .4rem; }
+.chain-rule-hard { background: rgba(200,241,105,.2); border-left: 3px solid var(--primary-mid); border-radius: var(--r-sm); padding: .45rem .6rem; color: var(--gray-800) !important; }
+
+/* ─── Bậc 3 · Đoạn, chế độ dựng theo đề ──────────────────────────────────── */
+
+.para-mode-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.para-mode-tab {
+  font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer;
+  padding: .4rem .85rem; border-radius: var(--radius-pill);
+  border: 1.5px solid var(--gray-300); background: var(--surface); color: var(--gray-600);
+}
+.para-mode-tab.active { background: var(--forest); color: var(--cream); border-color: var(--gray-900); }
+
+.pd-side { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.pd-side-k { font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); }
+.pd-side-v { font-size: .88rem; font-weight: 700; color: var(--gray-900); background: rgba(200,241,105,.3); border-radius: var(--radius-pill); padding: .2rem .7rem; }
+
+.pd-steps { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1.4rem; }
+.pd-step {
+  border: 1.5px solid var(--gray-200); border-left: 4px solid var(--coral);
+  border-radius: var(--r-md); padding: .85rem 1rem; background: var(--surface);
+}
+.pd-step.done { border-left-color: var(--success); }
+.pd-step-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; flex-wrap: wrap; }
+.pd-step-k {
+  flex: none; width: 2rem; height: 2rem; border-radius: var(--r-sm);
+  background: var(--forest); color: var(--lime);
+  font-size: .78rem; font-weight: 800; display: grid; place-items: center;
+}
+.pd-step-name { font-size: .95rem; font-weight: 800; color: var(--gray-900); }
+.pd-step-ask { font-size: .84rem; line-height: 1.55; color: var(--primary-mid); margin-bottom: .5rem; }
+
+.pd-opts { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.pd-opt {
+  font: inherit; font-size: .8rem; cursor: pointer; text-align: left;
+  padding: .35rem .7rem; border-radius: var(--r-sm);
+  border: 1.5px solid var(--gray-300); background: var(--surface-2); color: var(--gray-700);
+}
+.pd-opt.picked { background: var(--forest); color: var(--cream); border-color: var(--gray-900); }
+
+.pd-step .btn, .pd-join .btn { margin-top: .5rem; }
+.pd-ans { margin-top: .2rem; }
+.pd-trap { font-size: .8rem; line-height: 1.5; color: var(--danger); margin-top: .4rem; }
+.pd-trap span { font-size: .62rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); margin-right: .3rem; }
+
+.pd-join {
+  border: 2px solid var(--gray-900); border-radius: var(--r-lg);
+  background: var(--surface); padding: 1.1rem 1.2rem; box-shadow: var(--lift);
+}
+.pd-join h4 { font-size: 1rem; margin-bottom: .3rem; color: var(--gray-900); }
+.pd-counts { display: flex; gap: .6rem; font-size: .74rem; color: var(--gray-500); margin: .35rem 0; font-variant-numeric: tabular-nums; }
+.pd-counts .ok { color: var(--success); font-weight: 700; }
+.pd-join-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.pd-model-para { font-size: .9rem; line-height: 1.75; color: var(--gray-900); background: var(--success-light); border-radius: var(--r-sm); padding: .7rem .8rem; margin-bottom: .6rem; }
+
+.pd-review-empty { font-size: .84rem; color: var(--gray-500); margin-top: .7rem; }
+.pd-review-box { margin-top: .9rem; border: 1.5px solid var(--danger); border-radius: var(--r-md); padding: .8rem .9rem; background: var(--danger-light); }
+.pd-review-box.clean { border-color: var(--success); background: var(--success-light); }
+.pd-review-head { font-size: .9rem; font-weight: 800; color: var(--gray-900); margin-bottom: .5rem; }
+.pd-review-group { margin-bottom: .6rem; }
+.pd-review-k { font-size: .62rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--gray-500); margin-bottom: .25rem; }
+.pd-review-row { font-size: .84rem; line-height: 1.55; color: var(--gray-800); padding: .2rem 0; }
+.pd-review-s { display: block; font-style: italic; color: var(--gray-600); font-size: .8rem; }
+.pd-review-foot { font-size: .76rem; line-height: 1.5; color: var(--gray-600); border-top: 1px dashed var(--gray-300); padding-top: .45rem; margin-top: .3rem; }

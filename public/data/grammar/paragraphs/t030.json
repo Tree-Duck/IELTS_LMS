@@ -1,0 +1,72 @@
+{
+ "topic_id": "t030",
+ "engine": "HABIT",
+ "engine_vi": "Sự chú ý hữu hạn, và thiết bị được thiết kế để lấy đúng thứ đó.",
+ "side_vi": "Không đồng ý với cách hỏi, thiết bị trung tính, thiết kế mới có lỗi",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là disadvantageous. Có hại đo bằng gì, và có hại vì cái gì, đề không nói, ta chọn.",
+   "options": [
+    "Đo bằng khả năng tập trung liên tục bị mất",
+    "Đo bằng số giờ nhìn màn hình mỗi ngày",
+    "Đo bằng số người mắc tật khúc xạ"
+   ],
+   "model": "The harm is best measured by sustained concentration, and the question is who chose the design rather than whether the object is bad.",
+   "why_vi": "Đo bằng số giờ thì ta không phân biệt được đọc sách điện tử với lướt vô định. Đo bằng khả năng tập trung thì mới thấy cái mất thật.",
+   "trap_vi": "Nhận luôn cách hỏi của đề là thiết bị có hại hay không. Nhận rồi thì ta phải bênh hoặc chê một cái máy, mà máy thì không quyết định gì cả."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "The device itself is neutral, because what makes it hard to put down is a commercial decision.",
+   "why_vi": "Câu chuyển trọng tâm từ vật sang người ra quyết định. Chữ commercial cho biết bước sau sẽ nói ai được lợi.",
+   "trap_vi": "Viết Smartphones are bad for people. Câu này nhận cách hỏi của đề, và không nêu cái gì hữu hạn."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Students who revise with the phone face up break off at every banner and reread the same paragraph.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh đọc lại một đoạn thì quay được.",
+   "trap_vi": "Viết Technology captures our attention. Chữ technology nằm trong mười tám từ cấm làm chủ ngữ ở bước này."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The number of interruptions in an hour rises while the longest unbroken stretch of reading shrinks.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, cả hai đều đếm được bằng lần và bằng phút.",
+   "trap_vi": "Viết Concentration levels decline. Chữ level nằm trong danh sách cấm, và câu không nói giảm bao nhiêu."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "English teachers who set a novel a term now set three short stories instead.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và việc dạy của họ dựa vào đúng khoảng tập trung vừa ngắn lại.",
+   "trap_vi": "Viết tiếp về học sinh mất tập trung. Đó là nói lại bước B chứ không phải bước tiếp."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The set text list for that year drops its two longest books.",
+   "why_vi": "Một con số đếm được, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết The effect is shorter attention spans. Chủ ngữ effect nằm trong danh sách cấm, và câu lặp lại bước C."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "This holds for feeds built to be endless, and not for a device used to read one book.",
+   "why_vi": "Đây là khoanh phạm vi, và nó bảo vệ đúng luận điểm ở bước A rằng cái máy không có lỗi.",
+   "trap_vi": "Bỏ bước N ở đề này. Không khoanh phạm vi thì luận điểm thiết bị trung tính bị chính chuỗi của ta phản lại."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "Mobile devices are disadvantageous only in the form their designers chose to sell.",
+   "why_vi": "Chữ disadvantageous lấy thẳng từ đề, và vế only in the form giữ nguyên lập trường đã nêu ở bước A.",
+   "trap_vi": "Kết bằng chuyện danh sách sách bị cắt. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "The device itself is neutral, because what makes it hard to put down is a commercial decision. Students who revise with the phone face up break off at every banner and reread the same paragraph. The number of interruptions in an hour rises while the longest unbroken stretch of reading shrinks. English teachers who set a novel a term now set three short stories instead. The set text list for that year drops its two longest books. This holds for feeds built to be endless, and not for a device used to read one book. Mobile devices are disadvantageous only in the form their designers chose to sell.",
+ "note_vi": "Đây là kiểu đề mà ta không nhận cách hỏi. Muốn làm vậy an toàn thì bước E vẫn phải chứa chữ của đề, nếu không giám khảo đọc thành né câu hỏi."
+}

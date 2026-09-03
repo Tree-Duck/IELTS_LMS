@@ -1,0 +1,72 @@
+{
+ "topic_id": "t002",
+ "engine": "TIME",
+ "engine_vi": "Thời lượng chương trình hữu hạn, thêm một môn thì một môn khác mất giờ.",
+ "side_vi": "Nên dạy, nhưng chỉ khi nó đẩy được một môn yếu hơn ra",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Đề bảo bàn cả hai phía rồi nêu quan điểm. Hai phía đang cãi nhau về cái gì, và ta đo bằng thước nào?",
+   "options": [
+    "Đo bằng thứ bị đẩy ra khỏi thời khoá biểu",
+    "Đo bằng lượng kiến thức học sinh thu được",
+    "Đo bằng mức độ quan tâm của học sinh"
+   ],
+   "model": "Both sides are really arguing about what the timetable should give up, so that is the measure worth using.",
+   "why_vi": "Đặt thước đo ở chỗ đánh đổi thì hai phía không còn nói chuyện khác nhau nữa, và cả đoạn có chỗ bám.",
+   "trap_vi": "Đo bằng lượng kiến thức thì phía nào cũng thắng, vì môn nào cũng dạy được cái gì đó."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "A news lesson earns its place because it can displace a weaker subject, not because the topic is important.",
+   "why_vi": "Câu gắn thẳng vào thời lượng. Chữ displace cho biết bước sau sẽ nói ai mất giờ.",
+   "trap_vi": "Viết Students should know about the world. Câu này đúng nhưng không nêu cái gì hữu hạn nên bước B không có gì để tiếp."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Heads of English who lose one period a week cut two novels from the reading list.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh gạch tên sách khỏi danh sách thì quay được.",
+   "trap_vi": "Viết The school suffers. Camera không quay được chữ suffers, và câu đó không nói ai làm gì."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "Weekly reading time falls by forty minutes while the number of subjects rises by one.",
+   "why_vi": "Một thứ giảm và một thứ tăng trong cùng một câu, đo bằng phút và bằng số môn.",
+   "trap_vi": "Viết Standards decline. Standard nằm trong mười tám từ cấm làm chủ ngữ, và câu không đo được gì."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "The strongest readers, who used the long texts to pull ahead, lose the one lesson that stretched them.",
+   "why_vi": "Nhóm này khác nhóm ở bước B. Bước B nói giáo viên, bước D nói học sinh đọc tốt.",
+   "trap_vi": "Viết tiếp về tổ Ngữ văn. Đó là giậm chân tại chỗ chứ không phải bước tiếp."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The set text list for that year group drops from six books to four.",
+   "why_vi": "Một con số đếm được, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết The effect is a narrower curriculum. Chủ ngữ effect nằm trong danh sách cấm, và câu không kiểm lại được."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "This holds where the school already runs a full timetable, and not where a free period exists.",
+   "why_vi": "Đây là khoanh phạm vi. Nó nói rõ luận điểm đúng trong điều kiện nào.",
+   "trap_vi": "Thêm một nhượng bộ nữa ở ngay sau. Đoạn loãng và mất trọng tâm mà chuỗi vừa tạo ra."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "International news is worth its place in school time only when it replaces a weaker subject.",
+   "why_vi": "Cụm school time lấy thẳng từ đề, và vế only when gói lại toàn bộ chuỗi.",
+   "trap_vi": "Kết bằng cách nhắc lại chuyện danh sách sách bị cắt. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "A news lesson earns its place because it can displace a weaker subject, not because the topic is important. Heads of English who lose one period a week cut two novels from the reading list. Weekly reading time falls by forty minutes while the number of subjects rises by one. The strongest readers, who used the long texts to pull ahead, lose the one lesson that stretched them. The set text list for that year group drops from six books to four. This holds where the school already runs a full timetable, and not where a free period exists. International news is worth its place in school time only when it replaces a weaker subject.",
+ "note_vi": "Đề dạng bàn cả hai phía nên bước A phải nói được cái mà cả hai phía đang tranh, ở đây là chỗ trong thời khoá biểu. Nếu bước A chỉ khen môn học thì đoạn thành một phía."
+}

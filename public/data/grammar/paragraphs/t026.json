@@ -1,0 +1,72 @@
+{
+ "topic_id": "t026",
+ "engine": "TIME",
+ "engine_vi": "Sự chú ý của một đứa trẻ là hữu hạn, và không ai trông thì nó đi chỗ khác.",
+ "side_vi": "Không đồng ý, trường cung cấp ba thứ mà mạng không có",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là no longer necessary. Cần thiết đo bằng gì, đề không nói, ta chọn.",
+   "options": [
+    "Đo bằng những thứ trường có mà mạng không có",
+    "Đo bằng lượng thông tin học sinh tiếp cận được",
+    "Đo bằng chi phí nhà nước bỏ ra cho mỗi học sinh"
+   ],
+   "model": "Necessity here is measured by what a school supplies that a search engine cannot, not by how much information exists.",
+   "why_vi": "Đo bằng thông tin thì phía kia thắng ngay, vì mạng có nhiều thông tin hơn mọi trường học cộng lại.",
+   "trap_vi": "Nhận thước đo thông tin của đề. Nhận rồi thì cả đoạn phải chống lại một sự thật hiển nhiên."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "Home study loses to school because attention runs out long before information does.",
+   "why_vi": "Câu gắn vào sự chú ý, không gắn vào kiến thức. Chữ runs out cho biết bước sau sẽ nói cảnh bỏ dở.",
+   "trap_vi": "Viết Schools are very important for children. Không nêu cái gì hữu hạn nên bước B không có chỗ bắt đầu."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Children who study unsupervised at home open a second tab at the first difficult page.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh mở tab thứ hai thì quay được.",
+   "trap_vi": "Viết Technology distracts students. Chữ technology nằm trong mười tám từ cấm làm chủ ngữ ở bước này."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The hours logged go up while the number of topics finished goes down.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, và cả hai đều đếm được.",
+   "trap_vi": "Viết Their learning becomes less effective. Không có chữ nào mang nghĩa nhiều hơn hay ít hơn, chuỗi đứng yên."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Secondary teachers who expect fractions in the first term spend that term teaching division instead.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ sống nhờ đúng phần kiến thức vừa bị bỏ dở.",
+   "trap_vi": "Viết tiếp về đứa trẻ mất tập trung. Đó là nói lại bước B chứ không phải bước tiếp."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "That school adds a catch-up class to the timetable in September.",
+   "why_vi": "Một thứ mở ra, chủ ngữ có thật, động từ thường, và ai cũng kiểm lại được.",
+   "trap_vi": "Viết The effect is a widening gap. Chủ ngữ effect nằm trong danh sách cấm, và câu không kiểm lại được."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "Households with a free adult can supply the missing supervision, though that is a small share of families.",
+   "why_vi": "Đây là nhượng bộ. Nó thừa nhận trường hợp phía kia đúng mà không đổi phe.",
+   "trap_vi": "Viết nhượng bộ mà không nói nhóm đó nhỏ. Thiếu vế đó thì nhượng bộ thành một luận điểm ngược."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "Schools remain necessary because they supply supervision and sequence, which no amount of available information replaces.",
+   "why_vi": "Chữ necessary lấy thẳng từ đề, và vế because gói lại toàn bộ chuỗi trong một dòng.",
+   "trap_vi": "Kết bằng chuyện trường mở lớp bù. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "Home study loses to school because attention runs out long before information does. Children who study unsupervised at home open a second tab at the first difficult page. The hours logged go up while the number of topics finished goes down. Secondary teachers who expect fractions in the first term spend that term teaching division instead. That school adds a catch-up class to the timetable in September. Households with a free adult can supply the missing supervision, though that is a small share of families. Schools remain necessary because they supply supervision and sequence, which no amount of available information replaces.",
+ "note_vi": "Bước F ở đề này quan trọng hơn cả bước A. Nếu để đề áp thước đo thông tin thì mọi chuỗi ta dựng đều phải chống lại một sự thật, và đoạn đọc lên nghe cố cãi."
+}

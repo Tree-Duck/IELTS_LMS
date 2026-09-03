@@ -1,0 +1,72 @@
+{
+ "topic_id": "t027",
+ "engine": "TIME",
+ "engine_vi": "Cái giá của việc cắt đứt một mối quan hệ là hữu hạn, và nó vừa rơi xuống gần bằng không.",
+ "side_vi": "Đồng ý, nhưng hại nằm ở chỗ cắt đứt quá rẻ chứ không ở chỗ liên lạc nhiều",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là negative effects. Tác động xấu tới quan hệ đo bằng gì, ta chọn.",
+   "options": [
+    "Đo bằng số người sẽ tới lúc nửa đêm",
+    "Đo bằng số người ta liên lạc mỗi tuần",
+    "Đo bằng thời gian dùng mạng xã hội mỗi ngày"
+   ],
+   "model": "A relationship is measured by who would come at midnight, not by how many names sit in a contact list.",
+   "why_vi": "Đo bằng số liên lạc thì công nghệ thắng, vì con số đó chỉ có tăng. Đo bằng chiều sâu thì mới thấy được cái mất.",
+   "trap_vi": "Đo bằng thời gian dùng máy. Con số đó không nói gì về quan hệ, và tới bước D ta không biết ai chịu hệ quả."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "The damage comes from the second change, because ending a friendship now costs one tap.",
+   "why_vi": "Câu tách hai thay đổi ra và chỉ đúng cái gây hại. Chữ costs cho biết bước sau sẽ nói ai không phải trả gì.",
+   "trap_vi": "Viết Social media harms relationships. Câu này gộp cả hai thay đổi nên bước C không biết đo cái nào."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Two friends who fall out over messages stop answering and never sit through the awkward hour.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh không ai ngồi lại thì quay được, vì nó là một chỗ trống nhìn thấy được.",
+   "trap_vi": "Viết People today are less connected. Chữ people nằm trong danh sách cấm, và camera không quay được chữ connected."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The number of weak ties climbs while the number of repaired quarrels falls to almost none.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, và cái giảm chính là chỗ vế negative sẽ bám vào.",
+   "trap_vi": "Viết The quality of friendship decreases. Chữ quality nằm trong danh sách cấm, và câu không đo được gì."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Neighbours who once noticed an empty chair now hear about a hospital stay a fortnight late.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ sống nhờ đúng những lần gặp vừa mất.",
+   "trap_vi": "Viết tiếp về hai người vừa cắt liên lạc. Vẫn là nhóm ở bước B nên chuỗi không tiến."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The residents association cancels its monthly meeting for want of numbers.",
+   "why_vi": "Một thứ biến mất, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết This shows up as social fragmentation. Cụm shows up as bị cấm ở bước D cộng, và câu đọc rất cứng."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "The reach is real, but it buys frequency at the price of the few who would come at midnight.",
+   "why_vi": "Đây là ý phụ. Nó thừa nhận cái được rồi đặt ngay cái mất bên cạnh, đúng thước đo đã chọn ở bước F.",
+   "trap_vi": "Viết ý phụ mà quên nhắc lại thước đo. Lúc đó nó thành một câu khen công nghệ, và đoạn mất lập trường."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "The negative effect on relationships comes from how cheaply they can now be ended.",
+   "why_vi": "Cụm negative effect on relationships lấy thẳng từ đề, và vế sau gói lại đúng cơ chế cả chuỗi vừa dựng.",
+   "trap_vi": "Kết bằng chuyện cuộc họp tổ dân phố bị huỷ. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "The damage comes from the second change, because ending a friendship now costs one tap. Two friends who fall out over messages stop answering and never sit through the awkward hour. The number of weak ties climbs while the number of repaired quarrels falls to almost none. Neighbours who once noticed an empty chair now hear about a hospital stay a fortnight late. The residents association cancels its monthly meeting for want of numbers. The reach is real, but it buys frequency at the price of the few who would come at midnight. The negative effect on relationships comes from how cheaply they can now be ended.",
+ "note_vi": "Đề này có hai thay đổi cùng lúc, số liên lạc tăng và giá cắt đứt giảm. Bước A phải tách được hai cái đó ra, nếu không cả đoạn sẽ chứng minh nhầm cái không gây hại."
+}

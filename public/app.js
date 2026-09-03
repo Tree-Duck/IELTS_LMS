@@ -6238,42 +6238,56 @@ let _trucCurrent = null;
    worked example and the gapped drill both come from the bank so the lesson
    and the axes never drift apart. */
 
+// The eight steps of the v5 handout. F and N are new: F picks the criterion
+// the prompt leaves blank, N is one optional turn and only one.
 const CHAIN_LINKS = [
   {
-    k: 'A', name: 'Câu luận điểm',
-    must: 'Nêu cơ chế, không nêu cảm nghĩ. Dạng nếu X thì Y, chứ không phải X là tốt.',
-    fail: 'Viết một lời khen hoặc chê. Nghe thì mạnh nhưng không có gì để chứng minh tiếp.',
-    ask: 'Câu này nói cái gì dẫn tới cái gì chưa?',
+    k: 'F', name: 'Đề hỏi gì',
+    must: 'Tìm chữ đánh giá trong đề, rồi tự chọn tiêu chí để đo nó. Đề không nói đo bằng gì, ta là người chọn.',
+    fail: 'Trả lời vế đánh giá bằng cảm tính, kiểu nó không tốt cho xã hội. Câu đó không dựa vào gì cả.',
+    ask: 'Chữ đánh giá trong đề là chữ nào, và ta đo nó bằng thước nào?',
   },
   {
-    k: 'B', name: 'Ai làm gì, quay được',
-    must: 'Một lớp người cụ thể làm một việc camera quay được. Viết dạng when cộng danh từ số nhiều.',
-    fail: 'Viết people hoặc society. Không ai quay được cảnh society làm gì.',
-    ask: 'Đặt camera ở đâu thì thấy được cảnh này?',
+    k: 'A', name: 'Luận điểm',
+    must: 'Nêu cơ chế bằng chữ của đề. Cần một bên được hoặc mất, một động từ chỉ thay đổi, và một mệnh đề because.',
+    fail: 'Nghĩ luận điểm trước rồi mới đi tìm engine. Làm ngược thứ tự thì ra câu chung chung, không nối tiếp được.',
+    ask: 'Trong đề này cái gì là hữu hạn?',
+  },
+  {
+    k: 'B', name: 'Người nào làm gì',
+    must: 'Một lớp người có hoàn cảnh, làm một việc camera quay được. Số nhiều cộng hoàn cảnh, không phải một nhân vật.',
+    fail: 'Viết people are busy nowadays, camera không quay được chữ busy. Hoặc dựng một nhân vật tên riêng, đọc thành truyện ngắn.',
+    ask: 'Đặt camera ở đó thì nó quay được cảnh gì?',
   },
   {
     k: 'C', name: 'Cái gì tăng giảm',
-    must: 'Một thứ đo được đổi chiều. Tiền, thời gian chờ, số lần, tỉ lệ, số chỗ trống.',
-    fail: 'Viết mọi thứ tệ đi. Không đo được thì không chứng minh được.',
-    ask: 'Cái gì tăng, cái gì giảm, đo bằng đơn vị nào?',
+    must: 'Một thứ đo được đổi chiều. Tìm ở ba chỗ, trong túi là tiền, trong ngày là giờ, trong người là sức khoẻ. Mạnh nhất khi một thứ tăng và một thứ giảm trong cùng câu.',
+    fail: 'Viết chất lượng sống giảm sút. Không có chữ nào mang nghĩa nhiều hơn hay ít hơn thì chuỗi đang đứng yên.',
+    ask: 'Trong câu có chữ nào mang nghĩa nhiều hơn hoặc ít hơn không?',
   },
   {
-    k: 'D', name: 'Ai khác gánh hệ quả',
-    must: 'Một nhóm khác nhóm ở B. Chuỗi chỉ mạnh khi hệ quả chuyển sang người thứ hai.',
-    fail: 'Vẫn nhóm cũ. Đó là lặp lại B chứ không phải bước tiếp.',
-    ask: 'Nhóm này có xuất hiện ở mắt xích B không? Nếu có thì viết lại.',
+    k: 'D', name: 'Nhóm nào chịu tiếp',
+    must: 'Một nhóm khác hẳn nhóm ở bước B. Hỏi ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C.',
+    fail: 'Vẫn viết về nhóm ở bước B, chỉ đổi cách nói. Đó là giậm chân tại chỗ chứ không phải bước tiếp.',
+    ask: 'Gạch chân chủ ngữ câu B và câu D, hai chủ ngữ có khác nhau không?',
   },
   {
-    k: 'D+', name: 'Hệ quả nổi ở đâu',
-    must: 'Bắc cầu từ một trường hợp lên quy mô. Một con số, một chỉ dấu, một hiện tượng ai cũng thấy.',
-    fail: 'Nhảy thẳng từ một người sang cả xã hội. Giám khảo gọi đó là khái quát vội.',
-    ask: 'Nếu chuyện này xảy ra hàng loạt thì ta nhìn vào đâu để biết?',
+    k: 'D+', name: 'Cái gì khác đi',
+    must: 'Một khoản chi đổi, một con số đếm được, hoặc một thứ đóng cửa. Chủ ngữ có thật, động từ thường.',
+    fail: 'Dùng shows up as, surfaces as, lands as, the effect is. Bốn cụm này đẩy hết nội dung vào một cụm danh từ dài, câu đọc rất cứng.',
+    ask: 'Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?',
   },
   {
-    k: 'E', name: 'Chốt về đề',
-    must: 'Kéo về đúng chữ trong đề. Nói vì sao chuỗi vừa rồi trả lời được câu hỏi.',
-    fail: 'Dừng ở hệ quả rồi sang đoạn mới. Đoạn có nội dung nhưng không ăn điểm Task Response.',
-    ask: 'Câu này có nhắc lại chữ của đề không?',
+    k: 'N', name: 'Khúc rẽ, tuỳ chọn', optional: true,
+    must: 'Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi. Chỉ dùng khi bảy bước kia đã chắc.',
+    fail: 'Nhét cả ý phụ lẫn nhượng bộ vào một đoạn. Đoạn loãng và mất luôn trọng tâm chuỗi vừa tạo ra.',
+    ask: 'Đoạn này cần một khúc rẽ không, và nếu cần thì là loại nào?',
+  },
+  {
+    k: 'E', name: 'Trả lời đề',
+    must: 'Chạm được vào đúng chữ đánh giá của đề. Không phải tóm tắt lại bước C hay bước D.',
+    fail: 'Kết đoạn bằng cách nhắc lại hệ quả. Như vậy là tóm tắt chứ chưa trả lời câu hỏi của đề.',
+    ask: 'Câu cuối có chứa đúng chữ mà đề dùng không?',
   },
 ];
 
@@ -6320,12 +6334,14 @@ function renderChainLesson() {
     '</div>' +
 
     '<div class="chain-links">' +
-      '<h3>Sáu mắt xích</h3>' +
+      '<h3>Tám bước</h3>' +
+      '<p class="chain-note">Tám câu hỏi để nghĩ, không phải tám ô để điền. Trả lời hết rồi viết liền mạch, xong mới dò lại xem đủ bước chưa.</p>' +
       CHAIN_LINKS.map(l =>
         '<div class="chain-link">' +
           '<span class="chain-link-k">' + l.k + '</span>' +
           '<div class="chain-link-body">' +
-            '<div class="chain-link-name">' + escHtml(l.name) + '</div>' +
+            '<div class="chain-link-name">' + escHtml(l.name) +
+              (l.optional ? ' <span class="chain-opt">tuỳ chọn</span>' : '') + '</div>' +
             '<div class="chain-link-must">' + escHtml(l.must) + '</div>' +
             '<div class="chain-link-fail"><span>Hay hỏng ở</span> ' + escHtml(l.fail) + '</div>' +
             '<div class="chain-link-ask"><span>Tự hỏi</span> ' + escHtml(l.ask) + '</div>' +
@@ -6333,9 +6349,26 @@ function renderChainLesson() {
         '</div>').join('') +
     '</div>' +
 
+    '<div class="chain-review">' +
+      '<h3>Vòng soát, chạy sau khi viết xong</h3>' +
+      '<p class="chain-note">Đừng vừa viết vừa soát. Vòng viết lo ý, vòng soát lo chữ, và vòng soát chỉ chiếm ba tới bốn phút cuối giờ.</p>' +
+      '<div class="chain-rule">' +
+        '<div class="chain-rule-k">Luật 1</div>' +
+        '<div><div class="chain-rule-name">Show Don' + '&#39;' + 't Tell, trừ hai câu</div>' +
+        '<p>Câu A và câu E được phép trừu tượng. Mọi câu ở giữa phải quay được. Show cả đoạn thì đoạn thành phóng sự, đọc xong không biết ta đứng phe nào.</p>' +
+        '<p class="chain-rule-hard">Luật cứng, ở bốn bước B C D và D cộng, không cho mười tám từ này làm chủ ngữ. quality, standard, level, situation, condition, development, aspect, factor, impact, effect, influence, benefit, problem, issue, society, people, technology. Thêm the government khi không nói rõ chính phủ nào.</p></div>' +
+      '</div>' +
+      '<div class="chain-rule">' +
+        '<div class="chain-rule-k">Luật 2</div>' +
+        '<div><div class="chain-rule-name">Less is more, phép kiểm 5 chữ</div>' +
+        '<p>Đọc năm chữ đầu của câu. Chưa gặp chủ ngữ thật thì câu đó có mào đầu thừa, cắt. Chữ thừa không bị trừ trực tiếp, nó bị trừ qua Task Response vì ta hết chỗ triển khai ý.</p>' +
+        '<p class="chain-rule-hard">Nhưng đừng cắt hedging, tends to hay in most cases chống lỗi khái quát vội. Cũng đừng cắt hoàn cảnh, students who commute an hour each way dài gấp ba chữ students và nó đáng.</p></div>' +
+      '</div>' +
+    '</div>' +
+
     (Object.keys(chain).length
       ? '<div class="chain-worked">' +
-          '<h3>Chuỗi mẫu, chạy đủ sáu bước</h3>' +
+          '<h3>Chuỗi mẫu</h3>' +
           (a.model_chain.prompt ? '<div class="chain-prompt">' + escHtml(a.model_chain.prompt) + '</div>' : '') +
           '<div class="chain-run">' +
             CHAIN_LINKS.filter(l => chain[l.k]).map(l =>
@@ -9275,7 +9308,7 @@ function luyenTab(name) {
   }
   try { localStorage.setItem('luyen_tab', name); } catch (e) {}
   if (name === 'vocab') loadPracticeSentences();
-  else if (name === 'para') loadPracticeParagraphs();
+  else if (name === 'para') { let m = 'drill'; try { m = localStorage.getItem('para_mode') || 'drill'; } catch (e) {} paraMode(m); }
   else if (name === 'sentence') loadLuyenSentence();
 }
 
@@ -9794,6 +9827,354 @@ let _ppAxis = 1;
 let _ppSide = 0;
 let _ppTask = null;
 let _ppQuiz = null;
+
+/* ─── Bậc 3 · Đoạn, chế độ dựng theo đề ───────────────────────────────────
+   Same shape as the sentence rung: the prompts come from the grammar bank, the
+   student writes each step, and the model is injected only on click. What is
+   new here is the second pass. The teacher's v5 file turns two of its review
+   rules into things a machine can actually check, so the eighteen banned
+   subjects and the filler list run in the browser against the student's own
+   paragraph. No model call, so the rung stays free to use. */
+
+let _pdTopics = null;
+let _pdTopic = null;
+let _pdSet = null;
+let _pdFilterTheme = 'all';
+
+function paraMode(m) {
+  const d = document.getElementById('pmode-drill');
+  const a = document.getElementById('pmode-ai');
+  const td = document.getElementById('pmode-tab-drill');
+  const ta = document.getElementById('pmode-tab-ai');
+  if (d) d.classList.toggle('hidden', m !== 'drill');
+  if (a) a.classList.toggle('hidden', m !== 'ai');
+  if (td) td.classList.toggle('active', m === 'drill');
+  if (ta) ta.classList.toggle('active', m === 'ai');
+  try { localStorage.setItem('para_mode', m); } catch (e) {}
+  if (m === 'drill') loadParaDrill();
+  else loadPracticeParagraphs();
+}
+
+function pdDone() {
+  try { return JSON.parse(localStorage.getItem('pd_done') || '{}'); } catch (e) { return {}; }
+}
+function pdMarkDone(id) {
+  try { const d = pdDone(); d[id] = 1; localStorage.setItem('pd_done', JSON.stringify(d)); } catch (e) {}
+}
+function pdDraft(id, v) {
+  try {
+    if (v === undefined) return localStorage.getItem('pd_draft_' + id) || '';
+    localStorage.setItem('pd_draft_' + id, v);
+  } catch (e) { return ''; }
+}
+
+async function loadParaDrill(force) {
+  const box = document.getElementById('pd-body');
+  if (!box) return;
+  if (_pdTopic) return pdRenderTopic(_pdTopic);
+  if (_pdTopics && !force) return pdRenderList();
+  box.innerHTML = '<div class="loading">Đang tải kho đề…</div>';
+  try {
+    const r = await fetch('data/grammar/topics.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    _pdTopics = await r.json();
+  } catch (e) {
+    box.innerHTML = '<div class="error-msg" style="display:block">Chưa tải được kho đề. ' + escHtml(e.message) + '</div>';
+    return;
+  }
+  pdRenderList();
+}
+
+function pdRenderList() {
+  const box = document.getElementById('pd-body');
+  const done = pdDone();
+  // Only prompts that have a paragraph set written are offered.
+  const ready = _pdTopics.filter(t => t.para_set);
+  if (!ready.length) {
+    box.innerHTML = '<div class="wp-empty-state">Chưa có đề nào cho bậc đoạn. Bậc câu vẫn dùng được.</div>';
+    return;
+  }
+  const themes = ['all', ...new Set(ready.map(t => t.theme))];
+  const shown = _pdFilterTheme === 'all' ? ready : ready.filter(t => t.theme === _pdFilterTheme);
+
+  box.innerHTML =
+    '<p class="ls-intro">Mỗi đề là một đoạn thân bài dựng theo tám bước. Ta viết từng bước, mở đáp án mẫu ra đối chiếu, rồi chạy vòng soát trên chính đoạn của ta.</p>' +
+    (themes.length > 2
+      ? '<div class="ls-themes">' + themes.map(th =>
+          '<button class="ls-theme' + (_pdFilterTheme === th ? ' active' : '') + '" onclick="pdSetTheme(\'' + th + '\')">' +
+          (th === 'all' ? 'Tất cả' : escHtml(lsTheme(th))) + '</button>').join('') + '</div>'
+      : '') +
+    '<div class="ls-grid">' +
+      shown.map(t =>
+        '<button class="ls-card" onclick="pdOpen(\'' + t.id + '\')">' +
+          '<div class="ls-card-top">' +
+            '<span class="ls-truc">Trục ' + t.truc + '</span>' +
+            '<span class="ls-theme-tag">' + escHtml(lsTheme(t.theme)) + '</span>' +
+            (done[t.id] ? '<span class="ls-count full">đã làm</span>' : '') +
+          '</div>' +
+          '<div class="ls-card-q">' + escHtml(t.prompt_vi || t.prompt_en) + '</div>' +
+          '<div class="ls-card-en">' + escHtml(t.prompt_en.slice(0, 110)) + (t.prompt_en.length > 110 ? '…' : '') + '</div>' +
+        '</button>').join('') +
+    '</div>';
+}
+
+function pdSetTheme(th) { _pdFilterTheme = th; pdRenderList(); }
+
+async function pdOpen(id) {
+  const box = document.getElementById('pd-body');
+  box.innerHTML = '<div class="loading">Đang tải đề…</div>';
+  try {
+    const r = await fetch('data/grammar/paragraphs/' + id + '.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    _pdSet = await r.json();
+    _pdTopic = _pdTopics.find(t => t.id === id);
+  } catch (e) {
+    box.innerHTML = '<div class="error-msg" style="display:block">Chưa tải được đề. ' + escHtml(e.message) + '</div>';
+    return;
+  }
+  pdRenderTopic(_pdTopic);
+}
+
+function pdBack() { _pdTopic = null; _pdSet = null; pdRenderList(); }
+
+function pdRenderTopic(t) {
+  const box = document.getElementById('pd-body');
+  const s = _pdSet;
+
+  box.innerHTML =
+    '<button class="btn-back-plain" onclick="pdBack()">← Tất cả đề</button>' +
+    '<div class="ls-prompt">' +
+      '<div class="ls-prompt-vi">' + escHtml(t.prompt_vi || '') + '</div>' +
+      '<div class="ls-prompt-en">' + escHtml(t.prompt_en) + '</div>' +
+      '<div class="ls-prompt-meta">Trục ' + t.truc + ' · engine ' + escHtml(s.engine) + '</div>' +
+    '</div>' +
+
+    '<div class="pd-side">' +
+      '<span class="pd-side-k">Đoạn này bênh phía</span>' +
+      '<span class="pd-side-v">' + escHtml(s.side_vi) + '</span>' +
+    '</div>' +
+
+    '<div class="pd-steps">' +
+      s.steps.map((st, i) => pdStepHtml(st, i)).join('') +
+    '</div>' +
+
+    '<div class="pd-join">' +
+      '<h4>Ghép lại thành đoạn</h4>' +
+      '<p class="chain-note">Viết liền mạch, đừng dán tám câu vào nhau. Đoạn mẫu bên dưới gần như không có từ nối, các câu dính nhau nhờ câu sau nhặt đúng cái vừa đổi ở câu trước.</p>' +
+      '<textarea class="ls-input" id="pd-para" rows="9" placeholder="Viết cả đoạn ở đây…"></textarea>' +
+      '<div class="pd-counts" id="pd-counts"></div>' +
+      '<div class="pd-join-actions">' +
+        '<button class="btn btn-primary btn-sm" onclick="pdReview()">Chạy vòng soát</button>' +
+        '<button class="btn btn-secondary btn-sm" onclick="pdRevealPara()" id="pd-para-btn">Xem đoạn mẫu</button>' +
+      '</div>' +
+      '<div id="pd-review"></div>' +
+      '<div id="pd-model"></div>' +
+    '</div>';
+
+  for (const st of s.steps) {
+    const ta = document.getElementById('pd-in-' + st.k.replace('+', 'plus'));
+    if (ta) { ta.value = pdDraft(t.id + '-' + st.k); ta.oninput = () => pdDraft(t.id + '-' + st.k, ta.value); }
+  }
+  const para = document.getElementById('pd-para');
+  if (para) {
+    para.value = pdDraft(t.id + '-para');
+    para.oninput = () => { pdDraft(t.id + '-para', para.value); pdCount(); };
+    pdCount();
+  }
+}
+
+function pdStepHtml(st, i) {
+  const id = st.k.replace('+', 'plus');
+  const link = (typeof CHAIN_LINKS !== 'undefined') ? CHAIN_LINKS.find(l => l.k === st.k) : null;
+  return '' +
+    '<div class="pd-step" id="pd-step-' + id + '">' +
+      '<div class="pd-step-head">' +
+        '<span class="pd-step-k">' + st.k + '</span>' +
+        '<span class="pd-step-name">' + escHtml(link ? link.name : st.k) + '</span>' +
+        (st.optional ? '<span class="chain-opt">tuỳ chọn</span>' : '') +
+      '</div>' +
+      '<div class="pd-step-ask">' + escHtml(st.ask_vi) + '</div>' +
+      (st.k === 'F' && st.options
+        ? '<div class="pd-opts">' + st.options.map((o, n) =>
+            '<button class="pd-opt" onclick="pdPickCriterion(this)">' + escHtml(o) + '</button>').join('') + '</div>'
+        : '') +
+      '<textarea class="ls-input" id="pd-in-' + id + '" rows="2" placeholder="Viết bước ' + st.k + '…"></textarea>' +
+      '<button class="btn btn-ghost btn-sm" onclick="pdReveal(\'' + st.k + '\')" id="pd-btn-' + id + '">Xem mẫu</button>' +
+      '<div class="pd-ans" id="pd-ans-' + id + '"></div>' +
+    '</div>';
+}
+
+function pdPickCriterion(btn) {
+  for (const b of btn.parentElement.querySelectorAll('.pd-opt')) b.classList.remove('picked');
+  btn.classList.add('picked');
+  const ta = document.getElementById('pd-in-F');
+  if (ta && !ta.value.trim()) ta.focus();
+}
+
+// Model sentences are injected on click, never rendered up front.
+function pdReveal(k) {
+  const id = k.replace('+', 'plus');
+  const st = _pdSet.steps.find(x => x.k === k);
+  const out = document.getElementById('pd-ans-' + id);
+  const btn = document.getElementById('pd-btn-' + id);
+  if (!st || !out) return;
+  if (out.innerHTML) { out.innerHTML = ''; btn.textContent = 'Xem mẫu'; return; }
+  out.innerHTML =
+    '<div class="ls-ans-box">' +
+      '<div class="ls-ans-label">Câu mẫu</div>' +
+      '<div class="ls-ans-text">' + escHtml(st.model) + '</div>' +
+      (st.why_vi ? '<div class="ls-why">' + escHtml(st.why_vi) + '</div>' : '') +
+      (st.trap_vi ? '<div class="pd-trap"><span>Hay hỏng ở</span> ' + escHtml(st.trap_vi) + '</div>' : '') +
+    '</div>';
+  btn.textContent = 'Ẩn mẫu';
+  document.getElementById('pd-step-' + id).classList.add('done');
+}
+
+function pdRevealPara() {
+  const out = document.getElementById('pd-model');
+  const btn = document.getElementById('pd-para-btn');
+  if (!out) return;
+  if (out.innerHTML) { out.innerHTML = ''; btn.textContent = 'Xem đoạn mẫu'; return; }
+  out.innerHTML =
+    '<div class="ls-ans-box">' +
+      '<div class="ls-ans-label">Đoạn mẫu</div>' +
+      '<div class="pd-model-para">' + escHtml(_pdSet.model_paragraph) + '</div>' +
+      (_pdSet.note_vi ? '<div class="ls-why">' + escHtml(_pdSet.note_vi) + '</div>' : '') +
+    '</div>';
+  btn.textContent = 'Ẩn đoạn mẫu';
+  if (_pdTopic) pdMarkDone(_pdTopic.id);
+}
+
+function pdCount() {
+  const ta = document.getElementById('pd-para');
+  const out = document.getElementById('pd-counts');
+  if (!ta || !out) return;
+  const text = ta.value.trim();
+  const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+  const sents = text ? text.split(/(?<=[.!?])\s+/).filter(Boolean).length : 0;
+  out.innerHTML =
+    '<span class="' + (words >= 80 && words <= 140 ? 'ok' : '') + '">' + words + ' từ</span>' +
+    '<span>' + sents + ' câu</span>';
+}
+
+/* ── Vòng soát, chạy hẳn ở máy ────────────────────────────────────────────
+   Both rules in the v5 file are string checks, so they cost nothing and give
+   an answer the moment the student asks. */
+
+// Section 9.4. Banned as the subject of steps B, C, D and D+.
+const PD_BANNED_SUBJECTS = [
+  'quality', 'standard', 'level', 'situation', 'condition', 'development',
+  'aspect', 'factor', 'impact', 'effect', 'influence', 'benefit', 'problem',
+  'issue', 'society', 'people', 'technology', 'the government',
+];
+
+// Section 10, groups A to D. Cut or shorten.
+const PD_FILLER = [
+  ['the first and foremost reason', 'The clearest reason is'],
+  ['one of the main reasons for this is the fact that', 'bỏ hẳn, viết thẳng mệnh đề'],
+  ['it is an undeniable fact that', 'bỏ hẳn'],
+  ['there is no doubt that', 'bỏ hẳn'],
+  ['it goes without saying that', 'bỏ hẳn'],
+  ['it cannot be denied that', 'bỏ hẳn'],
+  ['it is widely believed that', 'Many argue that'],
+  ['in my opinion, i think that', 'I think, hoặc bỏ luôn'],
+  ['from my point of view', 'bỏ hẳn'],
+  ['as far as i am concerned', 'bỏ hẳn'],
+  ['due to the fact that', 'because'],
+  ['in spite of the fact that', 'although'],
+  ['despite the fact that', 'although'],
+  ['for the purpose of', 'to'],
+  ['in the event that', 'if'],
+  ['plays an important role in', 'shapes, drives, decides'],
+  ['has a positive impact on', 'improves, raises, speeds up'],
+  ['has a negative impact on', 'erodes, drains, delays'],
+  ['is one of the most important factors in', 'matters most in'],
+  ['a large number of people', 'many people'],
+  ['when it comes to', 'bỏ hẳn'],
+  ['in terms of', 'bỏ hẳn'],
+  ['on a daily basis', 'every day'],
+  ['in this day and age', 'bỏ hẳn'],
+  ['in modern society', 'bỏ hẳn'],
+  ['at the present time', 'bỏ hẳn'],
+  ['moving on to the next point', 'bỏ cả câu'],
+  ['turning to the other side', 'bỏ cả câu'],
+  ['last but not least', 'bỏ cả câu'],
+  ['having said that', 'bỏ cả câu'],
+  ['all things considered', 'bỏ cả câu'],
+  ['in a nutshell', 'bỏ cả câu'],
+  ['as mentioned above', 'bỏ cả câu'],
+  ['take into consideration', 'consider, weigh'],
+  ['make a decision', 'decide'],
+  ['carry out an investigation', 'investigate'],
+  ['provide assistance to', 'help, fund, staff'],
+  ['cause a reduction in', 'cut, halve, thin out'],
+];
+
+function pdReview() {
+  const ta = document.getElementById('pd-para');
+  const out = document.getElementById('pd-review');
+  if (!ta || !out) return;
+  const text = ta.value.trim();
+  if (!text) { out.innerHTML = '<div class="pd-review-empty">Viết đoạn trước đã.</div>'; return; }
+
+  const sents = text.split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
+  const hits = { subject: [], filler: [], preamble: [] };
+
+  // Rule one applies to the middle sentences only: the claim and the answer
+  // are allowed to be abstract.
+  sents.forEach((s, i) => {
+    const isEdge = i === 0 || i === sents.length - 1;
+    const low = s.toLowerCase();
+    if (!isEdge) {
+      for (const w of PD_BANNED_SUBJECTS) {
+        // subject position only, so look at the opening of the sentence
+        const head = low.replace(/^(the|a|an|this|these|those|such)\s+/, '');
+        if (head.startsWith(w.replace(/^the\s+/, '')) || low.startsWith(w)) {
+          hits.subject.push({ n: i + 1, word: w, s });
+          break;
+        }
+      }
+    }
+    // Rule two, the five word test
+    const first5 = s.split(/\s+/).slice(0, 5).join(' ').toLowerCase();
+    if (/^(it is|there is|there are|the reason why|the first|one of the)/.test(first5)) {
+      hits.preamble.push({ n: i + 1, s });
+    }
+  });
+
+  const low = text.toLowerCase();
+  for (const [bad, good] of PD_FILLER) {
+    if (low.includes(bad)) hits.filler.push({ bad, good });
+  }
+
+  const total = hits.subject.length + hits.filler.length + hits.preamble.length;
+  out.innerHTML =
+    '<div class="pd-review-box' + (total ? '' : ' clean') + '">' +
+      '<div class="pd-review-head">' +
+        (total
+          ? 'Vòng soát tìm thấy ' + total + ' chỗ'
+          : 'Vòng soát không bắt được lỗi nào trong hai luật này') +
+      '</div>' +
+      (hits.subject.length
+        ? '<div class="pd-review-group"><div class="pd-review-k">Danh từ trừu tượng làm chủ ngữ</div>' +
+          hits.subject.map(h =>
+            '<div class="pd-review-row">Câu ' + h.n + ', chủ ngữ là <b>' + escHtml(h.word) + '</b>. ' +
+            '<span class="pd-review-s">' + escHtml(h.s.slice(0, 90)) + '</span></div>').join('') + '</div>'
+        : '') +
+      (hits.preamble.length
+        ? '<div class="pd-review-group"><div class="pd-review-k">Năm chữ đầu chưa gặp chủ ngữ thật</div>' +
+          hits.preamble.map(h =>
+            '<div class="pd-review-row">Câu ' + h.n + '. <span class="pd-review-s">' + escHtml(h.s.slice(0, 90)) + '</span></div>').join('') + '</div>'
+        : '') +
+      (hits.filler.length
+        ? '<div class="pd-review-group"><div class="pd-review-k">Cụm thừa</div>' +
+          hits.filler.map(h =>
+            '<div class="pd-review-row"><b>' + escHtml(h.bad) + '</b> → ' + escHtml(h.good) + '</div>').join('') + '</div>'
+        : '') +
+      '<div class="pd-review-foot">Hai luật này soát chữ, không soát ý. Chuỗi có chạy hay không thì phải tự đối chiếu với đoạn mẫu.</div>' +
+    '</div>';
+}
+
 
 async function loadPracticeParagraphs() {
   const chips = document.getElementById('pp-axis-chips');

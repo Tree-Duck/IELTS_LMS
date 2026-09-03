@@ -1,0 +1,72 @@
+{
+ "topic_id": "t020",
+ "engine": "SKILL",
+ "engine_vi": "Cơ hội luyện một kỹ năng là hữu hạn, không ai làm thì kỹ năng mất theo người biết nó.",
+ "side_vi": "Không đồng ý, vì phù hợp hay không là thước đo sai",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là no longer relevant và not worth keeping. Đáng giữ đo bằng gì, đề không nói, ta chọn.",
+   "options": [
+    "Đo bằng tri thức thực hành mất đi cùng phong tục",
+    "Đo bằng số người còn thực hành nó",
+    "Đo bằng việc nó có hợp với đời sống hiện đại không"
+   ],
+   "model": "Worth keeping is better measured by what disappears with the practice than by how modern it looks.",
+   "why_vi": "Đặt thước đo ở chỗ cái gì mất đi thì ta có thứ để đếm. Đo bằng hợp thời hay không thì đề đã tự trả lời rồi.",
+   "trap_vi": "Nhận luôn thước đo relevance của đề. Nhận rồi thì ta chỉ còn cách đồng ý, vì phong tục nào cũng cũ hơn đời sống hiện tại."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "Inherited practices die out quietly because nobody has to decide anything for them to stop.",
+   "why_vi": "Câu gắn vào cơ hội thực hành. Chữ quietly cho biết bước sau sẽ nói cảnh không ai ra quyết định gì cả.",
+   "trap_vi": "Viết Traditions are an important part of our identity. Câu này không nêu cái gì hữu hạn nên bước B không có chỗ bắt đầu."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Families who order the New Year dishes from a restaurant stand in the kitchen for ten minutes instead of a morning.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh đứng bếp mười phút thì quay được.",
+   "trap_vi": "Viết Society is losing its traditions. Chữ society nằm trong mười tám từ cấm làm chủ ngữ ở bước này."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The morning is freed while the number of people who can still fold the trays drops by one household.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, và cái giảm đếm được bằng số hộ.",
+   "trap_vi": "Viết Cultural quality declines. Chữ quality nằm trong danh sách cấm, và câu không đo được gì."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "The next generation watches a courier hand over a box and learns nothing they could repeat.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ sống nhờ đúng buổi sáng vừa biến mất.",
+   "trap_vi": "Viết tiếp về gia đình đặt đồ ăn. Đó là nói lại bước B chứ không phải bước tiếp."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The two shops that sold the folding paper close before the following New Year.",
+   "why_vi": "Một thứ đóng cửa, chủ ngữ có thật, động từ thường, và ai cũng kiểm lại được.",
+   "trap_vi": "Viết The effect is a loss of heritage. Chủ ngữ effect nằm trong danh sách cấm, và câu không kiểm lại được."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "Some customs really are empty ritual, though they are not usually the ones anyone bothers to argue about.",
+   "why_vi": "Đây là nhượng bộ. Nó thừa nhận phần đúng của phía kia mà không đổi phe.",
+   "trap_vi": "Viết nhượng bộ mạnh tới mức bênh phía kia. Nhượng bộ phải nhỏ hơn luận điểm, nếu không đoạn mất lập trường."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "A custom stops being worth keeping long after it stops being relevant, so relevance is the wrong test.",
+   "why_vi": "Hai chữ relevant và worth keeping đều lấy thẳng từ đề, và câu nói rõ ta bác thước đo chứ không bác nội dung.",
+   "trap_vi": "Kết bằng chuyện hai cửa hàng đóng cửa. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "Inherited practices die out quietly because nobody has to decide anything for them to stop. Families who order the New Year dishes from a restaurant stand in the kitchen for ten minutes instead of a morning. The morning is freed while the number of people who can still fold the trays drops by one household. The next generation watches a courier hand over a box and learns nothing they could repeat. The two shops that sold the folding paper close before the following New Year. Some customs really are empty ritual, though they are not usually the ones anyone bothers to argue about. A custom stops being worth keeping long after it stops being relevant, so relevance is the wrong test.",
+ "note_vi": "Đề dạng đồng ý hay không mà ta lại bác thước đo của đề. Muốn làm được vậy thì bước F phải nói rõ ta thay thước nào, nếu không giám khảo đọc thành lạc đề."
+}

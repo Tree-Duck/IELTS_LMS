@@ -1,0 +1,72 @@
+{
+ "topic_id": "t003",
+ "engine": "TIME",
+ "engine_vi": "Số giờ trong ngày hữu hạn, thêm một hoạt động thì giờ phải lấy từ chỗ khác.",
+ "side_vi": "Đồng ý một phần, chỉ khi hoạt động thay thế được học thêm",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là alleviate stress. Căng thẳng đo bằng gì, đề không nói, ta chọn.",
+   "options": [
+    "Đo bằng tổng số giờ đứa trẻ phải làm trong tuần",
+    "Đo bằng việc đứa trẻ có thấy vui hay không",
+    "Đo bằng điểm số ở trường"
+   ],
+   "model": "Stress here is best measured by the total number of hours worked, not by how enjoyable each hour is.",
+   "why_vi": "Chọn thước đo là số giờ thì cả chuỗi sau đo được. Chọn cảm giác vui thì không ai kiểm lại được.",
+   "trap_vi": "Đo bằng cảm giác thì tới bước C không có gì tăng giảm, và ta chỉ còn cách viết cảm nhận chung chung."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "Funded clubs relieve pressure only when they replace paid tutoring, because the harm sits in the hours themselves.",
+   "why_vi": "Câu gắn thẳng vào số giờ, và điều kiện only when cho biết bước sau phải nói chuyện gì xảy ra khi không thay thế.",
+   "trap_vi": "Viết Sport is good for stressed students. Không nêu cái gì hữu hạn nên bước B không có chỗ bắt đầu."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Parents who already pay for six evening classes a week add the free club on top of them.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh ghi thêm một buổi vào lịch thì quay được.",
+   "trap_vi": "Viết People are under a lot of pressure. Chữ people nằm trong mười tám từ cấm làm chủ ngữ."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The child gains two hours of sport and loses the two hours that used to be unstructured time.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, đo bằng giờ. Đây đúng chỗ vế agree hay disagree sẽ bám vào.",
+   "trap_vi": "Viết Their quality of life decreases. Chữ quality nằm trong danh sách cấm, và câu không đo được gì."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Grandparents who used to be visited on Sunday afternoons now see the child once a month.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ sống nhờ đúng khoảng thời gian vừa mất.",
+   "trap_vi": "Viết tiếp về đứa trẻ mệt mỏi. Vẫn là nhân vật ở bước B nên chuỗi không tiến."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The Sunday bus to the next town runs half empty.",
+   "why_vi": "Một hiện tượng ai cũng thấy, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết This surfaces as weaker family ties. Cụm surfaces as bị cấm ở bước D cộng, và câu không kiểm lại được."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "For households that cannot afford tutoring the free club is a real gain, and that group is the exception here.",
+   "why_vi": "Đây là ý phụ, cùng chiều nhưng không đủ lớn để thành luận điểm riêng.",
+   "trap_vi": "Viết ý phụ này dài thành hai câu. Bước N chỉ được một câu, dài hơn thì nó lấn bước E."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "Investing in after-school activities alleviates stress only where it cuts the total hours rather than adding to them.",
+   "why_vi": "Chữ alleviate stress lấy thẳng từ đề, và vế only where gói lại điều kiện cả chuỗi vừa chứng minh.",
+   "trap_vi": "Kết bằng chuyện chuyến xe buýt vắng khách. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "Funded clubs relieve pressure only when they replace paid tutoring, because the harm sits in the hours themselves. Parents who already pay for six evening classes a week add the free club on top of them. The child gains two hours of sport and loses the two hours that used to be unstructured time. Grandparents who used to be visited on Sunday afternoons now see the child once a month. The Sunday bus to the next town runs half empty. For households that cannot afford tutoring the free club is a real gain, and that group is the exception here. Investing in after-school activities alleviates stress only where it cuts the total hours rather than adding to them.",
+ "note_vi": "Đề dạng to what extent nên câu E phải nói rõ mức độ đồng ý, không phải đồng ý trơn. Cụm only where làm đúng việc đó."
+}

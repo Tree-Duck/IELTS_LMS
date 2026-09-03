@@ -1,0 +1,72 @@
+{
+ "topic_id": "t036",
+ "engine": "TIME",
+ "engine_vi": "Số giờ có người lớn trông là hữu hạn, và khoảng trống buổi chiều luôn có ai đó lấp vào.",
+ "side_vi": "Nguyên nhân nằm ở nhà, nên hình phạt phải đi kèm can thiệp gia đình",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Đề hỏi nguyên nhân và hình phạt. Hình phạt nào là đúng thì đo bằng gì, ta chọn.",
+   "options": [
+    "Đo bằng tỉ lệ tái phạm trong vòng một năm",
+    "Đo bằng mức độ nghiêm khắc của hình phạt",
+    "Đo bằng cảm giác công bằng của người dân"
+   ],
+   "model": "A punishment is judged by whether the child reoffends within a year, not by how severe it sounds.",
+   "why_vi": "Đo bằng tái phạm thì hai phần của đề nối được với nhau, vì nguyên nhân nào không được xử lý thì tái phạm còn đó.",
+   "trap_vi": "Đo bằng mức độ nghiêm khắc thì đề tự trả lời, và cả đoạn chỉ còn là ý kiến nên nặng hay nhẹ."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "Most of these offences follow an absent adult at home, because the afternoon has to be spent somewhere.",
+   "why_vi": "Câu trả lời phần nguyên nhân và gắn vào giờ giấc, thứ đếm được. Chữ somewhere mở đường cho bước B.",
+   "trap_vi": "Viết Children commit crimes because of bad influences. Câu này không nêu cái gì hữu hạn, và bad influences không quay được."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Children whose parents work shifts ending after seven spend the hours between school and dinner on the street.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh đứng ngoài phố lúc bốn giờ thì quay được.",
+   "trap_vi": "Viết Society fails these children. Chữ society nằm trong mười tám từ cấm làm chủ ngữ ở bước này."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "Unsupervised hours rise from one a day to four while the number of adults who know where they are falls to none.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, cả hai đếm được bằng giờ và bằng người.",
+   "trap_vi": "Viết Their situation gets worse. Chữ situation nằm trong danh sách cấm, và câu không đo được gì."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Shopkeepers on that parade take on a guard for the hour after school closes.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ hứng đúng khoảng giờ vừa mất người trông.",
+   "trap_vi": "Viết tiếp về đứa trẻ ngoài phố. Đó là nói lại bước B chứ không phải bước tiếp."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "Two shops on that street close an hour earlier than they did last year.",
+   "why_vi": "Một thứ đổi giờ, chủ ngữ có thật, động từ thường, và ai đi qua cũng thấy.",
+   "trap_vi": "Viết This surfaces as rising local crime. Cụm surfaces as bị cấm ở bước D cộng, và câu lặp lại đề."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "A proportionate punishment is still owed to the shopkeeper, though it does nothing about the empty afternoon.",
+   "why_vi": "Đây là nhượng bộ. Nó giữ phần đúng của phía đòi phạt mà vẫn dẫn về luận điểm của ta.",
+   "trap_vi": "Bỏ nhượng bộ này. Đề hỏi hình phạt nào, không nói tới hình phạt thì đoạn trả lời thiếu một nửa."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "The punishment that works is a supervised order arriving alongside an intervention in the household.",
+   "why_vi": "Chữ punishment lấy thẳng từ đề, và câu nêu đủ hai vế mà cả chuỗi vừa chứng minh.",
+   "trap_vi": "Kết bằng chuyện hai cửa hàng đóng sớm. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "Most of these offences follow an absent adult at home, because the afternoon has to be spent somewhere. Children whose parents work shifts ending after seven spend the hours between school and dinner on the street. Unsupervised hours rise from one a day to four while the number of adults who know where they are falls to none. Shopkeepers on that parade take on a guard for the hour after school closes. Two shops on that street close an hour earlier than they did last year. A proportionate punishment is still owed to the shopkeeper, though it does nothing about the empty afternoon. The punishment that works is a supervised order arriving alongside an intervention in the household.",
+ "note_vi": "Đề dạng nguyên nhân và giải pháp thì một đoạn phải gánh cả hai. Bước A nhận phần nguyên nhân, bước N và bước E nhận phần giải pháp."
+}

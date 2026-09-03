@@ -1,0 +1,72 @@
+{
+ "topic_id": "t037",
+ "engine": "INCENTIVE",
+ "engine_vi": "Cái được lợi khi ra tù là hữu hạn, và tờ giấy trong tay quyết định cửa nào mở ra.",
+ "side_vi": "Đồng ý một phần, chỉ khi khoá học kết thúc bằng bằng cấp dùng được",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Chữ đánh giá là reduce the recidivism rate. Giảm tái phạm đo bằng gì, và học cái gì mới tính, ta chọn.",
+   "options": [
+    "Đo bằng việc khoá học có kết thúc bằng bằng cấp hay không",
+    "Đo bằng số giờ học trong trại",
+    "Đo bằng số phạm nhân ghi danh"
+   ],
+   "model": "Education counts here only where the course ends in something an employer will read, not in hours attended.",
+   "why_vi": "Đo bằng số giờ thì mọi khoá học đều tính là có, và ta không giải thích được vì sao nhiều nơi vẫn tái phạm.",
+   "trap_vi": "Đo bằng số người ghi danh. Con số đó chỉ nói có bao nhiêu người vào lớp, không nói cửa nào mở ra sau đó."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "A prison education programme cuts reoffending only when it ends in a qualification an employer accepts.",
+   "why_vi": "Câu gắn vào tờ giấy chứ không vào việc học. Cụm only when cho biết bước sau sẽ nói chuyện gì xảy ra khi thiếu nó.",
+   "trap_vi": "Viết Education helps criminals become better people. Không nêu cái gì hữu hạn, và tới bước C không có gì để đo."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Men released with a trade card hand it across the desk at the agency in the first month after release.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh đưa tấm thẻ qua bàn thì quay được.",
+   "trap_vi": "Viết Prisoners benefit from education. Chữ benefit nằm trong mười tám từ cấm, và câu không nói ai làm gì."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The number of interviews they reach rises from none to three a month while the empty weeks shrink.",
+   "why_vi": "Một thứ tăng và một thứ giảm trong cùng câu, và cái tăng đếm được bằng số buổi phỏng vấn.",
+   "trap_vi": "Viết Their prospects improve. Không có chữ nào mang nghĩa nhiều hơn hay ít hơn, chuỗi đứng yên."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa thay đổi ở bước C?",
+   "model": "Site foremen short of bricklayers fill a vacancy they had advertised twice.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ sống nhờ đúng số người vừa đủ điều kiện ứng tuyển.",
+   "trap_vi": "Viết tiếp về người mới ra tù. Vẫn là nhóm ở bước B nên chuỗi không tiến."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "That contractor stops paying agency rates for the same work.",
+   "why_vi": "Một khoản chi đổi, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết The effect is lower recidivism. Chủ ngữ effect nằm trong danh sách cấm, và câu lặp lại chính đề."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "A course with no certificate changes none of this, however many hours it runs.",
+   "why_vi": "Đây là khoanh phạm vi, và nó dựng lại đúng điều kiện đã nêu ở bước A.",
+   "trap_vi": "Viết khoanh phạm vi thành một câu chê giáo dục. Khoanh phạm vi giới hạn luận điểm, không phản lại nó."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "Education reduces the recidivism rate where it ends in a qualification, and changes nothing where it does not.",
+   "why_vi": "Cụm reduce the recidivism rate lấy thẳng từ đề, và hai vế where trả lời đúng chữ to what extent.",
+   "trap_vi": "Kết bằng chuyện nhà thầu tiết kiệm tiền. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "A prison education programme cuts reoffending only when it ends in a qualification an employer accepts. Men released with a trade card hand it across the desk at the agency in the first month after release. The number of interviews they reach rises from none to three a month while the empty weeks shrink. Site foremen short of bricklayers fill a vacancy they had advertised twice. That contractor stops paying agency rates for the same work. A course with no certificate changes none of this, however many hours it runs. Education reduces the recidivism rate where it ends in a qualification, and changes nothing where it does not.",
+ "note_vi": "Đề dạng to what extent nên câu E phải chia hai vế, chỗ nào đúng và chỗ nào không. Trả lời đồng ý trơn là mất điểm Task Response dù chuỗi chạy tốt."
+}

@@ -1,0 +1,72 @@
+{
+ "topic_id": "t021",
+ "engine": "IDENTITY",
+ "engine_vi": "Chỗ đứng của một người trong dòng thời gian là hữu hạn, mất mốc cũ thì phải đi tìm mốc khác.",
+ "side_vi": "Tích cực, chừng nào còn là tò mò chứ chưa thành yêu sách",
+ "steps": [
+  {
+   "k": "F",
+   "ask_vi": "Đề hỏi hai phần, vì sao và tích cực hay tiêu cực. Tích cực đo bằng gì, ta chọn.",
+   "options": [
+    "Đo bằng việc câu chuyện có biến thành yêu sách hay không",
+    "Đo bằng số người tham gia tìm hiểu dòng họ",
+    "Đo bằng độ chính xác của tư liệu tìm được"
+   ],
+   "model": "Whether this is positive turns on one line, the point where a story starts being used as a claim.",
+   "why_vi": "Đặt thước đo ở ranh giới đó thì cả hai phần của đề được trả lời bằng cùng một chuỗi.",
+   "trap_vi": "Đo bằng số người tham gia thì con số nào cũng chỉ nói phổ biến hay không, không nói tốt hay xấu."
+  },
+  {
+   "k": "A",
+   "ask_vi": "Trong đề này cái gì là hữu hạn? Viết thành một câu có bên được lợi, một động từ chỉ thay đổi, và một mệnh đề because.",
+   "model": "People trace a family line because the places they came from stopped looking like themselves.",
+   "why_vi": "Câu trả lời luôn phần vì sao của đề, và chữ stopped cho biết bước sau sẽ nói cảnh gì đã đổi.",
+   "trap_vi": "Viết People are curious about their roots. Câu này lặp lại đề chứ không nêu cái gì đã thay đổi."
+  },
+  {
+   "k": "B",
+   "ask_vi": "Thay đổi này ảnh hưởng tới ai, họ ở đâu, và camera đặt ở đó quay được cảnh gì?",
+   "model": "Families who left a shipyard town a generation ago come back and cannot find the street they grew up on.",
+   "why_vi": "Lớp người có hoàn cảnh, và cảnh đứng tìm một con phố không còn thì quay được.",
+   "trap_vi": "Viết People feel disconnected. Chữ people nằm trong danh sách cấm, và camera không quay được chữ disconnected."
+  },
+  {
+   "k": "C",
+   "ask_vi": "Sau đó, cái gì trong túi họ, trong ngày của họ, hoặc trong người họ nhiều lên hay ít đi?",
+   "model": "The number of places that hold a memory falls while the number of documents they order rises.",
+   "why_vi": "Một thứ giảm và một thứ tăng trong cùng câu, cả hai đều đếm được.",
+   "trap_vi": "Viết Their sense of identity weakens. Không có chữ nào mang nghĩa nhiều hơn hay ít hơn, chuỗi đứng yên."
+  },
+  {
+   "k": "D",
+   "ask_vi": "Ai đang sống nhờ vào đúng cái vừa giảm đi ở bước C?",
+   "model": "Local archivists who used to handle four requests a week now book appointments a month ahead.",
+   "why_vi": "Nhóm này khác hẳn nhóm ở bước B, và họ hứng đúng phần nhu cầu vừa chuyển sang giấy tờ.",
+   "trap_vi": "Viết tiếp về các gia đình đi tìm gốc. Vẫn là nhóm ở bước B nên chuỗi không tiến."
+  },
+  {
+   "k": "D+",
+   "ask_vi": "Nếu chuyện này có thật, cái gì ngoài đời sẽ khác đi?",
+   "model": "The county record office opens on Saturdays for the first time in thirty years.",
+   "why_vi": "Một thứ mở ra, chủ ngữ có thật, động từ thường.",
+   "trap_vi": "Viết This lands as increased public interest. Cụm lands as bị cấm ở bước D cộng, và câu đọc rất cứng."
+  },
+  {
+   "k": "N",
+   "optional": true,
+   "ask_vi": "Đoạn này cần một khúc rẽ không? Chọn đúng một trong ba, ý phụ, nhượng bộ, hoặc khoanh phạm vi.",
+   "model": "This holds while the search stays private, and not where the same dates are read out at a land hearing.",
+   "why_vi": "Đây là khoanh phạm vi, và nó chính là ranh giới ta đã dựng ở bước F.",
+   "trap_vi": "Bỏ luôn bước N. Với đề hai phần kiểu này, không khoanh phạm vi thì phần đánh giá thành một chiều."
+  },
+  {
+   "k": "E",
+   "ask_vi": "Đề dùng chữ gì? Câu cuối có chứa đúng chữ đó không?",
+   "model": "The development stays positive for as long as it remains curiosity rather than a claim about who belongs.",
+   "why_vi": "Chữ positive development lấy thẳng từ đề, và vế for as long as gói lại đúng ranh giới cả chuỗi vừa dựng.",
+   "trap_vi": "Kết bằng chuyện phòng lưu trữ mở cửa thứ bảy. Đó là tóm tắt bước D cộng chứ chưa trả lời đề."
+  }
+ ],
+ "model_paragraph": "People trace a family line because the places they came from stopped looking like themselves. Families who left a shipyard town a generation ago come back and cannot find the street they grew up on. The number of places that hold a memory falls while the number of documents they order rises. Local archivists who used to handle four requests a week now book appointments a month ahead. The county record office opens on Saturdays for the first time in thirty years. This holds while the search stays private, and not where the same dates are read out at a land hearing. The development stays positive for as long as it remains curiosity rather than a claim about who belongs.",
+ "note_vi": "Đề hai phần thì bước A gánh phần vì sao, còn bước E gánh phần đánh giá. Nếu bước A chỉ mô tả hiện tượng thì đoạn trả lời thiếu một nửa đề."
+}

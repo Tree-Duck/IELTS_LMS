@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'public', 'data', 'grammar');
 const EX_DIR = join(DATA, 'exercises');
+const PARA_DIR = join(DATA, 'paragraphs');
 
 const TYPES = ['fix_error', 'translate', 'causal_link', 'paragraph'];
 const GRAMMAR_FOCUS = [
@@ -173,10 +174,88 @@ for (const file of files) {
   if (orders.join(',') !== [1, 2, 3, 4, 5, 6, 7, 8, 9].join(',')) fail(file, `order không phải 1 tới 9 (${orders.join(',')})`);
 }
 
+/* ── paragraph sets ──────────────────────────────────────────────────────── */
+// One file per prompt for the paragraph rung. The eight steps of the v5 chain,
+// each with the question to ask, a model sentence and the trap for that step.
+const CHAIN_ORDER = ['F', 'A', 'B', 'C', 'D', 'D+', 'N', 'E'];
+// Section 9.4: banned as the subject of B, C, D and D+. A and E are exempt.
+const ABSTRACT_SUBJECTS = [
+  'quality', 'standard', 'level', 'situation', 'condition', 'development',
+  'aspect', 'factor', 'impact', 'effect', 'influence', 'benefit', 'problem',
+  'issue', 'society', 'people', 'technology',
+];
+// Section 4.6: these four turn the D+ step into a long noun phrase.
+const BANNED_DPLUS = ['shows up as', 'surfaces as', 'lands as', 'the effect is'];
+
+const paraFiles = existsSync(PARA_DIR) ? readdirSync(PARA_DIR).filter(f => f.endsWith('.json')) : [];
+let paraTotal = 0;
+
+for (const file of paraFiles) {
+  const set = JSON.parse(readFileSync(join(PARA_DIR, file), 'utf8'));
+  const topicId = file.replace('.json', '');
+  const topic = topicById.get(topicId);
+  const f = 'paragraphs/' + file;
+  if (!topic) { fail(f, 'không có topic tương ứng trong topics.json'); continue; }
+  paraTotal++;
+
+  for (const k of ['topic_id', 'engine', 'side_vi', 'steps', 'model_paragraph']) {
+    if (set[k] === undefined || set[k] === '') fail(f, `thiếu trường ${k}`);
+  }
+  if (set.topic_id !== topicId) fail(f, `topic_id "${set.topic_id}" không khớp tên file`);
+
+  const keys = (set.steps || []).map(x => x.k);
+  if (keys.join(',') !== CHAIN_ORDER.join(',')) fail(f, `các bước là ${keys.join(',')}, cần ${CHAIN_ORDER.join(',')}`);
+
+  for (const st of set.steps || []) {
+    const g = `${f}/${st.k}`;
+    for (const k of ['ask_vi', 'model', 'trap_vi']) {
+      if (!st[k]) fail(g, `thiếu ${k}`);
+    }
+    for (const field of ['ask_vi', 'why_vi', 'trap_vi']) {
+      for (const [re, label] of BANNED_VI) if (re.test(st[field] || '')) fail(g, `${field} ${label}`);
+    }
+    if (st.model && words(st.model) > 25) fail(g, `câu mẫu ${words(st.model)} từ, quá 25`);
+    // The hard rule only applies to the four middle steps.
+    if (['B', 'C', 'D', 'D+'].includes(st.k)) {
+      const head = String(st.model || '').toLowerCase().replace(/^(the|a|an|this|these|those)\s+/, '');
+      for (const w of ABSTRACT_SUBJECTS) {
+        if (head.startsWith(w + ' ') || head.startsWith(w + ',')) fail(g, `chủ ngữ "${w}" nằm trong danh sách cấm ở bước này`);
+      }
+    }
+    if (st.k === 'D+') {
+      for (const bad of BANNED_DPLUS) {
+        if (String(st.model || '').toLowerCase().includes(bad)) fail(g, `bước D cộng dùng cụm bị cấm "${bad}"`);
+      }
+    }
+    if (st.k === 'F' && (!Array.isArray(st.options) || st.options.length !== 3)) {
+      fail(g, 'bước F cần đúng 3 lựa chọn tiêu chí');
+    }
+  }
+  if (set.note_vi) {
+    for (const [re, label] of BANNED_VI) if (re.test(set.note_vi)) fail(f, `note_vi ${label}`);
+  }
+  for (const [re, label] of BANNED_VI) if (re.test(set.side_vi || '')) fail(f, `side_vi ${label}`);
+
+  // The paragraph is the seven body steps joined, so F is not in it.
+  const sents = sentences(set.model_paragraph || '');
+  const bodySteps = (set.steps || []).filter(x => x.k !== 'F');
+  if (sents.length !== bodySteps.length) {
+    fail(f, `đoạn mẫu có ${sents.length} câu, cần ${bodySteps.length} vì đó là các bước trừ F`);
+  }
+  for (const st of bodySteps) {
+    if (st.model && !set.model_paragraph.includes(st.model)) {
+      fail(f, `đoạn mẫu không chứa nguyên văn câu mẫu của bước ${st.k}`);
+    }
+  }
+  const lowPara = String(set.model_paragraph || '').toLowerCase();
+  if (lowPara.includes('for example')) fail(f, 'đoạn mẫu dùng For example, bước B đã làm việc của một ví dụ rồi');
+}
+
 /* ── report ──────────────────────────────────────────────────────────────── */
 console.log(`topics: ${topics.length}`);
 console.log(`đề đã có bài tập: ${files.length}`);
 console.log(`tổng bài tập: ${total}`);
+console.log(`đề đã có bộ đoạn: ${paraTotal}`);
 if (warn.length) { console.log(`\nlưu ý (${warn.length}):`); warn.forEach(w => console.log('  ' + w)); }
 if (errors.length) {
   console.log(`\nLỖI (${errors.length}):`);
