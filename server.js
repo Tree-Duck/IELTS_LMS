@@ -672,6 +672,9 @@ RULES: one entry per step the student attempted, in order B, C, D, D+. Never wri
         error: 'AI trả về dữ liệu không đọc được.',
         reason: 'bad_model_output',
         raw_len: text.length,
+        blocks: (response.content || []).map(b => b.type),
+        stop_reason: response.stop_reason,
+        out_tokens: response.usage && response.usage.output_tokens,
         raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
       });
     }
@@ -1853,6 +1856,9 @@ RULES:
         error: 'AI trả về dữ liệu không đọc được.',
         reason: 'bad_model_output',
         raw_len: text.length,
+        blocks: (response.content || []).map(b => b.type),
+        stop_reason: response.stop_reason,
+        out_tokens: response.usage && response.usage.output_tokens,
         raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
       });
     }
@@ -1927,6 +1933,9 @@ RULES: never rewrite the idea for them, never hand them a replacement argument, 
         error: 'AI trả về dữ liệu không đọc được.',
         reason: 'bad_model_output',
         raw_len: text.length,
+        blocks: (response.content || []).map(b => b.type),
+        stop_reason: response.stop_reason,
+        out_tokens: response.usage && response.usage.output_tokens,
         raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
       });
     }
