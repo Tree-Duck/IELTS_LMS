@@ -1875,7 +1875,10 @@ RULES:
     const reason = classifyAiFailure(err);
     noteAiOutcome(reason);
     console.error('Outline options error [' + reason + ']:', err.message || err);
-    res.status(500).json({ error: 'Không dựng được các lựa chọn.', reason });
+    res.status(500).json({ error: 'Không dựng được các lựa chọn.', reason,
+      // An admin needs the provider message itself; a classified reason is not
+      // enough when the class comes out as unknown.
+      detail: (req.user && req.user.role === 'admin') ? String(err && err.message || err).slice(0, 400) : undefined });
   }
 });
 
