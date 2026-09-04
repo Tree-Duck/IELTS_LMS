@@ -1365,6 +1365,13 @@ function goBack() {
 }
 
 function showView(name) {
+  // Session gone mid-use: api() cleared it on a 401 and sent us to the auth
+  // screen. Rendering an app view now runs a loader against a null user.
+  if (!currentUser || !token) {
+    hide('app-screen');
+    show('auth-screen');
+    return;
+  }
   // The old thin "writing" hub is gone — send it straight to writing practice
   if (name === 'writing') name = 'writing-practice';
   // Close mobile drawer if open
@@ -9715,8 +9722,11 @@ function psBuildItems(u) {
 
 function psLoadExercise() {
   const area = document.getElementById('pse-exercise-area');
-  if (!area || !_vocabUnits) return;
-  const u = _vocabUnits[_psUnit];
+  if (!area) return;
+  // An empty bank is truthy, so the old guard let it through and the unit came
+  // back undefined. Say so instead of throwing on the whole rung.
+  const u = (_vocabUnits || [])[_psUnit];
+  if (!u) { area.innerHTML = '<div class="empty-state">Chưa tải được kho từ vựng. Tải lại trang giúp thầy.</div>'; return; }
   _psItems = psBuildItems(u);
   _psIdx = 0;
   if (!_psItems.length) {
