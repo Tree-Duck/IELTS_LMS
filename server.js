@@ -9,6 +9,7 @@ const { OAuth2Client } = require('google-auth-library');
 const Anthropic = require('@anthropic-ai/sdk');
 const { Resend } = require('resend');
 const db = require('./database');
+const backup = require('./backup');
 const path = require('path');
 const fs = require('fs');
 
@@ -2196,7 +2197,9 @@ app.get('/api/admin/ai-health', authenticate, adminOnly, async (req, res) => {
 // Database backup — admin only, returns full lms-data.json as download
 app.get('/api/admin/backup', authenticate, adminOnly, (req, res) => {
   try {
-    const data = fs.readFileSync(path.join(__dirname, 'lms-data.json'), 'utf8');
+    // Read the file the database actually uses. The old hardcoded path missed
+    // the mounted volume entirely, so this route downloaded the wrong copy.
+    const data = fs.readFileSync(db.dbFilePath(), 'utf8');
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="lms-backup-${stamp}.json"`);
@@ -2205,6 +2208,19 @@ app.get('/api/admin/backup', authenticate, adminOnly, (req, res) => {
     console.error('Backup error:', err);
     res.status(500).json({ error: 'Backup failed' });
   }
+});
+
+app.get('/api/admin/backups', authenticate, adminOnly, (req, res) => {
+  res.json({ db_file: db.dbFilePath(), snapshots: backup.listSnapshots(db.dbFilePath()) });
+});
+
+app.post('/api/admin/backup/run', authenticate, adminOnly, async (req, res) => {
+  const snap = backup.writeSnapshot(db.dbFilePath());
+  const mailed = await backup.emailBackup(db.dbFilePath(), {
+    getResend, to: process.env.ADMIN_EMAIL,
+    from: 'SSP IELTS <noreply@tintinlab.com>',
+  });
+  res.json({ snapshot: snap ? require('path').basename(snap) : null, emailed: mailed });
 });
 
 app.get('/api/admin/users', authenticate, teacherOrAdmin, (req, res) => {
@@ -4254,6 +4270,11 @@ Bản dịch của học viên: ${userEn}`;
 
 httpServer.listen(PORT, () => {
   console.log(`IELTS LMS running at http://localhost:${PORT}`);
+  // Student data lives in one file on one volume, and nothing copied it off
+  // until now. Snapshots locally, one copy by email.
+  backup.startSchedule(db.dbFilePath(), {
+    getResend, to: process.env.ADMIN_EMAIL, from: 'SSP IELTS <noreply@tintinlab.com>',
+  });
   // Ask once at boot so the first page load already knows.
   refreshAiStatus(true).then(s => console.log('AI status: ' + (s.ok ? 'ok' : s.reason)));
   if (!ANTHROPIC_API_KEY) {

@@ -3,3 +3,7 @@ node_modules/
 lms-data.json
 *.log
 .DS_Store
+
+# Snapshot DB chứa tài khoản và bài nộp của học viên, không bao giờ commit
+backups/
+lms-backup-*.json
