@@ -305,8 +305,16 @@ app.post('/api/login', authStrictLimiter, async (req, res) => {
 });
 
 // Public config the frontend needs before auth (e.g. the Google client id)
-app.get('/api/public-config', (req, res) => {
-  res.json({ googleClientId: GOOGLE_CLIENT_ID });
+app.get('/api/ai-status', async (req, res) => {
+  const s = await refreshAiStatus(false);
+  res.json({ ok: s.ok, reason: s.reason, hard_down: AI_HARD_DOWN.includes(s.reason), checked_at: s.checked_at });
+});
+
+app.get('/api/public-config', async (req, res) => {
+  // Wait for a verdict rather than reporting the optimistic default before the
+  // first check has run. Cached for ten minutes, so this is at most one probe.
+  const s = await refreshAiStatus(false);
+  res.json({ googleClientId: GOOGLE_CLIENT_ID, ai: { ok: s.ok, reason: s.reason, hard_down: AI_HARD_DOWN.includes(s.reason) } });
 });
 
 // Sign in / sign up with Google (Google Identity Services ID-token flow)
@@ -992,6 +1000,35 @@ function parseGradingJson(text) {
 
 // Name the failure so "Lỗi chấm bài" stops meaning four different things. The
 // Anthropic SDK puts an HTTP status on the error; the message carries the rest.
+// Last verdict on the provider, so the client can close off AI paths before a
+// student walks into one. Refreshed by any real call, and by a cheap probe at
+// most once every ten minutes.
+const AI_STATUS = { ok: true, reason: null, checked_at: 0 };
+const AI_STATUS_TTL_MS = 10 * 60 * 1000;
+// A reason retrying cannot fix. Anything else is treated as a passing wobble.
+const AI_HARD_DOWN = ['account_disabled', 'bad_api_key', 'no_api_key', 'out_of_credit'];
+
+function noteAiOutcome(reason) {
+  AI_STATUS.ok = !reason;
+  AI_STATUS.reason = reason || null;
+  AI_STATUS.checked_at = Date.now();
+}
+
+async function refreshAiStatus(force) {
+  if (!ANTHROPIC_API_KEY) { noteAiOutcome('no_api_key'); return AI_STATUS; }
+  if (!force && Date.now() - AI_STATUS.checked_at < AI_STATUS_TTL_MS) return AI_STATUS;
+  try {
+    await client.messages.create(
+      { model: MODEL, max_tokens: 4, messages: [{ role: 'user', content: 'OK' }] },
+      { timeout: 20000, maxRetries: 0 },
+    );
+    noteAiOutcome(null);
+  } catch (err) {
+    noteAiOutcome(classifyAiFailure(err));
+  }
+  return AI_STATUS;
+}
+
 function classifyAiFailure(err) {
   if (!ANTHROPIC_API_KEY) return 'no_api_key';
   const status = err && (err.status || err.statusCode);
@@ -1022,6 +1059,7 @@ async function gradeWithRetry(messageContent, systemPrompt) {
     return await call(systemPrompt, 16000);
   } catch (err) {
     const reason = classifyAiFailure(err);
+    noteAiOutcome(reason);
     // Only worth a second attempt if the first one ran out of room or time.
     if (!['bad_model_output', 'network', 'api_overloaded', 'rate_limited'].includes(reason)) throw err;
     console.warn('Grading attempt 1 failed (' + reason + '); retrying without annotations');
@@ -1193,6 +1231,7 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
     try { db.updateStreak(userId); } catch (e) { console.error('Streak update error:', e); }
   } catch (err) {
     const reason = classifyAiFailure(err);
+    noteAiOutcome(reason);
     console.error('Grading error for submission', submissionId, '[' + reason + ']', err && err.message ? err.message : err);
     db.updateSubmissionStatus(submissionId, 'error', reason);
   }
@@ -1789,6 +1828,7 @@ RULES:
     res.json(parseGradingJson(text));
   } catch (err) {
     const reason = classifyAiFailure(err);
+    noteAiOutcome(reason);
     console.error('Outline options error [' + reason + ']:', err.message || err);
     res.status(500).json({ error: 'Không dựng được các lựa chọn.', reason });
   }
@@ -1964,6 +2004,7 @@ RULES:
     res.json(outline);
   } catch (err) {
     const reason = classifyAiFailure(err);
+    noteAiOutcome(reason);
     console.error('Outline error [' + reason + ']:', err.message || err);
     res.status(500).json({ error: 'Không dựng được dàn ý.', reason });
   }
@@ -4213,6 +4254,8 @@ Bản dịch của học viên: ${userEn}`;
 
 httpServer.listen(PORT, () => {
   console.log(`IELTS LMS running at http://localhost:${PORT}`);
+  // Ask once at boot so the first page load already knows.
+  refreshAiStatus(true).then(s => console.log('AI status: ' + (s.ok ? 'ok' : s.reason)));
   if (!ANTHROPIC_API_KEY) {
     console.warn('WARNING: ANTHROPIC_API_KEY is not set. AI features will fail.');
   }

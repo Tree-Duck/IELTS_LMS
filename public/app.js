@@ -1019,6 +1019,49 @@ const GRADE_ERROR_REASONS = {
   unknown:         { title: 'Lỗi chấm bài', text: 'Có trục trặc khi chấm bài này. Bài của ta vẫn còn nguyên.', retry: true },
 };
 
+// Whether the provider is reachable, learned once per page load. Only a
+// reason that retrying cannot fix closes anything off; a wobble is left alone
+// so a student can try again.
+let _aiDown = null;   // {reason} when hard down, else null
+
+async function checkAiStatus() {
+  try {
+    const r = await fetch('/api/public-config');
+    const cfg = await r.json();
+    _aiDown = (cfg.ai && cfg.ai.hard_down) ? { reason: cfg.ai.reason } : null;
+  } catch (e) { _aiDown = null; }
+  applyAiDownUI();
+}
+
+function applyAiDownUI() {
+  const banner = document.getElementById('ai-down-banner');
+  if (!_aiDown) {
+    if (banner) banner.classList.add('hidden');
+    return;
+  }
+  const m = GRADE_ERROR_REASONS[_aiDown.reason] || GRADE_ERROR_REASONS.unknown;
+  if (banner) {
+    banner.innerHTML =
+      '<div class="ai-down-title">' + escHtml(m.title) + '</div>' +
+      '<div class="ai-down-text">Phần chấm tự động và dựng dàn ý đang tạm ngưng. Nộp bài vẫn được, giáo viên chấm tay. Chuỗi lập luận, bậc Từ vựng, bậc Câu và bậc Đoạn không dùng AI nên vẫn chạy bình thường.</div>';
+    banner.classList.remove('hidden');
+  }
+  // Grading choice: force the teacher route and say why.
+  const aiRadio = document.querySelector('input[name="grading_mode"][value="ai"]');
+  const teacherRadio = document.querySelector('input[name="grading_mode"][value="teacher"]');
+  if (aiRadio) {
+    aiRadio.disabled = true;
+    if (aiRadio.checked && teacherRadio) { teacherRadio.checked = true; teacherRadio.dispatchEvent(new Event('change')); }
+    const lab = document.getElementById('mode-ai-label');
+    if (lab) { lab.classList.add('mode-disabled'); lab.title = m.title; }
+  }
+  // Buttons that can only end in the same error.
+  for (const id of ['wp-outline-btn', 'wp-socratic-btn', 'pp-submit-btn', 'generate-btn', 'rewrite-btn']) {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = true; b.title = m.title; }
+  }
+}
+
 function statusChip(status) {
   const map = { graded: 'Graded', grading: 'Grading…', pending: 'Pending', error: 'Error', pending_review: 'Awaiting Review' };
   const cssClass = status === 'pending_review' ? 'pending-review' : status;
@@ -1331,6 +1374,7 @@ async function showApp() {
   } catch (e) { /* network error — keep cached role */ }
 
   _buildMobileDrawer();
+  checkAiStatus();
   showView('home');
 }
 
@@ -1411,7 +1455,7 @@ function showView(name) {
   if (name === 'home') loadHomeScreen();
   else if (name === 'dashboard') loadDashboard();
   else if (name === 'history') loadHistory();
-  else if (name === 'submit') { _currentDraftId = null; updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); }
+  else if (name === 'submit') { _currentDraftId = null; updateTopicOptions(); loadDraftIfExists(); initPasteTracking(); applyAiDownUI(); }
   else if (name === 'admin') loadAdminUsers();
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
