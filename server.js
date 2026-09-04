@@ -843,6 +843,10 @@ app.get('/api/admin/ai-health', authenticate, teacherOrAdmin, async (req, res) =
       ok: true,
       ms: Date.now() - t0,
       reply: (r.content?.[0]?.text || '').trim().slice(0, 20),
+      // What shape did the reply actually arrive in? If the first block is not
+      // text, every caller that reads content[0].text gets an empty string.
+      blocks: (r.content || []).map(b => b.type),
+      first_block_has_text: typeof (r.content || [])[0]?.text === "string",
       input_tokens: r.usage?.input_tokens || 0,
       output_tokens: r.usage?.output_tokens || 0,
     };
