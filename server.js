@@ -662,7 +662,20 @@ RULES: one entry per step the student attempted, in order B, C, D, D+. Never wri
     const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('truc-chain', calculateCost(i, o), i + o);
-    res.json(parseGradingJson(text));
+    // Parsing is the step that fails here, not the call. Name it that way, and
+    // keep a snippet of what came back so an admin can read it instead of guessing.
+    let parsed;
+    try { parsed = parseGradingJson(text); }
+    catch (pe) {
+      console.error('Outline options: unparseable reply, ' + text.length + ' chars: ' + text.slice(0, 400));
+      return res.status(500).json({
+        error: 'AI trả về dữ liệu không đọc được.',
+        reason: 'bad_model_output',
+        raw_len: text.length,
+        raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
+      });
+    }
+    res.json(parsed);
   } catch (err) {
     console.error('Chain check error:', err.message || err);
     res.status(500).json({ error: 'Chưa soi được chain. Thử lại.' });
@@ -1830,7 +1843,20 @@ RULES:
     const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('outline-options', calculateCost(i, o), i + o);
-    res.json(parseGradingJson(text));
+    // Parsing is the step that fails here, not the call. Name it that way, and
+    // keep a snippet of what came back so an admin can read it instead of guessing.
+    let parsed;
+    try { parsed = parseGradingJson(text); }
+    catch (pe) {
+      console.error('Outline options: unparseable reply, ' + text.length + ' chars: ' + text.slice(0, 400));
+      return res.status(500).json({
+        error: 'AI trả về dữ liệu không đọc được.',
+        reason: 'bad_model_output',
+        raw_len: text.length,
+        raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
+      });
+    }
+    res.json(parsed);
   } catch (err) {
     const reason = classifyAiFailure(err);
     noteAiOutcome(reason);
@@ -1891,7 +1917,20 @@ RULES: never rewrite the idea for them, never hand them a replacement argument, 
     const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('check-idea', calculateCost(i, o), i + o);
-    res.json(parseGradingJson(text));
+    // Parsing is the step that fails here, not the call. Name it that way, and
+    // keep a snippet of what came back so an admin can read it instead of guessing.
+    let parsed;
+    try { parsed = parseGradingJson(text); }
+    catch (pe) {
+      console.error('Outline options: unparseable reply, ' + text.length + ' chars: ' + text.slice(0, 400));
+      return res.status(500).json({
+        error: 'AI trả về dữ liệu không đọc được.',
+        reason: 'bad_model_output',
+        raw_len: text.length,
+        raw_head: (req.user && req.user.role === 'admin') ? text.slice(0, 400) : undefined,
+      });
+    }
+    res.json(parsed);
   } catch (err) {
     console.error('Check idea error:', err.message || err);
     res.status(500).json({ error: 'Chưa soi được ý. Thử lại.' });
