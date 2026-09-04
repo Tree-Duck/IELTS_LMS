@@ -470,7 +470,7 @@ async function classifyTrucBatch(prompts) {
   const items = prompts.map((p, i) => `[${i + 1}] ${p.q.replace(/\s+/g, ' ').slice(0, 420)}`).join('\n\n');
 
   const response = await client.messages.create({
-    model: MODEL, max_tokens: 1200,
+    model: MODEL, max_tokens: 8000,
     system: 'You classify IELTS Task 2 prompts by the causal argument they require. Respond with valid JSON only — no markdown fences.',
     messages: [{ role: 'user', content: `These are the 14 argument axes a Task 2 essay can run on. The axis is about WHAT CAUSAL MECHANISM the essay has to build, not about the surface topic — a prompt about elderly care can be a public-budget argument or a fairness-between-groups argument, and only the mechanism decides.
 
@@ -484,7 +484,7 @@ Return ONLY this JSON:
 {"assignments":[{"i":1,"axis":<1-14>,"confidence":"<high|low>"}]}
 One entry per prompt, in order. Use "low" when two axes genuinely both fit — a low-confidence tag is still recorded but shown as provisional.` }],
   });
-  const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+  const text = replyText(response).replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
   const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
   db.logUsage('truc-classify', calculateCost(i, o), i + o);
   const parsed = parseGradingJson(text);
@@ -655,11 +655,11 @@ RULES: one entry per step the student attempted, in order B, C, D, D+. Never wri
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 900,
+      model: MODEL, max_tokens: 8000,
       system: 'You are an IELTS writing coach marking a mechanism chain. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: userPrompt }],
     });
-    const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+    const text = replyText(response).replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('truc-chain', calculateCost(i, o), i + o);
     // Parsing is the step that fails here, not the call. Name it that way, and
@@ -701,7 +701,7 @@ const MICRO_TYPE_NOTE = {
 async function buildMicroItems({ type, err, quote, fix, why, up }) {
   if (!ANTHROPIC_API_KEY) throw new Error('AI service unavailable');
   const response = await client.messages.create({
-    model: MODEL, max_tokens: 1000,
+    model: MODEL, max_tokens: 8000,
     system: 'You build short, targeted IELTS writing drills. Respond with valid JSON only — no markdown fences.',
     messages: [{ role: 'user', content: `An IELTS student made this mistake in their own essay.
 
@@ -727,7 +727,7 @@ RULES: exactly three items. "good" must differ from "bad" only by the fault bein
 so a string comparison can mark it. Both must be plausible IELTS Task 2 sentences.
 Never invent statistics. Do not reuse the student's original sentence.` }],
   });
-  const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+  const text = replyText(response).replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
   const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
   db.logUsage('micro-task', calculateCost(i, o), i + o);
   const parsed = parseGradingJson(text);
@@ -858,7 +858,7 @@ app.get('/api/admin/ai-health', authenticate, teacherOrAdmin, async (req, res) =
     out.probe = {
       ok: true,
       ms: Date.now() - t0,
-      reply: (r.content?.[0]?.text || '').trim().slice(0, 20),
+      reply: replyText(r).slice(0, 20),
       // What shape did the reply actually arrive in? If the first block is not
       // text, every caller that reads content[0].text gets an empty string.
       blocks: (r.content || []).map(b => b.type),
@@ -981,6 +981,14 @@ function mapQuotesToAnnotations(essay, rawAnnotations) {
 // The prompt lists annotations / sentence_analysis LAST, so cutting to the last
 // completed value and closing open containers preserves band scores + earlier
 // feedback rather than failing the whole grading.
+// The reply can arrive as several blocks, and with this model the first one
+// is a thinking block. Reading content[0].text therefore returned undefined
+// on every call. Join whatever text blocks are actually present.
+function replyText(response) {
+  const blocks = (response && response.content) || [];
+  return blocks.filter(b => b && b.type === 'text').map(b => b.text || '').join('').trim();
+}
+
 function parseGradingJson(text) {
   try { return JSON.parse(text); } catch (e) {}
   // Recovery: try cutting at each value boundary from the end, close any open
@@ -1284,7 +1292,7 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 300,
+      max_tokens: 8000,
       system: 'You are an expert IELTS task writer. Output only the task text with no preamble, labels, or commentary.',
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -1386,7 +1394,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1400,
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [{ role: 'user', content: finalPrompt }],
     });
@@ -1420,7 +1428,7 @@ app.post('/api/translate-prompt', authenticate, async (req, res) => {
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 500,
+      max_tokens: 8000,
       system: 'You are a translator. You translate IELTS Writing prompts into natural Vietnamese. You NEVER answer the prompt, never plan it, never write an essay — you only translate. Keep IELTS terminology (Task 1, Task 2, band) in English. Return the translation alone, with no preamble.',
       messages: [{ role: 'user', content: `Translate the text between the markers into Vietnamese. It is an exam question — translate it, do not answer it.
 
@@ -1428,7 +1436,7 @@ app.post('/api/translate-prompt', authenticate, async (req, res) => {
 ${prompt.trim()}
 PROMPT>>>` }],
     });
-    const translation = (response.content?.[0]?.text || '').trim();
+    const translation = replyText(response);
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('translate-prompt', calculateCost(i, o), i + o);
     res.json({ translation });
@@ -1839,11 +1847,11 @@ RULES:
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 2200,
+      model: MODEL, max_tokens: 8000,
       system: 'You are an expert IELTS examiner. Respond with valid JSON only — no markdown fences, no commentary.',
       messages: [{ role: 'user', content: userPrompt }],
     });
-    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const text = replyText(response).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('outline-options', calculateCost(i, o), i + o);
     // Parsing is the step that fails here, not the call. Name it that way, and
@@ -1916,11 +1924,11 @@ RULES: never rewrite the idea for them, never hand them a replacement argument, 
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 400,
+      model: MODEL, max_tokens: 8000,
       system: 'You are an IELTS writing coach giving fast, blunt, encouraging feedback. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: userPrompt }],
     });
-    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const text = replyText(response).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('check-idea', calculateCost(i, o), i + o);
     // Parsing is the step that fails here, not the call. Name it that way, and
@@ -2033,11 +2041,11 @@ RULES:
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 3600,
+      model: MODEL, max_tokens: 8000,
       system: 'You are an expert IELTS writing coach. Respond with valid JSON only — no markdown fences, no commentary.',
       messages: [{ role: 'user', content: isTask1 ? task1Prompt : task2Prompt }],
     });
-    const text = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const text = replyText(response).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const outline = parseGradingJson(text);
 
     // attach the Vietnamese gloss for each vocabulary item from the bank
@@ -2104,7 +2112,7 @@ ${submission.essay}`;
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1500,
+      max_tokens: 8000,
       system: 'You are an expert IELTS writing coach. Rewrite the essay at Band 8.0–8.5 level, then explain what you changed. Output the rewritten essay first, then the "## What Changed" section.',
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -2499,7 +2507,7 @@ async function generateTestExplanations(attemptId, test, answers, wrongQNumbers)
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1024,
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [{ role: 'user', content: `Wrong answers:\n${userContent}` }]
     });
@@ -3049,7 +3057,7 @@ Return this exact JSON structure (band scores must be 0–9 in 0.5 steps):
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 400,
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -3271,7 +3279,7 @@ Rules:
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 1800,
+      max_tokens: 8000,
       system: 'You are an IELTS vocabulary coach. Return ONLY valid JSON arrays. No markdown.',
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -3918,11 +3926,11 @@ statistics.`;
 
   try {
     const response = await client.messages.create({
-      model: MODEL, max_tokens: 3000,
+      model: MODEL, max_tokens: 8000,
       system: 'You are an IELTS writing coach comparing a draft with its rewrite. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: userPrompt }],
     });
-    const text = (response.content?.[0]?.text || '').trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
+    const text = replyText(response).replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '');
     const i = response.usage?.input_tokens || 0, o = response.usage?.output_tokens || 0;
     db.logUsage('paragraph-revise', calculateCost(i, o), i + o);
     const parsed = parseGradingJson(text);
@@ -4059,7 +4067,7 @@ statistics.`;
       model: MODEL,
       // "Every fault" on a weak 120-word paragraph runs long; the recovery in
       // parseGradingJson still salvages the entries that did land if it truncates.
-      max_tokens: 5000,
+      max_tokens: 8000,
       system: 'You are an IELTS writing coach. Respond with valid JSON only — no markdown fences.',
       messages: [{ role: 'user', content: prompt }],
     });
@@ -4136,7 +4144,7 @@ Return ONLY valid JSON, no markdown:
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 250,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -4173,11 +4181,11 @@ IMPORTANT: pronunciation CANNOT be reliably judged from a text transcript — gi
 Reply with ONLY a JSON object — no markdown, no extra text — in exactly this shape:
 {"band": <overall 0-9, half-steps>, "fluency": <0-9>, "lexical": <0-9>, "grammar": <0-9>, "pronunciation": <0-9>, "strengths": ["<vi>","<vi>"], "improvements": ["<vi>","<vi>"], "better_phrases": ["<English phrase> — <nghĩa tiếng Việt>","..."], "comment": "<2-3 câu nhận xét tiếng Việt>"}
 All of strengths, improvements and comment must be in Vietnamese; better_phrases give 2-3 natural English upgrades each with a short Vietnamese gloss. Be encouraging but honest.`;
-    const response = await client.messages.create({ model: MODEL, max_tokens: 700, messages: [{ role: 'user', content: prompt }] });
+    const response = await client.messages.create({ model: MODEL, max_tokens: 8000, messages: [{ role: 'user', content: prompt }] });
     const inputTokens = response.usage?.input_tokens || 0;
     const outputTokens = response.usage?.output_tokens || 0;
     db.logUsage('speaking-score', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
-    let raw = (response.content?.[0]?.text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    let raw = replyText(response).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
     let data;
     try { data = JSON.parse(raw); } catch { return res.status(500).json({ error: 'Không đọc được kết quả chấm. Vui lòng thử lại.' }); }
     res.json(data);
@@ -4243,11 +4251,11 @@ Be encouraging but honest. Keep total response under 350 words.`;
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 600,
+      max_tokens: 8000,
       system,
       messages: [{ role: 'user', content: userMsg }],
     });
-    const feedback = response.content?.[0]?.text || '';
+    const feedback = replyText(response);
     res.json({ feedback });
   } catch (e) {
     console.error('grade-writing AI error:', e.message);
@@ -4273,14 +4281,14 @@ RULES:
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 900,
+      max_tokens: 8000,
       system,
       messages: [{ role: 'user', content: userMsg }],
     });
     const inputTokens = response.usage?.input_tokens || 0;
     const outputTokens = response.usage?.output_tokens || 0;
     db.logUsage('improve-writing', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
-    const improved = response.content?.[0]?.text?.trim() || '';
+    const improved = replyText(response);
     res.json({ improved });
   } catch (e) {
     console.error('improve-writing AI error:', e.message);
@@ -4308,11 +4316,11 @@ Bản dịch của học viên: ${userEn}`;
   try {
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 400,
+      max_tokens: 8000,
       system,
       messages: [{ role: 'user', content: userMsg }],
     });
-    const feedback = response.content?.[0]?.text || '';
+    const feedback = replyText(response);
     res.json({ feedback });
   } catch (e) {
     console.error('grade-paragraph AI error:', e.message);
