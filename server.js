@@ -3913,6 +3913,148 @@ app.put('/api/game/tower', authenticate, (req, res) => {
   }
 });
 
+// ─── Game coins: earned in Bắn Chữ and Xây tháp, spent in the shop ──────────
+// Prices live here, so a purchase is only ever as good as the balance the
+// server holds. Earnings are reported by the client, so each report is
+// capped, and so is what one student can collect in a day.
+const SHOP_PRICES = { hint: 15, slow: 20, double: 25, revive: 40 };
+const WALLET_EARN_MAX = 500;
+const WALLET_DAY_MAX = 2000;
+const WALLET_INV_MAX = 20;
+const walletDay = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
+// Weeks start on Monday, Vietnam time; the key is that Monday's date.
+const walletWeek = () => {
+  const d = new Date(Date.now() + 7 * 3600e3);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+};
+const walletOut = w => ({
+  coins: w.coins || 0,
+  inv: w.inv || {},
+  earned: w.earned || 0,
+  day_left: w.day === walletDay() ? Math.max(0, WALLET_DAY_MAX - (w.day_earned || 0)) : WALLET_DAY_MAX,
+});
+
+// Runs fn against the student's wallet. A string back from fn is a refusal:
+// nothing is saved and the student sees why.
+function walletRoute(fn) {
+  return (req, res) => {
+    try {
+      let refusal = null;
+      const extra = {};
+      const w = db.updateWallet(req.user.id, w => {
+        if (!w.inv) w.inv = {};
+        refusal = fn(w, req.body || {}, extra);
+        return !refusal;
+      });
+      if (refusal) return res.status(400).json({ error: refusal, ...walletOut(w) });
+      res.json({ ...walletOut(w), ...extra });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to update coins' });
+    }
+  };
+}
+
+app.get('/api/game/wallet', authenticate, (req, res) => {
+  try {
+    res.json(walletOut(db.getWallet(req.user.id) || {}));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load coins' });
+  }
+});
+
+app.post('/api/game/wallet/earn', authenticate, walletRoute((w, b, extra) => {
+  const today = walletDay();
+  if (w.day !== today) { w.day = today; w.day_earned = 0; }
+  const want = Math.max(0, Math.min(WALLET_EARN_MAX, parseInt(b.amount, 10) || 0));
+  const add = Math.min(want, WALLET_DAY_MAX - w.day_earned);
+  w.coins = (w.coins || 0) + add;
+  w.earned = (w.earned || 0) + add;
+  w.day_earned += add;
+  const week = walletWeek();
+  if (w.week !== week) { w.week = week; w.week_earned = 0; }
+  w.week_earned += add;
+  extra.added = add;
+  return null;
+}));
+
+app.post('/api/game/wallet/buy', authenticate, walletRoute((w, b) => {
+  const price = SHOP_PRICES[b.item];
+  if (!price) return 'Không có món này trong cửa hàng.';
+  if ((w.coins || 0) < price) return 'Chưa đủ xu để mua.';
+  if ((w.inv[b.item] || 0) >= WALLET_INV_MAX) return `Mỗi món giữ tối đa ${WALLET_INV_MAX} cái.`;
+  w.coins -= price;
+  w.inv[b.item] = (w.inv[b.item] || 0) + 1;
+  return null;
+}));
+
+app.post('/api/game/wallet/use', authenticate, walletRoute((w, b) => {
+  if (!SHOP_PRICES[b.item] || !(w.inv[b.item] > 0)) return 'Hết món này rồi.';
+  w.inv[b.item] -= 1;
+  return null;
+}));
+
+// ─── Game rankings ──────────────────────────────────────────────────────────
+// Bắn Chữ records used to live only in the browser; they are sent here too so
+// they can be ranked. Only the best per mode and speed is kept.
+const SHOOT_MODES = ['copy', 'meaning'];
+const SHOOT_DIFFS = ['easy', 'medium', 'hard'];
+app.post('/api/game/score', authenticate, (req, res) => {
+  try {
+    const { mode, diff } = req.body || {};
+    if (!SHOOT_MODES.includes(mode) || !SHOOT_DIFFS.includes(diff)) return res.status(400).json({ error: 'Unknown game' });
+    const score = Math.max(0, Math.min(1000000, parseInt(req.body.score, 10) || 0));
+    res.json({ best: db.saveShootBest(req.user.id, `${mode}_${diff}`, score) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save score' });
+  }
+});
+
+// Boards: coins this week, coins all time, tallest tower, and Bắn Chữ at one
+// speed (best of the two modes). Students only; a class board is open to its
+// own students and to teachers.
+const RANK_BOARDS = ['week', 'coins', 'tower', 'shoot'];
+const RANK_TOP = 20;
+app.get('/api/game/leaderboard', authenticate, (req, res) => {
+  try {
+    const board = RANK_BOARDS.includes(req.query.board) ? req.query.board : 'week';
+    const diff = SHOOT_DIFFS.includes(req.query.diff) ? req.query.diff : 'easy';
+    const { role, id: me } = req.user;
+    const classes = role === 'student'
+      ? db.getStudentClasses(me).map(c => ({ id: c.class_id, name: c.name }))
+      : (role === 'admin' ? db.getAllClasses() : db.getClassesByTeacher(me)).map(c => ({ id: c.id, name: c.name }));
+    const scope = req.query.scope && req.query.scope !== 'all' ? parseInt(req.query.scope, 10) : null;
+    if (scope && !classes.some(c => c.id === scope)) return res.status(403).json({ error: 'Không xem được bảng của lớp này.' });
+    const inScope = scope ? new Set(db.getClassStudents(scope).map(s => s.user_id)) : null;
+    const g = db.getGameStats();
+    const week = walletWeek();
+    const value = uid => {
+      const w = g.wallets[uid] || {};
+      if (board === 'week') return w.week === week ? w.week_earned || 0 : 0;
+      if (board === 'coins') return w.earned || 0;
+      if (board === 'tower') return (g.towers[uid] && g.towers[uid].best) || 0;
+      const s = g.scores[uid] || {};
+      return Math.max(...SHOOT_MODES.map(m => s[`${m}_${diff}`] || 0));
+    };
+    const ranked = db.getAllUsers()
+      .filter(u => u.role === 'student' && (!inScope || inScope.has(u.id)))
+      .map(u => ({ id: u.id, name: u.name || 'Học viên', value: value(u.id) }))
+      .filter(r => r.value > 0)
+      .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
+    // Equal values share a rank: 1, 2, 2, 4.
+    ranked.forEach((r, i) => { r.rank = i && r.value === ranked[i - 1].value ? ranked[i - 1].rank : i + 1; });
+    const mine = ranked.find(r => r.id === me);
+    const out = r => ({ rank: r.rank, name: r.name, value: r.value, me: r.id === me });
+    res.json({
+      board, diff, scope: scope || 'all', classes, total: ranked.length,
+      rows: ranked.slice(0, RANK_TOP).map(out),
+      me: mine ? out(mine) : null,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load rankings' });
+  }
+});
+
 // ─── Practice: Paragraph Feedback ────────────────────────────────────────────
 // Turn quote-based marks into offsets. Unlike essay annotations these are
 // allowed to overlap: the whole point is that one span can be wrong in several

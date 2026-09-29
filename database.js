@@ -1466,6 +1466,39 @@ const db = {
     return data.game_towers[userId];
   },
 
+  // ── Game coins: one wallet per student ────────────────────────────────────
+  getWallet(userId) {
+    const data = load();
+    return (data.game_wallets || {})[userId] || null;
+  },
+
+  // fn changes the wallet in place; returning false leaves it unsaved.
+  updateWallet(userId, fn) {
+    const data = load();
+    if (!data.game_wallets) data.game_wallets = {};
+    const w = data.game_wallets[userId] || { coins: 0, inv: {}, earned: 0, day: '', day_earned: 0 };
+    if (fn(w) === false) return w;
+    w.updated_at = new Date().toISOString();
+    data.game_wallets[userId] = w;
+    save(data);
+    return w;
+  },
+
+  // Bắn Chữ: best score per mode and speed, e.g. "copy_easy". Never goes down.
+  saveShootBest(userId, key, score) {
+    const data = load();
+    if (!data.game_scores) data.game_scores = {};
+    const s = data.game_scores[userId] || (data.game_scores[userId] = {});
+    if (score > (s[key] || 0)) { s[key] = score; save(data); }
+    return s[key] || 0;
+  },
+
+  // Everything the rankings read, in one load.
+  getGameStats() {
+    const data = load();
+    return { wallets: data.game_wallets || {}, towers: data.game_towers || {}, scores: data.game_scores || {} };
+  },
+
   getNotificationCount(userId) {
     const data = load();
     const gradedCount = (data.submissions || [])

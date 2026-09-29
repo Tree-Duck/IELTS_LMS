@@ -7515,3 +7515,59 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw-ruin { font-size: 2.6rem; line-height: 1; margin-bottom: 0.3rem; }
 .tw-restart-note { font-size: 0.92rem; color: var(--moss); margin: 0.2rem auto 1rem; max-width: 30rem; line-height: 1.5; }
 .lv-mode-progress { font-size: 0.82rem; font-weight: 700; color: var(--lime); }
+
+/* Xu, cửa hàng, vật phẩm trong game, bảng xếp hạng */
+.wal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin: 0 0 0.9rem; padding: 0.6rem 0.8rem; border: 1.5px solid #E8D9A8; background: #FFF8E1; border-radius: var(--r-md); }
+.wal-coins { font-size: 1.05rem; color: #6B4E00; }
+.wal-coins strong { font-weight: 700; }
+.wal-invs { display: flex; gap: 0.5rem; flex: 1; flex-wrap: wrap; font-size: 0.92rem; }
+.wal-inv { background: #fff; border: 1px solid #EFE2B8; border-radius: 999px; padding: 0.1rem 0.5rem; }
+.wal-shop-btn { border: 2px solid #D9A520; background: #fff; color: #6B4E00; border-radius: 999px; padding: 0.3rem 0.85rem; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+.wal-shop-btn.active, .wal-shop-btn:hover { background: #F5C542; }
+.wal-shop { margin: -0.4rem 0 1rem; }
+.wal-earn-note { font-size: 0.86rem; color: var(--moss); margin-bottom: 0.6rem; line-height: 1.5; }
+.wal-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.7rem; }
+.wal-item { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.8rem; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md); }
+.wal-item-head { display: flex; align-items: center; gap: 0.45rem; }
+.wal-item-icon { font-size: 1.5rem; }
+.wal-item-name { font-weight: 700; flex: 1; }
+.wal-item-have { font-size: 0.8rem; color: var(--moss); }
+.wal-item-where { font-size: 0.78rem; font-weight: 700; color: #8A6A10; }
+.wal-item-desc { font-size: 0.86rem; line-height: 1.45; flex: 1; }
+.wal-buy { margin-top: 0.3rem; }
+.wal-buy:disabled { opacity: 0.45; cursor: default; }
+.wal-mini { font-weight: 700; color: #6B4E00; background: #FFF1C2; border-radius: 999px; padding: 0.15rem 0.6rem; margin-left: auto; }
+.wal-earned { display: inline-block; margin: 0.4rem 0 0.2rem; font-weight: 700; color: #6B4E00; background: #FFF1C2; border-radius: 999px; padding: 0.25rem 0.8rem; }
+
+.ts-powers { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; margin: 0.5rem 0 0.1rem; }
+.ts-power { display: inline-flex; align-items: center; gap: 0.35rem; border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0.25rem 0.75rem 0.25rem 0.35rem; font-weight: 700; font-size: 0.88rem; cursor: pointer; touch-action: manipulation; }
+.ts-power kbd { font-family: inherit; font-size: 0.75rem; background: var(--forest-deep); color: var(--cream); border-radius: 6px; padding: 0.05rem 0.4rem; }
+.ts-power:disabled { opacity: 0.4; cursor: default; }
+.ts-power.on { border-color: #7EC8FF; background: #E6F4FF; }
+.ts-power-n { font-size: 0.8rem; color: var(--moss); }
+.ts-power-revive { margin-left: auto; font-weight: 700; font-size: 0.9rem; }
+.ts-arena.slowed { box-shadow: inset 0 0 70px rgba(126, 200, 255, 0.6); }
+.ts-arena.slowed .ts-item { border-color: #7EC8FF; }
+.ts-ship--double { background: #7EC8FF; box-shadow: 0 0 14px #7EC8FF; filter: drop-shadow(-14px 0 0 #7EC8FF) drop-shadow(28px 0 0 #7EC8FF); }
+.ts-ov-sub { color: var(--cream); max-width: 22rem; text-align: center; line-height: 1.5; padding: 0 1rem; }
+
+.lb-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.6rem; }
+.lb-sub .vb-chip { font-size: 0.85rem; }
+.lb-note { font-size: 0.86rem; color: var(--moss); margin: 0.2rem 0 0.9rem; }
+.lb-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.lb-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.9rem; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md); }
+.lb-row.top { border-color: #E8C65A; background: #FFFAEA; }
+.lb-row.me { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(14, 77, 60, 0.15); }
+.lb-rank { width: 2rem; text-align: center; font-weight: 700; font-size: 1.05rem; }
+.lb-row.top .lb-rank { font-size: 1.4rem; }
+.lb-name { flex: 1; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-name em { font-style: normal; font-weight: 400; color: var(--moss); }
+.lb-val { font-weight: 700; white-space: nowrap; }
+.lb-val small { font-weight: 400; color: var(--moss); }
+.lb-gap { text-align: center; color: var(--moss); }
+.lb-empty, .lb-you-none { padding: 1rem; text-align: center; color: var(--moss); border: 1.5px dashed var(--line); border-radius: var(--r-md); }
+.lb-count { margin-top: 0.8rem; font-size: 0.82rem; color: var(--moss); text-align: center; }
+@media (max-width: 520px) {
+  .ts-power-name { display: none; }
+  .ts-powers { margin-top: 0.4rem; }
+}

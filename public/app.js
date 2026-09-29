@@ -14395,6 +14395,8 @@ function lvRenderHub() {
         <span class="lv-diff-label">Tốc độ Bắn Chữ</span>
         ${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${_tsDiff === k ? ' active' : ''}" onclick="tsSetDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}
       </div>
+      <div class="wal-bar" id="wal-bar"></div>
+      <div class="wal-shop hidden" id="wal-shop"></div>
       <div class="lv-modes">
         <button class="lv-mode" onclick="lvStartFlash()">
           <span class="lv-mode-icon">🃏</span>
@@ -14423,6 +14425,8 @@ function lvRenderHub() {
       </div>
     </div>`;
   twHubProgress();
+  walBar();
+  walLoad().then(walBar);
 }
 
 function lvSetSrc(src) {
@@ -14573,6 +14577,180 @@ function lvUnbindKeys() {
 }
 
 /* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
+/* ─── Xu và cửa hàng ───────────────────────────────────────────────────────
+   Coins are earned in Bắn Chữ and Xây tháp and spent on items that work in
+   those games. The server holds the balance and the prices; the screen
+   shows earnings at once and sends them in batches. */
+const SHOP_ITEMS = [
+  { id: 'slow',   icon: '❄️', name: 'Tia làm chậm', price: 20, where: 'Bắn Chữ · phím 1', desc: 'Mọi từ rơi chậm hẳn trong 10 giây.' },
+  { id: 'double', icon: '🔱', name: 'Bắn 2 tia',    price: 25, where: 'Bắn Chữ · phím 2', desc: 'Trong 15 giây, bắn trúng một từ thì tia thứ hai hạ luôn từ đang rơi thấp nhất.' },
+  { id: 'revive', icon: '💖', name: 'Hồi sinh',     price: 40, where: 'Cả hai game', desc: 'Hết mạng thì được sống lại. Bắn Chữ: 3 mạng và dọn sạch màn. Xây tháp: toà nhà không sập, hồi đủ mạng.' },
+  { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
+];
+let _wal = null;
+let _walFor = null;
+let _walPending = 0;
+let _walTimer = 0;
+let _walShopOpen = false;
+
+function walWho() { return (currentUser && currentUser.id) || 'guest'; }
+async function walLoad() {
+  if (_wal && _walFor === walWho()) return _wal;
+  try { walSet(await api('/api/game/wallet')); } catch (e) { if (!_wal) _wal = { coins: 0, inv: {} }; }
+  _walFor = walWho();
+  return _wal;
+}
+// The server's figures, plus whatever has been earned here and not sent yet.
+function walSet(w) {
+  if (!w || typeof w.coins !== 'number') return;
+  _wal = { ...w, inv: { ...(w.inv || {}) }, coins: w.coins + _walPending };
+  walBar();
+}
+function walCoins() { return (_wal && _wal.coins) || 0; }
+function walCount(id) { return (_wal && _wal.inv && _wal.inv[id]) || 0; }
+
+function walEarn(n, now) {
+  n = Math.round(n);
+  if (!(n > 0)) return;
+  if (!_wal) _wal = { coins: 0, inv: {} };
+  _wal.coins += n;
+  _walPending += n;
+  clearTimeout(_walTimer);
+  if (now) walFlush(); else _walTimer = setTimeout(walFlush, 3000);
+  walBar();
+}
+function walFlush() {
+  clearTimeout(_walTimer);
+  const n = _walPending;
+  if (!n) return Promise.resolve();
+  _walPending = 0;
+  return api('/api/game/wallet/earn', { method: 'POST', body: JSON.stringify({ amount: n }) })
+    .then(w => {
+      walSet(w);
+      if (w.added < n) showToast('Hôm nay đã nhận đủ xu tối đa. Mai chơi tiếp để kiếm thêm nhé.');
+    })
+    .catch(() => { _walPending += n; });
+}
+
+// Using an item takes effect at once; the server is told in the background.
+function walUse(id) {
+  if (walCount(id) <= 0) return false;
+  _wal.inv[id]--;
+  api('/api/game/wallet/use', { method: 'POST', body: JSON.stringify({ item: id }) }).then(walSet).catch(() => {});
+  walBar();
+  return true;
+}
+
+async function walBuy(id) {
+  const item = SHOP_ITEMS.find(i => i.id === id);
+  if (!item || walCoins() < item.price) return;
+  try {
+    // Coins still on their way to the server have to land before they are spent.
+    if (_walPending) await walFlush();
+    walSet(await api('/api/game/wallet/buy', { method: 'POST', body: JSON.stringify({ item: id }) }));
+    tsSfx('power');
+    showToast(`${item.icon} Đã mua ${item.name}.`);
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+function walToggleShop() { _walShopOpen = !_walShopOpen; walBar(); }
+
+function walBar() {
+  const mini = document.getElementById('wal-mini');
+  if (mini) mini.textContent = `🪙 ${walCoins()}`;
+  const bar = document.getElementById('wal-bar');
+  if (!bar) return;
+  const inv = SHOP_ITEMS.map(i => `<span class="wal-inv" title="${escapeHtml(i.name)}">${i.icon} ${walCount(i.id)}</span>`).join('');
+  bar.innerHTML = `
+    <span class="wal-coins">🪙 <strong>${walCoins()}</strong> xu</span>
+    <span class="wal-invs">${inv}</span>
+    <button class="wal-shop-btn${_walShopOpen ? ' active' : ''}" onclick="walToggleShop()">🛒 ${_walShopOpen ? 'Đóng cửa hàng' : 'Cửa hàng'}</button>
+    <button class="wal-shop-btn" onclick="lbOpen()">🏆 Xếp hạng</button>`;
+  const shop = document.getElementById('wal-shop');
+  if (!shop) return;
+  shop.classList.toggle('hidden', !_walShopOpen);
+  shop.innerHTML = `
+    <div class="wal-earn-note">Kiếm xu: Bắn Chữ mỗi từ bắn trúng được 1 xu ở Dễ, 2 xu ở Vừa, 3 xu ở Khó, gà trùm gấp ba. Xây tháp mỗi tầng được 2 xu, tầng tự gõ 3 xu, trứng vàng thêm 5 xu, qua mốc thêm 20 xu.</div>
+    <div class="wal-items">${SHOP_ITEMS.map(i => `
+      <div class="wal-item">
+        <div class="wal-item-head"><span class="wal-item-icon">${i.icon}</span><span class="wal-item-name">${escapeHtml(i.name)}</span><span class="wal-item-have">đang có ${walCount(i.id)}</span></div>
+        <div class="wal-item-where">${escapeHtml(i.where)}</div>
+        <div class="wal-item-desc">${escapeHtml(i.desc)}</div>
+        <button class="vb-start-btn wal-buy" onclick="walBuy('${i.id}')" ${walCoins() < i.price ? 'disabled' : ''}>Mua · ${i.price} 🪙</button>
+      </div>`).join('')}
+    </div>`;
+}
+
+/* ─── Bảng xếp hạng ─── */
+const LB_BOARDS = [
+  { id: 'week',  label: '🪙 Xu tuần này',  unit: 'xu',   note: 'Tính xu kiếm được từ thứ Hai tuần này. Sáng thứ Hai cả lớp về 0 và đua lại.' },
+  { id: 'tower', label: '🏗️ Tháp cao nhất', unit: 'tầng', note: 'Kỷ lục số tầng Xây tháp.' },
+  { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Điểm cao nhất của một lượt, lấy chế độ tốt hơn trong hai chế độ.' },
+  { id: 'coins', label: '💰 Tổng xu',       unit: 'xu',   note: 'Tất cả xu từng kiếm được. Mua đồ không làm tụt hạng.' },
+];
+let _lb = { board: 'week', diff: null, scope: 'all' };
+
+async function lbOpen(board) {
+  tsStop();
+  twStop();
+  lvUnbindKeys();
+  if (board) _lb.board = board;
+  if (!_lb.diff) _lb.diff = _tsDiff;
+  // Coins from the round just played should already count.
+  try { await walFlush(); } catch (e) {}
+  lbLoad();
+}
+function lbSet(key, val) { _lb[key] = val; lbLoad(); }
+
+async function lbLoad() {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  const b = LB_BOARDS.find(x => x.id === _lb.board) || LB_BOARDS[0];
+  const head = data => `
+    <button class="btn-back-plain" onclick="lvRenderHub()">← Chọn buổi</button>
+    <div class="lv-head"><div class="vb-logo">🏆 Bảng xếp hạng</div></div>
+    <div class="lb-tabs">${LB_BOARDS.map(x => `<button class="vb-chip${x.id === b.id ? ' active' : ''}" onclick="lbSet('board','${x.id}')">${x.label}</button>`).join('')}</div>
+    ${b.id === 'shoot' ? `<div class="lb-tabs lb-sub">${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${_lb.diff === k ? ' active' : ''}" onclick="lbSet('diff','${k}')">${d.label}</button>`).join('')}</div>` : ''}
+    ${data && data.classes.length ? `<div class="lb-tabs lb-sub">
+      <button class="vb-chip${_lb.scope === 'all' ? ' active' : ''}" onclick="lbSet('scope','all')">Tất cả học viên</button>
+      ${data.classes.map(c => `<button class="vb-chip${String(_lb.scope) === String(c.id) ? ' active' : ''}" onclick="lbSet('scope','${c.id}')">Lớp ${escapeHtml(c.name)}</button>`).join('')}
+    </div>` : ''}
+    <div class="lb-note">${escapeHtml(b.note)}</div>`;
+  root.innerHTML = `<div class="lv-wrap lv-wrap--narrow">${head(null)}<div class="loading">Đang tải bảng xếp hạng…</div></div>`;
+  let data;
+  const want = { ..._lb };
+  try {
+    data = await api(`/api/game/leaderboard?board=${want.board}&diff=${want.diff}&scope=${encodeURIComponent(want.scope)}`);
+  } catch (e) {
+    if (String(want.scope) !== 'all') { _lb.scope = 'all'; return lbLoad(); }
+    root.innerHTML = `<div class="lv-wrap lv-wrap--narrow">${head(null)}<div class="error-msg" style="display:block">${escapeHtml(e.message)}</div></div>`;
+    return;
+  }
+  // A newer tab was clicked while this one loaded.
+  if (JSON.stringify(want) !== JSON.stringify(_lb) || !document.getElementById('lesson-vocab-root')) return;
+  const medal = r => (r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank);
+  const row = r => `<div class="lb-row${r.me ? ' me' : ''}${r.rank <= 3 ? ' top' : ''}">
+      <span class="lb-rank">${medal(r)}</span>
+      <span class="lb-name">${escapeHtml(r.name)}${r.me ? ' <em>(em)</em>' : ''}</span>
+      <span class="lb-val">${r.value.toLocaleString('vi-VN')} <small>${b.unit}</small></span>
+    </div>`;
+  const mineShown = data.rows.some(r => r.me);
+  const you = data.me
+    ? (mineShown ? '' : `<div class="lb-gap">⋯</div>${row(data.me)}`)
+    : `<div class="lb-you-none">Em chưa có tên trên bảng này. Chơi một lượt là có ngay.</div>`;
+  root.innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow">
+      ${head(data)}
+      <div class="lb-list">
+        ${data.rows.length ? data.rows.map(row).join('') : '<div class="lb-empty">Chưa ai có điểm ở bảng này. Người đầu tiên chơi sẽ đứng hạng 1.</div>'}
+        ${data.rows.length ? you : ''}
+      </div>
+      <div class="lb-count">${data.total} bạn có tên trên bảng</div>
+    </div>`;
+}
+
 const TS_MODES = {
   copy:    { label: 'Nhìn tiếng Anh', fall: 20, gap: 3.2, gapMin: 1.4, maxOn: 7 },
   meaning: { label: 'Nhìn nghĩa Việt', fall: 30, gap: 4.6, gapMin: 2.2, maxOn: 5 },
@@ -14581,10 +14759,15 @@ const TS_MAX_LIVES = 5;
 // Speed levels. "Vừa" is the tuning students already had; "Dễ" is for those
 // who still found it too fast, with fewer words on screen and two more lives.
 const TS_DIFFS = {
-  easy:   { label: 'Dễ',  note: 'bay chậm',  fall: 1.6, step: 0.4, floor: 0.7,  gap: 1.5, crowd: 0.6, lives: 5 },
-  medium: { label: 'Vừa', note: 'bay vừa',   fall: 1,   step: 0.7, floor: 0.45, gap: 1,   crowd: 1,   lives: 3 },
-  hard:   { label: 'Khó', note: 'bay nhanh', fall: 0.7, step: 0.9, floor: 0.4,  gap: 0.8, crowd: 1,   lives: 3 },
+  easy:   { label: 'Dễ',  note: 'bay chậm',  fall: 1.6, step: 0.4, floor: 0.7,  gap: 1.5, crowd: 0.6, lives: 5, coin: 1 },
+  medium: { label: 'Vừa', note: 'bay vừa',   fall: 1,   step: 0.7, floor: 0.45, gap: 1,   crowd: 1,   lives: 3, coin: 2 },
+  hard:   { label: 'Khó', note: 'bay nhanh', fall: 0.7, step: 0.9, floor: 0.4,  gap: 0.8, crowd: 1,   lives: 3, coin: 3 },
 };
+// Shop items in play: how long they last, and how much the slow beam slows.
+const TS_SLOW_SECS = 10;
+const TS_SLOW_RATE = 0.4;
+const TS_DOUBLE_SECS = 15;
+const TS_REVIVE_LIVES = 3;
 let _tsDiff = 'easy';
 try { const d = localStorage.getItem('tsDiff'); if (TS_DIFFS[d]) _tsDiff = d; } catch (e) {}
 function tsSetDiff(d) { if (TS_DIFFS[d]) { _tsDiff = d; lvSave('tsDiff', d); } lvRenderHub(); }
@@ -14696,6 +14879,7 @@ function tsStart(mode, list) {
         <span class="ts-combo" id="ts-combo"></span>
         <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
         <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
+        <span class="ts-stat">🪙 <strong id="ts-coins">0</strong></span>
         <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
         <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">⏸</button>
       </div>
@@ -14705,6 +14889,7 @@ function tsStart(mode, list) {
         <div class="ts-miss" id="ts-miss"></div>
         <div class="ts-overlay hidden" id="ts-overlay"></div>
       </div>
+      <div class="ts-powers" id="ts-powers"></div>
       <input class="ts-input" id="ts-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ vào đây…" aria-label="Ô gõ từ">
     </div>`;
   const g = _ts = {
@@ -14713,7 +14898,7 @@ function tsStart(mode, list) {
     items: [], lockId: null, nextId: 1, spawned: 0,
     score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
     missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: false,
-    W: 0, H: 0,
+    W: 0, H: 0, coins: 0, slow: 0, dbl: 0, revives: 0, reviving: false, powersShown: '',
   };
   const input = document.getElementById('ts-input');
   input.addEventListener('input', tsOnInput);
@@ -14725,10 +14910,53 @@ function tsStart(mode, list) {
   if (window.visualViewport) window.visualViewport.addEventListener('resize', g.onResize);
   document.addEventListener('visibilitychange', g.onVis);
   document.getElementById('ts-wrap').scrollIntoView({ block: 'start' });
+  tsPowers();
   tsFit();
   tsHud();
+  walLoad().then(() => { if (_ts === g) { tsPowers(); tsFit(); } });
   input.focus();
   g.raf = requestAnimationFrame(tsFrame);
+}
+
+// The two shop items used mid-game, with what the student still has. The
+// buttons keep the keyboard up on a phone: they never take the focus.
+function tsPowers() {
+  const g = _ts;
+  const el = document.getElementById('ts-powers');
+  if (!g || !el) return;
+  const btn = (id, key, left) => {
+    const it = SHOP_ITEMS.find(i => i.id === id);
+    const on = left > 0;
+    return `<button class="ts-power${on ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('${id}')" ${!on && !walCount(id) ? 'disabled' : ''} title="${escapeHtml(it.name)}, phím ${key}">
+      <kbd>${key}</kbd>${it.icon} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
+  };
+  const html = btn('slow', 1, g.slow) + btn('double', 2, g.dbl) +
+    `<span class="ts-power-revive" title="Hồi sinh">💖 ×${walCount('revive')}</span>`;
+  if (html === g.powersShown) return;
+  g.powersShown = html;
+  el.innerHTML = html;
+}
+
+function tsUsePower(id) {
+  const g = _ts;
+  document.getElementById('ts-input')?.focus();
+  if (!g || !g.running || g.paused) return;
+  if ((id === 'slow' && g.slow > 0) || (id === 'double' && g.dbl > 0)) return;
+  if (!walUse(id)) {
+    tsFloat('Hết món này, mua thêm ở 🛒 Cửa hàng', g.W / 2, g.H / 2);
+    return;
+  }
+  tsSfx('power');
+  if (id === 'slow') {
+    g.slow = TS_SLOW_SECS;
+    document.getElementById('ts-arena')?.classList.add('slowed');
+    tsFloat(`❄️ Làm chậm ${TS_SLOW_SECS} giây`, g.W / 2, g.H / 2, 'big');
+  } else {
+    g.dbl = TS_DOUBLE_SECS;
+    document.getElementById('ts-ship')?.classList.add('ts-ship--double');
+    tsFloat(`🔱 Bắn 2 tia ${TS_DOUBLE_SECS} giây`, g.W / 2, g.H / 2, 'big');
+  }
+  tsPowers();
 }
 
 function tsStop() {
@@ -14751,7 +14979,8 @@ function tsFit() {
   if (!g || !arena) return;
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   const top = Math.max(0, arena.getBoundingClientRect().top);
-  const h = Math.round(Math.max(240, Math.min(720, vh - top - 72)));
+  const powers = document.getElementById('ts-powers');
+  const h = Math.round(Math.max(240, Math.min(720, vh - top - 72 - (powers ? powers.offsetHeight : 0))));
   arena.style.height = h + 'px';
   g.W = arena.clientWidth;
   g.H = h;
@@ -14835,21 +15064,27 @@ function tsFrame(now) {
   const dt = Math.min(0.05, (now - g.last) / 1000);
   g.last = now;
   if (!g.paused) {
+    if (g.slow > 0 && (g.slow -= dt) <= 0) document.getElementById('ts-arena')?.classList.remove('slowed');
+    if (g.dbl > 0 && (g.dbl -= dt) <= 0) document.getElementById('ts-ship')?.classList.remove('ts-ship--double');
+    tsPowers();
+    // The slow beam slows the arrivals as well, so words do not pile up.
+    const k = g.slow > 0 ? TS_SLOW_RATE : 1;
     if (g.freeze > 0) {
       g.freeze -= dt;
       if (g.freeze <= 0) document.getElementById('ts-arena')?.classList.remove('frozen');
     } else {
-      g.spawnIn -= dt;
+      g.spawnIn -= dt * k;
       const alive = g.items.filter(it => !it.dead).length;
       if (g.spawnIn <= 0 && alive < Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd))) { tsSpawn(); g.spawnIn = tsGap(); }
       else if (alive === 0 && g.spawnIn > 0.4) g.spawnIn = 0.4;
       for (const it of g.items) {
         if (it.dead) continue;
-        it.t += dt;
+        it.t += dt * k;
         it.y = -it.h + (it.t / it.fall) * g.H;
         it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
         if (it.y + it.h >= g.H) tsGround(it);
         if (!g.running) return;
+        if (g.paused) break;
       }
     }
     g.items = g.items.filter(it => !it.dead);
@@ -14869,6 +15104,14 @@ function tsOnInput(e) {
   const input = e.target;
   if (!g || !g.running) return;
   if (g.paused) { input.value = ''; return; }
+  // No word has a digit in it, so 1 and 2 are free to fire the shop items.
+  // Phone keyboards send them here rather than as key presses.
+  const digit = input.value.match(/[0-9]/);
+  if (digit) {
+    input.value = input.value.replace(/[0-9]/g, '');
+    if (digit[0] === '1') tsUsePower('slow');
+    else if (digit[0] === '2') tsUsePower('double');
+  }
   let typed = tsTyped(input);
   if (!typed) { tsLock(null, ''); return; }
   let cands = tsCandidates(typed);
@@ -14903,6 +15146,11 @@ function tsOnInput(e) {
 
 function tsOnKey(e) {
   if (!_ts) return;
+  if (e.key === '1' || e.key === '2') {
+    e.preventDefault();
+    tsUsePower(e.key === '1' ? 'slow' : 'double');
+    return;
+  }
   if (e.key === 'Enter' || e.key === 'Escape') {
     e.preventDefault();
     e.target.value = '';
@@ -14978,18 +15226,35 @@ function tsExplode(it, withLaser) {
   setTimeout(() => it.el.remove(), 260);
 }
 
-function tsKill(it) {
+function tsKill(it, second) {
   const g = _ts;
   g.kills++;
   g.combo++;
   g.bestCombo = Math.max(g.bestCombo, g.combo);
+  g.coins += g.diff.coin * (it.boss ? 3 : 1);
   const pts = tsPoints(it);
   g.score += pts;
   tsExplode(it, true);
-  tsFloat(`+${pts}`, it.x + it.w / 2, it.y);
-  tsSfx('kill');
+  tsFloat(`${second ? '🔱 ' : ''}+${pts}`, it.x + it.w / 2, it.y);
+  if (!second) tsSfx('kill');
   if (it.boss) tsShakeArena();
   if (it.egg) tsPower();
+  // Double shot: the second beam takes the lowest word still falling. A boss
+  // still has to be typed out.
+  if (g.dbl > 0 && !second) {
+    const next = g.items.filter(x => !x.dead && x !== it && !x.boss).sort((a, b) => b.y - a.y)[0];
+    if (next) {
+      setTimeout(() => {
+        if (_ts !== g || !g.running || next.dead) return;
+        if (g.lockId === next.id) {
+          g.lockId = null;
+          const input = document.getElementById('ts-input');
+          if (input) input.value = '';
+        }
+        tsKill(next, true);
+      }, 90);
+    }
+  }
   if (g.kills % TS_PER_LEVEL === 0) {
     g.level++;
     tsSfx('level');
@@ -15048,7 +15313,49 @@ function tsGround(it) {
     g.lockId = null;
   }
   tsHud();
-  if (g.lives <= 0) tsEnd();
+  if (g.lives <= 0) tsOfferRevive();
+}
+
+// Out of lives. With a revive in the bag the student chooses; without one
+// the round ends as before.
+function tsOfferRevive() {
+  const g = _ts;
+  if (!walCount('revive')) { tsEnd(); return; }
+  g.paused = true;
+  g.reviving = true;
+  document.getElementById('ts-arena')?.classList.add('paused');
+  const input = document.getElementById('ts-input');
+  if (input) input.value = '';
+  const ov = document.getElementById('ts-overlay');
+  if (ov) {
+    ov.innerHTML = `<div class="ts-ov-title">Hết mạng!</div>
+      <div class="ts-ov-sub">Dùng 💖 Hồi sinh để chơi tiếp với ${TS_REVIVE_LIVES} mạng. Màn hình được dọn sạch. Còn ${walCount('revive')} lượt hồi sinh.</div>
+      <button class="vb-start-btn" onclick="tsRevive()">💖 Hồi sinh</button>
+      <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>`;
+    ov.classList.remove('hidden');
+  }
+}
+
+function tsRevive() {
+  const g = _ts;
+  if (!g || !g.reviving) return;
+  if (!walUse('revive')) { tsEnd(); return; }
+  g.reviving = false;
+  g.revives++;
+  g.lives = TS_REVIVE_LIVES;
+  g.items.filter(x => !x.dead).forEach(x => tsExplode(x, false));
+  g.items = [];
+  g.lockId = null;
+  g.spawnIn = 1.2;
+  g.paused = false;
+  g.last = performance.now();
+  document.getElementById('ts-arena')?.classList.remove('paused');
+  document.getElementById('ts-overlay')?.classList.add('hidden');
+  tsSfx('power');
+  tsFloat('💖 Hồi sinh!', g.W / 2, g.H / 2, 'big');
+  tsHud();
+  tsPowers();
+  document.getElementById('ts-input')?.focus();
 }
 
 function tsFloat(text, x, y, big) {
@@ -15083,6 +15390,7 @@ function tsHud() {
   const left = Math.max(0, g.lives);
   set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
   set('ts-score', g.score);
+  set('ts-coins', g.coins);
   set('ts-level', g.level);
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
   set('ts-combo', g.combo >= 3 ? `🔥 ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
@@ -15117,6 +15425,7 @@ function tsEnd() {
   const g = _ts;
   if (!g) return;
   tsStop();
+  walEarn(g.coins, true);
   tsRenderResults(g);
 }
 
@@ -15128,6 +15437,7 @@ function tsRenderResults(g) {
   const prevBest = tsGetBest(g.mode, g.diffKey);
   const isNew = g.score > prevBest;
   if (isNew) tsSetBest(g.mode, g.diffKey, g.score);
+  if (g.score > 0) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
   const missedHtml = g.missed.length
     ? g.missed.map(w => `<div class="vb-missed-item"><button class="ts-say-btn" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
     : '<div class="vb-missed-empty">Không để rơi từ nào 🎉</div>';
@@ -15137,6 +15447,7 @@ function tsRenderResults(g) {
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
         <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
+        <div class="wal-earned">+${g.coins} 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
         <div class="vb-results-stats">
           <div class="vb-rstat"><div class="vb-rstat-val">${g.kills}</div><div class="vb-rstat-lbl">Bắn trúng</div></div>
           <div class="vb-rstat"><div class="vb-rstat-val">${g.drops}</div><div class="vb-rstat-lbl">Để rơi</div></div>
@@ -15150,6 +15461,7 @@ function tsRenderResults(g) {
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="tsStart(_tsLast.mode, _tsLast.list)">↺ Chơi lại</button>
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lbOpen('shoot')">🏆 Xếp hạng</button>
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
@@ -15174,6 +15486,10 @@ const TW_LIVES = 3;
 const TW_START_HINTS = 1;
 const TW_MAX_HINTS = 9;
 const TW_EGG_EVERY = 6;
+const TW_COIN = 2;
+const TW_COIN_TYPED = 3;
+const TW_COIN_EGG = 5;
+const TW_COIN_MILESTONE = 20;
 const TW_MILESTONES = [
   { at: 5, name: 'Nhà phố', icon: '🏠' },
   { at: 12, name: 'Khách sạn mini', icon: '🏨' },
@@ -15314,12 +15630,15 @@ async function twStart(list) {
     best: Math.max(twGetBest(), floors.length),
     peak: floors.length, startedAt: floors.length,
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
+    coins: 0, revivable: false, revives: 0, lastResult: null,
   };
+  walLoad().then(() => { if (_tw && !_tw.answered) twRenderCard(); walBar(); });
   root.innerHTML = `
     <div class="tw-wrap">
       <div class="tw-top">
         <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
         <span class="tw-hearts" id="tw-hearts"></span>
+        <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
       </div>
       <div class="tw-grid">
@@ -15347,7 +15666,10 @@ async function twStart(list) {
 }
 
 function twQuit() {
-  if (_tw && !_tw.collapsed) twSave(_tw, true);
+  // A tower waiting on a revive was already saved as fallen: leaving counts
+  // as letting it fall, or quitting would be a free way round the collapse.
+  if (_tw && !_tw.collapsed && !_tw.revivable) twSave(_tw, true);
+  walFlush();
   twStop();
   lvRenderHub();
 }
@@ -15465,13 +15787,20 @@ function twRenderCard(result) {
   }
   let feedback = '';
   if (done) {
+    const coins = result.coins ? ` · +${result.coins} 🪙` : '';
     const line = result.ok
-      ? (result.reward ? `✓ Xây thêm một tầng, và trứng vàng cho ${result.reward}` : '✓ Xây thêm một tầng')
+      ? (result.reward ? `✓ Xây thêm một tầng, và trứng vàng cho ${result.reward}${coins}` : `✓ Xây thêm một tầng${coins}`)
       : q.golden
         ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Trứng vỡ, nhưng không mất mạng.`
-        : g.collapsed
-          ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>. Hết mạng, cả toà nhà sập.`
-          : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng trên cùng bị rơi.`;
+        : g.revivable
+          ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>. Hết mạng! Dùng 💖 Hồi sinh thì toà nhà không sập và được hồi đủ ${TW_LIVES} mạng.`
+          : g.collapsed
+            ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>. Hết mạng, cả toà nhà sập.`
+            : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng trên cùng bị rơi.`;
+    const next = g.revivable
+      ? `<button class="vb-start-btn" id="tw-revive" onclick="twRevive()">💖 Hồi sinh · còn ${walCount('revive')}</button>
+         <button class="vb-secondary-btn" onclick="twLetFall()">Để toà nhà sập</button>`
+      : `<button class="vb-start-btn" id="tw-next" onclick="twAfter()"${g.collapsed ? ' disabled' : ''}>${g.collapsed ? 'Xem kết quả' : 'Câu tiếp →'}</button>`;
     feedback = `
     <div class="tw-feedback ${result.ok ? 'ok' : 'bad'}">
       ${line}
@@ -15479,16 +15808,17 @@ function twRenderCard(result) {
     </div>
     <div class="tw-after">
       <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(q.ex))})" title="Nghe cả câu" aria-label="Nghe cả câu">🔊</button>
-      <button class="vb-start-btn" id="tw-next" onclick="twAfter()"${g.collapsed ? ' disabled' : ''}>${g.collapsed ? 'Xem kết quả' : 'Câu tiếp →'}</button>
+      ${next}
     </div>`;
   }
-  const canHint = !done && g.hints > 0 && !q.hinted;
+  const hintsLeft = g.hints + walCount('hint');
+  const canHint = !done && hintsLeft > 0 && !q.hinted;
   card.className = 'tw-card' + (q.golden ? ' tw-card--gold' : '');
   card.innerHTML = `
     <div class="tw-card-head">
       <span class="tw-floor-no">${q.golden ? '🥚 ' : ''}Tầng ${floorNo}</span>
       <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
-      ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${g.hints}</button>`}
+      ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${hintsLeft}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
     <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
@@ -15500,12 +15830,15 @@ function twRenderCard(result) {
     const inp = document.getElementById('tw-input');
     if (inp) { inp.focus(); inp.addEventListener('input', () => { const e = document.getElementById('tw-err'); if (e) e.textContent = ''; }); }
   }
-  if (done && !g.collapsed) document.getElementById('tw-next')?.focus();
+  if (done && !g.collapsed) (document.getElementById('tw-next') || document.getElementById('tw-revive'))?.focus();
 }
 
+// Hints earned in the tower go first; bought ones after.
 function twUseHint() {
   const g = _tw;
-  if (!g || g.answered || g.q.hinted || g.hints <= 0) return;
+  if (!g || g.answered || g.q.hinted) return;
+  if (g.hints > 0) g.hints--;
+  else if (!walUse('hint')) return;
   const q = g.q;
   if (q.typing) {
     q.reveal = Math.max(1, Math.ceil(q.blank.text.length / 2));
@@ -15514,7 +15847,6 @@ function twUseHint() {
     q.hidden = vbShuffle(wrong).slice(0, 2);
   }
   q.hinted = true;
-  g.hints--;
   twSave(g);
   const typed = document.getElementById('tw-input')?.value || '';
   twRenderCard();
@@ -15570,6 +15902,7 @@ function twResolve(ok, extra) {
   g.answered = true;
   const q = g.q;
   let reward = '';
+  let coins = 0;
   if (ok) {
     g.right++;
     const before = twMilestone(g.floors.length).cur;
@@ -15586,6 +15919,9 @@ function twResolve(ok, extra) {
     twRenderScene(dropped);
     const crossed = twCheckMilestone(before);
     if (reward && !crossed) twBanner('🥚 ' + reward.charAt(0).toUpperCase() + reward.slice(1));
+    coins = (q.typing ? TW_COIN_TYPED : TW_COIN) + (q.golden ? TW_COIN_EGG : 0) + (crossed ? TW_COIN_MILESTONE : 0);
+    g.coins += coins;
+    walEarn(coins);
   } else {
     g.wrong++;
     if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
@@ -15594,12 +15930,43 @@ function twResolve(ok, extra) {
     } else {
       g.lives--;
       tsSfx('miss');
-      if (g.lives <= 0) twCollapse(); else twKnockTop();
+      if (g.lives > 0) twKnockTop();
+      else if (walCount('revive') > 0) { g.revivable = true; twKnockTop(); }
+      else twCollapse();
     }
   }
-  if (!g.collapsed) twSave(g);
-  twRenderCard({ ok, reward, ...extra });
+  if (g.revivable) twSaveFallen(g);
+  else if (!g.collapsed) twSave(g);
+  g.lastResult = { ok, reward, coins, ...extra };
+  twRenderCard(g.lastResult);
   if (ok && !g.collapsed) g.timer = setTimeout(twAfter, reward ? 2000 : 1400);
+}
+
+// Saved as if it had already fallen, so closing the tab while the revive
+// question is open does not keep the tower standing for free.
+function twSaveFallen(g) {
+  twSave({ floors: g.ckFloors, ckFloors: g.ckFloors, lives: TW_LIVES, hints: g.hints, checkpoint: g.checkpoint, best: g.best }, true);
+}
+
+function twRevive() {
+  const g = _tw;
+  if (!g || !g.revivable) return;
+  if (!walUse('revive')) { twLetFall(); return; }
+  g.revivable = false;
+  g.revives++;
+  g.lives = TW_LIVES;
+  twSave(g, true);
+  twRenderScene(false);
+  twBanner('💖 Hồi sinh! Toà nhà vẫn đứng');
+  twNext();
+}
+
+function twLetFall() {
+  const g = _tw;
+  if (!g || !g.revivable) return;
+  g.revivable = false;
+  twCollapse();
+  twRenderCard(g.lastResult);
 }
 
 // The top floor tips off and falls; the tower settles one floor lower.
@@ -15683,7 +16050,7 @@ function twBanner(text) {
 
 function twAfter() {
   const g = _tw;
-  if (!g || !g.answered) return;
+  if (!g || !g.answered || g.revivable) return;
   clearTimeout(g.timer);
   if (g.collapsed) twEnd(); else twNext();
 }
@@ -15724,6 +16091,7 @@ function twEnd() {
   const g = _tw;
   if (!g) return;
   twStop();
+  walFlush();
   _twLast = g;
   const total = g.right + g.wrong;
   const top = twMilestone(g.peak).cur;
@@ -15736,6 +16104,7 @@ function twEnd() {
         <div class="tw-ruin">🏚️</div>
         <div class="vb-results-score">${g.peak}</div>
         <div class="vb-results-score-lbl">tầng cao nhất lượt này${top ? ` · ${top.icon} ${escapeHtml(top.name)}` : ''} · kỷ lục ${g.best} tầng</div>
+        <div class="wal-earned">+${g.coins} 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
         <div class="tw-restart-note">${g.checkpoint
           ? `Toà nhà sập nhưng mốc ${ck ? ck.icon + ' ' + escapeHtml(ck.name) + ', ' : ''}${g.checkpoint} tầng vẫn còn. Xây lại từ đó, không phải bắt đầu từ mặt đất.`
           : 'Chưa qua mốc nào nên lần này xây lại từ mặt đất. Qua mốc 5 tầng là có chỗ lưu.'}</div>
@@ -15755,6 +16124,7 @@ function twEnd() {
           <button class="vb-start-btn" onclick="twRestart(false)">🏗️ ${g.checkpoint ? `Xây lại từ tầng ${g.checkpoint}` : 'Xây lại'}</button>
           ${g.checkpoint ? '<button class="vb-secondary-btn" onclick="twRestart(true)">Xây từ mặt đất</button>' : ''}
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_twLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lbOpen('tower')">🏆 Xếp hạng</button>
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
