@@ -14561,8 +14561,8 @@ function lvUnbindKeys() {
 
 /* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
 const TS_MODES = {
-  copy:    { label: 'Nhìn tiếng Anh', fall: 12, gap: 2.2, gapMin: 0.9, maxOn: 7 },
-  meaning: { label: 'Nhìn nghĩa Việt', fall: 18, gap: 3.2, gapMin: 1.5, maxOn: 5 },
+  copy:    { label: 'Nhìn tiếng Anh', fall: 15, gap: 2.6, gapMin: 1.1, maxOn: 7 },
+  meaning: { label: 'Nhìn nghĩa Việt', fall: 23, gap: 3.8, gapMin: 1.8, maxOn: 5 },
 };
 const TS_LIVES = 3;
 const TS_MAX_LIVES = 5;
@@ -14731,7 +14731,7 @@ function tsFit() {
 
 function tsFallTime(boss) {
   const g = _ts;
-  const t = Math.max(g.cfg.fall * 0.45, g.cfg.fall - (g.level - 1) * 1.1);
+  const t = Math.max(g.cfg.fall * 0.45, g.cfg.fall - (g.level - 1) * 0.9);
   return boss ? t * 1.6 : t;
 }
 function tsGap() {
