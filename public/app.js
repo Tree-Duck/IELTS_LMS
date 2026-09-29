@@ -14154,6 +14154,62 @@ const LESSON_VOCAB = [
       ["expand", "mở rộng phạm vi phục vụ", "Hay đi với coverage, capacity", "A city can expand coverage faster with buses than with a new tunnel."],
     ] },
   ] },
+  { n: 11, title: "Sức khỏe, thực phẩm và lối sống", groups: [
+    { id: "A", name: "Y tế và chính sách", kind: "phrase", items: [
+      ["public health", "sức khỏe của cả cộng đồng, y tế công cộng", "Không đếm được. Khác với health nói chung.", ""],
+      ["preventive care", "chăm sóc để phòng bệnh", "Không đếm được. Tiếng Anh Mỹ viết preventive.", ""],
+      ["chronic illness", "bệnh kéo dài nhiều năm", "Không đếm được khi nói chung.", ""],
+      ["access to healthcare", "khả năng được khám và chữa bệnh", "Luôn đi với to. Viết healthcare hay health care đều đúng. Cả bài giữ một cách viết.", ""],
+      ["health outcomes", "kết quả sức khỏe đo được", "Số nhiều. Hay đi với improve, worsen.", ""],
+      ["health inequality", "chênh lệch sức khỏe giữa các nhóm người", "Không đếm được. Hay đi với widen, narrow.", ""],
+      ["the healthcare system", "hệ thống y tế", "Đếm được, thường có the.", ""],
+      ["medical treatment", "việc điều trị", "Không đếm được khi nói chung.", ""],
+      ["life expectancy", "tuổi thọ trung bình", "Không đếm được. Hay đi với rise, stagnate.", ""],
+      ["a risk factor", "yếu tố làm tăng nguy cơ mắc bệnh", "Đếm được. Cụ thể hơn hẳn a cause.", ""],
+    ] },
+    { id: "B", name: "Thực phẩm và ăn uống", kind: "phrase", items: [
+      ["a balanced diet", "chế độ ăn cân bằng", "Đếm được, thường có a. Không viết a healthy food.", ""],
+      ["processed food", "thực phẩm chế biến sẵn", "Không đếm được. Ultra-processed food có nghĩa mạnh hơn.", ""],
+      ["nutritional quality", "chất lượng dinh dưỡng", "Không đếm được. Nutritional là tính từ của nutrition.", ""],
+      ["food labeling", "việc ghi nhãn thực phẩm", "Không đếm được. Tiếng Anh Mỹ viết labeling với một chữ l.", ""],
+      ["portion sizes", "khẩu phần mỗi lần ăn", "Số nhiều. Hay đi với grow, shrink.", ""],
+      ["food safety standards", "tiêu chuẩn an toàn thực phẩm", "Số nhiều. Hay đi với set, enforce.", ""],
+      ["the food environment", "mọi thứ xung quanh ảnh hưởng tới việc ta ăn gì", "Thường có the. Đây là cụm chính của Phần 3.", ""],
+      ["dietary guidelines", "khuyến nghị về dinh dưỡng", "Số nhiều. Dietary là tính từ của diet.", ""],
+      ["a food desert", "khu dân cư không có chỗ mua đồ ăn tươi ở gần", "Đếm được. Đây là cụm chuyên môn, dùng đúng chỗ thì rất tốt.", ""],
+      ["traditional cuisine", "ẩm thực truyền thống", "Không đếm được. Trang trọng hơn traditional food.", ""],
+    ] },
+    { id: "C", name: "Thói quen và lối sống", kind: "phrase", items: [
+      ["sedentary behavior", "lối sống ít vận động", "Không đếm được. Tiếng Anh Mỹ viết behavior.", ""],
+      ["physical activity", "vận động thể chất", "Không đếm được. Chính xác hơn exercise.", ""],
+      ["work pressure", "áp lực công việc", "Không đếm được. Hay đi với mount, ease.", ""],
+      ["a daily routine", "nếp sinh hoạt hằng ngày", "Đếm được. Hay đi với build, disrupt.", ""],
+      ["lifestyle choices", "lựa chọn lối sống", "Số nhiều. Cụm này dễ đưa câu văn sang giọng đổ lỗi, xem Phần 3.", ""],
+      ["a behavioral intervention", "biện pháp nhằm thay đổi hành vi", "Đếm được. Tiếng Anh Mỹ viết behavioral.", ""],
+      ["peer influence", "ảnh hưởng từ người xung quanh", "Không đếm được. Rộng và chính xác hơn friends.", ""],
+      ["screen time", "thời gian dùng màn hình", "Không đếm được. Không viết screen times.", ""],
+      ["the default option", "thứ ta chọn khi không suy nghĩ gì", "Thường có the. Dùng được cho hầu hết các đề giải pháp.", ""],
+      ["a sleep deficit", "lượng ngủ bị thiếu cộng dồn qua nhiều ngày", "Đếm được. Cụ thể hơn not enough sleep.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["normalize", "làm một điều trở thành chuyện bình thường", "Hay đi với a portion, a habit", "Larger packaging normalizes a portion size that was unusual twenty years ago."],
+      ["exacerbate", "làm trầm trọng thêm", "Hay đi với inequality, a problem", "Cutting school meals exacerbates a gap that already existed at the school gate."],
+      ["erode", "làm mòn dần", "Hay đi với a routine, a habit", "Rotating shifts erode the routine that makes regular meals possible."],
+      ["displace", "đẩy cái cũ ra khỏi chỗ của nó", "Hay đi với meals, cuisine", "Cheap delivery displaces the evening meal that used to take an hour to cook."],
+      ["strain", "làm một hệ thống bị quá tải", "Hay đi với hospitals, a system", "Untreated chronic illness strains hospitals that were built for short stays."],
+      ["stigmatize", "gán tiếng xấu cho một nhóm người", "Hay đi với patients, children", "Campaigns that stigmatize children rarely change what those children eat."],
+      ["undermine", "làm hỏng dần từ bên trong", "Hay đi với an effort, sleep", "Long shifts undermine the sleep on which every other habit depends."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["subsidize", "dùng tiền ngân sách để giảm giá", "Hay đi với produce, meals", "Cities that subsidize fresh produce change the price before they change the advice."],
+      ["regulate", "quản lý bằng quy định", "Hay đi với advertising, labeling", "Governments regulate cigarette advertising far more tightly than food advertising."],
+      ["mandate", "bắt buộc bằng luật", "Hay đi với labeling, a standard", "A rule that mandates clear labeling costs less than a campaign that asks nicely."],
+      ["screen", "khám để phát hiện bệnh sớm", "Hay đi với patients, a population", "Clinics that screen earlier catch what is cheap to manage and costly to ignore."],
+      ["incentivize", "tạo động lực để làm một việc", "Hay đi với clinics, behavior", "Paying clinics for outcomes rather than visits incentivizes the unglamorous work."],
+      ["reformulate", "đổi công thức sản phẩm", "Hay đi với a product, a recipe", "Manufacturers reformulate products when a sugar threshold changes their tax bill."],
+      ["promote", "thúc đẩy, khuyến khích", "Hay đi với healthy habits, activity", "Schools can promote healthy habits without shaming any child in the room."],
+    ] },
+  ] },
   { n: 12, title: "Nghệ thuật, thể thao và giải trí", groups: [
     { id: "A", name: "Nghệ thuật và không gian công cộng", kind: "phrase", items: [
       ["the arts", "nghệ thuật nói chung, như một lĩnh vực", "Luôn có the và ở số nhiều khi chỉ cả lĩnh vực. Khác với art khi nói về tác phẩm.", ""],
@@ -15352,7 +15408,10 @@ function tsStart(mode, list) {
         <div class="ts-overlay hidden" id="ts-overlay"></div>
       </div>
       <div class="ts-powers" id="ts-powers"></div>
-      <input class="ts-input" id="ts-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ vào đây…" aria-label="Ô gõ từ">
+      <div class="ts-typebar">
+        <input class="ts-input" id="ts-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ vào đây…" aria-label="Ô gõ từ">
+        <button class="ts-clear" onpointerdown="event.preventDefault()" onclick="tsClearInput()" title="Xoá hết chữ đang gõ (Esc)" aria-label="Xoá hết chữ đang gõ">✕ Xoá</button>
+      </div>
     </div>`;
   const g = _ts = {
     mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff],
@@ -15670,6 +15729,16 @@ function tsOnKey(e) {
     e.target.value = '';
     tsLock(null, '');
   }
+}
+
+// Wipes what has been typed so far, for a phone where Escape is out of reach.
+function tsClearInput() {
+  const input = document.getElementById('ts-input');
+  if (!_ts || !input) return;
+  input.value = '';
+  tsLock(null, '');
+  tsSfx('equip');
+  input.focus();
 }
 
 function tsOnArenaTap(e) {
@@ -16014,6 +16083,20 @@ function tsRenderResults(g) {
 /* Nghĩa tiếng Việt của câu mẫu, hiện sau khi trả lời trong Xây tháp. Khoá là
    đúng câu tiếng Anh trong kho từ; sửa câu mẫu thì sửa luôn khoá ở đây. */
 const TW_VI = {
+  "Larger packaging normalizes a portion size that was unusual twenty years ago.": "Bao bì to hơn khiến một khẩu phần vốn bất thường hai mươi năm trước trở thành chuyện bình thường.",
+  "Cutting school meals exacerbates a gap that already existed at the school gate.": "Cắt bữa ăn ở trường làm trầm trọng thêm khoảng cách vốn đã có ngay từ cổng trường.",
+  "Rotating shifts erode the routine that makes regular meals possible.": "Làm ca xoay vòng bào mòn nếp sinh hoạt giúp người ta ăn uống đúng bữa.",
+  "Cheap delivery displaces the evening meal that used to take an hour to cook.": "Đồ ăn giao tận nơi giá rẻ thay chỗ bữa tối vốn từng mất một tiếng để nấu.",
+  "Untreated chronic illness strains hospitals that were built for short stays.": "Bệnh mãn tính không được điều trị gây quá tải cho những bệnh viện vốn được xây cho các đợt nằm viện ngắn.",
+  "Campaigns that stigmatize children rarely change what those children eat.": "Những chiến dịch bêu xấu trẻ em hiếm khi thay đổi được những gì các em ăn.",
+  "Long shifts undermine the sleep on which every other habit depends.": "Những ca làm dài phá hỏng dần giấc ngủ, thứ mà mọi thói quen khác đều phụ thuộc vào.",
+  "Cities that subsidize fresh produce change the price before they change the advice.": "Những thành phố trợ giá rau quả tươi thay đổi giá cả trước khi thay đổi lời khuyên.",
+  "Governments regulate cigarette advertising far more tightly than food advertising.": "Chính phủ quản lý quảng cáo thuốc lá chặt chẽ hơn nhiều so với quảng cáo thực phẩm.",
+  "A rule that mandates clear labeling costs less than a campaign that asks nicely.": "Một quy định bắt buộc ghi nhãn rõ ràng tốn ít chi phí hơn một chiến dịch chỉ nhẹ nhàng kêu gọi.",
+  "Clinics that screen earlier catch what is cheap to manage and costly to ignore.": "Những phòng khám tầm soát sớm hơn phát hiện được những bệnh rẻ khi kiểm soát nhưng đắt nếu bỏ qua.",
+  "Paying clinics for outcomes rather than visits incentivizes the unglamorous work.": "Trả tiền cho phòng khám theo kết quả chứ không theo số lượt khám tạo động lực cho những việc thầm lặng.",
+  "Manufacturers reformulate products when a sugar threshold changes their tax bill.": "Các nhà sản xuất đổi công thức sản phẩm khi một ngưỡng đường làm thay đổi tiền thuế họ phải nộp.",
+  "Schools can promote healthy habits without shaming any child in the room.": "Nhà trường có thể khuyến khích thói quen lành mạnh mà không làm em nào trong lớp phải xấu hổ.",
   "Fewer workers now shoulder the cost of state pensions.": "Giờ đây ít người lao động hơn phải gánh chi phí lương hưu nhà nước.",
   "An aging population strains public health budgets.": "Dân số già hoá gây sức ép lên ngân sách y tế công.",
   "Teenagers tend to succumb to peer pressure fastest in a new school.": "Thanh thiếu niên thường dễ khuất phục trước áp lực bạn bè nhất khi vào trường mới.",
