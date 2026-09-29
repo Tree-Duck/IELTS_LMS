@@ -15226,7 +15226,7 @@ function tsApplySkins() {
   }
 }
 
-const TS_CALLOUTS = { 5: 'Tốt lắm! 🔥', 10: 'Xuất sắc! ⚡', 15: 'Siêu đỉnh! 🌟', 20: 'KHÔNG THỂ CẢN! 💥', 30: 'HUYỀN THOẠI! 👑', 50: 'THẦN GÕ PHÍM! 🚀' };
+const TS_CALLOUTS = { 5: 'Tốt lắm! 🔥', 10: 'Xuất sắc! ⚡', 15: 'Siêu đỉnh! 🌟', 20: 'KHÔNG THỂ CẢN PHÁ! 💥', 30: 'HUYỀN THOẠI! 👑', 40: 'VÔ ĐỐI! 🐉', 50: 'THẦN GÕ PHÍM! 🚀' };
 function tsFlash(kind) {
   const a = document.getElementById('ts-arena');
   if (!a) return;
