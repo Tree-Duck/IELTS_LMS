@@ -14391,6 +14391,10 @@ function lvRenderHub() {
         <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
         ${sel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
       </div>
+      <div class="lv-diff">
+        <span class="lv-diff-label">Tốc độ Bắn Chữ</span>
+        ${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${_tsDiff === k ? ' active' : ''}" onclick="tsSetDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}
+      </div>
       <div class="lv-modes">
         <button class="lv-mode" onclick="lvStartFlash()">
           <span class="lv-mode-icon">🃏</span>
@@ -14564,8 +14568,17 @@ const TS_MODES = {
   copy:    { label: 'Nhìn tiếng Anh', fall: 20, gap: 3.2, gapMin: 1.4, maxOn: 7 },
   meaning: { label: 'Nhìn nghĩa Việt', fall: 30, gap: 4.6, gapMin: 2.2, maxOn: 5 },
 };
-const TS_LIVES = 3;
 const TS_MAX_LIVES = 5;
+// Speed levels. "Vừa" is the tuning students already had; "Dễ" is for those
+// who still found it too fast, with fewer words on screen and two more lives.
+const TS_DIFFS = {
+  easy:   { label: 'Dễ',  note: 'bay chậm',  fall: 1.6, step: 0.4, floor: 0.7,  gap: 1.5, crowd: 0.6, lives: 5 },
+  medium: { label: 'Vừa', note: 'bay vừa',   fall: 1,   step: 0.7, floor: 0.45, gap: 1,   crowd: 1,   lives: 3 },
+  hard:   { label: 'Khó', note: 'bay nhanh', fall: 0.7, step: 0.9, floor: 0.4,  gap: 0.8, crowd: 1,   lives: 3 },
+};
+let _tsDiff = 'easy';
+try { const d = localStorage.getItem('tsDiff'); if (TS_DIFFS[d]) _tsDiff = d; } catch (e) {}
+function tsSetDiff(d) { if (TS_DIFFS[d]) { _tsDiff = d; lvSave('tsDiff', d); } lvRenderHub(); }
 const TS_PER_LEVEL = 8;
 const TS_BOSS_EVERY = 14;
 const TS_EGG_EVERY = 11;
@@ -14596,8 +14609,15 @@ function tsMask(word) {
   return word.split(' ').map(w => w.replace(/[a-z0-9]/gi, (c, i) => (i === 0 ? c : '_'))).join(' ');
 }
 
-function tsGetBest(mode) { try { return parseInt(localStorage.getItem('tsBest_' + mode) || '0', 10) || 0; } catch (e) { return 0; } }
-function tsSetBest(mode, s) { lvSave('tsBest_' + mode, String(s)); }
+// Records are kept per speed. Scores from before speeds existed count as "Vừa".
+function tsGetBest(mode, diff) {
+  const d = diff || _tsDiff;
+  try {
+    const v = localStorage.getItem('tsBest_' + mode + '_' + d) ?? (d === 'medium' ? localStorage.getItem('tsBest_' + mode) : null);
+    return parseInt(v || '0', 10) || 0;
+  } catch (e) { return 0; }
+}
+function tsSetBest(mode, diff, s) { lvSave('tsBest_' + mode + '_' + diff, String(s)); }
 function tsMuted() { try { return localStorage.getItem('tsMute') === '1'; } catch (e) { return false; } }
 
 function tsSpeak(text) {
@@ -14679,10 +14699,10 @@ function tsStart(mode, list) {
       <input class="ts-input" id="ts-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ vào đây…" aria-label="Ô gõ từ">
     </div>`;
   const g = _ts = {
-    mode, cfg: TS_MODES[mode], list: list || null,
+    mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff],
     pool, deck: vbShuffle(pool), deckPos: 0,
     items: [], lockId: null, nextId: 1, spawned: 0,
-    score: 0, lives: TS_LIVES, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
+    score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
     missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: false,
     W: 0, H: 0,
   };
@@ -14731,12 +14751,13 @@ function tsFit() {
 
 function tsFallTime(boss) {
   const g = _ts;
-  const t = Math.max(g.cfg.fall * 0.45, g.cfg.fall - (g.level - 1) * 0.7);
+  const base = g.cfg.fall * g.diff.fall;
+  const t = Math.max(base * g.diff.floor, base - (g.level - 1) * g.diff.step);
   return boss ? t * 1.6 : t;
 }
 function tsGap() {
   const g = _ts;
-  return Math.max(g.cfg.gapMin, g.cfg.gap - (g.level - 1) * 0.18);
+  return Math.max(g.cfg.gapMin * g.diff.gap, g.cfg.gap * g.diff.gap - (g.level - 1) * 0.18);
 }
 
 function tsItemHtml(it, typed) {
@@ -14811,7 +14832,7 @@ function tsFrame(now) {
     } else {
       g.spawnIn -= dt;
       const alive = g.items.filter(it => !it.dead).length;
-      if (g.spawnIn <= 0 && alive < g.cfg.maxOn) { tsSpawn(); g.spawnIn = tsGap(); }
+      if (g.spawnIn <= 0 && alive < Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd))) { tsSpawn(); g.spawnIn = tsGap(); }
       else if (alive === 0 && g.spawnIn > 0.4) g.spawnIn = 0.4;
       for (const it of g.items) {
         if (it.dead) continue;
@@ -14973,7 +14994,7 @@ function tsKill(it) {
 function tsPower() {
   const g = _ts;
   const opts = ['freeze', 'bomb'];
-  if (g.lives < TS_MAX_LIVES) opts.push('life');
+  if (g.lives < Math.max(TS_MAX_LIVES, g.diff.lives)) opts.push('life');
   const pick = opts[Math.floor(Math.random() * opts.length)];
   tsSfx('power');
   if (pick === 'freeze') {
@@ -15051,7 +15072,7 @@ function tsHud() {
   if (!g) return;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   const left = Math.max(0, g.lives);
-  set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, TS_LIVES - left))}</span>`);
+  set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
   set('ts-score', g.score);
   set('ts-level', g.level);
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
@@ -15095,9 +15116,9 @@ function tsRenderResults(g) {
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
   _tsLast = g;
-  const prevBest = tsGetBest(g.mode);
+  const prevBest = tsGetBest(g.mode, g.diffKey);
   const isNew = g.score > prevBest;
-  if (isNew) tsSetBest(g.mode, g.score);
+  if (isNew) tsSetBest(g.mode, g.diffKey, g.score);
   const missedHtml = g.missed.length
     ? g.missed.map(w => `<div class="vb-missed-item"><button class="ts-say-btn" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
     : '<div class="vb-missed-empty">Không để rơi từ nào 🎉</div>';
@@ -15106,7 +15127,7 @@ function tsRenderResults(g) {
       <div class="vb-results">
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
-        <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · kỷ lục cũ ${prevBest}</div>
+        <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
         <div class="vb-results-stats">
           <div class="vb-rstat"><div class="vb-rstat-val">${g.kills}</div><div class="vb-rstat-lbl">Bắn trúng</div></div>
           <div class="vb-rstat"><div class="vb-rstat-val">${g.drops}</div><div class="vb-rstat-lbl">Để rơi</div></div>
