@@ -14413,6 +14413,12 @@ function lvRenderHub() {
           <span class="lv-mode-desc">Nghĩa tiếng Việt rơi xuống kèm chữ cái đầu. Gõ từ tiếng Anh để bắn.</span>
           <span class="lv-mode-best">🏆 ${tsGetBest('meaning')}</span>
         </button>
+        <button class="lv-mode" onclick="twStart()">
+          <span class="lv-mode-icon">🏗️</span>
+          <span class="lv-mode-name">Xây tháp</span>
+          <span class="lv-mode-desc">Điền từ vào câu. Đúng thì xây thêm tầng, sai thì rơi tầng. Từ tầng 21 phải tự gõ đúng dạng. Phần đang chọn có ${twPool().length} câu.</span>
+          <span class="lv-mode-best">🏆 ${twGetBest()} tầng</span>
+        </button>
       </div>
     </div>`;
 }
@@ -14561,6 +14567,7 @@ function lvBindKeys() {
 function lvUnbindKeys() {
   if (_fcKeyHandler) document.removeEventListener('keydown', _fcKeyHandler);
   _fcKeyHandler = null;
+  twStop();
 }
 
 /* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
@@ -15141,6 +15148,387 @@ function tsRenderResults(g) {
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="tsStart(_tsLast.mode, _tsLast.list)">↺ Chơi lại</button>
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ─── Xây tháp ─────────────────────────────────────────────────────────────
+   Gap-fill over the example sentences already in the word bank. A right
+   answer adds a floor, a wrong one knocks the top floor off. Up to floor
+   TW_TYPE_FROM - 1 the student picks from four words; above it the word has
+   to be typed in the form the sentence needs (strains, not strain), so the
+   top of the tower tests grammar as well as meaning. */
+const TW_TYPE_FROM = 21;
+const TW_LIVES = 3;
+const TW_MILESTONES = [
+  { at: 5, name: 'Nhà phố', icon: '🏠' },
+  { at: 12, name: 'Khách sạn mini', icon: '🏨' },
+  { at: 20, name: 'Chung cư', icon: '🏢' },
+  { at: 40, name: 'Toà văn phòng', icon: '🏙️' },
+  { at: 68, name: 'Bitexco', icon: '🗼' },
+  { at: 81, name: 'Landmark 81', icon: '🌆' },
+];
+const TW_FLOOR_H = 40;
+let _tw = null;
+let _twKeyHandler = null;
+
+// Where the word sits in its example sentence, allowing for the inflection
+// the sentence uses: strain -> strains, oversimplify -> oversimplifies.
+function twFind(en, sentence) {
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const forms = String(en).replace(/\([^)]*\)/g, ' ').split('/').map(s => s.trim()).filter(Boolean);
+  for (const f of forms) {
+    const words = f.replace(/^(a|an|the)\s+/i, '').split(/\s+/);
+    const first = words[0].toLowerCase();
+    const stem = first.length > 3 ? first.replace(/(e|y)$/, '') : first;
+    const rest = words.slice(1).map(w => '\\s+' + esc(w) + '(?:s|es)?').join('');
+    const m = String(sentence).match(new RegExp('\\b' + esc(stem) + '[a-z]*' + rest + '\\b', 'i'));
+    if (m) return { start: m.index, text: m[0] };
+  }
+  return null;
+}
+
+function twKind(w) { return /^Động từ/.test(w.group) ? 'verb' : 'phrase'; }
+
+function twPool() {
+  return lvPool().map(w => ({ ...w, show: tsDisplay(w.en), blank: w.ex ? twFind(w.en, w.ex) : null }))
+    .filter(w => w.blank && w.show);
+}
+
+function twGetBest() { try { return parseInt(localStorage.getItem('twBest') || '0', 10) || 0; } catch (e) { return 0; } }
+
+// Distractors come from the same kind of word (verb with verb) but, where the
+// data allows, from a different group: a problem verb against solution verbs,
+// a family noun against education nouns. Same-group words are too often a
+// second right answer, and a student should never lose a floor for that.
+function twOptions(q, pool) {
+  const kind = twKind(q);
+  const key = w => w.tag + '|' + w.group;
+  const ok = w => w.show.toLowerCase() !== q.show.toLowerCase() && twKind(w) === kind;
+  const tiers = [
+    pool.filter(w => ok(w) && w.tag === q.tag && key(w) !== key(q)),
+    pool.filter(w => ok(w) && w.tag !== q.tag),
+    pool.filter(w => ok(w) && key(w) === key(q)),
+  ];
+  const picked = [];
+  for (const tier of tiers) {
+    for (const w of vbShuffle(tier)) {
+      if (picked.length >= 3) break;
+      if (!picked.some(p => p.show.toLowerCase() === w.show.toLowerCase())) picked.push(w);
+    }
+  }
+  return vbShuffle([q, ...picked.slice(0, 3)]);
+}
+
+function twStart(list) {
+  tsStop();
+  lvUnbindKeys();
+  const pool = list && list.length ? list : twPool();
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  if (pool.length < 4) { showToast('Phần đang chọn chưa đủ câu mẫu để xây tháp. Chọn thêm buổi hoặc unit.'); return; }
+  _tw = {
+    pool, all: twPool().length >= 4 ? twPool() : pool, deck: vbShuffle(pool), deckPos: 0, list: list || null,
+    floors: [], best: 0, lives: TW_LIVES, right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0,
+  };
+  root.innerHTML = `
+    <div class="tw-wrap">
+      <div class="tw-top">
+        <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
+        <span class="tw-hearts" id="tw-hearts"></span>
+        <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
+      </div>
+      <div class="tw-grid">
+        <div class="tw-scene" id="tw-scene">
+          <div class="tw-stars" id="tw-stars"></div>
+          <div class="tw-sun" id="tw-sun"></div>
+          <div class="tw-crane" aria-hidden="true">
+            <div class="tw-crane-arm"></div>
+            <div class="tw-crane-rope"><div class="tw-crane-block" id="tw-crane-block"></div></div>
+          </div>
+          <div class="tw-world" id="tw-world">
+            <div class="tw-stack" id="tw-stack"></div>
+            <div class="tw-ground"><span>🌳</span><span>🏡</span><span>🌳</span><span class="tw-ground-r">🌲</span><span>🚲</span></div>
+          </div>
+          <div class="tw-meter" id="tw-meter"></div>
+          <div class="tw-banner hidden" id="tw-banner"></div>
+        </div>
+        <div class="tw-card" id="tw-card"></div>
+      </div>
+    </div>`;
+  twBindKeys();
+  twRenderScene(false);
+  twNext();
+}
+
+function twQuit() { twStop(); lvRenderHub(); }
+function twStop() {
+  if (_tw) clearTimeout(_tw.timer);
+  if (_twKeyHandler) document.removeEventListener('keydown', _twKeyHandler);
+  _twKeyHandler = null;
+}
+function twToggleMute() {
+  lvSave('tsMute', tsMuted() ? '0' : '1');
+  const b = document.getElementById('tw-mute');
+  if (b) b.textContent = tsMuted() ? '🔇' : '🔊';
+}
+
+function twMilestone(h) {
+  let cur = null, next = TW_MILESTONES[0];
+  for (const m of TW_MILESTONES) { if (h >= m.at) cur = m; else { next = m; break; } }
+  if (cur && cur === TW_MILESTONES[TW_MILESTONES.length - 1]) next = null;
+  return { cur, next };
+}
+
+// Sky goes from morning blue to sunset to night as the tower climbs.
+function twSky(h) {
+  const t = Math.min(1, h / 81);
+  const stops = [[126, 200, 227], [255, 176, 120], [24, 34, 74]];
+  const mix = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+  const top = t < 0.5 ? mix(stops[0], stops[1], t * 2) : mix(stops[1], stops[2], (t - 0.5) * 2);
+  const low = t < 0.5 ? mix([214, 240, 247], [255, 224, 190], t * 2) : mix([255, 224, 190], [70, 60, 110], (t - 0.5) * 2);
+  return `linear-gradient(180deg, rgb(${top}) 0%, rgb(${low}) 100%)`;
+}
+
+function twRenderScene(animateTop) {
+  const g = _tw;
+  const scene = document.getElementById('tw-scene');
+  const stack = document.getElementById('tw-stack');
+  const world = document.getElementById('tw-world');
+  if (!g || !scene || !stack || !world) return;
+  const h = g.floors.length;
+  stack.innerHTML = g.floors.map((f, i) =>
+    `<div class="tw-floor tw-floor--${i % 4}${animateTop && i === h - 1 ? ' tw-drop' : ''}"><span class="tw-plate">${escapeHtml(f)}</span></div>`
+  ).join('');
+  // Keep the top of the tower in view: the world slides down as it grows.
+  const room = scene.clientHeight - 200;
+  const lift = Math.max(0, h * TW_FLOOR_H - room);
+  world.style.transform = `translateY(${lift}px)`;
+  scene.style.background = twSky(h);
+  const stars = document.getElementById('tw-stars');
+  if (stars) stars.style.opacity = Math.max(0, (h - 45) / 36).toFixed(2);
+  const sun = document.getElementById('tw-sun');
+  if (sun) sun.style.transform = `translateY(${Math.min(260, h * 3.2)}px)`;
+  const block = document.getElementById('tw-crane-block');
+  if (block) block.className = 'tw-crane-block tw-floor--' + (h % 4);
+  const { cur, next } = twMilestone(h);
+  const meter = document.getElementById('tw-meter');
+  if (meter) meter.innerHTML = `<div class="tw-meter-h">${h}<small> tầng</small></div>` +
+    (cur ? `<div class="tw-meter-cur">${cur.icon} ${escapeHtml(cur.name)}</div>` : '') +
+    (next ? `<div class="tw-meter-next">còn ${next.at - h} tầng tới ${next.icon} ${escapeHtml(next.name)}</div>` : '<div class="tw-meter-next">Đã lên đỉnh 🎉</div>');
+  const hearts = document.getElementById('tw-hearts');
+  if (hearts) hearts.innerHTML = '❤️'.repeat(Math.max(0, g.lives)) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, TW_LIVES - g.lives))}</span>`;
+}
+
+function twNext() {
+  const g = _tw;
+  if (!g) return;
+  clearTimeout(g.timer);
+  if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
+  const q = g.deck[g.deckPos++];
+  const typing = g.floors.length + 1 >= TW_TYPE_FROM;
+  g.q = { ...q, typing, options: typing ? null : twOptions(q, g.all) };
+  g.answered = false;
+  twRenderCard();
+}
+
+function twSentence(q, filled, ok) {
+  const s = q.ex, b = q.blank;
+  const mid = filled
+    ? `<span class="tw-fill${ok ? '' : ' tw-fill--fix'}">${escapeHtml(s.slice(b.start, b.start + b.text.length))}</span>`
+    : '<span class="tw-blank"></span>';
+  return escapeHtml(s.slice(0, b.start)) + mid + escapeHtml(s.slice(b.start + b.text.length));
+}
+
+function twRenderCard(result) {
+  const g = _tw;
+  const card = document.getElementById('tw-card');
+  if (!g || !card) return;
+  const q = g.q;
+  const floorNo = g.floors.length + 1;
+  const done = !!result;
+  let body;
+  if (q.typing) {
+    body = done ? '' : `
+      <div class="tw-hint">${escapeHtml(q.vi)} · <span class="tw-mask">${escapeHtml(tsMask(q.blank.text))}</span></div>
+      <div class="tw-typebar">
+        <input class="ts-input tw-input" id="tw-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ đúng dạng của từ trong câu" aria-label="Ô gõ từ">
+        <button class="vb-start-btn tw-go" onclick="twSubmitTyped()">Xây</button>
+      </div>
+      <div class="tw-err" id="tw-err"></div>`;
+  } else {
+    body = `<div class="tw-opts">${q.options.map((o, i) => {
+      let cls = 'tw-opt';
+      if (done && o.en === q.en) cls += ' right';
+      else if (done && result.pick === o) cls += ' wrong';
+      return `<button class="${cls}" ${done ? 'disabled' : ''} onclick="twPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(o.show)}</button>`;
+    }).join('')}</div>`;
+  }
+  const feedback = !done ? '' : `
+    <div class="tw-feedback ${result.ok ? 'ok' : 'bad'}">
+      ${result.ok ? '✓ Xây thêm một tầng' : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng trên cùng bị rơi.`}
+      <div class="tw-feedback-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>
+    </div>
+    <div class="tw-after">
+      <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(q.ex))})" title="Nghe cả câu" aria-label="Nghe cả câu">🔊</button>
+      <button class="vb-start-btn" id="tw-next" onclick="twAfter()">${g.lives <= 0 ? 'Xem kết quả' : 'Câu tiếp →'}</button>
+    </div>`;
+  card.innerHTML = `
+    <div class="tw-card-head">
+      <span class="tw-floor-no">Tầng ${floorNo}</span>
+      <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
+    </div>
+    <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
+    <div class="tw-sent">${twSentence(q, done, done && result.ok)}</div>
+    ${body}
+    ${feedback}
+    ${!done ? `<div class="vb-hint-text">${q.typing ? 'Enter để xây.' : 'Bấm chọn hoặc gõ phím 1 đến 4.'}</div>` : ''}`;
+  if (q.typing && !done) {
+    const inp = document.getElementById('tw-input');
+    if (inp) { inp.focus(); inp.addEventListener('input', () => { const e = document.getElementById('tw-err'); if (e) e.textContent = ''; }); }
+  }
+  if (done) document.getElementById('tw-next')?.focus();
+}
+
+function twPick(i) {
+  const g = _tw;
+  if (!g || g.answered || !g.q.options) return;
+  const pick = g.q.options[i];
+  if (!pick) return;
+  twResolve(pick.en === g.q.en, { pick });
+}
+
+function twSubmitTyped() {
+  const g = _tw;
+  if (!g || g.answered) return;
+  const inp = document.getElementById('tw-input');
+  const typed = inp ? inp.value.trim() : '';
+  if (!typed) { const e = document.getElementById('tw-err'); if (e) e.textContent = 'Gõ từ vào trước đã.'; return; }
+  twResolve(tsNorm(typed) === tsNorm(g.q.blank.text), { typed });
+}
+
+function twResolve(ok, extra) {
+  const g = _tw;
+  g.answered = true;
+  const q = g.q;
+  if (ok) {
+    g.right++;
+    const before = twMilestone(g.floors.length).cur;
+    g.floors.push(q.show);
+    g.best = Math.max(g.best, g.floors.length);
+    tsSfx('kill');
+    twRenderScene(true);
+    const after = twMilestone(g.floors.length).cur;
+    if (after && after !== before) twBanner(`${after.icon} ${after.name}, ${after.at} tầng!`);
+  } else {
+    g.wrong++;
+    g.lives--;
+    if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
+    tsSfx('miss');
+    twKnockTop();
+  }
+  twRenderCard({ ok, ...extra });
+  if (ok && g.lives > 0) g.timer = setTimeout(twAfter, 1400);
+}
+
+// The top floor tips off and falls; the tower settles one floor lower.
+function twKnockTop() {
+  const g = _tw;
+  const stack = document.getElementById('tw-stack');
+  const scene = document.getElementById('tw-scene');
+  if (scene) { scene.classList.remove('shake'); void scene.offsetWidth; scene.classList.add('shake'); }
+  if (!g.floors.length || !stack) { twRenderScene(false); return; }
+  const top = stack.lastElementChild;
+  if (top) top.classList.add('tw-fall');
+  g.floors.pop();
+  setTimeout(() => { if (_tw === g) twRenderScene(false); }, 650);
+}
+
+function twBanner(text) {
+  const b = document.getElementById('tw-banner');
+  if (!b) return;
+  b.textContent = text;
+  b.classList.remove('hidden', 'show');
+  void b.offsetWidth;
+  b.classList.add('show');
+  tsSfx('level');
+  const scene = document.getElementById('tw-scene');
+  if (scene) {
+    for (let k = 0; k < 26; k++) {
+      const c = document.createElement('span');
+      c.className = 'tw-confetti';
+      c.style.left = Math.random() * 100 + '%';
+      c.style.background = ['#C8F169', '#FF7A59', '#FFF7E9', '#F5C542'][k % 4];
+      c.style.animationDelay = (Math.random() * 0.4).toFixed(2) + 's';
+      scene.appendChild(c);
+      setTimeout(() => c.remove(), 2200);
+    }
+  }
+}
+
+function twAfter() {
+  const g = _tw;
+  if (!g || !g.answered) return;
+  clearTimeout(g.timer);
+  if (g.lives <= 0) twEnd(); else twNext();
+}
+
+function twBindKeys() {
+  twStop();
+  _twKeyHandler = e => {
+    const view = document.getElementById('view-lesson-vocab');
+    if (!view || view.classList.contains('hidden') || !_tw || !document.getElementById('tw-card')) { twStop(); return; }
+    const g = _tw;
+    if (g.answered) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); twAfter(); }
+      return;
+    }
+    if (g.q.typing) {
+      if (e.key === 'Enter') { e.preventDefault(); twSubmitTyped(); }
+      return;
+    }
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4) { e.preventDefault(); twPick(n - 1); }
+  };
+  document.addEventListener('keydown', _twKeyHandler);
+}
+
+let _twLast = null;
+function twEnd() {
+  const g = _tw;
+  if (!g) return;
+  twStop();
+  _twLast = g;
+  const prev = twGetBest();
+  const isNew = g.best > prev;
+  if (isNew) lvSave('twBest', String(g.best));
+  const top = twMilestone(g.best).cur;
+  const total = g.right + g.wrong;
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results">
+        ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
+        <div class="vb-results-score">${g.best}</div>
+        <div class="vb-results-score-lbl">tầng cao nhất${top ? ` · ${top.icon} ${escapeHtml(top.name)}` : ''} · kỷ lục cũ ${prev}</div>
+        <div class="vb-results-stats">
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.right}</div><div class="vb-rstat-lbl">Câu đúng</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.wrong}</div><div class="vb-rstat-lbl">Câu sai</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${total ? Math.round(g.right / total * 100) : 0}%</div><div class="vb-rstat-lbl">Chính xác</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.floors.length}</div><div class="vb-rstat-lbl">Tầng còn lại</div></div>
+        </div>
+        <div class="vb-missed">
+          <div class="vb-missed-title">📒 Câu cần ôn</div>
+          ${g.missed.length
+            ? g.missed.map(q => `<div class="vb-missed-item tw-missed"><div>${twSentence(q, true, false)}</div><div class="tw-missed-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div></div>`).join('')
+            : '<div class="vb-missed-empty">Không sai câu nào 🎉</div>'}
+        </div>
+        <div class="vb-results-btns">
+          <button class="vb-start-btn" onclick="twStart(_twLast.list)">↺ Xây lại</button>
+          ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_twLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
