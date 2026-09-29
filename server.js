@@ -4048,10 +4048,31 @@ app.post('/api/game/score', authenticate, (req, res) => {
   }
 });
 
+// Hầm ngục chữ: stars per lesson dungeon, 0 to 3, keyed by lesson number.
+app.get('/api/game/raid', authenticate, (req, res) => {
+  try {
+    res.json(db.getRaid(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load dungeon progress' });
+  }
+});
+app.put('/api/game/raid', authenticate, (req, res) => {
+  try {
+    const stars = {};
+    for (const [k, v] of Object.entries((req.body && req.body.stars) || {})) {
+      const n = parseInt(k, 10);
+      if (n >= 1 && n <= 50) stars[n] = Math.max(0, Math.min(3, parseInt(v, 10) || 0));
+    }
+    res.json(db.saveRaid(req.user.id, stars));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save dungeon progress' });
+  }
+});
+
 // Boards: coins this week, coins all time, tallest tower, and Bắn Chữ at one
 // speed (best of the two modes). Students only; a class board is open to its
 // own students and to teachers.
-const RANK_BOARDS = ['week', 'coins', 'tower', 'shoot'];
+const RANK_BOARDS = ['week', 'coins', 'tower', 'shoot', 'raid'];
 const RANK_TOP = 20;
 app.get('/api/game/leaderboard', authenticate, (req, res) => {
   try {
@@ -4071,6 +4092,7 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
       if (board === 'week') return w.week === week ? w.week_earned || 0 : 0;
       if (board === 'coins') return w.earned || 0;
       if (board === 'tower') return (g.towers[uid] && g.towers[uid].best) || 0;
+      if (board === 'raid') return Object.values((g.raids[uid] && g.raids[uid].stars) || {}).reduce((a, b) => a + b, 0);
       const s = g.scores[uid] || {};
       return Math.max(...SHOOT_MODES.map(m => s[`${m}_${diff}`] || 0));
     };

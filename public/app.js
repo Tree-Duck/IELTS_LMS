@@ -14536,6 +14536,11 @@ function lvRenderHub() {
           <span class="lv-mode-best" id="tw-hub-best">🏆 ${twGetBest()} tầng</span>
           <span class="lv-mode-progress" id="tw-hub-progress"></span>
         </button>
+        <button class="lv-mode lv-mode--raid" onclick="raidMap()">
+          <span class="lv-mode-icon">⚔️</span>
+          <span class="lv-mode-name">Hầm ngục chữ</span>
+          <span class="lv-mode-desc">Đánh theo lượt với quái và boss bằng văn mẫu của từng buổi: câu mở bài, câu mở đoạn, rồi cả đoạn. Mỗi lượt có đồng hồ, hết giờ là quái đánh lại.</span>
+        </button>
       </div>
     </div>`;
   twHubProgress();
@@ -14549,10 +14554,12 @@ const LV_MODES = [
   { id: 'copy',    icon: '🚀', name: 'Bắn chữ, nhìn tiếng Anh' },
   { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
   { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
+  { id: 'raid',    icon: '⚔️', name: 'Hầm ngục chữ' },
 ];
 
 // Which game is on screen right now, if any.
 function lvCurrentMode() {
+  if (_rd) return 'raid';
   if (_ts) return _ts.mode;
   if (_tw && document.getElementById('tw-card')) return 'tower';
   if (document.querySelector('#lesson-vocab-root .lv-fc-top')) return 'flash';
@@ -14596,6 +14603,7 @@ function lvSwitch(mode) {
   tsSfx('equip');
   if (mode === 'flash') lvStartFlash();
   else if (mode === 'tower') twStart();
+  else if (mode === 'raid') raidMap();
   else tsStart(mode, list);
 }
 
@@ -14797,6 +14805,7 @@ function lvUnbindKeys() {
   if (_fcKeyHandler) document.removeEventListener('keydown', _fcKeyHandler);
   _fcKeyHandler = null;
   twStop();
+  raidStop();
 }
 
 /* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
@@ -15174,6 +15183,7 @@ const LB_BOARDS = [
   { id: 'tower', label: '🏗️ Tháp cao nhất', unit: 'tầng', note: 'Kỷ lục số tầng Xây tháp.' },
   { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Điểm cao nhất của một lượt, lấy chế độ tốt hơn trong hai chế độ.' },
   { id: 'coins', label: '💰 Tổng xu',       unit: 'xu',   note: 'Tất cả xu từng kiếm được. Mua đồ không làm tụt hạng.' },
+  { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục. Mỗi hầm ngục tối đa 3 sao, tính lần đánh tốt nhất.' },
 ];
 let _lb = { board: 'week', diff: null, scope: 'all' };
 
@@ -16920,7 +16930,7 @@ function twRenderCard(result) {
     <div class="tw-feedback ${result.ok ? 'ok' : 'bad'}">
       ${line}
       <div class="tw-feedback-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>
-      ${TW_VI[q.ex] ? `<div class="tw-trans">🇻🇳 ${escapeHtml(TW_VI[q.ex])}</div>` : ''}
+      ${TW_VI[q.ex] ? `<div class="tw-trans"><b>Dịch:</b> ${escapeHtml(TW_VI[q.ex])}</div>` : ''}
     </div>
     <div class="tw-after">
       <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(q.ex))})" title="Nghe cả câu" aria-label="Nghe cả câu">🔊</button>
@@ -17302,7 +17312,7 @@ function twEnd() {
         <div class="vb-missed">
           <div class="vb-missed-title">📒 Câu cần ôn</div>
           ${g.missed.length
-            ? g.missed.map(q => `<div class="vb-missed-item tw-missed"><div>${twSentence(q, true, false)}</div><div class="tw-missed-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>${TW_VI[q.ex] ? `<div class="tw-trans">🇻🇳 ${escapeHtml(TW_VI[q.ex])}</div>` : ''}</div>`).join('')
+            ? g.missed.map(q => `<div class="vb-missed-item tw-missed"><div>${twSentence(q, true, false)}</div><div class="tw-missed-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>${TW_VI[q.ex] ? `<div class="tw-trans"><b>Dịch:</b> ${escapeHtml(TW_VI[q.ex])}</div>` : ''}</div>`).join('')
             : '<div class="vb-missed-empty">Không sai câu nào 🎉</div>'}
         </div>
         <div class="vb-results-btns">
@@ -17316,6 +17326,944 @@ function twEnd() {
       </div>
     </div>`;
   jCountUp(root.querySelector('.j-count'), g.coins);
+}
+
+/* Hầm ngục chữ: văn mẫu của từng buổi (thesis mục 5.1, đoạn mẫu mục 3). Chỗ
+   đục lỗ viết {đáp án|gợi ý tiếng Việt}; bỏ dấu ngoặc đi thì câu phải trùng
+   nguyên văn giáo trình. vi là nghĩa cả câu, hiện sau khi hạ quái. */
+const RAID_LESSONS = [
+  { n: 1,
+    thesis: { prompt: "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+      t: "Adult children clearly have a {moral reason|lý do đạo đức} to help, but I disagree with turning that reason into a {legal duty|nghĩa vụ pháp lý}, because the real test of such a law is whether it {improves the care|cải thiện sự chăm sóc} older people receive, not who is blamed when it fails.",
+      vi: "Con cái trưởng thành rõ ràng có lý do đạo đức để giúp đỡ, nhưng tôi không đồng ý biến lý do đó thành nghĩa vụ pháp lý, vì thước đo thật của một luật như vậy là nó có cải thiện sự chăm sóc người già nhận được hay không, chứ không phải ai bị đổ lỗi khi nó thất bại." },
+    paras: [
+      { prompt: "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.", label: "", s: [
+        { step: "A", t: "Making family support a {legal duty|nghĩa vụ pháp lý} does not create any {extra care|thêm sự chăm sóc}. It only decides who provides it.",
+          vi: "Biến việc gia đình chu cấp thành nghĩa vụ pháp lý không tạo thêm chút chăm sóc nào. Nó chỉ quyết định ai là người chăm sóc." },
+        { step: "B", t: "{In practice|trên thực tế}, the duty {settles on|dồn lên, rơi vào} the adult children who live closest, since they are the ones the hospital calls first.",
+          vi: "Trên thực tế, nghĩa vụ này dồn lên những người con sống gần nhất, vì họ là người bệnh viện gọi đầu tiên." },
+        { step: "C", t: "Many of them move to {part-time work|công việc bán thời gian} in order to keep visiting, and their {income falls|thu nhập giảm} at the age when they most need to be saving for their own retirement.",
+          vi: "Nhiều người chuyển sang làm bán thời gian để tiếp tục thăm nom, và thu nhập của họ giảm đúng vào độ tuổi họ cần tiết kiệm cho việc nghỉ hưu của chính mình nhất." },
+        { step: "D", t: "{Wealthier|khá giả hơn} families avoid this by paying someone to help, so the same law {costs them very little|khiến họ tốn rất ít}.",
+          vi: "Các gia đình khá giả tránh được điều này bằng cách thuê người giúp, nên cùng một luật ấy khiến họ tốn rất ít." },
+        { step: "D+", t: "The cost {lands instead on|thay vào đó lại đổ lên} the households that had the least to begin with.",
+          vi: "Thay vào đó, chi phí lại đổ lên những hộ gia đình vốn đã có ít nhất ngay từ đầu." },
+        { step: "E", t: "A rule that asks the most of the families that have the least is {unlikely to|khó có thể} improve the care that older people {actually receive|thực sự nhận được}.",
+          vi: "Một quy định đòi hỏi nhiều nhất ở những gia đình có ít nhất thì khó có thể cải thiện sự chăm sóc mà người già thực sự nhận được." },
+      ] },
+    ] },
+  { n: 2,
+    thesis: { prompt: "Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.",
+      t: "Contact with other countries can either {add options|thêm lựa chọn} for local people or take the old ones away, and {in my view|theo quan điểm của tôi} it usually adds them, except where the {incoming business|doanh nghiệp từ bên ngoài vào} is large enough to buy up the space the local one was using.",
+      vi: "Giao lưu với các nước khác có thể thêm lựa chọn cho người dân địa phương hoặc lấy mất những lựa chọn cũ, và theo quan điểm của tôi, nó thường thêm lựa chọn, trừ khi doanh nghiệp từ bên ngoài đủ lớn để mua lại chỗ mà doanh nghiệp địa phương đang dùng." },
+    paras: [
+      { prompt: "Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?", label: "", s: [
+        { step: "A", t: "A {custom|phong tục} is often less about the {ritual|nghi lễ} itself than about the meeting it forces people to attend.",
+          vi: "Một phong tục thường không nằm ở bản thân nghi lễ bằng việc nó buộc mọi người phải gặp nhau." },
+        { step: "B", t: "Households that still prepare a New Year {gathering|buổi họp mặt} work {side by side|sát cánh bên nhau} for several days, even when their members share no workplace and no school.",
+          vi: "Những hộ gia đình vẫn chuẩn bị buổi họp mặt đầu năm cùng làm việc sát cánh bên nhau trong nhiều ngày, dù các thành viên không chung nơi làm việc hay trường học." },
+        { step: "C", t: "A young {resident|cư dân} spends those days {finding out|tìm hiểu, phát hiện ra} which neighbor owns a ladder and which one can fix a motorbike.",
+          vi: "Một cư dân trẻ dành những ngày đó để biết hàng xóm nào có thang và ai biết sửa xe máy." },
+        { step: "D", t: "Once the gathering stops, nothing {replaces|thay thế} that knowledge. People pay a shop for the same small jobs, and those who cannot afford it simply {go without|đành chịu thiếu}.",
+          vi: "Khi buổi họp mặt không còn, không gì thay thế được những hiểu biết đó. Mọi người phải trả tiền cho cửa hàng làm những việc vặt ấy, còn ai không có tiền thì đành chịu thiếu." },
+        { step: "D+", t: "{Favors|sự giúp đỡ, ân huệ} between neighbors become rare enough that residents notice their {absence|sự vắng bóng}.",
+          vi: "Sự giúp đỡ giữa hàng xóm trở nên hiếm đến mức cư dân nhận ra nó đã vắng bóng." },
+        { step: "E", t: "A custom that looks {purely decorative|chỉ để trang trí} can still be doing {practical work|việc thiết thực}, so whether it looks modern is the wrong test to judge it by.",
+          vi: "Một phong tục trông chỉ để trang trí vẫn có thể đang làm việc thiết thực, nên việc nó trông có hiện đại hay không là thước đo sai để đánh giá nó." },
+      ] },
+    ] },
+  { n: 3,
+    thesis: { prompt: "Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?",
+      t: "Parents push this hard mainly because they can name only one {route|con đường} out of {financial insecurity|sự bấp bênh về tài chính}, and while that pressure does raise {short-term results|kết quả trước mắt}, I see it as a negative development if we measure it by whether a child still wants to study once nobody is watching.",
+      vi: "Cha mẹ ép con mạnh như vậy chủ yếu vì họ chỉ thấy một con đường thoát khỏi sự bấp bênh tài chính, và dù áp lực đó có nâng kết quả trước mắt, tôi coi đó là xu hướng tiêu cực nếu ta đánh giá bằng việc đứa trẻ có còn muốn học khi không ai theo dõi hay không." },
+    paras: [
+      { prompt: "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?", label: "Thân bài 1, nguyên nhân", s: [
+        { step: "A", t: "The clearest reason is that a lesson now {competes with|phải cạnh tranh với} a screen that answers faster than any teacher can.",
+          vi: "Lý do rõ nhất là bài học giờ phải cạnh tranh với một màn hình trả lời nhanh hơn bất kỳ giáo viên nào." },
+        { step: "B", t: "A student who has spent the evening on a {feed|bảng tin (mạng xã hội)} that changes every few seconds walks into a class that moves at {roughly|khoảng chừng} one idea every ten minutes.",
+          vi: "Một học sinh đã dành cả buổi tối lướt bảng tin thay đổi sau vài giây sẽ bước vào lớp học đi với tốc độ khoảng một ý mỗi mười phút." },
+        { step: "C", t: "The {gap in pace|khoảng chênh về nhịp độ} makes the lesson feel slower than it is, and attention starts to {drift|trôi đi, lơ đãng} well before the first half hour is over.",
+          vi: "Khoảng chênh về nhịp độ khiến bài học có cảm giác chậm hơn thực tế, và sự chú ý bắt đầu lơ đãng từ lâu trước khi hết nửa giờ đầu." },
+        { step: "D", t: "Teachers then {repeat instructions|nhắc lại hướng dẫn} more often, so the class {gets through|học hết, đi qua được} less material in the same period.",
+          vi: "Giáo viên sau đó phải nhắc lại hướng dẫn thường xuyên hơn, nên lớp học được ít nội dung hơn trong cùng một tiết." },
+        { step: "E", t: "The problem is less that children have lost the {ability to focus|khả năng tập trung} than that the pace they are {used to|quen với} has changed.",
+          vi: "Vấn đề không hẳn là trẻ mất khả năng tập trung mà là nhịp độ chúng quen thuộc đã thay đổi." },
+      ] },
+      { prompt: "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?", label: "Thân bài 2, giải pháp", s: [
+        { step: "A", t: "Any fix therefore has to work on that gap in pace {rather than|thay vì} on the child's {willpower|ý chí}.",
+          vi: "Vì vậy, mọi giải pháp phải tác động vào khoảng chênh nhịp độ đó thay vì vào ý chí của đứa trẻ." },
+        { step: "B", t: "Schools that break a lesson into {shorter segments|các phần ngắn hơn}, with a visible change of task every ten minutes, give attention a place to {reset|khởi động lại}.",
+          vi: "Những trường chia bài học thành các phần ngắn hơn, cứ mười phút lại đổi hoạt động rõ ràng, sẽ cho sự chú ý có chỗ để khởi động lại." },
+        { step: "C", t: "Students who know a change is coming stop {watching the clock|nhìn đồng hồ}, and the teacher {gets back|lấy lại được} the minutes that used to go into repeating instructions.",
+          vi: "Học sinh biết sắp có thay đổi sẽ thôi nhìn đồng hồ, và giáo viên lấy lại được những phút trước đây dùng để nhắc lại hướng dẫn." },
+        { step: "D", t: "Those minutes are what a {crowded curriculum|chương trình học dày đặc} is short of, so the change {pays for itself|tự bù đắp chi phí} without extra funding.",
+          vi: "Những phút đó chính là thứ một chương trình học dày đặc đang thiếu, nên thay đổi này tự bù đắp chi phí mà không cần thêm kinh phí." },
+        { step: "E", t: "Telling children to {try harder|cố gắng hơn} leaves the pace gap {untouched|còn nguyên, không đụng tới}, which is why it is the weaker of the two responses.",
+          vi: "Bảo trẻ cố gắng hơn thì khoảng chênh nhịp độ vẫn còn nguyên, đó là lý do nó là cách ứng phó yếu hơn trong hai cách." },
+      ] },
+    ] },
+  { n: 4,
+    thesis: { prompt: "Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?",
+      t: "Weighed by how easily each loss can be {undone|đảo ngược, khôi phục}, development wins only with a {safeguard|biện pháp bảo vệ}, since a slower rise in income can be {made up|bù lại} later while a craft with no apprentices left does not come back, so I believe the advantages outweigh the disadvantages wherever a country spends part of the new revenue on keeping those things alive.",
+      vi: "Nếu cân nhắc theo mức độ dễ khôi phục của mỗi mất mát, phát triển chỉ thắng khi có biện pháp bảo vệ, vì thu nhập tăng chậm có thể bù lại sau, còn một nghề thủ công không còn người học việc thì không quay lại được, nên tôi tin lợi ích lớn hơn tác hại ở bất cứ nơi nào một quốc gia dành một phần nguồn thu mới để giữ những thứ đó tồn tại." },
+    paras: [
+      { prompt: "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?", label: "Thân bài 1, mặt lợi", s: [
+        { step: "A", t: "When the state pays, the people who {gain most|được lợi nhiều nhất} are the ones who would {otherwise|nếu không thì} not have applied at all.",
+          vi: "Khi nhà nước chi trả, những người được lợi nhiều nhất là những người nếu không thì đã chẳng nộp hồ sơ." },
+        { step: "B", t: "A student whose parents never finished {secondary school|trung học} does not {weigh|cân nhắc} a course against its cost, because there is no cost to weigh.",
+          vi: "Một học sinh có cha mẹ chưa học hết trung học sẽ không phải cân nhắc khoá học với học phí, vì chẳng có chi phí nào để cân nhắc." },
+        { step: "C", t: "That removes the one {calculation|phép tính, sự tính toán} that keeps such families out, which is the fear of {borrowing against|vay tiền dựa vào} a degree nobody in the house has seen work.",
+          vi: "Điều đó xoá bỏ phép tính duy nhất ngăn những gia đình như vậy, đó là nỗi sợ phải vay tiền cho một tấm bằng mà chưa ai trong nhà thấy nó có ích." },
+        { step: "D", t: "Employers in the same region then draw from a {wider pool|nguồn (ứng viên) rộng hơn} than the families who could already {afford the fees|đủ tiền đóng học phí}.",
+          vi: "Nhờ đó, nhà tuyển dụng trong vùng có nguồn ứng viên rộng hơn nhóm gia đình vốn đã đủ tiền đóng học phí." },
+      ] },
+      { prompt: "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?", label: "Thân bài 2, mặt hại", s: [
+        { step: "A", t: "The cost of that decision also {lands on|đổ lên} a group, and it is {worth naming|đáng để gọi tên} which one.",
+          vi: "Chi phí của quyết định đó cũng đổ lên một nhóm người, và đáng để gọi tên đó là nhóm nào." },
+        { step: "B", t: "The money comes from {general taxation|thuế chung}, so a warehouse worker who left school at sixteen {pays toward|góp tiền cho} degrees he will never hold.",
+          vi: "Tiền này đến từ thuế chung, nên một công nhân kho bỏ học từ năm mười sáu tuổi cũng góp tiền cho những tấm bằng anh ta sẽ không bao giờ có." },
+        { step: "C", t: "Graduates go on to {earn more|kiếm nhiều hơn} than he does, which means the {transfer|sự chuyển giao (tiền)} runs from the lower earner to the higher one.",
+          vi: "Người tốt nghiệp sau đó kiếm được nhiều hơn anh ta, nghĩa là dòng tiền chảy từ người thu nhập thấp sang người thu nhập cao." },
+        { step: "D+", t: "{Vocational training|đào tạo nghề}, which serves people like him, {competes for|cạnh tranh để giành} the same budget and usually loses.",
+          vi: "Đào tạo nghề, thứ phục vụ những người như anh ta, phải tranh cùng một ngân sách và thường thua." },
+        { step: "E", t: "On the measure of who {bears the cost|gánh chi phí}, the advantages are still the heavier side, but only if vocational funding is {protected|được bảo vệ} at the same time.",
+          vi: "Nếu đo bằng việc ai gánh chi phí, lợi ích vẫn nặng hơn, nhưng chỉ khi kinh phí đào tạo nghề được bảo vệ cùng lúc." },
+      ] },
+    ] },
+  { n: 5,
+    thesis: { prompt: "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+      t: "Messaging clearly keeps some relationships alive that {distance|khoảng cách địa lý} would once have ended, but I agree that the effect is {negative overall|tiêu cực xét tổng thể}, because what the technology changes is not how much people talk but how little of that talking needs their {full attention|sự chú ý trọn vẹn}.",
+      vi: "Nhắn tin rõ ràng giữ được một số mối quan hệ mà khoảng cách từng làm đứt đoạn, nhưng tôi đồng ý rằng tác động nhìn chung là tiêu cực, vì thứ công nghệ thay đổi không phải là người ta nói chuyện bao nhiêu, mà là phần trò chuyện cần sự chú ý trọn vẹn còn ít đến mức nào." },
+    paras: [
+      { prompt: "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programs. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "{Coverage|việc đưa tin} does not create the fear {so much as|bằng việc} change where people think the danger is.",
+          vi: "Việc đưa tin không tạo ra nỗi sợ bằng việc thay đổi chỗ người ta nghĩ nguy hiểm nằm ở đâu." },
+        { step: "B", t: "A resident who reads about one {street robbery|vụ cướp giật trên phố} every evening starts to {picture|hình dung} the route home as the risky part of the day.",
+          vi: "Một người dân tối nào cũng đọc về một vụ cướp giật trên phố sẽ bắt đầu hình dung đường về nhà là phần nguy hiểm nhất trong ngày." },
+        { step: "C", t: "She stops walking the {last stretch|đoạn đường cuối} and pays for a ride instead, and the street she used to cross has {fewer people|ít người hơn} on it each week.",
+          vi: "Cô ấy thôi đi bộ đoạn đường cuối mà trả tiền đi xe, và con phố cô từng băng qua mỗi tuần lại vắng người hơn." },
+        { step: "D", t: "The shops on that stretch lose their {evening trade|khách buổi tối} and close earlier, which leaves the street {emptier still|càng vắng hơn}.",
+          vi: "Các cửa hàng trên đoạn đường đó mất khách buổi tối và đóng cửa sớm hơn, khiến con phố càng vắng hơn." },
+        { step: "D+", t: "The change {shows up|thể hiện ra} in shop hours and bus timetables long before it shows up in any {crime figure|số liệu tội phạm}.",
+          vi: "Sự thay đổi thể hiện trong giờ mở cửa hàng và lịch xe buýt từ rất lâu trước khi nó xuất hiện trong bất kỳ số liệu tội phạm nào." },
+        { step: "E", t: "Banning the coverage would remove the information without {touching this|tác động gì tới điều này}, so the answer is {better reporting|đưa tin tốt hơn} rather than no reporting.",
+          vi: "Cấm đưa tin sẽ xoá thông tin mà không tác động gì tới điều này, nên câu trả lời là đưa tin tốt hơn chứ không phải không đưa tin." },
+      ] },
+    ] },
+  { n: 6,
+    thesis: { prompt: "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+      t: "Clean air and dry housing clearly {prevent more illness|ngăn ngừa được nhiều bệnh hơn} than any clinic can treat, and I {largely agree|phần lớn đồng ý}, though the case only holds if the money comes from a {new source|nguồn mới} rather than from the treatment budget that the same households rely on this winter.",
+      vi: "Không khí sạch và nhà ở khô ráo rõ ràng ngăn ngừa được nhiều bệnh hơn bất kỳ phòng khám nào có thể chữa, và tôi phần lớn đồng ý, dù lập luận này chỉ đứng vững nếu tiền đến từ một nguồn mới chứ không lấy từ ngân sách điều trị mà chính những hộ gia đình đó đang trông cậy trong mùa đông này." },
+    paras: [
+      { prompt: "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "Prevention and treatment {draw on|lấy từ, dựa vào} the same budget, so the real question is which one {loses|chịu thiệt} when the other grows.",
+          vi: "Phòng bệnh và chữa bệnh cùng lấy từ một ngân sách, nên câu hỏi thật là bên nào chịu thiệt khi bên kia tăng lên." },
+        { step: "B", t: "A district that funds a walking program and {free screening|khám sàng lọc miễn phí} reaches people who {feel well|thấy khoẻ} and have no appointment to attend.",
+          vi: "Một quận tài trợ chương trình đi bộ và khám sàng lọc miễn phí sẽ tiếp cận được những người đang thấy khoẻ và không có lịch hẹn khám nào." },
+        { step: "C", t: "Some of them find a {condition|bệnh, tình trạng sức khoẻ} early, at a stage that costs {a fraction|một phần nhỏ} of what it would cost in a ward five years later.",
+          vi: "Một số người phát hiện bệnh sớm, ở giai đoạn chỉ tốn một phần nhỏ so với chi phí nằm viện năm năm sau." },
+        { step: "D", t: "The ward keeps the beds it would {otherwise|nếu không thì} have used on them, and the {waiting list|danh sách chờ} for planned surgery stops lengthening.",
+          vi: "Khoa điều trị giữ được những giường lẽ ra phải dùng cho họ, và danh sách chờ phẫu thuật theo lịch thôi dài thêm." },
+        { step: "D+", t: "The {saving|khoản tiết kiệm được} shows up as an operating theater that runs on a Thursday instead of {standing idle|nằm không, bỏ trống}.",
+          vi: "Khoản tiết kiệm thể hiện ở một phòng mổ hoạt động vào thứ Năm thay vì bỏ trống." },
+        { step: "E", t: "Prevention is therefore the better use of the same money, though only where {treatment capacity|năng lực điều trị} is already {adequate|đủ, đáp ứng được}, since a person who is ill today cannot wait for a program to work.",
+          vi: "Vì vậy, phòng bệnh là cách dùng cùng số tiền tốt hơn, nhưng chỉ ở nơi năng lực điều trị đã đủ, vì người đang ốm hôm nay không thể chờ một chương trình phát huy tác dụng." },
+      ] },
+    ] },
+  { n: 7,
+    thesis: { prompt: "The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?",
+      t: "Nobody works for nothing, so pay is plainly a {condition|điều kiện} for turning up, but the claim fails at the word only, since the behavior that separates a {functioning team|một đội làm việc hiệu quả} from a merely present one is exactly the part no contract can {specify|quy định cụ thể} and no bonus can reliably buy.",
+      vi: "Không ai làm việc không công, nên tiền lương rõ ràng là điều kiện để người ta đi làm, nhưng nhận định này sai ở chữ 'duy nhất', vì hành vi phân biệt một đội làm việc hiệu quả với một đội chỉ có mặt chính là phần mà không hợp đồng nào quy định được và không khoản thưởng nào mua chắc được." },
+    paras: [
+      { prompt: "Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "Pay decides whether someone {takes the job|nhận việc}, but rarely decides how they behave once the day is {underway|đang diễn ra}.",
+          vi: "Tiền lương quyết định việc ai đó có nhận việc hay không, nhưng hiếm khi quyết định họ cư xử thế nào khi ngày làm việc đã bắt đầu." },
+        { step: "B", t: "A technician who {spots|phát hiện} a hairline crack at the end of a shift can {log it|ghi nhận nó (vào sổ)} now or leave it for the morning team.",
+          vi: "Một kỹ thuật viên phát hiện vết nứt nhỏ lúc cuối ca có thể ghi nhận ngay hoặc để lại cho ca sáng." },
+        { step: "C", t: "Logging it costs her twenty {unpaid minutes|phút không được trả lương} and earns her nothing that appears on a {pay stub|phiếu lương}.",
+          vi: "Ghi nhận nó tốn của cô ấy hai mươi phút không lương và chẳng mang lại gì hiện trên phiếu lương." },
+        { step: "D", t: "She logs it {anyway|dù sao vẫn} where a {supervisor|người giám sát} has asked her opinion before, and leaves it where nobody has.",
+          vi: "Cô ấy vẫn ghi nhận ở nơi người giám sát từng hỏi ý kiến cô, và bỏ qua ở nơi chưa ai hỏi." },
+        { step: "D+", t: "The difference shows up in how often a line stops {without warning|không báo trước}, not in any {wage figure|số liệu tiền lương}.",
+          vi: "Sự khác biệt thể hiện ở tần suất dây chuyền dừng đột ngột, chứ không ở bất kỳ con số tiền lương nào." },
+        { step: "E", t: "Money is therefore a condition for the work rather than the {driver|động lực} of it, which is why {raising pay|tăng lương} alone rarely changes what a team actually does.",
+          vi: "Vì vậy, tiền là điều kiện cho công việc chứ không phải động lực của nó, đó là lý do chỉ tăng lương hiếm khi thay đổi những gì một đội thực sự làm." },
+      ] },
+    ] },
+  { n: 8,
+    thesis: { prompt: "The natural resources such as oil, forests and fresh water are being consumed at an alarming rate. What problems does it cause? How can we solve these problems?",
+      t: "The clearest problem is that the cost of using a {resource|tài nguyên} falls on whoever comes next rather than on whoever uses it now, and the only measures that change this are the ones that put that {future cost|chi phí tương lai} into today's price, since {individual restraint|sự tự kiềm chế của cá nhân}, however sincere, cannot price a river.",
+      vi: "Vấn đề rõ nhất là chi phí dùng một tài nguyên rơi vào người đến sau chứ không phải người đang dùng, và biện pháp duy nhất thay đổi được điều này là đưa chi phí tương lai vào giá hôm nay, vì sự tự kiềm chế của cá nhân, dù chân thành đến đâu, cũng không định giá được một dòng sông." },
+    paras: [
+      { prompt: "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "A {fuel price|giá nhiên liệu} decides how much driving costs, but it cannot decide whether a person has {another way|cách khác} to get to work.",
+          vi: "Giá nhiên liệu quyết định việc lái xe tốn bao nhiêu, nhưng không quyết định được một người có cách khác để đi làm hay không." },
+        { step: "B", t: "A cleaner on an {early shift|ca sớm} in a district with no bus before six has one {route|lộ trình} to the hospital, and it runs on fuel.",
+          vi: "Một nhân viên vệ sinh làm ca sớm ở khu không có xe buýt trước sáu giờ chỉ có một lộ trình đến bệnh viện, và nó cần đến xăng." },
+        { step: "C", t: "A higher price does not remove that trip. It removes something else from the same week, usually an item on the {grocery list|danh sách đi chợ} rather than a {journey|chuyến đi}.",
+          vi: "Giá cao hơn không xoá được chuyến đi đó. Nó xoá một thứ khác trong cùng tuần, thường là một món trong danh sách đi chợ chứ không phải một chuyến đi." },
+        { step: "D", t: "{Meanwhile|trong khi đó}, a household with a {rail station|nhà ga tàu} at the end of the road drops one car and feels the tax as a saving.",
+          vi: "Trong khi đó, một hộ có nhà ga ngay cuối đường bỏ bớt một chiếc xe và thấy khoản thuế như một khoản tiết kiệm." },
+        { step: "D+", t: "The measure shows up as {falling fuel sales|doanh số nhiên liệu giảm} in the districts that already had {alternatives|các lựa chọn thay thế}, and as thinner shopping baskets in the ones that did not.",
+          vi: "Biện pháp này thể hiện qua doanh số nhiên liệu giảm ở những khu vốn có lựa chọn thay thế, và qua giỏ hàng vơi đi ở những khu không có." },
+        { step: "E", t: "Raising the price therefore works where a {substitute|thứ thay thế} exists and simply {redistributes hardship|chuyển gánh khó khăn sang người khác} where it does not, which is why it cannot be the best single answer.",
+          vi: "Vì vậy, tăng giá có tác dụng ở nơi có thứ thay thế và chỉ chuyển gánh khó khăn sang người khác ở nơi không có, đó là lý do nó không thể là câu trả lời tốt nhất duy nhất." },
+      ] },
+    ] },
+  { n: 9,
+    thesis: { prompt: "Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.",
+      t: "Both sides are describing the same {mechanism|cơ chế} from opposite ends, since technology lowers the cost of {committing|thực hiện, phạm (tội)} some crimes and the cost of {detecting|phát hiện} others, and on balance I think it displaces crime rather than reducing it, unless detection improves in the same places where the new opportunities appear.",
+      vi: "Cả hai phía đang mô tả cùng một cơ chế từ hai đầu ngược nhau, vì công nghệ làm giảm chi phí phạm một số tội và chi phí phát hiện những tội khác, và xét tổng thể tôi nghĩ nó chuyển tội phạm sang chỗ khác chứ không giảm nó, trừ khi việc phát hiện được cải thiện ở đúng nơi xuất hiện cơ hội mới." },
+    paras: [
+      { prompt: "Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.", label: "", s: [
+        { step: "A", t: "The useful question is not whether machines are {dangerous|nguy hiểm} but which part of a job they {take first|lấy đi trước}.",
+          vi: "Câu hỏi hữu ích không phải máy móc có nguy hiểm không, mà là chúng lấy đi phần nào của công việc trước." },
+        { step: "B", t: "A warehouse that {installs|lắp đặt} a sorting arm removes the picking work that a {new employee|nhân viên mới} used to do in their first month.",
+          vi: "Một nhà kho lắp cánh tay phân loại sẽ lấy đi việc nhặt hàng mà nhân viên mới từng làm trong tháng đầu tiên." },
+        { step: "C", t: "The {experienced staff|nhân viên có kinh nghiệm} keep their jobs, but the {first rung|nấc thang đầu tiên} that newcomers used to climb onto is gone.",
+          vi: "Nhân viên có kinh nghiệm giữ được việc, nhưng nấc thang đầu tiên mà người mới từng bước lên đã mất." },
+        { step: "D", t: "Five years on, the firm still needs {supervisors|người giám sát}, finds it has trained nobody, and hires from outside at a {higher rate|mức lương cao hơn}.",
+          vi: "Năm năm sau, công ty vẫn cần người giám sát, nhận ra chưa đào tạo được ai, và phải tuyển từ bên ngoài với mức lương cao hơn." },
+        { step: "D+", t: "The change shows up first in the {age profile|cơ cấu độ tuổi} of the shop floor, long before it shows up in a {headline|dòng tít} about unemployment.",
+          vi: "Sự thay đổi thể hiện trước tiên ở cơ cấu độ tuổi của xưởng, từ rất lâu trước khi xuất hiện trên một dòng tít về thất nghiệp." },
+        { step: "E", t: "Robots are therefore neither the danger nor the {promise|lời hứa hẹn} the two sides describe, and what decides the {outcome|kết quả} is whether firms rebuild the training that automation quietly removed.",
+          vi: "Vì vậy, robot không phải mối nguy cũng không phải lời hứa hẹn như hai phía mô tả, và điều quyết định kết quả là các công ty có xây dựng lại việc đào tạo mà tự động hoá đã âm thầm xoá bỏ hay không." },
+      ] },
+    ] },
+  { n: 10,
+    thesis: { prompt: "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+      t: "A car-free day is better understood as a {measurement|phép đo} than as a solution, since a single closed street {reveals|cho thấy} how many trips existed only because driving was the {cheapest option|lựa chọn rẻ nhất}, and I think the policy is worth keeping, provided a city treats the result as a list of routes to build rather than an event to repeat each year.",
+      vi: "Ngày không xe nên được hiểu là một phép đo hơn là một giải pháp, vì chỉ một con phố bị đóng cũng cho thấy bao nhiêu chuyến đi tồn tại chỉ vì lái xe là lựa chọn rẻ nhất, và tôi nghĩ chính sách này đáng giữ, miễn là thành phố coi kết quả là danh sách các tuyến cần xây chứ không phải một sự kiện lặp lại mỗi năm." },
+    paras: [
+      { prompt: "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "The useful question is not whether higher {fuel prices|giá nhiên liệu} reduce driving but which drivers are actually able to {respond|phản ứng, thích ứng}.",
+          vi: "Câu hỏi hữu ích không phải giá nhiên liệu cao hơn có giảm lái xe không, mà là những người lái nào thực sự có thể thích ứng." },
+        { step: "B", t: "A {commuter|người đi làm hằng ngày} who lives two stops from a train line can {switch|chuyển đổi} within a week of the price going up.",
+          vi: "Một người đi làm sống cách tuyến tàu hai trạm có thể chuyển đổi trong vòng một tuần sau khi giá tăng." },
+        { step: "C", t: "A warehouse worker whose {shift|ca làm} starts at five in the morning, before the first bus runs, keeps driving and {simply pays more|đành trả nhiều tiền hơn}.",
+          vi: "Một công nhân kho có ca làm bắt đầu lúc năm giờ sáng, trước khi chuyến xe buýt đầu tiên chạy, vẫn phải lái xe và đành trả nhiều tiền hơn." },
+        { step: "D", t: "The policy therefore removes the trips that were {easiest to replace|dễ thay thế nhất} and taxes the trips that were hardest, so the cost settles on the households with the {fewest alternatives|ít lựa chọn thay thế nhất}.",
+          vi: "Vì vậy, chính sách này xoá đi những chuyến dễ thay thế nhất và đánh thuế những chuyến khó thay thế nhất, nên chi phí dồn lên những hộ có ít lựa chọn thay thế nhất." },
+        { step: "D+", t: "The effect shows up in the fuel spending of {outer districts|các quận ngoại thành} long before it shows up in any {traffic count|số liệu đếm xe} downtown.",
+          vi: "Tác động thể hiện ở chi tiêu xăng dầu của các quận ngoại thành từ rất lâu trước khi xuất hiện trong bất kỳ số liệu đếm xe nào ở trung tâm." },
+        { step: "E", t: "Fuel pricing is worth using, but it {changes behavior|thay đổi hành vi} only where a {usable alternative|lựa chọn thay thế dùng được} already runs at the hours people actually travel.",
+          vi: "Định giá nhiên liệu đáng áp dụng, nhưng nó chỉ thay đổi hành vi ở nơi đã có lựa chọn thay thế dùng được chạy vào đúng giờ người ta đi lại." },
+      ] },
+    ] },
+  { n: 11,
+    thesis: { prompt: "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+      t: "The comparison only holds if prevention is treated as a set of {concrete changes|những thay đổi cụ thể} to price, access, and {default options|lựa chọn mặc định} rather than as advice, and, understood that way, I largely agree with {shifting money|chuyển tiền} toward prevention, provided the shift is measured over a decade rather than a single budget year.",
+      vi: "Phép so sánh chỉ đứng vững nếu phòng bệnh được hiểu là một loạt thay đổi cụ thể về giá cả, khả năng tiếp cận và lựa chọn mặc định chứ không phải lời khuyên, và hiểu theo cách đó, tôi phần lớn đồng ý với việc chuyển tiền sang phòng bệnh, miễn là sự chuyển dịch được đo trong một thập kỷ chứ không phải một năm ngân sách." },
+    paras: [
+      { prompt: "Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "A {ban|lệnh cấm} is only one point on a scale that runs from doing nothing to {removing a product|loại bỏ một sản phẩm} entirely, and the interesting question is which point changes behavior at the lowest cost.",
+          vi: "Lệnh cấm chỉ là một điểm trên thang đo trải từ không làm gì đến loại bỏ hoàn toàn một sản phẩm, và câu hỏi đáng quan tâm là điểm nào thay đổi hành vi với chi phí thấp nhất." },
+        { step: "B", t: "A parent shopping after a nine-hour shift picks up whatever sits at the end of the {aisle|lối đi giữa các kệ hàng}, because deciding carefully takes {attention|sự chú ý} that the shift has already used up.",
+          vi: "Một phụ huynh đi chợ sau ca làm chín tiếng sẽ lấy bất cứ thứ gì nằm ở cuối dãy kệ, vì cân nhắc kỹ cần sự chú ý mà ca làm đã vắt kiệt." },
+        { step: "C", t: "Moving that product two shelves down, or {pricing it|định giá nó} slightly higher, changes what goes into the {basket|giỏ hàng} without taking the choice away from anyone.",
+          vi: "Dời sản phẩm đó xuống hai kệ, hoặc định giá cao hơn một chút, sẽ thay đổi thứ được bỏ vào giỏ mà không tước quyền lựa chọn của ai." },
+        { step: "D", t: "A full ban, {by contrast|ngược lại}, invites a {black market|chợ đen}, punishes the occasional buyer along with the daily one, and hands opponents an easy argument about personal freedom.",
+          vi: "Ngược lại, một lệnh cấm hoàn toàn dễ sinh ra chợ đen, trừng phạt cả người thỉnh thoảng mua lẫn người mua hằng ngày, và trao cho phe phản đối một lập luận dễ dàng về tự do cá nhân." },
+        { step: "D+", t: "The {weaker measure|biện pháp nhẹ hơn} also {survives|tồn tại được qua} a change of government, while a ban tends not to.",
+          vi: "Biện pháp nhẹ hơn cũng tồn tại được qua một lần thay đổi chính phủ, còn lệnh cấm thường thì không." },
+        { step: "E", t: "I therefore disagree with {prohibition|sự cấm đoán} but agree with the reasoning behind it, since the same goal is reachable through price, {placement|cách sắp đặt vị trí}, and labeling, and those tools do not require the state to decide what an adult may buy.",
+          vi: "Vì vậy, tôi không đồng ý với việc cấm đoán nhưng đồng ý với lý lẽ đằng sau nó, vì cùng mục tiêu có thể đạt được qua giá cả, cách sắp đặt và ghi nhãn, và những công cụ đó không đòi nhà nước quyết định người trưởng thành được mua gì." },
+      ] },
+    ] },
+  { n: 12,
+    thesis: { prompt: "Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.",
+      t: "Both sides are looking at the same activity from different distances, since sport is indeed a way of {passing an afternoon|giết thời gian một buổi chiều} and also one of the few remaining reasons for people with nothing else {in common|điểm chung} to meet every week, and I {lean toward|nghiêng về} the second view, though it holds only for sport that people play rather than sport they watch.",
+      vi: "Hai phía đang nhìn cùng một hoạt động từ những khoảng cách khác nhau, vì thể thao đúng là một cách giết thời gian buổi chiều và cũng là một trong số ít lý do còn lại để những người không có điểm chung nào khác gặp nhau mỗi tuần, và tôi nghiêng về quan điểm thứ hai, dù nó chỉ đúng với thể thao người ta chơi chứ không phải thể thao người ta xem." },
+    paras: [
+      { prompt: "Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "The question is not whether a {sculpture|tác phẩm điêu khắc} is {worth its price|đáng với giá của nó} but what a street looks like once nothing in it was paid for by anyone other than a shop.",
+          vi: "Câu hỏi không phải một bức tượng có đáng giá tiền không, mà là một con phố sẽ trông ra sao khi mọi thứ trên đó đều do cửa hàng trả tiền." },
+        { step: "B", t: "Everything else at {eye level|tầm mắt} on a {commercial street|phố thương mại} is there to sell something, from the window display to the bench with a logo on it.",
+          vi: "Mọi thứ khác ngang tầm mắt trên một con phố thương mại đều ở đó để bán thứ gì đó, từ tủ kính trưng bày đến chiếc ghế dài in logo." },
+        { step: "C", t: "A public sculpture is one of the few things a person passes that {asks for nothing|không đòi hỏi gì}, and children treat it as a {meeting point|điểm hẹn} long before anyone explains it to them.",
+          vi: "Một bức tượng công cộng là một trong số ít thứ người ta đi ngang qua mà không đòi hỏi gì, và trẻ em coi nó là điểm hẹn từ lâu trước khi có ai giải thích cho chúng." },
+        { step: "D", t: "A city that funds none of this does not end up with a {neutral|trung lập} street; it ends up with a street {composed entirely of|toàn bộ được tạo nên từ} advertising.",
+          vi: "Một thành phố không tài trợ gì cho những thứ này sẽ không có được một con phố trung lập; nó sẽ có một con phố toàn là quảng cáo." },
+        { step: "D+", t: "The loss is {invisible|vô hình} in a budget, because the {line item|khoản mục (ngân sách)} simply disappears and nothing appears to replace it.",
+          vi: "Mất mát này vô hình trong ngân sách, vì khoản mục đó chỉ đơn giản biến mất và không có gì xuất hiện thay thế." },
+        { step: "E", t: "I therefore agree that governments should fund {public art|nghệ thuật công cộng}, though the case {rests on|dựa trên} what a street becomes without it rather than on the visitors a sculpture is supposed to attract.",
+          vi: "Vì vậy, tôi đồng ý rằng chính phủ nên tài trợ nghệ thuật công cộng, dù lập luận dựa trên việc con phố sẽ thành ra sao nếu thiếu nó chứ không phải lượng khách mà bức tượng được kỳ vọng thu hút." },
+      ] },
+    ] },
+  { n: 13,
+    thesis: { prompt: "Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?",
+      t: "The answer depends on what a punishment is meant to achieve, since {identical sentencing|tuyên án giống hệt nhau} makes sense if the aim is only to mark how serious an act was, and much less sense if the aim is to reduce the chance of a {second offense|lần phạm tội thứ hai}, and I disagree with identical sentencing on that second ground, while accepting that the {most serious cases|những vụ nghiêm trọng nhất} may need to be treated separately.",
+      vi: "Câu trả lời phụ thuộc vào mục đích của hình phạt, vì tuyên án giống hệt nhau hợp lý nếu mục đích chỉ là đánh dấu mức độ nghiêm trọng của hành vi, và kém hợp lý hơn nhiều nếu mục đích là giảm khả năng tái phạm, và tôi không đồng ý với việc tuyên án giống nhau vì lý do thứ hai đó, đồng thời chấp nhận rằng những vụ nghiêm trọng nhất có thể cần được xử lý riêng." },
+    paras: [
+      { prompt: "The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?", label: "", s: [
+        { step: "A", t: "The phrase \"the only way\" is the {weakest part|phần yếu nhất} of this claim, because punishment is one of at least three {levers|đòn bẩy, công cụ} and it is the one that works last.",
+          vi: "Cụm \"cách duy nhất\" là phần yếu nhất của nhận định này, vì hình phạt chỉ là một trong ít nhất ba đòn bẩy và là đòn bẩy phát huy tác dụng sau cùng." },
+        { step: "B", t: "A driver deciding whether to {run a red light|vượt đèn đỏ} at midnight is not weighing the size of the {fine|tiền phạt}; they are weighing whether anyone is there to see it.",
+          vi: "Một tài xế đang tính có vượt đèn đỏ lúc nửa đêm hay không không cân nhắc mức phạt; họ cân nhắc xem có ai ở đó nhìn thấy không." },
+        { step: "C", t: "A camera at that {intersection|ngã tư} changes that calculation {immediately|ngay lập tức}, while a larger fine reaches only the small number of drivers who are actually stopped.",
+          vi: "Một camera ở ngã tư đó thay đổi phép tính ấy ngay lập tức, còn mức phạt lớn hơn chỉ chạm tới số ít tài xế thực sự bị dừng xe." },
+        { step: "D", t: "{Road design|thiết kế đường sá} does more still, since a {narrower lane|làn đường hẹp hơn} slows a car without requiring the driver to agree with anything at all.",
+          vi: "Thiết kế đường sá còn hiệu quả hơn nữa, vì làn đường hẹp hơn khiến xe chạy chậm lại mà không cần tài xế đồng ý với điều gì cả." },
+        { step: "D+", t: "These measures also work at three in the morning, when no {officer|cảnh sát} is on that road and no {court|toà án} is open.",
+          vi: "Những biện pháp này cũng có tác dụng lúc ba giờ sáng, khi không có cảnh sát nào trên đường và không toà án nào mở cửa." },
+        { step: "E", t: "{Stricter punishment|hình phạt nghiêm khắc hơn} therefore has a place, but calling it the only way {mistakes|nhầm lẫn} the last step in the chain for the whole of it.",
+          vi: "Vì vậy, hình phạt nghiêm khắc hơn có chỗ đứng của nó, nhưng gọi nó là cách duy nhất là nhầm bước cuối cùng của chuỗi thành cả chuỗi." },
+      ] },
+    ] },
+  { n: 14,
+    thesis: { prompt: "Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.",
+      t: "The disagreement is really about whether {closeness|sự gần gũi} creates a stronger {obligation|nghĩa vụ} or only a stronger feeling, and I lean toward the second reading, since a {donation|khoản quyên góp} reaches further where need is greatest, though local giving has one advantage the other cannot match, which is that donors can see whether it worked.",
+      vi: "Bất đồng thực chất là về việc sự gần gũi tạo ra nghĩa vụ lớn hơn hay chỉ là cảm xúc mạnh hơn, và tôi nghiêng về cách hiểu thứ hai, vì một khoản quyên góp đi xa hơn ở nơi nhu cầu lớn nhất, dù cho đi tại địa phương có một lợi thế mà cách kia không có, đó là người cho có thể thấy nó có hiệu quả hay không." },
+    paras: [
+      { prompt: "Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.", label: "", s: [
+        { step: "A", t: "Both sides are reading the same {pattern|khuôn mẫu, xu hướng} in {opposite directions|những hướng ngược nhau}, and neither side can settle it from the pattern alone.",
+          vi: "Cả hai phía đang đọc cùng một xu hướng theo hai hướng ngược nhau, và không phía nào có thể phân định chỉ dựa vào xu hướng đó." },
+        { step: "B", t: "People who spend the most time on violent games are, {on average|tính trung bình}, more {aggressive|hung hăng} than people who spend none.",
+          vi: "Những người dành nhiều thời gian nhất cho game bạo lực, tính trung bình, hung hăng hơn những người không chơi." },
+        { step: "C", t: "That gap is real, but the two groups were never {alike|giống nhau} to begin with, since a person already {drawn to|bị thu hút bởi} conflict is also more likely to choose that kind of game.",
+          vi: "Khoảng chênh đó là thật, nhưng hai nhóm vốn chưa bao giờ giống nhau ngay từ đầu, vì người vốn đã bị cuốn vào xung đột cũng dễ chọn loại game đó hơn." },
+        { step: "D", t: "A more useful question is what happens to one person {over time|theo thời gian}, and the honest answer is that the effect looks small compared with the things that {shaped them|định hình họ} before any console arrived.",
+          vi: "Một câu hỏi hữu ích hơn là điều gì xảy ra với một người theo thời gian, và câu trả lời thật lòng là tác động trông nhỏ so với những thứ đã định hình họ trước khi có máy chơi game." },
+        { step: "D+", t: "It is also {worth noticing|đáng để ý} that these games spread widely in the same decades in which {violent crime|tội phạm bạo lực} fell in many countries.",
+          vi: "Cũng đáng để ý rằng những trò chơi này lan rộng đúng trong những thập kỷ mà tội phạm bạo lực giảm ở nhiều nước." },
+        { step: "E", t: "I therefore side with neither view {as stated|như cách nó được phát biểu}, since banning treats a {weak cause|nguyên nhân yếu} as a strong one, while calling these games harmless ignores the smaller effects that do appear in careful work.",
+          vi: "Vì vậy, tôi không đứng về quan điểm nào như cách chúng được phát biểu, vì cấm đoán coi một nguyên nhân yếu là nguyên nhân mạnh, còn gọi những trò chơi này là vô hại lại bỏ qua những tác động nhỏ hơn vẫn xuất hiện trong các nghiên cứu cẩn thận." },
+      ] },
+    ] },
+];
+
+/* ─── Hầm ngục chữ ─────────────────────────────────────────────────────────
+   One player, turn-based. Each lesson is a dungeon: a goblin guards the
+   thesis (mở bài), a brute guards the opening line of a model paragraph
+   (mở đầu đoạn), and the boss guards the rest of that paragraph (viết đoạn).
+   Every blank is one turn with its own clock. A right word is a hit on the
+   monster; a wrong word or a clock that runs out loses the turn, and the
+   monster hits back. The first two fights give a word bank; the boss gives
+   only the Vietnamese meaning, and the word has to be typed. */
+const RAID_BOSSES = {
+  1: { icon: '🧙', name: 'Phù thuỷ Khoảng cách Thế hệ' },
+  2: { icon: '🐲', name: 'Rồng Toàn cầu hoá' },
+  3: { icon: '🦖', name: 'Khủng long Áp lực Thi cử' },
+  4: { icon: '🐙', name: 'Bạch tuộc Tiêu dùng' },
+  5: { icon: '👁️', name: 'Con mắt Thuật toán' },
+  6: { icon: '🦏', name: 'Tê giác Ngân sách' },
+  7: { icon: '🤖', name: 'Robot Tăng ca' },
+  8: { icon: '🐉', name: 'Rồng Khói Than' },
+  9: { icon: '👾', name: 'Quái vật Tự động hoá' },
+  10: { icon: '🦍', name: 'Khỉ đột Kẹt xe' },
+  11: { icon: '🍔', name: 'Vua Đồ ăn nhanh' },
+  12: { icon: '🎭', name: 'Bóng ma Nhà hát' },
+  13: { icon: '🦹', name: 'Siêu tội phạm Tái phạm' },
+  14: { icon: '🐍', name: 'Rắn Bất bình đẳng' },
+};
+const RAID_MINIONS = [
+  { icon: '👺', name: 'Yêu tinh' }, { icon: '🦇', name: 'Dơi hút máu' }, { icon: '🧟', name: 'Xác sống' }, { icon: '👻', name: 'Hồn ma' },
+];
+const RAID_BRUTES = [
+  { icon: '👹', name: 'Quỷ đầu đàn' }, { icon: '🐺', name: 'Sói xám' }, { icon: '🦂', name: 'Bọ cạp khổng lồ' }, { icon: '🕷️', name: 'Nhện độc' },
+];
+const RAID_TIERS = {
+  1: { label: 'Mở bài', hp: 100, hit: 25, coin: 10, bg: 'forest' },
+  2: { label: 'Mở đầu đoạn', hp: 150, hit: 25, coin: 15, bg: 'cave' },
+  3: { label: 'Viết đoạn', hp: 300, hit: 15, coin: 40, bg: 'lava' },
+};
+const RAID_PACES = {
+  calm:   { label: 'Thong thả', bank: 40, type: 60 },
+  normal: { label: 'Vừa',       bank: 25, type: 45 },
+  quick:  { label: 'Gấp',       bank: 15, type: 30 },
+};
+const RAID_BOSS_BLANKS = 8;
+const RAID_HEAL = 40;
+let _raidPace = 'normal';
+try { const p = localStorage.getItem('raidPace'); if (RAID_PACES[p]) _raidPace = p; } catch (e) {}
+let _rd = null;
+let _raidStars = null;
+let _raidStarsFor = null;
+
+// "{legal duty|nghĩa vụ pháp lý}" → a blank with its answer and meaning.
+function raidParse(t) {
+  const parts = [];
+  let last = 0;
+  const re = /\{([^|{}]+)\|([^{}]+)\}/g;
+  let m;
+  while ((m = re.exec(t))) {
+    if (m.index > last) parts.push(t.slice(last, m.index));
+    parts.push({ ans: m[1], hint: m[2] });
+    last = re.lastIndex;
+  }
+  if (last < t.length) parts.push(t.slice(last));
+  return parts;
+}
+function raidPlain(t) { return t.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'); }
+function raidNorm(s) { return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/[.,;:!?]+$/, '').replace(/\s+/g, ' ').trim(); }
+
+function raidEnemy(n, fi, tier, finalBoss) {
+  if (tier === 3) return finalBoss ? RAID_BOSSES[n] : { icon: '🐗', name: 'Hộ vệ của ' + RAID_BOSSES[n].name };
+  const list = tier === 1 ? RAID_MINIONS : RAID_BRUTES;
+  return list[(n + fi) % list.length];
+}
+
+// The fights of one lesson, in order.
+function raidFights(L) {
+  const f = [{ tier: 1, prompt: L.thesis.prompt, label: 'Câu cuối của mở bài', lines: [L.thesis], given: [] }];
+  L.paras.forEach((p, i) => {
+    f.push({ tier: 2, prompt: p.prompt, label: p.label || 'Câu mở đoạn', lines: [p.s[0]], given: [] });
+    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: p.s.slice(1), given: [p.s[0]], final: i === L.paras.length - 1 });
+  });
+  return f.map((x, i) => ({ ...x, enemy: raidEnemy(L.n, i, x.tier, x.final) }));
+}
+
+/* ── Progress ── */
+function raidKey() { return 'raidStars_' + ((currentUser && currentUser.id) || 'guest'); }
+async function raidLoadStars() {
+  const who = (currentUser && currentUser.id) || 'guest';
+  if (_raidStars && _raidStarsFor === who) return _raidStars;
+  let local = {};
+  try { local = JSON.parse(localStorage.getItem(raidKey()) || '{}') || {}; } catch (e) {}
+  let remote = {};
+  try { remote = ((await api('/api/game/raid')) || {}).stars || {}; } catch (e) {}
+  const merged = { ...remote };
+  for (const [k, v] of Object.entries(local)) merged[k] = Math.max(v, merged[k] || 0);
+  _raidStars = merged;
+  _raidStarsFor = who;
+  return merged;
+}
+function raidSaveStars(n, stars) {
+  if (!_raidStars) _raidStars = {};
+  _raidStars[n] = Math.max(stars, _raidStars[n] || 0);
+  lvSave(raidKey(), JSON.stringify(_raidStars));
+  api('/api/game/raid', { method: 'PUT', body: JSON.stringify({ stars: { [n]: stars } }) }).catch(() => {});
+}
+
+/* ── Map ── */
+async function raidMap() {
+  raidStop();
+  tsStop();
+  twStop();
+  lvUnbindKeys();
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  root.innerHTML = '<div class="loading">Đang mở bản đồ…</div>';
+  const [stars] = await Promise.all([raidLoadStars(), walLoad()]);
+  if (!document.getElementById('lesson-vocab-root')) return;
+  const total = Object.values(stars).reduce((a, b) => a + b, 0);
+  const titles = Object.fromEntries(LESSON_VOCAB.map(l => [l.n, l.title]));
+  root.innerHTML = `
+    <div class="lv-wrap rd-mapwrap">
+      <div class="rd-map-top">
+        <button class="btn-back-plain" onclick="lvRenderHub()">← Chọn buổi</button>
+        <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+      </div>
+      <div class="rd-map-head">
+        <div class="rd-map-title">⚔️ Hầm ngục chữ</div>
+        <div class="rd-map-sub">Mỗi buổi là một hầm ngục. Hạ yêu tinh ở câu mở bài, hạ quỷ ở câu mở đoạn, rồi đánh boss bằng cả đoạn văn. Mỗi lượt có đồng hồ, hết giờ là mất lượt. Bị đánh trúng không quá 2 lần cả hầm ngục là được 3 sao.</div>
+        <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 3} sao</div>
+        <div class="rd-pace"><span>Thời gian mỗi lượt</span>${Object.entries(RAID_PACES).map(([k, p]) => `<button class="vb-chip${_raidPace === k ? ' active' : ''}" onclick="raidSetPace('${k}')">${p.label} · ${p.bank}s</button>`).join('')}</div>
+      </div>
+      <div class="rd-path">${RAID_LESSONS.map((L, i) => {
+        const s = stars[L.n] || 0;
+        const b = RAID_BOSSES[L.n];
+        return `<button class="rd-node rd-node--${i % 2 ? 'r' : 'l'}${s ? ' done' : ''}" onclick="raidStart(${L.n})" style="animation-delay:${i * 40}ms">
+          <span class="rd-node-boss">${b.icon}</span>
+          <span class="rd-node-body">
+            <span class="rd-node-n">Buổi ${L.n}</span>
+            <span class="rd-node-t">${escapeHtml(titles[L.n] || '')}</span>
+            <span class="rd-node-b">Boss: ${escapeHtml(b.name)}</span>
+          </span>
+          <span class="rd-node-stars">${'★'.repeat(s)}<span class="rd-star-off">${'★'.repeat(3 - s)}</span></span>
+        </button>`;
+      }).join('')}</div>
+    </div>`;
+}
+function raidSetPace(k) { if (RAID_PACES[k]) { _raidPace = k; lvSave('raidPace', k); tsSfx('key'); raidMap(); } }
+
+/* ── A dungeon run ── */
+function raidStart(n) {
+  const L = RAID_LESSONS.find(x => x.n === n);
+  if (!L) return;
+  raidStop();
+  _rd = { L, fights: raidFights(L), fi: 0, hp: 100, hitsTaken: 0, coins: 0, crits: 0, shield: false, fight: null, timer: 0, busy: false, done: false };
+  document.addEventListener('keydown', raidOnKey);
+  tsSfx('boss');
+  raidBeginFight();
+}
+
+function raidBeginFight() {
+  const g = _rd;
+  const F = g.fights[g.fi];
+  const tier = RAID_TIERS[F.tier];
+  // Every marked word in the fight is a blank; the boss keeps at most
+  // RAID_BOSS_BLANKS of them, spread across its sentences.
+  let blanks = [];
+  F.lines.forEach((line, li) => raidParse(line.t).forEach((p, pi) => { if (typeof p !== 'string') blanks.push({ li, pi, ans: p.ans, hint: p.hint }); }));
+  if (F.tier === 3 && blanks.length > RAID_BOSS_BLANKS) {
+    const step = blanks.length / RAID_BOSS_BLANKS;
+    blanks = Array.from({ length: RAID_BOSS_BLANKS }, (_, i) => blanks[Math.floor(i * step)]);
+  }
+  blanks.forEach(b => { b.done = false; b.wrongs = 0; b.removed = []; b.reveal = 0; b.bank = F.tier < 3; });
+  const pool = [...new Set(RAID_LESSONS.flatMap(x => [x.thesis, ...x.paras.flatMap(p => p.s)]).flatMap(line => raidParse(line.t).filter(p => typeof p !== 'string').map(p => p.ans)))];
+  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, pool, own: blanks.map(b => b.ans) };
+  g.busy = false;
+  raidRenderArena();
+  raidNextTurn();
+}
+
+// Four choices: the answer and three others, closest in length first, taken
+// from this fight before the rest of the lessons.
+function raidChoices(b) {
+  const f = _rd.fight;
+  const len = b.ans.split(' ').length;
+  const others = [...new Set([...f.own, ...vbShuffle(f.pool)])].filter(a => raidNorm(a) !== raidNorm(b.ans));
+  others.sort((x, y) => Math.abs(x.split(' ').length - len) - Math.abs(y.split(' ').length - len));
+  const near = others.slice(0, 10);
+  return vbShuffle([b.ans, ...vbShuffle(near).slice(0, 3)]);
+}
+
+function raidRenderArena() {
+  const g = _rd;
+  const f = g.fight;
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root || !f) return;
+  const F = f.F;
+  root.innerHTML = `
+    <div class="rd-wrap">
+      <div class="rd-top">
+        <button class="ts-icon-btn" onclick="raidQuit()" title="Về bản đồ" aria-label="Về bản đồ">←</button>
+        <span class="rd-progress">${g.fights.map((x, i) => `<span class="rd-pip${i < g.fi ? ' done' : i === g.fi ? ' now' : ''}" title="${escapeHtml(RAID_TIERS[x.tier].label)}">${i < g.fi ? '✓' : x.enemy.icon}</span>`).join('')}</span>
+        <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+        <button class="ts-icon-btn" id="rd-mute" onclick="raidMute()" title="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ">🔀</button>
+      </div>
+      <div class="rd-stage rd-bg--${f.tier.bg}" id="rd-stage">
+        <div class="rd-embers"></div>
+        <div class="rd-side rd-hero-side">
+          <div class="rd-bar"><div class="rd-bar-name">${escapeHtml((currentUser && currentUser.name) || 'Hiệp sĩ')}</div><div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--hero" id="rd-hero-hp"></div></div><div class="rd-hp-num" id="rd-hero-num"></div></div>
+          <div class="rd-fighter rd-hero" id="rd-hero">🤺<div class="rd-shield-fx" id="rd-shield-fx"></div></div>
+        </div>
+        <div class="rd-clock" id="rd-clock"><span id="rd-clock-n"></span></div>
+        <div class="rd-side rd-enemy-side">
+          <div class="rd-bar"><div class="rd-bar-name">${escapeHtml(F.enemy.name)} <small>· ${escapeHtml(f.tier.label)}</small></div><div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--enemy" id="rd-enemy-hp"></div></div><div class="rd-hp-num" id="rd-enemy-num"></div></div>
+          <div class="rd-fighter rd-enemy${F.tier === 3 ? ' rd-enemy--boss' : ''}" id="rd-enemy">${F.enemy.icon}</div>
+        </div>
+        <div class="rd-banner hidden" id="rd-banner"></div>
+      </div>
+      <div class="rd-scroll">
+        <details class="rd-prompt"><summary>📜 Đề bài · ${escapeHtml(F.label)}</summary><div>${escapeHtml(F.prompt)}</div></details>
+        <div class="rd-text" id="rd-text"></div>
+      </div>
+      <div class="rd-panel" id="rd-panel"></div>
+    </div>`;
+  raidRenderBars();
+  raidRenderText();
+}
+
+function raidRenderBars() {
+  const g = _rd;
+  const f = g.fight;
+  const set = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = Math.max(0, pct) + '%'; };
+  set('rd-hero-hp', g.hp);
+  set('rd-enemy-hp', f.enemyHp / f.tier.hp * 100);
+  const hn = document.getElementById('rd-hero-num'); if (hn) hn.textContent = `${Math.max(0, g.hp)} / 100`;
+  const en = document.getElementById('rd-enemy-num'); if (en) en.textContent = `${Math.max(0, Math.round(f.enemyHp))} / ${f.tier.hp}`;
+  document.getElementById('rd-shield-fx')?.classList.toggle('on', g.shield);
+}
+
+function raidRenderText() {
+  const g = _rd;
+  const f = g.fight;
+  const el = document.getElementById('rd-text');
+  if (!el) return;
+  const active = f.blanks[f.bi];
+  const given = f.F.given.map(line => `<span class="rd-given">${escapeHtml(raidPlain(line.t))}</span>`).join(' ');
+  const lines = f.F.lines.map((line, li) => raidParse(line.t).map((p, pi) => {
+    if (typeof p === 'string') return escapeHtml(p);
+    const b = f.blanks.find(x => x.li === li && x.pi === pi);
+    if (!b) return escapeHtml(p.ans);
+    if (b.done) return `<span class="rd-word${b.shown ? ' rd-word--shown' : ''}">${escapeHtml(b.ans)}</span>`;
+    const n = f.blanks.indexOf(b) + 1;
+    return `<span class="rd-slot${b === active ? ' now' : ''}" data-n="${n}">${b === active ? '?' : n}</span>`;
+  }).join('')).join(' ');
+  el.innerHTML = (given ? given + ' ' : '') + lines;
+  el.querySelector('.rd-slot.now')?.scrollIntoView({ block: 'nearest' });
+}
+
+function raidRenderPanel(result) {
+  const g = _rd;
+  const f = g.fight;
+  const panel = document.getElementById('rd-panel');
+  if (!panel) return;
+  const b = f.blanks[f.bi];
+  if (!b) { panel.innerHTML = ''; return; }
+  const items = `
+    <div class="rd-items">
+      <button class="rd-item" onclick="raidHint()" ${walCount('hint') && !b.hinted ? '' : 'disabled'} title="Bỏ 2 lựa chọn sai, hoặc hiện kho từ khi phải tự gõ">💡 <b>${walCount('hint')}</b></button>
+      <button class="rd-item${g.shield ? ' on' : ''}" onclick="raidShield()" ${walCount('shield') && !g.shield ? '' : 'disabled'} title="Đỡ đòn đánh tiếp theo của quái">🛡️ <b>${g.shield ? 'bật' : walCount('shield')}</b></button>
+      <span class="rd-item rd-item--static" title="Hồi sinh khi hết máu">💖 <b>${walCount('revive')}</b></span>
+    </div>`;
+  const label = `<div class="rd-turn">Lượt ${f.bi + 1} / ${f.blanks.length} · ${b.bank ? 'chọn từ đúng' : 'gõ từ đúng'}</div>`;
+  if (b.bank) {
+    if (!b.choices) b.choices = raidChoices(b);
+    // The word bank stands alone in the first two fights; a boss blank that
+    // was opened with a hint keeps its Vietnamese meaning above the bank.
+    panel.innerHTML = label + `
+      ${f.F.tier === 3 ? `<div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>` : ''}
+      <div class="rd-bank">${b.choices.map((c, i) => `<button class="rd-choice" onclick="raidPick(${i})" ${b.removed.includes(i) ? 'disabled' : ''}><kbd>${i + 1}</kbd>${escapeHtml(c)}</button>`).join('')}</div>` + items;
+  } else {
+    const mask = b.ans.split('').map((c, i) => (i < Math.max(1, b.reveal) || c === ' ' || c === '-' || c === "'" ? c : '_')).join('');
+    panel.innerHTML = label + `
+      <div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>
+      <div class="rd-mask">${escapeHtml(mask)}</div>
+      <div class="rd-typebar">
+        <input class="ts-input rd-input" id="rd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="Gõ từ tiếng Anh" aria-label="Gõ từ tiếng Anh">
+        <button class="vb-start-btn rd-go" onclick="raidSubmit()">⚔️ Chém</button>
+      </div>` + items;
+    const inp = document.getElementById('rd-input');
+    if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); raidSubmit(); } }); }
+  }
+  if (result) panel.classList.add(result);
+}
+
+/* ── Turns ── */
+function raidNextTurn() {
+  const g = _rd;
+  const f = g.fight;
+  while (f.blanks[f.bi] && f.blanks[f.bi].done) f.bi++;
+  if (!f.blanks[f.bi]) return;
+  g.busy = false;
+  const b = f.blanks[f.bi];
+  const pace = RAID_PACES[_raidPace];
+  g.tMax = b.bank ? pace.bank : pace.type;
+  g.tLeft = g.tMax;
+  raidRenderText();
+  raidRenderPanel();
+  raidRenderBars();
+  raidClock();
+  clearInterval(g.timer);
+  g.last = performance.now();
+  g.timer = setInterval(raidTick, 100);
+}
+
+function raidTick() {
+  const g = _rd;
+  if (!g || g.busy || g.done) return;
+  const view = document.getElementById('view-lesson-vocab');
+  if (!view || view.classList.contains('hidden') || !document.getElementById('rd-stage')) { raidStop(); return; }
+  if (document.hidden || document.getElementById('lv-modal')) { g.last = performance.now(); return; }
+  const now = performance.now();
+  const before = Math.ceil(g.tLeft);
+  g.tLeft -= (now - g.last) / 1000;
+  g.last = now;
+  if (Math.ceil(g.tLeft) !== before && g.tLeft <= 5 && g.tLeft > 0) tsSfx('tick');
+  raidClock();
+  if (g.tLeft <= 0) raidMiss(true);
+}
+
+function raidClock() {
+  const g = _rd;
+  const el = document.getElementById('rd-clock');
+  const n = document.getElementById('rd-clock-n');
+  if (!el || !n) return;
+  const pct = Math.max(0, g.tLeft / g.tMax);
+  n.textContent = Math.max(0, Math.ceil(g.tLeft));
+  el.style.setProperty('--p', (pct * 360).toFixed(1) + 'deg');
+  el.classList.toggle('late', g.tLeft <= 5);
+}
+
+function raidPick(i) {
+  const g = _rd;
+  if (!g || g.busy) return;
+  const b = g.fight.blanks[g.fight.bi];
+  if (!b || !b.bank || b.removed.includes(i)) return;
+  if (raidNorm(b.choices[i]) === raidNorm(b.ans)) raidHit();
+  else { b.removed.push(i); raidMiss(false); }
+}
+
+function raidSubmit() {
+  const g = _rd;
+  if (!g || g.busy) return;
+  const b = g.fight.blanks[g.fight.bi];
+  const inp = document.getElementById('rd-input');
+  if (!b || !inp) return;
+  const typed = inp.value.trim();
+  if (!typed) { inp.focus(); return; }
+  if (raidNorm(typed) === raidNorm(b.ans)) raidHit();
+  else raidMiss(false, typed);
+}
+
+// A right word: the hero strikes. Fast answers land as a critical.
+function raidHit(auto) {
+  const g = _rd;
+  const f = g.fight;
+  const b = f.blanks[f.bi];
+  g.busy = true;
+  clearInterval(g.timer);
+  b.done = true;
+  if (auto) b.shown = true;
+  const left = f.blanks.filter(x => !x.done).length;
+  const dmg = left === 0 ? f.enemyHp : Math.round(f.tier.hp / f.blanks.length);
+  f.enemyHp = Math.max(0, f.enemyHp - dmg);
+  const crit = !auto && g.tLeft > g.tMax * 0.6;
+  const coin = (auto ? 0 : crit ? 2 : 1) * walMult();
+  g.coins += coin;
+  if (crit) g.crits++;
+  raidAnim('rd-hero', 'lunge');
+  setTimeout(() => {
+    raidAnim('rd-enemy', 'hurt');
+    raidSlash();
+    raidDamage('rd-enemy', `-${dmg}`, crit ? 'crit' : '');
+    if (crit) raidBanner('CHÍ MẠNG! ⚡', 'crit');
+    tsSfx(crit ? 'callout' : 'kill', 8);
+    jBuzz(crit ? [20, 30, 40] : 15);
+    raidRenderBars();
+    raidRenderText();
+    const e = document.getElementById('rd-enemy')?.getBoundingClientRect();
+    if (e && coin) jCoinFly(e.left + e.width / 2, e.top + e.height / 2, 'wal-mini');
+  }, 180);
+  setTimeout(() => {
+    if (_rd !== g) return;
+    if (f.enemyHp <= 0) raidWinFight(); else { f.bi++; raidNextTurn(); }
+  }, crit ? 1100 : 850);
+}
+
+// A wrong word or the clock running out: the turn is lost and the monster
+// strikes back. The blank stays; a third miss shows the answer.
+function raidMiss(timeout, typed) {
+  const g = _rd;
+  const f = g.fight;
+  const b = f.blanks[f.bi];
+  if (!b || g.busy) return;
+  g.busy = true;
+  clearInterval(g.timer);
+  b.wrongs++;
+  if (!b.bank) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
+  raidBanner(timeout ? '⌛ Hết giờ! Mất lượt' : '✗ Chưa đúng! Mất lượt', 'miss');
+  if (!timeout && typed) {
+    const inp = document.getElementById('rd-input');
+    if (inp) { inp.classList.remove('ts-shake'); void inp.offsetWidth; inp.classList.add('ts-shake'); }
+  }
+  tsSfx('wrong');
+  setTimeout(() => {
+    if (_rd !== g) return;
+    raidAnim('rd-enemy', 'lunge-l');
+    setTimeout(() => {
+      if (_rd !== g) return;
+      if (g.shield) {
+        g.shield = false;
+        raidDamage('rd-hero', '🛡️ Đỡ!', 'block');
+        tsSfx('shield');
+        jBuzz([40, 30, 40]);
+      } else {
+        const hit = f.tier.hit;
+        g.hp -= hit;
+        g.hitsTaken++;
+        raidAnim('rd-hero', 'hurt');
+        raidAnim('rd-stage', 'quake');
+        raidDamage('rd-hero', `-${hit}`, 'hero');
+        tsSfx('miss');
+        jBuzz(90);
+      }
+      raidRenderBars();
+    }, 200);
+  }, 500);
+  setTimeout(() => {
+    if (_rd !== g) return;
+    if (g.hp <= 0) { raidDown(); return; }
+    if (b.wrongs >= 3) {
+      raidBanner(`Đáp án: ${b.ans}`, 'reveal');
+      setTimeout(() => { if (_rd === g) raidHit(true); }, 1300);
+      return;
+    }
+    raidNextTurn();
+  }, 1400);
+}
+
+function raidAnim(id, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+  if (cls !== 'die') setTimeout(() => el.classList.remove(cls), 700);
+}
+function raidSlash() {
+  const e = document.getElementById('rd-enemy');
+  if (!e) return;
+  const s = document.createElement('div');
+  s.className = 'rd-slash';
+  e.appendChild(s);
+  setTimeout(() => s.remove(), 450);
+}
+function raidDamage(id, text, kind) {
+  const host = document.getElementById(id);
+  if (!host) return;
+  const d = document.createElement('div');
+  d.className = 'rd-dmg' + (kind ? ' rd-dmg--' + kind : '');
+  d.textContent = text;
+  host.appendChild(d);
+  setTimeout(() => d.remove(), 1100);
+}
+function raidBanner(text, kind) {
+  const b = document.getElementById('rd-banner');
+  if (!b) return;
+  b.textContent = text;
+  b.className = 'rd-banner rd-banner--' + kind;
+  void b.offsetWidth;
+  b.classList.add('show');
+}
+
+/* ── Items ── */
+function raidHint() {
+  const g = _rd;
+  if (!g || g.busy) return;
+  const b = g.fight.blanks[g.fight.bi];
+  if (!b || b.hinted || !walUse('hint')) return;
+  b.hinted = true;
+  if (b.bank) {
+    const wrong = b.choices.map((c, i) => (raidNorm(c) === raidNorm(b.ans) || b.removed.includes(i) ? -1 : i)).filter(i => i >= 0);
+    b.removed.push(...vbShuffle(wrong).slice(0, 2));
+  } else {
+    b.bank = true;
+  }
+  tsSfx('power');
+  raidRenderPanel();
+}
+function raidShield() {
+  const g = _rd;
+  if (!g || g.busy || g.shield || !walUse('shield')) return;
+  g.shield = true;
+  tsSfx('shield');
+  jBuzz(25);
+  raidRenderBars();
+  raidRenderPanel();
+}
+
+/* ── Winning and losing ── */
+function raidWinFight() {
+  const g = _rd;
+  const f = g.fight;
+  const F = f.F;
+  raidAnim('rd-enemy', 'die');
+  tsSfx('level');
+  jBuzz([30, 40, 30, 40, 90]);
+  const bonus = f.tier.coin * walMult();
+  g.coins += bonus;
+  walEarn(g.coins, true);
+  g.coins = 0;
+  const lastFight = g.fi === g.fights.length - 1;
+  if (!lastFight) g.hp = Math.min(100, g.hp + RAID_HEAL);
+  setTimeout(() => {
+    if (_rd !== g) return;
+    const panel = document.getElementById('rd-panel');
+    const lines = [...F.given, ...F.lines];
+    if (panel) panel.innerHTML = `
+      <div class="rd-win">
+        <div class="rd-win-title">${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục! <span class="rd-loot">+${bonus} 🪙</span></div>
+        <div class="rd-win-text">${lines.map(l => `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span><span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span></p>`).join('')}</div>
+        ${lastFight ? '' : `<div class="rd-heal">💚 Hồi ${RAID_HEAL} máu trước trận sau</div>`}
+        <div class="rd-win-btns">
+          <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(lines.map(l => raidPlain(l.t)).join(' ')))})" title="Nghe cả đoạn">🔊</button>
+          <button class="vb-start-btn" id="rd-next" onclick="raidAfterWin()">${lastFight ? '🏆 Nhận thưởng' : 'Đánh tiếp →'}</button>
+        </div>
+      </div>`;
+    document.getElementById('rd-next')?.focus();
+    raidRenderBars();
+  }, 700);
+}
+
+function raidAfterWin() {
+  const g = _rd;
+  if (!g) return;
+  if (g.fi < g.fights.length - 1) { g.fi++; tsSfx('boss'); raidBeginFight(); return; }
+  raidCleared();
+}
+
+function raidCleared() {
+  const g = _rd;
+  g.done = true;
+  clearInterval(g.timer);
+  // Stars count the hits taken over the whole dungeon, since health refills
+  // between fights.
+  const stars = g.hitsTaken <= 2 ? 3 : g.hitsTaken <= 5 ? 2 : 1;
+  const prev = (_raidStars && _raidStars[g.L.n]) || 0;
+  raidSaveStars(g.L.n, stars);
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results rd-clear">
+        <div class="rd-clear-boss">${RAID_BOSSES[g.L.n].icon}</div>
+        <div class="rd-clear-title">Hầm ngục Buổi ${g.L.n} đã sạch bóng quái!</div>
+        <div class="rd-clear-stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.3 + i * 0.25}s">★</span>`).join('')}</div>
+        <div class="vb-results-score-lbl">Còn ${Math.max(0, g.hp)} máu · trúng đòn ${g.hitsTaken} lần · ${g.crits} chí mạng${stars > prev ? ' · kỷ lục mới!' : ''}</div>
+        <div class="vb-results-btns">
+          <button class="vb-start-btn" onclick="raidStart(${g.L.n})">↺ Đánh lại</button>
+          ${RAID_LESSONS.some(x => x.n > g.L.n) ? `<button class="vb-secondary-btn" onclick="raidStart(${RAID_LESSONS.find(x => x.n > g.L.n).n})">Hầm ngục tiếp theo →</button>` : ''}
+          <button class="vb-secondary-btn" onclick="raidMap()">🗺️ Bản đồ</button>
+          <button class="vb-secondary-btn" onclick="lbOpen('raid')">🏆 Xếp hạng</button>
+        </div>
+      </div>
+    </div>`;
+  tsSfx('rankup');
+  jConfetti(stars === 3 ? 110 : 60);
+  jBuzz([40, 60, 40, 60, 120]);
+}
+
+// Out of health. A revive puts the hero back on their feet on the same turn.
+function raidDown() {
+  const g = _rd;
+  clearInterval(g.timer);
+  raidAnim('rd-hero', 'die');
+  tsSfx('boss');
+  const panel = document.getElementById('rd-panel');
+  if (!panel) return;
+  panel.innerHTML = `
+    <div class="rd-lose">
+      <div class="rd-lose-title">💀 Em đã gục trước ${escapeHtml(g.fight.F.enemy.name)}</div>
+      <div class="rd-lose-btns">
+        ${walCount('revive') ? `<button class="vb-start-btn" onclick="raidRevive()">💖 Hồi sinh · còn ${walCount('revive')}</button>` : ''}
+        <button class="${walCount('revive') ? 'vb-secondary-btn' : 'vb-start-btn'}" onclick="raidRetry()">↺ Đánh lại trận này</button>
+        <button class="vb-secondary-btn" onclick="raidMap()">🗺️ Bản đồ</button>
+      </div>
+      ${walCount('revive') ? '' : '<div class="rd-lose-note">Mua 💖 Hồi sinh ở 🛒 Cửa hàng để đứng dậy đánh tiếp.</div>'}
+    </div>`;
+}
+function raidRevive() {
+  const g = _rd;
+  if (!g || !walUse('revive')) return;
+  g.hp = 60;
+  tsSfx('power');
+  jConfetti(30);
+  raidBanner('💖 Hồi sinh!', 'crit');
+  raidRenderBars();
+  raidNextTurn();
+}
+function raidRetry() {
+  const g = _rd;
+  if (!g) return;
+  g.hp = 100;
+  raidBeginFight();
+}
+
+// Keys 1 to 4 pick from the word bank; Enter moves on after a win.
+function raidOnKey(e) {
+  const g = _rd;
+  if (!g || document.getElementById('lv-modal') || (e.target && e.target.id === 'rd-input')) return;
+  if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); return; }
+  const n = parseInt(e.key, 10);
+  const b = g.fight && g.fight.blanks[g.fight.bi];
+  if (n >= 1 && n <= 4 && b && b.bank && !g.busy) { e.preventDefault(); raidPick(n - 1); }
+}
+
+function raidQuit() { raidMap(); }
+function raidStop() {
+  document.removeEventListener('keydown', raidOnKey);
+  if (_rd) { clearInterval(_rd.timer); if (_rd.coins) { walEarn(_rd.coins, true); _rd.coins = 0; } }
+  _rd = null;
+}
+function raidMute() {
+  lvSave('tsMute', tsMuted() ? '0' : '1');
+  const b = document.getElementById('rd-mute');
+  if (b) b.textContent = tsMuted() ? '🔇' : '🔊';
 }
 
 /* =====================================================

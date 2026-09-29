@@ -1496,7 +1496,24 @@ const db = {
   // Everything the rankings read, in one load.
   getGameStats() {
     const data = load();
-    return { wallets: data.game_wallets || {}, towers: data.game_towers || {}, scores: data.game_scores || {} };
+    return { wallets: data.game_wallets || {}, towers: data.game_towers || {}, scores: data.game_scores || {}, raids: data.game_raids || {} };
+  },
+
+  // Hầm ngục chữ: best stars per lesson dungeon. A lesson's stars never go down.
+  getRaid(userId) {
+    const data = load();
+    return (data.game_raids || {})[userId] || { stars: {} };
+  },
+  saveRaid(userId, stars) {
+    const data = load();
+    if (!data.game_raids) data.game_raids = {};
+    const r = data.game_raids[userId] || (data.game_raids[userId] = { stars: {} });
+    let changed = false;
+    for (const [k, v] of Object.entries(stars)) {
+      if (v > (r.stars[k] || 0)) { r.stars[k] = v; changed = true; }
+    }
+    if (changed) { r.updated_at = new Date().toISOString(); save(data); }
+    return r;
   },
 
   getNotificationCount(userId) {
