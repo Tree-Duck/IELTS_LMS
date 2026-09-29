@@ -13582,7 +13582,7 @@ function renderVbResults() {
     </div>`;
 }
 
-/* Kho từ của 12 buổi Writing Task 2, tách từ phần 1 "Kho từ chủ đề" trong giáo
+/* Kho từ các buổi Writing Task 2, tách từ phần 1 "Kho từ chủ đề" trong giáo
    trình v2. Mỗi mục là [cụm từ, nghĩa, cách dùng, câu mẫu]; câu mẫu chỉ có ở động
    từ (nhóm D và E). Sửa từ thì sửa ở đây, flashcard và Bắn Chữ đọc cùng một chỗ. */
 const LESSON_VOCAB = [
@@ -13644,6 +13644,64 @@ const LESSON_VOCAB = [
       ["rejuvenate", "làm trẻ lại", "Hay đi với a workforce, an economy", "Immigration can rejuvenate an aging workforce."],
       ["widen access to", "giúp nhiều người tiếp cận hơn", "Hay đi với care, education, services", "Home visits widen access to care for people who cannot travel."],
       ["bridge", "làm khoảng cách nhỏ lại", "Hay đi với the generation gap, a divide", "Regular family meals help bridge the generation gap."],
+    ] },
+  ] },
+  { n: 2, title: "Văn hóa và toàn cầu hóa", groups: [
+    { id: "A", name: "Bản sắc và di sản", kind: "phrase", items: [
+      ["cultural identity", "bản sắc văn hóa", "Hay đi với shape, erode, dilute, preserve.", ""],
+      ["national identity", "bản sắc dân tộc", "Dùng khi đề nói về cả một nước. Không dùng cho một làng.", ""],
+      ["collective identity", "bản sắc chung của một cộng đồng", "Hẹp hơn national identity. Hợp khi nói về một nhóm người cụ thể.", ""],
+      ["cultural heritage", "di sản văn hóa", "Không đếm được. Không viết a heritage hay heritages.", ""],
+      ["intangible heritage", "di sản phi vật thể", "Gồm bài hát, nghề thủ công, chuyện kể truyền miệng. Cụm hay, ít học viên dùng.", ""],
+      ["customs", "phong tục", "Thường ở số nhiều. Đừng nhầm với costume, xem mục 1.F.", ""],
+      ["traditional arts", "nghệ thuật truyền thống", "Hay đi với preserve, revive, pass down.", ""],
+      ["indigenous cultures", "văn hóa bản địa", "Trang trọng. Hợp với đề về các nhóm dân tộc thiểu số.", ""],
+      ["local culture", "văn hóa địa phương", "Trung tính. Dùng được cho nơi lớn hay nhỏ.", ""],
+      ["artistic expression", "việc thể hiện bản thân qua nghệ thuật", "Không đếm được. Hay đi với restrict, encourage.", ""],
+      ["cultural participation", "việc tham gia sinh hoạt văn hóa", "Dùng khi bàn ai được tiếp cận nghệ thuật.", ""],
+      ["artistic freedom", "tự do sáng tác nghệ thuật", "Cụm hay dùng trong mọi đề về tài trợ nghệ thuật.", ""],
+    ] },
+    { id: "B", name: "Toàn cầu hóa và tiếp xúc giữa các nước", kind: "phrase", items: [
+      ["globalization", "toàn cầu hóa", "Không đếm được và không có mạo từ. Không viết a globalization.", ""],
+      ["cultural exchange", "giao lưu văn hóa", "Hay đi với promote, foster, encourage.", ""],
+      ["cultural homogenization", "việc văn hóa các nơi trở nên giống nhau", "Mang nghĩa tiêu cực. Xem mục 1.F để phân biệt với standardization.", ""],
+      ["Westernization", "sự Tây hóa", "Viết hoa chữ W. Tốt hay xấu tùy ngữ cảnh, không mặc định là xấu.", ""],
+      ["assimilation", "sự hòa nhập tới mức mất nét riêng", "Động từ assimilate đi với into, không đi với to.", ""],
+      ["cross-cultural communication", "giao tiếp giữa các nền văn hóa", "Có gạch nối. Hợp với đề về du học và làm việc ở nước ngoài.", ""],
+      ["multinational corporations", "tập đoàn đa quốc gia", "Hợp làm chủ ngữ ở bước B, vì các tập đoàn này làm được việc cụ thể.", ""],
+      ["global interconnectedness", "mức độ kết nối toàn cầu", "Cụm dài và nặng. Cả bài chỉ dùng một lần.", ""],
+      ["consumerism", "chủ nghĩa tiêu dùng", "Không đếm được. Dùng tốt cho đề về quảng cáo và thời trang.", ""],
+      ["cultural commodification", "việc biến văn hóa thành hàng để bán", "Dùng khi nói lễ hội bị biến thành buổi diễn cho khách xem.", ""],
+      ["cultural diversity", "sự đa dạng văn hóa", "Hay đi với embrace, protect, celebrate.", ""],
+    ] },
+    { id: "C", name: "Du lịch và cộng đồng địa phương", kind: "phrase", items: [
+      ["international travel", "du lịch quốc tế", "Không đếm được, không có mạo từ.", ""],
+      ["tourist attractions", "điểm du lịch", "Đếm được, thường ở số nhiều.", ""],
+      ["overseas visitors", "du khách nước ngoài", "Trang trọng hơn foreign tourists.", ""],
+      ["the local economy", "nền kinh tế địa phương", "Luôn có the.", ""],
+      ["seasonal jobs", "việc làm theo mùa", "Dùng khi phản bác ý du lịch tạo ra nhiều việc làm.", ""],
+      ["overtourism", "tình trạng quá tải du lịch", "Viết liền một từ, không có gạch nối.", ""],
+      ["economic leakage", "tiền du lịch đi ra khỏi địa phương", "Dùng khi muốn chỉ ra tiền của khách không ở lại làng.", ""],
+      ["carrying capacity", "số khách tối đa một nơi chịu được", "Vốn là thuật ngữ sinh thái. Dùng cho du lịch vẫn rất tự nhiên.", ""],
+      ["local businesses", "cơ sở kinh doanh địa phương", "Hay đi với support, squeeze out, displace.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["erode", "làm mòn dần theo thời gian", "Hay đi với identity, traditions, trust", "Globalization can slowly erode local traditions."],
+      ["homogenize", "làm mất khác biệt, khiến mọi nơi giống nhau", "Hay đi với culture, tastes", "Global brands tend to homogenize consumer tastes."],
+      ["dilute", "làm nhạt bớt", "Hay đi với identity, meaning", "Commercialization can dilute the meaning of a traditional festival."],
+      ["undermine", "làm yếu dần từ bên trong", "Hay đi với values, identity", "Mass media can quietly undermine traditional values."],
+      ["put pressure on", "gây áp lực lên", "Hay đi với infrastructure, residents", "Large visitor numbers put pressure on water supplies, roads, and waste systems."],
+      ["displace", "đẩy ra khỏi chỗ vốn có", "Hay đi với residents, local businesses", "Short-term rentals can displace residents from central districts."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["preserve", "gìn giữ nguyên như cũ", "Hay đi với heritage, customs", "Museums help preserve fragile cultural heritage."],
+      ["pass down", "truyền lại cho đời sau", "Hay đi với traditions, skills", "Families and schools help pass down traditions to younger generations."],
+      ["foster", "giúp một điều tốt lớn dần lên", "Hay đi với understanding, tolerance", "Exchange programs foster mutual understanding."],
+      ["embrace", "đón nhận một cách cởi mở", "Hay đi với diversity, change", "Younger generations tend to embrace cultural diversity."],
+      ["revive", "làm sống lại thứ gần mất", "Hay đi với a craft, a festival", "A local grant can revive a craft that had almost no apprentices left."],
+      ["promote", "thúc đẩy một hoạt động", "Hay đi với cultural exchange, tourism", "International festivals can promote cultural exchange."],
+      ["adapt", "thay đổi cho hợp với hoàn cảnh mới", "Hay đi với to modern life", "Customs that adapt to modern working hours tend to survive longest."],
+      ["support", "giúp đỡ về tiền bạc", "Hay đi với local businesses, artists", "Small-group tours can support local businesses more directly."],
     ] },
   ] },
   { n: 3, title: "Giáo dục", groups: [
@@ -14357,7 +14415,7 @@ function lvRenderHub() {
   if (_lvSrc === 'unit' && !_vocabBankReady) {
     root.innerHTML = '<div class="loading">Đang tải 25 unit…</div>';
     ensureVocabBank().then(() => { if (_vocabBankReady) lvRenderHub(); }).catch(e => {
-      root.innerHTML = `<div class="lv-wrap"><button class="btn-back-plain" onclick="lvSetSrc('lesson')">← Về 12 buổi</button><div class="error-msg" style="display:block">${escHtml(e.message)}</div></div>`;
+      root.innerHTML = `<div class="lv-wrap"><button class="btn-back-plain" onclick="lvSetSrc('lesson')">← Về ${LESSON_VOCAB.length} buổi</button><div class="error-msg" style="display:block">${escHtml(e.message)}</div></div>`;
     });
     return;
   }
@@ -14381,7 +14439,7 @@ function lvRenderHub() {
       <div class="lv-head">
         <div class="vb-logo">📚 Flashcard và Bắn Chữ</div>
         <div class="lv-src">
-          <button class="vb-chip${_lvSrc === 'lesson' ? ' active' : ''}" onclick="lvSetSrc('lesson')">12 buổi Writing Task 2</button>
+          <button class="vb-chip${_lvSrc === 'lesson' ? ' active' : ''}" onclick="lvSetSrc('lesson')">${LESSON_VOCAB.length} buổi Writing Task 2</button>
           <button class="vb-chip${_lvSrc === 'unit' ? ' active' : ''}" onclick="lvSetSrc('unit')">25 unit từ vựng</button>
         </div>
         <div class="vb-tagline">Chọn một ${unitWord} để học riêng, hoặc chọn nhiều ${unitWord} để trộn. Không chọn ${unitWord} nào là trộn tất cả.</div>
@@ -14694,7 +14752,7 @@ function lvUnbindKeys() {
 const SHOP_ITEMS = [
   { id: 'slow',   icon: '❄️', name: 'Tia làm chậm', price: 20, where: 'Bắn Chữ · phím 1', desc: 'Mọi từ rơi chậm hẳn trong 10 giây.' },
   { id: 'double', icon: '🔱', name: 'Bắn 2 tia',    price: 25, where: 'Bắn Chữ · phím 2', desc: 'Trong 15 giây, bắn trúng một từ thì tia thứ hai hạ luôn từ đang rơi thấp nhất.' },
-  { id: 'shield', icon: '🛡️', name: 'Khiên',        price: 30, where: 'Bắn Chữ · phím 3', desc: 'Bật lên là khiên chờ sẵn. Từ đầu tiên chạm đất sẽ vỡ vào khiên, không mất mạng.' },
+  { id: 'shield', icon: '🛡️', name: 'Khiên',        price: 30, where: 'Cả hai game · phím 3 ở Bắn Chữ', desc: 'Bật lên là khiên chờ sẵn. Bắn Chữ: từ đầu tiên chạm đất vỡ vào khiên. Xây tháp: đỡ một câu sai, không mất mạng, không rơi tầng.' },
   { id: 'revive', icon: '💖', name: 'Hồi sinh',     price: 40, where: 'Cả hai game', desc: 'Hết mạng thì được sống lại. Bắn Chữ: 3 mạng và dọn sạch màn. Xây tháp: toà nhà không sập, hồi đủ mạng.' },
   { id: 'boost',  icon: '⏱️', name: 'Nhân đôi xu',  price: 50, where: 'Cả hai game · 10 phút', desc: 'Mọi xu kiếm được nhân đôi trong 10 phút. Bật ở đây, đồng hồ vẫn chạy khi đổi game.' },
   { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
@@ -14884,6 +14942,7 @@ function walBoostClock() {
 
 function walBar() {
   walBoostClock();
+  if (typeof twSkinSync === 'function') twSkinSync();
   const boost = walBoostLeft() > 0 ? `<span class="wal-boost">${walBoostText()}</span>` : '';
   const mini = document.getElementById('wal-mini');
   if (mini) mini.innerHTML = `🪙 ${walCoins()}${walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''}`;
@@ -15952,6 +16011,486 @@ function tsRenderResults(g) {
   if (isNew) { jConfetti(80); tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); }
 }
 
+/* Nghĩa tiếng Việt của câu mẫu, hiện sau khi trả lời trong Xây tháp. Khoá là
+   đúng câu tiếng Anh trong kho từ; sửa câu mẫu thì sửa luôn khoá ở đây. */
+const TW_VI = {
+  "Fewer workers now shoulder the cost of state pensions.": "Giờ đây ít người lao động hơn phải gánh chi phí lương hưu nhà nước.",
+  "An aging population strains public health budgets.": "Dân số già hoá gây sức ép lên ngân sách y tế công.",
+  "Teenagers tend to succumb to peer pressure fastest in a new school.": "Thanh thiếu niên thường dễ khuất phục trước áp lực bạn bè nhất khi vào trường mới.",
+  "Long shifts place pressure on parents who have nobody to help with school drop-offs.": "Những ca làm dài gây áp lực lên các bậc cha mẹ không có ai giúp đưa con đi học.",
+  "Constant comparison online erodes teenagers' confidence.": "Việc liên tục so sánh trên mạng bào mòn sự tự tin của thanh thiếu niên.",
+  "Longer lives mean many retirees outlive their savings.": "Tuổi thọ dài hơn khiến nhiều người về hưu sống lâu hơn số tiền tiết kiệm của mình.",
+  "Many parents juggle full-time work and domestic responsibilities.": "Nhiều bậc cha mẹ phải xoay xở giữa công việc toàn thời gian và việc nhà.",
+  "Rising care costs widen the gap between rich and poor households.": "Chi phí chăm sóc tăng làm nới rộng khoảng cách giữa hộ giàu và hộ nghèo.",
+  "Housing policy must cater to older people who cannot manage stairs.": "Chính sách nhà ở phải đáp ứng nhu cầu của người già không thể leo cầu thang.",
+  "Affordable childcare relieves pressure on working parents.": "Dịch vụ giữ trẻ giá phải chăng giảm bớt áp lực cho các bậc cha mẹ đi làm.",
+  "Shared meals nurture the bond between grandparents and grandchildren.": "Những bữa ăn chung nuôi dưỡng sợi dây gắn kết giữa ông bà và cháu.",
+  "Living nearby fosters cooperation between three generations.": "Sống gần nhau thúc đẩy sự hợp tác giữa ba thế hệ.",
+  "Shared hardship can cement family ties.": "Cùng nhau vượt khó có thể thắt chặt tình cảm gia đình.",
+  "Immigration can rejuvenate an aging workforce.": "Nhập cư có thể trẻ hoá một lực lượng lao động đang già đi.",
+  "Home visits widen access to care for people who cannot travel.": "Các buổi thăm khám tại nhà mở rộng khả năng tiếp cận chăm sóc cho người không thể đi lại.",
+  "Regular family meals help bridge the generation gap.": "Những bữa cơm gia đình đều đặn giúp thu hẹp khoảng cách thế hệ.",
+  "The ministry added coding to the curriculum, so every elementary school now teaches it from third grade.": "Bộ đã đưa lập trình vào chương trình học, nên giờ mọi trường tiểu học đều dạy môn này từ lớp ba.",
+  "Because of curriculum overload, history teachers rush through two world wars in a single week.": "Vì chương trình học quá tải, giáo viên lịch sử phải dạy vội hai cuộc thế chiến chỉ trong một tuần.",
+  "Rural schools struggle to attract qualified teachers, so a sports coach often ends up teaching chemistry.": "Trường nông thôn khó thu hút giáo viên có chuyên môn, nên huấn luyện viên thể thao thường phải dạy cả hoá học.",
+  "When lessons include group projects, student engagement rises and fewer pupils stare at the clock.": "Khi bài học có dự án nhóm, mức độ hứng thú của học sinh tăng lên và ít em ngồi nhìn đồng hồ hơn.",
+  "In mixed-ability classes, the fastest readers finish in ten minutes while others are still on page one.": "Trong lớp có trình độ không đồng đều, em đọc nhanh nhất xong trong mười phút còn các bạn khác vẫn ở trang một.",
+  "Drama club and football practice are extracurricular activities that many parents now pay extra for.": "Câu lạc bộ kịch và tập bóng đá là những hoạt động ngoại khoá mà nhiều phụ huynh giờ phải trả thêm tiền.",
+  "If schools capped class size at twenty-five, a teacher in a mixed-ability class could check every student's work before the lesson moved on.": "Nếu trường giới hạn sĩ số lớp ở mức hai mươi lăm, giáo viên lớp có trình độ không đồng đều có thể kiểm tra bài của từng em trước khi chuyển sang phần mới.",
+  "Students who rely on rote learning can recite a formula but cannot use it on a new problem.": "Học sinh học vẹt có thể đọc thuộc công thức nhưng không biết áp dụng vào một bài toán mới.",
+  "In student-centered learning, pupils choose their own project topic and the teacher acts as a guide.": "Trong phương pháp lấy người học làm trung tâm, học sinh tự chọn đề tài dự án còn giáo viên đóng vai trò người hướng dẫn.",
+  "A standardized assessment gives every twelve-year-old in the country the same paper on the same morning.": "Một bài đánh giá chuẩn hoá cho mọi học sinh mười hai tuổi trên cả nước làm cùng một đề vào cùng một buổi sáng.",
+  "Pupils who sleep eight hours tend to show better academic performance than classmates who stay up gaming.": "Học sinh ngủ đủ tám tiếng thường có kết quả học tập tốt hơn các bạn thức khuya chơi game.",
+  "Debating both sides of a news story trains critical thinking better than memorizing the textbook summary.": "Tranh luận hai mặt của một tin tức rèn tư duy phản biện tốt hơn học thuộc phần tóm tắt trong sách giáo khoa.",
+  "The cooking and budgeting course teaches practical skills that school leavers use in their first apartment.": "Khoá học nấu ăn và quản lý chi tiêu dạy những kỹ năng thực tế mà học sinh ra trường dùng ngay khi thuê căn hộ đầu tiên.",
+  "Running the school newspaper builds transferable skills, such as meeting deadlines, that any employer values.": "Làm báo trường rèn các kỹ năng chuyển đổi được, chẳng hạn đúng hạn chót, điều mà nhà tuyển dụng nào cũng coi trọng.",
+  "A teacher who answers every why question patiently keeps a child's intellectual curiosity alive.": "Một giáo viên kiên nhẫn trả lời mọi câu hỏi 'tại sao' sẽ giữ cho sự tò mò trí tuệ của trẻ luôn sống động.",
+  "Free evening classes at the public library promote lifelong learning among retirees and shift workers.": "Các lớp học buổi tối miễn phí ở thư viện công cộng thúc đẩy việc học suốt đời cho người về hưu và người làm ca.",
+  "After two years of vocational training, the apprentices can wire a house without supervision.": "Sau hai năm đào tạo nghề, những người học việc có thể tự đi dây điện cho một ngôi nhà mà không cần giám sát.",
+  "Employers in construction often ask for vocational qualifications rather than a university degree.": "Các nhà tuyển dụng ngành xây dựng thường yêu cầu chứng chỉ nghề hơn là bằng đại học.",
+  "Only one student from the village went on to higher education because the nearest university is 200 kilometers away.": "Chỉ một học sinh trong làng học lên đại học vì trường đại học gần nhất cách đó 200 cây số.",
+  "Distance learning lets a nurse on night shifts attend lectures by video during her breaks.": "Học từ xa giúp một y tá làm ca đêm có thể nghe giảng qua video trong giờ nghỉ.",
+  "Under heavy academic pressure, many high school seniors study until midnight and skip weekend sports.": "Dưới áp lực học tập nặng nề, nhiều học sinh cuối cấp học đến nửa đêm và bỏ cả thể thao cuối tuần.",
+  "A free school bus gives children in remote villages access to education they would otherwise miss.": "Xe buýt đưa đón miễn phí giúp trẻ em ở làng xa được tiếp cận giáo dục mà lẽ ra các em đã bỏ lỡ.",
+  "When tuition fees doubled, applications from low-income families dropped at most state universities.": "Khi học phí tăng gấp đôi, số hồ sơ từ các gia đình thu nhập thấp giảm ở hầu hết các trường đại học công.",
+  "Without financial aid, the top student in the class could not afford the first semester.": "Nếu không có hỗ trợ tài chính, học sinh giỏi nhất lớp cũng không đủ tiền học kỳ đầu.",
+  "Schools that rely on public funding lost their music teachers when the city cut the budget.": "Các trường phụ thuộc vào ngân sách công đã mất giáo viên âm nhạc khi thành phố cắt giảm ngân sách.",
+  "Children from a poorer socioeconomic background are less likely to have a quiet room for homework.": "Trẻ em có hoàn cảnh kinh tế xã hội khó khăn hơn ít có khả năng có một căn phòng yên tĩnh để làm bài tập.",
+  "Scholarships for rural students increase educational mobility, letting a farmer's daughter become a doctor.": "Học bổng cho học sinh nông thôn tăng cơ hội thăng tiến nhờ giáo dục, giúp con gái một nông dân trở thành bác sĩ.",
+  "Free tutoring after school helped narrow the achievement gap between rich and poor districts.": "Dạy kèm miễn phí sau giờ học đã giúp thu hẹp khoảng cách thành tích giữa khu giàu và khu nghèo.",
+  "Parents who choose home education must plan every lesson themselves and find other ways for children to socialize.": "Phụ huynh chọn cho con học tại nhà phải tự lên kế hoạch mọi bài học và tìm cách khác để con giao lưu.",
+  "Blind marking of exam papers supports equal opportunity, since examiners cannot see a candidate's name.": "Chấm thi ẩn danh hỗ trợ cơ hội bình đẳng, vì giám khảo không nhìn thấy tên thí sinh.",
+  "A rigid syllabus can stifle creativity.": "Một chương trình học cứng nhắc có thể bóp nghẹt sự sáng tạo.",
+  "Schools that prioritize test scores tend to cut art and music first.": "Các trường đặt điểm thi lên hàng đầu thường cắt môn mỹ thuật và âm nhạc trước tiên.",
+  "Placing students in ability groups at eleven tends to widen the achievement gap rather than narrow it.": "Xếp học sinh vào nhóm theo năng lực từ năm mười một tuổi thường nới rộng khoảng cách thành tích thay vì thu hẹp nó.",
+  "Councils that cut public funding leave schools to raise the difference through fees.": "Các hội đồng địa phương cắt ngân sách công khiến trường phải bù phần chênh lệch bằng học phí.",
+  "Good schools cultivate intellectual curiosity.": "Trường tốt nuôi dưỡng sự tò mò trí tuệ.",
+  "Schools should equip students with practical skills.": "Nhà trường nên trang bị cho học sinh những kỹ năng thực tế.",
+  "Teachers instill discipline in young learners.": "Giáo viên rèn tính kỷ luật cho các em nhỏ.",
+  "Studying abroad broadens students' horizons.": "Du học mở rộng tầm nhìn của sinh viên.",
+  "Teachers tailor lessons to individual needs.": "Giáo viên điều chỉnh bài học theo nhu cầu của từng em.",
+  "Homework reinforces classroom learning.": "Bài tập về nhà củng cố kiến thức học trên lớp.",
+  "Scholarships can widen access to higher education for low-income students.": "Học bổng có thể mở rộng cơ hội học đại học cho sinh viên thu nhập thấp.",
+  "Early support can help bridge the achievement gap.": "Hỗ trợ sớm có thể giúp thu hẹp khoảng cách thành tích.",
+  "Smaller classes can enhance learning outcomes.": "Lớp học nhỏ hơn có thể nâng cao kết quả học tập.",
+  "Online courses promote lifelong learning.": "Các khoá học trực tuyến thúc đẩy việc học suốt đời.",
+  "Governments fund the places that private tutoring cannot reach.": "Chính phủ tài trợ cho những nơi mà dạy kèm tư nhân không vươn tới được.",
+  "Subsidized meals keep low-income students in class after lunch.": "Bữa ăn được trợ giá giữ học sinh thu nhập thấp ở lại lớp sau giờ trưa.",
+  "Automation may widen the wealth gap between skilled and unskilled workers.": "Tự động hoá có thể nới rộng khoảng cách giàu nghèo giữa lao động có tay nghề và không có tay nghề.",
+  "Deep discounts lure shoppers into spending more than they planned.": "Các đợt giảm giá sâu dụ người mua tiêu nhiều hơn dự định.",
+  "Some campaigns manipulate the emotions of viewers who are already anxious.": "Một số chiến dịch thao túng cảm xúc của những người xem vốn đã lo âu.",
+  "Advertising that exploits teenagers' insecurities is hard to defend.": "Quảng cáo khai thác nỗi bất an của thanh thiếu niên thì khó mà bào chữa được.",
+  "Aggressive marketing fuels demand for products nobody asked for.": "Tiếp thị rầm rộ thổi bùng nhu cầu về những sản phẩm không ai cần đến.",
+  "Celebrities are paid to endorse products they may never use.": "Người nổi tiếng được trả tiền để quảng bá những sản phẩm có khi họ chưa từng dùng.",
+  "Cheap imports have saturated the market for basic tools.": "Hàng nhập khẩu giá rẻ đã làm bão hoà thị trường dụng cụ cơ bản.",
+  "Temporary tax cuts may stimulate demand during a downturn.": "Giảm thuế tạm thời có thể kích cầu trong thời kỳ suy thoái.",
+  "Tourism boosts revenue for the businesses on one street.": "Du lịch tăng doanh thu cho các cửa hàng trên một con phố.",
+  "A loan guarantee can bolster confidence among small lenders.": "Một khoản bảo lãnh vay vốn có thể củng cố niềm tin của các bên cho vay nhỏ.",
+  "A new plant generates jobs for the district around it.": "Một nhà máy mới tạo ra việc làm cho khu vực xung quanh.",
+  "Towns that rely on one factory need to diversify their income sources.": "Những thị trấn phụ thuộc vào một nhà máy cần đa dạng hoá nguồn thu nhập.",
+  "Governments may curb excessive consumption through taxes.": "Chính phủ có thể hạn chế tiêu dùng quá mức bằng thuế.",
+  "Brands cultivate loyalty through storytelling rather than price.": "Các thương hiệu xây dựng lòng trung thành bằng cách kể chuyện thay vì giảm giá.",
+  "Recommendation algorithms tend to amplify content that makes people angry.": "Thuật toán gợi ý thường khuếch đại những nội dung khiến người ta tức giận.",
+  "Selective reporting can distort public understanding of a rare event.": "Đưa tin có chọn lọc có thể làm sai lệch nhận thức của công chúng về một sự việc hiếm gặp.",
+  "Tabloids sensationalize incidents that would once have filled two lines.": "Báo lá cải giật gân hoá những vụ việc mà trước đây chỉ chiếm hai dòng tin.",
+  "Coordinated accounts can manipulate public opinion before anyone checks the source.": "Các tài khoản phối hợp với nhau có thể thao túng dư luận trước khi ai kịp kiểm tra nguồn.",
+  "Repeated scandals erode trust in every outlet, including the careful ones.": "Những vụ bê bối liên tiếp làm xói mòn niềm tin vào mọi cơ quan báo chí, kể cả những nơi làm việc cẩn thận.",
+  "Long-lens photographs invade the privacy of people who never sought attention.": "Ảnh chụp bằng ống kính tầm xa xâm phạm quyền riêng tư của những người chưa bao giờ muốn được chú ý.",
+  "Constant exposure can normalize behavior that a community once refused to accept.": "Tiếp xúc liên tục có thể bình thường hoá những hành vi mà một cộng đồng từng không chấp nhận.",
+  "Readers should verify a claim before sharing it, especially an alarming one.": "Người đọc nên kiểm chứng một thông tin trước khi chia sẻ, nhất là thông tin gây hoang mang.",
+  "Platforms struggle to moderate harmful content at the speed it appears.": "Các nền tảng khó kiểm duyệt nội dung độc hại kịp với tốc độ nó xuất hiện.",
+  "Editors curate a front page, while an algorithm curates a feed for one person.": "Biên tập viên chọn lọc nội dung cho trang nhất, còn thuật toán chọn lọc bảng tin cho từng người.",
+  "Public health agencies disseminate findings faster than they once could.": "Các cơ quan y tế công cộng phổ biến kết quả nghiên cứu nhanh hơn trước đây rất nhiều.",
+  "Governments that regulate advertising to children rarely regulate feeds the same way.": "Những chính phủ quản lý quảng cáo nhắm vào trẻ em hiếm khi quản lý bảng tin theo cùng cách đó.",
+  "Corrections rarely restore the trust that the original headline removed.": "Lời đính chính hiếm khi lấy lại được niềm tin mà dòng tít ban đầu đã làm mất.",
+  "A prestige project can divert funds from the clinics that were already short of staff.": "Một dự án phô trương có thể rút bớt ngân sách của các phòng khám vốn đã thiếu nhân lực.",
+  "An aging population strains a health budget that was set years earlier.": "Dân số già hoá gây sức ép lên một ngân sách y tế được lập từ nhiều năm trước.",
+  "When demand outruns funding, a service starts to ration hours rather than announce cuts.": "Khi nhu cầu vượt quá kinh phí, một dịch vụ bắt đầu hạn chế giờ phục vụ thay vì công bố cắt giảm.",
+  "A scandal can undermine public trust in every department, not only the one at fault.": "Một vụ bê bối có thể làm suy giảm niềm tin của công chúng vào mọi cơ quan, không chỉ nơi có lỗi.",
+  "A single large commitment can crowd out the smaller programs that nobody defends.": "Một khoản chi lớn duy nhất có thể chèn ép những chương trình nhỏ hơn mà không ai lên tiếng bảo vệ.",
+  "Reforms stall when the people who benefit are spread out and the people who lose are organized.": "Cải cách bị đình trệ khi những người được lợi thì phân tán còn những người chịu thiệt lại có tổ chức.",
+  "The council plans to levy a charge on packaging rather than ban it outright.": "Hội đồng dự định đánh phí lên bao bì thay vì cấm hẳn.",
+  "More funding should be allocated to preventive healthcare than to late-stage treatment.": "Nên phân bổ nhiều ngân sách cho y tế dự phòng hơn là điều trị giai đoạn cuối.",
+  "It is far easier to announce a policy than to implement it in every district.": "Công bố một chính sách dễ hơn nhiều so với thực hiện nó ở mọi quận huyện.",
+  "Without inspectors, a council cannot enforce the rules it has already written.": "Không có thanh tra, hội đồng không thể thực thi những quy định đã ban hành.",
+  "Subsidized fares let a worker take a job on the far side of the city.": "Giá vé được trợ giá giúp người lao động có thể nhận việc ở tận phía bên kia thành phố.",
+  "A budget that prioritizes emergency care will always look like it is failing at prevention.": "Một ngân sách ưu tiên cấp cứu sẽ luôn trông như đang thất bại ở khâu phòng bệnh.",
+  "Support that is targeted at the households with no savings costs less and reaches further.": "Hỗ trợ nhắm đúng vào các hộ không có tiền tiết kiệm tốn ít chi phí hơn mà lại đến được với nhiều người hơn.",
+  "Mobile clinics expand access to care for people who cannot reach a hospital.": "Các phòng khám lưu động mở rộng khả năng tiếp cận chăm sóc cho người không thể đến bệnh viện.",
+  "Weeks of unpaid overtime undermine morale faster than a pay freeze does.": "Nhiều tuần làm thêm giờ không lương làm suy giảm tinh thần nhanh hơn cả việc đóng băng lương.",
+  "A run of short contracts erodes the job security that made the role worth taking.": "Một chuỗi hợp đồng ngắn hạn bào mòn sự ổn định công việc vốn là lý do khiến vị trí đó đáng nhận.",
+  "Firms outsource the work that is easiest to specify and hardest to see.": "Các công ty thuê ngoài những việc dễ mô tả nhất và khó bị nhìn thấy nhất.",
+  "Employers automate the tasks a manager can describe in a sentence.": "Nhà tuyển dụng tự động hoá những công việc mà người quản lý có thể mô tả trong một câu.",
+  "An opaque promotion process deters the candidates who would have to move cities.": "Quy trình thăng chức thiếu minh bạch làm nản lòng những ứng viên phải chuyển sang thành phố khác.",
+  "Wages that stagnate for a decade change what a job is worth without any announcement.": "Lương giậm chân tại chỗ suốt một thập kỷ làm thay đổi giá trị của một công việc mà không cần thông báo nào.",
+  "Teams that cover two vacancies at once burn out before the posts are filled.": "Những nhóm phải gánh hai vị trí trống cùng lúc sẽ kiệt sức trước khi tuyển được người.",
+  "Predictable hours retain staff more reliably than a bonus paid once a year.": "Giờ làm ổn định giữ chân nhân viên hiệu quả hơn một khoản thưởng mỗi năm một lần.",
+  "An apprenticeship lets a worker hone a skill that no course can finish teaching.": "Học việc giúp người lao động mài giũa một kỹ năng mà không khoá học nào dạy hết được.",
+  "Managers who delegate real decisions, not just tasks, keep their best people longer.": "Những người quản lý giao quyền quyết định thực sự, chứ không chỉ giao việc, giữ chân được người giỏi lâu hơn.",
+  "Remote work alleviates the stress of commuting rather than the workload itself.": "Làm việc từ xa giảm bớt căng thẳng khi đi lại chứ không giảm khối lượng công việc.",
+  "Flexible policies foster the loyalty that a signing bonus only rents.": "Chính sách linh hoạt nuôi dưỡng lòng trung thành mà một khoản thưởng ký hợp đồng chỉ 'thuê' được tạm thời.",
+  "Strong references help a candidate secure a position without a personal connection.": "Thư giới thiệu tốt giúp ứng viên có được vị trí mà không cần quen biết.",
+  "Firms that reskill their own workers pay less than firms that hire and fire twice.": "Những công ty đào tạo lại nhân viên của mình tốn ít chi phí hơn những công ty cứ tuyển rồi sa thải hai lần.",
+  "A coal plant emits more in a week than a district of homes does in a year.": "Một nhà máy nhiệt điện than thải ra trong một tuần nhiều hơn cả một khu dân cư thải ra trong một năm.",
+  "Intensive fishing depletes the stocks that a coastal town has lived on for generations.": "Đánh bắt cá quá mức làm cạn kiệt nguồn cá mà một thị trấn ven biển đã sống nhờ qua nhiều thế hệ.",
+  "Repeated planting without rest degrades the soil long before anyone measures it.": "Trồng trọt liên tục không cho đất nghỉ làm đất bạc màu từ rất lâu trước khi có ai đo đạc.",
+  "Clearing the slope exacerbates the flooding that the village was already facing.": "Phá rừng trên sườn đồi làm trầm trọng thêm tình trạng lũ lụt mà ngôi làng vốn đã phải đối mặt.",
+  "A town that exhausts its groundwater cannot simply drill deeper next year.": "Một thị trấn đã khai thác cạn nước ngầm không thể cứ thế khoan sâu hơn vào năm sau.",
+  "A dam that diverts water upstream changes what a downstream farm can plant.": "Một con đập chuyển dòng nước ở thượng nguồn sẽ thay đổi những gì một nông trại ở hạ nguồn có thể trồng.",
+  "Airlines let passengers offset emissions, which pays for trees rather than preventing the flight.": "Các hãng hàng không cho hành khách bù đắp lượng khí thải, tức là trả tiền trồng cây chứ không ngăn chuyến bay.",
+  "Reforestation can mitigate the effects of a warming that has already begun.": "Trồng lại rừng có thể giảm nhẹ tác động của sự nóng lên đã bắt đầu diễn ra.",
+  "A carbon tax is designed to curb industrial emissions without banning production.": "Thuế carbon được thiết kế để hạn chế khí thải công nghiệp mà không cấm sản xuất.",
+  "Several governments have pledged to phase out coal by a fixed date.": "Nhiều chính phủ đã cam kết loại bỏ dần than đá trước một thời hạn cố định.",
+  "Simple changes help a household conserve water without anyone noticing a difference.": "Những thay đổi đơn giản giúp một hộ gia đình tiết kiệm nước mà không ai nhận thấy khác biệt.",
+  "Coastal regions are best placed to harness wind at the scale a grid needs.": "Các vùng ven biển có điều kiện tốt nhất để khai thác gió ở quy mô mà lưới điện cần.",
+  "Subsidized insulation cuts a heating bill and a carbon figure in the same winter.": "Hỗ trợ tiền cách nhiệt giúp giảm cả hoá đơn sưởi lẫn lượng khí thải carbon ngay trong cùng một mùa đông.",
+  "Manufacturers have ramped up battery capacity faster than grids have been rebuilt.": "Các nhà sản xuất đã đẩy mạnh công suất pin nhanh hơn tốc độ xây lại lưới điện.",
+  "Employers automate the tasks a manager can describe in one sentence.": "Nhà tuyển dụng tự động hoá những công việc mà người quản lý có thể mô tả trong một câu.",
+  "Streaming disrupted broadcasting before regulators had a word for what it was.": "Dịch vụ phát trực tuyến đã làm đảo lộn ngành truyền hình trước khi các cơ quan quản lý kịp gọi tên nó.",
+  "Technological change is outpacing the rules written for the tools it replaced.": "Thay đổi công nghệ đang vượt nhanh hơn những quy định được viết cho các công cụ mà nó thay thế.",
+  "Turn-by-turn directions erode the map a driver used to build in their head.": "Chỉ đường từng ngã rẽ làm mai một tấm bản đồ mà người lái xe từng tự vẽ trong đầu.",
+  "A model trained on past hiring decisions entrenches the pattern it was shown.": "Một mô hình được huấn luyện trên các quyết định tuyển dụng cũ sẽ củng cố chính khuôn mẫu mà nó được cho xem.",
+  "A single breached database exposes people who never used the service directly.": "Chỉ một cơ sở dữ liệu bị xâm nhập cũng làm lộ thông tin của cả những người chưa từng trực tiếp dùng dịch vụ.",
+  "Hospitals that harness pattern recognition still keep a radiologist in the room.": "Các bệnh viện tận dụng công nghệ nhận dạng hình ảnh vẫn giữ một bác sĩ chẩn đoán hình ảnh trong phòng.",
+  "Clear consent rules safeguard data that people hand over without reading anything.": "Quy định rõ ràng về sự đồng ý giúp bảo vệ dữ liệu mà mọi người cung cấp mà không đọc gì cả.",
+  "Digital records streamline the paperwork that used to take a nurse an hour each shift.": "Hồ sơ điện tử giúp tinh gọn giấy tờ vốn từng tốn của một y tá một tiếng mỗi ca.",
+  "Affordable connectivity does more to bridge the digital divide than free devices do.": "Kết nối internet giá rẻ giúp thu hẹp khoảng cách số hiệu quả hơn việc phát thiết bị miễn phí.",
+  "Governments that regulate advertising rarely regulate the ranking behind it.": "Những chính phủ quản lý quảng cáo hiếm khi quản lý cơ chế xếp hạng đứng đằng sau nó.",
+  "A system nobody can audit cannot be held to account when it is wrong.": "Một hệ thống mà không ai kiểm tra được thì không thể bị quy trách nhiệm khi nó sai.",
+  "Pattern-matching tools accelerate the screening stage rather than the trial itself.": "Các công cụ đối chiếu mẫu giúp đẩy nhanh giai đoạn sàng lọc chứ không phải bản thân quá trình thử nghiệm.",
+  "Rapid growth on the edge of a city strains schools and clinics first.": "Tăng trưởng nhanh ở vùng ven đô gây sức ép lên trường học và phòng khám trước tiên.",
+  "Building homes far from jobs deepens the car dependency a city wants to cut.": "Xây nhà ở xa nơi làm việc làm tăng sự phụ thuộc vào ô tô mà thành phố muốn giảm.",
+  "Rising property prices slowly price out the teachers and nurses a district needs.": "Giá nhà đất tăng dần đẩy những giáo viên và y tá mà một khu vực cần ra khỏi thị trường nhà ở.",
+  "Fast redevelopment displaces the households least able to pay a new deposit.": "Tái phát triển đô thị nhanh chóng đẩy đi những hộ ít có khả năng trả khoản đặt cọc mới nhất.",
+  "Rental costs absorb a large share of what a young household earns each month.": "Chi phí thuê nhà chiếm một phần lớn thu nhập hằng tháng của một gia đình trẻ.",
+  "A fare increase undermines transport equity even when the service itself improves.": "Tăng giá vé làm suy giảm sự công bằng trong giao thông ngay cả khi chất lượng dịch vụ được cải thiện.",
+  "Towers approved with no station nearby worsen congestion from the first week.": "Những toà nhà cao tầng được duyệt mà không có nhà ga gần đó làm tắc đường tệ hơn ngay từ tuần đầu tiên.",
+  "Bus lanes ease congestion by moving more people through the same strip of road.": "Làn xe buýt giảm ùn tắc bằng cách chở được nhiều người hơn trên cùng một đoạn đường.",
+  "Streets that prioritize pedestrians help the shops along them as well.": "Những con phố ưu tiên người đi bộ cũng giúp các cửa hàng dọc theo đó.",
+  "Governments subsidize fares more often than the frequency behind them.": "Chính phủ trợ giá vé thường xuyên hơn là đầu tư vào tần suất chạy xe.",
+  "A city that relaxes height limits near a station adds homes where the trains already run.": "Một thành phố nới giới hạn chiều cao gần nhà ga sẽ có thêm nhà ở ngay nơi tàu đã chạy qua.",
+  "Cities that zone land for homes above shops shorten the trip itself.": "Những thành phố quy hoạch đất cho nhà ở phía trên cửa hàng giúp rút ngắn chính quãng đường đi lại.",
+  "One ticket that integrates buses and trains keeps a rider out of the car.": "Một loại vé tích hợp cả xe buýt và tàu giúp giữ hành khách không quay lại dùng ô tô.",
+  "A city can expand coverage faster with buses than with a new tunnel.": "Một thành phố có thể mở rộng phạm vi phục vụ bằng xe buýt nhanh hơn là đào một đường hầm mới.",
+  "Every new stadium diverts money a city had already promised somewhere else.": "Mỗi sân vận động mới đều rút đi khoản tiền mà thành phố đã hứa chi cho việc khác.",
+  "One flagship project can crowd out the twenty small venues around it.": "Một dự án trọng điểm có thể chèn ép hai mươi địa điểm nhỏ xung quanh nó.",
+  "Chasing medals sidelines the clubs where every athlete actually starts.": "Chạy theo huy chương khiến các câu lạc bộ, nơi mọi vận động viên thực sự bắt đầu, bị gạt ra lề.",
+  "Sponsorship commercializes a competition faster than any rule change does.": "Tài trợ thương mại hoá một giải đấu nhanh hơn bất kỳ thay đổi luật lệ nào.",
+  "Nobody has managed to quantify what a district loses when its last theater closes.": "Chưa ai định lượng được một khu phố mất đi những gì khi nhà hát cuối cùng của nó đóng cửa.",
+  "Cities scale back arts programs first, because nobody protests on the day it happens.": "Các thành phố cắt giảm chương trình nghệ thuật trước tiên, vì không ai biểu tình vào ngày điều đó xảy ra.",
+  "A gallery has to justify its budget in a language written for road repairs.": "Một phòng tranh phải biện minh cho ngân sách của mình bằng thứ ngôn ngữ vốn dành cho việc sửa đường.",
+  "School fields underpin a talent pathway that nobody notices until it is gone.": "Sân bãi ở trường học là nền tảng cho con đường phát triển tài năng mà không ai để ý cho đến khi nó mất đi.",
+  "Small clubs sustain participation in a way a single national team cannot.": "Các câu lạc bộ nhỏ duy trì sự tham gia theo cách mà một đội tuyển quốc gia không làm được.",
+  "Free admission broadens access more cheaply than any advertising campaign.": "Miễn phí vé vào cửa mở rộng khả năng tiếp cận với chi phí thấp hơn bất kỳ chiến dịch quảng cáo nào.",
+  "A theater anchors the restaurants and buses that depend on an evening crowd.": "Một nhà hát là điểm tựa cho các nhà hàng và tuyến xe buýt sống nhờ lượng khách buổi tối.",
+  "A city that hosts a tournament inherits the buildings long after the visitors leave.": "Một thành phố đăng cai giải đấu sẽ phải giữ lại các công trình rất lâu sau khi du khách đã rời đi.",
+  "Elite competition showcases a country, but it does not teach anyone to swim.": "Thi đấu đỉnh cao giúp quảng bá một quốc gia, nhưng không dạy ai biết bơi.",
+  "Ticket revenue rarely offsets the cost of keeping a heritage building standing.": "Doanh thu bán vé hiếm khi bù đắp được chi phí giữ cho một công trình di sản đứng vững.",
+  "People released with no address and no job are the most likely to reoffend.": "Những người ra tù mà không có chỗ ở và việc làm là những người dễ tái phạm nhất.",
+  "Escalating penalties without improving detection raises the stakes of a losing bet.": "Tăng nặng hình phạt mà không cải thiện khả năng phát hiện chỉ làm tăng cái giá của một ván cược thua.",
+  "A criminal record brands a person long after the sentence itself has ended.": "Tiền án đóng dấu lên một người rất lâu sau khi bản án đã kết thúc.",
+  "A short sentence compounds every disadvantage that came before the arrest.": "Một bản án ngắn làm chồng chất thêm mọi bất lợi đã có từ trước khi bị bắt.",
+  "Mandatory sentencing overwhelms courts that were already scheduling a year ahead.": "Án phạt bắt buộc làm quá tải các toà án vốn đã phải xếp lịch trước cả năm.",
+  "Nightly coverage of rare crimes inflames a fear the crime rate does not support.": "Đưa tin hằng đêm về những tội ác hiếm gặp thổi bùng nỗi sợ mà tỷ lệ tội phạm không hề phản ánh.",
+  "A sentence served far from home isolates a person from the family who would help.": "Thụ án ở xa nhà khiến một người bị cô lập khỏi chính gia đình có thể giúp đỡ họ.",
+  "Punishment deters most reliably when an offender believes detection is likely.": "Hình phạt có tác dụng răn đe chắc chắn nhất khi người phạm tội tin rằng mình có khả năng bị phát hiện.",
+  "Programs that rehabilitate offenders cost less than a second sentence does.": "Các chương trình cải tạo người phạm tội tốn ít chi phí hơn một bản án thứ hai.",
+  "Courts that divert first-time offenders into supervised programs see fewer of them return.": "Những toà án chuyển người phạm tội lần đầu sang các chương trình có giám sát thấy ít người quay lại hơn.",
+  "Policies that address the root causes work slowly and win nobody an election.": "Các chính sách giải quyết nguyên nhân gốc rễ có tác dụng chậm và không giúp ai thắng cử.",
+  "A housing placement reintegrates a person faster than counseling alone ever does.": "Được sắp xếp chỗ ở giúp một người tái hoà nhập nhanh hơn chỉ tư vấn tâm lý.",
+  "A system that detects half of all offenses shapes behavior more than a harsh one.": "Một hệ thống phát hiện được một nửa số vụ vi phạm định hình hành vi hiệu quả hơn một hệ thống hà khắc.",
+  "Officers who supervise fewer cases can actually visit everyone on their list.": "Những cán bộ giám sát ít hồ sơ hơn thực sự có thể đến thăm mọi người trong danh sách của mình.",
+  "Unpaid internships perpetuate a cycle only some families can afford to enter.": "Thực tập không lương duy trì một vòng luẩn quẩn mà chỉ một số gia đình đủ khả năng bước vào.",
+  "Uneven wage growth widens a gap that was already there in 2010.": "Tăng lương không đồng đều nới rộng khoảng cách vốn đã tồn tại từ năm 2010.",
+  "Services that exist only online marginalize the people least likely to complain.": "Các dịch vụ chỉ có trên mạng đẩy ra bên lề những người ít có khả năng lên tiếng phàn nàn nhất.",
+  "Comparing two groups that never started level conflates a head start with a cause.": "So sánh hai nhóm vốn không xuất phát ngang nhau là đánh đồng lợi thế ban đầu với nguyên nhân.",
+  "A flat fine penalizes a low-income household far more than a wealthy one.": "Một mức phạt cố định đánh vào hộ thu nhập thấp nặng hơn nhiều so với hộ giàu.",
+  "A decade of insecure work frays the ties that hold a neighborhood together.": "Một thập kỷ làm công việc bấp bênh làm sờn mòn những mối liên kết giữ một khu phố gắn bó với nhau.",
+  "Ranking two countries by one figure oversimplifies everything behind it.": "Xếp hạng hai quốc gia bằng một con số là đơn giản hoá quá mức mọi thứ đằng sau nó.",
+  "Free preschool levels the playing field before a child ever takes a test.": "Mầm non miễn phí tạo sân chơi bình đẳng trước cả khi trẻ làm bài kiểm tra đầu tiên.",
+  "Progressive taxation redistributes income without deciding how anyone spends it.": "Thuế lũy tiến phân phối lại thu nhập mà không quyết định thay ai cách chi tiêu.",
+  "A fair comparison accounts for what each group already brought with them.": "Một phép so sánh công bằng phải tính đến những gì mỗi nhóm đã có sẵn từ trước.",
+  "Courts uphold a principle most usefully when doing so costs somebody something.": "Toà án bảo vệ một nguyên tắc có ý nghĩa nhất khi việc đó khiến ai đó phải trả giá.",
+  "The harder question is how far a duty of care extends beyond people we can see.": "Câu hỏi khó hơn là nghĩa vụ quan tâm của chúng ta mở rộng đến đâu, vượt ra ngoài những người ta nhìn thấy.",
+  "A workable policy reconciles two claims that both sound obvious on their own.": "Một chính sách khả thi phải dung hoà hai yêu cầu mà riêng từng cái nghe đều hiển nhiên.",
+  "Weighing two obligations honestly beats pretending only one of them exists.": "Cân nhắc trung thực hai nghĩa vụ tốt hơn là giả vờ chỉ có một nghĩa vụ tồn tại.",
+  "Early experiences shape a child’s character.": "Những trải nghiệm thời thơ ấu định hình tính cách của một đứa trẻ.",
+  "Good parents instil discipline in their children.": "Cha mẹ tốt rèn tính kỷ luật cho con cái.",
+  "Team sports foster resilience.": "Thể thao đồng đội nuôi dưỡng sự kiên cường.",
+  "Reading widely cultivates a curious mindset.": "Đọc nhiều bồi đắp một tư duy ham tìm hiểu.",
+  "Harsh criticism undermines confidence.": "Lời chỉ trích gay gắt làm suy giảm sự tự tin.",
+  "Constant comparison erodes self-worth.": "Việc liên tục so sánh bào mòn lòng tự trọng.",
+  "Praise reinforces positive behaviour.": "Lời khen củng cố hành vi tích cực.",
+  "Exams can trigger severe anxiety.": "Kỳ thi có thể gây ra lo âu nghiêm trọng.",
+  "A supportive upbringing tends to instil the emotional resilience children need to cope with setbacks later in life.": "Được nuôi dạy trong sự nâng đỡ thường giúp trẻ có sức bền cảm xúc cần thiết để vượt qua thất bại sau này.",
+  "Constant comparison on social media can quietly erode teenagers’ self-esteem, even when no direct criticism is involved.": "Việc liên tục so sánh trên mạng xã hội có thể âm thầm bào mòn lòng tự trọng của thanh thiếu niên, dù không có lời chỉ trích trực tiếp nào.",
+  "Schools that reward effort rather than raw talent foster intrinsic motivation, which outlasts the promise of external rewards.": "Những trường khen thưởng nỗ lực thay vì năng khiếu bẩm sinh sẽ nuôi dưỡng động lực nội tại, thứ bền lâu hơn lời hứa về phần thưởng bên ngoài.",
+  "A loving home nurtures a child's confidence.": "Một mái ấm yêu thương nuôi dưỡng sự tự tin của trẻ.",
+  "Long working hours can strain family relationships.": "Làm việc nhiều giờ có thể gây căng thẳng cho các mối quan hệ gia đình.",
+  "Shared meals foster closeness between generations.": "Những bữa ăn chung thúc đẩy sự gần gũi giữa các thế hệ.",
+  "Some adults choose to sever ties with abusive relatives.": "Một số người trưởng thành chọn cắt đứt quan hệ với những người thân bạo hành.",
+  "It took years for the estranged brothers to reconcile.": "Phải mất nhiều năm hai anh em bất hoà mới làm lành được với nhau.",
+  "Many parents struggle to juggle work and childcare.": "Nhiều bậc cha mẹ chật vật xoay xở giữa công việc và chăm con.",
+  "Constant arguments slowly erode intimacy between partners.": "Những cuộc cãi vã liên miên dần bào mòn sự gần gũi giữa hai vợ chồng.",
+  "Shared hardship can cement family bonds.": "Cùng nhau vượt khó có thể thắt chặt tình cảm gia đình.",
+  "While the extended family once played a central role, the rise of the nuclear family has arguably widened the generation gap.": "Trong khi đại gia đình từng giữ vai trò trung tâm, sự phổ biến của gia đình hạt nhân có lẽ đã nới rộng khoảng cách thế hệ.",
+  "A stable upbringing tends to nurture the emotional support networks that children draw on later in life.": "Được nuôi dạy ổn định thường giúp nuôi dưỡng mạng lưới hỗ trợ tinh thần mà trẻ sẽ dựa vào sau này.",
+  "Long working hours can put a considerable strain on family relationships, leaving parents little quality time with their children.": "Làm việc nhiều giờ có thể gây áp lực đáng kể lên các mối quan hệ gia đình, khiến cha mẹ có ít thời gian chất lượng bên con.",
+  "Many working parents find it increasingly difficult to juggle domestic responsibilities with the demands of a full-time career.": "Nhiều bậc cha mẹ đi làm ngày càng khó xoay xở giữa việc nhà và những đòi hỏi của một công việc toàn thời gian.",
+  "As populations age, pressure on healthcare systems mounts.": "Khi dân số già đi, áp lực lên hệ thống y tế ngày càng tăng.",
+  "Immigration can rejuvenate an ageing workforce.": "Nhập cư có thể trẻ hoá một lực lượng lao động đang già đi.",
+  "Public services must cater for the needs of an ageing population.": "Các dịch vụ công phải đáp ứng nhu cầu của một dân số đang già hoá.",
+  "Fewer workers must now shoulder the cost of state pensions.": "Giờ đây ít người lao động hơn phải gánh chi phí lương hưu nhà nước.",
+  "Young people mature at very different rates.": "Người trẻ trưởng thành với tốc độ rất khác nhau.",
+  "Teenagers can easily succumb to peer pressure.": "Thanh thiếu niên rất dễ khuất phục trước áp lực bạn bè.",
+  "Gap years broaden young people's horizons.": "Năm nghỉ trước khi vào đại học mở rộng tầm nhìn của người trẻ.",
+  "Longer lifespans mean many pensioners outlive their savings.": "Tuổi thọ dài hơn khiến nhiều người hưu trí sống lâu hơn số tiền tiết kiệm của mình.",
+  "An ageing population places a growing burden on the working-age generation, who must shoulder higher taxes.": "Dân số già hoá đặt gánh nặng ngày càng lớn lên thế hệ trong độ tuổi lao động, những người phải gánh mức thuế cao hơn.",
+  "As life expectancy rises, many governments are being forced to raise the retirement age to keep pension systems solvent.": "Khi tuổi thọ tăng, nhiều chính phủ buộc phải nâng tuổi nghỉ hưu để giữ cho hệ thống lương hưu đủ khả năng chi trả.",
+  "During their formative years, adolescents are particularly susceptible to peer pressure, which can shape lifelong habits.": "Trong những năm định hình nhân cách, thanh thiếu niên đặc biệt dễ bị ảnh hưởng bởi áp lực bạn bè, điều có thể định hình thói quen cả đời.",
+  "Encouraging intergenerational bonds, some argue, benefits both the young and the elderly.": "Một số người cho rằng khuyến khích sự gắn kết giữa các thế hệ có lợi cho cả người trẻ lẫn người già.",
+  "Well-targeted subsidies can help alleviate poverty.": "Các khoản trợ cấp nhắm đúng đối tượng có thể giúp giảm nghèo.",
+  "Policymakers must tackle inequality head-on.": "Các nhà hoạch định chính sách phải trực tiếp giải quyết bất bình đẳng.",
+  "Automation may exacerbate the wealth gap.": "Tự động hoá có thể làm trầm trọng thêm khoảng cách giàu nghèo.",
+  "Poor housing policy can marginalise vulnerable groups.": "Chính sách nhà ở kém có thể đẩy các nhóm dễ tổn thương ra bên lề xã hội.",
+  "Education helps to bridge the social divide.": "Giáo dục giúp thu hẹp sự chia rẽ trong xã hội.",
+  "Community events promote social cohesion.": "Các sự kiện cộng đồng thúc đẩy sự gắn kết xã hội.",
+  "Tax cuts for the rich tend to widen the wealth gap.": "Giảm thuế cho người giàu thường nới rộng khoảng cách giàu nghèo.",
+  "Rapid growth has lifted millions out of poverty.": "Tăng trưởng nhanh đã giúp hàng triệu người thoát nghèo.",
+  "Critics argue that unregulated markets tend to widen the wealth gap and erode social cohesion.": "Những người phản đối cho rằng thị trường không được quản lý thường nới rộng khoảng cách giàu nghèo và làm xói mòn sự gắn kết xã hội.",
+  "Unless governments tackle discrimination directly, marginalised groups will continue to be denied genuine social mobility.": "Nếu chính phủ không trực tiếp giải quyết nạn phân biệt đối xử, các nhóm bị gạt ra lề sẽ tiếp tục bị tước cơ hội thăng tiến xã hội thực sự.",
+  "Harsh penalties may deter potential offenders.": "Hình phạt nghiêm khắc có thể răn đe những người có ý định phạm tội.",
+  "Prisons should aim to rehabilitate rather than merely punish.": "Nhà tù nên hướng tới cải tạo thay vì chỉ trừng phạt.",
+  "Young people who commit petty crimes can often be reformed.": "Những người trẻ phạm tội vặt thường có thể được cải tạo.",
+  "Better street lighting can help curb crime.": "Chiếu sáng đường phố tốt hơn có thể giúp hạn chế tội phạm.",
+  "Proponents of capital punishment claim it acts as a powerful deterrent, yet the evidence for this is far from conclusive.": "Những người ủng hộ án tử hình cho rằng nó có tác dụng răn đe mạnh mẽ, nhưng bằng chứng cho điều này còn lâu mới thuyết phục.",
+  "Rather than relying solely on custodial sentences, many experts argue that prisons should do more to rehabilitate offenders.": "Thay vì chỉ dựa vào án giam giữ, nhiều chuyên gia cho rằng nhà tù nên làm nhiều hơn để cải tạo người phạm tội.",
+  "Unless governments address the root causes of crime, such as poverty and unemployment, harsher penalties are unlikely to reduce reoffending.": "Nếu chính phủ không giải quyết nguyên nhân gốc rễ của tội phạm như nghèo đói và thất nghiệp, hình phạt nặng hơn khó có thể giảm tái phạm.",
+  "Widespread surveillance may help curb crime, but it raises serious concerns about individual privacy.": "Giám sát trên diện rộng có thể giúp hạn chế tội phạm, nhưng lại gây lo ngại nghiêm trọng về quyền riêng tư cá nhân.",
+  "Many graduates pursue a career abroad for better prospects.": "Nhiều sinh viên tốt nghiệp theo đuổi sự nghiệp ở nước ngoài để có triển vọng tốt hơn.",
+  "Internships allow students to hone practical skills.": "Thực tập giúp sinh viên mài giũa các kỹ năng thực tế.",
+  "Flexible policies foster employee loyalty.": "Chính sách linh hoạt nuôi dưỡng lòng trung thành của nhân viên.",
+  "Competitive pay helps firms retain skilled staff.": "Mức lương cạnh tranh giúp các công ty giữ chân nhân viên giỏi.",
+  "Excessive overtime can undermine staff morale.": "Làm thêm giờ quá nhiều có thể làm suy giảm tinh thần nhân viên.",
+  "Remote working may alleviate commuting stress.": "Làm việc từ xa có thể giảm bớt căng thẳng khi đi lại.",
+  "Strong references help candidates secure a position.": "Thư giới thiệu tốt giúp ứng viên có được vị trí.",
+  "Effective managers delegate tasks to their teams.": "Người quản lý giỏi biết giao việc cho nhóm của mình.",
+  "While a competitive salary undoubtedly matters, many employees now prioritise work-life balance and a sense of purpose over pay alone.": "Dù mức lương cạnh tranh chắc chắn quan trọng, nhiều nhân viên giờ đặt sự cân bằng giữa công việc và cuộc sống cùng ý nghĩa công việc lên trên tiền lương.",
+  "The rise of the gig economy has offered greater flexibility, though this has often come at the expense of job security.": "Sự phát triển của nền kinh tế tự do đã mang lại nhiều linh hoạt hơn, dù điều này thường phải đánh đổi bằng sự ổn định công việc.",
+  "Remote working arguably boosts productivity, yet it may also blur the boundary between professional and personal life.": "Làm việc từ xa có lẽ giúp tăng năng suất, nhưng nó cũng có thể xoá nhoà ranh giới giữa công việc và đời sống cá nhân.",
+  "Investing in professional development tends to reduce staff turnover, since employees who see clear career prospects are less likely to leave.": "Đầu tư vào phát triển chuyên môn thường giảm tỷ lệ nghỉ việc, vì nhân viên thấy rõ triển vọng nghề nghiệp sẽ ít muốn rời đi hơn.",
+  "Tax cuts stimulate consumer demand.": "Giảm thuế kích thích nhu cầu tiêu dùng.",
+  "Tourism boosts local revenue.": "Du lịch tăng nguồn thu cho địa phương.",
+  "Stimulus packages bolster a fragile economy.": "Các gói kích thích kinh tế củng cố một nền kinh tế còn yếu.",
+  "New factories generate thousands of jobs.": "Các nhà máy mới tạo ra hàng nghìn việc làm.",
+  "Oil states must diversify their economies.": "Các quốc gia dầu mỏ phải đa dạng hoá nền kinh tế.",
+  "Automation may widen the wealth gap.": "Tự động hoá có thể nới rộng khoảng cách giàu nghèo.",
+  "Firms outsource production to cut costs.": "Các công ty thuê ngoài sản xuất để cắt giảm chi phí.",
+  "Companies cut costs during a recession.": "Các công ty cắt giảm chi phí trong thời kỳ suy thoái.",
+  "Rising disposable income allows households to increase consumer spending, which in turn stimulates economic growth.": "Thu nhập khả dụng tăng giúp các hộ gia đình chi tiêu nhiều hơn, từ đó kích thích tăng trưởng kinh tế.",
+  "Although multinational corporations generate thousands of jobs, critics argue that they widen the wealth gap by concentrating profits abroad.": "Dù các tập đoàn đa quốc gia tạo ra hàng nghìn việc làm, những người phản đối cho rằng họ nới rộng khoảng cách giàu nghèo khi dồn lợi nhuận ra nước ngoài.",
+  "Deep discounts lure customers into overspending.": "Các đợt giảm giá sâu dụ khách hàng chi tiêu quá mức.",
+  "Advertisements often manipulate consumers' emotions.": "Quảng cáo thường thao túng cảm xúc của người tiêu dùng.",
+  "Some campaigns exploit teenagers' insecurities.": "Một số chiến dịch khai thác nỗi bất an của thanh thiếu niên.",
+  "Brands cultivate loyalty through storytelling.": "Các thương hiệu xây dựng lòng trung thành bằng cách kể chuyện.",
+  "Cheap imports have saturated the market.": "Hàng nhập khẩu giá rẻ đã làm bão hoà thị trường.",
+  "Celebrities are paid to endorse products.": "Người nổi tiếng được trả tiền để quảng bá sản phẩm.",
+  "Aggressive marketing fuels consumer demand.": "Tiếp thị rầm rộ thổi bùng nhu cầu tiêu dùng.",
+  "Rising disposable income has fuelled conspicuous consumption, yet greater wealth does not necessarily translate into greater happiness.": "Thu nhập khả dụng tăng đã thúc đẩy tiêu dùng phô trương, nhưng giàu có hơn không nhất thiết đồng nghĩa với hạnh phúc hơn.",
+  "Although targeted advertising makes marketing more efficient, many argue that it exploits personal data and manipulates vulnerable consumers.": "Dù quảng cáo nhắm mục tiêu giúp tiếp thị hiệu quả hơn, nhiều người cho rằng nó khai thác dữ liệu cá nhân và thao túng những người tiêu dùng dễ tổn thương.",
+  "Advertising undeniably drives economic growth, but it can also foster a throwaway culture in which goods are discarded far too quickly.": "Không thể phủ nhận quảng cáo thúc đẩy tăng trưởng kinh tế, nhưng nó cũng có thể nuôi dưỡng văn hoá dùng một lần, khiến hàng hoá bị vứt bỏ quá nhanh.",
+  "Rigid syllabuses can stifle creativity.": "Chương trình học cứng nhắc có thể bóp nghẹt sự sáng tạo.",
+  "Teachers instil discipline in young learners.": "Giáo viên rèn tính kỷ luật cho các em nhỏ.",
+  "Exams assess students' progress.": "Các kỳ thi đánh giá sự tiến bộ của học sinh.",
+  "While academic performance matters, an overemphasis on exams can stifle creativity and fuel unhealthy academic pressure.": "Dù kết quả học tập quan trọng, việc quá chú trọng thi cử có thể bóp nghẹt sự sáng tạo và tạo ra áp lực học tập không lành mạnh.",
+  "Rather than relying on rote learning, schools should cultivate critical thinking so that students can evaluate information independently.": "Thay vì dựa vào học vẹt, nhà trường nên rèn tư duy phản biện để học sinh có thể tự đánh giá thông tin.",
+  "Although higher education broadens opportunities, rising tuition fees may deter students from disadvantaged backgrounds.": "Dù giáo dục đại học mở ra nhiều cơ hội, học phí tăng có thể khiến học sinh có hoàn cảnh khó khăn chùn bước.",
+  "Tone of voice helps convey meaning.": "Giọng điệu giúp truyền tải ý nghĩa.",
+  "Learners often struggle to grasp cultural nuances.": "Người học thường khó nắm bắt những sắc thái văn hoá.",
+  "Young children acquire language effortlessly.": "Trẻ nhỏ tiếp thu ngôn ngữ một cách dễ dàng.",
+  "Poor pronunciation can hinder communication.": "Phát âm kém có thể cản trở giao tiếp.",
+  "Communities strive to preserve endangered languages.": "Các cộng đồng nỗ lực gìn giữ những ngôn ngữ có nguy cơ biến mất.",
+  "Skilled speakers articulate ideas clearly.": "Người nói giỏi diễn đạt ý tưởng rõ ràng.",
+  "A common language can bridge cultural divides.": "Một ngôn ngữ chung có thể thu hẹp khoảng cách văn hoá.",
+  "It takes years to master a foreign language.": "Phải mất nhiều năm mới thành thạo một ngoại ngữ.",
+  "English has become a lingua franca, enabling people from very different backgrounds to communicate despite persistent language barriers.": "Tiếng Anh đã trở thành ngôn ngữ chung, giúp những người có xuất thân rất khác nhau giao tiếp được dù rào cản ngôn ngữ vẫn còn.",
+  "While fluency allows speakers to converse naturally, genuine proficiency also requires an awareness of subtle cultural nuances.": "Dù sự trôi chảy giúp người nói trò chuyện tự nhiên, thành thạo thực sự còn đòi hỏi sự nhạy bén với những sắc thái văn hoá tinh tế.",
+  "As globalisation spreads, many minority dialects are becoming endangered, and considerable effort is needed to preserve them.": "Khi toàn cầu hoá lan rộng, nhiều phương ngữ thiểu số đang có nguy cơ biến mất và cần nỗ lực đáng kể để gìn giữ chúng.",
+  "The team conducted a five-year trial.": "Nhóm nghiên cứu đã tiến hành một thử nghiệm kéo dài năm năm.",
+  "Governments fund basic research.": "Chính phủ tài trợ cho nghiên cứu cơ bản.",
+  "AI is accelerating drug discovery.": "AI đang đẩy nhanh việc tìm ra thuốc mới.",
+  "Later studies corroborated the findings.": "Các nghiên cứu sau đó đã xác nhận kết quả này.",
+  "New data refuted the earlier claim.": "Dữ liệu mới đã bác bỏ nhận định trước đó.",
+  "The survey yielded surprising results.": "Cuộc khảo sát cho ra những kết quả đáng ngạc nhiên.",
+  "The state allocated more funding to R&D.": "Nhà nước phân bổ thêm kinh phí cho nghiên cứu và phát triển.",
+  "The scandal undermined trust in the study.": "Vụ bê bối làm suy giảm niềm tin vào nghiên cứu đó.",
+  "Before a new drug is approved, it must undergo years of clinical trials to yield reliable data on its safety.": "Trước khi được phê duyệt, một loại thuốc mới phải trải qua nhiều năm thử nghiệm lâm sàng để có dữ liệu đáng tin cậy về độ an toàn.",
+  "A single study rarely settles a debate; its findings must be replicated before they gain scientific consensus.": "Một nghiên cứu đơn lẻ hiếm khi khép lại một cuộc tranh luận; kết quả của nó phải được lặp lại trước khi đạt được sự đồng thuận khoa học.",
+  "Firms are racing to automate routine tasks to cut costs.": "Các công ty đang chạy đua tự động hoá những công việc lặp lại để cắt giảm chi phí.",
+  "Digital tools streamline administrative processes across departments.": "Công cụ số giúp tinh gọn quy trình hành chính giữa các phòng ban.",
+  "Universities are learning to harness the potential of AI in teaching.": "Các trường đại học đang học cách khai thác tiềm năng của AI trong giảng dạy.",
+  "Streaming platforms have disrupted traditional broadcasting.": "Các nền tảng phát trực tuyến đã làm đảo lộn ngành truyền hình truyền thống.",
+  "The pandemic accelerated the adoption of remote-working tools.": "Đại dịch đã đẩy nhanh việc áp dụng các công cụ làm việc từ xa.",
+  "Automation may render many manual skills obsolete.": "Tự động hoá có thể khiến nhiều kỹ năng thủ công trở nên lỗi thời.",
+  "Governments must safeguard citizens' personal data.": "Chính phủ phải bảo vệ dữ liệu cá nhân của công dân.",
+  "Technological change is outpacing regulation.": "Thay đổi công nghệ đang vượt nhanh hơn các quy định.",
+  "While automation undoubtedly boosts productivity, it may also render a significant proportion of low-skilled jobs redundant.": "Dù tự động hoá chắc chắn giúp tăng năng suất, nó cũng có thể khiến một phần đáng kể việc làm phổ thông trở nên dư thừa.",
+  "If harnessed responsibly, artificial intelligence could transform healthcare, though its benefits are unlikely to be evenly distributed.": "Nếu được khai thác có trách nhiệm, trí tuệ nhân tạo có thể thay đổi ngành y tế, dù lợi ích của nó khó được phân bổ đồng đều.",
+  "Social platforms disseminate news faster than traditional outlets.": "Các nền tảng mạng xã hội lan truyền tin tức nhanh hơn các kênh truyền thống.",
+  "Recommendation algorithms tend to amplify sensational content.": "Thuật toán gợi ý thường khuếch đại những nội dung giật gân.",
+  "Selective reporting can distort public understanding of events.": "Đưa tin có chọn lọc có thể làm sai lệch nhận thức của công chúng về các sự kiện.",
+  "Political actors use bots to manipulate public opinion.": "Các thế lực chính trị dùng tài khoản ảo để thao túng dư luận.",
+  "Readers should verify claims before sharing them.": "Người đọc nên kiểm chứng thông tin trước khi chia sẻ.",
+  "Editors carefully curate content to suit their audience.": "Biên tập viên chọn lọc nội dung cẩn thận cho phù hợp với độc giả.",
+  "Tabloids often sensationalise minor incidents.": "Báo lá cải thường giật gân hoá những vụ việc nhỏ.",
+  "Platforms struggle to moderate harmful content at scale.": "Các nền tảng khó kiểm duyệt nội dung độc hại trên quy mô lớn.",
+  "The proliferation of social media has arguably made it far harder to distinguish reliable reporting from misinformation.": "Sự bùng nổ của mạng xã hội có lẽ đã khiến việc phân biệt tin tức đáng tin cậy với tin sai lệch trở nên khó hơn rất nhiều.",
+  "Critics contend that news outlets increasingly sensationalise stories in a bid to capture dwindling audiences.": "Những người phản đối cho rằng các cơ quan báo chí ngày càng giật gân hoá tin tức nhằm giữ chân lượng độc giả đang sụt giảm.",
+  "The agency launched a probe to study the outer planets.": "Cơ quan này đã phóng một tàu thăm dò để nghiên cứu các hành tinh vòng ngoài.",
+  "Thousands of satellites now orbit the Earth.": "Hàng nghìn vệ tinh hiện đang bay quanh Trái Đất.",
+  "Robotic rovers explore terrain too dangerous for humans.": "Xe tự hành khám phá những địa hình quá nguy hiểm đối với con người.",
+  "Some entrepreneurs dream of colonising Mars within decades.": "Một số doanh nhân mơ ước chinh phục sao Hoả trong vài thập kỷ tới.",
+  "Governments are increasingly reluctant to fund costly space programmes.": "Các chính phủ ngày càng ngần ngại tài trợ cho những chương trình không gian tốn kém.",
+  "The crew deployed a new telescope into orbit.": "Phi hành đoàn đã đưa một kính viễn vọng mới lên quỹ đạo.",
+  "Critics argue that space budgets divert funds from pressing needs.": "Những người phản đối cho rằng ngân sách không gian rút bớt tiền khỏi những nhu cầu cấp bách.",
+  "Fierce competition propelled rapid progress during the space race.": "Cạnh tranh gay gắt đã thúc đẩy tiến bộ nhanh chóng trong cuộc chạy đua vào không gian.",
+  "Proponents maintain that space exploration drives technological innovation that ultimately benefits everyday life on Earth.": "Những người ủng hộ khẳng định việc thám hiểm không gian thúc đẩy đổi mới công nghệ, rốt cuộc mang lại lợi ích cho đời sống hằng ngày trên Trái Đất.",
+  "The growing accumulation of space debris poses a genuine threat to the satellites on which modern communication depends.": "Lượng rác vũ trụ ngày càng tích tụ là mối đe doạ thực sự đối với các vệ tinh mà liên lạc hiện đại phụ thuộc vào.",
+  "Large-scale reforestation can help mitigate the effects of climate change.": "Trồng rừng trên quy mô lớn có thể giúp giảm nhẹ tác động của biến đổi khí hậu.",
+  "Stricter laws are needed to curb carbon emissions.": "Cần có luật nghiêm ngặt hơn để hạn chế khí thải carbon.",
+  "Overfishing rapidly depletes marine stocks.": "Đánh bắt quá mức làm cạn kiệt nhanh chóng nguồn hải sản.",
+  "Companies plant trees to offset their carbon emissions.": "Các công ty trồng cây để bù đắp lượng khí thải carbon của mình.",
+  "Intensive farming gradually degrades the soil.": "Canh tác thâm canh dần làm đất bạc màu.",
+  "Simple habits can help households conserve energy.": "Những thói quen đơn giản có thể giúp các hộ gia đình tiết kiệm năng lượng.",
+  "Coal-fired plants emit vast quantities of carbon dioxide.": "Các nhà máy nhiệt điện than thải ra một lượng khí carbon dioxide khổng lồ.",
+  "Deforestation exacerbates the effects of global warming.": "Phá rừng làm trầm trọng thêm tác động của hiện tượng nóng lên toàn cầu.",
+  "Unless governments act decisively to curb emissions, the most catastrophic effects of climate change may become irreversible.": "Nếu chính phủ không hành động quyết liệt để hạn chế khí thải, những tác động thảm khốc nhất của biến đổi khí hậu có thể trở nên không thể đảo ngược.",
+  "There is broad scientific consensus that human activity has significantly exacerbated global warming.": "Giới khoa học có sự đồng thuận rộng rãi rằng hoạt động của con người đã làm trầm trọng thêm đáng kể hiện tượng nóng lên toàn cầu.",
+  "While renewable energy offers a promising alternative, the transition away from fossil fuels is likely to be neither cheap nor straightforward.": "Dù năng lượng tái tạo là một giải pháp thay thế đầy hứa hẹn, quá trình từ bỏ nhiên liệu hoá thạch có lẽ sẽ không rẻ cũng không đơn giản.",
+  "Protecting biodiversity is arguably as urgent as reducing emissions, though it tends to receive far less attention.": "Bảo vệ đa dạng sinh học có lẽ cũng cấp bách như giảm khí thải, dù nó thường nhận được ít sự quan tâm hơn nhiều.",
+  "Intensive extraction depletes natural reserves within a few decades.": "Khai thác thâm dụng làm cạn kiệt trữ lượng tự nhiên chỉ trong vài thập kỷ.",
+  "Countries are racing to harness solar and wind energy.": "Các quốc gia đang chạy đua khai thác năng lượng mặt trời và năng lượng gió.",
+  "Several governments have pledged to phase out coal-fired plants by 2035.": "Nhiều chính phủ đã cam kết loại bỏ dần các nhà máy nhiệt điện than trước năm 2035.",
+  "Carbon taxes are designed to curb industrial emissions.": "Thuế carbon được thiết kế để hạn chế khí thải công nghiệp.",
+  "Airlines let passengers offset their carbon emissions by funding reforestation.": "Các hãng hàng không cho hành khách bù đắp lượng khí thải carbon bằng cách tài trợ trồng rừng.",
+  "Manufacturers have ramped up battery production sharply.": "Các nhà sản xuất đã đẩy mạnh sản xuất pin một cách mạnh mẽ.",
+  "Many states still heavily subsidise fossil fuels.": "Nhiều nước vẫn trợ giá rất nhiều cho nhiên liệu hoá thạch.",
+  "While renewable energy has become markedly cheaper, critics point out that it cannot yet fully replace conventional sources on demand.": "Dù năng lượng tái tạo đã rẻ hơn đáng kể, những người phản đối chỉ ra rằng nó chưa thể thay thế hoàn toàn các nguồn truyền thống khi cần.",
+  "There is growing consensus that governments must phase out fossil fuels, yet the pace of this transition remains fiercely contested.": "Ngày càng có nhiều đồng thuận rằng chính phủ phải loại bỏ dần nhiên liệu hoá thạch, nhưng tốc độ chuyển đổi vẫn còn gây tranh cãi gay gắt.",
+  "Curbing carbon emissions arguably requires not only new technology but a fundamental shift in how societies consume energy.": "Hạn chế khí thải carbon có lẽ không chỉ cần công nghệ mới mà còn cần thay đổi căn bản cách xã hội tiêu thụ năng lượng.",
+  "Farmers cultivate rice on terraced hillsides.": "Nông dân trồng lúa trên những ruộng bậc thang.",
+  "Fertilisers can boost crop yields substantially.": "Phân bón có thể tăng năng suất cây trồng đáng kể.",
+  "Intensive farming rapidly depletes the soil of nutrients.": "Canh tác thâm canh nhanh chóng làm đất cạn kiệt chất dinh dưỡng.",
+  "Feeding a growing population is a mounting challenge.": "Nuôi sống một dân số ngày càng tăng là thách thức ngày càng lớn.",
+  "The nation imports most of its wheat from abroad.": "Quốc gia này nhập khẩu phần lớn lúa mì từ nước ngoài.",
+  "During the war, governments rationed basic foods.": "Trong chiến tranh, chính phủ phân phối lương thực cơ bản theo khẩu phần.",
+  "Salting was traditionally used to preserve meat.": "Ướp muối là cách truyền thống để bảo quản thịt.",
+  "Pressure to intensify production has degraded much farmland.": "Áp lực thâm canh sản xuất đã làm thoái hoá nhiều đất nông nghiệp.",
+  "Intensifying production may raise output in the short term, but it often degrades the arable land on which farming ultimately depends.": "Thâm canh có thể tăng sản lượng trong ngắn hạn, nhưng thường làm thoái hoá chính đất canh tác mà nông nghiệp rốt cuộc phải dựa vào.",
+  "Although genetically modified crops can boost yields dramatically, their long-term effects remain a matter of considerable debate.": "Dù cây trồng biến đổi gen có thể tăng năng suất đáng kể, tác động lâu dài của chúng vẫn là vấn đề gây tranh cãi lớn.",
+  "Globalisation can slowly erode local traditions.": "Toàn cầu hoá có thể dần bào mòn các truyền thống địa phương.",
+  "Museums help preserve fragile cultural heritage.": "Bảo tàng giúp gìn giữ những di sản văn hoá dễ bị tổn hại.",
+  "Immigrants often feel pressure to assimilate into the mainstream.": "Người nhập cư thường cảm thấy áp lực phải hoà nhập vào dòng chính.",
+  "Exchange programmes foster mutual understanding.": "Các chương trình trao đổi thúc đẩy sự hiểu biết lẫn nhau.",
+  "Mass media can quietly undermine traditional values.": "Truyền thông đại chúng có thể âm thầm làm suy yếu các giá trị truyền thống.",
+  "Global brands tend to homogenise consumer tastes.": "Các thương hiệu toàn cầu thường làm thị hiếu người tiêu dùng trở nên giống nhau.",
+  "Younger generations tend to embrace cultural diversity.": "Thế hệ trẻ thường đón nhận sự đa dạng văn hoá.",
+  "Commercialisation can dilute the meaning of traditional festivals.": "Thương mại hoá có thể làm nhạt đi ý nghĩa của các lễ hội truyền thống.",
+  "Globalisation, its critics warn, tends to homogenise local cultures, gradually eroding the traditions that give communities their identity.": "Những người phản đối cảnh báo rằng toàn cầu hoá có xu hướng đồng nhất hoá văn hoá địa phương, dần bào mòn những truyền thống làm nên bản sắc của cộng đồng.",
+  "There is a persuasive case that governments should actively preserve cultural heritage rather than leave it entirely to market forces.": "Có lý lẽ thuyết phục rằng chính phủ nên chủ động gìn giữ di sản văn hoá thay vì phó mặc hoàn toàn cho thị trường.",
+  "While cultural exchange can foster mutual understanding, it may also pressure minorities to assimilate at the expense of their heritage.": "Dù giao lưu văn hoá có thể thúc đẩy sự hiểu biết lẫn nhau, nó cũng có thể gây áp lực buộc các nhóm thiểu số hoà nhập mà đánh mất di sản của mình.",
+  "Whether the spread of global brands genuinely dilutes national identity, or simply broadens people's choices, remains open to debate.": "Liệu sự lan rộng của các thương hiệu toàn cầu thực sự làm phai nhạt bản sắc dân tộc, hay chỉ đơn giản mở rộng lựa chọn cho mọi người, vẫn còn là vấn đề bỏ ngỏ.",
+  "Art education fosters creativity in young minds.": "Giáo dục nghệ thuật nuôi dưỡng sự sáng tạo ở trẻ nhỏ.",
+  "Rigid rote learning can stifle creativity.": "Lối học vẹt cứng nhắc có thể bóp nghẹt sự sáng tạo.",
+  "A painting can convey emotions that words cannot.": "Một bức tranh có thể truyền tải những cảm xúc mà lời nói không thể.",
+  "The mural evokes a deep sense of nostalgia.": "Bức tranh tường gợi lên một nỗi hoài niệm sâu sắc.",
+  "Good mentors nurture young talent patiently.": "Người thầy giỏi kiên nhẫn nuôi dưỡng tài năng trẻ.",
+  "The state should adequately fund the arts.": "Nhà nước nên tài trợ thoả đáng cho nghệ thuật.",
+  "Streaming has heavily commercialised music.": "Dịch vụ phát trực tuyến đã thương mại hoá âm nhạc một cách nặng nề.",
+  "Her work has inspired a whole generation of designers.": "Tác phẩm của cô ấy đã truyền cảm hứng cho cả một thế hệ nhà thiết kế.",
+  "A rigid, exam-driven education system, many argue, risks stifling the very creativity that societies increasingly claim to value.": "Nhiều người cho rằng một hệ thống giáo dục cứng nhắc, nặng về thi cử có nguy cơ bóp nghẹt chính sự sáng tạo mà xã hội ngày càng tuyên bố coi trọng.",
+  "While commercialisation has made art more accessible, some fear it also erodes the artistic freedom on which genuine innovation depends.": "Dù thương mại hoá giúp nghệ thuật dễ tiếp cận hơn, một số người lo rằng nó cũng làm xói mòn tự do sáng tác, thứ mà đổi mới thực sự phụ thuộc vào.",
+  "Well-managed tourism can boost the local economy by creating jobs.": "Du lịch được quản lý tốt có thể thúc đẩy kinh tế địa phương nhờ tạo ra việc làm.",
+  "Tourism generates substantial revenue for host communities.": "Du lịch tạo ra nguồn thu đáng kể cho các cộng đồng sở tại.",
+  "Governments should preserve cultural heritage rather than exploit it.": "Chính phủ nên gìn giữ di sản văn hoá thay vì khai thác nó.",
+  "Mass tourism can gradually erode the authenticity of a place.": "Du lịch đại trà có thể dần làm mất đi nét nguyên bản của một nơi.",
+  "A sudden influx of visitors strains local infrastructure.": "Lượng du khách đổ về đột ngột gây quá tải cho cơ sở hạ tầng địa phương.",
+  "Historic sites attract millions of visitors each year.": "Các di tích lịch sử thu hút hàng triệu du khách mỗi năm.",
+  "Tourism tends to commodify local cultures, reducing rituals to spectacle.": "Du lịch có xu hướng biến văn hoá địa phương thành hàng hoá, khiến các nghi lễ chỉ còn là màn trình diễn.",
+  "Tourism can revitalise declining rural communities.": "Du lịch có thể hồi sinh những cộng đồng nông thôn đang suy tàn.",
+  "Rather than commodifying local traditions, responsible tourism should seek to preserve and celebrate cultural heritage.": "Thay vì biến truyền thống địa phương thành hàng hoá, du lịch có trách nhiệm nên tìm cách gìn giữ và tôn vinh di sản văn hoá.",
+  "Ecotourism is often presented as a panacea, yet critics argue that it can still strain fragile ecosystems if poorly regulated.": "Du lịch sinh thái thường được xem như liều thuốc vạn năng, nhưng những người phản đối cho rằng nó vẫn có thể gây sức ép lên các hệ sinh thái mong manh nếu quản lý kém.",
+  "There is growing evidence that overtourism can erode the very authenticity that draws visitors in the first place.": "Ngày càng có nhiều bằng chứng cho thấy tình trạng quá tải du lịch có thể làm mất đi chính nét nguyên bản đã thu hút du khách ngay từ đầu.",
+  "Schools should promote physical activity from an early age.": "Nhà trường nên khuyến khích vận động thể chất từ khi còn nhỏ.",
+  "Team sports can instil discipline and cooperation in children.": "Thể thao đồng đội có thể rèn cho trẻ tính kỷ luật và tinh thần hợp tác.",
+  "Regular exercise enhances both physical and mental wellbeing.": "Tập thể dục đều đặn nâng cao cả sức khoẻ thể chất lẫn tinh thần.",
+  "Playing in a team fosters a strong sense of camaraderie.": "Chơi trong một đội nuôi dưỡng tình đồng đội gắn bó.",
+  "Daily walking can counteract the effects of a sedentary lifestyle.": "Đi bộ hằng ngày có thể chống lại tác hại của lối sống ít vận động.",
+  "Few amateurs can sustain their motivation without visible progress.": "Ít người chơi nghiệp dư duy trì được động lực nếu không thấy tiến bộ rõ ràng.",
+  "Cities compete fiercely to host major sporting events.": "Các thành phố cạnh tranh gay gắt để đăng cai những sự kiện thể thao lớn.",
+  "Elite athletes spend years honing their technique.": "Các vận động viên đỉnh cao dành nhiều năm mài giũa kỹ thuật.",
+  "Regular physical activity is widely regarded as one of the most effective ways to counteract the health risks of a sedentary lifestyle.": "Vận động thể chất đều đặn được coi là một trong những cách hiệu quả nhất để chống lại nguy cơ sức khoẻ của lối sống ít vận động.",
+  "While competitive sport can instil valuable discipline, an excessive emphasis on winning may foster anxiety rather than enjoyment.": "Dù thể thao thi đấu có thể rèn tính kỷ luật quý giá, việc quá coi trọng chiến thắng có thể gây lo âu thay vì niềm vui.",
+  "Grassroots sport arguably does more to foster lifelong participation than the elite competitions that dominate media coverage.": "Thể thao phong trào có lẽ giúp duy trì sự tham gia suốt đời hiệu quả hơn các giải đấu đỉnh cao chiếm sóng truyền thông.",
+  "Hosting a major sporting event can enhance a nation's global profile, though the economic benefits are frequently overstated.": "Đăng cai một sự kiện thể thao lớn có thể nâng tầm vị thế quốc gia trên thế giới, dù lợi ích kinh tế thường bị thổi phồng.",
+  "Preventive care can alleviate pressure on hospitals.": "Chăm sóc dự phòng có thể giảm bớt áp lực cho bệnh viện.",
+  "Governments are struggling to combat the obesity epidemic.": "Các chính phủ đang chật vật đối phó với đại dịch béo phì.",
+  "A balanced diet helps prevent chronic illness.": "Chế độ ăn cân bằng giúp phòng ngừa bệnh mãn tính.",
+  "Chronic stress can exacerbate existing health conditions.": "Căng thẳng kéo dài có thể làm trầm trọng thêm các bệnh sẵn có.",
+  "Ministers must decide how to allocate limited healthcare resources.": "Các bộ trưởng phải quyết định cách phân bổ nguồn lực y tế có hạn.",
+  "Chronic sleep deprivation gradually undermines mental health.": "Thiếu ngủ kéo dài dần làm suy giảm sức khoẻ tinh thần.",
+  "An ageing population is straining healthcare systems worldwide.": "Dân số già hoá đang gây quá tải cho hệ thống y tế trên toàn thế giới.",
+  "Vaccination has helped eradicate several deadly diseases.": "Tiêm chủng đã giúp xoá sổ một số căn bệnh chết người.",
+  "While medical breakthroughs capture headlines, the greatest gains in life expectancy have come from basic public health measures.": "Dù những đột phá y học chiếm các dòng tít, mức tăng tuổi thọ lớn nhất lại đến từ các biện pháp y tế công cộng cơ bản.",
+  "An ageing population is placing unprecedented strain on healthcare systems that were never designed for such demand.": "Dân số già hoá đang tạo sức ép chưa từng có lên những hệ thống y tế vốn không được thiết kế cho nhu cầu như vậy.",
+  "Investing in preventive medicine is often more cost-effective than treating chronic illnesses once they have developed.": "Đầu tư vào y học dự phòng thường hiệu quả về chi phí hơn điều trị bệnh mãn tính khi bệnh đã phát triển.",
+  "Mental health, long overshadowed by physical illness, is increasingly recognised as central to overall wellbeing.": "Sức khoẻ tinh thần, vốn lâu nay bị lu mờ bởi bệnh thể chất, ngày càng được công nhận là cốt lõi của sức khoẻ tổng thể.",
+  "It is far easier to announce a policy than to implement it effectively.": "Công bố một chính sách dễ hơn nhiều so với thực hiện nó một cách hiệu quả.",
+  "Without adequate resources, governments cannot enforce these regulations.": "Không có đủ nguồn lực, chính phủ không thể thực thi các quy định này.",
+  "The government allocates a large share of its budget to education.": "Chính phủ phân bổ một phần lớn ngân sách cho giáo dục.",
+  "Many states subsidise renewable energy to encourage adoption.": "Nhiều nước trợ giá năng lượng tái tạo để khuyến khích sử dụng.",
+  "Central banks are expected to regulate the financial sector.": "Các ngân hàng trung ương được kỳ vọng sẽ quản lý khu vực tài chính.",
+  "New rules are intended to curb public spending.": "Các quy định mới nhằm hạn chế chi tiêu công.",
+  "The government plans to levy a tax on sugary drinks.": "Chính phủ dự định đánh thuế lên đồ uống có đường.",
+  "Corruption scandals undermine public trust in institutions.": "Các vụ bê bối tham nhũng làm suy giảm niềm tin của công chúng vào các thể chế.",
+  "Subsidising fossil fuels while claiming to fight climate change reveals a troubling contradiction in public policy.": "Vừa trợ giá nhiên liệu hoá thạch vừa tuyên bố chống biến đổi khí hậu cho thấy một mâu thuẫn đáng lo ngại trong chính sách công.",
+  "Heavy-handed regulation may curb certain abuses, yet it risks stifling the very innovation it seeks to guide.": "Quản lý quá tay có thể hạn chế một số sai phạm, nhưng có nguy cơ bóp nghẹt chính sự đổi mới mà nó muốn định hướng.",
+  "Genuine reform requires the political will to confront the vested interests that benefit from the status quo.": "Cải cách thực sự đòi hỏi ý chí chính trị để đối đầu với các nhóm lợi ích đang hưởng lợi từ hiện trạng.",
+  "Cities must build upwards to accommodate a growing population.": "Các thành phố phải xây dựng theo chiều cao để có chỗ cho dân số ngày càng tăng.",
+  "Unchecked migration can exacerbate housing shortages.": "Di cư không được kiểm soát có thể làm trầm trọng thêm tình trạng thiếu nhà ở.",
+  "Gentrification often displaces long-standing residents.": "Quá trình cải tạo đô thị thường đẩy những cư dân lâu năm ra đi.",
+  "Building satellite towns can alleviate pressure on the city centre.": "Xây dựng các đô thị vệ tinh có thể giảm bớt áp lực cho trung tâm thành phố.",
+  "The council plans to regenerate the derelict waterfront.": "Hội đồng thành phố dự định tái thiết khu bờ sông bị bỏ hoang.",
+  "The city has sprawled outward across former farmland.": "Thành phố đã lan rộng ra những vùng đất nông nghiệp trước đây.",
+  "Green belts are intended to curb urban sprawl.": "Các vành đai xanh nhằm hạn chế đô thị lan toả.",
+  "Rapid growth strains public services such as schools and clinics.": "Tăng trưởng nhanh gây quá tải cho các dịch vụ công như trường học và phòng khám.",
+  "Unregulated urban sprawl consumes farmland and lengthens commutes, undermining the very efficiency that cities promise.": "Đô thị lan toả không kiểm soát nuốt chửng đất nông nghiệp và kéo dài quãng đường đi làm, làm suy giảm chính sự hiệu quả mà thành phố hứa hẹn.",
+  "As millions move to cities in search of work, governments face the daunting task of providing affordable housing at scale.": "Khi hàng triệu người đổ về thành phố tìm việc, chính phủ đối mặt với nhiệm vụ gian nan là cung cấp nhà ở giá rẻ trên quy mô lớn.",
+  "Regeneration schemes can revive neglected districts, but they risk accelerating gentrification and displacing the poor.": "Các dự án tái thiết có thể hồi sinh những khu vực bị bỏ bê, nhưng có nguy cơ đẩy nhanh quá trình cải tạo đô thị và đẩy người nghèo ra đi.",
+  "Preserving green space within dense cities is no luxury but increasingly seen as essential to residents' wellbeing.": "Gìn giữ không gian xanh trong các thành phố đông đúc không phải là xa xỉ mà ngày càng được coi là thiết yếu cho sức khoẻ của cư dân.",
+  "Investing in metro lines can ease traffic congestion.": "Đầu tư vào các tuyến tàu điện ngầm có thể giảm ùn tắc giao thông.",
+  "The government plans to upgrade the ageing rail network.": "Chính phủ dự định nâng cấp mạng lưới đường sắt đã cũ.",
+  "Millions commute into the capital every morning.": "Hàng triệu người đi làm vào thủ đô mỗi sáng.",
+  "Congestion charges are designed to discourage car use.": "Phí chống ùn tắc được đặt ra để hạn chế việc dùng ô tô.",
+  "Countries that invest heavily in public transport tend to have cleaner air.": "Những quốc gia đầu tư mạnh vào giao thông công cộng thường có không khí sạch hơn.",
+  "High-speed rail connects previously isolated regions.": "Đường sắt cao tốc kết nối những vùng trước đây bị cô lập.",
+  "A new bypass would relieve pressure on the town centre.": "Một tuyến đường tránh mới sẽ giảm áp lực cho trung tâm thị trấn.",
+  "Low-emission zones aim to curb harmful emissions.": "Các vùng phát thải thấp nhằm hạn chế khí thải độc hại.",
+  "Expanding public transport is widely seen as the most effective way to ease the chronic congestion that plagues large cities.": "Mở rộng giao thông công cộng được xem rộng rãi là cách hiệu quả nhất để giảm tình trạng ùn tắc kinh niên ở các thành phố lớn.",
+  "Unless governments invest in infrastructure ahead of demand, rapid growth quickly outpaces the roads and railways it relies on.": "Nếu chính phủ không đầu tư vào cơ sở hạ tầng đi trước nhu cầu, tăng trưởng nhanh sẽ sớm vượt quá khả năng của hệ thống đường sá và đường sắt.",
+  "Globalization can slowly erode local traditions.": "Toàn cầu hoá có thể dần bào mòn các truyền thống địa phương.",
+  "Global brands tend to homogenize consumer tastes.": "Các thương hiệu toàn cầu thường làm thị hiếu người tiêu dùng trở nên giống nhau.",
+  "Commercialization can dilute the meaning of a traditional festival.": "Thương mại hoá có thể làm nhạt đi ý nghĩa của một lễ hội truyền thống.",
+  "Large visitor numbers put pressure on water supplies, roads, and waste systems.": "Lượng du khách lớn gây áp lực lên nguồn cấp nước, đường sá và hệ thống xử lý rác thải.",
+  "Short-term rentals can displace residents from central districts.": "Cho thuê nhà ngắn hạn có thể đẩy cư dân ra khỏi các quận trung tâm.",
+  "Families and schools help pass down traditions to younger generations.": "Gia đình và nhà trường giúp truyền lại truyền thống cho thế hệ trẻ.",
+  "Exchange programs foster mutual understanding.": "Các chương trình trao đổi thúc đẩy sự hiểu biết lẫn nhau.",
+  "A local grant can revive a craft that had almost no apprentices left.": "Một khoản tài trợ địa phương có thể hồi sinh một nghề thủ công gần như không còn người học việc.",
+  "International festivals can promote cultural exchange.": "Các lễ hội quốc tế có thể thúc đẩy giao lưu văn hoá.",
+  "Customs that adapt to modern working hours tend to survive longest.": "Những phong tục thích nghi với giờ làm việc hiện đại thường tồn tại lâu nhất.",
+  "Small-group tours can support local businesses more directly.": "Các tour nhóm nhỏ có thể hỗ trợ trực tiếp hơn cho các cơ sở kinh doanh địa phương.",
+};
+
 /* ─── Xây tháp ─────────────────────────────────────────────────────────────
    Gap-fill over the example sentences already in the word bank. A right
    answer adds a floor, a wrong one knocks the top floor off. Up to floor
@@ -16114,7 +16653,7 @@ async function twStart(list) {
     best: Math.max(twGetBest(), floors.length),
     peak: floors.length, startedAt: floors.length,
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
-    coins: 0, revivable: false, revives: 0, lastResult: null,
+    coins: 0, revivable: false, revives: 0, lastResult: null, shield: false, shielded: 0,
   };
   walLoad().then(() => {
     const sc = document.getElementById('tw-scene'), sk = walLook('tower').id;
@@ -16128,6 +16667,7 @@ async function twStart(list) {
         <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
         <span class="tw-hearts" id="tw-hearts"></span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+        <button class="ts-icon-btn" onclick="twSkinModal()" title="Đổi kiểu nhà" aria-label="Đổi kiểu nhà">🎨</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
       </div>
@@ -16282,6 +16822,8 @@ function twRenderCard(result) {
       ? (result.reward ? `✓ Xây thêm một tầng, và trứng vàng cho ${result.reward}${coins}` : `✓ Xây thêm một tầng${coins}`)
       : q.golden
         ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Trứng vỡ, nhưng không mất mạng.`
+        : result.blocked
+          ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. 🛡️ Khiên đỡ rồi, không mất mạng, không rơi tầng.`
         : g.revivable
           ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>. Hết mạng! Dùng 💖 Hồi sinh thì toà nhà không sập và được hồi đủ ${TW_LIVES} mạng.`
           : g.collapsed
@@ -16295,6 +16837,7 @@ function twRenderCard(result) {
     <div class="tw-feedback ${result.ok ? 'ok' : 'bad'}">
       ${line}
       <div class="tw-feedback-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>
+      ${TW_VI[q.ex] ? `<div class="tw-trans">🇻🇳 ${escapeHtml(TW_VI[q.ex])}</div>` : ''}
     </div>
     <div class="tw-after">
       <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(q.ex))})" title="Nghe cả câu" aria-label="Nghe cả câu">🔊</button>
@@ -16309,6 +16852,7 @@ function twRenderCard(result) {
       <span class="tw-floor-no">${q.golden ? '🥚 ' : ''}Tầng ${floorNo}</span>
       <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
       ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${hintsLeft}</button>`}
+      ${done ? '' : `<button class="tw-hint-btn tw-skip-btn${g.shield ? ' on' : ''}" onclick="twShield()" ${g.shield || walCount('shield') ? '' : 'disabled'} title="Đỡ một câu sai: không mất mạng, không rơi tầng. Mua ở cửa hàng.">🛡️ ${g.shield ? 'Khiên đang bật' : 'Khiên · ' + walCount('shield')}</button>`}
       ${done ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
@@ -16343,6 +16887,51 @@ function twUseHint() {
   twRenderCard();
   const inp = document.getElementById('tw-input');
   if (inp) inp.value = typed;
+}
+
+// Put the shield up: the next wrong answer costs neither a life nor a floor.
+function twShield() {
+  const g = _tw;
+  if (!g || g.answered || g.shield || !walUse('shield')) return;
+  g.shield = true;
+  document.getElementById('tw-scene')?.classList.add('tw-shielded');
+  tsSfx('shield');
+  jBuzz(25);
+  const typed = document.getElementById('tw-input')?.value || '';
+  twRenderCard();
+  const inp = document.getElementById('tw-input');
+  if (inp) inp.value = typed;
+}
+
+// Pick a building style without leaving the tower. Owned styles switch at
+// once; the others can be bought from here.
+function twSkinModal() {
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  document.body.appendChild(el);
+  twSkinSync();
+  tsSfx('key');
+}
+// Called whenever the wallet changes: keeps the picker and the scene current.
+function twSkinSync() {
+  const scene = document.getElementById('tw-scene');
+  if (scene) {
+    [...scene.classList].filter(c => c.startsWith('tw-skin-')).forEach(c => scene.classList.remove(c));
+    const id = walLook('tower').id;
+    if (id) scene.classList.add('tw-skin-' + id);
+  }
+  const el = document.getElementById('lv-modal');
+  if (!el || !scene) return;
+  el.innerHTML = `
+    <div class="lv-modal-card lv-modal-card--wide">
+      <div class="lv-modal-title">🎨 Đổi kiểu nhà</div>
+      <div class="wal-items">${COSMETICS.tower.map(c => walLookCard('tower', c)).join('')}</div>
+      <div class="lv-modal-note">Đang có 🪙 ${walCoins()} xu.</div>
+      <div class="lv-modal-btns"><button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">▶ Xây tiếp</button></div>
+    </div>`;
 }
 
 // Swap the question for another. A golden question stays golden.
@@ -16431,6 +17020,14 @@ function twResolve(ok, extra) {
     if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
     if (q.golden) {
       tsSfx('wrong');
+    } else if (g.shield) {
+      g.shield = false;
+      g.shielded++;
+      extra = { ...extra, blocked: true };
+      document.getElementById('tw-scene')?.classList.remove('tw-shielded');
+      tsSfx('shield');
+      jBuzz([40, 30, 40]);
+      twBanner('🛡️ Khiên đỡ!');
     } else {
       g.lives--;
       tsSfx('miss');
@@ -16622,7 +17219,7 @@ function twEnd() {
         <div class="vb-missed">
           <div class="vb-missed-title">📒 Câu cần ôn</div>
           ${g.missed.length
-            ? g.missed.map(q => `<div class="vb-missed-item tw-missed"><div>${twSentence(q, true, false)}</div><div class="tw-missed-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div></div>`).join('')
+            ? g.missed.map(q => `<div class="vb-missed-item tw-missed"><div>${twSentence(q, true, false)}</div><div class="tw-missed-vi">${escapeHtml(q.show)} · ${escapeHtml(q.vi)}</div>${TW_VI[q.ex] ? `<div class="tw-trans">🇻🇳 ${escapeHtml(TW_VI[q.ex])}</div>` : ''}</div>`).join('')
             : '<div class="vb-missed-empty">Không sai câu nào 🎉</div>'}
         </div>
         <div class="vb-results-btns">
