@@ -13648,40 +13648,40 @@ const LESSON_VOCAB = [
   ] },
   { n: 3, title: "Giáo dục", groups: [
     { id: "A", name: "Trường học, chương trình và cách dạy", kind: "phrase", items: [
-      ["the curriculum", "toàn bộ chương trình học của một cấp học", "Số nhiều trong bài học thuật là curricula. Xem mục 1.F để phân biệt với syllabus.", ""],
-      ["curriculum overload", "tình trạng chương trình học quá tải", "Dùng khi giải thích vì sao giáo viên phải dạy vội.", ""],
-      ["qualified teachers", "giáo viên có đủ chuyên môn", "Số nhiều. Hay đi với attract, retain, train.", ""],
-      ["student engagement", "mức độ tham gia của người học", "Không đếm được. Hay đi với improve, sustain, lose.", ""],
-      ["mixed-ability classes", "lớp có học sinh nhiều trình độ", "Có gạch nối. Đây là cụm chính của đề chọn lọc học sinh.", ""],
-      ["extracurricular activities", "hoạt động ngoại khóa", "Viết extracurricular liền một từ, không có gạch nối.", ""],
-      ["class size", "sĩ số lớp", "Hay đi với reduce, cap. Không viết class quantity.", ""],
-      ["rote learning", "học vẹt, học thuộc lòng", "Không đếm được. Hay đi với rely on, move away from.", ""],
-      ["student-centered learning", "cách dạy lấy người học làm trung tâm", "Tiếng Anh Mỹ viết centered, đuôi -er.", ""],
-      ["standardized assessment", "hình thức đánh giá chuẩn hóa", "Tiếng Anh Mỹ viết standardized, đuôi -ize.", ""],
-      ["academic performance", "kết quả học tập", "Không đếm được. Hay đi với affect, improve, measure.", ""],
+      ["the curriculum", "toàn bộ chương trình học của một cấp học", "Số nhiều trong bài học thuật là curricula. Xem mục 1.F để phân biệt với syllabus.", "The ministry added coding to the curriculum, so every elementary school now teaches it from third grade."],
+      ["curriculum overload", "tình trạng chương trình học quá tải", "Dùng khi giải thích vì sao giáo viên phải dạy vội.", "Because of curriculum overload, history teachers rush through two world wars in a single week."],
+      ["qualified teachers", "giáo viên có đủ chuyên môn", "Số nhiều. Hay đi với attract, retain, train.", "Rural schools struggle to attract qualified teachers, so a sports coach often ends up teaching chemistry."],
+      ["student engagement", "mức độ tham gia của người học", "Không đếm được. Hay đi với improve, sustain, lose.", "When lessons include group projects, student engagement rises and fewer pupils stare at the clock."],
+      ["mixed-ability classes", "lớp có học sinh nhiều trình độ", "Có gạch nối. Đây là cụm chính của đề chọn lọc học sinh.", "In mixed-ability classes, the fastest readers finish in ten minutes while others are still on page one."],
+      ["extracurricular activities", "hoạt động ngoại khóa", "Viết extracurricular liền một từ, không có gạch nối.", "Drama club and football practice are extracurricular activities that many parents now pay extra for."],
+      ["class size", "sĩ số lớp", "Hay đi với reduce, cap. Không viết class quantity.", "If schools capped class size at twenty-five, a teacher in a mixed-ability class could check every student's work before the lesson moved on."],
+      ["rote learning", "học vẹt, học thuộc lòng", "Không đếm được. Hay đi với rely on, move away from.", "Students who rely on rote learning can recite a formula but cannot use it on a new problem."],
+      ["student-centered learning", "cách dạy lấy người học làm trung tâm", "Tiếng Anh Mỹ viết centered, đuôi -er.", "In student-centered learning, pupils choose their own project topic and the teacher acts as a guide."],
+      ["standardized assessment", "hình thức đánh giá chuẩn hóa", "Tiếng Anh Mỹ viết standardized, đuôi -ize.", "A standardized assessment gives every twelve-year-old in the country the same paper on the same morning."],
+      ["academic performance", "kết quả học tập", "Không đếm được. Hay đi với affect, improve, measure.", "Pupils who sleep eight hours tend to show better academic performance than classmates who stay up gaming."],
     ] },
     { id: "B", name: "Kỹ năng và mục tiêu của việc học", kind: "phrase", items: [
-      ["critical thinking", "tư duy phản biện", "Không đếm được. Hay đi với develop, teach, apply.", ""],
-      ["practical skills", "kỹ năng thực tế", "Luôn ở số nhiều. Ngược với academic knowledge.", ""],
-      ["transferable skills", "kỹ năng dùng được ở nhiều nơi", "Dùng khi bảo vệ các môn học không có thi.", ""],
-      ["intellectual curiosity", "sự tò mò muốn hiểu biết", "Không đếm được. Hay đi với cultivate, stifle.", ""],
-      ["lifelong learning", "việc học suốt đời", "Không đếm được. Hay đi với promote, encourage.", ""],
-      ["vocational training", "đào tạo nghề", "Không đếm được. Ngược với higher education.", ""],
-      ["vocational qualifications", "bằng cấp nghề", "Số nhiều. Cụ thể hơn vocational training.", ""],
-      ["higher education", "giáo dục bậc đại học", "Không đếm được. Thường không có mạo từ.", ""],
-      ["distance learning", "học từ xa", "Không đếm được. Trung tính hơn online learning.", ""],
-      ["academic pressure", "áp lực học hành", "Không đếm được. Hay đi với face, mount, alleviate.", ""],
+      ["critical thinking", "tư duy phản biện", "Không đếm được. Hay đi với develop, teach, apply.", "Debating both sides of a news story trains critical thinking better than memorizing the textbook summary."],
+      ["practical skills", "kỹ năng thực tế", "Luôn ở số nhiều. Ngược với academic knowledge.", "The cooking and budgeting course teaches practical skills that school leavers use in their first apartment."],
+      ["transferable skills", "kỹ năng dùng được ở nhiều nơi", "Dùng khi bảo vệ các môn học không có thi.", "Running the school newspaper builds transferable skills, such as meeting deadlines, that any employer values."],
+      ["intellectual curiosity", "sự tò mò muốn hiểu biết", "Không đếm được. Hay đi với cultivate, stifle.", "A teacher who answers every why question patiently keeps a child's intellectual curiosity alive."],
+      ["lifelong learning", "việc học suốt đời", "Không đếm được. Hay đi với promote, encourage.", "Free evening classes at the public library promote lifelong learning among retirees and shift workers."],
+      ["vocational training", "đào tạo nghề", "Không đếm được. Ngược với higher education.", "After two years of vocational training, the apprentices can wire a house without supervision."],
+      ["vocational qualifications", "bằng cấp nghề", "Số nhiều. Cụ thể hơn vocational training.", "Employers in construction often ask for vocational qualifications rather than a university degree."],
+      ["higher education", "giáo dục bậc đại học", "Không đếm được. Thường không có mạo từ.", "Only one student from the village went on to higher education because the nearest university is 200 kilometers away."],
+      ["distance learning", "học từ xa", "Không đếm được. Trung tính hơn online learning.", "Distance learning lets a nurse on night shifts attend lectures by video during her breaks."],
+      ["academic pressure", "áp lực học hành", "Không đếm được. Hay đi với face, mount, alleviate.", "Under heavy academic pressure, many high school seniors study until midnight and skip weekend sports."],
     ] },
     { id: "C", name: "Tiếp cận, tiền bạc và cơ hội", kind: "phrase", items: [
-      ["access to education", "khả năng tiếp cận giáo dục", "Danh từ access luôn đi với to.", ""],
-      ["tuition fees", "học phí", "Luôn ở số nhiều khi nói về mức học phí đại học.", ""],
-      ["financial aid", "tiền hỗ trợ cho người học", "Không đếm được. Hay đi với offer, apply for. Không viết financial aids.", ""],
-      ["public funding", "ngân sách công", "Không đếm được. Hay đi với rely on, cut, allocate.", ""],
-      ["socioeconomic background", "hoàn cảnh kinh tế và xã hội của gia đình", "Viết socioeconomic liền một từ, không có gạch nối.", ""],
-      ["educational mobility", "khả năng đổi đời nhờ việc học", "Ít người dùng, rất hợp với đề học phí.", ""],
-      ["the achievement gap", "khoảng cách thành tích giữa các nhóm học sinh", "Luôn có the. Hay đi với widen, narrow, bridge.", ""],
-      ["home education", "việc học tại nhà", "Không đếm được. Tiếng Anh Mỹ hay dùng homeschooling.", ""],
-      ["equal opportunity", "cơ hội ngang nhau", "Thường không đếm được khi nói về nguyên tắc chung.", ""],
+      ["access to education", "khả năng tiếp cận giáo dục", "Danh từ access luôn đi với to.", "A free school bus gives children in remote villages access to education they would otherwise miss."],
+      ["tuition fees", "học phí", "Luôn ở số nhiều khi nói về mức học phí đại học.", "When tuition fees doubled, applications from low-income families dropped at most state universities."],
+      ["financial aid", "tiền hỗ trợ cho người học", "Không đếm được. Hay đi với offer, apply for. Không viết financial aids.", "Without financial aid, the top student in the class could not afford the first semester."],
+      ["public funding", "ngân sách công", "Không đếm được. Hay đi với rely on, cut, allocate.", "Schools that rely on public funding lost their music teachers when the city cut the budget."],
+      ["socioeconomic background", "hoàn cảnh kinh tế và xã hội của gia đình", "Viết socioeconomic liền một từ, không có gạch nối.", "Children from a poorer socioeconomic background are less likely to have a quiet room for homework."],
+      ["educational mobility", "khả năng đổi đời nhờ việc học", "Ít người dùng, rất hợp với đề học phí.", "Scholarships for rural students increase educational mobility, letting a farmer's daughter become a doctor."],
+      ["the achievement gap", "khoảng cách thành tích giữa các nhóm học sinh", "Luôn có the. Hay đi với widen, narrow, bridge.", "Free tutoring after school helped narrow the achievement gap between rich and poor districts."],
+      ["home education", "việc học tại nhà", "Không đếm được. Tiếng Anh Mỹ hay dùng homeschooling.", "Parents who choose home education must plan every lesson themselves and find other ways for children to socialize."],
+      ["equal opportunity", "cơ hội ngang nhau", "Thường không đếm được khi nói về nguyên tắc chung.", "Blind marking of exam papers supports equal opportunity, since examiners cannot see a candidate's name."],
     ] },
     { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
       ["stifle", "bóp nghẹt gần như hoàn toàn", "Hay đi với creativity, curiosity", "A rigid syllabus can stifle creativity."],
@@ -15179,8 +15179,11 @@ let _twKeyHandler = null;
 function twFind(en, sentence) {
   const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const forms = String(en).replace(/\([^)]*\)/g, ' ').split('/').map(s => s.trim()).filter(Boolean);
-  for (const f of forms) {
-    const words = f.replace(/^(a|an|the)\s+/i, '').split(/\s+/);
+  // Try the form as written first, so "the achievement gap" blanks its "the"
+  // too; then without the article, for sentences that use "a" or none.
+  const tries = forms.flatMap(f => { const bare = f.replace(/^(a|an|the)\s+/i, ''); return bare !== f ? [f, bare] : [f]; });
+  for (const f of tries) {
+    const words = f.split(/\s+/);
     const first = words[0].toLowerCase();
     const stem = first.length > 3 ? first.replace(/(e|y)$/, '') : first;
     const rest = words.slice(1).map(w => '\\s+' + esc(w) + '(?:s|es)?').join('');
