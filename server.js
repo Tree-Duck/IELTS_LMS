@@ -3917,7 +3917,18 @@ app.put('/api/game/tower', authenticate, (req, res) => {
 // Prices live here, so a purchase is only ever as good as the balance the
 // server holds. Earnings are reported by the client, so each report is
 // capped, and so is what one student can collect in a day.
-const SHOP_PRICES = { hint: 15, slow: 20, double: 25, revive: 40 };
+const SHOP_PRICES = { hint: 15, slow: 20, double: 25, revive: 40, shield: 30, boost: 50, skip: 10 };
+// Looks only: bought once, kept for good, one worn per slot. The slot is the
+// part of the id before the underscore.
+const COSMETIC_PRICES = {
+  ship_rocket: 60, ship_ufo: 150, ship_pencil: 150, ship_dragon: 300, ship_unicorn: 600,
+  drop_duck: 60, drop_donut: 150, drop_balloon: 150, drop_monster: 300,
+  tower_wood: 60, tower_glass: 150, tower_castle: 300, tower_pagoda: 600,
+  title_hunter: 60, title_typer: 150, title_architect: 150, title_wordlord: 300, title_band9: 600,
+  frame_gold: 150, frame_fire: 300, frame_rainbow: 600,
+};
+const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame'];
+const BOOST_MS = 10 * 60 * 1000;
 const WALLET_EARN_MAX = 500;
 const WALLET_DAY_MAX = 2000;
 const WALLET_INV_MAX = 20;
@@ -3932,6 +3943,9 @@ const walletOut = w => ({
   coins: w.coins || 0,
   inv: w.inv || {},
   earned: w.earned || 0,
+  owned: w.owned || {},
+  equip: w.equip || {},
+  boost_until: w.boost_until || 0,
   day_left: w.day === walletDay() ? Math.max(0, WALLET_DAY_MAX - (w.day_earned || 0)) : WALLET_DAY_MAX,
 });
 
@@ -3944,6 +3958,8 @@ function walletRoute(fn) {
       const extra = {};
       const w = db.updateWallet(req.user.id, w => {
         if (!w.inv) w.inv = {};
+        if (!w.owned) w.owned = {};
+        if (!w.equip) w.equip = {};
         refusal = fn(w, req.body || {}, extra);
         return !refusal;
       });
@@ -3979,6 +3995,16 @@ app.post('/api/game/wallet/earn', authenticate, walletRoute((w, b, extra) => {
 }));
 
 app.post('/api/game/wallet/buy', authenticate, walletRoute((w, b) => {
+  const look = COSMETIC_PRICES[b.item];
+  if (look) {
+    if (w.owned[b.item]) return 'Em đã có món này rồi.';
+    if ((w.coins || 0) < look) return 'Chưa đủ xu để mua.';
+    w.coins -= look;
+    w.owned[b.item] = true;
+    // Worn straight away: the point of buying it is to see it.
+    w.equip[b.item.split('_')[0]] = b.item;
+    return null;
+  }
   const price = SHOP_PRICES[b.item];
   if (!price) return 'Không có món này trong cửa hàng.';
   if ((w.coins || 0) < price) return 'Chưa đủ xu để mua.';
@@ -3991,6 +4017,18 @@ app.post('/api/game/wallet/buy', authenticate, walletRoute((w, b) => {
 app.post('/api/game/wallet/use', authenticate, walletRoute((w, b) => {
   if (!SHOP_PRICES[b.item] || !(w.inv[b.item] > 0)) return 'Hết món này rồi.';
   w.inv[b.item] -= 1;
+  // Double coins runs on the clock, so it carries across games and devices.
+  if (b.item === 'boost') w.boost_until = Math.max(Date.now(), w.boost_until || 0) + BOOST_MS;
+  return null;
+}));
+
+// Wear something already owned, or go back to the default with item empty.
+app.post('/api/game/wallet/equip', authenticate, walletRoute((w, b) => {
+  if (!COSMETIC_SLOTS.includes(b.slot)) return 'Không có ô trang bị này.';
+  if (!b.item) { delete w.equip[b.slot]; return null; }
+  if (!COSMETIC_PRICES[b.item] || b.item.split('_')[0] !== b.slot) return 'Món này không hợp ô này.';
+  if (!w.owned[b.item]) return 'Em chưa có món này.';
+  w.equip[b.slot] = b.item;
   return null;
 }));
 
@@ -4044,7 +4082,8 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
     // Equal values share a rank: 1, 2, 2, 4.
     ranked.forEach((r, i) => { r.rank = i && r.value === ranked[i - 1].value ? ranked[i - 1].rank : i + 1; });
     const mine = ranked.find(r => r.id === me);
-    const out = r => ({ rank: r.rank, name: r.name, value: r.value, me: r.id === me });
+    const look = uid => ((g.wallets[uid] || {}).equip) || {};
+    const out = r => ({ rank: r.rank, name: r.name, value: r.value, me: r.id === me, title: look(r.id).title || null, frame: look(r.id).frame || null });
     res.json({
       board, diff, scope: scope || 'all', classes, total: ranked.length,
       rows: ranked.slice(0, RANK_TOP).map(out),

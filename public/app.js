@@ -14578,41 +14578,115 @@ function lvUnbindKeys() {
 
 /* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
 /* ─── Xu và cửa hàng ───────────────────────────────────────────────────────
-   Coins are earned in Bắn Chữ and Xây tháp and spent on items that work in
-   those games. The server holds the balance and the prices; the screen
-   shows earnings at once and sends them in batches. */
+   Coins are earned in Bắn Chữ and Xây tháp and spent in the shop, on items
+   used up in a game and on looks that are bought once and kept. The server
+   holds the balance and the prices; the screen shows earnings at once and
+   sends them in batches. */
 const SHOP_ITEMS = [
   { id: 'slow',   icon: '❄️', name: 'Tia làm chậm', price: 20, where: 'Bắn Chữ · phím 1', desc: 'Mọi từ rơi chậm hẳn trong 10 giây.' },
   { id: 'double', icon: '🔱', name: 'Bắn 2 tia',    price: 25, where: 'Bắn Chữ · phím 2', desc: 'Trong 15 giây, bắn trúng một từ thì tia thứ hai hạ luôn từ đang rơi thấp nhất.' },
+  { id: 'shield', icon: '🛡️', name: 'Khiên',        price: 30, where: 'Bắn Chữ · phím 3', desc: 'Bật lên là khiên chờ sẵn. Từ đầu tiên chạm đất sẽ vỡ vào khiên, không mất mạng.' },
   { id: 'revive', icon: '💖', name: 'Hồi sinh',     price: 40, where: 'Cả hai game', desc: 'Hết mạng thì được sống lại. Bắn Chữ: 3 mạng và dọn sạch màn. Xây tháp: toà nhà không sập, hồi đủ mạng.' },
+  { id: 'boost',  icon: '⏱️', name: 'Nhân đôi xu',  price: 50, where: 'Cả hai game · 10 phút', desc: 'Mọi xu kiếm được nhân đôi trong 10 phút. Bật ở đây, đồng hồ vẫn chạy khi đổi game.' },
   { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
+  { id: 'skip',   icon: '🔁', name: 'Đổi câu',      price: 10, where: 'Xây tháp', desc: 'Bỏ câu đang làm, lấy câu khác. Không mất mạng, không mất tầng.' },
+];
+const RARITY = {
+  common:    { label: 'Thường' },
+  rare:      { label: 'Hiếm' },
+  epic:      { label: 'Sử thi' },
+  legendary: { label: 'Huyền thoại' },
+};
+// Looks, by slot. The first entry of each slot is the free default.
+const COSMETICS = {
+  ship: [
+    { id: null, name: 'Tàu lá xanh', icon: '', laser: '#C8F169' },
+    { id: 'ship_rocket',  rarity: 'common',    price: 60,  name: 'Tên lửa',         icon: '🚀', tilt: -45, laser: '#FF7A59' },
+    { id: 'ship_ufo',     rarity: 'rare',      price: 150, name: 'Đĩa bay',         icon: '🛸', tilt: 0,   laser: '#5CE1E6' },
+    { id: 'ship_pencil',  rarity: 'rare',      price: 150, name: 'Bút chì thần',    icon: '✏️', tilt: 135, laser: '#FFD166' },
+    { id: 'ship_dragon',  rarity: 'epic',      price: 300, name: 'Rồng lửa',        icon: '🐉', tilt: 0,   laser: '#FF4D2E' },
+    { id: 'ship_unicorn', rarity: 'legendary', price: 600, name: 'Kỳ lân cầu vồng', icon: '🦄', tilt: 0,   laser: 'rainbow' },
+  ],
+  drop: [
+    { id: null, name: 'Đàn gà', icons: ['🐔', '🐓', '🥚'], burst: '🍗', boss: 'GÀ TRÙM' },
+    { id: 'drop_duck',    rarity: 'common', price: 60,  name: 'Đàn vịt',         icons: ['🦆', '🦢', '🥚'], burst: '🪶', boss: 'THIÊN NGA TRÙM' },
+    { id: 'drop_donut',   rarity: 'rare',   price: 150, name: 'Tiệm bánh ngọt',  icons: ['🍩', '🎂', '🍬'], burst: '✨', boss: 'BÁNH KEM KHỔNG LỒ' },
+    { id: 'drop_balloon', rarity: 'rare',   price: 150, name: 'Lễ hội bóng bay', icons: ['🎈', '🪅', '🎁'], burst: '🎊', boss: 'PIÑATA TRÙM' },
+    { id: 'drop_monster', rarity: 'epic',   price: 300, name: 'Quái vật vũ trụ', icons: ['👾', '👹', '💎'], burst: '💥', boss: 'QUỶ TRÙM' },
+  ],
+  tower: [
+    { id: null, name: 'Nhà phố', icon: '🏢' },
+    { id: 'tower_wood',   rarity: 'common',    price: 60,  name: 'Nhà gỗ',    icon: '🪵' },
+    { id: 'tower_glass',  rarity: 'rare',      price: 150, name: 'Tháp kính', icon: '🏙️' },
+    { id: 'tower_castle', rarity: 'epic',      price: 300, name: 'Lâu đài',   icon: '🏰' },
+    { id: 'tower_pagoda', rarity: 'legendary', price: 600, name: 'Chùa vàng', icon: '🛕' },
+  ],
+  title: [
+    { id: null, name: 'Không danh hiệu', text: '' },
+    { id: 'title_hunter',    rarity: 'common',    price: 60,  name: 'Thợ săn gà',       text: '🐔 Thợ săn gà' },
+    { id: 'title_typer',     rarity: 'rare',      price: 150, name: 'Thần gõ phím',     text: '⌨️ Thần gõ phím' },
+    { id: 'title_architect', rarity: 'rare',      price: 150, name: 'Kiến trúc sư',     text: '🏗️ Kiến trúc sư' },
+    { id: 'title_wordlord',  rarity: 'epic',      price: 300, name: 'Chúa tể từ vựng',  text: '📚 Chúa tể từ vựng' },
+    { id: 'title_band9',     rarity: 'legendary', price: 600, name: 'Band 9 tương lai', text: '👑 Band 9 tương lai' },
+  ],
+  frame: [
+    { id: null, name: 'Khung thường', icon: '▫️' },
+    { id: 'frame_gold',    rarity: 'rare',      price: 150, name: 'Viền vàng',     icon: '✨' },
+    { id: 'frame_fire',    rarity: 'epic',      price: 300, name: 'Viền lửa',      icon: '🔥' },
+    { id: 'frame_rainbow', rarity: 'legendary', price: 600, name: 'Viền cầu vồng', icon: '🌈' },
+  ],
+};
+const SHOP_TABS = [
+  { id: 'items', label: '⚡ Vật phẩm' },
+  { id: 'ship',  label: '🚀 Tàu bắn' },
+  { id: 'drop',  label: '🐔 Vật rơi' },
+  { id: 'tower', label: '🏰 Toà nhà' },
+  { id: 'badge', label: '🏷️ Danh hiệu' },
 ];
 let _wal = null;
 let _walFor = null;
 let _walPending = 0;
 let _walTimer = 0;
 let _walShopOpen = false;
+let _walTab = 'items';
+let _walBoostTick = 0;
 
 function walWho() { return (currentUser && currentUser.id) || 'guest'; }
 async function walLoad() {
   if (_wal && _walFor === walWho()) return _wal;
-  try { walSet(await api('/api/game/wallet')); } catch (e) { if (!_wal) _wal = { coins: 0, inv: {} }; }
+  try { walSet(await api('/api/game/wallet')); } catch (e) { if (!_wal) _wal = { coins: 0, inv: {}, owned: {}, equip: {} }; }
   _walFor = walWho();
   return _wal;
 }
 // The server's figures, plus whatever has been earned here and not sent yet.
 function walSet(w) {
   if (!w || typeof w.coins !== 'number') return;
-  _wal = { ...w, inv: { ...(w.inv || {}) }, coins: w.coins + _walPending };
+  _wal = { ...w, inv: { ...(w.inv || {}) }, owned: { ...(w.owned || {}) }, equip: { ...(w.equip || {}) }, coins: w.coins + _walPending };
   walBar();
 }
 function walCoins() { return (_wal && _wal.coins) || 0; }
 function walCount(id) { return (_wal && _wal.inv && _wal.inv[id]) || 0; }
+function walOwns(id) { return !id || !!(_wal && _wal.owned && _wal.owned[id]); }
+// What the student wears in a slot: the default when nothing is chosen.
+function walLook(slot) {
+  const id = _wal && _wal.equip && _wal.equip[slot];
+  return COSMETICS[slot].find(c => c.id === id) || COSMETICS[slot][0];
+}
+function walLookById(id) {
+  for (const slot of Object.keys(COSMETICS)) {
+    const c = COSMETICS[slot].find(x => x.id === id);
+    if (c) return { ...c, slot };
+  }
+  return null;
+}
+function walBoostLeft() { return Math.max(0, ((_wal && _wal.boost_until) || 0) - Date.now()); }
+// Games multiply what they earn by this before reporting it.
+function walMult() { return walBoostLeft() > 0 ? 2 : 1; }
 
 function walEarn(n, now) {
   n = Math.round(n);
   if (!(n > 0)) return;
-  if (!_wal) _wal = { coins: 0, inv: {} };
+  if (!_wal) _wal = { coins: 0, inv: {}, owned: {}, equip: {} };
   _wal.coins += n;
   _walPending += n;
   clearTimeout(_walTimer);
@@ -14641,46 +14715,233 @@ function walUse(id) {
   return true;
 }
 
-async function walBuy(id) {
-  const item = SHOP_ITEMS.find(i => i.id === id);
+async function walBuy(id, btn) {
+  const item = SHOP_ITEMS.find(i => i.id === id) || walLookById(id);
   if (!item || walCoins() < item.price) return;
+  if (btn) btn.disabled = true;
   try {
     // Coins still on their way to the server have to land before they are spent.
     if (_walPending) await walFlush();
     walSet(await api('/api/game/wallet/buy', { method: 'POST', body: JSON.stringify({ item: id }) }));
-    tsSfx('power');
-    showToast(`${item.icon} Đã mua ${item.name}.`);
+    if (item.slot) {
+      jUnbox(item);
+    } else {
+      tsSfx('buy');
+      jBuzz(20);
+      jPop(`${item.icon} +1 ${item.name}`);
+    }
   } catch (e) {
     showToast(e.message);
+    walBar();
   }
 }
 
-function walToggleShop() { _walShopOpen = !_walShopOpen; walBar(); }
+async function walEquip(slot, id) {
+  if (!_wal || !walOwns(id)) return;
+  if (id) _wal.equip[slot] = id; else delete _wal.equip[slot];
+  tsSfx('equip');
+  walBar();
+  try { walSet(await api('/api/game/wallet/equip', { method: 'POST', body: JSON.stringify({ slot, item: id }) })); }
+  catch (e) { showToast(e.message); }
+}
+
+function walBoost() {
+  if (!walUse('boost')) return;
+  _wal.boost_until = Math.max(Date.now(), _wal.boost_until || 0) + 10 * 60 * 1000;
+  tsSfx('callout');
+  jBuzz([20, 40, 20]);
+  jPop('⏱️ Nhân đôi xu trong 10 phút!');
+  jConfetti(30);
+  walBar();
+}
+
+function walToggleShop() { _walShopOpen = !_walShopOpen; tsSfx('equip'); walBar(); }
+function walSetTab(t) { _walTab = t; walBar(); }
+
+function walBoostText() {
+  const ms = walBoostLeft();
+  const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60;
+  return `⏱️ x2 xu · ${m}:${String(s).padStart(2, '0')}`;
+}
+// A one-second clock while double coins runs, for every place that shows it.
+function walBoostClock() {
+  if (_walBoostTick || !walBoostLeft()) return;
+  _walBoostTick = setInterval(() => {
+    const left = walBoostLeft();
+    document.querySelectorAll('.wal-boost').forEach(el => { el.textContent = walBoostText(); });
+    if (!left) { clearInterval(_walBoostTick); _walBoostTick = 0; walBar(); if (_ts) tsHud(); }
+  }, 1000);
+}
 
 function walBar() {
+  walBoostClock();
+  const boost = walBoostLeft() > 0 ? `<span class="wal-boost">${walBoostText()}</span>` : '';
   const mini = document.getElementById('wal-mini');
-  if (mini) mini.textContent = `🪙 ${walCoins()}`;
+  if (mini) mini.innerHTML = `🪙 ${walCoins()}${walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''}`;
   const bar = document.getElementById('wal-bar');
   if (!bar) return;
   const inv = SHOP_ITEMS.map(i => `<span class="wal-inv" title="${escapeHtml(i.name)}">${i.icon} ${walCount(i.id)}</span>`).join('');
   bar.innerHTML = `
-    <span class="wal-coins">🪙 <strong>${walCoins()}</strong> xu</span>
+    <span class="wal-coins">🪙 <strong id="wal-coins-n">${walCoins()}</strong> xu</span>
+    ${boost}
     <span class="wal-invs">${inv}</span>
     <button class="wal-shop-btn${_walShopOpen ? ' active' : ''}" onclick="walToggleShop()">🛒 ${_walShopOpen ? 'Đóng cửa hàng' : 'Cửa hàng'}</button>
     <button class="wal-shop-btn" onclick="lbOpen()">🏆 Xếp hạng</button>`;
   const shop = document.getElementById('wal-shop');
   if (!shop) return;
   shop.classList.toggle('hidden', !_walShopOpen);
-  shop.innerHTML = `
-    <div class="wal-earn-note">Kiếm xu: Bắn Chữ mỗi từ bắn trúng được 1 xu ở Dễ, 2 xu ở Vừa, 3 xu ở Khó, gà trùm gấp ba. Xây tháp mỗi tầng được 2 xu, tầng tự gõ 3 xu, trứng vàng thêm 5 xu, qua mốc thêm 20 xu.</div>
-    <div class="wal-items">${SHOP_ITEMS.map(i => `
+  if (!_walShopOpen) return;
+  let body;
+  if (_walTab === 'items') {
+    body = `<div class="wal-earn-note">Kiếm xu: Bắn Chữ mỗi từ bắn trúng được 1 xu ở Dễ, 2 xu ở Vừa, 3 xu ở Khó, trùm gấp ba. Xây tháp mỗi tầng 2 xu, tầng tự gõ 3 xu, trứng vàng thêm 5 xu, qua mốc thêm 20 xu. Đang bật ⏱️ thì mọi xu nhân đôi.</div>
+      <div class="wal-items">${SHOP_ITEMS.map(i => `
       <div class="wal-item">
         <div class="wal-item-head"><span class="wal-item-icon">${i.icon}</span><span class="wal-item-name">${escapeHtml(i.name)}</span><span class="wal-item-have">đang có ${walCount(i.id)}</span></div>
         <div class="wal-item-where">${escapeHtml(i.where)}</div>
         <div class="wal-item-desc">${escapeHtml(i.desc)}</div>
-        <button class="vb-start-btn wal-buy" onclick="walBuy('${i.id}')" ${walCoins() < i.price ? 'disabled' : ''}>Mua · ${i.price} 🪙</button>
+        <div class="wal-item-btns">
+          <button class="vb-start-btn wal-buy" onclick="walBuy('${i.id}', this)" ${walCoins() < i.price ? 'disabled' : ''}>${walCoins() < i.price ? `Thiếu ${i.price - walCoins()} 🪙` : `Mua · ${i.price} 🪙`}</button>
+          ${i.id === 'boost' && walCount('boost') ? '<button class="vb-secondary-btn wal-buy" onclick="walBoost()">Bật ngay</button>' : ''}
+        </div>
       </div>`).join('')}
     </div>`;
+  } else if (_walTab === 'badge') {
+    body = `<div class="wal-earn-note">Danh hiệu và khung hiện trên bảng xếp hạng, cả lớp đều thấy.</div>
+      <div class="wal-sec">Danh hiệu</div>
+      <div class="wal-items">${COSMETICS.title.map(c => walLookCard('title', c)).join('')}</div>
+      <div class="wal-sec">Khung tên</div>
+      <div class="wal-items">${COSMETICS.frame.map(c => walLookCard('frame', c)).join('')}</div>`;
+  } else {
+    const note = { ship: 'Đổi hình tàu và màu tia laser trong Bắn Chữ.', drop: 'Đổi thứ rơi xuống trong Bắn Chữ, cả con trùm và trứng vàng.', tower: 'Đổi kiểu toà nhà trong Xây tháp.' }[_walTab];
+    body = `<div class="wal-earn-note">${note}</div><div class="wal-items">${COSMETICS[_walTab].map(c => walLookCard(_walTab, c)).join('')}</div>`;
+  }
+  shop.innerHTML = `
+    <div class="wal-tabs">${SHOP_TABS.map(t => `<button class="vb-chip${_walTab === t.id ? ' active' : ''}" onclick="walSetTab('${t.id}')">${t.label}</button>`).join('')}</div>
+    ${body}`;
+}
+
+function walLookCard(slot, c) {
+  const owned = walOwns(c.id);
+  const worn = walLook(slot).id === c.id;
+  const r = c.rarity || 'common';
+  const idArg = c.id ? `'${c.id}'` : 'null';
+  let btn;
+  if (worn) btn = '<button class="vb-secondary-btn wal-buy" disabled>✓ Đang dùng</button>';
+  else if (owned) btn = `<button class="vb-start-btn wal-buy" onclick="walEquip('${slot}', ${idArg})">Trang bị</button>`;
+  else btn = `<button class="vb-start-btn wal-buy" onclick="walBuy('${c.id}', this)" ${walCoins() < c.price ? 'disabled' : ''}>${walCoins() < c.price ? `Thiếu ${c.price - walCoins()} 🪙` : `Mua · ${c.price} 🪙`}</button>`;
+  return `<div class="wal-item wal-look wal-r-${c.id ? r : 'free'}${worn ? ' worn' : ''}">
+    <div class="wal-prev">${walPreview(slot, c)}</div>
+    <div class="wal-item-head"><span class="wal-item-name">${escapeHtml(c.name)}</span><span class="wal-rarity">${c.id ? RARITY[r].label : 'Miễn phí'}</span></div>
+    ${btn}
+  </div>`;
+}
+
+function walShipIcon(c) {
+  return c.icon ? `<span class="ts-ship-emoji" style="transform: rotate(${c.tilt || 0}deg)">${c.icon}</span>` : '<span class="wal-prev-tri"></span>';
+}
+function walPreview(slot, c) {
+  if (slot === 'ship') return `<div class="wal-prev-ship">${walShipIcon(c)}</div><div class="wal-prev-laser${c.laser === 'rainbow' ? ' rainbow' : ''}" style="--laser: ${c.laser === 'rainbow' ? '#fff' : c.laser}"></div>`;
+  if (slot === 'drop') return `<div class="wal-prev-drop">${c.icons.map(i => `<span>${i}</span>`).join('')}</div>`;
+  if (slot === 'tower') return `<div class="wal-prev-tower${c.id ? ' tw-skin-' + c.id : ''}">${[0, 1, 2, 3].map(i => `<div class="tw-floor tw-floor--${i}"></div>`).join('')}</div>`;
+  if (slot === 'title') return `<div class="wal-prev-title">${c.text ? `<span class="lb-title">${escapeHtml(c.text)}</span>` : '<span class="wal-prev-none">Không hiện gì</span>'}</div>`;
+  return `<div class="lb-row wal-prev-frame${c.id ? ' lb-' + c.id : ''}"><span class="lb-rank">🥇</span><span class="lb-name">Tên em</span></div>`;
+}
+function walBigIcon(c) {
+  if (c.slot === 'ship') return walShipIcon(c);
+  if (c.slot === 'drop') return c.icons.join('');
+  if (c.slot === 'title') return `<span class="lb-title lb-title--big">${escapeHtml(c.text)}</span>`;
+  return c.icon;
+}
+
+/* ─── Hiệu ứng: rung, xu bay, pháo giấy, mở hộp ───────────────────────────
+   Small rewards that make a right answer feel like one. All of it stays
+   quiet when the sound is muted. */
+function jBuzz(pattern) {
+  if (tsMuted()) return;
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+}
+function jBump(el) {
+  if (!el) return;
+  el.classList.remove('j-bump');
+  void el.offsetWidth;
+  el.classList.add('j-bump');
+}
+// A coin flies from a point on screen into a counter, which then pops.
+let _jFlyAt = 0;
+function jCoinFly(x, y, targetId) {
+  const t = document.getElementById(targetId);
+  if (!t || !document.body.animate) return;
+  const now = performance.now();
+  if (now - _jFlyAt < 90) { jBump(t); return; }
+  _jFlyAt = now;
+  const r = t.getBoundingClientRect();
+  const dx = r.left + r.width / 2 - x, dy = r.top + r.height / 2 - y;
+  const c = document.createElement('span');
+  c.className = 'j-coin';
+  c.textContent = '🪙';
+  c.style.left = x + 'px';
+  c.style.top = y + 'px';
+  document.body.appendChild(c);
+  const anim = c.animate([
+    { transform: 'translate(-50%, -50%) scale(0.6)', opacity: 1 },
+    { transform: `translate(calc(-50% + ${dx * 0.25}px), calc(-50% + ${dy * 0.25 - 50}px)) scale(1.5)`, opacity: 1, offset: 0.3 },
+    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.7)`, opacity: 0.9 },
+  ], { duration: 620, easing: 'cubic-bezier(.45, 0, .75, 1)' });
+  anim.onfinish = () => { c.remove(); jBump(t); tsSfx('coin'); };
+}
+function jConfetti(n) {
+  const colors = ['#C8F169', '#FF7A59', '#F5C542', '#5CE1E6', '#B98CFF', '#FFFFFF'];
+  for (let k = 0; k < n; k++) {
+    const c = document.createElement('span');
+    c.className = 'j-confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[k % colors.length];
+    c.style.setProperty('--dx', Math.round((Math.random() - 0.5) * 160) + 'px');
+    c.style.setProperty('--rot', Math.round(Math.random() * 720) + 'deg');
+    c.style.animationDelay = (Math.random() * 0.5).toFixed(2) + 's';
+    c.style.animationDuration = (1.8 + Math.random() * 1.2).toFixed(2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3600);
+  }
+}
+// A short message that pops up in the middle of the screen.
+function jPop(text) {
+  const p = document.createElement('div');
+  p.className = 'j-pop';
+  p.textContent = text;
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 1500);
+}
+// Counts a number up with a ticking sound, the way a game totals a round.
+function jCountUp(el, to) {
+  if (!el || !(to > 0)) return;
+  const steps = Math.min(30, to);
+  let i = 0;
+  const tick = setInterval(() => {
+    i++;
+    el.textContent = Math.round(to * i / steps);
+    if (i % 2) tsSfx('tick');
+    if (i >= steps) { clearInterval(tick); jBump(el); tsSfx('coin'); }
+  }, 45);
+}
+// Opening a new look: light rays, the item popping in, confetti by rarity.
+function jUnbox(c) {
+  const r = c.rarity || 'common';
+  const el = document.createElement('div');
+  el.className = 'j-unbox j-r-' + r;
+  el.innerHTML = `<div class="j-unbox-rays"></div>
+    <div class="j-unbox-card">
+      <div class="j-unbox-rarity">${RARITY[r].label}</div>
+      <div class="j-unbox-icon">${walBigIcon(c)}</div>
+      <div class="j-unbox-name">${escapeHtml(c.name)}</div>
+      <div class="j-unbox-note">Đã trang bị. Vào game là thấy ngay.</div>
+      <button class="vb-start-btn" onclick="this.closest('.j-unbox').remove()">Tuyệt vời!</button>
+    </div>`;
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  document.body.appendChild(el);
+  tsSfx('unbox', r);
+  jBuzz([30, 50, 30, 50, 80]);
+  jConfetti({ common: 30, rare: 50, epic: 70, legendary: 110 }[r]);
 }
 
 /* ─── Bảng xếp hạng ─── */
@@ -14702,7 +14963,10 @@ async function lbOpen(board) {
   try { await walFlush(); } catch (e) {}
   lbLoad();
 }
-function lbSet(key, val) { _lb[key] = val; lbLoad(); }
+function lbSet(key, val) { _lb[key] = val; tsSfx('key'); lbLoad(); }
+
+// Remembers the rank last seen on each board, to celebrate a climb.
+function lbRankKey(d) { return `lbRank_${walWho()}_${d.board}_${d.board === 'shoot' ? d.diff : ''}_${d.scope}`; }
 
 async function lbLoad() {
   const root = document.getElementById('lesson-vocab-root');
@@ -14731,24 +14995,34 @@ async function lbLoad() {
   // A newer tab was clicked while this one loaded.
   if (JSON.stringify(want) !== JSON.stringify(_lb) || !document.getElementById('lesson-vocab-root')) return;
   const medal = r => (r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank);
-  const row = r => `<div class="lb-row${r.me ? ' me' : ''}${r.rank <= 3 ? ' top' : ''}">
+  const title = r => { const t = r.title && walLookById(r.title); return t ? `<span class="lb-title">${escapeHtml(t.text)}</span>` : ''; };
+  const row = (r, i) => `<div class="lb-row${r.me ? ' me' : ''}${r.rank <= 3 ? ' top' : ''}${r.frame && walLookById(r.frame) ? ' lb-' + r.frame : ''}" style="animation-delay: ${Math.min(i, 12) * 45}ms">
       <span class="lb-rank">${medal(r)}</span>
-      <span class="lb-name">${escapeHtml(r.name)}${r.me ? ' <em>(em)</em>' : ''}</span>
+      <span class="lb-name"><span class="lb-name-t">${escapeHtml(r.name)}${r.me ? ' <em>(em)</em>' : ''}</span>${title(r)}</span>
       <span class="lb-val">${r.value.toLocaleString('vi-VN')} <small>${b.unit}</small></span>
     </div>`;
   const mineShown = data.rows.some(r => r.me);
   const you = data.me
-    ? (mineShown ? '' : `<div class="lb-gap">⋯</div>${row(data.me)}`)
-    : `<div class="lb-you-none">Em chưa có tên trên bảng này. Chơi một lượt là có ngay.</div>`;
+    ? (mineShown ? '' : `<div class="lb-gap">⋯</div>${row(data.me, data.rows.length)}`)
+    : '<div class="lb-you-none">Em chưa có tên trên bảng này. Chơi một lượt là có ngay.</div>';
+  let climb = '';
+  if (data.me) {
+    let prev = 0;
+    try { prev = parseInt(localStorage.getItem(lbRankKey(want)) || '0', 10) || 0; } catch (e) {}
+    if (prev && data.me.rank < prev) climb = `<div class="lb-climb">⬆️ Em lên hạng! ${prev} → ${data.me.rank}</div>`;
+    lvSave(lbRankKey(want), String(data.me.rank));
+  }
   root.innerHTML = `
     <div class="lv-wrap lv-wrap--narrow">
       ${head(data)}
+      ${climb}
       <div class="lb-list">
         ${data.rows.length ? data.rows.map(row).join('') : '<div class="lb-empty">Chưa ai có điểm ở bảng này. Người đầu tiên chơi sẽ đứng hạng 1.</div>'}
         ${data.rows.length ? you : ''}
       </div>
-      <div class="lb-count">${data.total} bạn có tên trên bảng</div>
+      <div class="lb-count">${data.total} bạn có tên trên bảng · mua danh hiệu và khung tên ở 🛒 Cửa hàng</div>
     </div>`;
+  if (climb) { tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); jConfetti(60); }
 }
 
 const TS_MODES = {
@@ -14825,7 +15099,7 @@ function tsSpeak(text) {
 }
 
 // Sound effects are synthesised, so there are no audio files to load.
-function tsSfx(kind) {
+function tsSfx(kind, arg) {
   if (tsMuted()) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -14849,11 +15123,28 @@ function tsSfx(kind) {
     };
     if (kind === 'key') tone(900, 0.03, 'square', 0.02);
     else if (kind === 'wrong') tone(130, 0.09, 'square', 0.05);
-    else if (kind === 'kill') { tone(700, 0.1, 'square', 0.05, 1400); tone(150, 0.2, 'triangle', 0.08, 50, 0.02); }
+    // Each kill in a combo rings a little higher.
+    else if (kind === 'kill') { const p = 1 + Math.min(20, arg || 0) * 0.045; tone(700 * p, 0.1, 'square', 0.05, 1400 * p); tone(150, 0.2, 'triangle', 0.08, 50, 0.02); }
     else if (kind === 'miss') tone(240, 0.4, 'sawtooth', 0.06, 60);
     else if (kind === 'boss') tone(110, 0.7, 'sawtooth', 0.07, 40);
     else if (kind === 'power') [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.13, 'triangle', 0.07, 0, i * 0.07));
     else if (kind === 'level') [392, 523, 659, 784].forEach((f, i) => tone(f, 0.14, 'square', 0.045, 0, i * 0.08));
+    else if (kind === 'coin') { tone(1319, 0.05, 'square', 0.03); tone(1760, 0.14, 'square', 0.03, 0, 0.05); }
+    else if (kind === 'tick') tone(1600, 0.025, 'square', 0.015);
+    else if (kind === 'buy') { [659, 880, 1319].forEach((f, i) => tone(f, 0.1, 'square', 0.04, 0, i * 0.06)); tone(1760, 0.2, 'triangle', 0.05, 0, 0.2); }
+    else if (kind === 'equip') tone(380, 0.14, 'triangle', 0.07, 900);
+    else if (kind === 'shield') { tone(1400, 0.25, 'triangle', 0.06, 600); tone(260, 0.18, 'square', 0.04, 120, 0.02); }
+    else if (kind === 'slow') tone(1000, 0.55, 'sine', 0.08, 180);
+    else if (kind === 'double') { tone(1300, 0.08, 'square', 0.04, 500); tone(1500, 0.08, 'square', 0.04, 600, 0.1); }
+    else if (kind === 'callout') { tone(300, 0.28, 'sawtooth', 0.035, 1200); [784, 988, 1175].forEach((f, i) => tone(f, 0.16, 'triangle', 0.05, 0, 0.18 + i * 0.05)); }
+    else if (kind === 'rankup') [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, i === 5 ? 0.45 : 0.14, 'square', 0.045, 0, i * 0.09));
+    else if (kind === 'unbox') {
+      // A drum-roll sweep, then a fanfare that grows with the rarity.
+      const n = { common: [523, 659, 784], rare: [523, 659, 784, 1047], epic: [392, 523, 659, 784, 1047, 1319], legendary: [392, 523, 659, 784, 1047, 1319, 1568, 2093] }[arg] || [523, 659, 784];
+      tone(200, 0.35, 'sawtooth', 0.04, 1400);
+      n.forEach((f, i) => tone(f, i === n.length - 1 ? 0.6 : 0.13, 'triangle', 0.06, 0, 0.3 + i * 0.08));
+      if (arg === 'legendary' || arg === 'epic') n.forEach((f, i) => tone(f * 2, 0.1, 'sine', 0.025, 0, 0.34 + i * 0.08));
+    }
   } catch (e) {}
 }
 
@@ -14886,6 +15177,7 @@ function tsStart(mode, list) {
       <div class="ts-arena" id="ts-arena">
         <div class="ts-stars"></div>
         <div class="ts-ship" id="ts-ship"></div>
+        <div class="ts-bubble" id="ts-bubble"></div>
         <div class="ts-miss" id="ts-miss"></div>
         <div class="ts-overlay hidden" id="ts-overlay"></div>
       </div>
@@ -14898,8 +15190,9 @@ function tsStart(mode, list) {
     items: [], lockId: null, nextId: 1, spawned: 0,
     score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
     missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: false,
-    W: 0, H: 0, coins: 0, slow: 0, dbl: 0, revives: 0, reviving: false, powersShown: '',
+    W: 0, H: 0, coins: 0, slow: 0, dbl: 0, shield: false, revives: 0, reviving: false, powersShown: '',
   };
+  tsApplySkins();
   const input = document.getElementById('ts-input');
   input.addEventListener('input', tsOnInput);
   input.addEventListener('keydown', tsOnKey);
@@ -14913,12 +15206,49 @@ function tsStart(mode, list) {
   tsPowers();
   tsFit();
   tsHud();
-  walLoad().then(() => { if (_ts === g) { tsPowers(); tsFit(); } });
+  walLoad().then(() => { if (_ts === g) { tsPowers(); tsFit(); tsApplySkins(); } });
   input.focus();
   g.raf = requestAnimationFrame(tsFrame);
 }
 
-// The two shop items used mid-game, with what the student still has. The
+// The ship and laser the student has on, from the shop.
+function tsApplySkins() {
+  const ship = document.getElementById('ts-ship');
+  const arena = document.getElementById('ts-arena');
+  const s = walLook('ship');
+  if (ship) {
+    ship.classList.toggle('ts-ship--emoji', !!s.icon);
+    ship.innerHTML = s.icon ? walShipIcon(s) : '';
+  }
+  if (arena) {
+    arena.style.setProperty('--laser', s.laser === 'rainbow' ? '#ffffff' : s.laser);
+    arena.classList.toggle('laser-rainbow', s.laser === 'rainbow');
+  }
+}
+
+const TS_CALLOUTS = { 5: 'Tốt lắm! 🔥', 10: 'Xuất sắc! ⚡', 15: 'Siêu đỉnh! 🌟', 20: 'KHÔNG THỂ CẢN! 💥', 30: 'HUYỀN THOẠI! 👑', 50: 'THẦN GÕ PHÍM! 🚀' };
+function tsFlash(kind) {
+  const a = document.getElementById('ts-arena');
+  if (!a) return;
+  const f = document.createElement('div');
+  f.className = 'ts-flash ts-flash--' + kind;
+  a.appendChild(f);
+  setTimeout(() => f.remove(), 500);
+}
+function tsCallout(text) {
+  const a = document.getElementById('ts-arena');
+  if (!a) return;
+  const c = document.createElement('div');
+  c.className = 'ts-callout';
+  c.textContent = text;
+  a.appendChild(c);
+  setTimeout(() => c.remove(), 1400);
+  tsFlash('combo');
+  tsSfx('callout');
+  jBuzz([20, 30, 40]);
+}
+
+// The shop items used mid-game, with what the student still has. The
 // buttons keep the keyboard up on a phone: they never take the focus.
 function tsPowers() {
   const g = _ts;
@@ -14930,7 +15260,9 @@ function tsPowers() {
     return `<button class="ts-power${on ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('${id}')" ${!on && !walCount(id) ? 'disabled' : ''} title="${escapeHtml(it.name)}, phím ${key}">
       <kbd>${key}</kbd>${it.icon} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
   };
-  const html = btn('slow', 1, g.slow) + btn('double', 2, g.dbl) +
+  const shield = `<button class="ts-power${g.shield ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('shield')" ${!g.shield && !walCount('shield') ? 'disabled' : ''} title="Khiên, phím 3">
+      <kbd>3</kbd>🛡️ <span class="ts-power-name">Khiên</span> <span class="ts-power-n">${g.shield ? 'sẵn sàng' : '×' + walCount('shield')}</span></button>`;
+  const html = btn('slow', 1, g.slow) + btn('double', 2, g.dbl) + shield +
     `<span class="ts-power-revive" title="Hồi sinh">💖 ×${walCount('revive')}</span>`;
   if (html === g.powersShown) return;
   g.powersShown = html;
@@ -14941,12 +15273,21 @@ function tsUsePower(id) {
   const g = _ts;
   document.getElementById('ts-input')?.focus();
   if (!g || !g.running || g.paused) return;
-  if ((id === 'slow' && g.slow > 0) || (id === 'double' && g.dbl > 0)) return;
+  if ((id === 'slow' && g.slow > 0) || (id === 'double' && g.dbl > 0) || (id === 'shield' && g.shield)) return;
   if (!walUse(id)) {
     tsFloat('Hết món này, mua thêm ở 🛒 Cửa hàng', g.W / 2, g.H / 2);
     return;
   }
-  tsSfx('power');
+  jBuzz(25);
+  if (id === 'shield') {
+    g.shield = true;
+    document.getElementById('ts-bubble')?.classList.add('on');
+    tsSfx('shield');
+    tsFloat('🛡️ Khiên đã bật', g.W / 2, g.H / 2, 'big');
+    tsPowers();
+    return;
+  }
+  tsSfx(id);
   if (id === 'slow') {
     g.slow = TS_SLOW_SECS;
     document.getElementById('ts-arena')?.classList.add('slowed');
@@ -14999,7 +15340,8 @@ function tsGap() {
 }
 
 function tsItemHtml(it, typed) {
-  const icon = it.boss ? '🐓' : it.egg ? '🥚' : '🐔';
+  const pack = walLook('drop');
+  const icon = it.boss ? pack.icons[1] : it.egg ? pack.icons[2] : pack.icons[0];
   if (_ts.mode === 'copy') {
     const onTrack = typed && tsNorm(it.show).startsWith(typed);
     const word = onTrack
@@ -15052,7 +15394,7 @@ function tsSpawn() {
   it.y = -it.h;
   el.style.transform = `translate(${it.x}px, ${it.y}px)`;
   g.items.push(it);
-  if (boss) { tsSfx('boss'); tsFloat('🐓 GÀ TRÙM', g.W / 2, 40, 'big'); }
+  if (boss) { const pack = walLook('drop'); tsSfx('boss'); tsFloat(`${pack.icons[1]} ${pack.boss}`, g.W / 2, 40, 'big'); }
 }
 
 function tsFrame(now) {
@@ -15111,6 +15453,7 @@ function tsOnInput(e) {
     input.value = input.value.replace(/[0-9]/g, '');
     if (digit[0] === '1') tsUsePower('slow');
     else if (digit[0] === '2') tsUsePower('double');
+    else if (digit[0] === '3') tsUsePower('shield');
   }
   let typed = tsTyped(input);
   if (!typed) { tsLock(null, ''); return; }
@@ -15146,9 +15489,10 @@ function tsOnInput(e) {
 
 function tsOnKey(e) {
   if (!_ts) return;
-  if (e.key === '1' || e.key === '2') {
+  const power = { 1: 'slow', 2: 'double', 3: 'shield' }[e.key];
+  if (power) {
     e.preventDefault();
-    tsUsePower(e.key === '1' ? 'slow' : 'double');
+    tsUsePower(power);
     return;
   }
   if (e.key === 'Enter' || e.key === 'Escape') {
@@ -15215,7 +15559,7 @@ function tsExplode(it, withLaser) {
     }
     const leg = document.createElement('span');
     leg.className = 'ts-leg';
-    leg.textContent = '🍗';
+    leg.textContent = walLook('drop').burst;
     leg.style.left = cx + 'px';
     leg.style.top = cy + 'px';
     arena.appendChild(leg);
@@ -15231,12 +15575,16 @@ function tsKill(it, second) {
   g.kills++;
   g.combo++;
   g.bestCombo = Math.max(g.bestCombo, g.combo);
-  g.coins += g.diff.coin * (it.boss ? 3 : 1);
+  g.coins += g.diff.coin * (it.boss ? 3 : 1) * walMult();
   const pts = tsPoints(it);
   g.score += pts;
   tsExplode(it, true);
   tsFloat(`${second ? '🔱 ' : ''}+${pts}`, it.x + it.w / 2, it.y);
-  if (!second) tsSfx('kill');
+  if (!second) tsSfx('kill', g.combo);
+  jBuzz(it.boss ? [30, 30, 60] : 12);
+  const ar = document.getElementById('ts-arena')?.getBoundingClientRect();
+  if (ar) jCoinFly(ar.left + it.x + it.w / 2, ar.top + it.y + it.h / 2, 'ts-coins');
+  if (TS_CALLOUTS[g.combo]) tsCallout(TS_CALLOUTS[g.combo]);
   if (it.boss) tsShakeArena();
   if (it.egg) tsPower();
   // Double shot: the second beam takes the lowest word still falling. A boss
@@ -15258,6 +15606,8 @@ function tsKill(it, second) {
   if (g.kills % TS_PER_LEVEL === 0) {
     g.level++;
     tsSfx('level');
+    tsFlash('level');
+    jBuzz([20, 30, 20]);
     tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
   }
   tsHud();
@@ -15293,6 +15643,21 @@ function tsGround(it) {
   it.dead = true;
   it.el.classList.add('ts-crash');
   setTimeout(() => it.el.remove(), 300);
+  if (g.shield) {
+    g.shield = false;
+    document.getElementById('ts-bubble')?.classList.remove('on');
+    if (g.lockId === it.id) {
+      g.lockId = null;
+      const input = document.getElementById('ts-input');
+      if (input) input.value = '';
+    }
+    tsSfx('shield');
+    tsFlash('shield');
+    jBuzz([40, 30, 40]);
+    tsFloat('🛡️ Khiên đỡ!', it.x + it.w / 2, g.H - 70, 'big');
+    tsPowers();
+    return;
+  }
   g.drops++;
   g.lives--;
   g.combo = 0;
@@ -15306,6 +15671,8 @@ function tsGround(it) {
     m.classList.add('show');
   }
   tsSfx('miss');
+  tsFlash('miss');
+  jBuzz(90);
   tsShakeArena();
   if (g.lockId === it.id) {
     const input = document.getElementById('ts-input');
@@ -15390,7 +15757,7 @@ function tsHud() {
   const left = Math.max(0, g.lives);
   set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
   set('ts-score', g.score);
-  set('ts-coins', g.coins);
+  set('ts-coins', g.coins + (walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''));
   set('ts-level', g.level);
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
   set('ts-combo', g.combo >= 3 ? `🔥 ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
@@ -15447,7 +15814,7 @@ function tsRenderResults(g) {
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
         <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
-        <div class="wal-earned">+${g.coins} 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
+        <div class="wal-earned">+<span class="j-count">0</span> 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
         <div class="vb-results-stats">
           <div class="vb-rstat"><div class="vb-rstat-val">${g.kills}</div><div class="vb-rstat-lbl">Bắn trúng</div></div>
           <div class="vb-rstat"><div class="vb-rstat-val">${g.drops}</div><div class="vb-rstat-lbl">Để rơi</div></div>
@@ -15466,6 +15833,8 @@ function tsRenderResults(g) {
         </div>
       </div>
     </div>`;
+  jCountUp(root.querySelector('.j-count'), g.coins);
+  if (isNew) { jConfetti(80); tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); }
 }
 
 /* ─── Xây tháp ─────────────────────────────────────────────────────────────
@@ -15632,7 +16001,12 @@ async function twStart(list) {
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
     coins: 0, revivable: false, revives: 0, lastResult: null,
   };
-  walLoad().then(() => { if (_tw && !_tw.answered) twRenderCard(); walBar(); });
+  walLoad().then(() => {
+    const sc = document.getElementById('tw-scene'), sk = walLook('tower').id;
+    if (sc && sk) sc.classList.add('tw-skin-' + sk);
+    if (_tw && !_tw.answered) twRenderCard();
+    walBar();
+  });
   root.innerHTML = `
     <div class="tw-wrap">
       <div class="tw-top">
@@ -15642,7 +16016,7 @@ async function twStart(list) {
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
       </div>
       <div class="tw-grid">
-        <div class="tw-scene" id="tw-scene">
+        <div class="tw-scene${walLook('tower').id ? ' tw-skin-' + walLook('tower').id : ''}" id="tw-scene">
           <div class="tw-stars" id="tw-stars"></div>
           <div class="tw-sun" id="tw-sun"></div>
           <div class="tw-crane" aria-hidden="true">
@@ -15819,6 +16193,7 @@ function twRenderCard(result) {
       <span class="tw-floor-no">${q.golden ? '🥚 ' : ''}Tầng ${floorNo}</span>
       <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
       ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${hintsLeft}</button>`}
+      ${done ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
     <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
@@ -15852,6 +16227,15 @@ function twUseHint() {
   twRenderCard();
   const inp = document.getElementById('tw-input');
   if (inp) inp.value = typed;
+}
+
+// Swap the question for another. A golden question stays golden.
+function twSkip() {
+  const g = _tw;
+  if (!g || g.answered || !walUse('skip')) return;
+  tsSfx('equip');
+  g.qCount--;
+  twNext();
 }
 
 function twPick(i) {
@@ -15919,9 +16303,13 @@ function twResolve(ok, extra) {
     twRenderScene(dropped);
     const crossed = twCheckMilestone(before);
     if (reward && !crossed) twBanner('🥚 ' + reward.charAt(0).toUpperCase() + reward.slice(1));
-    coins = (q.typing ? TW_COIN_TYPED : TW_COIN) + (q.golden ? TW_COIN_EGG : 0) + (crossed ? TW_COIN_MILESTONE : 0);
+    coins = ((q.typing ? TW_COIN_TYPED : TW_COIN) + (q.golden ? TW_COIN_EGG : 0) + (crossed ? TW_COIN_MILESTONE : 0)) * walMult();
     g.coins += coins;
     walEarn(coins);
+    jBuzz(crossed ? [30, 40, 30, 40, 90] : 15);
+    if (crossed) jConfetti(50);
+    const top = document.getElementById('tw-stack')?.lastElementChild?.getBoundingClientRect();
+    if (top) setTimeout(() => jCoinFly(top.left + top.width / 2, top.top + top.height / 2, 'wal-mini'), 350);
   } else {
     g.wrong++;
     if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
@@ -15930,6 +16318,7 @@ function twResolve(ok, extra) {
     } else {
       g.lives--;
       tsSfx('miss');
+      jBuzz(90);
       if (g.lives > 0) twKnockTop();
       else if (walCount('revive') > 0) { g.revivable = true; twKnockTop(); }
       else twCollapse();
@@ -16104,7 +16493,7 @@ function twEnd() {
         <div class="tw-ruin">🏚️</div>
         <div class="vb-results-score">${g.peak}</div>
         <div class="vb-results-score-lbl">tầng cao nhất lượt này${top ? ` · ${top.icon} ${escapeHtml(top.name)}` : ''} · kỷ lục ${g.best} tầng</div>
-        <div class="wal-earned">+${g.coins} 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
+        <div class="wal-earned">+<span class="j-count">0</span> 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
         <div class="tw-restart-note">${g.checkpoint
           ? `Toà nhà sập nhưng mốc ${ck ? ck.icon + ' ' + escapeHtml(ck.name) + ', ' : ''}${g.checkpoint} tầng vẫn còn. Xây lại từ đó, không phải bắt đầu từ mặt đất.`
           : 'Chưa qua mốc nào nên lần này xây lại từ mặt đất. Qua mốc 5 tầng là có chỗ lưu.'}</div>
@@ -16129,6 +16518,7 @@ function twEnd() {
         </div>
       </div>
     </div>`;
+  jCountUp(root.querySelector('.j-count'), g.coins);
 }
 
 /* =====================================================
