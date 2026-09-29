@@ -14272,7 +14272,8 @@ const LESSON_VOCAB = [
    types it back; "Nhìn nghĩa Việt" hides the English, so the word has to come
    out of memory. Known words and best scores live in localStorage only.
    ===================================================== */
-let _lvSel = new Set();
+let _lvSrc = 'lesson';
+const _lvSelBy = { lesson: new Set(), unit: new Set() };
 let _lvFront = 'en';
 let _lvSkipKnown = false;
 let _fc = null;
@@ -14281,7 +14282,10 @@ let _fcKeyHandler = null;
 (function lvRestore() {
   try {
     const s = JSON.parse(localStorage.getItem('lvSel') || '[]');
-    if (Array.isArray(s)) s.forEach(n => { if (LESSON_VOCAB.some(t => t.n === n)) _lvSel.add(n); });
+    if (Array.isArray(s)) s.forEach(n => { if (LESSON_VOCAB.some(t => t.n === n)) _lvSelBy.lesson.add(n); });
+    const u = JSON.parse(localStorage.getItem('lvSelUnit') || '[]');
+    if (Array.isArray(u)) u.forEach(n => { if (Number.isInteger(n) && n >= 1 && n <= 40) _lvSelBy.unit.add(n); });
+    _lvSrc = localStorage.getItem('lvSrc') === 'unit' ? 'unit' : 'lesson';
     _lvFront = localStorage.getItem('lvFront') === 'vi' ? 'vi' : 'en';
     _lvSkipKnown = localStorage.getItem('lvSkipKnown') === '1';
   } catch (e) {}
@@ -14294,17 +14298,48 @@ function lvKnownSet() {
 }
 function lvSaveKnown(set) { lvSave('lvKnown', JSON.stringify([...set])); }
 
-// Words repeat across lessons (erode appears in four). When lessons are mixed
-// each word is kept once, under the first lesson that has it.
+function lvSel() { return _lvSelBy[_lvSrc]; }
+
+// Two word sources behind one picker: the 12 lesson handouts (LESSON_VOCAB)
+// and the 25 vocabulary units (VOCAB_BANK, fetched from the server).
+function lvTopics() {
+  if (_lvSrc === 'unit') {
+    return Object.keys(VOCAB_BANK).map((topic, i) => ({
+      id: i + 1,
+      label: 'Unit ' + (i + 1),
+      title: topic,
+      items: ((VOCAB_BANK[topic] || {}).all || [])
+        // Two Crime & Justice rows hold Vietnamese where the English verb should be.
+        .filter(w => w.word && w.vietnamese && !/[^\x00-\x7F]/.test(w.word))
+        .map(w => ({
+          en: w.word,
+          vi: w.vietnamese,
+          use: w.kind === 'verb' && w.definition ? 'Hay ' + w.definition : '',
+          ex: w.example || '',
+          group: w.kind === 'verb' ? 'Động từ' : 'Cụm từ',
+        })),
+    }));
+  }
+  return LESSON_VOCAB.map(t => ({
+    id: t.n,
+    label: 'Buổi ' + t.n,
+    title: t.title,
+    items: t.groups.flatMap(g => g.items.map(([en, vi, use, ex]) => ({ en, vi, use, ex, group: g.name }))),
+  }));
+}
+
+// Words repeat across topics (erode appears in four lessons). When topics are
+// mixed each word is kept once, under the first topic that has it.
 function lvPool() {
+  const sel = lvSel();
   const seen = new Set();
   const out = [];
-  LESSON_VOCAB.filter(t => !_lvSel.size || _lvSel.has(t.n)).forEach(t => t.groups.forEach(g => g.items.forEach(([en, vi, use, ex]) => {
-    const k = en.toLowerCase();
+  lvTopics().filter(t => !sel.size || sel.has(t.id)).forEach(t => t.items.forEach(w => {
+    const k = w.en.toLowerCase();
     if (seen.has(k)) return;
     seen.add(k);
-    out.push({ en, vi, use, ex, n: t.n, group: g.name });
-  })));
+    out.push({ ...w, tag: t.label });
+  }));
   return out;
 }
 
@@ -14319,29 +14354,42 @@ function lvRenderHub() {
   if (!root) return;
   tsStop();
   lvUnbindKeys();
+  if (_lvSrc === 'unit' && !_vocabBankReady) {
+    root.innerHTML = '<div class="loading">Đang tải 25 unit…</div>';
+    ensureVocabBank().then(() => { if (_vocabBankReady) lvRenderHub(); }).catch(e => {
+      root.innerHTML = `<div class="lv-wrap"><button class="btn-back-plain" onclick="lvSetSrc('lesson')">← Về 12 buổi</button><div class="error-msg" style="display:block">${escHtml(e.message)}</div></div>`;
+    });
+    return;
+  }
   const known = lvKnownSet();
+  const topics = lvTopics();
+  const sel = lvSel();
   const pool = lvPool();
-  const selLabel = _lvSel.size ? `${_lvSel.size} buổi` : `cả ${LESSON_VOCAB.length} buổi`;
-  const chips = LESSON_VOCAB.map(t => {
-    const words = t.groups.flatMap(g => g.items.map(i => i[0].toLowerCase()));
-    const k = words.filter(w => known.has(w)).length;
-    return `<button class="lv-topic${_lvSel.has(t.n) ? ' active' : ''}" onclick="lvToggle(${t.n})">
-      <span class="lv-topic-n">Buổi ${t.n}</span>
+  const unitWord = _lvSrc === 'unit' ? 'unit' : 'buổi';
+  const selLabel = sel.size ? `${sel.size} ${unitWord}` : `cả ${topics.length} ${unitWord}`;
+  const chips = topics.map(t => {
+    const k = t.items.filter(i => known.has(i.en.toLowerCase())).length;
+    return `<button class="lv-topic${sel.has(t.id) ? ' active' : ''}" onclick="lvToggle(${t.id})">
+      <span class="lv-topic-n">${escapeHtml(t.label)}</span>
       <span class="lv-topic-name">${escapeHtml(t.title)}</span>
-      <span class="lv-topic-known">${k}/${words.length} đã nhớ</span>
+      <span class="lv-topic-known">${k}/${t.items.length} đã nhớ</span>
     </button>`;
   }).join('');
   root.innerHTML = `
     <div class="lv-wrap">
       <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
       <div class="lv-head">
-        <div class="vb-logo">📚 Từ vựng theo buổi</div>
-        <div class="vb-tagline">Chọn một buổi để học riêng, hoặc chọn nhiều buổi để trộn. Không chọn buổi nào là trộn tất cả.</div>
+        <div class="vb-logo">📚 Flashcard và Bắn Chữ</div>
+        <div class="lv-src">
+          <button class="vb-chip${_lvSrc === 'lesson' ? ' active' : ''}" onclick="lvSetSrc('lesson')">12 buổi Writing Task 2</button>
+          <button class="vb-chip${_lvSrc === 'unit' ? ' active' : ''}" onclick="lvSetSrc('unit')">25 unit từ vựng</button>
+        </div>
+        <div class="vb-tagline">Chọn một ${unitWord} để học riêng, hoặc chọn nhiều ${unitWord} để trộn. Không chọn ${unitWord} nào là trộn tất cả.</div>
       </div>
       <div class="lv-topics">${chips}</div>
       <div class="lv-selbar">
         <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
-        ${_lvSel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
+        ${sel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
       </div>
       <div class="lv-modes">
         <button class="lv-mode" onclick="lvStartFlash()">
@@ -14365,14 +14413,21 @@ function lvRenderHub() {
     </div>`;
 }
 
-function lvToggle(n) {
-  if (_lvSel.has(n)) _lvSel.delete(n); else _lvSel.add(n);
-  lvSave('lvSel', JSON.stringify([..._lvSel]));
+function lvSetSrc(src) {
+  _lvSrc = src === 'unit' ? 'unit' : 'lesson';
+  lvSave('lvSrc', _lvSrc);
+  lvRenderHub();
+}
+function lvSelKey() { return _lvSrc === 'unit' ? 'lvSelUnit' : 'lvSel'; }
+function lvToggle(id) {
+  const sel = lvSel();
+  if (sel.has(id)) sel.delete(id); else sel.add(id);
+  lvSave(lvSelKey(), JSON.stringify([...sel]));
   lvRenderHub();
 }
 function lvClearSel() {
-  _lvSel.clear();
-  lvSave('lvSel', '[]');
+  lvSel().clear();
+  lvSave(lvSelKey(), '[]');
   lvRenderHub();
 }
 
@@ -14421,7 +14476,7 @@ function lvRenderFlash() {
       <div class="lv-card${_fc.flipped ? ' flipped' : ''}" onclick="lvFlip()">
         <div class="lv-card-inner">
           <div class="lv-face lv-face--front">
-            <div class="lv-card-tag">Buổi ${w.n} · ${escapeHtml(w.group)}</div>
+            <div class="lv-card-tag">${escapeHtml(w.tag || '')} · ${escapeHtml(w.group)}</div>
             ${_lvFront === 'vi' ? viFace : enFace}
             <div class="lv-card-hint">Bấm để lật</div>
           </div>
@@ -14520,11 +14575,22 @@ let _tsAudio = null;
 function tsNorm(s) {
   return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
 }
-// A leading article is optional: nobody should lose a word for leaving out "a".
+// Unit terms can read "innate ability / talent" or "research and development
+// (R&D)". The game shows the first form and accepts every form, and a leading
+// article is optional: nobody should lose a word for leaving out "a".
+function tsDisplay(en) {
+  return String(en).replace(/\([^)]*\)/g, ' ').split('/')[0].replace(/\s+/g, ' ').trim();
+}
 function tsAnswers(en) {
-  const n = tsNorm(en);
-  const bare = n.replace(/^(a|an|the) /, '');
-  return bare && bare !== n ? [n, bare] : [n];
+  const out = new Set();
+  String(en).replace(/\([^)]*\)/g, ' ').split('/').forEach(p => {
+    const n = tsNorm(p);
+    if (!n) return;
+    out.add(n);
+    const bare = n.replace(/^(a|an|the) /, '');
+    if (bare) out.add(bare);
+  });
+  return [...out];
 }
 function tsMask(word) {
   return word.split(' ').map(w => w.replace(/[a-z0-9]/gi, (c, i) => (i === 0 ? c : '_'))).join(' ');
@@ -14589,7 +14655,9 @@ function tsToggleMute() {
 function tsStart(mode, list) {
   tsStop();
   lvUnbindKeys();
-  const pool = (list && list.length ? list : lvPool()).map(w => ({ ...w, answers: tsAnswers(w.en) }));
+  const pool = (list && list.length ? list : lvPool())
+    .map(w => ({ ...w, show: tsDisplay(w.en), answers: tsAnswers(w.en) }))
+    .filter(w => w.show && w.answers.length && w.show.length <= 30);
   const root = document.getElementById('lesson-vocab-root');
   if (!pool.length || !root || !TS_MODES[mode]) return;
   root.innerHTML = `
@@ -14674,13 +14742,13 @@ function tsGap() {
 function tsItemHtml(it, typed) {
   const icon = it.boss ? '🐓' : it.egg ? '🥚' : '🐔';
   if (_ts.mode === 'copy') {
-    const onTrack = typed && tsNorm(it.en).startsWith(typed);
+    const onTrack = typed && tsNorm(it.show).startsWith(typed);
     const word = onTrack
-      ? `<span class="ts-hit">${escapeHtml(it.en.slice(0, typed.length))}</span>${escapeHtml(it.en.slice(typed.length))}`
-      : escapeHtml(it.en);
+      ? `<span class="ts-hit">${escapeHtml(it.show.slice(0, typed.length))}</span>${escapeHtml(it.show.slice(typed.length))}`
+      : escapeHtml(it.show);
     return `<span class="ts-chick">${icon}</span><div class="ts-word">${word}</div>` + (typed && !onTrack ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
   }
-  return `<span class="ts-chick">${icon}</span><div class="ts-vi">${escapeHtml(it.vi)}</div><div class="ts-mask">${escapeHtml(tsMask(it.en))}</div>` + (typed ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+  return `<span class="ts-chick">${icon}</span><div class="ts-vi">${escapeHtml(it.vi)}</div><div class="ts-mask">${escapeHtml(tsMask(it.show))}</div>` + (typed ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
 }
 
 function tsRender(it, typed) {
@@ -14703,7 +14771,7 @@ function tsSpawn() {
   let pick = null;
   if (boss) {
     // The boss is one of the longest phrases in the selection.
-    const long = g.pool.filter(w => !onScreen.has(w.answers[0])).sort((a, b) => b.en.length - a.en.length).slice(0, 12);
+    const long = g.pool.filter(w => !onScreen.has(w.answers[0])).sort((a, b) => b.show.length - a.show.length).slice(0, 12);
     pick = long.length ? long[Math.floor(Math.random() * long.length)] : null;
   }
   // Otherwise prefer a word whose first letter is not already falling, so the
@@ -14839,7 +14907,7 @@ function tsAim(it) {
 
 function tsPoints(it) {
   const mult = 1 + Math.min(4, Math.floor(_ts.combo / 5));
-  return it.en.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss ? 3 : 1);
+  return it.show.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss ? 3 : 1);
 }
 
 function tsExplode(it, withLaser) {
@@ -15051,7 +15119,7 @@ function tsRenderResults(g) {
         </div>
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="tsStart(_tsLast.mode, _tsLast.list)">↺ Chơi lại</button>
-          ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, n: w.n, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
