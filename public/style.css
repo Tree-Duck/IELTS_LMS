@@ -7481,3 +7481,37 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .tw-sent { font-size: 1.08rem; }
   .tw-opts { grid-template-columns: 1fr; }
 }
+/* Xây tháp: collapse, golden egg, hints */
+.tw-scene.collapsing { animation: twQuake 1.3s linear; }
+@keyframes twQuake {
+  0%, 100% { translate: 0 0; } 10% { translate: -7px 2px; } 20% { translate: 6px -3px; } 30% { translate: -8px 1px; }
+  40% { translate: 7px 2px; } 50% { translate: -5px -2px; } 60% { translate: 5px 1px; } 70% { translate: -3px 0; } 80% { translate: 3px 1px; } 90% { translate: -1px 0; }
+}
+.tw-crumble { animation: twCrumble 1.35s cubic-bezier(.55, 0, .9, .55) forwards; }
+@keyframes twCrumble {
+  0% { transform: none; }
+  18% { transform: translate(calc(var(--dx) * 0.08), -8px) rotate(calc(var(--rot) * 0.12)); }
+  100% { transform: translate(var(--dx), 760px) rotate(var(--rot)); opacity: 0; }
+}
+.tw-puff {
+  position: absolute; left: 50%; bottom: 40px; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%;
+  background: rgba(214, 200, 176, 0.85); pointer-events: none; z-index: 2; opacity: 0;
+  animation: twPuff 1.6s ease-out forwards;
+}
+@keyframes twPuff {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+  25% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(var(--dx), -70px) scale(var(--s)); }
+}
+.tw-floor--star { background-color: #F5C542; }
+.tw-card--gold { border-color: #D9A520; box-shadow: 0 0 0 4px rgba(245, 197, 66, 0.35); background: #FFFBEA; }
+.tw-gold-note { font-size: 0.85rem; font-weight: 700; color: #7A5A00; background: #FFF1C2; border-radius: 8px; padding: 0.4rem 0.65rem; margin-bottom: 0.6rem; }
+.tw-hint-btn {
+  margin-left: auto; border: 2px solid #D9A520; background: #FFF6D6; color: #6B4E00; border-radius: 999px;
+  padding: 0.2rem 0.7rem; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.tw-hint-btn:disabled { opacity: 0.45; cursor: default; }
+.tw-opt--gone { opacity: 0.25; text-decoration: line-through; }
+.tw-ruin { font-size: 2.6rem; line-height: 1; margin-bottom: 0.3rem; }
+.tw-restart-note { font-size: 0.92rem; color: var(--moss); margin: 0.2rem auto 1rem; max-width: 30rem; line-height: 1.5; }
+.lv-mode-progress { font-size: 0.82rem; font-weight: 700; color: var(--lime); }

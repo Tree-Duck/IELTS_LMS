@@ -3879,6 +3879,40 @@ app.delete('/api/drafts/:id', authenticate, (req, res) => {
   }
 });
 
+// ─── Xây tháp: each student's tower, so a game carries on from any device ──
+// Everything the client sends is clamped: floors are short word labels, and
+// the counters stay within what the game can actually produce.
+const TOWER_MAX_FLOORS = 400;
+function cleanTower(b) {
+  const words = v => (Array.isArray(v) ? v : []).slice(0, TOWER_MAX_FLOORS).map(w => String(w).slice(0, 60));
+  const int = (v, lo, hi) => Math.max(lo, Math.min(hi, parseInt(v, 10) || 0));
+  return {
+    floors: words(b.floors),
+    ck_floors: words(b.ck_floors),
+    lives: int(b.lives, 0, 5),
+    hints: int(b.hints, 0, 20),
+    checkpoint: int(b.checkpoint, 0, TOWER_MAX_FLOORS),
+    best: int(b.best, 0, 100000),
+    saved_at: int(b.saved_at, 0, 9e15),
+  };
+}
+
+app.get('/api/game/tower', authenticate, (req, res) => {
+  try {
+    res.json(db.getTower(req.user.id) || {});
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load tower' });
+  }
+});
+
+app.put('/api/game/tower', authenticate, (req, res) => {
+  try {
+    res.json(db.saveTower(req.user.id, cleanTower(req.body || {})));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save tower' });
+  }
+});
+
 // ─── Practice: Paragraph Feedback ────────────────────────────────────────────
 // Turn quote-based marks into offsets. Unlike essay annotations these are
 // allowed to overlap: the whole point is that one span can be wrong in several

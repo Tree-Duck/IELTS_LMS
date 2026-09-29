@@ -1449,6 +1449,23 @@ const db = {
     return false;
   },
 
+  // ── Xây tháp: one saved tower per student ─────────────────────────────────
+  getTower(userId) {
+    const data = load();
+    return (data.game_towers || {})[userId] || null;
+  },
+
+  // The best height only ever goes up, whatever the client sends.
+  saveTower(userId, tower) {
+    const data = load();
+    if (!data.game_towers) data.game_towers = {};
+    const prev = data.game_towers[userId];
+    const best = Math.max(tower.best || 0, (prev && prev.best) || 0);
+    data.game_towers[userId] = { ...tower, best, updated_at: new Date().toISOString() };
+    save(data);
+    return data.game_towers[userId];
+  },
+
   getNotificationCount(userId) {
     const data = load();
     const gradedCount = (data.submissions || [])
