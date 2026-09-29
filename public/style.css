@@ -359,6 +359,11 @@
    serif voice was tried and rejected — it read as decoration here. */
 h1, h2 { text-wrap: balance; }
 
+/* Buttons do not inherit the page font by default, so they fell back to Arial.
+   At weight 800 and above Windows swaps in Arial Black, which has no stacked
+   Vietnamese marks (ổ, ắ, ữ). Inheriting keeps every button on Space Grotesk. */
+button { font-family: inherit; }
+
 body {
   font-family: 'Space Grotesk', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--body-bg);
