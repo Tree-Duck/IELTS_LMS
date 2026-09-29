@@ -7720,3 +7720,19 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 @media (prefers-reduced-motion: reduce) {
   .wal-r-legendary::after, .j-unbox-rays, .lb-list .lb-row, .lb-row.lb-frame_fire, .lb-row.lb-frame_rainbow, .ts-bubble.on, .wal-boost, .ts-callout { animation: none !important; }
 }
+
+/* Đổi chế độ */
+.lv-modal { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4, 16, 10, 0.6); }
+.lv-modal-card { width: min(440px, 100%); background: var(--surface); border-radius: 20px; padding: 1.2rem; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); animation: jCard .45s cubic-bezier(.2, 1.4, .4, 1); }
+.lv-modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.8rem; text-align: center; }
+.lv-modal-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.lv-modal-mode { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.8rem 0.5rem; border: 2px solid var(--line); background: var(--surface); border-radius: 14px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: transform .15s, border-color .15s; }
+.lv-modal-mode:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--forest); }
+.lv-modal-mode:disabled { cursor: default; opacity: 0.6; }
+.lv-modal-mode.here { border-color: var(--forest); background: #EAF6EF; }
+.lv-modal-mode small { font-weight: 400; color: var(--moss); font-size: 0.75rem; }
+.lv-modal-icon { font-size: 1.8rem; }
+.lv-modal-speed { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.9rem 0; font-weight: 700; font-size: 0.88rem; }
+.lv-modal-speed span { margin-right: 0.2rem; }
+.lv-modal-btns { display: flex; flex-direction: column; gap: 0.5rem; }
+.lv-fc-top .ts-icon-btn { margin-right: auto; }

@@ -14429,6 +14429,114 @@ function lvRenderHub() {
   walLoad().then(walBar);
 }
 
+/* ─── Quay về và đổi chế độ, từ giữa bất kỳ game nào ─────────────────────── */
+const LV_MODES = [
+  { id: 'flash',   icon: '🃏', name: 'Flashcard' },
+  { id: 'copy',    icon: '🚀', name: 'Bắn chữ, nhìn tiếng Anh' },
+  { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
+  { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
+];
+
+// Which game is on screen right now, if any.
+function lvCurrentMode() {
+  if (_ts) return _ts.mode;
+  if (_tw && document.getElementById('tw-card')) return 'tower';
+  if (document.querySelector('#lesson-vocab-root .lv-fc-top')) return 'flash';
+  return null;
+}
+
+// Leaving mid-round keeps what was earned: coins go in, a Bắn Chữ score
+// still counts for the record, and the tower is saved where it stands.
+function tsBank(g) {
+  if (!g || g.banked) return;
+  g.banked = true;
+  walEarn(g.coins, true);
+  if (g.score > tsGetBest(g.mode, g.diffKey)) tsSetBest(g.mode, g.diffKey, g.score);
+  if (g.score > 0) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
+}
+function lvLeaveGame() {
+  if (_ts) { const g = _ts; tsStop(); tsBank(g); }
+  if (_tw && document.getElementById('tw-card')) {
+    if (!_tw.collapsed && !_tw.revivable) twSave(_tw, true);
+    walFlush();
+  }
+  twStop();
+  lvUnbindKeys();
+  document.getElementById('lv-modal')?.remove();
+}
+function lvBack() {
+  lvLeaveGame();
+  tsSfx('equip');
+  lvRenderHub();
+}
+function lvOpenShop() {
+  lvLeaveGame();
+  tsSfx('equip');
+  _walShopOpen = true;
+  lvRenderHub();
+  document.getElementById('wal-bar')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+function lvSwitch(mode) {
+  const list = _ts ? _ts.list : null;
+  lvLeaveGame();
+  tsSfx('equip');
+  if (mode === 'flash') lvStartFlash();
+  else if (mode === 'tower') twStart();
+  else tsStart(mode, list);
+}
+
+// The switch menu: the four games, and the Bắn Chữ speed. A game in play is
+// paused underneath and carries on if the menu is closed.
+function lvModeModal() {
+  const cur = lvCurrentMode();
+  if (_ts && _ts.reviving) return;
+  if (_ts && !_ts.paused) tsPause();
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.addEventListener('click', e => { if (e.target === el) lvModalClose(); });
+  document.body.appendChild(el);
+  lvModalRender(cur);
+  tsSfx('key');
+}
+function lvModalRender(cur) {
+  const el = document.getElementById('lv-modal');
+  if (!el) return;
+  const speedChanged = _ts && _ts.diffKey !== _tsDiff;
+  el.innerHTML = `
+    <div class="lv-modal-card">
+      <div class="lv-modal-title">🔀 Đổi chế độ chơi</div>
+      <div class="lv-modal-modes">${LV_MODES.map(m => {
+        const here = m.id === cur;
+        const again = here && speedChanged;
+        return `<button class="lv-modal-mode${here ? ' here' : ''}" onclick="lvSwitch('${m.id}')" ${here && !again ? 'disabled' : ''}>
+          <span class="lv-modal-icon">${m.icon}</span><span>${escapeHtml(m.name)}</span>
+          ${here ? `<small>${again ? 'chơi lại với tốc độ mới' : 'đang chơi'}</small>` : ''}</button>`;
+      }).join('')}</div>
+      <div class="lv-modal-speed">
+        <span>Tốc độ Bắn Chữ</span>
+        ${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${_tsDiff === k ? ' active' : ''}" onclick="lvModalSpeed('${k}')">${d.label}</button>`).join('')}
+      </div>
+      <div class="lv-modal-btns">
+        ${cur ? '<button class="vb-start-btn" onclick="lvModalClose()">▶ Chơi tiếp</button>' : ''}
+        <button class="vb-secondary-btn" onclick="lvOpenShop()">🛒 Cửa hàng</button>
+        <button class="vb-secondary-btn" onclick="lvBack()">← Về chọn buổi</button>
+      </div>
+    </div>`;
+}
+function lvModalSpeed(k) {
+  if (!TS_DIFFS[k]) return;
+  _tsDiff = k;
+  lvSave('tsDiff', k);
+  tsSfx('key');
+  lvModalRender(lvCurrentMode());
+}
+function lvModalClose() {
+  document.getElementById('lv-modal')?.remove();
+  if (_ts && _ts.paused && !_ts.reviving) tsResume();
+}
+
 function lvSetSrc(src) {
   _lvSrc = src === 'unit' ? 'unit' : 'lesson';
   lvSave('lvSrc', _lvSrc);
@@ -14481,6 +14589,7 @@ function lvRenderFlash() {
     <div class="lv-wrap lv-wrap--narrow">
       <div class="lv-fc-top">
         <button class="btn-back-plain" onclick="lvRenderHub()">← Chọn buổi</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <div class="lv-fc-opts">
           <button class="vb-chip${_lvFront === 'en' ? ' active' : ''}" onclick="lvSetFront('en')">Mặt trước tiếng Anh</button>
           <button class="vb-chip${_lvFront === 'vi' ? ' active' : ''}" onclick="lvSetFront('vi')">Mặt trước tiếng Việt</button>
@@ -15166,6 +15275,7 @@ function tsStart(mode, list) {
   root.innerHTML = `
     <div class="ts-wrap" id="ts-wrap">
       <div class="ts-hud">
+        <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">←</button>
         <span class="ts-lives" id="ts-lives"></span>
         <span class="ts-combo" id="ts-combo"></span>
         <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
@@ -15173,6 +15283,7 @@ function tsStart(mode, list) {
         <span class="ts-stat">🪙 <strong id="ts-coins">0</strong></span>
         <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
         <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">⏸</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
       </div>
       <div class="ts-arena" id="ts-arena">
         <div class="ts-stars"></div>
@@ -15773,7 +15884,9 @@ function tsPause() {
   if (ov) {
     ov.innerHTML = `<div class="ts-ov-title">Tạm dừng</div>
       <button class="vb-start-btn" onclick="tsResume()">▶ Chơi tiếp</button>
-      <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>`;
+      <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>
+      <button class="vb-secondary-btn" onclick="lvModeModal()">🔀 Đổi chế độ</button>
+      <button class="vb-secondary-btn" onclick="lvBack()">← Về chọn buổi</button>`;
     ov.classList.remove('hidden');
   }
 }
@@ -15792,6 +15905,7 @@ function tsEnd() {
   const g = _ts;
   if (!g) return;
   tsStop();
+  g.banked = true;
   walEarn(g.coins, true);
   tsRenderResults(g);
 }
@@ -15828,6 +15942,7 @@ function tsRenderResults(g) {
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="tsStart(_tsLast.mode, _tsLast.list)">↺ Chơi lại</button>
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lvModeModal()">🔀 Đổi chế độ</button>
           <button class="vb-secondary-btn" onclick="lbOpen('shoot')">🏆 Xếp hạng</button>
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
@@ -16013,6 +16128,7 @@ async function twStart(list) {
         <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
         <span class="tw-hearts" id="tw-hearts"></span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
       </div>
       <div class="tw-grid">
@@ -16513,6 +16629,7 @@ function twEnd() {
           <button class="vb-start-btn" onclick="twRestart(false)">🏗️ ${g.checkpoint ? `Xây lại từ tầng ${g.checkpoint}` : 'Xây lại'}</button>
           ${g.checkpoint ? '<button class="vb-secondary-btn" onclick="twRestart(true)">Xây từ mặt đất</button>' : ''}
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_twLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lvModeModal()">🔀 Đổi chế độ</button>
           <button class="vb-secondary-btn" onclick="lbOpen('tower')">🏆 Xếp hạng</button>
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
