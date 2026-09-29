@@ -7227,3 +7227,152 @@ input:focus, textarea:focus, select:focus {
 .ai-down-text { font-size: .8rem; line-height: 1.55; color: var(--gray-700); margin-top: .15rem; }
 .grading-mode-option.mode-disabled { opacity: .45; cursor: not-allowed; }
 .grading-mode-option.mode-disabled * { cursor: not-allowed; }
+
+
+/* ─── Từ vựng theo buổi: picker, flashcard, Bắn Chữ ─────────────────────── */
+.lv-wrap { max-width: 920px; margin: 0 auto; padding: 1.25rem 1.25rem 2.5rem; }
+.lv-wrap--narrow { max-width: 640px; }
+.lv-head { text-align: center; margin-bottom: 1.25rem; }
+.lv-topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
+.lv-topic {
+  display: flex; flex-direction: column; gap: 0.15rem; text-align: left; cursor: pointer;
+  padding: 0.7rem 0.85rem; border-radius: var(--r-md); border: 2px solid var(--track);
+  background: var(--surface); color: var(--forest-deep); transition: border-color .15s, transform .15s;
+}
+.lv-topic:hover { border-color: var(--primary); transform: translateY(-1px); }
+.lv-topic.active { border-color: var(--forest); background: var(--mist); }
+.lv-topic-n { font-size: 0.75rem; font-weight: 800; color: var(--primary); }
+.lv-topic-name { font-weight: 700; font-size: 0.92rem; line-height: 1.3; }
+.lv-topic-known { font-size: 0.75rem; color: var(--moss); }
+.lv-selbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; margin: 1rem 0; font-size: 0.92rem; }
+.lv-link { background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; padding: 0; }
+.lv-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
+.lv-mode {
+  position: relative; display: flex; flex-direction: column; gap: 0.35rem; text-align: left; cursor: pointer;
+  padding: 1.1rem 1.1rem 1.2rem; border-radius: var(--r-lg); border: 2px solid var(--forest-deep);
+  background: var(--forest); color: var(--cream); transition: transform .15s, box-shadow .15s;
+}
+.lv-mode:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--forest-deep); }
+.lv-mode-icon { font-size: 1.8rem; }
+.lv-mode-name { font-weight: 900; font-size: 1.1rem; color: var(--lime); }
+.lv-mode-desc { font-size: 0.86rem; line-height: 1.4; opacity: 0.92; }
+.lv-mode-best { position: absolute; top: 0.9rem; right: 1rem; font-weight: 800; font-size: 0.85rem; }
+
+.lv-fc-top { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; }
+.lv-fc-opts { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.lv-check { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; cursor: pointer; }
+.lv-progress { height: 8px; background: var(--track); border-radius: 999px; overflow: hidden; }
+.lv-progress-bar { height: 100%; background: var(--forest); transition: width .25s; }
+.lv-count { text-align: center; font-size: 0.82rem; font-weight: 700; color: var(--moss); margin: 0.4rem 0 0.8rem; }
+.lv-card { perspective: 1200px; cursor: pointer; margin-bottom: 1rem; user-select: none; }
+.lv-card-inner { display: grid; transition: transform .45s cubic-bezier(.3,.7,.3,1); transform-style: preserve-3d; }
+.lv-card.flipped .lv-card-inner { transform: rotateY(180deg); }
+.lv-face {
+  grid-area: 1 / 1; min-height: 270px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.7rem; padding: 1.5rem 1.4rem; text-align: center; border-radius: var(--r-lg);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; box-sizing: border-box;
+}
+.lv-face--front { background: var(--forest); color: var(--cream); border: 2px solid var(--forest-deep); }
+.lv-face--back { background: var(--surface); color: var(--forest-deep); border: 2px solid var(--forest); transform: rotateY(180deg); }
+.lv-card-tag { font-size: 0.78rem; font-weight: 700; opacity: 0.75; }
+.lv-card-main { font-size: 2rem; font-weight: 900; line-height: 1.2; }
+.lv-face--front .lv-card-main { color: var(--lime); }
+.lv-card-main--vi { font-size: 1.45rem; }
+.lv-face--back .lv-card-main { color: var(--forest); }
+.lv-card-use { font-size: 0.92rem; line-height: 1.45; color: var(--moss); max-width: 34rem; }
+.lv-card-ex { font-size: 0.95rem; font-style: italic; line-height: 1.45; padding: 0.55rem 0.8rem; border-left: 3px solid var(--primary); background: var(--primary-light); border-radius: 6px; max-width: 34rem; }
+.lv-card-hint { font-size: 0.75rem; opacity: 0.6; }
+.lv-fc-btns { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.6rem; }
+.lv-btn { padding: 0.85rem 1rem; border-radius: var(--r-md); border: 2px solid transparent; font-weight: 800; font-size: 1rem; cursor: pointer; }
+.lv-btn--miss { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+.lv-btn--got { background: var(--forest); color: var(--lime); }
+.lv-btn--say { background: var(--surface); border-color: var(--track); }
+
+.ts-wrap { max-width: 900px; margin: 0 auto; padding: 0.75rem 1rem 1rem; }
+.ts-hud { display: flex; align-items: center; gap: 0.9rem; font-weight: 800; font-size: 1rem; margin-bottom: 0.5rem; }
+.ts-combo { flex: 1; color: var(--coral); }
+.ts-lives { letter-spacing: 1px; }
+.ts-life-lost { opacity: 0.35; }
+.ts-icon-btn { border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 0.2rem 0.55rem; cursor: pointer; font-size: 1rem; }
+.ts-arena {
+  position: relative; overflow: hidden; height: 460px; border-radius: var(--r-lg);
+  background: radial-gradient(ellipse at 50% 120%, #1B5E47 0%, var(--forest-deep) 55%, #041A10 100%);
+  border: 2px solid var(--forest-deep); touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.ts-arena::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--coral); opacity: 0.6; }
+.ts-stars {
+  position: absolute; inset: -50% 0 0 0; pointer-events: none; opacity: 0.5;
+  background-image: radial-gradient(1.5px 1.5px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 60%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 80%, var(--lime) 50%, transparent 51%), radial-gradient(1px 1px at 85% 15%, #fff 50%, transparent 51%);
+  background-size: 180px 180px; animation: tsStars 18s linear infinite;
+}
+@keyframes tsStars { to { transform: translateY(33%); } }
+.ts-arena.frozen { box-shadow: inset 0 0 60px rgba(140, 200, 255, 0.55); }
+.ts-arena.frozen .ts-item { border-color: #9fd4ff; }
+.ts-arena.shake { animation: tsArenaShake .3s; }
+@keyframes tsArenaShake { 20% { translate: -6px 2px; } 40% { translate: 5px -2px; } 60% { translate: -4px 1px; } 80% { translate: 3px 0; } }
+.ts-item {
+  position: absolute; left: 0; top: 0; will-change: transform; max-width: 46%;
+  padding: 0.35rem 0.7rem 0.35rem 2rem; border-radius: 10px; text-align: center;
+  background: rgba(255, 247, 233, 0.08); border: 1.5px solid rgba(201, 227, 213, 0.35); color: var(--cream);
+  font-weight: 700; line-height: 1.25; transition: opacity .25s, scale .25s;
+}
+.ts-chick { position: absolute; left: 0.45rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+.ts-item.ts-locked { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(200, 241, 105, 0.25); z-index: 2; }
+.ts-item.ts-boss { font-size: 1.2rem; padding: 0.6rem 1rem 0.6rem 2.6rem; border: 2px solid var(--coral); background: rgba(255, 122, 89, 0.18); max-width: 70%; }
+.ts-item.ts-boss .ts-chick { font-size: 1.6rem; left: 0.55rem; }
+.ts-item.ts-egg { border-color: #F5C542; background: rgba(245, 197, 66, 0.16); box-shadow: 0 0 14px rgba(245, 197, 66, 0.45); }
+.ts-word { font-size: 1.05rem; }
+.ts-hit { color: var(--lime); }
+.ts-vi { font-size: 0.95rem; }
+.ts-mask, .ts-typed { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; letter-spacing: 1.5px; font-size: 0.88rem; }
+.ts-mask { color: var(--mist); opacity: 0.8; }
+.ts-typed { color: var(--lime); }
+.ts-boom { opacity: 0; scale: 1.5; }
+.ts-crash { opacity: 0; background: rgba(255, 122, 89, 0.5); }
+.ts-ship {
+  position: absolute; left: 50%; bottom: 6px; width: 30px; height: 32px; margin-left: -15px; z-index: 3;
+  background: var(--lime); clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%); transition: transform .08s;
+}
+.ts-laser {
+  position: absolute; left: 0; top: 0; height: 3px; margin-top: -1.5px; transform-origin: 0 50%; z-index: 1; pointer-events: none;
+  background: linear-gradient(90deg, var(--lime), rgba(200, 241, 105, 0.2)); box-shadow: 0 0 8px var(--lime); animation: tsFade .2s linear forwards;
+}
+@keyframes tsFade { to { opacity: 0; } }
+.ts-spark { position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--lime); pointer-events: none; z-index: 3; animation: tsSpark .55s ease-out forwards; }
+.ts-spark:nth-child(3n) { background: var(--coral); }
+@keyframes tsSpark { to { translate: var(--dx) var(--dy); opacity: 0; scale: 0.3; } }
+.ts-leg { position: absolute; font-size: 1.3rem; translate: -50% -50%; pointer-events: none; z-index: 3; animation: tsLeg .9s ease-in forwards; }
+@keyframes tsLeg { 0% { opacity: 1; } 100% { opacity: 0; translate: -50% 90px; rotate: 200deg; } }
+.ts-float { position: absolute; translate: -50% 0; color: var(--lime); font-weight: 900; pointer-events: none; z-index: 4; white-space: nowrap; animation: tsRise .8s ease-out forwards; }
+.ts-float--big { font-size: 1.7rem; color: var(--cream); text-shadow: 0 2px 0 var(--forest-deep); animation-duration: 1.3s; }
+@keyframes tsRise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-45px); } }
+.ts-miss {
+  position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); z-index: 4; pointer-events: none;
+  background: rgba(255, 122, 89, 0.95); color: #fff; padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.9rem;
+  white-space: nowrap; max-width: 92%; overflow: hidden; text-overflow: ellipsis; opacity: 0;
+}
+.ts-miss.show { animation: tsMiss 2.4s ease forwards; }
+@keyframes tsMiss { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+.ts-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; background: rgba(4, 26, 16, 0.72); z-index: 5; }
+.ts-ov-title { color: var(--cream); font-size: 1.6rem; font-weight: 900; }
+.ts-arena.paused .ts-item { filter: blur(7px); }
+input.ts-input {
+  display: block; width: 100%; box-sizing: border-box; margin-top: 0.6rem; padding: 0.75rem 1rem;
+  font-size: 1.15rem; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  border: 2px solid var(--forest-deep); border-radius: var(--r-md); background: var(--surface); color: var(--forest-deep); outline: none;
+}
+input.ts-input:focus { border-color: var(--primary); }
+input.ts-input.ts-shake { animation: tsInputShake .25s; border-color: var(--danger); }
+@keyframes tsInputShake { 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+.ts-say-btn { border: none; background: none; cursor: pointer; font-size: 1rem; margin-right: 0.35rem; padding: 0; }
+@media (max-width: 600px) {
+  .lv-wrap, .ts-wrap { padding: 0.6rem 0.75rem 1.5rem; }
+  .lv-topics { grid-template-columns: 1fr 1fr; }
+  .lv-card-main { font-size: 1.6rem; }
+  .lv-card-main--vi { font-size: 1.2rem; }
+  .ts-hud { gap: 0.55rem; font-size: 0.88rem; }
+  .ts-item { max-width: 62%; }
+  .ts-word, .ts-vi { font-size: 0.9rem; }
+  input.ts-input { font-size: 16px; } /* under 16px iOS zooms the page on focus */
+}

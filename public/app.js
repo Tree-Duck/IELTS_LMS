@@ -1487,6 +1487,7 @@ function showView(name) {
   else if (name === 'games') { /* static hub, no loader */ }
   else if (name === 'dictation') loadDictation();
   else if (name === 'vocab-blitz') showVocabBlitz();
+  else if (name === 'lesson-vocab') showLessonVocab();
   else if (name === 'band-climber') showBandClimber();
   else if (name === 'settings') loadSettings();
   else if (name === 'model-essays') loadModelEssays();
@@ -13576,6 +13577,1482 @@ function renderVbResults() {
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="vbStartGame()">↺ Chơi lại</button>
           <button class="vb-secondary-btn" onclick="renderVbStart()">⚙ Đổi chủ đề</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* Kho từ của 12 buổi Writing Task 2, tách từ phần 1 "Kho từ chủ đề" trong giáo
+   trình v2. Mỗi mục là [cụm từ, nghĩa, cách dùng, câu mẫu]; câu mẫu chỉ có ở động
+   từ (nhóm D và E). Sửa từ thì sửa ở đây, flashcard và Bắn Chữ đọc cùng một chỗ. */
+const LESSON_VOCAB = [
+  { n: 1, title: "Tuổi tác, thế hệ và gia đình", groups: [
+    { id: "A", name: "Gia đình và quan hệ", kind: "phrase", items: [
+      ["nuclear family", "gia đình chỉ có cha mẹ và con", "Ngược với extended family. Hay dùng khi bàn về việc gia đình thay đổi.", ""],
+      ["extended family", "gia đình nhiều thế hệ sống chung", "Dùng cho đề ông bà sống chung, ông bà trông cháu.", ""],
+      ["upbringing", "cách một người được nuôi dạy lúc nhỏ", "Không đếm được. Viết a strict upbringing.", ""],
+      ["parenting style", "cách cha mẹ nuôi dạy con", "Đếm được. Hai kiểu hay nhắc là authoritarian và permissive.", ""],
+      ["family ties", "sự gắn bó giữa các thành viên trong gia đình", "Luôn ở số nhiều. Hay đi với strengthen, weaken, sever.", ""],
+      ["single-parent household", "gia đình chỉ có cha hoặc mẹ nuôi con", "Dùng khi cần chỉ ra nhóm chịu thiệt nhiều nhất.", ""],
+      ["domestic responsibilities", "việc nhà và việc chăm sóc người thân", "Hay đi với share, juggle, take on.", ""],
+      ["emotional support", "sự hỗ trợ về tinh thần", "Hay đi với provide, offer, need. Ngược với financial support.", ""],
+      ["quality time", "thời gian ở bên nhau thật sự", "Hay đi với spend. Dùng khi muốn nói số giờ ở cạnh nhau chưa đủ.", ""],
+      ["generation gap", "khoảng cách giữa các thế hệ", "Hay đi với widen, narrow, bridge.", ""],
+      ["parental responsibility", "trách nhiệm của cha mẹ", "Hay đi với shoulder, share, shift.", ""],
+      ["sibling rivalry", "sự ganh đua giữa anh chị em", "Chỉ dùng khi đề thật sự nói về anh chị em.", ""],
+    ] },
+    { id: "B", name: "Người cao tuổi, nghỉ hưu và chăm sóc", kind: "phrase", items: [
+      ["aging population", "dân số đang già đi", "Viết aging, không viết aged population.", ""],
+      ["life expectancy", "tuổi thọ trung bình của cả một nhóm dân", "Chỉ dùng cho cả nhóm, không dùng cho một người. Xem mục 1.F.", ""],
+      ["retirement age", "tuổi nghỉ hưu", "Hay đi với raise, lower. Đề hay hỏi có nên tăng tuổi nghỉ hưu không.", ""],
+      ["pension system", "hệ thống lương hưu", "Hay đi với strain, fund, reform.", ""],
+      ["state pension", "lương hưu do nhà nước trả", "Cụ thể hơn pension system. Hợp khi bàn về tiền ngân sách.", ""],
+      ["nursing home", "viện dưỡng lão", "Tiếng Anh Mỹ. Tiếng Anh Anh là care home. Cả bài chỉ dùng một từ.", ""],
+      ["dependency ratio", "số người cần được nuôi so với số người đi làm", "Dùng khi cần chỉ ra ai đang trả tiền cho ai.", ""],
+      ["caregiver burden", "gánh nặng của người chăm sóc", "Hay đi với increase, ease, shoulder.", ""],
+      ["intergenerational care", "các thế hệ chăm sóc lẫn nhau", "Dùng khi muốn nói cả hai bên cùng được lợi.", ""],
+      ["financial independence", "khả năng tự lo về tiền bạc", "Dùng được cho cả người trẻ lẫn người già.", ""],
+      ["senior citizens", "người cao tuổi, cách gọi lịch sự", "Hay dùng khi bàn chính sách. Xem mục 1.F trước khi chọn từ.", ""],
+      ["respite care", "dịch vụ chăm sóc thay, để người nhà được nghỉ", "Cụ thể, rất hợp với đoạn giải pháp.", ""],
+    ] },
+    { id: "C", name: "Người trẻ, học hành và áp lực", kind: "phrase", items: [
+      ["peer pressure", "áp lực từ bạn bè cùng lứa", "Hay đi với succumb to, resist, face.", ""],
+      ["adolescence", "tuổi mới lớn", "Trang trọng hơn teenage years, hợp với bài viết học thuật.", ""],
+      ["formative years", "những năm tính cách được hình thành", "Luôn ở số nhiều. Dùng khi nói giai đoạn nào có ảnh hưởng lâu dài.", ""],
+      ["academic pressure", "áp lực học hành", "Hay đi với face, alleviate, mount.", ""],
+      ["child development", "sự phát triển của trẻ", "Không đếm được. Hay đi với support, hinder.", ""],
+      ["maturity", "sự trưởng thành về suy nghĩ", "Khác với tuổi. Dùng khi muốn nói tuổi không quyết định tất cả.", ""],
+      ["role model", "người để noi theo", "Đề về người nổi tiếng thường cần cụm này.", ""],
+      ["financial insecurity", "nỗi lo không đủ tiền", "Dùng khi giải thích vì sao cha mẹ ép con học.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["shoulder", "gánh một việc nặng vì trách nhiệm", "Hay đi với burden, cost, responsibility", "Fewer workers now shoulder the cost of state pensions."],
+      ["strain", "làm một thứ bị căng, gần như quá tải", "Hay đi với relationships, budgets, systems", "An aging population strains public health budgets."],
+      ["succumb to", "không chống lại được", "Hay đi với pressure, temptation", "Teenagers tend to succumb to peer pressure fastest in a new school."],
+      ["place pressure on", "tạo áp lực lên", "Hay đi với parents, systems, children", "Long shifts place pressure on parents who have nobody to help with school drop-offs."],
+      ["erode", "làm mòn dần theo thời gian", "Hay đi với trust, confidence, ties", "Constant comparison online erodes teenagers' confidence."],
+      ["outlive", "sống lâu hơn cả", "Hay đi với savings, a pension", "Longer lives mean many retirees outlive their savings."],
+      ["juggle", "cố lo nhiều việc cùng một lúc", "Hay đi với work, family, responsibilities", "Many parents juggle full-time work and domestic responsibilities."],
+      ["widen", "làm khoảng cách lớn thêm", "Hay đi với the gap, the divide", "Rising care costs widen the gap between rich and poor households."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["cater to", "đáp ứng nhu cầu của một nhóm", "Hay đi với needs, older people", "Housing policy must cater to older people who cannot manage stairs."],
+      ["relieve pressure on", "giảm áp lực cho", "Hay đi với parents, hospitals, budgets", "Affordable childcare relieves pressure on working parents."],
+      ["nurture", "chăm cho một thứ lớn lên", "Hay đi với a bond, talent, confidence", "Shared meals nurture the bond between grandparents and grandchildren."],
+      ["foster", "giúp một phẩm chất tốt phát triển", "Hay đi với closeness, cooperation, trust", "Living nearby fosters cooperation between three generations."],
+      ["cement", "làm cho bền chặt hơn", "Hay đi với a bond, loyalty", "Shared hardship can cement family ties."],
+      ["rejuvenate", "làm trẻ lại", "Hay đi với a workforce, an economy", "Immigration can rejuvenate an aging workforce."],
+      ["widen access to", "giúp nhiều người tiếp cận hơn", "Hay đi với care, education, services", "Home visits widen access to care for people who cannot travel."],
+      ["bridge", "làm khoảng cách nhỏ lại", "Hay đi với the generation gap, a divide", "Regular family meals help bridge the generation gap."],
+    ] },
+  ] },
+  { n: 3, title: "Giáo dục", groups: [
+    { id: "A", name: "Trường học, chương trình và cách dạy", kind: "phrase", items: [
+      ["the curriculum", "toàn bộ chương trình học của một cấp học", "Số nhiều trong bài học thuật là curricula. Xem mục 1.F để phân biệt với syllabus.", ""],
+      ["curriculum overload", "tình trạng chương trình học quá tải", "Dùng khi giải thích vì sao giáo viên phải dạy vội.", ""],
+      ["qualified teachers", "giáo viên có đủ chuyên môn", "Số nhiều. Hay đi với attract, retain, train.", ""],
+      ["student engagement", "mức độ tham gia của người học", "Không đếm được. Hay đi với improve, sustain, lose.", ""],
+      ["mixed-ability classes", "lớp có học sinh nhiều trình độ", "Có gạch nối. Đây là cụm chính của đề chọn lọc học sinh.", ""],
+      ["extracurricular activities", "hoạt động ngoại khóa", "Viết extracurricular liền một từ, không có gạch nối.", ""],
+      ["class size", "sĩ số lớp", "Hay đi với reduce, cap. Không viết class quantity.", ""],
+      ["rote learning", "học vẹt, học thuộc lòng", "Không đếm được. Hay đi với rely on, move away from.", ""],
+      ["student-centered learning", "cách dạy lấy người học làm trung tâm", "Tiếng Anh Mỹ viết centered, đuôi -er.", ""],
+      ["standardized assessment", "hình thức đánh giá chuẩn hóa", "Tiếng Anh Mỹ viết standardized, đuôi -ize.", ""],
+      ["academic performance", "kết quả học tập", "Không đếm được. Hay đi với affect, improve, measure.", ""],
+    ] },
+    { id: "B", name: "Kỹ năng và mục tiêu của việc học", kind: "phrase", items: [
+      ["critical thinking", "tư duy phản biện", "Không đếm được. Hay đi với develop, teach, apply.", ""],
+      ["practical skills", "kỹ năng thực tế", "Luôn ở số nhiều. Ngược với academic knowledge.", ""],
+      ["transferable skills", "kỹ năng dùng được ở nhiều nơi", "Dùng khi bảo vệ các môn học không có thi.", ""],
+      ["intellectual curiosity", "sự tò mò muốn hiểu biết", "Không đếm được. Hay đi với cultivate, stifle.", ""],
+      ["lifelong learning", "việc học suốt đời", "Không đếm được. Hay đi với promote, encourage.", ""],
+      ["vocational training", "đào tạo nghề", "Không đếm được. Ngược với higher education.", ""],
+      ["vocational qualifications", "bằng cấp nghề", "Số nhiều. Cụ thể hơn vocational training.", ""],
+      ["higher education", "giáo dục bậc đại học", "Không đếm được. Thường không có mạo từ.", ""],
+      ["distance learning", "học từ xa", "Không đếm được. Trung tính hơn online learning.", ""],
+      ["academic pressure", "áp lực học hành", "Không đếm được. Hay đi với face, mount, alleviate.", ""],
+    ] },
+    { id: "C", name: "Tiếp cận, tiền bạc và cơ hội", kind: "phrase", items: [
+      ["access to education", "khả năng tiếp cận giáo dục", "Danh từ access luôn đi với to.", ""],
+      ["tuition fees", "học phí", "Luôn ở số nhiều khi nói về mức học phí đại học.", ""],
+      ["financial aid", "tiền hỗ trợ cho người học", "Không đếm được. Hay đi với offer, apply for. Không viết financial aids.", ""],
+      ["public funding", "ngân sách công", "Không đếm được. Hay đi với rely on, cut, allocate.", ""],
+      ["socioeconomic background", "hoàn cảnh kinh tế và xã hội của gia đình", "Viết socioeconomic liền một từ, không có gạch nối.", ""],
+      ["educational mobility", "khả năng đổi đời nhờ việc học", "Ít người dùng, rất hợp với đề học phí.", ""],
+      ["the achievement gap", "khoảng cách thành tích giữa các nhóm học sinh", "Luôn có the. Hay đi với widen, narrow, bridge.", ""],
+      ["home education", "việc học tại nhà", "Không đếm được. Tiếng Anh Mỹ hay dùng homeschooling.", ""],
+      ["equal opportunity", "cơ hội ngang nhau", "Thường không đếm được khi nói về nguyên tắc chung.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["stifle", "bóp nghẹt gần như hoàn toàn", "Hay đi với creativity, curiosity", "A rigid syllabus can stifle creativity."],
+      ["prioritize", "ưu tiên một thứ trước thứ khác", "Hay đi với spending, a subject", "Schools that prioritize test scores tend to cut art and music first."],
+      ["widen", "làm khoảng cách lớn thêm", "Hay đi với the achievement gap, the divide", "Placing students in ability groups at eleven tends to widen the achievement gap rather than narrow it."],
+      ["cut", "cắt bớt", "Hay đi với funding, lessons, hours", "Councils that cut public funding leave schools to raise the difference through fees."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["cultivate", "nuôi dưỡng dần cho lớn lên", "Hay đi với curiosity, talent", "Good schools cultivate intellectual curiosity."],
+      ["equip", "trang bị cho ai thứ dùng được", "Hay đi với students with skills", "Schools should equip students with practical skills."],
+      ["instill", "dạy dần để ai có một phẩm chất", "Hay đi với discipline, values", "Teachers instill discipline in young learners."],
+      ["broaden", "mở rộng ra", "Hay đi với horizons, knowledge", "Studying abroad broadens students' horizons."],
+      ["tailor", "điều chỉnh cho vừa với ai", "Hay đi với teaching to needs", "Teachers tailor lessons to individual needs."],
+      ["reinforce", "củng cố cho chắc thêm", "Hay đi với learning, a concept", "Homework reinforces classroom learning."],
+      ["widen access to", "giúp nhiều người tiếp cận hơn", "Hay đi với education, training", "Scholarships can widen access to higher education for low-income students."],
+      ["bridge", "thu hẹp một khoảng cách", "Hay đi với the achievement gap", "Early support can help bridge the achievement gap."],
+      ["enhance", "nâng chất lượng lên", "Hay đi với learning outcomes", "Smaller classes can enhance learning outcomes."],
+      ["promote", "thúc đẩy một hoạt động", "Hay đi với lifelong learning", "Online courses promote lifelong learning."],
+      ["fund", "cấp tiền cho", "Hay đi với schools, places, training", "Governments fund the places that private tutoring cannot reach."],
+      ["subsidize", "trả giúp một phần chi phí", "Hay đi với fees, transportation, meals", "Subsidized meals keep low-income students in class after lunch."],
+    ] },
+  ] },
+  { n: 4, title: "Kinh tế, tiền và tiêu dùng", groups: [
+    { id: "A", name: "Kinh tế và túi tiền hộ gia đình", kind: "phrase", items: [
+      ["economic growth", "tăng trưởng kinh tế", "Không đếm được. Hay đi với stimulate, sustain, slow.", ""],
+      ["living standards", "mức sống", "Luôn ở số nhiều khi nói về cả một nhóm dân cư.", ""],
+      ["the cost of living", "chi phí sinh hoạt", "Luôn có the. Hay đi với rise, absorb.", ""],
+      ["household income", "thu nhập của một hộ gia đình", "Không đếm được. Cụ thể hơn chữ income đứng một mình.", ""],
+      ["disposable income", "thu nhập còn lại sau các khoản chi thiết yếu", "Đây là cụm cố định. Không viết disposable salary.", ""],
+      ["purchasing power", "sức mua", "Không đếm được. Hay đi với reduce, erode, restore.", ""],
+      ["financial security", "sự an toàn về tài chính", "Không đếm được. Ngược với financial insecurity.", ""],
+      ["the wealth gap", "khoảng cách giàu nghèo", "Luôn có the. Hay đi với widen, narrow.", ""],
+      ["job creation", "việc tạo ra công ăn việc làm", "Không đếm được. Dùng làm chủ ngữ được, gọn hơn cụm create jobs.", ""],
+      ["an economic downturn", "giai đoạn kinh tế đi xuống", "Đếm được. An toàn hơn recession.", ""],
+      ["tax revenue", "nguồn thu từ thuế", "Không đếm được. Hay đi với raise, collect, fund.", ""],
+    ] },
+    { id: "B", name: "Doanh nghiệp và thị trường", kind: "phrase", items: [
+      ["consumer spending", "chi tiêu của người tiêu dùng", "Không đếm được. Hay đi với stimulate, curb, fall.", ""],
+      ["market competition", "sự cạnh tranh trên thị trường", "Không đếm được. Hay đi với increase, restrict.", ""],
+      ["local businesses", "doanh nghiệp địa phương", "Số nhiều. Hay đi với support, squeeze out, displace.", ""],
+      ["multinational corporations", "tập đoàn đa quốc gia", "Số nhiều. Chủ ngữ tốt cho bước B, vì tập đoàn làm được hành động cụ thể.", ""],
+      ["entrepreneurship", "tinh thần khởi nghiệp", "Không đếm được. Danh từ chỉ người là an entrepreneur.", ""],
+      ["a startup", "một công ty khởi nghiệp", "Đếm được. Tiếng Anh Mỹ thường viết startup, không có gạch nối.", ""],
+      ["corporate social responsibility", "trách nhiệm xã hội của doanh nghiệp", "Cụm dài, chỉ nên dùng một lần trong bài.", ""],
+      ["profit margin", "biên lợi nhuận", "Đếm được. Hay đi với thin, squeeze, protect.", ""],
+      ["market saturation", "sự bão hòa thị trường", "Không đếm được. Động từ là saturate.", ""],
+      ["outsourcing", "việc thuê bên ngoài sản xuất hoặc làm dịch vụ", "Không đếm được. Động từ là outsource.", ""],
+    ] },
+    { id: "C", name: "Tiêu dùng và quảng cáo", kind: "phrase", items: [
+      ["consumer culture", "văn hóa tiêu dùng", "Không đếm được. Dùng consumer, không dùng customer. Xem hộp cảnh báo cuối Phần 1.", ""],
+      ["brand loyalty", "lòng trung thành với thương hiệu", "Không đếm được. Hay đi với build, cultivate, lose.", ""],
+      ["impulse buying", "việc mua theo cảm hứng nhất thời", "Không đếm được. Muốn dùng động từ, ta viết make impulse purchases.", ""],
+      ["targeted advertising", "quảng cáo nhắm đúng đối tượng", "Không đếm được. Hay đi với ban, restrict, regulate.", ""],
+      ["planned obsolescence", "việc cố ý làm sản phẩm mau hỏng hoặc mau lỗi thời", "Ít học viên dùng, rất hợp với đề đồ dùng một lần.", ""],
+      ["a throwaway culture", "thói quen dùng xong rồi bỏ", "Có mạo từ a. Hay đi với create, encourage.", ""],
+      ["conspicuous consumption", "tiêu dùng phô trương để người khác thấy", "Không đếm được. Hợp với đề thời trang và đề chạy theo người khác.", ""],
+      ["materialistic values", "lối sống coi trọng vật chất", "Số nhiều. Materialistic mang nghĩa xấu, khác với material.", ""],
+      ["misleading claims", "những lời quảng cáo gây hiểu lầm", "Số nhiều. Nhẹ hơn false advertising, nên an toàn hơn.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["widen", "làm một khoảng cách rộng thêm", "Hay đi với the wealth gap", "Automation may widen the wealth gap between skilled and unskilled workers."],
+      ["lure", "dụ dỗ, có ý đồ, mang nghĩa xấu", "Hay đi với customers, buyers", "Deep discounts lure shoppers into spending more than they planned."],
+      ["manipulate", "điều khiển người khác một cách ngầm", "Hay đi với consumers, emotions", "Some campaigns manipulate the emotions of viewers who are already anxious."],
+      ["exploit", "lợi dụng điểm yếu của ai", "Hay đi với insecurities, fears", "Advertising that exploits teenagers' insecurities is hard to defend."],
+      ["fuel", "làm một thứ tăng mạnh lên", "Hay đi với demand, consumption", "Aggressive marketing fuels demand for products nobody asked for."],
+      ["endorse", "đứng tên quảng cáo cho một sản phẩm", "Hay đi với a product, a brand", "Celebrities are paid to endorse products they may never use."],
+      ["saturate", "làm thị trường bão hòa", "Hay đi với the market", "Cheap imports have saturated the market for basic tools."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["stimulate", "làm một hoạt động sôi động lên", "Hay đi với demand, the economy", "Temporary tax cuts may stimulate demand during a downturn."],
+      ["boost", "làm tăng, nghĩa chung và tích cực", "Hay đi với revenue, spending", "Tourism boosts revenue for the businesses on one street."],
+      ["bolster", "đỡ cho một thứ đang yếu đi", "Hay đi với confidence, a fragile economy", "A loan guarantee can bolster confidence among small lenders."],
+      ["generate", "tạo ra", "Hay đi với jobs, revenue", "A new plant generates jobs for the district around it."],
+      ["diversify", "đa dạng hóa để bớt phụ thuộc", "Hay đi với an economy, income sources", "Towns that rely on one factory need to diversify their income sources."],
+      ["curb", "kìm lại, không cắt bỏ hẳn", "Hay đi với spending, consumption", "Governments may curb excessive consumption through taxes."],
+      ["cultivate", "gây dựng dần, mang nghĩa tốt", "Hay đi với loyalty, an image", "Brands cultivate loyalty through storytelling rather than price."],
+    ] },
+  ] },
+  { n: 5, title: "Truyền thông và mạng xã hội", groups: [
+    { id: "A", name: "Báo chí và cách đưa tin", kind: "phrase", items: [
+      ["news coverage", "việc đưa tin về một sự việc", "Không đếm được. Hay đi với extensive, balanced, sensationalist.", ""],
+      ["a news outlet", "một cơ quan báo chí", "Đếm được. Dùng thay cho a media, vì a media là sai.", ""],
+      ["mass media", "truyền thông đại chúng", "Không đếm được. Media vốn là số nhiều của medium.", ""],
+      ["press freedom", "tự do báo chí", "Không đếm được. Hay đi với restrict, protect, guarantee.", ""],
+      ["censorship", "sự kiểm duyệt", "Không đếm được. Không viết a censorship.", ""],
+      ["reliable information", "thông tin đáng tin cậy", "Information không đếm được. Không viết informations.", ""],
+      ["sensationalist coverage", "cách đưa tin giật gân", "Dùng thay cho cách nói chung chung bad news.", ""],
+      ["clickbait", "tiêu đề giật gân để câu lượt xem", "Viết liền một từ, không đếm được. Từ này đã có trong từ điển chuẩn.", ""],
+      ["public discourse", "những cuộc thảo luận chung của xã hội", "Không đếm được. Hay đi với shape, coarsen, enrich.", ""],
+      ["media literacy", "khả năng đọc và đánh giá thông tin trên truyền thông", "Không đếm được. Đây là cụm chính của hầu hết đề giải pháp trong chủ đề này.", ""],
+    ] },
+    { id: "B", name: "Mạng xã hội và người dùng", kind: "phrase", items: [
+      ["social media", "mạng xã hội", "Không đếm được. Trong bài học thuật, thường chia động từ số ít.", ""],
+      ["online content", "nội dung trên mạng", "Content không đếm được theo nghĩa này. Không viết contents.", ""],
+      ["screen time", "thời gian dùng màn hình", "Không đếm được. Hay đi với limit, cut, track.", ""],
+      ["online anonymity", "việc ẩn danh trên mạng", "Không đếm được. Hay dùng ở bước C.", ""],
+      ["a digital footprint", "dấu vết một người để lại trên mạng", "Đếm được. Hợp với đề riêng tư và dữ liệu cá nhân.", ""],
+      ["an echo chamber", "nơi người dùng chỉ nghe thấy ý giống ý của họ", "Đếm được. Ít học viên dùng đúng. Xem mục 1.F.", ""],
+      ["a filter bubble", "vùng nội dung do thuật toán lọc sẵn cho từng người", "Đếm được. Khác echo chamber ở chỗ do thuật toán tạo ra. Xem mục 1.F.", ""],
+      ["user engagement", "mức độ người dùng tương tác", "Không đếm được. Đây là thứ các nền tảng thật sự bán.", ""],
+      ["personal data", "dữ liệu cá nhân", "Trong bài viết thông thường, data được dùng như danh từ không đếm được.", ""],
+      ["content moderation", "việc kiểm duyệt và gỡ nội dung", "Không đếm được. Động từ là moderate.", ""],
+    ] },
+    { id: "C", name: "Thông tin sai và tác động", kind: "phrase", items: [
+      ["misinformation", "tin sai được lan truyền mà không cố ý", "Không đếm được. Phân biệt với disinformation, xem mục 1.F.", ""],
+      ["disinformation", "tin sai được bịa ra có chủ đích", "Không đếm được. Dùng đúng từ này cho thấy ta chọn từ chính xác.", ""],
+      ["public opinion", "dư luận", "Không đếm được. Hay đi với shape, sway, reflect.", ""],
+      ["a moral panic", "nỗi hoảng sợ của cả cộng đồng về một mối lo bị thổi phồng", "Đếm được. Rất hợp với đề bạo lực và đề về trẻ nhỏ.", ""],
+      ["selective reporting", "việc chỉ chọn đưa tin một phần sự thật", "Không đếm được. Chính xác hơn cách nói báo chí nói dối.", ""],
+      ["the news cycle", "vòng quay tin tức mỗi ngày", "Luôn có the. Dùng khi giải thích vì sao tin cũ bị quên nhanh.", ""],
+      ["a role model", "người để noi theo", "Đếm được. Đề về người nổi tiếng rất hay cần cụm này.", ""],
+      ["privacy", "quyền riêng tư", "Không đếm được. Hay đi với invade, protect, respect.", ""],
+      ["a correction", "bài đính chính sau khi đưa tin sai", "Đếm được. Bài đính chính thường không lan xa bằng bản tin gốc.", ""],
+      ["a front page", "trang nhất của một tờ báo", "Đếm được. Dùng để nói về thứ mà cả thành phố từng cùng nhìn thấy.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["amplify", "làm một thứ lan rộng hơn thực tế", "Hay đi với rumors, outrage, content", "Recommendation algorithms tend to amplify content that makes people angry."],
+      ["distort", "bóp méo, làm sai bản chất", "Hay đi với facts, public understanding", "Selective reporting can distort public understanding of a rare event."],
+      ["sensationalize", "biến một chuyện nhỏ thành tin giật gân", "Hay đi với a story, an incident", "Tabloids sensationalize incidents that would once have filled two lines."],
+      ["manipulate", "điều khiển người khác một cách ngầm", "Hay đi với public opinion, users", "Coordinated accounts can manipulate public opinion before anyone checks the source."],
+      ["erode", "làm mòn dần theo thời gian", "Hay đi với trust, attention spans", "Repeated scandals erode trust in every outlet, including the careful ones."],
+      ["invade", "xâm phạm", "Hay đi với privacy", "Long-lens photographs invade the privacy of people who never sought attention."],
+      ["normalize", "làm một thứ trở thành bình thường", "Hay đi với behavior, an attitude", "Constant exposure can normalize behavior that a community once refused to accept."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["verify", "kiểm chứng trước khi tin", "Hay đi với sources, claims", "Readers should verify a claim before sharing it, especially an alarming one."],
+      ["moderate", "kiểm duyệt và điều chỉnh nội dung", "Hay đi với content, comments", "Platforms struggle to moderate harmful content at the speed it appears."],
+      ["curate", "tuyển chọn nội dung có chủ đích", "Hay đi với a feed, content", "Editors curate a front page, while an algorithm curates a feed for one person."],
+      ["disseminate", "phổ biến thông tin, từ trang trọng", "Hay đi với information, findings", "Public health agencies disseminate findings faster than they once could."],
+      ["regulate", "quản lý bằng quy định", "Hay đi với platforms, advertising", "Governments that regulate advertising to children rarely regulate feeds the same way."],
+      ["hold to account", "buộc phải chịu trách nhiệm", "Hay đi với platforms, officials", "A free press holds officials to account in a way no other institution does."],
+      ["restore", "lấy lại thứ đã mất", "Hay đi với trust, confidence", "Corrections rarely restore the trust that the original headline removed."],
+    ] },
+  ] },
+  { n: 6, title: "Chính phủ và dịch vụ công", groups: [
+    { id: "A", name: "Ngân sách và ai trả tiền", kind: "phrase", items: [
+      ["public spending", "chi tiêu công", "Không đếm được. Hay đi với cut, increase, justify.", ""],
+      ["tax revenue", "nguồn thu từ thuế", "Không đếm được. Hay đi với raise, collect. Cũng hay làm chủ ngữ cho fund.", ""],
+      ["a taxpayer", "người đóng thuế", "Đếm được. Dùng làm chủ ngữ tốt khi cần chỉ ra ai trả tiền.", ""],
+      ["fiscal priorities", "thứ tự ưu tiên khi chi ngân sách", "Số nhiều. Cho thấy ta hiểu ngân sách có giới hạn.", ""],
+      ["a subsidy", "khoản trợ cấp", "Đếm được. Số nhiều là subsidies. Động từ là subsidize.", ""],
+      ["the public sector", "khu vực công", "Luôn có the. Ngược với the private sector.", ""],
+      ["a budget shortfall", "khoản hụt ngân sách", "Đếm được. Cụ thể hơn not enough money.", ""],
+      ["means-tested support", "hỗ trợ xét theo khả năng tài chính", "Không đếm được. Rất hợp với đoạn giải pháp.", ""],
+      ["a welfare state", "nhà nước phúc lợi", "Đếm được. Dùng khi bàn về cả một mô hình, không phải một khoản chi.", ""],
+      ["policy trade-offs", "những đánh đổi trong chính sách", "Số nhiều, có gạch nối. Đây là cụm chính của buổi này, xem Phần 3.", ""],
+    ] },
+    { id: "B", name: "Luật, quy định và thực thi", kind: "phrase", items: [
+      ["legislation", "luật pháp, các đạo luật", "Không đếm được. Một luật cụ thể là a law hoặc an act.", ""],
+      ["public policy", "chính sách công", "Không đếm được khi nói chung. Một chính sách cụ thể thì đếm được, như a housing policy.", ""],
+      ["regulation", "việc quản lý bằng quy định", "Không đếm được khi nói chung. Các quy định cụ thể là regulations.", ""],
+      ["a ban", "lệnh cấm", "Đếm được. Hay đi với impose, lift, enforce.", ""],
+      ["a fine", "khoản tiền phạt", "Đếm được. Hay đi với impose, face, pay.", ""],
+      ["an incentive", "khoản khuyến khích để người dân đổi cách làm", "Đếm được. Thường hiệu quả hơn lệnh cấm, hợp với đoạn giải pháp.", ""],
+      ["accountability", "trách nhiệm giải trình", "Không đếm được. Hay đi với demand, strengthen, weaken.", ""],
+      ["governance", "cách nhà nước điều hành", "Không đếm được. Khác với government, xem mục 1.F.", ""],
+      ["bureaucracy", "bộ máy hành chính cồng kềnh", "Không đếm được khi nói chung. Nghĩa hơi tiêu cực.", ""],
+      ["political will", "quyết tâm của chính quyền để làm tới cùng", "Không đếm được. Hợp khi giải thích vì sao đã có luật mà luật không được thực hiện.", ""],
+    ] },
+    { id: "C", name: "Dịch vụ công và người dùng", kind: "phrase", items: [
+      ["essential services", "dịch vụ thiết yếu", "Số nhiều. Hay đi với protect, ration, maintain.", ""],
+      ["public transportation", "giao thông công cộng", "Không đếm được. Tiếng Anh Mỹ dùng transportation, hoặc public transit.", ""],
+      ["the healthcare system", "hệ thống y tế", "Luôn có the. Hay đi với strain, fund, reform.", ""],
+      ["preventive healthcare", "y tế dự phòng", "Không đếm được. Cụm chính của đề phòng bệnh hay chữa bệnh.", ""],
+      ["service delivery", "việc đưa dịch vụ tới tay người dân", "Không đếm được. Cụ thể hơn public services.", ""],
+      ["a civil servant", "công chức", "Đếm được. Dùng làm chủ ngữ tốt ở bước B.", ""],
+      ["public housing", "nhà ở xã hội", "Không đếm được. Hay đi với build, allocate, fund.", ""],
+      ["a waiting list", "danh sách chờ", "Đếm được. Hợp với bước D+, vì ai cũng nhìn thấy danh sách dài thêm.", ""],
+      ["universal provision", "cấp dịch vụ cho tất cả mọi người", "Không đếm được. Ngược với means-tested support.", ""],
+      ["vested interests", "nhóm lợi ích", "Luôn ở số nhiều. Dùng để giải thích vì sao cải cách bị chặn lại.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["divert", "chuyển tiền hoặc nguồn lực sang chỗ khác", "Hay đi với funds, resources", "A prestige project can divert funds from the clinics that were already short of staff."],
+      ["strain", "làm một hệ thống bị quá tải", "Hay đi với a budget, a system", "An aging population strains a health budget that was set years earlier."],
+      ["ration", "chia ít đi vì không đủ cho mọi người", "Hay đi với care, places, hours", "When demand outruns funding, a service starts to ration hours rather than announce cuts."],
+      ["undermine", "làm hỏng dần từ bên trong", "Hay đi với public trust, institutions", "A scandal can undermine public trust in every department, not only the one at fault."],
+      ["crowd out", "chiếm chỗ và đẩy khoản khác ra ngoài", "Hay đi với smaller programs, spending", "A single large commitment can crowd out the smaller programs that nobody defends."],
+      ["stall", "bị đứng lại, không tiến lên được", "Hay đi với a reform, a project", "Reforms stall when the people who benefit are spread out and the people who lose are organized."],
+      ["levy", "đánh thuế hoặc thu phí, nghĩa trang trọng", "Hay đi với a tax, duties", "The council plans to levy a charge on packaging rather than ban it outright."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["allocate", "phân bổ ngân sách cho một việc", "Hay đi với funding, resources", "More funding should be allocated to preventive healthcare than to late-stage treatment."],
+      ["implement", "đưa chính sách vào thực tế", "Hay đi với a policy, reforms", "It is far easier to announce a policy than to implement it in every district."],
+      ["enforce", "bắt mọi người tuân thủ, ai vi phạm thì bị phạt", "Hay đi với laws, regulations", "Without inspectors, a council cannot enforce the rules it has already written."],
+      ["subsidize", "trả giúp một phần chi phí", "Hay đi với fares, meals, housing", "Subsidized fares let a worker take a job on the far side of the city."],
+      ["prioritize", "ưu tiên trước việc khác", "Hay đi với spending, a group", "A budget that prioritizes emergency care will always look like it is failing at prevention."],
+      ["target", "nhắm đúng nhóm cần hỗ trợ", "Hay đi với support, a program", "Support that is targeted at the households with no savings costs less and reaches further."],
+      ["expand access to", "giúp nhiều người tiếp cận hơn", "Hay đi với services, care", "Mobile clinics expand access to care for people who cannot reach a hospital."],
+    ] },
+  ] },
+  { n: 7, title: "Công việc và sự nghiệp", groups: [
+    { id: "A", name: "Trải nghiệm của người đi làm", kind: "phrase", items: [
+      ["job satisfaction", "sự hài lòng với công việc", "Không đếm được. Hay đi với improve, measure, report.", ""],
+      ["working conditions", "điều kiện làm việc", "Luôn ở số nhiều. Hay đi với improve, inspect, tolerate.", ""],
+      ["work-life balance", "sự cân bằng giữa công việc và cuộc sống", "Có gạch nối. Không đếm được.", ""],
+      ["job security", "sự ổn định của công việc", "Không đếm được. Ngược với cảnh làm theo từng đầu việc ngắn trong the gig economy.", ""],
+      ["workplace burnout", "tình trạng kiệt sức vì công việc", "Không đếm được. Cụ thể hơn nhiều so với stress.", ""],
+      ["a fulfilling career", "một sự nghiệp mà người làm thấy có ý nghĩa", "Đếm được. Dùng khi phản bác ý kiến cho rằng người ta làm việc chỉ vì tiền.", ""],
+      ["career prospects", "triển vọng nghề nghiệp", "Luôn ở số nhiều. Hay đi với improve, limit, weigh.", ""],
+      ["career progression", "con đường thăng tiến", "Không đếm được. Không viết job progression.", ""],
+      ["flexible work arrangements", "các hình thức làm việc linh hoạt", "Số nhiều. Cụm chính của đề làm việc từ xa.", ""],
+      ["remote work", "làm việc từ xa", "Không đếm được. Tiếng Anh Mỹ cũng hay nói working remotely.", ""],
+    ] },
+    { id: "B", name: "Tuyển dụng, lương và cơ cấu", kind: "phrase", items: [
+      ["a competitive salary", "mức lương đủ sức cạnh tranh", "Đếm được. Salary khác wage, xem mục 1.F.", ""],
+      ["staff turnover", "tỷ lệ nhân viên nghỉ việc", "Không đếm được. Hợp với bước D+, vì công ty nào cũng đếm được số người nghỉ.", ""],
+      ["skilled workers", "lao động có tay nghề", "Số nhiều. Hay đi với a shortage of, attract, retain.", ""],
+      ["a labor shortage", "tình trạng thiếu lao động", "Đếm được. Tiếng Anh Mỹ viết labor, không có chữ u.", ""],
+      ["the gig economy", "kiểu làm việc tự do, nhận từng đầu việc ngắn", "Luôn có the. Rất hợp với đề về sự ổn định của công việc.", ""],
+      ["a recruitment process", "quy trình tuyển dụng", "Đếm được. Cụm chính của đề về phỏng vấn.", ""],
+      ["promotion criteria", "các tiêu chí xét thăng chức", "Số nhiều. Số ít là criterion.", ""],
+      ["professional development", "việc nâng cao chuyên môn", "Không đếm được. Hay đi với invest in, fund.", ""],
+      ["vocational training", "đào tạo nghề", "Không đếm được. Ngược với a university degree.", ""],
+      ["occupational mobility", "khả năng chuyển sang nghề khác", "Không đếm được. Hợp khi đề bàn về việc đổi nghề hoặc học lại.", ""],
+    ] },
+    { id: "C", name: "Động lực và thứ tiền không mua được", kind: "phrase", items: [
+      ["financial incentives", "các khoản thưởng bằng tiền", "Số nhiều. Ngược với intrinsic motivation.", ""],
+      ["intrinsic motivation", "động lực từ bên trong", "Không đếm được. Cụm chính của mọi đề về động lực.", ""],
+      ["employee autonomy", "quyền tự quyết của nhân viên", "Không đếm được. Đây là thứ tiền không mua được.", ""],
+      ["a sense of purpose", "cảm giác công việc có ý nghĩa", "Luôn đi với a. Hay đi với give, lose, restore.", ""],
+      ["recognition", "sự ghi nhận công sức", "Không đếm được. Tốn ít tiền hơn thưởng, và thường hiệu quả hơn.", ""],
+      ["staff morale", "tinh thần của nhân viên", "Không đếm được. Hay đi với boost, undermine, restore.", ""],
+      ["discretionary effort", "phần nỗ lực làm thêm ngoài yêu cầu", "Không đếm được. Đây là thứ tiền khó mua được, xem Phần 3.", ""],
+      ["a living wage", "mức lương đủ sống", "Đếm được. Khác minimum wage. A living wage là mức đủ sống, còn minimum wage là mức luật quy định.", ""],
+      ["transferable skills", "kỹ năng dùng được ở nhiều nghề", "Số nhiều. Hay đi với develop, value.", ""],
+      ["a career break", "quãng nghỉ giữa sự nghiệp", "Đếm được. Hợp với đề nghỉ phép và đề chăm con.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["undermine", "làm yếu dần mà khó nhận ra", "Hay đi với morale, productivity", "Weeks of unpaid overtime undermine morale faster than a pay freeze does."],
+      ["erode", "làm mòn dần theo thời gian", "Hay đi với job security, trust", "A run of short contracts erodes the job security that made the role worth taking."],
+      ["outsource", "thuê công ty bên ngoài làm", "Hay đi với production, labor", "Firms outsource the work that is easiest to specify and hardest to see."],
+      ["automate", "thay người bằng máy hoặc phần mềm", "Hay đi với tasks, jobs", "Employers automate the tasks a manager can describe in a sentence."],
+      ["deter", "làm ai đó ngại, không muốn làm", "Hay đi với candidates, applicants", "An opaque promotion process deters the candidates who would have to move cities."],
+      ["stagnate", "đứng yên, không tăng lên", "Hay đi với wages, a career", "Wages that stagnate for a decade change what a job is worth without any announcement."],
+      ["burn out", "kiệt sức tới mức phải dừng", "Hay đi với staff, a workforce", "Teams that cover two vacancies at once burn out before the posts are filled."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["retain", "giữ chân nhân viên", "Hay đi với staff, talent", "Predictable hours retain staff more reliably than a bonus paid once a year."],
+      ["hone", "mài giũa kỹ năng cho thật giỏi", "Hay đi với skills, expertise", "An apprenticeship lets a worker hone a skill that no course can finish teaching."],
+      ["delegate", "giao việc hoặc quyền cho người khác", "Hay đi với tasks, responsibility", "Managers who delegate real decisions, not just tasks, keep their best people longer."],
+      ["alleviate", "làm nhẹ bớt", "Hay đi với stress, pressure", "Remote work alleviates the stress of commuting rather than the workload itself."],
+      ["foster", "giúp một điều tốt lớn dần", "Hay đi với loyalty, collaboration", "Flexible policies foster the loyalty that a signing bonus only rents."],
+      ["secure", "giành được một thứ ổn định", "Hay đi với a position, employment", "Strong references help a candidate secure a position without a personal connection."],
+      ["reskill", "đào tạo lại để làm việc khác", "Hay đi với workers, a workforce", "Firms that reskill their own workers pay less than firms that hire and fire twice."],
+    ] },
+  ] },
+  { n: 8, title: "Môi trường và năng lượng", groups: [
+    { id: "A", name: "Vấn đề môi trường", kind: "phrase", items: [
+      ["climate change", "biến đổi khí hậu", "Không đếm được. Không có mạo từ đi trước.", ""],
+      ["carbon emissions", "khí thải carbon", "Thường ở số nhiều khi nói về khí hậu. Không viết carbon emission ở số ít.", ""],
+      ["air pollution", "ô nhiễm không khí", "Không đếm được. Hay đi với worsen, reduce, monitor.", ""],
+      ["household waste", "rác thải sinh hoạt", "Không đếm được. Cụ thể hơn trash.", ""],
+      ["deforestation", "nạn phá rừng", "Không đếm được. Không viết a deforestation.", ""],
+      ["biodiversity loss", "sự suy giảm đa dạng sinh học", "Không đếm được. Chính xác hơn animals are dying.", ""],
+      ["an ecological footprint", "mức tác động lên môi trường của một người hoặc một hộ", "Đếm được. Dùng khi bàn về trách nhiệm của từng người.", ""],
+      ["extreme weather", "thời tiết cực đoan", "Không đếm được. Hay đi với frequent, withstand.", ""],
+      ["a natural habitat", "môi trường sống tự nhiên", "Đếm được. Hay đi với protect, destroy, fragment.", ""],
+      ["environmental damage", "thiệt hại cho môi trường", "Không đếm được. Hay đi với cause, reverse, limit.", ""],
+    ] },
+    { id: "B", name: "Năng lượng và nguồn cung", kind: "phrase", items: [
+      ["renewable energy", "năng lượng tái tạo", "Không đếm được. Khác với sustainable, xem mục 1.F.", ""],
+      ["fossil fuels", "nhiên liệu hóa thạch", "Luôn ở số nhiều. Hay đi với phase out, subsidize, burn.", ""],
+      ["energy consumption", "mức tiêu thụ năng lượng", "Không đếm được. Hay đi với cut, measure.", ""],
+      ["energy security", "an ninh năng lượng", "Không đếm được. Một lý do tốt để ủng hộ năng lượng tái tạo, ngoài lý do khí hậu.", ""],
+      ["finite resources", "tài nguyên có hạn", "Số nhiều. Phần lớn đề của chủ đề này xoay quanh việc tài nguyên có hạn.", ""],
+      ["a power grid", "lưới điện", "Đếm được. Hữu ích khi giải thích vì sao năng lượng tái tạo khó thay hết nguồn cũ.", ""],
+      ["nuclear power", "điện hạt nhân", "Không đếm được. Hay đi với expand, phase out.", ""],
+      ["a carbon tax", "thuế carbon", "Đếm được. Cụm chính của đề tăng giá nhiên liệu.", ""],
+      ["reliance on", "sự phụ thuộc vào", "Luôn đi với on. Không viết reliance in.", ""],
+      ["the transition", "quá trình chuyển sang nguồn năng lượng khác", "Có the. Hay đi với manage, fund, accelerate.", ""],
+    ] },
+    { id: "C", name: "Giải pháp và ai chịu trách nhiệm", kind: "phrase", items: [
+      ["sustainability", "tính bền vững", "Không đếm được. Nói về cách khai thác, không nói về nguồn năng lượng.", ""],
+      ["conservation", "việc bảo tồn", "Không đếm được. Hay đi với fund, prioritize.", ""],
+      ["public transportation", "giao thông công cộng", "Không đếm được. Tiếng Anh Mỹ dùng transportation. Cụm chính của mọi đề giải pháp ở thành phố.", ""],
+      ["recycling rates", "tỷ lệ tái chế", "Số nhiều. Hợp với bước D+, vì quận nào cũng đếm được con số này.", ""],
+      ["a subsidy", "khoản trợ giá", "Đếm được. Số nhiều là subsidies. Động từ là subsidize.", ""],
+      ["an incentive", "khoản khuyến khích để người dân đổi cách làm", "Đếm được. Thường hiệu quả hơn lời kêu gọi người dân có ý thức.", ""],
+      ["infrastructure", "hạ tầng", "Không đếm được. Không viết infrastructures.", ""],
+      ["individual responsibility", "trách nhiệm của từng người", "Không đếm được. Cụm chính của lỗi ở mục 3.1.", ""],
+      ["collective action", "hành động chung của cả cộng đồng", "Không đếm được. Ngược với individual responsibility.", ""],
+      ["climate resilience", "khả năng chống chịu với biến đổi khí hậu", "Không đếm được. Hợp với đoạn giải pháp khi vấn đề đã xảy ra.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["emit", "thải ra", "Hay đi với carbon dioxide, pollutants", "A coal plant emits more in a week than a district of homes does in a year."],
+      ["deplete", "làm cạn kiệt tới mức nguy hiểm", "Hay đi với reserves, stocks", "Intensive fishing depletes the stocks that a coastal town has lived on for generations."],
+      ["degrade", "làm xấu dần, kém dần", "Hay đi với soil, habitats", "Repeated planting without rest degrades the soil long before anyone measures it."],
+      ["exacerbate", "làm nặng thêm", "Hay đi với the problem, drought", "Clearing the slope exacerbates the flooding that the village was already facing."],
+      ["exhaust", "dùng cạn hoàn toàn", "Hay đi với a resource, a supply", "A town that exhausts its groundwater cannot simply drill deeper next year."],
+      ["divert", "chuyển nguồn nước hoặc tiền sang chỗ khác", "Hay đi với funds, water", "A dam that diverts water upstream changes what a downstream farm can plant."],
+      ["offset", "bù lại lượng khí thải", "Hay đi với emissions, carbon", "Airlines let passengers offset emissions, which pays for trees rather than preventing the flight."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["mitigate", "giảm nhẹ tác hại khi vấn đề đã xảy ra", "Hay đi với the effects, risks", "Reforestation can mitigate the effects of a warming that has already begun."],
+      ["curb", "kìm lại thứ xấu đang tăng", "Hay đi với emissions, consumption", "A carbon tax is designed to curb industrial emissions without banning production."],
+      ["phase out", "bỏ dần theo lộ trình", "Hay đi với coal, subsidies", "Several governments have pledged to phase out coal by a fixed date."],
+      ["conserve", "dùng tiết kiệm để giữ lại", "Hay đi với energy, water", "Simple changes help a household conserve water without anyone noticing a difference."],
+      ["harness", "khai thác một nguồn sẵn có", "Hay đi với wind, solar energy", "Coastal regions are best placed to harness wind at the scale a grid needs."],
+      ["subsidize", "trả giúp một phần chi phí", "Hay đi với fares, insulation", "Subsidized insulation cuts a heating bill and a carbon figure in the same winter."],
+      ["ramp up", "tăng lên nhanh", "Hay đi với production, capacity", "Manufacturers have ramped up battery capacity faster than grids have been rebuilt."],
+    ] },
+  ] },
+  { n: 9, title: "Khoa học, công nghệ và AI", groups: [
+    { id: "A", name: "Công nghệ trong đời sống", kind: "phrase", items: [
+      ["digital technology", "công nghệ kỹ thuật số", "Technology không đếm được khi nói chung.", ""],
+      ["automation", "sự tự động hóa", "Không đếm được. Động từ là automate.", ""],
+      ["artificial intelligence", "trí tuệ nhân tạo", "Không đếm được. Viết tắt là AI, không có mạo từ đi trước.", ""],
+      ["automated systems", "các hệ thống tự động", "Số nhiều. Dùng làm chủ ngữ tốt ở bước B.", ""],
+      ["digital skills", "kỹ năng số", "Số nhiều. Hay đi với equip, lack, teach.", ""],
+      ["online access", "khả năng truy cập mạng", "Không đếm được. Hay đi với reliable, affordable.", ""],
+      ["the digital divide", "khoảng cách giữa người dùng được công nghệ và người không dùng được", "Luôn có the. Hay đi với bridge, widen.", ""],
+      ["connectivity", "khả năng kết nối mạng", "Không đếm được. Trang trọng hơn internet access.", ""],
+      ["infrastructure", "hạ tầng", "Không đếm được. Không viết infrastructures.", ""],
+      ["cutting-edge technology", "công nghệ mới và tiên tiến nhất", "Có gạch nối. Nghĩa mạnh hơn advanced.", ""],
+    ] },
+    { id: "B", name: "Nghiên cứu và bằng chứng", kind: "phrase", items: [
+      ["a scientific breakthrough", "một đột phá khoa học", "Đếm được. Hay đi với achieve, announce.", ""],
+      ["empirical evidence", "bằng chứng có được từ thực nghiệm", "Evidence không đếm được. Không viết evidences.", ""],
+      ["a peer-reviewed study", "nghiên cứu đã được các nhà khoa học khác thẩm định", "Đếm được, có gạch nối. Research thì không đếm được.", ""],
+      ["clinical trials", "thử nghiệm lâm sàng", "Số nhiều. Hay đi với conduct, pass, fail.", ""],
+      ["scientific consensus", "sự đồng thuận trong giới khoa học", "Không đếm được. Chắc chắn hơn nhiều so với scientists say.", ""],
+      ["a hypothesis", "giả thuyết chưa được kiểm chứng", "Đếm được. Số nhiều là hypotheses. Khác với theory, xem mục 1.F.", ""],
+      ["research funding", "kinh phí nghiên cứu", "Không đếm được. Hay đi với allocate, cut, compete for.", ""],
+      ["ethical concerns", "những lo ngại về đạo đức", "Số nhiều. Hay đi với raise, address.", ""],
+      ["unintended consequences", "hệ quả ngoài ý muốn", "Số nhiều. Dùng được cho hầu hết các đề về công nghệ mới.", ""],
+      ["correlation and causation", "tương quan và nhân quả", "Dùng khi muốn chỉ ra lỗi nhầm tương quan thành nhân quả, đã học ở Buổi 5.", ""],
+    ] },
+    { id: "C", name: "Mặt trái và rủi ro", kind: "phrase", items: [
+      ["algorithmic bias", "sự thiên lệch trong thuật toán", "Không đếm được. Ít học viên dùng đúng cụm này.", ""],
+      ["technological displacement", "việc người lao động bị công nghệ thay thế", "Không đếm được. Chính xác hơn nhiều so với job loss.", ""],
+      ["data privacy", "quyền riêng tư về dữ liệu", "Không đếm được. Hay đi với protect, breach.", ""],
+      ["surveillance", "sự giám sát", "Không đếm được. Không viết a surveillance.", ""],
+      ["dependence on technology", "sự phụ thuộc vào công nghệ", "Luôn đi với on. Không viết dependence in.", ""],
+      ["skill atrophy", "kỹ năng mai một vì không dùng tới", "Không đếm được. Rất hợp với đề viết tay và đề chỉ đường bằng bản đồ số.", ""],
+      ["obsolescence", "sự lỗi thời", "Không đếm được. Tính từ là obsolete.", ""],
+      ["human oversight", "việc con người giám sát máy móc", "Không đếm được. Hay dùng trong đoạn giải pháp của các đề về AI.", ""],
+      ["a false positive", "kết quả báo nhầm là có", "Đếm được. Cụ thể hơn nhiều so với mistake.", ""],
+      ["accountability", "việc ai phải chịu trách nhiệm khi có lỗi", "Không đếm được. Với mọi hệ thống tự động, đây là câu hỏi khó trả lời.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["automate", "dùng máy hoặc phần mềm làm thay một việc", "Hay đi với tasks, processes", "Employers automate the tasks a manager can describe in one sentence."],
+      ["render obsolete", "làm một kỹ năng hay công việc trở nên lỗi thời", "Hay đi với skills, a role", "Translation software has rendered some routine translation work obsolete."],
+      ["disrupt", "làm đảo lộn cả một ngành", "Hay đi với an industry, a market", "Streaming disrupted broadcasting before regulators had a word for what it was."],
+      ["outpace", "thay đổi nhanh hơn, bỏ lại phía sau", "Hay đi với regulation, understanding", "Technological change is outpacing the rules written for the tools it replaced."],
+      ["erode", "làm mòn dần", "Hay đi với a skill, privacy", "Turn-by-turn directions erode the map a driver used to build in their head."],
+      ["entrench", "làm một điều xấu bám chặt hơn", "Hay đi với bias, inequality", "A model trained on past hiring decisions entrenches the pattern it was shown."],
+      ["breach", "xâm phạm, làm rò rỉ", "Hay đi với privacy, data", "A single breached database exposes people who never used the service directly."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["harness", "khai thác theo hướng có lợi", "Hay đi với the potential, AI", "Hospitals that harness pattern recognition still keep a radiologist in the room."],
+      ["safeguard", "bảo vệ dữ liệu và quyền riêng tư", "Hay đi với privacy, data", "Clear consent rules safeguard data that people hand over without reading anything."],
+      ["streamline", "làm một quy trình gọn và nhanh hơn", "Hay đi với a process, paperwork", "Digital records streamline the paperwork that used to take a nurse an hour each shift."],
+      ["bridge", "thu hẹp một khoảng cách", "Hay đi với the digital divide", "Affordable connectivity does more to bridge the digital divide than free devices do."],
+      ["regulate", "quản lý bằng quy định", "Hay đi với platforms, algorithms", "Governments that regulate advertising rarely regulate the ranking behind it."],
+      ["audit", "kiểm tra lại một cách có hệ thống", "Hay đi với an algorithm, a system", "A system nobody can audit cannot be held to account when it is wrong."],
+      ["accelerate", "đẩy nhanh", "Hay đi với progress, discovery", "Pattern-matching tools accelerate the screening stage rather than the trial itself."],
+    ] },
+  ] },
+  { n: 10, title: "Giao thông, đô thị và nhà ở", groups: [
+    { id: "A", name: "Đi lại và phương tiện", kind: "phrase", items: [
+      ["public transportation", "giao thông công cộng", "Không đếm được. Tiếng Anh Mỹ dùng transportation.", ""],
+      ["traffic congestion", "tình trạng kẹt xe", "Không đếm được. Không viết traffics.", ""],
+      ["car dependency", "sự phụ thuộc vào ô tô", "Không đếm được. Hay đi với reduce, deepen, break.", ""],
+      ["road capacity", "số xe một con đường chở được", "Không đếm được. Hay đi với add, expand.", ""],
+      ["induced demand", "lượng xe tăng thêm vì đường vừa được mở rộng", "Không đếm được. Đây là cụm chính của buổi này, xem Phần 3.", ""],
+      ["a modal shift", "việc chuyển sang đi bằng loại xe khác", "Đếm được. Hay đi với produce, trigger.", ""],
+      ["the daily commute", "chuyến đi làm hằng ngày", "Đếm được. Viết commute to work, không có tân ngữ đi ngay sau commute.", ""],
+      ["last-mile access", "cách đi đoạn đường cuối từ bến xe về nhà", "Có gạch nối. Dùng để giải thích vì sao metro vắng khách.", ""],
+      ["service frequency", "số chuyến xe trong một giờ", "Không đếm được. Cụ thể hơn quality of service.", ""],
+      ["road safety", "an toàn giao thông", "Không đếm được. Hay đi với improve, compromise.", ""],
+    ] },
+    { id: "B", name: "Thành phố và quy hoạch", kind: "phrase", items: [
+      ["urban sprawl", "thành phố lan dần ra vùng ven", "Không đếm được. Không viết urban sprawls.", ""],
+      ["population density", "mật độ dân số", "Không đếm được. Con số này quyết định xe buýt có đủ khách hay không.", ""],
+      ["mixed-use development", "khu vừa có nhà ở, chỗ làm, và cửa hàng", "Không đếm được. Ngược với kiểu chia thành phố thành từng khu riêng.", ""],
+      ["zoning rules", "quy định khu nào được xây gì", "Số nhiều. Hay đi với relax, tighten, rewrite.", ""],
+      ["urban planners", "người làm quy hoạch đô thị", "Số nhiều. Dùng làm chủ ngữ tốt hơn the government.", ""],
+      ["public space", "không gian công cộng", "Không đếm được. Viết public spaces khi kể từng nơi cụ thể.", ""],
+      ["a transport hub", "nơi nhiều tuyến xe gặp nhau", "Đếm được. Hay đi với build around.", ""],
+      ["infrastructure", "hạ tầng", "Không đếm được. Không viết infrastructures.", ""],
+      ["land use", "cách dùng đất", "Không đếm được. Hay đi với efficient, wasteful.", ""],
+      ["transport equity", "sự công bằng trong việc đi lại", "Không đếm được. Hay đi với improve, undermine.", ""],
+    ] },
+    { id: "C", name: "Nhà ở và chi phí sống", kind: "phrase", items: [
+      ["affordable housing", "nhà ở giá vừa túi tiền", "Housing không đếm được. Không viết housings.", ""],
+      ["a housing shortage", "tình trạng thiếu nhà", "Đếm được. Hay đi với ease, worsen.", ""],
+      ["housing affordability", "khả năng người dân mua hoặc thuê được nhà", "Không đếm được. Khác với affordable housing, xem mục 1.F.", ""],
+      ["rental costs", "tiền thuê nhà", "Số nhiều. Hay đi với absorb, push up.", ""],
+      ["residential displacement", "việc dân cũ phải dọn đi nơi khác", "Không đếm được. Chính xác hơn people move away.", ""],
+      ["high-density housing", "nhà ở nhiều tầng, nhiều hộ trên một khu đất nhỏ", "Có gạch nối. Hay đi với build, approve.", ""],
+      ["social housing", "nhà ở xã hội", "Không đếm được. Tiếng Anh Mỹ cũng dùng public housing.", ""],
+      ["property prices", "giá nhà đất", "Số nhiều. Hay đi với rise, outpace wages.", ""],
+      ["tenants", "người thuê nhà", "Số nhiều. Dùng làm chủ ngữ tốt. Phía bên kia là landlords.", ""],
+      ["household income", "thu nhập của một hộ gia đình", "Không đếm được. Dùng khi so tiền nhà với tiền kiếm được.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["strain", "làm một hệ thống bị quá tải", "Hay đi với services, infrastructure", "Rapid growth on the edge of a city strains schools and clinics first."],
+      ["deepen", "làm một tình trạng nặng thêm", "Hay đi với dependency, inequality", "Building homes far from jobs deepens the car dependency a city wants to cut."],
+      ["price out", "làm ai đó không trả nổi nên phải rời đi", "Hay đi với buyers, tenants", "Rising property prices slowly price out the teachers and nurses a district needs."],
+      ["displace", "buộc ai đó phải dời đi nơi khác", "Hay đi với residents, tenants", "Fast redevelopment displaces the households least able to pay a new deposit."],
+      ["absorb", "lấy mất một phần lớn", "Hay đi với income, a budget", "Rental costs absorb a large share of what a young household earns each month."],
+      ["undermine", "làm hỏng dần từ bên trong", "Hay đi với equity, a policy", "A fare increase undermines transport equity even when the service itself improves."],
+      ["worsen", "làm tệ thêm", "Hay đi với congestion, a shortage", "Towers approved with no station nearby worsen congestion from the first week."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["ease", "làm giảm bớt sức ép", "Hay đi với congestion, pressure", "Bus lanes ease congestion by moving more people through the same strip of road."],
+      ["prioritize", "ưu tiên cho một nhóm", "Hay đi với pedestrians, cyclists", "Streets that prioritize pedestrians help the shops along them as well."],
+      ["subsidize", "dùng tiền ngân sách để giảm giá", "Hay đi với fares, housing", "Governments subsidize fares more often than the frequency behind them."],
+      ["relax", "nới lỏng một quy định", "Hay đi với restrictions, limits", "A city that relaxes height limits near a station adds homes where the trains already run."],
+      ["zone", "quy định một khu đất được dùng vào việc gì", "Hay đi với land, a district", "Cities that zone land for homes above shops shorten the trip itself."],
+      ["integrate", "gộp nhiều thứ thành một hệ thống chung", "Hay đi với services, ticketing", "One ticket that integrates buses and trains keeps a rider out of the car."],
+      ["expand", "mở rộng phạm vi phục vụ", "Hay đi với coverage, capacity", "A city can expand coverage faster with buses than with a new tunnel."],
+    ] },
+  ] },
+  { n: 12, title: "Nghệ thuật, thể thao và giải trí", groups: [
+    { id: "A", name: "Nghệ thuật và không gian công cộng", kind: "phrase", items: [
+      ["the arts", "nghệ thuật nói chung, như một lĩnh vực", "Luôn có the và ở số nhiều khi chỉ cả lĩnh vực. Khác với art khi nói về tác phẩm.", ""],
+      ["public art", "tác phẩm nghệ thuật đặt ở nơi công cộng ngoài trời", "Không đếm được. Ví dụ tượng, tranh tường, đài phun nước.", ""],
+      ["an art gallery", "phòng trưng bày tranh", "Đếm được. Khác với museum, xem mục 1.F.", ""],
+      ["a permanent collection", "bộ sưu tập trưng bày thường xuyên", "Đếm được. Hay đi với build, house.", ""],
+      ["cultural institutions", "các cơ sở văn hóa như bảo tàng, nhà hát, thư viện", "Số nhiều. Dùng khi nói chung về các nơi này.", ""],
+      ["arts funding", "tiền công chi cho nghệ thuật", "Không đếm được. Hay đi với cut, allocate.", ""],
+      ["free admission", "vào cửa miễn phí", "Không đếm được. Hay đi với offer, scrap.", ""],
+      ["the creative industries", "các ngành công nghiệp sáng tạo", "Số nhiều, thường có the.", ""],
+      ["aesthetic value", "giá trị thẩm mỹ", "Không đếm được. Đây là cách nói học thuật về cái đẹp.", ""],
+      ["civic pride", "niềm tự hào về nơi đang sống", "Không đếm được. Cụm này hay, nhưng ít học viên dùng.", ""],
+    ] },
+    { id: "B", name: "Thể thao", kind: "phrase", items: [
+      ["grassroots participation", "việc người bình thường chơi thể thao", "Không đếm được. Ngược với elite sport.", ""],
+      ["elite sport", "thể thao thành tích cao", "Không đếm được. Hay đi với fund, showcase.", ""],
+      ["sports facilities", "sân bãi và nơi tập thể thao", "Số nhiều. Tiếng Anh Mỹ viết sports, có s, khi chữ này đứng trước một danh từ khác.", ""],
+      ["professional athletes", "vận động viên chuyên nghiệp", "Số nhiều. Dùng làm chủ ngữ tốt cho bước B.", ""],
+      ["performance pressure", "áp lực thành tích", "Không đếm được. Hay đi với face, ease.", ""],
+      ["a governing body", "liên đoàn quản lý một môn thể thao", "Đếm được. Cụ thể hơn the organization.", ""],
+      ["competitive sport", "thể thao thi đấu", "Không đếm được khi nói chung.", ""],
+      ["a talent pathway", "con đường từ phong trào lên đỉnh cao", "Đếm được. Dùng khi giải thích vì sao thể thao phong trào quan trọng.", ""],
+      ["sponsorship", "tiền tài trợ của doanh nghiệp", "Không đếm được. Hay đi với attract, lose.", ""],
+      ["spectator numbers", "số người tới xem", "Số nhiều. Cụ thể hơn popularity.", ""],
+    ] },
+    { id: "C", name: "Giải trí và cách lập luận về giá trị", kind: "phrase", items: [
+      ["leisure time", "thời gian rảnh", "Không đếm được. Không viết leisures.", ""],
+      ["community recreation", "hoạt động giải trí chung của cộng đồng", "Không đếm được. Hợp khi nói về sân chơi và câu lạc bộ ở khu dân cư.", ""],
+      ["social inclusion", "việc mọi nhóm người đều được tham gia", "Không đếm được. Hay đi với support, widen.", ""],
+      ["a public good", "thứ ai cũng được hưởng, không loại ai ra được", "Đếm được. Đây là cụm chính của Phần 3.", ""],
+      ["an intangible benefit", "lợi ích không cân đo được", "Đếm được. Đây là cụm chính của Phần 3.", ""],
+      ["a proxy measure", "con số thay thế, dùng để đo một thứ khó đo", "Đếm được. Cụm này rất có giá trị khi dùng đúng.", ""],
+      ["return on investment", "mức sinh lời của một khoản chi", "Không đếm được. Không viết tắt ROI trong bài.", ""],
+      ["discretionary spending", "khoản chi có thể cắt được", "Không đếm được. Đây thường là khoản bị cắt đầu tiên.", ""],
+      ["a subsidy", "khoản trợ cấp từ ngân sách", "Đếm được. Số nhiều là subsidies.", ""],
+      ["cost-benefit analysis", "việc so sánh được và mất của một khoản chi", "Có gạch nối. Hay đi với carry out.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["divert", "chuyển tiền sang chỗ khác", "Hay đi với funds, resources", "Every new stadium diverts money a city had already promised somewhere else."],
+      ["crowd out", "chiếm mất chỗ của thứ nhỏ hơn", "Hay đi với venues, funding", "One flagship project can crowd out the twenty small venues around it."],
+      ["sideline", "đẩy ra ngoài lề", "Hay đi với grassroots, amateurs", "Chasing medals sidelines the clubs where every athlete actually starts."],
+      ["commercialize", "biến thành hàng hóa để kinh doanh", "Hay đi với a sport, an event", "Sponsorship commercializes a competition faster than any rule change does."],
+      ["quantify", "đo bằng con số", "Hay đi với a benefit, value", "Nobody has managed to quantify what a district loses when its last theater closes."],
+      ["scale back", "thu hẹp quy mô", "Hay đi với a program, funding", "Cities scale back arts programs first, because nobody protests on the day it happens."],
+      ["justify", "chứng minh một khoản chi là đáng", "Hay đi với spending, a subsidy", "A gallery has to justify its budget in a language written for road repairs."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["underpin", "làm nền móng cho cả một hệ thống", "Hay đi với a pathway, an industry", "School fields underpin a talent pathway that nobody notices until it is gone."],
+      ["sustain", "duy trì được lâu dài", "Hay đi với a club, participation", "Small clubs sustain participation in a way a single national team cannot."],
+      ["broaden", "mở rộng ra cho nhiều nhóm hơn", "Hay đi với access, participation", "Free admission broadens access more cheaply than any advertising campaign."],
+      ["anchor", "giữ cho cả khu vực xung quanh có người qua lại", "Hay đi với a district, a street", "A theater anchors the restaurants and buses that depend on an evening crowd."],
+      ["host", "đăng cai một sự kiện", "Hay đi với an event, a tournament", "A city that hosts a tournament inherits the buildings long after the visitors leave."],
+      ["showcase", "giới thiệu cho người bên ngoài thấy", "Hay đi với talent, a country", "Elite competition showcases a country, but it does not teach anyone to swim."],
+      ["offset", "bù lại phần đã mất", "Hay đi với a cost, a loss", "Ticket revenue rarely offsets the cost of keeping a heritage building standing."],
+    ] },
+  ] },
+  { n: 13, title: "Tội phạm và pháp luật", groups: [
+    { id: "A", name: "Luật pháp và hệ thống tư pháp", kind: "phrase", items: [
+      ["the criminal justice system", "hệ thống tư pháp hình sự", "Thường có the. Gồm cảnh sát, tòa án, và trại giam.", ""],
+      ["law enforcement", "việc thực thi pháp luật", "Không đếm được. Hay đi với strengthen.", ""],
+      ["an offense", "một hành vi vi phạm pháp luật", "Đếm được. Tiếng Anh Mỹ viết offense.", ""],
+      ["an offender", "người phạm tội", "Đếm được. Trung tính hơn criminal, xem mục 1.F.", ""],
+      ["a custodial sentence", "bản án phải ngồi tù", "Đếm được. Trang trọng hơn prison sentence.", ""],
+      ["public safety", "an toàn công cộng", "Không đếm được. Hay đi với protect, compromise.", ""],
+      ["the crime rate", "tỷ lệ tội phạm", "Thường có the. Hay đi với fall, spike.", ""],
+      ["petty crime", "tội nhẹ, như trộm vặt", "Không đếm được. Ngược với violent crime.", ""],
+      ["due process", "việc xét xử đúng trình tự luật định", "Không đếm được. Hợp với đề về công lý.", ""],
+      ["a juvenile court", "tòa án dành cho người chưa thành niên", "Đếm được. Cụ thể hơn the court.", ""],
+    ] },
+    { id: "B", name: "Hình phạt, tái phạm và tái hòa nhập", kind: "phrase", items: [
+      ["deterrence", "tác dụng răn đe", "Không đếm được. Động từ là deter.", ""],
+      ["the certainty of detection", "khả năng chắc chắn bị phát hiện", "Đây là cụm chính của Phần 3.", ""],
+      ["the severity of punishment", "mức nặng của hình phạt", "Đây là cụm chính của Phần 3.", ""],
+      ["recidivism", "tình trạng tái phạm", "Không đếm được. Động từ là reoffend.", ""],
+      ["rehabilitation", "việc cải tạo người phạm tội", "Không đếm được. Động từ là rehabilitate.", ""],
+      ["social reintegration", "việc hòa nhập lại với xã hội", "Không đếm được. Hay đi với support.", ""],
+      ["restorative justice", "cách xử lý tập trung vào việc sửa chữa tổn hại cho nạn nhân", "Không đếm được.", ""],
+      ["proportionate punishment", "hình phạt tương xứng với hành vi", "Không đếm được.", ""],
+      ["a criminal record", "tiền án", "Đếm được. Tiền án thường cản trở việc xin việc về sau.", ""],
+      ["root causes", "nguyên nhân gốc", "Số nhiều. Hay đi với tackle, address.", ""],
+    ] },
+    { id: "C", name: "Người trẻ, hoàn cảnh và phòng ngừa", kind: "phrase", items: [
+      ["young offenders", "người trẻ phạm tội", "Số nhiều. Dùng làm chủ ngữ tốt cho bước B.", ""],
+      ["criminal responsibility", "khả năng chịu trách nhiệm hình sự", "Không đếm được. Hay đi với the age of.", ""],
+      ["impulse control", "khả năng kìm lại một hành động bốc đồng", "Không đếm được.", ""],
+      ["early intervention", "can thiệp từ sớm", "Không đếm được. Hay đi với fund.", ""],
+      ["a support network", "những người và nơi có thể giúp đỡ một người", "Đếm được. Hay đi với build, lose.", ""],
+      ["stable employment", "việc làm ổn định", "Không đếm được. Đây là yếu tố then chốt sau khi ra tù.", ""],
+      ["social deprivation", "tình trạng thiếu thốn kéo dài", "Không đếm được.", ""],
+      ["a second chance", "cơ hội làm lại", "Đếm được. Hay đi với offer, deny.", ""],
+      ["community sentencing", "án phục vụ cộng đồng thay cho án tù", "Không đếm được.", ""],
+      ["a diversion program", "chương trình thay cho việc truy tố", "Đếm được. Tiếng Anh Mỹ viết program.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["reoffend", "phạm tội lại sau khi đã bị xử", "Hay đi với không có tân ngữ", "People released with no address and no job are the most likely to reoffend."],
+      ["escalate", "đẩy lên mức nặng hơn", "Hay đi với a penalty, a conflict", "Escalating penalties without improving detection raises the stakes of a losing bet."],
+      ["brand", "gắn một cái nhãn theo người đó suốt đời", "Hay đi với a person, a record", "A criminal record brands a person long after the sentence itself has ended."],
+      ["compound", "chồng thêm khó khăn lên khó khăn", "Hay đi với a disadvantage, a problem", "A short sentence compounds every disadvantage that came before the arrest."],
+      ["overwhelm", "làm một hệ thống bị quá tải", "Hay đi với courts, a system", "Mandatory sentencing overwhelms courts that were already scheduling a year ahead."],
+      ["inflame", "làm nỗi sợ hoặc cơn giận tăng lên", "Hay đi với fear, opinion", "Nightly coverage of rare crimes inflames a fear the crime rate does not support."],
+      ["isolate", "tách một người khỏi những ai có thể giúp họ", "Hay đi với an offender, a family", "A sentence served far from home isolates a person from the family who would help."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["deter", "răn đe bằng nỗi sợ bị xử", "Hay đi với crime, offenders", "Punishment deters most reliably when an offender believes detection is likely."],
+      ["rehabilitate", "cải tạo để người đó không phạm tội lại", "Hay đi với offenders, prisoners", "Programs that rehabilitate offenders cost less than a second sentence does."],
+      ["divert", "đưa ra khỏi quy trình truy tố", "Hay đi với a case, young offenders", "Courts that divert first-time offenders into supervised programs see fewer of them return."],
+      ["address", "xử lý tận gốc", "Hay đi với root causes, a cause", "Policies that address the root causes work slowly and win nobody an election."],
+      ["reintegrate", "đưa trở lại cuộc sống bình thường", "Hay đi với a prisoner, an offender", "A housing placement reintegrates a person faster than counseling alone ever does."],
+      ["detect", "phát hiện ra hành vi phạm pháp", "Hay đi với an offense, fraud", "A system that detects half of all offenses shapes behavior more than a harsh one."],
+      ["supervise", "giám sát người vừa được thả có điều kiện", "Hay đi với an offender, a release", "Officers who supervise fewer cases can actually visit everyone on their list."],
+    ] },
+  ] },
+  { n: 14, title: "Xã hội, bình đẳng và đạo đức", groups: [
+    { id: "A", name: "Bình đẳng và cơ hội", kind: "phrase", items: [
+      ["equal opportunity", "cơ hội ngang nhau", "Không đếm được khi nói chung.", ""],
+      ["social mobility", "khả năng thay đổi vị thế trong xã hội", "Không đếm được. Hay đi với promote, stall.", ""],
+      ["structural inequality", "bất bình đẳng do cách hệ thống vận hành", "Không đếm được. Ngược với lỗi của từng cá nhân.", ""],
+      ["social exclusion", "tình trạng bị gạt ra ngoài đời sống chung", "Không đếm được.", ""],
+      ["marginalized groups", "các nhóm bị gạt ra bên lề", "Số nhiều. Tiếng Anh Mỹ viết marginalized.", ""],
+      ["a level playing field", "điều kiện cạnh tranh ngang nhau", "Đếm được. Đây là cụm chính của Phần 3.", ""],
+      ["distributive fairness", "sự công bằng trong cách chia", "Không đếm được.", ""],
+      ["intergenerational poverty", "cái nghèo truyền từ đời này sang đời khác", "Không đếm được.", ""],
+      ["the social safety net", "hệ thống an sinh xã hội", "Thường có the. Hay đi với strengthen.", ""],
+      ["a starting point", "điểm xuất phát của một nhóm", "Đếm được. Đây là cụm chính của Phần 3.", ""],
+    ] },
+    { id: "B", name: "Trách nhiệm và chuẩn mực", kind: "phrase", items: [
+      ["social cohesion", "sự gắn kết trong xã hội", "Không đếm được. Hay đi với strengthen, fray.", ""],
+      ["civic duty", "nghĩa vụ công dân", "Không đếm được.", ""],
+      ["collective responsibility", "trách nhiệm chung của cả nhóm", "Không đếm được.", ""],
+      ["individual agency", "khả năng tự quyết của một người", "Không đếm được. Cụm này rất có giá trị khi dùng đúng.", ""],
+      ["a moral obligation", "nghĩa vụ về mặt đạo đức", "Đếm được. Hay đi với have, feel.", ""],
+      ["charitable giving", "việc quyên góp từ thiện", "Không đếm được.", ""],
+      ["foreign aid", "viện trợ cho nước ngoài", "Không đếm được. Không viết aids.", ""],
+      ["public opinion", "dư luận", "Không đếm được. Hay đi với shape, shift.", ""],
+      ["cultural norms", "chuẩn mực của một cộng đồng", "Số nhiều. Hay đi với follow, challenge.", ""],
+      ["a value judgment", "một đánh giá dựa trên quan điểm về giá trị", "Đếm được. Tiếng Anh Mỹ viết judgment.", ""],
+    ] },
+    { id: "C", name: "Đạo đức cá nhân và lựa chọn tiêu dùng", kind: "phrase", items: [
+      ["a moral principle", "một nguyên tắc đạo đức", "Đếm được. Hay đi với uphold, abandon.", ""],
+      ["a competing claim", "một đòi hỏi ngược chiều", "Đếm được. Cụm này giúp viết câu nhượng bộ.", ""],
+      ["a trade-off", "sự đánh đổi giữa hai thứ", "Có gạch nối. Đếm được.", ""],
+      ["proximity", "sự gần gũi về khoảng cách hoặc quan hệ", "Không đếm được. Đây là cụm chính cho đề từ thiện.", ""],
+      ["a duty of care", "trách nhiệm phải chăm lo cho ai đó", "Đếm được. Hay đi với owe, extend.", ""],
+      ["self-interest", "lợi ích riêng", "Có gạch nối. Không đếm được.", ""],
+      ["reciprocity", "sự có qua có lại", "Không đếm được.", ""],
+      ["a double standard", "tiêu chuẩn kép", "Đếm được. Hay đi với apply, expose.", ""],
+      ["a slippery slope", "lập luận cho rằng một bước nhỏ sẽ kéo theo cả chuỗi hậu quả xấu", "Đếm được. Đây là tên một lỗi lập luận.", ""],
+      ["a baseline difference", "chênh lệch có sẵn từ đầu", "Đếm được. Đây là cụm chính của Phần 3.", ""],
+    ] },
+    { id: "D", name: "Động từ khi nói về vấn đề", kind: "verb", items: [
+      ["perpetuate", "giữ cho một tình trạng kéo dài mãi", "Hay đi với inequality, a cycle", "Unpaid internships perpetuate a cycle only some families can afford to enter."],
+      ["widen", "làm khoảng cách lớn thêm", "Hay đi với a gap, a divide", "Uneven wage growth widens a gap that was already there in 2010."],
+      ["marginalize", "gạt ra bên lề", "Hay đi với a group, communities", "Services that exist only online marginalize the people least likely to complain."],
+      ["conflate", "gộp nhầm hai thứ khác nhau làm một", "Hay đi với two groups, causes", "Comparing two groups that never started level conflates a head start with a cause."],
+      ["penalize", "làm một nhóm bị thiệt", "Hay đi với households, workers", "A flat fine penalizes a low-income household far more than a wealthy one."],
+      ["fray", "làm yếu dần một mối gắn kết", "Hay đi với cohesion, ties", "A decade of insecure work frays the ties that hold a neighborhood together."],
+      ["oversimplify", "làm một vấn đề trở nên quá đơn giản", "Hay đi với an issue, a comparison", "Ranking two countries by one figure oversimplifies everything behind it."],
+    ] },
+    { id: "E", name: "Động từ khi nói về giải pháp", kind: "verb", items: [
+      ["level", "làm cho ngang bằng", "Hay đi với the playing field", "Free preschool levels the playing field before a child ever takes a test."],
+      ["redistribute", "phân phối lại", "Hay đi với wealth, resources", "Progressive taxation redistributes income without deciding how anyone spends it."],
+      ["account for", "tính đến một yếu tố", "Hay đi với a difference, a factor", "A fair comparison accounts for what each group already brought with them."],
+      ["uphold", "giữ vững một nguyên tắc", "Hay đi với a right, a standard", "Courts uphold a principle most usefully when doing so costs somebody something."],
+      ["extend", "mở rộng phạm vi trách nhiệm", "Hay đi với a duty, coverage", "The harder question is how far a duty of care extends beyond people we can see."],
+      ["reconcile", "dung hòa hai đòi hỏi", "Hay đi với claims, principles", "A workable policy reconciles two claims that both sound obvious on their own."],
+      ["weigh", "cân nhắc hai bên", "Hay đi với a claim, an obligation", "Weighing two obligations honestly beats pretending only one of them exists."],
+    ] },
+  ] },
+];
+/* =====================================================
+   TỪ VỰNG THEO BUỔI — flashcard and Bắn Chữ over LESSON_VOCAB
+   One picker (one lesson, or several mixed), three ways to use the words.
+   Bắn Chữ has two modes. "Nhìn tiếng Anh" shows the word and the student
+   types it back; "Nhìn nghĩa Việt" hides the English, so the word has to come
+   out of memory. Known words and best scores live in localStorage only.
+   ===================================================== */
+let _lvSel = new Set();
+let _lvFront = 'en';
+let _lvSkipKnown = false;
+let _fc = null;
+let _fcKeyHandler = null;
+
+(function lvRestore() {
+  try {
+    const s = JSON.parse(localStorage.getItem('lvSel') || '[]');
+    if (Array.isArray(s)) s.forEach(n => { if (LESSON_VOCAB.some(t => t.n === n)) _lvSel.add(n); });
+    _lvFront = localStorage.getItem('lvFront') === 'vi' ? 'vi' : 'en';
+    _lvSkipKnown = localStorage.getItem('lvSkipKnown') === '1';
+  } catch (e) {}
+})();
+
+function lvSave(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+function lvKnownSet() {
+  try { return new Set(JSON.parse(localStorage.getItem('lvKnown') || '[]')); } catch (e) { return new Set(); }
+}
+function lvSaveKnown(set) { lvSave('lvKnown', JSON.stringify([...set])); }
+
+// Words repeat across lessons (erode appears in four). When lessons are mixed
+// each word is kept once, under the first lesson that has it.
+function lvPool() {
+  const seen = new Set();
+  const out = [];
+  LESSON_VOCAB.filter(t => !_lvSel.size || _lvSel.has(t.n)).forEach(t => t.groups.forEach(g => g.items.forEach(([en, vi, use, ex]) => {
+    const k = en.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push({ en, vi, use, ex, n: t.n, group: g.name });
+  })));
+  return out;
+}
+
+function showLessonVocab() {
+  tsStop();
+  lvUnbindKeys();
+  lvRenderHub();
+}
+
+function lvRenderHub() {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  tsStop();
+  lvUnbindKeys();
+  const known = lvKnownSet();
+  const pool = lvPool();
+  const selLabel = _lvSel.size ? `${_lvSel.size} buổi` : `cả ${LESSON_VOCAB.length} buổi`;
+  const chips = LESSON_VOCAB.map(t => {
+    const words = t.groups.flatMap(g => g.items.map(i => i[0].toLowerCase()));
+    const k = words.filter(w => known.has(w)).length;
+    return `<button class="lv-topic${_lvSel.has(t.n) ? ' active' : ''}" onclick="lvToggle(${t.n})">
+      <span class="lv-topic-n">Buổi ${t.n}</span>
+      <span class="lv-topic-name">${escapeHtml(t.title)}</span>
+      <span class="lv-topic-known">${k}/${words.length} đã nhớ</span>
+    </button>`;
+  }).join('');
+  root.innerHTML = `
+    <div class="lv-wrap">
+      <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
+      <div class="lv-head">
+        <div class="vb-logo">📚 Từ vựng theo buổi</div>
+        <div class="vb-tagline">Chọn một buổi để học riêng, hoặc chọn nhiều buổi để trộn. Không chọn buổi nào là trộn tất cả.</div>
+      </div>
+      <div class="lv-topics">${chips}</div>
+      <div class="lv-selbar">
+        <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
+        ${_lvSel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
+      </div>
+      <div class="lv-modes">
+        <button class="lv-mode" onclick="lvStartFlash()">
+          <span class="lv-mode-icon">🃏</span>
+          <span class="lv-mode-name">Flashcard</span>
+          <span class="lv-mode-desc">Lật thẻ xem nghĩa, cách dùng và câu mẫu. Tự đánh dấu nhớ hay chưa.</span>
+        </button>
+        <button class="lv-mode" onclick="tsStart('copy')">
+          <span class="lv-mode-icon">🚀</span>
+          <span class="lv-mode-name">Bắn chữ, nhìn tiếng Anh</span>
+          <span class="lv-mode-desc">Từ tiếng Anh rơi xuống, gõ lại cho đúng để bắn. Hợp để khởi động.</span>
+          <span class="lv-mode-best">🏆 ${tsGetBest('copy')}</span>
+        </button>
+        <button class="lv-mode" onclick="tsStart('meaning')">
+          <span class="lv-mode-icon">🎯</span>
+          <span class="lv-mode-name">Bắn chữ, nhìn nghĩa Việt</span>
+          <span class="lv-mode-desc">Nghĩa tiếng Việt rơi xuống kèm chữ cái đầu. Gõ từ tiếng Anh để bắn.</span>
+          <span class="lv-mode-best">🏆 ${tsGetBest('meaning')}</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function lvToggle(n) {
+  if (_lvSel.has(n)) _lvSel.delete(n); else _lvSel.add(n);
+  lvSave('lvSel', JSON.stringify([..._lvSel]));
+  lvRenderHub();
+}
+function lvClearSel() {
+  _lvSel.clear();
+  lvSave('lvSel', '[]');
+  lvRenderHub();
+}
+
+/* ─── Flashcard ─────────────────────────────────────────────────────────── */
+function lvStartFlash(list) {
+  tsStop();
+  let deck = list || lvPool();
+  let note = '';
+  if (!list && _lvSkipKnown) {
+    const k = lvKnownSet();
+    const rest = deck.filter(w => !k.has(w.en.toLowerCase()));
+    if (rest.length) deck = rest;
+    else note = 'Đã nhớ hết các từ này, lượt này ôn lại cả bộ.';
+  }
+  if (!deck.length) return;
+  _fc = { deck: vbShuffle(deck), i: 0, got: [], miss: [], flipped: false, retry: !!list };
+  lvBindKeys();
+  lvRenderFlash();
+  if (note) showToast(note);
+}
+
+function lvRenderFlash() {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root || !_fc) return;
+  const w = _fc.deck[_fc.i];
+  const total = _fc.deck.length;
+  const pct = Math.round(_fc.i / total * 100);
+  const enFace = `<div class="lv-card-main">${escapeHtml(w.en)}</div>`;
+  const viFace = `<div class="lv-card-main lv-card-main--vi">${escapeHtml(w.vi)}</div>`;
+  const detail = `
+    ${_lvFront === 'vi' ? enFace : viFace}
+    ${w.use ? `<div class="lv-card-use">${escapeHtml(w.use)}</div>` : ''}
+    ${w.ex ? `<div class="lv-card-ex">${escapeHtml(w.ex)}</div>` : ''}`;
+  root.innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow">
+      <div class="lv-fc-top">
+        <button class="btn-back-plain" onclick="lvRenderHub()">← Chọn buổi</button>
+        <div class="lv-fc-opts">
+          <button class="vb-chip${_lvFront === 'en' ? ' active' : ''}" onclick="lvSetFront('en')">Mặt trước tiếng Anh</button>
+          <button class="vb-chip${_lvFront === 'vi' ? ' active' : ''}" onclick="lvSetFront('vi')">Mặt trước tiếng Việt</button>
+          ${_fc.retry ? '' : `<label class="lv-check"><input type="checkbox"${_lvSkipKnown ? ' checked' : ''} onchange="lvSetSkip(this.checked)"> Bỏ qua từ đã nhớ</label>`}
+        </div>
+      </div>
+      <div class="lv-progress"><div class="lv-progress-bar" style="width:${pct}%"></div></div>
+      <div class="lv-count">${_fc.i + 1} / ${total}</div>
+      <div class="lv-card${_fc.flipped ? ' flipped' : ''}" onclick="lvFlip()">
+        <div class="lv-card-inner">
+          <div class="lv-face lv-face--front">
+            <div class="lv-card-tag">Buổi ${w.n} · ${escapeHtml(w.group)}</div>
+            ${_lvFront === 'vi' ? viFace : enFace}
+            <div class="lv-card-hint">Bấm để lật</div>
+          </div>
+          <div class="lv-face lv-face--back">
+            <div class="lv-card-tag">${escapeHtml(_lvFront === 'vi' ? w.vi : w.en)}</div>
+            ${detail}
+          </div>
+        </div>
+      </div>
+      <div class="lv-fc-btns">
+        <button class="lv-btn lv-btn--miss" onclick="lvMark(false)">✗ Chưa nhớ</button>
+        <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button>
+        <button class="lv-btn lv-btn--got" onclick="lvMark(true)">✓ Nhớ rồi</button>
+      </div>
+      <div class="vb-hint-text">Phím cách để lật thẻ. Mũi tên trái là chưa nhớ, mũi tên phải là nhớ rồi.</div>
+    </div>`;
+}
+
+function lvFlip() {
+  if (!_fc) return;
+  _fc.flipped = !_fc.flipped;
+  const card = document.querySelector('#lesson-vocab-root .lv-card');
+  if (card) card.classList.toggle('flipped', _fc.flipped);
+}
+function lvSetFront(side) { _lvFront = side; lvSave('lvFront', side); lvRenderFlash(); }
+function lvSetSkip(on) { _lvSkipKnown = on; lvSave('lvSkipKnown', on ? '1' : '0'); lvStartFlash(); }
+
+function lvMark(ok) {
+  if (!_fc) return;
+  const w = _fc.deck[_fc.i];
+  const known = lvKnownSet();
+  const k = w.en.toLowerCase();
+  if (ok) { known.add(k); _fc.got.push(w); } else { known.delete(k); _fc.miss.push(w); }
+  lvSaveKnown(known);
+  _fc.i++;
+  _fc.flipped = false;
+  if (_fc.i >= _fc.deck.length) lvRenderFlashDone(); else lvRenderFlash();
+}
+
+function lvRenderFlashDone() {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root || !_fc) return;
+  lvUnbindKeys();
+  const miss = _fc.miss;
+  _fc.done = true;
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results">
+        <div class="vb-results-score">${_fc.got.length}/${_fc.deck.length}</div>
+        <div class="vb-results-score-lbl">từ đã nhớ trong lượt này</div>
+        <div class="vb-missed">
+          <div class="vb-missed-title">📒 Chưa nhớ</div>
+          ${miss.length
+            ? miss.map(w => `<div class="vb-missed-item"><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
+            : '<div class="vb-missed-empty">Nhớ hết cả lượt 🎉</div>'}
+        </div>
+        <div class="vb-results-btns">
+          ${miss.length ? `<button class="vb-start-btn" onclick="lvStartFlash(_fc.miss.slice())">↺ Ôn lại ${miss.length} từ chưa nhớ</button>
+          <button class="vb-secondary-btn" onclick="tsStart('meaning', _fc.miss.slice())">🎯 Bắn các từ này</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function lvBindKeys() {
+  lvUnbindKeys();
+  _fcKeyHandler = e => {
+    const view = document.getElementById('view-lesson-vocab');
+    if (!view || view.classList.contains('hidden') || !_fc || _fc.done) { lvUnbindKeys(); return; }
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); lvFlip(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); lvMark(false); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); lvMark(true); }
+  };
+  document.addEventListener('keydown', _fcKeyHandler);
+}
+function lvUnbindKeys() {
+  if (_fcKeyHandler) document.removeEventListener('keydown', _fcKeyHandler);
+  _fcKeyHandler = null;
+}
+
+/* ─── Bắn Chữ ───────────────────────────────────────────────────────────── */
+const TS_MODES = {
+  copy:    { label: 'Nhìn tiếng Anh', fall: 12, gap: 2.2, gapMin: 0.9, maxOn: 7 },
+  meaning: { label: 'Nhìn nghĩa Việt', fall: 18, gap: 3.2, gapMin: 1.5, maxOn: 5 },
+};
+const TS_LIVES = 3;
+const TS_MAX_LIVES = 5;
+const TS_PER_LEVEL = 8;
+const TS_BOSS_EVERY = 14;
+const TS_EGG_EVERY = 11;
+let _ts = null;
+let _tsAudio = null;
+
+function tsNorm(s) {
+  return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
+}
+// A leading article is optional: nobody should lose a word for leaving out "a".
+function tsAnswers(en) {
+  const n = tsNorm(en);
+  const bare = n.replace(/^(a|an|the) /, '');
+  return bare && bare !== n ? [n, bare] : [n];
+}
+function tsMask(word) {
+  return word.split(' ').map(w => w.replace(/[a-z0-9]/gi, (c, i) => (i === 0 ? c : '_'))).join(' ');
+}
+
+function tsGetBest(mode) { try { return parseInt(localStorage.getItem('tsBest_' + mode) || '0', 10) || 0; } catch (e) { return 0; } }
+function tsSetBest(mode, s) { lvSave('tsBest_' + mode, String(s)); }
+function tsMuted() { try { return localStorage.getItem('tsMute') === '1'; } catch (e) { return false; } }
+
+function tsSpeak(text) {
+  if (!('speechSynthesis' in window) || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const voices = speechSynthesis.getVoices();
+  const en = voices.find(v => /en[-_]GB/i.test(v.lang)) || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  if (en) u.voice = en;
+  u.lang = (en && en.lang) || 'en-GB';
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+// Sound effects are synthesised, so there are no audio files to load.
+function tsSfx(kind) {
+  if (tsMuted()) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ac = _tsAudio || (_tsAudio = new AC());
+    if (ac.state === 'suspended') ac.resume();
+    const t0 = ac.currentTime;
+    const tone = (freq, dur, type, vol, slideTo, delay) => {
+      const t = t0 + (delay || 0);
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+      g.connect(ac.destination);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    };
+    if (kind === 'key') tone(900, 0.03, 'square', 0.02);
+    else if (kind === 'wrong') tone(130, 0.09, 'square', 0.05);
+    else if (kind === 'kill') { tone(700, 0.1, 'square', 0.05, 1400); tone(150, 0.2, 'triangle', 0.08, 50, 0.02); }
+    else if (kind === 'miss') tone(240, 0.4, 'sawtooth', 0.06, 60);
+    else if (kind === 'boss') tone(110, 0.7, 'sawtooth', 0.07, 40);
+    else if (kind === 'power') [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.13, 'triangle', 0.07, 0, i * 0.07));
+    else if (kind === 'level') [392, 523, 659, 784].forEach((f, i) => tone(f, 0.14, 'square', 0.045, 0, i * 0.08));
+  } catch (e) {}
+}
+
+function tsToggleMute() {
+  lvSave('tsMute', tsMuted() ? '0' : '1');
+  const b = document.getElementById('ts-mute');
+  if (b) b.textContent = tsMuted() ? '🔇' : '🔊';
+  document.getElementById('ts-input')?.focus();
+}
+
+function tsStart(mode, list) {
+  tsStop();
+  lvUnbindKeys();
+  const pool = (list && list.length ? list : lvPool()).map(w => ({ ...w, answers: tsAnswers(w.en) }));
+  const root = document.getElementById('lesson-vocab-root');
+  if (!pool.length || !root || !TS_MODES[mode]) return;
+  root.innerHTML = `
+    <div class="ts-wrap" id="ts-wrap">
+      <div class="ts-hud">
+        <span class="ts-lives" id="ts-lives"></span>
+        <span class="ts-combo" id="ts-combo"></span>
+        <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
+        <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
+        <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
+        <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">⏸</button>
+      </div>
+      <div class="ts-arena" id="ts-arena">
+        <div class="ts-stars"></div>
+        <div class="ts-ship" id="ts-ship"></div>
+        <div class="ts-miss" id="ts-miss"></div>
+        <div class="ts-overlay hidden" id="ts-overlay"></div>
+      </div>
+      <input class="ts-input" id="ts-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ vào đây…" aria-label="Ô gõ từ">
+    </div>`;
+  const g = _ts = {
+    mode, cfg: TS_MODES[mode], list: list || null,
+    pool, deck: vbShuffle(pool), deckPos: 0,
+    items: [], lockId: null, nextId: 1, spawned: 0,
+    score: 0, lives: TS_LIVES, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
+    missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: false,
+    W: 0, H: 0,
+  };
+  const input = document.getElementById('ts-input');
+  input.addEventListener('input', tsOnInput);
+  input.addEventListener('keydown', tsOnKey);
+  document.getElementById('ts-arena').addEventListener('pointerdown', tsOnArenaTap);
+  g.onResize = () => tsFit();
+  g.onVis = () => { if (document.hidden) tsPause(); };
+  window.addEventListener('resize', g.onResize);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', g.onResize);
+  document.addEventListener('visibilitychange', g.onVis);
+  document.getElementById('ts-wrap').scrollIntoView({ block: 'start' });
+  tsFit();
+  tsHud();
+  input.focus();
+  g.raf = requestAnimationFrame(tsFrame);
+}
+
+function tsStop() {
+  const g = _ts;
+  if (!g) return;
+  g.running = false;
+  cancelAnimationFrame(g.raf);
+  window.removeEventListener('resize', g.onResize);
+  if (window.visualViewport) window.visualViewport.removeEventListener('resize', g.onResize);
+  document.removeEventListener('visibilitychange', g.onVis);
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  _ts = null;
+}
+
+// The arena fills what is left of the screen above the input. On a phone that
+// is the visual viewport, which shrinks when the keyboard opens.
+function tsFit() {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!g || !arena) return;
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const top = Math.max(0, arena.getBoundingClientRect().top);
+  const h = Math.round(Math.max(240, Math.min(720, vh - top - 72)));
+  arena.style.height = h + 'px';
+  g.W = arena.clientWidth;
+  g.H = h;
+  g.items.forEach(it => { it.x = Math.min(it.x, Math.max(0, g.W - it.w)); });
+}
+
+function tsFallTime(boss) {
+  const g = _ts;
+  const t = Math.max(g.cfg.fall * 0.45, g.cfg.fall - (g.level - 1) * 1.1);
+  return boss ? t * 1.6 : t;
+}
+function tsGap() {
+  const g = _ts;
+  return Math.max(g.cfg.gapMin, g.cfg.gap - (g.level - 1) * 0.18);
+}
+
+function tsItemHtml(it, typed) {
+  const icon = it.boss ? '🐓' : it.egg ? '🥚' : '🐔';
+  if (_ts.mode === 'copy') {
+    const onTrack = typed && tsNorm(it.en).startsWith(typed);
+    const word = onTrack
+      ? `<span class="ts-hit">${escapeHtml(it.en.slice(0, typed.length))}</span>${escapeHtml(it.en.slice(typed.length))}`
+      : escapeHtml(it.en);
+    return `<span class="ts-chick">${icon}</span><div class="ts-word">${word}</div>` + (typed && !onTrack ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+  }
+  return `<span class="ts-chick">${icon}</span><div class="ts-vi">${escapeHtml(it.vi)}</div><div class="ts-mask">${escapeHtml(tsMask(it.en))}</div>` + (typed ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+}
+
+function tsRender(it, typed) {
+  it.el.innerHTML = tsItemHtml(it, typed);
+  it.w = it.el.offsetWidth;
+  it.h = it.el.offsetHeight;
+  it.x = Math.min(it.x, Math.max(0, _ts.W - it.w));
+}
+
+function tsSpawn() {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!arena) return;
+  g.spawned++;
+  const boss = g.spawned % TS_BOSS_EVERY === 0;
+  const egg = !boss && g.spawned % TS_EGG_EVERY === 0;
+  const alive = g.items.filter(it => !it.dead);
+  const onScreen = new Set(alive.map(it => it.answers[0]));
+  const firsts = new Set(alive.map(it => it.answers[0][0]));
+  let pick = null;
+  if (boss) {
+    // The boss is one of the longest phrases in the selection.
+    const long = g.pool.filter(w => !onScreen.has(w.answers[0])).sort((a, b) => b.en.length - a.en.length).slice(0, 12);
+    pick = long.length ? long[Math.floor(Math.random() * long.length)] : null;
+  }
+  // Otherwise prefer a word whose first letter is not already falling, so the
+  // first keystroke already says which word is meant.
+  for (let tries = 0; !pick && tries < 12; tries++) {
+    if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
+    const w = g.deck[g.deckPos++];
+    if (onScreen.has(w.answers[0])) continue;
+    if (!firsts.has(w.answers[0][0]) || tries >= 11) pick = w;
+  }
+  if (!pick) return;
+  const el = document.createElement('div');
+  el.className = 'ts-item' + (boss ? ' ts-boss' : '') + (egg ? ' ts-egg' : '');
+  const it = { ...pick, boss, egg, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: tsFallTime(boss), dead: false };
+  el.dataset.id = it.id;
+  arena.appendChild(el);
+  tsRender(it, '');
+  it.x = Math.random() * Math.max(0, g.W - it.w);
+  it.y = -it.h;
+  el.style.transform = `translate(${it.x}px, ${it.y}px)`;
+  g.items.push(it);
+  if (boss) { tsSfx('boss'); tsFloat('🐓 GÀ TRÙM', g.W / 2, 40, 'big'); }
+}
+
+function tsFrame(now) {
+  const g = _ts;
+  if (!g || !g.running) return;
+  // Left the screen mid-game: end quietly rather than play on unseen.
+  const view = document.getElementById('view-lesson-vocab');
+  if (!view || view.classList.contains('hidden')) { tsStop(); return; }
+  const dt = Math.min(0.05, (now - g.last) / 1000);
+  g.last = now;
+  if (!g.paused) {
+    if (g.freeze > 0) {
+      g.freeze -= dt;
+      if (g.freeze <= 0) document.getElementById('ts-arena')?.classList.remove('frozen');
+    } else {
+      g.spawnIn -= dt;
+      const alive = g.items.filter(it => !it.dead).length;
+      if (g.spawnIn <= 0 && alive < g.cfg.maxOn) { tsSpawn(); g.spawnIn = tsGap(); }
+      else if (alive === 0 && g.spawnIn > 0.4) g.spawnIn = 0.4;
+      for (const it of g.items) {
+        if (it.dead) continue;
+        it.t += dt;
+        it.y = -it.h + (it.t / it.fall) * g.H;
+        it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
+        if (it.y + it.h >= g.H) tsGround(it);
+        if (!g.running) return;
+      }
+    }
+    g.items = g.items.filter(it => !it.dead);
+  }
+  g.raf = requestAnimationFrame(tsFrame);
+}
+
+function tsTyped(input) {
+  return input.value.toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').replace(/^ /, '');
+}
+function tsCandidates(typed) {
+  return _ts.items.filter(it => !it.dead && it.answers.some(a => a.startsWith(typed)));
+}
+
+function tsOnInput(e) {
+  const g = _ts;
+  const input = e.target;
+  if (!g || !g.running) return;
+  if (g.paused) { input.value = ''; return; }
+  let typed = tsTyped(input);
+  if (!typed) { tsLock(null, ''); return; }
+  let cands = tsCandidates(typed);
+  if (!cands.length) {
+    // Wrong key: refuse it, break the combo, keep the good part already typed.
+    g.typos++;
+    g.combo = 0;
+    tsHud();
+    tsShake(input);
+    tsSfx('wrong');
+    while (input.value && !cands.length) {
+      input.value = input.value.slice(0, -1);
+      typed = tsTyped(input);
+      cands = typed ? tsCandidates(typed) : [];
+    }
+    if (!typed) { tsLock(null, ''); return; }
+  } else {
+    tsSfx('key');
+  }
+  const done = typed.trim();
+  const exact = cands.filter(it => it.answers.includes(done));
+  const from = exact.length ? exact : cands;
+  const target = from.find(it => it.id === g.lockId) || from.reduce((a, b) => (b.y > a.y ? b : a));
+  if (exact.length) {
+    input.value = '';
+    tsLock(null, '');
+    tsKill(target);
+    return;
+  }
+  tsLock(target, typed);
+}
+
+function tsOnKey(e) {
+  if (!_ts) return;
+  if (e.key === 'Enter' || e.key === 'Escape') {
+    e.preventDefault();
+    e.target.value = '';
+    tsLock(null, '');
+  }
+}
+
+function tsOnArenaTap(e) {
+  if (!_ts || e.target.closest('.ts-overlay')) return;
+  e.preventDefault();
+  document.getElementById('ts-input')?.focus();
+}
+
+function tsLock(target, typed) {
+  const g = _ts;
+  const prev = g.items.find(it => it.id === g.lockId);
+  if (prev && prev !== target && !prev.dead) { prev.el.classList.remove('ts-locked'); tsRender(prev, ''); }
+  g.lockId = target ? target.id : null;
+  if (!target) return;
+  target.el.classList.add('ts-locked');
+  tsRender(target, typed);
+  tsAim(target);
+}
+
+function tsAim(it) {
+  const g = _ts;
+  const ang = Math.atan2(it.y + it.h / 2 - (g.H - 22), it.x + it.w / 2 - g.W / 2);
+  const ship = document.getElementById('ts-ship');
+  if (ship) ship.style.transform = `rotate(${ang + Math.PI / 2}rad)`;
+  return ang;
+}
+
+function tsPoints(it) {
+  const mult = 1 + Math.min(4, Math.floor(_ts.combo / 5));
+  return it.en.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss ? 3 : 1);
+}
+
+function tsExplode(it, withLaser) {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  const cx = it.x + it.w / 2, cy = it.y + it.h / 2;
+  if (withLaser && arena) {
+    const sx = g.W / 2, sy = g.H - 22;
+    const laser = document.createElement('div');
+    laser.className = 'ts-laser';
+    laser.style.width = Math.hypot(cx - sx, cy - sy) + 'px';
+    laser.style.transform = `translate(${sx}px, ${sy}px) rotate(${tsAim(it)}rad)`;
+    arena.appendChild(laser);
+    setTimeout(() => laser.remove(), 200);
+  }
+  if (arena) {
+    for (let k = 0; k < (it.boss ? 16 : 8); k++) {
+      const p = document.createElement('span');
+      const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * (it.boss ? 90 : 45);
+      p.className = 'ts-spark';
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.setProperty('--dx', Math.cos(a) * d + 'px');
+      p.style.setProperty('--dy', Math.sin(a) * d + 'px');
+      arena.appendChild(p);
+      setTimeout(() => p.remove(), 600);
+    }
+    const leg = document.createElement('span');
+    leg.className = 'ts-leg';
+    leg.textContent = '🍗';
+    leg.style.left = cx + 'px';
+    leg.style.top = cy + 'px';
+    arena.appendChild(leg);
+    setTimeout(() => leg.remove(), 900);
+  }
+  it.dead = true;
+  it.el.classList.add('ts-boom');
+  setTimeout(() => it.el.remove(), 260);
+}
+
+function tsKill(it) {
+  const g = _ts;
+  g.kills++;
+  g.combo++;
+  g.bestCombo = Math.max(g.bestCombo, g.combo);
+  const pts = tsPoints(it);
+  g.score += pts;
+  tsExplode(it, true);
+  tsFloat(`+${pts}`, it.x + it.w / 2, it.y);
+  tsSfx('kill');
+  if (it.boss) tsShakeArena();
+  if (it.egg) tsPower();
+  if (g.kills % TS_PER_LEVEL === 0) {
+    g.level++;
+    tsSfx('level');
+    tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
+  }
+  tsHud();
+}
+
+// A golden egg gives one of three rewards. Extra life is offered only while
+// there is room for it.
+function tsPower() {
+  const g = _ts;
+  const opts = ['freeze', 'bomb'];
+  if (g.lives < TS_MAX_LIVES) opts.push('life');
+  const pick = opts[Math.floor(Math.random() * opts.length)];
+  tsSfx('power');
+  if (pick === 'freeze') {
+    g.freeze = 4;
+    document.getElementById('ts-arena')?.classList.add('frozen');
+    tsFloat('❄️ Đóng băng 4 giây', g.W / 2, g.H / 2, 'big');
+  } else if (pick === 'bomb') {
+    g.items.filter(x => !x.dead).forEach(x => { g.score += tsPoints(x); tsExplode(x, false); });
+    g.lockId = null;
+    const input = document.getElementById('ts-input');
+    if (input) input.value = '';
+    tsShakeArena();
+    tsFloat('💣 Nổ cả màn', g.W / 2, g.H / 2, 'big');
+  } else {
+    g.lives++;
+    tsFloat('❤️ Thêm một mạng', g.W / 2, g.H / 2, 'big');
+  }
+}
+
+function tsGround(it) {
+  const g = _ts;
+  it.dead = true;
+  it.el.classList.add('ts-crash');
+  setTimeout(() => it.el.remove(), 300);
+  g.drops++;
+  g.lives--;
+  g.combo = 0;
+  if (!g.missed.some(m => m.en === it.en)) g.missed.push(it);
+  // Show the answer at the moment it is lost, while the student still cares.
+  const m = document.getElementById('ts-miss');
+  if (m) {
+    m.innerHTML = `<strong>${escapeHtml(it.en)}</strong> · ${escapeHtml(it.vi)}`;
+    m.classList.remove('show');
+    void m.offsetWidth;
+    m.classList.add('show');
+  }
+  tsSfx('miss');
+  tsShakeArena();
+  if (g.lockId === it.id) {
+    const input = document.getElementById('ts-input');
+    if (input) input.value = '';
+    g.lockId = null;
+  }
+  tsHud();
+  if (g.lives <= 0) tsEnd();
+}
+
+function tsFloat(text, x, y, big) {
+  const arena = document.getElementById('ts-arena');
+  if (!arena) return;
+  const f = document.createElement('div');
+  f.className = 'ts-float' + (big ? ' ts-float--big' : '');
+  f.textContent = text;
+  f.style.left = x + 'px';
+  f.style.top = y + 'px';
+  arena.appendChild(f);
+  setTimeout(() => f.remove(), big ? 1300 : 800);
+}
+
+function tsShake(input) {
+  input.classList.remove('ts-shake');
+  void input.offsetWidth;
+  input.classList.add('ts-shake');
+}
+function tsShakeArena() {
+  const a = document.getElementById('ts-arena');
+  if (!a) return;
+  a.classList.remove('shake');
+  void a.offsetWidth;
+  a.classList.add('shake');
+}
+
+function tsHud() {
+  const g = _ts;
+  if (!g) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+  const left = Math.max(0, g.lives);
+  set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, TS_LIVES - left))}</span>`);
+  set('ts-score', g.score);
+  set('ts-level', g.level);
+  const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
+  set('ts-combo', g.combo >= 3 ? `🔥 ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
+}
+
+function tsPause() {
+  const g = _ts;
+  if (!g || !g.running || g.paused) return;
+  g.paused = true;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  document.getElementById('ts-arena')?.classList.add('paused');
+  const ov = document.getElementById('ts-overlay');
+  if (ov) {
+    ov.innerHTML = `<div class="ts-ov-title">Tạm dừng</div>
+      <button class="vb-start-btn" onclick="tsResume()">▶ Chơi tiếp</button>
+      <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>`;
+    ov.classList.remove('hidden');
+  }
+}
+
+function tsResume() {
+  const g = _ts;
+  if (!g || !g.paused) return;
+  g.paused = false;
+  g.last = performance.now();
+  document.getElementById('ts-arena')?.classList.remove('paused');
+  document.getElementById('ts-overlay')?.classList.add('hidden');
+  document.getElementById('ts-input')?.focus();
+}
+
+function tsEnd() {
+  const g = _ts;
+  if (!g) return;
+  tsStop();
+  tsRenderResults(g);
+}
+
+let _tsLast = null;
+function tsRenderResults(g) {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  _tsLast = g;
+  const prevBest = tsGetBest(g.mode);
+  const isNew = g.score > prevBest;
+  if (isNew) tsSetBest(g.mode, g.score);
+  const missedHtml = g.missed.length
+    ? g.missed.map(w => `<div class="vb-missed-item"><button class="ts-say-btn" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
+    : '<div class="vb-missed-empty">Không để rơi từ nào 🎉</div>';
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results">
+        ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
+        <div class="vb-results-score">${g.score}</div>
+        <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · kỷ lục cũ ${prevBest}</div>
+        <div class="vb-results-stats">
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.kills}</div><div class="vb-rstat-lbl">Bắn trúng</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.drops}</div><div class="vb-rstat-lbl">Để rơi</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.typos}</div><div class="vb-rstat-lbl">Gõ sai phím</div></div>
+          <div class="vb-rstat"><div class="vb-rstat-val">${g.bestCombo}</div><div class="vb-rstat-lbl">Combo dài nhất</div></div>
+        </div>
+        <div class="vb-missed">
+          <div class="vb-missed-title">📒 Từ cần ôn</div>
+          ${missedHtml}
+        </div>
+        <div class="vb-results-btns">
+          <button class="vb-start-btn" onclick="tsStart(_tsLast.mode, _tsLast.list)">↺ Chơi lại</button>
+          ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_tsLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, n: w.n, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
+          <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
     </div>`;

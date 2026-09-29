@@ -2423,6 +2423,11 @@
           <h2 class="games-hub-title">🎮 Trò chơi</h2>
           <p class="games-hub-sub">Học mà chơi — luyện từ vựng và viết IELTS</p>
           <div class="games-grid">
+            <button class="game-card" onclick="showView('lesson-vocab')">
+              <span class="game-card-icon">📚</span>
+              <span class="game-card-name">Từ vựng theo buổi</span>
+              <span class="game-card-desc">Kho từ của 12 buổi Writing Task 2. Flashcard và Bắn Chữ, học riêng từng buổi hoặc trộn</span>
+            </button>
             <button class="game-card" onclick="showView('vocab-blitz')">
               <span class="game-card-icon">⚡</span>
               <span class="game-card-name">Vocab Blitz</span>
@@ -2445,6 +2450,11 @@
       <!-- Band Climber Game View -->
       <div id="view-band-climber" class="view hidden">
         <div id="band-climber-root"></div>
+      </div>
+
+      <!-- Từ vựng theo buổi: flashcard + Bắn Chữ -->
+      <div id="view-lesson-vocab" class="view hidden">
+        <div id="lesson-vocab-root"></div>
       </div>
 
     </main>
