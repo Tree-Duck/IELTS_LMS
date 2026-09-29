@@ -3926,8 +3926,9 @@ const COSMETIC_PRICES = {
   tower_wood: 60, tower_glass: 150, tower_castle: 300, tower_pagoda: 600,
   title_hunter: 60, title_typer: 150, title_architect: 150, title_wordlord: 300, title_band9: 600,
   frame_gold: 150, frame_fire: 300, frame_rainbow: 600,
+  hero_mage: 60, hero_archer: 60, hero_ninja: 150, hero_dragon: 300, hero_gold: 600,
 };
-const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame'];
+const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame', 'hero'];
 const BOOST_MS = 10 * 60 * 1000;
 const WALLET_EARN_MAX = 500;
 const WALLET_DAY_MAX = 2000;

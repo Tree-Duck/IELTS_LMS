@@ -14539,7 +14539,7 @@ function lvRenderHub() {
         <button class="lv-mode lv-mode--raid" onclick="raidMap()">
           <span class="lv-mode-icon">⚔️</span>
           <span class="lv-mode-name">Hầm ngục chữ</span>
-          <span class="lv-mode-desc">Đánh theo lượt với quái và boss bằng văn mẫu của từng buổi: câu mở bài, câu mở đoạn, rồi cả đoạn. Mỗi lượt có đồng hồ, hết giờ là quái đánh lại.</span>
+          <span class="lv-mode-desc">Chọn nhân vật nam hoặc nữ, đánh theo lượt với quái và boss bằng văn mẫu của từng buổi. Chọn chém, hồi máu hay tuyệt kỹ, rồi gõ từ còn thiếu để ra đòn.</span>
         </button>
       </div>
     </div>`;
@@ -14867,12 +14867,29 @@ const COSMETICS = {
     { id: 'frame_fire',    rarity: 'epic',      price: 300, name: 'Viền lửa',      icon: '🔥' },
     { id: 'frame_rainbow', rarity: 'legendary', price: 600, name: 'Viền cầu vồng', icon: '🌈' },
   ],
+  // Hầm ngục chữ fighters. look feeds raidHeroSvg; shot is a ranged attack,
+  // rain falls on the monster during the special.
+  hero: [
+    { id: null, name: 'Hiệp sĩ', ult: 'Kiếm Ánh Sáng', rain: '⚡', fx: '#7FD3FF',
+      look: { body: '#C9D3E0', dark: '#7D8BA0', trim: '#F5C542', cape: '#2F6FE0', hair: '#5A3A22', wpn: 'sword', blade: '#EEF3FA', pad: true } },
+    { id: 'hero_mage', rarity: 'common', price: 60, name: 'Pháp sư', ult: 'Mưa Sao Băng', rain: '☄️', fx: '#B388FF', shot: '✦',
+      look: { body: '#6A3FC8', dark: '#4A2A96', trim: '#F5C542', hair: '#E8C07A', wpn: 'staff', orb: '#7FE3FF', gear: 'hat', robe: true } },
+    { id: 'hero_archer', rarity: 'common', price: 60, name: 'Cung thủ', ult: 'Mưa Tên', rain: '🏹', fx: '#7BE08A', shot: '➳',
+      look: { body: '#3F9B4A', dark: '#2B6E34', trim: '#8B5A2B', hair: '#B5562A', wpn: 'bow', gear: 'cap' } },
+    { id: 'hero_ninja', rarity: 'rare', price: 150, name: 'Ninja', ult: 'Ảnh Phân Thân', rain: '🗡️', fx: '#9AA0FF',
+      look: { body: '#2B2F45', dark: '#1A1D2E', trim: '#E04848', hair: '#1B1B24', wpn: 'katana', blade: '#E6ECF5', gear: 'band' } },
+    { id: 'hero_dragon', rarity: 'epic', price: 300, name: 'Chiến binh Rồng', ult: 'Long Hỏa', rain: '🔥', fx: '#FF6B3D',
+      look: { body: '#C8352A', dark: '#8E2019', trim: '#F5C542', cape: '#FF8A2A', hair: '#2A1A12', wpn: 'sword', blade: '#FFB347', gear: 'horns', pad: true } },
+    { id: 'hero_gold', rarity: 'legendary', price: 600, name: 'Hiệp sĩ Hoàng kim', ult: 'Thánh Quang', rain: '🌟', fx: '#FFD34D',
+      look: { body: '#F5C542', dark: '#B8860B', trim: '#FFFFFF', guard: '#B8860B', cape: '#FFFFFF', hair: '#F2E3B3', wpn: 'sword', blade: '#FFF4C2', gear: 'crown', pad: true, glow: true } },
+  ],
 };
 const SHOP_TABS = [
   { id: 'items', label: '⚡ Vật phẩm' },
   { id: 'ship',  label: '🚀 Tàu bắn' },
   { id: 'drop',  label: '🐔 Vật rơi' },
   { id: 'tower', label: '🏰 Toà nhà' },
+  { id: 'hero',  label: '⚔️ Nhân vật' },
   { id: 'badge', label: '🏷️ Danh hiệu' },
 ];
 let _wal = null;
@@ -15045,7 +15062,7 @@ function walBar() {
       <div class="wal-sec">Khung tên</div>
       <div class="wal-items">${COSMETICS.frame.map(c => walLookCard('frame', c)).join('')}</div>`;
   } else {
-    const note = { ship: 'Đổi hình tàu và màu tia laser trong Bắn Chữ.', drop: 'Đổi thứ rơi xuống trong Bắn Chữ, cả con trùm và trứng vàng.', tower: 'Đổi kiểu toà nhà trong Xây tháp.' }[_walTab];
+    const note = { ship: 'Đổi hình tàu và màu tia laser trong Bắn Chữ.', drop: 'Đổi thứ rơi xuống trong Bắn Chữ, cả con trùm và trứng vàng.', tower: 'Đổi kiểu toà nhà trong Xây tháp.', hero: 'Đổi trang phục, vũ khí và tuyệt kỹ của nhân vật trong ⚔️ Hầm ngục chữ. Nam hay nữ thì chọn trong phòng nhân vật của trò chơi.' }[_walTab];
     body = `<div class="wal-earn-note">${note}</div><div class="wal-items">${COSMETICS[_walTab].map(c => walLookCard(_walTab, c)).join('')}</div>`;
   }
   shop.innerHTML = `
@@ -15076,12 +15093,14 @@ function walPreview(slot, c) {
   if (slot === 'ship') return `<div class="wal-prev-ship">${walShipIcon(c)}</div><div class="wal-prev-laser${c.laser === 'rainbow' ? ' rainbow' : ''}" style="--laser: ${c.laser === 'rainbow' ? '#fff' : c.laser}"></div>`;
   if (slot === 'drop') return `<div class="wal-prev-drop">${c.icons.map(i => `<span>${i}</span>`).join('')}</div>`;
   if (slot === 'tower') return `<div class="wal-prev-tower${c.id ? ' tw-skin-' + c.id : ''}">${[0, 1, 2, 3].map(i => `<div class="tw-floor tw-floor--${i}"></div>`).join('')}</div>`;
+  if (slot === 'hero') return `<div class="wal-prev-hero">${raidHeroSvg(raidGender() || 'm', c)}</div>`;
   if (slot === 'title') return `<div class="wal-prev-title">${c.text ? `<span class="lb-title">${escapeHtml(c.text)}</span>` : '<span class="wal-prev-none">Không hiện gì</span>'}</div>`;
   return `<div class="lb-row wal-prev-frame${c.id ? ' lb-' + c.id : ''}"><span class="lb-rank">🥇</span><span class="lb-name">Tên em</span></div>`;
 }
 function walBigIcon(c) {
   if (c.slot === 'ship') return walShipIcon(c);
   if (c.slot === 'drop') return c.icons.join('');
+  if (c.slot === 'hero') return `<div class="wal-prev-hero wal-prev-hero--big">${raidHeroSvg(raidGender() || 'm', c)}</div>`;
   if (c.slot === 'title') return `<span class="lb-title lb-title--big">${escapeHtml(c.text)}</span>`;
   return c.icon;
 }
@@ -15183,7 +15202,7 @@ const LB_BOARDS = [
   { id: 'tower', label: '🏗️ Tháp cao nhất', unit: 'tầng', note: 'Kỷ lục số tầng Xây tháp.' },
   { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Điểm cao nhất của một lượt, lấy chế độ tốt hơn trong hai chế độ.' },
   { id: 'coins', label: '💰 Tổng xu',       unit: 'xu',   note: 'Tất cả xu từng kiếm được. Mua đồ không làm tụt hạng.' },
-  { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục. Mỗi hầm ngục tối đa 3 sao, tính lần đánh tốt nhất.' },
+  { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục. Mỗi hầm ngục tối đa 3 sao (sai không quá 2 lần), tính lần đánh tốt nhất.' },
 ];
 let _lb = { board: 'week', diff: null, scope: 'all' };
 
@@ -17636,10 +17655,11 @@ const RAID_LESSONS = [
    One player, turn-based. Each lesson is a dungeon: a goblin guards the
    thesis (mở bài), a brute guards the opening line of a model paragraph
    (mở đầu đoạn), and the boss guards the rest of that paragraph (viết đoạn).
-   Every blank is one turn with its own clock. A right word is a hit on the
-   monster; a wrong word or a clock that runs out loses the turn, and the
-   monster hits back. The first two fights give a word bank; the boss gives
-   only the Vietnamese meaning, and the word has to be typed. */
+   Every turn is one blank with its own clock. The student picks a move
+   (attack, heal, or the special once mana is full), then types the missing
+   words: the move only lands if the words are right. Word banks are shown
+   but never clicked, so every answer is typed out. The monster strikes
+   every few turns, and at once after a wrong word or a clock that runs out. */
 const RAID_BOSSES = {
   1: { icon: '🧙', name: 'Phù thuỷ Khoảng cách Thế hệ' },
   2: { icon: '🐲', name: 'Rồng Toàn cầu hoá' },
@@ -17662,23 +17682,34 @@ const RAID_MINIONS = [
 const RAID_BRUTES = [
   { icon: '👹', name: 'Quỷ đầu đàn' }, { icon: '🐺', name: 'Sói xám' }, { icon: '🦂', name: 'Bọ cạp khổng lồ' }, { icon: '🕷️', name: 'Nhện độc' },
 ];
+// hit: what one monster strike takes; every: turns between its strikes.
 const RAID_TIERS = {
-  1: { label: 'Mở bài', hp: 100, hit: 25, coin: 10, bg: 'forest' },
-  2: { label: 'Mở đầu đoạn', hp: 150, hit: 25, coin: 15, bg: 'cave' },
-  3: { label: 'Viết đoạn', hp: 300, hit: 15, coin: 40, bg: 'lava' },
+  1: { label: 'Mở bài', hp: 100, hit: 20, every: 3, coin: 10, bg: 'forest' },
+  2: { label: 'Mở đầu đoạn', hp: 150, hit: 20, every: 3, coin: 15, bg: 'cave' },
+  3: { label: 'Viết đoạn', hp: 300, hit: 15, every: 2, coin: 40, bg: 'lava' },
 };
+// Seconds per turn: with a word bank, and with only the Vietnamese meaning.
 const RAID_PACES = {
-  calm:   { label: 'Thong thả', bank: 40, type: 60 },
-  normal: { label: 'Vừa',       bank: 25, type: 45 },
-  quick:  { label: 'Gấp',       bank: 15, type: 30 },
+  calm:   { label: 'Thong thả', bank: 45, type: 60 },
+  normal: { label: 'Vừa',       bank: 30, type: 45 },
+  quick:  { label: 'Gấp',       bank: 20, type: 30 },
 };
 const RAID_BOSS_BLANKS = 8;
-const RAID_HEAL = 40;
+const RAID_HEAL = 40;     // health back between fights
+const RAID_POTION = 30;   // health back from the heal move
+const RAID_MANA = { atk: 25, crit: 35, heal: 15, copied: 10 };
+const RAID_ULT = 2.5;     // the special hits this many times as hard
+const RAID_ACTIONS = [
+  { id: 'atk',  icon: '⚔️', name: 'Tấn công', go: '⚔️ Chém' },
+  { id: 'heal', icon: '💚', name: 'Hồi máu',  go: '💚 Hồi máu' },
+  { id: 'ult',  icon: '✨', name: 'Tuyệt kỹ', go: '✨ Tung chiêu' },
+];
 let _raidPace = 'normal';
 try { const p = localStorage.getItem('raidPace'); if (RAID_PACES[p]) _raidPace = p; } catch (e) {}
 let _rd = null;
 let _raidStars = null;
 let _raidStarsFor = null;
+let _raidPick = null;
 
 // "{legal duty|nghĩa vụ pháp lý}" → a blank with its answer and meaning.
 function raidParse(t) {
@@ -17696,6 +17727,14 @@ function raidParse(t) {
 }
 function raidPlain(t) { return t.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'); }
 function raidNorm(s) { return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/[.,;:!?]+$/, '').replace(/\s+/g, ' ').trim(); }
+// One letter off counts as a spelling slip, which gets a gentler message.
+function raidNear(a, b) {
+  a = raidNorm(a); b = raidNorm(b);
+  if (Math.abs(a.length - b.length) > 1 || a === b) return false;
+  let i = 0;
+  while (i < a.length && a[i] === b[i]) i++;
+  return a.slice(i + 1) === b.slice(i + 1) || a.slice(i) === b.slice(i + 1) || a.slice(i + 1) === b.slice(i);
+}
 
 function raidEnemy(n, fi, tier, finalBoss) {
   if (tier === 3) return finalBoss ? RAID_BOSSES[n] : { icon: '🐗', name: 'Hộ vệ của ' + RAID_BOSSES[n].name };
@@ -17711,6 +17750,134 @@ function raidFights(L) {
     f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: p.s.slice(1), given: [p.s[0]], final: i === L.paras.length - 1 });
   });
   return f.map((x, i) => ({ ...x, enemy: raidEnemy(L.n, i, x.tier, x.final) }));
+}
+
+/* ── The hero ── */
+function raidGender() {
+  try { const g = localStorage.getItem('raidGender_' + walWho()); return g === 'm' || g === 'f' ? g : null; } catch (e) { return null; }
+}
+function raidHeroLook() { return walLook('hero'); }
+
+// A side-on chibi fighter facing right, toward the monster. The look comes
+// from the hero cosmetic; boys and girls differ in hair, brows and tunic.
+function raidHeroSvg(g, c) {
+  const k = (c && c.look) || COSMETICS.hero[0].look;
+  const f = g === 'f';
+  const skin = '#FFD9B8', skinD = '#F2B88F', ink = '#2B2140', boot = '#4A3326';
+  const P = [];
+  if (k.glow) P.push(`<circle cx="58" cy="62" r="50" fill="#FFE27A" opacity=".1"/><circle cx="58" cy="62" r="38" fill="#FFE27A" opacity=".14"/><path d="M58 4 V16 M58 108 V120 M4 62 H16 M100 62 H112 M20 24 l8 8 M96 24 l-8 8" stroke="#FFE27A" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>`);
+  if (k.cape) P.push(`<path d="M48 63 C30 76 25 98 29 116 L54 110 L58 68 Z" fill="${k.cape}"/><path d="M48 63 C38 80 36 98 38 113 L44 111 C43 96 46 80 52 66 Z" fill="#000" opacity=".12"/>`);
+  if (k.wpn === 'bow') P.push(`<g transform="rotate(-18 40 76)"><rect x="35" y="58" width="10" height="32" rx="3" fill="#8B5A2B"/><path d="M37 58 l2 -8 l2 8 M41 58 l2 -9 l2 9" stroke="#E04848" stroke-width="2.4" fill="none"/></g>`);
+  if (f) P.push(`<path d="M38 36 C25 58 28 84 41 96 C45 82 47 66 49 50 Z" fill="${k.hair}"/>`);
+  P.push(`<rect x="47" y="86" width="10" height="20" rx="4" fill="${k.dark}"/><path d="M46 102 H57 V108 H61 Q64 108 64 111 V114 H46 Z" fill="${boot}"/>`);
+  P.push(`<rect x="59" y="86" width="10" height="20" rx="4" fill="${k.dark}"/><path d="M58 102 H69 V108 H74 Q77 108 77 111 V114 H58 Z" fill="${boot}"/>`);
+  P.push(`<rect x="43" y="65" width="9" height="21" rx="4.5" fill="${k.dark}"/><circle cx="47.5" cy="87" r="4" fill="${skin}"/>`);
+  if (k.robe) P.push(`<path d="M43 63 Q57 57 71 63 L79 111 Q57 117 35 111 Z" fill="${k.body}"/><path d="M57 60 V114" stroke="${k.trim}" stroke-width="3"/><path d="M37 106 Q57 112 78 106" stroke="${k.trim}" stroke-width="3" fill="none"/>`);
+  else if (f) P.push(`<path d="M43 63 Q57 57 71 63 L77 96 Q57 102 37 96 Z" fill="${k.body}"/><rect x="41" y="82" width="32" height="5" rx="2" fill="${k.trim}"/><circle cx="62" cy="73" r="3.5" fill="${k.trim}"/>`);
+  else P.push(`<path d="M43 63 Q57 57 71 63 L73 92 Q57 97 41 92 Z" fill="${k.body}"/><rect x="41" y="84" width="32" height="5" rx="2" fill="${k.trim}"/><circle cx="62" cy="74" r="3.5" fill="${k.trim}"/>`);
+  P.push(`<circle cx="58" cy="40" r="22" fill="${skin}"/><ellipse cx="50" cy="44" rx="3.6" ry="5" fill="${skinD}"/>`);
+  P.push(`<ellipse cx="67" cy="42" rx="3" ry="4.3" fill="${ink}"/><circle cx="68.2" cy="40.3" r="1.3" fill="#fff"/>`);
+  P.push(f ? `<path d="M62.5 38.2 Q67 35.4 71.8 37.8 L74 36.4" stroke="${ink}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
+           : `<path d="M62.5 34.6 L71.5 33.4" stroke="${k.hair}" stroke-width="2.4" stroke-linecap="round"/>`);
+  P.push(`<circle cx="69" cy="50" r="3.3" fill="#FF9AA2" opacity=".55"/><path d="M72.5 51.5 Q75 53.5 77 51" stroke="#9A4A3A" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+  P.push(f ? `<path d="M38 58 C30 40 36 20 54 15 C70 11 82 20 81 34 C74 27 66 27 60 31 C56 27 50 29 48 38 L46 58 Z" fill="${k.hair}"/><circle cx="43" cy="28" r="3.6" fill="${k.trim}"/>`
+           : `<path d="M38 54 C32 40 36 22 52 16 C66 11 80 18 81 32 L76 28 L73 34 L68 26 L63 32 L58 25 L54 31 L50 27 L48 38 L46 54 Z" fill="${k.hair}"/>`);
+  if (k.gear === 'hat') P.push(`<path d="M41 30 C45 12 41 1 28 -7 C53 -5 67 9 75 29 Z" fill="${k.body}"/><path d="M31 31 Q58 38 85 29 L86 33 Q58 43 30 35 Z" fill="${k.dark}"/><path d="M42 27 Q58 32 74 27 L75 31 Q58 36 41 31 Z" fill="${k.trim}"/><path d="M52 11 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5 Z" fill="${k.trim}"/>`);
+  if (k.gear === 'cap') P.push(`<path d="M35 31 Q38 12 59 11 Q79 12 83 28 Q60 21 35 31 Z" fill="${k.body}"/><path d="M42 20 C30 9 22 10 16 3 C27 5 36 8 46 17 Z" fill="#E04848"/>`);
+  if (k.gear === 'band') P.push(`<path d="M36 29 Q58 23 81 29 L81 35 Q58 29 36 36 Z" fill="${k.trim}"/><path d="M38 31 C28 33 21 41 14 43 C23 37 28 33 37 29 Z M38 34 C30 40 26 48 19 54 C25 44 29 38 37 33 Z" fill="${k.trim}"/><path d="M61 48 Q71 46.5 80.5 45 L80 51 Q72 61 62 59 Q58 53 61 48 Z" fill="${k.body}"/>`);
+  if (k.gear === 'horns') P.push(`<path d="M46 19 C40 9 33 6 26 8 C35 10 39 16 41 23 Z M59 15 C57 5 51 0 44 0 C50 4 54 10 53 17 Z" fill="#F5E6C8" stroke="#B89A6A" stroke-width="1.2"/><path d="M37 30 Q58 22 81 29 L81 33 Q58 27 37 34 Z" fill="${k.trim}"/>`);
+  if (k.gear === 'crown') P.push(`<path d="M45 19 L46 6 L52 13 L57 3 L62 13 L68 7 L69 19 Q57 22 45 19 Z" fill="#FFD34D" stroke="#B8860B" stroke-width="1.2"/><circle cx="57" cy="14" r="2.2" fill="#E0304A"/>`);
+  P.push(`<line x1="63" y1="68" x2="82" y2="78" stroke="${k.dark}" stroke-width="9" stroke-linecap="round"/>`);
+  if (k.pad) P.push(`<circle cx="64" cy="67" r="7" fill="${k.body}" stroke="${k.dark}" stroke-width="2"/>`);
+  let w = '';
+  if (k.wpn === 'sword') w = `<g transform="rotate(38 83 78)"><rect x="81" y="78" width="4" height="12" rx="1.5" fill="#6B4A2B"/><rect x="75" y="74.5" width="16" height="4.5" rx="2" fill="${k.guard || k.trim}"/><path d="M80.5 75 V33 L83 26 L85.5 33 V75 Z" fill="${k.blade}" stroke="rgba(0,0,0,.25)" stroke-width="1"/><path d="M83 30 V73" stroke="#fff" stroke-width="1" opacity=".8"/></g>`;
+  if (k.wpn === 'katana') w = `<g transform="rotate(40 83 78)"><rect x="81.2" y="78" width="3.6" height="13" rx="1.5" fill="${k.trim}"/><ellipse cx="83" cy="77" rx="5" ry="1.8" fill="#C9A227"/><path d="M81.4 76 C80.5 58 81.5 42 86.5 26 C85 42 84.8 58 84.6 76 Z" fill="${k.blade}" stroke="rgba(0,0,0,.25)" stroke-width=".8"/></g>`;
+  if (k.wpn === 'staff') w = `<rect x="81.3" y="44" width="3.4" height="68" rx="1.7" fill="#7A4E2A"/><circle cx="83" cy="37" r="12" fill="${k.orb}" opacity=".3"/><circle cx="83" cy="37" r="7.5" fill="${k.orb}"/><circle cx="80.5" cy="34.5" r="2.2" fill="#fff" opacity=".85"/><path d="M78 44 Q83 40 88 44" stroke="${k.trim}" stroke-width="2.5" fill="none"/>`;
+  if (k.wpn === 'bow') w = `<path d="M77 48 Q93 78 77 108" stroke="#8B5A2B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M77 48 L71 78 L77 108" stroke="#EDE6D6" stroke-width="1.1" fill="none"/><path d="M71 78 H101" stroke="#6B4A2B" stroke-width="2"/><path d="M100 74.5 L107 78 L100 81.5 Z" fill="#B8C2CC"/><path d="M71 78 l-4 -3 M71 78 l-4 3" stroke="#E04848" stroke-width="2"/>`;
+  P.push(`<g class="rd-wpn">${w}</g><circle cx="83" cy="78" r="4.6" fill="${skin}"/>`);
+  return `<svg class="rd-hero-svg" viewBox="8 -12 104 130" aria-hidden="true">${P.join('')}</svg>`;
+}
+
+/* ── Picking a hero ── */
+async function raidHeroPick() {
+  raidStop();
+  tsStop();
+  twStop();
+  lvUnbindKeys();
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  root.innerHTML = '<div class="loading">Đang mở phòng thay đồ…</div>';
+  await walLoad();
+  _raidPick = { g: raidGender() || 'm', id: raidHeroLook().id };
+  raidRenderPick();
+}
+function raidRenderPick() {
+  const root = document.getElementById('lesson-vocab-root');
+  const p = _raidPick;
+  if (!root || !p) return;
+  const c = COSMETICS.hero.find(x => x.id === p.id) || COSMETICS.hero[0];
+  const first = !raidGender();
+  const worn = raidHeroLook().id;
+  root.innerHTML = `
+    <div class="lv-wrap rd-pick">
+      <div class="rd-map-top">
+        <button class="btn-back-plain" onclick="${first ? 'lvRenderHub()' : 'raidPickDone()'}">← ${first ? 'Chọn buổi' : 'Bản đồ'}</button>
+        <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+      </div>
+      <div class="rd-map-title">Chọn nhân vật</div>
+      <div class="rd-pick-stage rd-bg--cave">
+        <div class="rd-embers"></div>
+        <div class="rd-pick-hero rd-fighter">${raidHeroSvg(p.g, c)}</div>
+        <div class="rd-pick-info">
+          <div class="rd-pick-name">${escapeHtml(c.name)}</div>
+          <div class="rd-pick-ult" style="--c: ${c.fx}">${c.rain} Tuyệt kỹ: ${escapeHtml(c.ult)}</div>
+          ${walOwns(c.id) ? '' : `<div class="rd-pick-lock">🔒 ${RARITY[c.rarity].label} · ${c.price} 🪙</div>`}
+        </div>
+      </div>
+      <div class="rd-pick-g">
+        <button class="rd-g${p.g === 'm' ? ' on' : ''}" onclick="raidPickGender('m')">👦 Nam</button>
+        <button class="rd-g${p.g === 'f' ? ' on' : ''}" onclick="raidPickGender('f')">👧 Nữ</button>
+      </div>
+      <div class="rd-pick-grid">${COSMETICS.hero.map(h => {
+        const idArg = h.id ? `'${h.id}'` : 'null';
+        let btn;
+        if (worn === h.id) btn = '<span class="rd-pick-tag">✓ Đang dùng</span>';
+        else if (walOwns(h.id)) btn = `<button class="vb-secondary-btn wal-buy" onclick="event.stopPropagation(); raidPickWear(${idArg})">Dùng</button>`;
+        else btn = `<button class="vb-start-btn wal-buy" onclick="event.stopPropagation(); raidPickBuy('${h.id}', this)" ${walCoins() < h.price ? 'disabled' : ''}>${walCoins() < h.price ? `🔒 ${h.price} 🪙` : `Mua · ${h.price} 🪙`}</button>`;
+        return `<div class="rd-pick-card wal-r-${h.id ? h.rarity : 'free'}${h.id === p.id ? ' sel' : ''}" onclick="raidPickSee(${idArg})" role="button" tabindex="0">
+          <div class="rd-pick-mini">${raidHeroSvg(p.g, h)}</div>
+          <div class="rd-pick-cname">${escapeHtml(h.name)}</div>
+          <div class="rd-pick-cult">${h.rain} ${escapeHtml(h.ult)}</div>
+          ${btn}
+        </div>`;
+      }).join('')}</div>
+      <button class="vb-start-btn rd-pick-go" onclick="raidPickDone()">⚔️ Vào hầm ngục</button>
+      <div class="rd-pick-note">Trang phục đổi hình, vũ khí và hiệu ứng tuyệt kỹ. Sức mạnh của mọi nhân vật như nhau. Kiếm xu ở mọi trò để mở thêm.</div>
+    </div>`;
+}
+function raidPickGender(g) { _raidPick.g = g; tsSfx('equip'); raidRenderPick(); }
+function raidPickSee(id) { _raidPick.id = id; tsSfx('key'); raidRenderPick(); }
+async function raidPickWear(id) {
+  _raidPick.id = id;
+  const done = walEquip('hero', id);
+  raidRenderPick();
+  await done;
+  if (_raidPick) raidRenderPick();
+}
+async function raidPickBuy(id, btn) {
+  _raidPick.id = id;
+  await walBuy(id, btn);
+  if (_raidPick) raidRenderPick();
+}
+// Leaving the room wears the hero on show, if the student owns it.
+function raidPickDone() {
+  const p = _raidPick;
+  if (p) {
+    lvSave('raidGender_' + walWho(), p.g);
+    if (walOwns(p.id) && raidHeroLook().id !== p.id) walEquip('hero', p.id);
+  }
+  _raidPick = null;
+  raidMap();
 }
 
 /* ── Progress ── */
@@ -17743,11 +17910,13 @@ async function raidMap() {
   lvUnbindKeys();
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
+  if (!raidGender()) { raidHeroPick(); return; }
   root.innerHTML = '<div class="loading">Đang mở bản đồ…</div>';
   const [stars] = await Promise.all([raidLoadStars(), walLoad()]);
   if (!document.getElementById('lesson-vocab-root')) return;
   const total = Object.values(stars).reduce((a, b) => a + b, 0);
   const titles = Object.fromEntries(LESSON_VOCAB.map(l => [l.n, l.title]));
+  const look = raidHeroLook();
   root.innerHTML = `
     <div class="lv-wrap rd-mapwrap">
       <div class="rd-map-top">
@@ -17756,7 +17925,11 @@ async function raidMap() {
       </div>
       <div class="rd-map-head">
         <div class="rd-map-title">⚔️ Hầm ngục chữ</div>
-        <div class="rd-map-sub">Mỗi buổi là một hầm ngục. Hạ yêu tinh ở câu mở bài, hạ quỷ ở câu mở đoạn, rồi đánh boss bằng cả đoạn văn. Mỗi lượt có đồng hồ, hết giờ là mất lượt. Bị đánh trúng không quá 2 lần cả hầm ngục là được 3 sao.</div>
+        <button class="rd-hero-btn" onclick="raidHeroPick()" title="Đổi nhân vật">
+          <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
+          <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
+        </button>
+        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Sai không quá 2 lần cả hầm ngục là được 3 sao.</div>
         <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 3} sao</div>
         <div class="rd-pace"><span>Thời gian mỗi lượt</span>${Object.entries(RAID_PACES).map(([k, p]) => `<button class="vb-chip${_raidPace === k ? ' active' : ''}" onclick="raidSetPace('${k}')">${p.label} · ${p.bank}s</button>`).join('')}</div>
       </div>
@@ -17782,7 +17955,11 @@ function raidStart(n) {
   const L = RAID_LESSONS.find(x => x.n === n);
   if (!L) return;
   raidStop();
-  _rd = { L, fights: raidFights(L), fi: 0, hp: 100, hitsTaken: 0, coins: 0, crits: 0, shield: false, fight: null, timer: 0, busy: false, done: false };
+  _rd = {
+    L, fights: raidFights(L), fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
+    gender: raidGender() || 'm', look: raidHeroLook(),
+  };
   document.addEventListener('keydown', raidOnKey);
   tsSfx('boss');
   raidBeginFight();
@@ -17800,23 +17977,27 @@ function raidBeginFight() {
     const step = blanks.length / RAID_BOSS_BLANKS;
     blanks = Array.from({ length: RAID_BOSS_BLANKS }, (_, i) => blanks[Math.floor(i * step)]);
   }
-  blanks.forEach(b => { b.done = false; b.wrongs = 0; b.removed = []; b.reveal = 0; b.bank = F.tier < 3; });
+  blanks.forEach(raidResetBlank);
   const pool = [...new Set(RAID_LESSONS.flatMap(x => [x.thesis, ...x.paras.flatMap(p => p.s)]).flatMap(line => raidParse(line.t).filter(p => typeof p !== 'string').map(p => p.ans)))];
-  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, pool, own: blanks.map(b => b.ans) };
+  // Attacking on every turn brings the monster down on the last blank.
+  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, dmg: Math.ceil(tier.hp / blanks.length), cd: tier.every, stun: false, pool, own: blanks.map(b => b.ans) };
   g.busy = false;
   raidRenderArena();
   raidNextTurn();
 }
+function raidResetBlank(b) {
+  b.done = false; b.wrongs = 0; b.removed = []; b.reveal = 0; b.choices = null; b.hinted = false; b.shown = false;
+  b.bank = !_rd || !_rd.fights || _rd.fights[_rd.fi].tier < 3;
+}
 
-// Four choices: the answer and three others, closest in length first, taken
-// from this fight before the rest of the lessons.
+// Four words to read from: the answer and three others, closest in length
+// first, taken from this fight before the rest of the lessons.
 function raidChoices(b) {
   const f = _rd.fight;
   const len = b.ans.split(' ').length;
   const others = [...new Set([...f.own, ...vbShuffle(f.pool)])].filter(a => raidNorm(a) !== raidNorm(b.ans));
   others.sort((x, y) => Math.abs(x.split(' ').length - len) - Math.abs(y.split(' ').length - len));
-  const near = others.slice(0, 10);
-  return vbShuffle([b.ans, ...vbShuffle(near).slice(0, 3)]);
+  return vbShuffle([b.ans, ...vbShuffle(others.slice(0, 10)).slice(0, 3)]);
 }
 
 function raidRenderArena() {
@@ -17837,12 +18018,20 @@ function raidRenderArena() {
       <div class="rd-stage rd-bg--${f.tier.bg}" id="rd-stage">
         <div class="rd-embers"></div>
         <div class="rd-side rd-hero-side">
-          <div class="rd-bar"><div class="rd-bar-name">${escapeHtml((currentUser && currentUser.name) || 'Hiệp sĩ')}</div><div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--hero" id="rd-hero-hp"></div></div><div class="rd-hp-num" id="rd-hero-num"></div></div>
-          <div class="rd-fighter rd-hero" id="rd-hero">🤺<div class="rd-shield-fx" id="rd-shield-fx"></div></div>
+          <div class="rd-bar">
+            <div class="rd-bar-name">${escapeHtml((currentUser && currentUser.name) || g.look.name)}</div>
+            <div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--hero" id="rd-hero-hp"></div><span class="rd-hp-num" id="rd-hero-num"></span></div>
+            <div class="rd-mp" id="rd-mp"><div class="rd-mp-fill" id="rd-mana"></div><span class="rd-hp-num" id="rd-mana-num"></span></div>
+          </div>
+          <div class="rd-fighter rd-hero" id="rd-hero">${raidHeroSvg(g.gender, g.look)}<div class="rd-shield-fx" id="rd-shield-fx"></div></div>
         </div>
         <div class="rd-clock" id="rd-clock"><span id="rd-clock-n"></span></div>
         <div class="rd-side rd-enemy-side">
-          <div class="rd-bar"><div class="rd-bar-name">${escapeHtml(F.enemy.name)} <small>· ${escapeHtml(f.tier.label)}</small></div><div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--enemy" id="rd-enemy-hp"></div></div><div class="rd-hp-num" id="rd-enemy-num"></div></div>
+          <div class="rd-bar">
+            <div class="rd-bar-name">${escapeHtml(F.enemy.name)} <small>· ${escapeHtml(f.tier.label)}</small></div>
+            <div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--enemy" id="rd-enemy-hp"></div><span class="rd-hp-num" id="rd-enemy-num"></span></div>
+            <div class="rd-intent" id="rd-intent"></div>
+          </div>
           <div class="rd-fighter rd-enemy${F.tier === 3 ? ' rd-enemy--boss' : ''}" id="rd-enemy">${F.enemy.icon}</div>
         </div>
         <div class="rd-banner hidden" id="rd-banner"></div>
@@ -17859,13 +18048,24 @@ function raidRenderArena() {
 
 function raidRenderBars() {
   const g = _rd;
-  const f = g.fight;
-  const set = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = Math.max(0, pct) + '%'; };
+  const f = g && g.fight;
+  if (!f) return;
+  const set = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = Math.max(0, Math.min(100, pct)) + '%'; };
+  const txt = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
   set('rd-hero-hp', g.hp);
   set('rd-enemy-hp', f.enemyHp / f.tier.hp * 100);
-  const hn = document.getElementById('rd-hero-num'); if (hn) hn.textContent = `${Math.max(0, g.hp)} / 100`;
-  const en = document.getElementById('rd-enemy-num'); if (en) en.textContent = `${Math.max(0, Math.round(f.enemyHp))} / ${f.tier.hp}`;
+  set('rd-mana', g.mana);
+  txt('rd-hero-num', `${Math.max(0, g.hp)}/100`);
+  txt('rd-enemy-num', `${Math.max(0, Math.round(f.enemyHp))}/${f.tier.hp}`);
+  txt('rd-mana-num', g.mana >= 100 ? '✨ ĐẦY' : `✨ ${g.mana}`);
+  document.getElementById('rd-mp')?.classList.toggle('full', g.mana >= 100);
   document.getElementById('rd-shield-fx')?.classList.toggle('on', g.shield);
+  const it = document.getElementById('rd-intent');
+  if (it) {
+    it.className = 'rd-intent' + (f.stun ? ' stun' : f.cd <= 1 ? ' soon' : '');
+    it.textContent = f.stun ? '💫 Choáng, bỏ lượt đánh' : f.cd <= 1 ? '💢 Lượt sau quái đánh!' : `💢 Quái đánh sau ${f.cd} lượt`;
+  }
+  raidRenderActs();
 }
 
 function raidRenderText() {
@@ -17887,50 +18087,115 @@ function raidRenderText() {
   el.querySelector('.rd-slot.now')?.scrollIntoView({ block: 'nearest' });
 }
 
-function raidRenderPanel(result) {
+// The three moves. The special only opens with a full mana bar, and healing
+// is closed while health is full.
+function raidActOpen(id) {
+  const g = _rd;
+  if (id === 'ult') return g.mana >= 100;
+  if (id === 'heal') return g.hp < 100;
+  return true;
+}
+function raidRenderActs() {
+  const g = _rd;
+  const el = document.getElementById('rd-acts');
+  if (!g || !el) return;
+  if (!raidActOpen(g.action)) g.action = 'atk';
+  const f = g.fight;
+  const sub = { atk: `-${f.dmg} máu quái · +${RAID_MANA.atk} mana`, heal: `+${RAID_POTION} máu · +${RAID_MANA.heal} mana`, ult: g.mana >= 100 ? `${g.look.ult} · x${RAID_ULT}` : `cần đầy mana (${g.mana}/100)` };
+  el.innerHTML = RAID_ACTIONS.map(a => `
+    <button class="rd-act rd-act--${a.id}${g.action === a.id ? ' on' : ''}${a.id === 'ult' && g.mana >= 100 ? ' ready' : ''}" onclick="raidSetAction('${a.id}')" ${raidActOpen(a.id) ? '' : 'disabled'} style="--c: ${g.look.fx}">
+      <span class="rd-act-i">${a.id === 'ult' ? g.look.rain : a.icon}</span>
+      <span class="rd-act-t"><b>${a.name}</b><small>${escapeHtml(sub[a.id])}</small></span>
+    </button>`).join('');
+  const go = document.getElementById('rd-go');
+  if (go) {
+    go.textContent = RAID_ACTIONS.find(a => a.id === g.action).go;
+    go.className = 'vb-start-btn rd-go rd-go--' + g.action;
+  }
+}
+function raidSetAction(id) {
+  const g = _rd;
+  if (!g || g.busy || !raidActOpen(id)) return;
+  if (g.action !== id) tsSfx(id === 'ult' ? 'double' : 'equip');
+  g.action = id;
+  raidRenderActs();
+  document.getElementById('rd-input')?.focus();
+}
+
+function raidRenderPanel() {
   const g = _rd;
   const f = g.fight;
   const panel = document.getElementById('rd-panel');
   if (!panel) return;
   const b = f.blanks[f.bi];
   if (!b) { panel.innerHTML = ''; return; }
-  const items = `
+  const copied = b.wrongs >= 3;
+  let clue = '';
+  if (f.F.tier === 3) {
+    const mask = b.ans.split('').map((ch, i) => (i < Math.max(1, b.reveal) || ch === ' ' || ch === '-' || ch === "'" ? ch : '_')).join('');
+    clue += `<div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>`;
+    if (!copied) clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
+  }
+  if (b.bank && !copied) {
+    if (!b.choices) b.choices = raidChoices(b);
+    clue += `<div class="rd-opts" title="Gõ lại từ đúng vào ô bên dưới">${b.choices.map((c, i) => `<span class="rd-opt${b.removed.includes(i) ? ' off' : ''}">${escapeHtml(c)}</span>`).join('')}</div>`;
+  }
+  if (copied) clue += `<div class="rd-answer">Đáp án là <b>${escapeHtml(b.ans)}</b>. Gõ lại đúng từ này để ra đòn.</div>`;
+  panel.innerHTML = `
+    <div class="rd-turn">${b.review ? '🔁 Ôn lại · ' : ''}Ô số ${f.bi + 1} · ${b.bank && !copied ? 'nhìn kho từ rồi gõ từ đúng' : copied ? 'gõ lại đáp án' : 'gõ từ tiếng Anh'}</div>
+    ${clue}
+    <div class="rd-acts" id="rd-acts"></div>
+    <div class="rd-typebar">
+      <input class="ts-input rd-input" id="rd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="Gõ từ còn thiếu rồi Enter" aria-label="Gõ từ còn thiếu">
+      <button class="vb-start-btn rd-go" id="rd-go" onclick="raidSubmit()"></button>
+    </div>
     <div class="rd-items">
-      <button class="rd-item" onclick="raidHint()" ${walCount('hint') && !b.hinted ? '' : 'disabled'} title="Bỏ 2 lựa chọn sai, hoặc hiện kho từ khi phải tự gõ">💡 <b>${walCount('hint')}</b></button>
+      <span class="rd-keys">↑ ↓ đổi đòn · Enter ra đòn</span>
+      <button class="rd-item" onclick="raidHint()" ${walCount('hint') && !b.hinted && !copied ? '' : 'disabled'} title="${b.bank ? 'Gạch 2 từ sai trong kho từ' : 'Hiện kho từ'}">💡 <b>${walCount('hint')}</b></button>
       <button class="rd-item${g.shield ? ' on' : ''}" onclick="raidShield()" ${walCount('shield') && !g.shield ? '' : 'disabled'} title="Đỡ đòn đánh tiếp theo của quái">🛡️ <b>${g.shield ? 'bật' : walCount('shield')}</b></button>
       <span class="rd-item rd-item--static" title="Hồi sinh khi hết máu">💖 <b>${walCount('revive')}</b></span>
     </div>`;
-  const label = `<div class="rd-turn">Lượt ${f.bi + 1} / ${f.blanks.length} · ${b.bank ? 'chọn từ đúng' : 'gõ từ đúng'}</div>`;
-  if (b.bank) {
-    if (!b.choices) b.choices = raidChoices(b);
-    // The word bank stands alone in the first two fights; a boss blank that
-    // was opened with a hint keeps its Vietnamese meaning above the bank.
-    panel.innerHTML = label + `
-      ${f.F.tier === 3 ? `<div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>` : ''}
-      <div class="rd-bank">${b.choices.map((c, i) => `<button class="rd-choice" onclick="raidPick(${i})" ${b.removed.includes(i) ? 'disabled' : ''}><kbd>${i + 1}</kbd>${escapeHtml(c)}</button>`).join('')}</div>` + items;
-  } else {
-    const mask = b.ans.split('').map((c, i) => (i < Math.max(1, b.reveal) || c === ' ' || c === '-' || c === "'" ? c : '_')).join('');
-    panel.innerHTML = label + `
-      <div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>
-      <div class="rd-mask">${escapeHtml(mask)}</div>
-      <div class="rd-typebar">
-        <input class="ts-input rd-input" id="rd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="Gõ từ tiếng Anh" aria-label="Gõ từ tiếng Anh">
-        <button class="vb-start-btn rd-go" onclick="raidSubmit()">⚔️ Chém</button>
-      </div>` + items;
-    const inp = document.getElementById('rd-input');
-    if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); raidSubmit(); } }); }
+  raidRenderActs();
+  const inp = document.getElementById('rd-input');
+  if (inp) {
+    inp.focus();
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); raidSubmit(); return; }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const open = RAID_ACTIONS.filter(a => raidActOpen(a.id)).map(a => a.id);
+        const i = open.indexOf(g.action);
+        raidSetAction(open[(i + (e.key === 'ArrowDown' ? 1 : open.length - 1)) % open.length]);
+      }
+    });
   }
-  if (result) panel.classList.add(result);
 }
 
 /* ── Turns ── */
+// The next open blank, in order. Once every blank is filled and the monster
+// still stands, the words that went wrong come back for another go.
+function raidNextBlank() {
+  const f = _rd.fight;
+  let i = f.blanks.findIndex(b => !b.done);
+  if (i < 0) {
+    const weak = f.blanks.filter(b => b.missed);
+    const from = (weak.length ? weak : f.blanks).filter(b => f.blanks.indexOf(b) !== f.bi);
+    const b = (from.length ? from : f.blanks)[Math.floor(Math.random() * (from.length || f.blanks.length))];
+    raidResetBlank(b);
+    b.review = true;
+    b.missed = false;
+    i = f.blanks.indexOf(b);
+  }
+  f.bi = i;
+}
+
 function raidNextTurn() {
   const g = _rd;
-  const f = g.fight;
-  while (f.blanks[f.bi] && f.blanks[f.bi].done) f.bi++;
-  if (!f.blanks[f.bi]) return;
+  if (!g || !g.fight) return;
+  raidNextBlank();
+  const b = g.fight.blanks[g.fight.bi];
   g.busy = false;
-  const b = f.blanks[f.bi];
+  g.action = 'atk';
   const pace = RAID_PACES[_raidPace];
   g.tMax = b.bank ? pace.bank : pace.type;
   g.tLeft = g.tMax;
@@ -17969,15 +18234,6 @@ function raidClock() {
   el.classList.toggle('late', g.tLeft <= 5);
 }
 
-function raidPick(i) {
-  const g = _rd;
-  if (!g || g.busy) return;
-  const b = g.fight.blanks[g.fight.bi];
-  if (!b || !b.bank || b.removed.includes(i)) return;
-  if (raidNorm(b.choices[i]) === raidNorm(b.ans)) raidHit();
-  else { b.removed.push(i); raidMiss(false); }
-}
-
 function raidSubmit() {
   const g = _rd;
   if (!g || g.busy) return;
@@ -17986,47 +18242,138 @@ function raidSubmit() {
   if (!b || !inp) return;
   const typed = inp.value.trim();
   if (!typed) { inp.focus(); return; }
-  if (raidNorm(typed) === raidNorm(b.ans)) raidHit();
+  if (raidNorm(typed) === raidNorm(b.ans)) raidAct();
   else raidMiss(false, typed);
 }
 
-// A right word: the hero strikes. Fast answers land as a critical.
-function raidHit(auto) {
+// Right words: the chosen move lands. A fast answer is a critical. A word
+// typed from the shown answer still lands, for less mana and no coins.
+function raidAct() {
   const g = _rd;
   const f = g.fight;
   const b = f.blanks[f.bi];
+  const kind = raidActOpen(g.action) ? g.action : 'atk';
   g.busy = true;
   clearInterval(g.timer);
+  const copied = b.wrongs >= 3;
   b.done = true;
-  if (auto) b.shown = true;
-  const left = f.blanks.filter(x => !x.done).length;
-  const dmg = left === 0 ? f.enemyHp : Math.round(f.tier.hp / f.blanks.length);
-  f.enemyHp = Math.max(0, f.enemyHp - dmg);
-  const crit = !auto && g.tLeft > g.tMax * 0.6;
-  const coin = (auto ? 0 : crit ? 2 : 1) * walMult();
+  if (copied) b.shown = true;
+  const crit = !copied && g.tLeft > g.tMax * 0.6;
+  const coin = copied ? 0 : (crit ? 2 : 1) * walMult();
   g.coins += coin;
   if (crit) g.crits++;
-  raidAnim('rd-hero', 'lunge');
-  setTimeout(() => {
-    raidAnim('rd-enemy', 'hurt');
-    raidSlash();
-    raidDamage('rd-enemy', `-${dmg}`, crit ? 'crit' : '');
-    if (crit) raidBanner('CHÍ MẠNG! ⚡', 'crit');
-    tsSfx(crit ? 'callout' : 'kill', 8);
-    jBuzz(crit ? [20, 30, 40] : 15);
-    raidRenderBars();
-    raidRenderText();
+  const manaBefore = g.mana;
+  const gain = kind === 'ult' ? 0 : copied ? RAID_MANA.copied : kind === 'heal' ? RAID_MANA.heal : crit ? RAID_MANA.crit : RAID_MANA.atk;
+  g.mana = kind === 'ult' ? 0 : Math.min(100, g.mana + gain);
+  const coinFly = () => {
     const e = document.getElementById('rd-enemy')?.getBoundingClientRect();
     if (e && coin) jCoinFly(e.left + e.width / 2, e.top + e.height / 2, 'wal-mini');
-  }, 180);
-  setTimeout(() => {
+  };
+  const after = wait => setTimeout(() => {
     if (_rd !== g) return;
-    if (f.enemyHp <= 0) raidWinFight(); else { f.bi++; raidNextTurn(); }
-  }, crit ? 1100 : 850);
+    if (g.mana >= 100 && manaBefore < 100) { raidBanner('✨ Đầy mana! Tuyệt kỹ sẵn sàng', 'ult'); tsSfx('double'); }
+    if (f.enemyHp <= 0) { raidWinFight(); return; }
+    raidEnemyTurn();
+  }, wait);
+
+  if (kind === 'heal') {
+    const got = Math.min(RAID_POTION, 100 - g.hp);
+    g.hp += got;
+    raidAnim('rd-hero', 'heal');
+    raidDamage('rd-hero', `+${got}`, 'heal');
+    raidSparkle('rd-hero', '💚', 6);
+    if (crit) raidBanner('Nhanh tay! +mana ⚡', 'crit');
+    tsSfx('power');
+    jBuzz(20);
+    raidRenderBars();
+    raidRenderText();
+    coinFly();
+    after(900);
+    return;
+  }
+  const dmg = Math.round(f.dmg * (kind === 'ult' ? RAID_ULT : crit ? 1.5 : 1));
+  const land = () => {
+    if (_rd !== g) return;
+    f.enemyHp = Math.max(0, f.enemyHp - dmg);
+    raidAnim('rd-enemy', 'hurt');
+    if (kind !== 'ult') raidSlash();
+    raidDamage('rd-enemy', `-${dmg}`, kind === 'ult' ? 'ult' : crit ? 'crit' : '');
+    if (crit && kind !== 'ult') raidBanner('CHÍ MẠNG! ⚡', 'crit');
+    tsSfx(crit || kind === 'ult' ? 'callout' : 'kill', 8);
+    jBuzz(kind === 'ult' ? [40, 30, 60, 30, 90] : crit ? [20, 30, 40] : 15);
+    raidRenderBars();
+    raidRenderText();
+    coinFly();
+  };
+  if (kind === 'ult') {
+    g.ults++;
+    f.stun = true;
+    raidUltFx(g.look, land);
+    after(2000);
+    return;
+  }
+  if (g.look.shot) {
+    raidAnim('rd-hero', 'cast');
+    raidShoot(g.look.shot, g.look.fx, land);
+  } else {
+    raidAnim('rd-hero', 'lunge');
+    setTimeout(land, 180);
+  }
+  after(crit ? 1100 : 850);
 }
 
-// A wrong word or the clock running out: the turn is lost and the monster
-// strikes back. The blank stays; a third miss shows the answer.
+// The monster's side of a turn: it counts down to its strike. A stunned
+// monster loses its strike and starts counting again.
+function raidEnemyTurn() {
+  const g = _rd;
+  const f = g.fight;
+  if (f.stun) {
+    f.stun = false;
+    f.cd = f.tier.every;
+    raidDamage('rd-enemy', '💫', 'block');
+    raidNextTurn();
+    return;
+  }
+  f.cd--;
+  raidRenderBars();
+  if (f.cd > 0) { raidNextTurn(); return; }
+  f.cd = f.tier.every;
+  raidStrike(() => raidNextTurn());
+}
+
+// One monster strike, which a shield soaks up.
+function raidStrike(then) {
+  const g = _rd;
+  const f = g.fight;
+  raidAnim('rd-enemy', 'lunge-l');
+  setTimeout(() => {
+    if (_rd !== g) return;
+    if (g.shield) {
+      g.shield = false;
+      raidDamage('rd-hero', '🛡️ Đỡ!', 'block');
+      tsSfx('shield');
+      jBuzz([40, 30, 40]);
+    } else {
+      g.hp -= f.tier.hit;
+      g.hitsTaken++;
+      raidAnim('rd-hero', 'hurt');
+      raidAnim('rd-stage', 'quake');
+      raidDamage('rd-hero', `-${f.tier.hit}`, 'hero');
+      tsSfx('miss');
+      jBuzz(90);
+    }
+    raidRenderBars();
+  }, 200);
+  setTimeout(() => {
+    if (_rd !== g) return;
+    if (g.hp <= 0) { raidDown(); return; }
+    then();
+  }, 900);
+}
+
+// Wrong words or the clock running out: the move fails and the monster
+// strikes at once. The blank stays; the third miss shows the answer, which
+// then has to be typed.
 function raidMiss(timeout, typed) {
   const g = _rd;
   const f = g.fight;
@@ -18035,48 +18382,27 @@ function raidMiss(timeout, typed) {
   g.busy = true;
   clearInterval(g.timer);
   b.wrongs++;
-  if (!b.bank) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
-  raidBanner(timeout ? '⌛ Hết giờ! Mất lượt' : '✗ Chưa đúng! Mất lượt', 'miss');
-  if (!timeout && typed) {
+  b.missed = true;
+  g.misses++;
+  if (f.F.tier === 3) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
+  const near = typed && raidNear(typed, b.ans);
+  raidBanner(timeout ? '⌛ Hết giờ! Quái đánh' : near ? '✏️ Suýt đúng, sai chính tả!' : '✗ Chưa đúng! Quái đánh', 'miss');
+  if (typed) {
     const inp = document.getElementById('rd-input');
     if (inp) { inp.classList.remove('ts-shake'); void inp.offsetWidth; inp.classList.add('ts-shake'); }
   }
   tsSfx('wrong');
+  f.cd = f.tier.every;
   setTimeout(() => {
     if (_rd !== g) return;
-    raidAnim('rd-enemy', 'lunge-l');
-    setTimeout(() => {
-      if (_rd !== g) return;
-      if (g.shield) {
-        g.shield = false;
-        raidDamage('rd-hero', '🛡️ Đỡ!', 'block');
-        tsSfx('shield');
-        jBuzz([40, 30, 40]);
-      } else {
-        const hit = f.tier.hit;
-        g.hp -= hit;
-        g.hitsTaken++;
-        raidAnim('rd-hero', 'hurt');
-        raidAnim('rd-stage', 'quake');
-        raidDamage('rd-hero', `-${hit}`, 'hero');
-        tsSfx('miss');
-        jBuzz(90);
-      }
-      raidRenderBars();
-    }, 200);
+    raidStrike(() => {
+      if (b.wrongs === 3) raidBanner(`Đáp án: ${b.ans}`, 'reveal');
+      raidNextTurn();
+    });
   }, 500);
-  setTimeout(() => {
-    if (_rd !== g) return;
-    if (g.hp <= 0) { raidDown(); return; }
-    if (b.wrongs >= 3) {
-      raidBanner(`Đáp án: ${b.ans}`, 'reveal');
-      setTimeout(() => { if (_rd === g) raidHit(true); }, 1300);
-      return;
-    }
-    raidNextTurn();
-  }, 1400);
 }
 
+/* ── Effects ── */
 function raidAnim(id, cls) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -18110,22 +18436,110 @@ function raidBanner(text, kind) {
   void b.offsetWidth;
   b.classList.add('show');
 }
+// Where an element sits inside the stage.
+function raidSpot(id) {
+  const st = document.getElementById('rd-stage');
+  const el = document.getElementById(id);
+  if (!st || !el) return null;
+  const s = st.getBoundingClientRect(), r = el.getBoundingClientRect();
+  return { st, x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+}
+function raidSparkle(id, icon, n) {
+  const p = raidSpot(id);
+  if (!p) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span');
+    s.className = 'rd-spark';
+    s.textContent = icon;
+    s.style.left = (p.x + p.w * (0.15 + Math.random() * 0.7)) + 'px';
+    s.style.top = (p.y + p.h * (0.4 + Math.random() * 0.5)) + 'px';
+    s.style.animationDelay = (i * 70) + 'ms';
+    p.st.appendChild(s);
+    setTimeout(() => s.remove(), 1200);
+  }
+}
+// A bolt, orb or arrow from the hero to the monster.
+function raidShoot(icon, color, done) {
+  const h = raidSpot('rd-hero'), e = raidSpot('rd-enemy');
+  if (!h || !e) { done(); return; }
+  const p = document.createElement('div');
+  p.className = 'rd-proj';
+  p.textContent = icon;
+  p.style.setProperty('--c', color);
+  const x0 = h.x + h.w * 0.85, y0 = h.y + h.h * 0.45, x1 = e.x + e.w * 0.35, y1 = e.y + e.h * 0.5;
+  p.style.left = x0 + 'px';
+  p.style.top = y0 + 'px';
+  h.st.appendChild(p);
+  tsSfx('slow');
+  const a = p.animate([
+    { transform: 'translate(-50%, -50%) scale(0.6)' },
+    { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(1.25)` },
+  ], { duration: 280, easing: 'ease-in' });
+  a.onfinish = () => { p.remove(); done(); };
+}
+// The special: a cut-in with the hero, a flash, then a rain on the monster.
+function raidUltFx(look, land) {
+  const st = document.getElementById('rd-stage');
+  if (!st) { land(); return; }
+  const cut = document.createElement('div');
+  cut.className = 'rd-cutin';
+  cut.style.setProperty('--c', look.fx);
+  cut.innerHTML = `<div class="rd-cutin-hero">${raidHeroSvg(_rd.gender, look)}</div><div class="rd-cutin-t"><small>TUYỆT KỸ</small>${escapeHtml(look.ult)}</div>`;
+  st.appendChild(cut);
+  tsSfx('callout');
+  jBuzz([20, 30, 20]);
+  setTimeout(() => {
+    cut.remove();
+    if (!document.getElementById('rd-stage')) return;
+    const fl = document.createElement('div');
+    fl.className = 'rd-ultflash';
+    fl.style.setProperty('--c', look.fx);
+    st.appendChild(fl);
+    setTimeout(() => fl.remove(), 700);
+    const e = raidSpot('rd-enemy');
+    if (e) for (let i = 0; i < 12; i++) {
+      const r = document.createElement('span');
+      r.className = 'rd-rain';
+      r.textContent = look.rain;
+      const x = e.x + e.w / 2 + (Math.random() - 0.5) * 120;
+      r.style.left = x + 'px';
+      r.style.top = '-40px';
+      st.appendChild(r);
+      r.animate([
+        { transform: 'translate(-50%, 0) scale(0.7)', opacity: 0 },
+        { opacity: 1, offset: 0.2 },
+        { transform: `translate(calc(-50% + ${(e.x + e.w / 2 - x) * 0.6}px), ${e.y + e.h * 0.5 + 40}px) scale(1.3)`, opacity: 1 },
+      ], { duration: 420, delay: i * 45, easing: 'ease-in', fill: 'backwards' }).onfinish = () => r.remove();
+    }
+    tsSfx('rankup');
+    raidAnim('rd-stage', 'quake');
+    setTimeout(land, 450);
+  }, 950);
+}
 
 /* ── Items ── */
 function raidHint() {
   const g = _rd;
   if (!g || g.busy) return;
   const b = g.fight.blanks[g.fight.bi];
-  if (!b || b.hinted || !walUse('hint')) return;
+  if (!b || b.hinted || b.wrongs >= 3 || !walUse('hint')) return;
   b.hinted = true;
+  const inp = document.getElementById('rd-input');
+  const typed = inp ? inp.value : '';
   if (b.bank) {
+    if (!b.choices) b.choices = raidChoices(b);
     const wrong = b.choices.map((c, i) => (raidNorm(c) === raidNorm(b.ans) || b.removed.includes(i) ? -1 : i)).filter(i => i >= 0);
     b.removed.push(...vbShuffle(wrong).slice(0, 2));
   } else {
     b.bank = true;
   }
   tsSfx('power');
+  const action = g.action;
   raidRenderPanel();
+  g.action = action;
+  raidRenderActs();
+  const again = document.getElementById('rd-input');
+  if (again) again.value = typed;
 }
 function raidShield() {
   const g = _rd;
@@ -18134,7 +18548,9 @@ function raidShield() {
   tsSfx('shield');
   jBuzz(25);
   raidRenderBars();
-  raidRenderPanel();
+  const btn = document.querySelector('.rd-item[onclick="raidShield()"]');
+  if (btn) { btn.classList.add('on'); btn.disabled = true; btn.innerHTML = '🛡️ <b>bật</b>'; }
+  document.getElementById('rd-input')?.focus();
 }
 
 /* ── Winning and losing ── */
@@ -18142,6 +18558,10 @@ function raidWinFight() {
   const g = _rd;
   const f = g.fight;
   const F = f.F;
+  clearInterval(g.timer);
+  // A monster felled early leaves its last blanks filled in, in blue.
+  f.blanks.forEach(b => { if (!b.done) { b.done = true; b.shown = true; } });
+  raidRenderText();
   raidAnim('rd-enemy', 'die');
   tsSfx('level');
   jBuzz([30, 40, 30, 40, 90]);
@@ -18159,7 +18579,7 @@ function raidWinFight() {
       <div class="rd-win">
         <div class="rd-win-title">${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục! <span class="rd-loot">+${bonus} 🪙</span></div>
         <div class="rd-win-text">${lines.map(l => `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span><span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span></p>`).join('')}</div>
-        ${lastFight ? '' : `<div class="rd-heal">💚 Hồi ${RAID_HEAL} máu trước trận sau</div>`}
+        ${lastFight ? '' : `<div class="rd-heal">💚 Hồi ${RAID_HEAL} máu trước trận sau · ✨ mana giữ nguyên</div>`}
         <div class="rd-win-btns">
           <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(lines.map(l => raidPlain(l.t)).join(' ')))})" title="Nghe cả đoạn">🔊</button>
           <button class="vb-start-btn" id="rd-next" onclick="raidAfterWin()">${lastFight ? '🏆 Nhận thưởng' : 'Đánh tiếp →'}</button>
@@ -18181,9 +18601,9 @@ function raidCleared() {
   const g = _rd;
   g.done = true;
   clearInterval(g.timer);
-  // Stars count the hits taken over the whole dungeon, since health refills
-  // between fights.
-  const stars = g.hitsTaken <= 2 ? 3 : g.hitsTaken <= 5 ? 2 : 1;
+  // Stars count the misses over the whole dungeon: wrong words and clocks
+  // that ran out.
+  const stars = g.misses <= 2 ? 3 : g.misses <= 5 ? 2 : 1;
   const prev = (_raidStars && _raidStars[g.L.n]) || 0;
   raidSaveStars(g.L.n, stars);
   const root = document.getElementById('lesson-vocab-root');
@@ -18191,10 +18611,14 @@ function raidCleared() {
   root.innerHTML = `
     <div class="vb-wrap">
       <div class="vb-results rd-clear">
-        <div class="rd-clear-boss">${RAID_BOSSES[g.L.n].icon}</div>
+        <div class="rd-clear-row">
+          <div class="rd-clear-hero">${raidHeroSvg(g.gender, g.look)}</div>
+          <div class="rd-clear-boss">${RAID_BOSSES[g.L.n].icon}</div>
+        </div>
         <div class="rd-clear-title">Hầm ngục Buổi ${g.L.n} đã sạch bóng quái!</div>
         <div class="rd-clear-stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.3 + i * 0.25}s">★</span>`).join('')}</div>
-        <div class="vb-results-score-lbl">Còn ${Math.max(0, g.hp)} máu · trúng đòn ${g.hitsTaken} lần · ${g.crits} chí mạng${stars > prev ? ' · kỷ lục mới!' : ''}</div>
+        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu${stars > prev ? ' · kỷ lục mới!' : ''}</div>
+        ${stars < 3 ? `<div class="rd-clear-tip">Sai không quá ${stars === 1 ? 5 : 2} lần để lên ${stars + 1} sao.</div>` : ''}
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="raidStart(${g.L.n})">↺ Đánh lại</button>
           ${RAID_LESSONS.some(x => x.n > g.L.n) ? `<button class="vb-secondary-btn" onclick="raidStart(${RAID_LESSONS.find(x => x.n > g.L.n).n})">Hầm ngục tiếp theo →</button>` : ''}
@@ -18224,13 +18648,14 @@ function raidDown() {
         <button class="${walCount('revive') ? 'vb-secondary-btn' : 'vb-start-btn'}" onclick="raidRetry()">↺ Đánh lại trận này</button>
         <button class="vb-secondary-btn" onclick="raidMap()">🗺️ Bản đồ</button>
       </div>
-      ${walCount('revive') ? '' : '<div class="rd-lose-note">Mua 💖 Hồi sinh ở 🛒 Cửa hàng để đứng dậy đánh tiếp.</div>'}
+      <div class="rd-lose-note">${walCount('revive') ? '' : 'Mua 💖 Hồi sinh ở 🛒 Cửa hàng để đứng dậy đánh tiếp. '}Mẹo: khi quái sắp đánh mà máu thấp, chọn 💚 Hồi máu.</div>
     </div>`;
 }
 function raidRevive() {
   const g = _rd;
   if (!g || !walUse('revive')) return;
   g.hp = 60;
+  document.getElementById('rd-hero')?.classList.remove('die');
   tsSfx('power');
   jConfetti(30);
   raidBanner('💖 Hồi sinh!', 'crit');
@@ -18244,14 +18669,11 @@ function raidRetry() {
   raidBeginFight();
 }
 
-// Keys 1 to 4 pick from the word bank; Enter moves on after a win.
+// Enter moves on after a win.
 function raidOnKey(e) {
   const g = _rd;
   if (!g || document.getElementById('lv-modal') || (e.target && e.target.id === 'rd-input')) return;
-  if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); return; }
-  const n = parseInt(e.key, 10);
-  const b = g.fight && g.fight.blanks[g.fight.bi];
-  if (n >= 1 && n <= 4 && b && b.bank && !g.busy) { e.preventDefault(); raidPick(n - 1); }
+  if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); }
 }
 
 function raidQuit() { raidMap(); }
