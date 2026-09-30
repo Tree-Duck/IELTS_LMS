@@ -20951,6 +20951,7 @@ function raidRenderArena() {
         <button class="ts-icon-btn" id="rd-mute" onclick="raidMute()" title="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ">🔀</button>
       </div>
+      <div class="rd-body"><div class="rd-main">
       <div class="rd-stage rd-bg--${f.tier.bg}" id="rd-stage">
         <div class="rd-embers"></div>
         <div class="rd-side rd-hero-side">
@@ -20981,7 +20982,9 @@ function raidRenderArena() {
         <div class="rd-text${F.kind === 'words' ? ' rd-text--list' : ''}" id="rd-text"></div>
         ${F.kind === 'tpl' ? `<details class="rd-vibox" open><summary>Mỗi câu làm gì</summary>${F.lines.map((l, i) => `<p><b>${i + 1}.</b> ${escapeHtml(l.vi)}</p>`).join('')}</details>` : raidLv().showVi ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
       </div>
+      </div>
       <div class="rd-panel" id="rd-panel"></div>
+      </div>
     </div>`;
   raidRenderBars();
   raidRenderText();
