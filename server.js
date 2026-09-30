@@ -3919,7 +3919,7 @@ app.put('/api/game/tower', authenticate, (req, res) => {
 // Prices live here, so a purchase is only ever as good as the balance the
 // server holds. Earnings are reported by the client, so each report is
 // capped, and so is what one student can collect in a day.
-const SHOP_PRICES = { hint: 15, slow: 20, double: 25, revive: 40, shield: 30, boost: 50, skip: 10 };
+const SHOP_PRICES = { hint: 15, slow: 20, double: 25, revive: 40, shield: 30, boost: 50, skip: 10, wreck: 30 };
 // Looks only: bought once, kept for good, one worn per slot. The slot is the
 // part of the id before the underscore.
 const COSMETIC_PRICES = {

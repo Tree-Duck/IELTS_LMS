@@ -14603,10 +14603,6 @@ function lvRenderHub() {
         <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
         ${sel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
       </div>
-      <div class="lv-diff">
-        <span class="lv-diff-label">Tốc độ Bắn Chữ</span>
-        ${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${_tsDiff === k ? ' active' : ''}" onclick="tsSetDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}
-      </div>
       <div class="wal-bar" id="wal-bar"></div>
       <div class="wal-shop hidden" id="wal-shop"></div>
       <div class="lv-modes">
@@ -15324,6 +15320,7 @@ const SHOP_ITEMS = [
   { id: 'boost',  icon: '⏱️', name: 'Nhân đôi xu',  price: 50, where: 'Cả hai game · 10 phút', desc: 'Mọi xu kiếm được nhân đôi trong 10 phút. Bật ở đây, đồng hồ vẫn chạy khi đổi game.' },
   { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
   { id: 'skip',   icon: '🔁', name: 'Đổi câu',      price: 10, where: 'Xây tháp', desc: 'Bỏ câu đang làm, lấy câu khác. Không mất mạng, không mất tầng.' },
+  { id: 'wreck',  icon: '🏗️', name: 'Quả tạ phá',   price: 30, where: 'Xây tháp', desc: 'Đập bỏ các tầng bị lệch, rồi được trả lời lại các câu đó để xây lại cho thẳng.' },
 ];
 const RARITY = {
   common:    { label: 'Thường' },
@@ -15801,8 +15798,27 @@ let _tsDiff = 'easy';
 try { const d = localStorage.getItem('tsDiff'); if (TS_DIFFS[d]) _tsDiff = d; } catch (e) {}
 function tsSetDiff(d) { if (TS_DIFFS[d]) { _tsDiff = d; lvSave('tsDiff', d); } lvRenderHub(); }
 const TS_PER_LEVEL = 8;
-const TS_BOSS_EVERY = 14;
 const TS_EGG_EVERY = 11;
+// Bosses. Every TS_MINI_EVERY levels a miniboss; once every word of the
+// selection has fallen, or at level TS_FINAL_LEVEL for a big selection, the
+// final boss, and beating it wins the round. A boss is a fortress: columns of
+// word blocks stand under a core, only the bottom block of a column can be
+// hit, and clearing one whole column opens the core. The shortest column
+// holds the longest words and the tallest column the easiest, so every
+// student has a way in. The core then takes TS_CORE words: [miniboss, final].
+const TS_MINI_EVERY = 2;
+const TS_FINAL_LEVEL = 9;
+const TS_CORE = { easy: [1, 3], medium: [2, 5], hard: [3, 7] };
+// Left-to-right order of the columns, given them sorted short to tall.
+const TS_SHAPES = {
+  pyramid: n => (n === 3 ? [0, 2, 1] : [0, 2, 3, 1]),
+  valley:  n => (n === 3 ? [2, 0, 1] : [3, 1, 0, 2]),
+  up:      n => [...Array(n).keys()],
+  down:    n => [...Array(n).keys()].reverse(),
+  zigzag:  n => (n === 3 ? [1, 2, 0] : [1, 3, 0, 2]),
+};
+const TS_MINIBOSSES = ['👾', '🦂', '🐺', '🦇', '🕷️'];
+const TS_FINALBOSSES = ['🐉', '👹', '🦖'];
 let _ts = null;
 let _tsAudio = null;
 
@@ -15924,6 +15940,7 @@ function tsStart(mode, list) {
         <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">←</button>
         <span class="ts-lives" id="ts-lives"></span>
         <span class="ts-combo" id="ts-combo"></span>
+        <span class="ts-bossbar" id="ts-bossbar"></span>
         <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
         <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
         <span class="ts-stat">🪙 <strong id="ts-coins">0</strong></span>
@@ -15949,8 +15966,9 @@ function tsStart(mode, list) {
     pool, deck: vbShuffle(pool), deckPos: 0,
     items: [], lockId: null, nextId: 1, spawned: 0,
     score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
-    missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: false,
+    missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: true, started: false,
     W: 0, H: 0, coins: 0, slow: 0, dbl: 0, shield: false, revives: 0, reviving: false, powersShown: '',
+    lvKills: 0, seen: new Set(), boss: null, minis: 0, miniDue: false, finalDue: false, won: false, lastShape: '',
   };
   tsApplySkins();
   const input = document.getElementById('ts-input');
@@ -15967,8 +15985,43 @@ function tsStart(mode, list) {
   tsFit();
   tsHud();
   walLoad().then(() => { if (_ts === g) { tsPowers(); tsFit(); tsApplySkins(); } });
-  input.focus();
+  tsReadyScreen();
   g.raf = requestAnimationFrame(tsFrame);
+}
+
+// Before the first word: pick the speed. Enter starts.
+function tsReadyScreen() {
+  const g = _ts;
+  const ov = document.getElementById('ts-overlay');
+  if (!g || !ov) return;
+  ov.innerHTML = `<div class="ts-ov-title">${escapeHtml(g.cfg.label)}</div>
+    <div class="ts-ov-sub">Chọn tốc độ</div>
+    <div class="lv-diff ts-ready-diff">${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${g.diffKey === k ? ' active' : ''}" onclick="tsPickDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}</div>
+    <div class="ts-ov-sub ts-ready-note">Cứ ${TS_MINI_EVERY} cấp gặp một miniboss. Khi đã bắn hết từ thì gặp boss cuối, lõi boss cần ${TS_CORE[g.diffKey][1]} từ mới hạ được. Hạ boss cuối là thắng.</div>
+    <button class="vb-start-btn" id="ts-go" onclick="tsGo()">▶ Bắt đầu</button>`;
+  ov.classList.remove('hidden');
+  document.getElementById('ts-go')?.focus();
+}
+function tsPickDiff(k) {
+  const g = _ts;
+  if (!g || g.started || !TS_DIFFS[k]) return;
+  _tsDiff = k;
+  lvSave('tsDiff', k);
+  g.diffKey = k;
+  g.diff = TS_DIFFS[k];
+  g.lives = g.diff.lives;
+  tsSfx('key');
+  tsHud();
+  tsReadyScreen();
+}
+function tsGo() {
+  const g = _ts;
+  if (!g || g.started) return;
+  g.started = true;
+  g.paused = false;
+  g.last = performance.now();
+  document.getElementById('ts-overlay')?.classList.add('hidden');
+  document.getElementById('ts-input')?.focus();
 }
 
 // The ship and laser the student has on, from the shop.
@@ -16102,6 +16155,13 @@ function tsGap() {
 function tsItemHtml(it, typed) {
   const pack = walLook('drop');
   const icon = it.boss ? pack.icons[1] : it.egg ? pack.icons[2] : pack.icons[0];
+  if (it.fixed) {
+    const onTrack = typed && it.answers.some(x => x.startsWith(typed));
+    const word = _ts.mode === 'copy'
+      ? (onTrack ? `<span class="ts-hit">${escapeHtml(it.show.slice(0, typed.length))}</span>${escapeHtml(it.show.slice(typed.length))}` : escapeHtml(it.show))
+      : `<span class="ts-cell-vi">${escapeHtml(it.vi)}</span><span class="ts-mask">${escapeHtml(tsMask(it.show))}</span>`;
+    return `<div class="ts-cell-w">${word}</div>` + (typed && (!onTrack || _ts.mode !== 'copy') ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+  }
   if (_ts.mode === 'copy') {
     const onTrack = typed && tsNorm(it.show).startsWith(typed);
     const word = onTrack
@@ -16124,8 +16184,8 @@ function tsSpawn() {
   const arena = document.getElementById('ts-arena');
   if (!arena) return;
   g.spawned++;
-  const boss = g.spawned % TS_BOSS_EVERY === 0;
-  const egg = !boss && g.spawned % TS_EGG_EVERY === 0;
+  const boss = false;
+  const egg = !g.boss && g.spawned % TS_EGG_EVERY === 0;
   const alive = g.items.filter(it => !it.dead);
   const onScreen = new Set(alive.map(it => it.answers[0]));
   const firsts = new Set(alive.map(it => it.answers[0][0]));
@@ -16144,8 +16204,12 @@ function tsSpawn() {
     if (!firsts.has(w.answers[0][0]) || tries >= 11) pick = w;
   }
   if (!pick) return;
+  if (!g.boss) {
+    g.seen.add(pick.answers[0]);
+    if (g.seen.size >= new Set(g.pool.map(w => w.answers[0])).size) g.finalDue = true;
+  }
   const el = document.createElement('div');
-  el.className = 'ts-item' + (boss ? ' ts-boss' : '') + (egg ? ' ts-egg' : '');
+  el.className = 'ts-item' + (boss ? ' ts-boss' : '') + (egg ? ' ts-egg' : '') + (g.boss ? ' ts-shot' : '');
   const it = { ...pick, boss, egg, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: tsFallTime(boss), dead: false };
   el.dataset.id = it.id;
   arena.appendChild(el);
@@ -16176,11 +16240,16 @@ function tsFrame(now) {
       if (g.freeze <= 0) document.getElementById('ts-arena')?.classList.remove('frozen');
     } else {
       g.spawnIn -= dt * k;
-      const alive = g.items.filter(it => !it.dead).length;
-      if (g.spawnIn <= 0 && alive < Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd))) { tsSpawn(); g.spawnIn = tsGap(); }
+      const alive = g.items.filter(it => !it.dead && !it.fixed).length;
+      // While a boss is on, a few words still fall as its shots.
+      const most = g.boss ? (g.diffKey === 'easy' ? 1 : 2) : Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd));
+      const due = !g.boss && !g.won && (g.finalDue || g.miniDue);
+      if (due) {
+        if (alive === 0) { const kind = g.finalDue ? 'final' : 'mini'; g.miniDue = false; tsBossStart(kind); }
+      } else if (!g.won && g.spawnIn <= 0 && alive < most) { tsSpawn(); g.spawnIn = tsGap() * (g.boss ? 1.8 : 1); }
       else if (alive === 0 && g.spawnIn > 0.4) g.spawnIn = 0.4;
       for (const it of g.items) {
-        if (it.dead) continue;
+        if (it.dead || it.fixed) continue;
         it.t += dt * k;
         it.y = -it.h + (it.t / it.fall) * g.H;
         it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
@@ -16198,7 +16267,7 @@ function tsTyped(input) {
   return input.value.toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').replace(/^ /, '');
 }
 function tsCandidates(typed) {
-  return _ts.items.filter(it => !it.dead && it.answers.some(a => a.startsWith(typed)));
+  return _ts.items.filter(it => !it.dead && !it.locked && it.answers.some(a => a.startsWith(typed)));
 }
 
 function tsOnInput(e) {
@@ -16255,6 +16324,7 @@ function tsOnKey(e) {
     tsUsePower(power);
     return;
   }
+  if (e.key === 'Enter' && !_ts.started) { e.preventDefault(); tsGo(); return; }
   if (e.key === 'Enter' || e.key === 'Escape') {
     e.preventDefault();
     e.target.value = '';
@@ -16289,8 +16359,19 @@ function tsLock(target, typed) {
   tsAim(target);
 }
 
+// A fortress block sits in the page flow; read where it is now.
+function tsCellPos(it) {
+  const ar = document.getElementById('ts-arena')?.getBoundingClientRect();
+  if (!ar || !it.el) return;
+  const r = it.el.getBoundingClientRect();
+  it.x = r.left - ar.left;
+  it.y = r.top - ar.top;
+  it.w = r.width;
+  it.h = r.height;
+}
 function tsAim(it) {
   const g = _ts;
+  if (it.fixed) tsCellPos(it);
   const ang = Math.atan2(it.y + it.h / 2 - (g.H - 22), it.x + it.w / 2 - g.W / 2);
   const ship = document.getElementById('ts-ship');
   if (ship) ship.style.transform = `rotate(${ang + Math.PI / 2}rad)`;
@@ -16299,11 +16380,12 @@ function tsAim(it) {
 
 function tsPoints(it) {
   const mult = 1 + Math.min(4, Math.floor(_ts.combo / 5));
-  return it.show.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss ? 3 : 1);
+  return it.show.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss || it.core ? 3 : it.fixed ? 2 : 1);
 }
 
 function tsExplode(it, withLaser) {
   const g = _ts;
+  if (it.fixed) tsCellPos(it);
   const arena = document.getElementById('ts-arena');
   const cx = it.x + it.w / 2, cy = it.y + it.h / 2;
   if (withLaser && arena) {
@@ -16360,7 +16442,7 @@ function tsKill(it, second) {
   // Double shot: the second beam takes the lowest word still falling. A boss
   // still has to be typed out.
   if (g.dbl > 0 && !second) {
-    const next = g.items.filter(x => !x.dead && x !== it && !x.boss).sort((a, b) => b.y - a.y)[0];
+    const next = g.items.filter(x => !x.dead && x !== it && !x.boss && !x.fixed).sort((a, b) => b.y - a.y)[0];
     if (next) {
       setTimeout(() => {
         if (_ts !== g || !g.running || next.dead) return;
@@ -16373,13 +16455,16 @@ function tsKill(it, second) {
       }, 90);
     }
   }
-  if (g.kills % TS_PER_LEVEL === 0) {
+  if (!it.fixed && !g.boss && ++g.lvKills % TS_PER_LEVEL === 0) {
     g.level++;
     tsSfx('level');
     tsFlash('level');
     jBuzz([20, 30, 20]);
     tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
+    if (g.level >= TS_FINAL_LEVEL) g.finalDue = true;
+    else if (g.level % TS_MINI_EVERY === 1) g.miniDue = true;
   }
+  if (it.fixed) tsFortHit(it);
   tsHud();
 }
 
@@ -16396,7 +16481,7 @@ function tsPower() {
     document.getElementById('ts-arena')?.classList.add('frozen');
     tsFloat('❄️ Đóng băng 4 giây', g.W / 2, g.H / 2, 'big');
   } else if (pick === 'bomb') {
-    g.items.filter(x => !x.dead).forEach(x => { g.score += tsPoints(x); tsExplode(x, false); });
+    g.items.filter(x => !x.dead && !x.fixed).forEach(x => { g.score += tsPoints(x); tsExplode(x, false); });
     g.lockId = null;
     const input = document.getElementById('ts-input');
     if (input) input.value = '';
@@ -16480,8 +16565,8 @@ function tsRevive() {
   g.reviving = false;
   g.revives++;
   g.lives = TS_REVIVE_LIVES;
-  g.items.filter(x => !x.dead).forEach(x => tsExplode(x, false));
-  g.items = [];
+  g.items.filter(x => !x.dead && !x.fixed).forEach(x => tsExplode(x, false));
+  g.items = g.items.filter(x => x.fixed && !x.dead);
   g.lockId = null;
   g.spawnIn = 1.2;
   g.paused = false;
@@ -16493,6 +16578,149 @@ function tsRevive() {
   tsHud();
   tsPowers();
   document.getElementById('ts-input')?.focus();
+}
+
+/* ── Bosses: a fortress of word blocks around a core ── */
+function tsBossStart(kind) {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!g || !arena || g.boss) return;
+  const final = kind === 'final';
+  if (!final) g.minis++;
+  const lens = final ? [3, 4, 5, 7] : [1, 2, 3].map(x => Math.min(6, x + g.minis - 1));
+  const coreN = TS_CORE[g.diffKey][final ? 1 : 0];
+  const need = lens.reduce((s, n) => s + n, 0) + coreN;
+  // Words for the blocks, repeating only when the selection is small.
+  const src = vbShuffle(g.pool.slice());
+  const picks = [];
+  for (let i = 0; picks.length < need; i++) picks.push(src[i % src.length]);
+  const coreWords = picks.splice(0, coreN);
+  picks.sort((x, y) => y.show.length - x.show.length);
+  const asc = lens.slice().sort((x, y) => x - y);
+  let at = 0;
+  const cols = asc.map((len, rank) => { const words = picks.slice(at, at + len); at += len; return { rank, words, items: [] }; });
+  const shapes = Object.keys(TS_SHAPES).filter(k => k !== g.lastShape);
+  const shape = shapes[Math.floor(Math.random() * shapes.length)];
+  g.lastShape = shape;
+  const order = TS_SHAPES[shape](cols.length);
+  const pool = final ? TS_FINALBOSSES : TS_MINIBOSSES;
+  const icon = pool[Math.floor(Math.random() * pool.length)];
+  g.boss = { kind, final, cols, coreWords, coreN, coreLeft: coreN, open: false, icon };
+  g.items.filter(x => !x.dead).forEach(x => tsExplode(x, false));
+  g.items = [];
+  g.lockId = null;
+  const input = document.getElementById('ts-input');
+  if (input) input.value = '';
+  const fort = document.createElement('div');
+  fort.className = 'ts-fort ts-fort--' + (final ? 'final' : 'mini');
+  fort.id = 'ts-fort';
+  fort.innerHTML = `<div class="ts-fort-in" id="ts-fort-in">
+    <div class="ts-core shut" id="ts-core"><span class="ts-core-boss">${icon}</span><span class="ts-core-shield">🛡️</span><div class="ts-core-slot" id="ts-core-slot"></div></div>
+    <div class="ts-cols" id="ts-cols"></div>
+  </div>`;
+  arena.appendChild(fort);
+  const colsEl = fort.querySelector('#ts-cols');
+  const last = cols.length - 1;
+  order.forEach(ci => {
+    const c = cols[ci];
+    const col = document.createElement('div');
+    col.className = 'ts-col' + (c.rank === 0 ? ' ts-col--short' : c.rank === last ? ' ts-col--long' : '');
+    col.innerHTML = `<div class="ts-col-cells"></div><div class="ts-col-tag">${c.rank === 0 ? '🔥 Ngắn · từ dài' : c.rank === last ? '🌿 Dài · từ dễ' : '⚔️'}</div>`;
+    colsEl.appendChild(col);
+    const cellsEl = col.querySelector('.ts-col-cells');
+    c.words.forEach((w, j) => {
+      const el = document.createElement('div');
+      el.className = 'ts-cell' + (j ? ' ts-cell--locked' : '');
+      cellsEl.appendChild(el);
+      const it = { ...w, fixed: true, cell: true, col: c, locked: j > 0, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, dead: false };
+      el.dataset.id = it.id;
+      c.items.push(it);
+      g.items.push(it);
+      tsRender(it, '');
+    });
+  });
+  tsFortFit();
+  arena.classList.add('ts-bossfight');
+  tsSfx('boss');
+  tsShakeArena();
+  jBuzz([60, 40, 60]);
+  tsFloat(final ? `${icon} BOSS CUỐI!` : `${icon} MINIBOSS!`, g.W / 2, 30, 'big');
+  g.spawnIn = 3;
+  tsHud();
+}
+
+// A block or a core word went down.
+function tsFortHit(it) {
+  const g = _ts;
+  const b = g.boss;
+  if (!b) return;
+  if (it.core) {
+    b.coreLeft--;
+    if (b.coreLeft > 0) tsCoreWord(); else { tsBossDown(); return; }
+  } else {
+    const next = it.col.items.find(x => !x.dead && x.locked);
+    if (next) { next.locked = false; next.el.classList.remove('ts-cell--locked'); tsRender(next, ''); }
+    if (!b.open && it.col.items.every(x => x.dead)) {
+      b.open = true;
+      document.getElementById('ts-core')?.classList.remove('shut');
+      tsFloat(`🛡️ Lõi mở! Còn ${b.coreLeft} từ`, g.W / 2, 60, 'big');
+      tsSfx('power');
+      tsCoreWord();
+    }
+  }
+  setTimeout(tsFortFit, 280);
+  tsHud();
+}
+function tsCoreWord() {
+  const g = _ts;
+  const b = g.boss;
+  const slot = document.getElementById('ts-core-slot');
+  if (!b || !slot) return;
+  const w = b.coreWords[b.coreN - b.coreLeft];
+  const el = document.createElement('div');
+  el.className = 'ts-cell ts-cell--core';
+  slot.appendChild(el);
+  const it = { ...w, fixed: true, core: true, locked: false, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, dead: false };
+  el.dataset.id = it.id;
+  g.items.push(it);
+  tsRender(it, '');
+}
+function tsBossDown() {
+  const g = _ts;
+  const b = g.boss;
+  g.boss = null;
+  g.items.filter(x => x.fixed).forEach(x => { x.dead = true; });
+  g.items = g.items.filter(x => !x.dead);
+  g.lockId = null;
+  const input = document.getElementById('ts-input');
+  if (input) input.value = '';
+  const fort = document.getElementById('ts-fort');
+  if (fort) { fort.classList.add('ts-fort--down'); setTimeout(() => fort.remove(), 900); }
+  document.getElementById('ts-arena')?.classList.remove('ts-bossfight');
+  const bonus = Math.round((b.final ? 40 : 12) * g.diff.coin * walMult());
+  g.coins += bonus;
+  g.score += (b.final ? 2000 : 500) * (1 + ['easy', 'medium', 'hard'].indexOf(g.diffKey));
+  tsFloat(`💥 ${b.final ? 'HẠ BOSS CUỐI' : 'HẠ MINIBOSS'}! +${bonus} 🪙`, g.W / 2, g.H / 2 - 20, 'big');
+  tsSfx('rankup');
+  tsShakeArena();
+  jBuzz([40, 30, 40, 30, 120]);
+  jConfetti(b.final ? 120 : 45);
+  tsHud();
+  if (b.final) {
+    g.won = true;
+    setTimeout(() => { if (_ts === g) tsEnd(); }, 1800);
+    return;
+  }
+  g.spawnIn = 1.5;
+}
+// Big fortresses shrink to fit the arena, most of all on a phone.
+function tsFortFit() {
+  const fort = document.getElementById('ts-fort');
+  const inn = document.getElementById('ts-fort-in');
+  if (!fort || !inn) return;
+  inn.style.transform = '';
+  const k = Math.min(1, fort.clientHeight / Math.max(1, inn.scrollHeight));
+  inn.style.transform = k < 1 ? `scale(${k.toFixed(3)})` : '';
 }
 
 function tsFloat(text, x, y, big) {
@@ -16529,13 +16757,15 @@ function tsHud() {
   set('ts-score', g.score);
   set('ts-coins', g.coins + (walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''));
   set('ts-level', g.level);
+  const b = g.boss;
+  set('ts-bossbar', b ? (b.open ? `${b.icon} lõi ${b.coreLeft}/${b.coreN}` : `${b.icon} 🛡️ phá 1 cột`) : g.finalDue && !g.won ? '👹 boss cuối tới!' : g.miniDue ? '👾 miniboss tới!' : '');
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
   set('ts-combo', g.combo >= 3 ? `🔥 ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
 }
 
 function tsPause() {
   const g = _ts;
-  if (!g || !g.running || g.paused) return;
+  if (!g || !g.running || g.paused || !g.started) return;
   g.paused = true;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   document.getElementById('ts-arena')?.classList.add('paused');
@@ -16584,6 +16814,7 @@ function tsRenderResults(g) {
   root.innerHTML = `
     <div class="vb-wrap">
       <div class="vb-results">
+        ${g.won ? `<div class="ts-victory">🏆 CHIẾN THẮNG! Đã hạ boss cuối${g.minis ? ` và ${g.minis} miniboss` : ''}</div>` : ''}
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
         <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
@@ -16608,7 +16839,7 @@ function tsRenderResults(g) {
       </div>
     </div>`;
   jCountUp(root.querySelector('.j-count'), g.coins);
-  if (isNew) { jConfetti(80); tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); }
+  if (isNew || g.won) { jConfetti(80); tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); }
 }
 
 /* Nghĩa tiếng Việt của câu mẫu, hiện sau khi trả lời trong Xây tháp. Khoá là
@@ -17136,6 +17367,28 @@ const TW_MILESTONES = [
   { at: 81, name: 'Landmark 81', icon: '🌆' },
 ];
 const TW_FLOOR_H = 40;
+// Typed answers get TW_TRIES goes, but only a first go builds a straight
+// floor. A floor built on a later go leans, and TW_TILT_MAX leaning floors
+// stop the tower until the wrecking ball knocks them out (or they are let
+// fall). Leaning floors are saved with a "~" in front of their word.
+const TW_TRIES = 3;
+const TW_TILT_MAX = 3;
+// Hazards turn up at random: TW_HAZARD_QS typed questions to fend one off,
+// and TW_HAZARD_FAIL wrong answers let it take TW_HAZARD_LOSS floors. Every
+// hazard question is typed, so typing starts long before floor TW_TYPE_FROM.
+const TW_HAZARD_CHANCE = 0.12;
+const TW_HAZARD_FROM = 3;
+const TW_HAZARD_QS = 3;
+const TW_HAZARD_FAIL = 2;
+const TW_HAZARD_LOSS = 3;
+const TW_HAZARDS = [
+  { id: 'meteor', icon: '☄️', name: 'Thiên thạch', come: 'Thiên thạch đang lao tới!', win: 'Bắn nát thiên thạch!', lose: 'Thiên thạch đâm trúng tháp!' },
+  { id: 'bandit', icon: '🥷', name: 'Thổ phỉ', come: 'Thổ phỉ kéo tới phá nhà!', win: 'Đuổi được thổ phỉ!', lose: 'Thổ phỉ phá mất mấy tầng!' },
+  { id: 'bomb', icon: '💣', name: 'Bom', come: 'Có bom gài trên nóc tháp!', win: 'Gỡ bom thành công!', lose: 'Bom nổ!' },
+];
+const twIsTilt = f => typeof f === 'string' && f.startsWith('~');
+const twPlate = f => (twIsTilt(f) ? f.slice(1) : f);
+const twTilts = g => g.floors.filter(twIsTilt).length;
 let _tw = null;
 let _twKeyHandler = null;
 let _twSaved = null;
@@ -17268,6 +17521,7 @@ async function twStart(list) {
     peak: floors.length, startedAt: floors.length,
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
     coins: 0, revivable: false, revives: 0, lastResult: null, shield: false, shielded: 0,
+    hz: null, fixQ: [], blocked: false,
   };
   walLoad().then(() => {
     const sc = document.getElementById('tw-scene'), sk = walLook('tower').id;
@@ -17353,9 +17607,15 @@ function twRenderScene(animateTop) {
   if (!g || !scene || !stack || !world) return;
   const h = g.floors.length;
   const drop = typeof animateTop === 'number' ? animateTop : (animateTop ? 1 : 0);
-  stack.innerHTML = g.floors.map((f, i) =>
-    `<div class="tw-floor tw-floor--${i % 4}${i >= h - drop ? ' tw-drop' : ''}${f === '⭐' ? ' tw-floor--star' : ''}"><span class="tw-plate">${escapeHtml(f)}</span></div>`
-  ).join('');
+  // Each leaning floor pushes everything above it a little further over.
+  let lean = 0;
+  stack.innerHTML = g.floors.map((f, i) => {
+    const tilt = twIsTilt(f);
+    if (tilt) lean++;
+    const style = lean ? ` style="translate: ${lean * 9}px 0;${tilt ? ` rotate: ${lean % 2 ? 4 : -3}deg;` : ''}"` : '';
+    return `<div class="tw-floor tw-floor--${i % 4}${i >= h - drop ? ' tw-drop' : ''}${f === '⭐' ? ' tw-floor--star' : ''}${tilt ? ' tw-floor--tilt' : ''}"${style}><span class="tw-plate">${escapeHtml(twPlate(f))}</span></div>`;
+  }).join('');
+  scene.classList.toggle('tw-leaning', lean >= TW_TILT_MAX);
   // Keep the top of the tower in view: the world slides down as it grows.
   const room = scene.clientHeight - 200;
   const lift = Math.max(0, h * TW_FLOOR_H - room);
@@ -17380,11 +17640,19 @@ function twNext() {
   const g = _tw;
   if (!g) return;
   clearTimeout(g.timer);
-  if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
-  const q = g.deck[g.deckPos++];
-  g.qCount++;
-  const typing = g.floors.length + 1 >= TW_TYPE_FROM;
-  g.q = { ...q, typing, options: typing ? null : twOptions(q, g.all), golden: g.qCount % TW_EGG_EVERY === 0, hidden: [], reveal: 0 };
+  g.blocked = false;
+  if (!g.hz && twTilts(g) >= TW_TILT_MAX) { twTiltBlock(); return; }
+  let q;
+  let fix = false;
+  if (!g.hz && g.fixQ.length) { q = g.fixQ.shift(); fix = true; }
+  else {
+    if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
+    q = g.deck[g.deckPos++];
+  }
+  if (!g.hz && !fix && g.floors.length >= TW_HAZARD_FROM && g.qCount > 2 && Math.random() < TW_HAZARD_CHANCE) twHazardStart();
+  if (!g.hz && !fix) g.qCount++;
+  const typing = !!g.hz || fix || g.floors.length + 1 >= TW_TYPE_FROM;
+  g.q = { ...q, typing, options: typing ? null : twOptions(q, g.all), golden: !g.hz && !fix && g.qCount % TW_EGG_EVERY === 0, hidden: [], reveal: 0, tries: 0, fix, hz: !!g.hz };
   g.answered = false;
   twRenderCard();
 }
@@ -17432,7 +17700,14 @@ function twRenderCard(result) {
   let feedback = '';
   if (done) {
     const coins = result.coins ? ` · +${result.coins} 🪙` : '';
-    const line = result.ok
+    const hzEnd = result.hzEnd ? `<div class="tw-hz-end ${result.hzEnd.lost ? 'bad' : 'ok'}">${result.hzEnd.icon} ${escapeHtml(result.hzEnd.text)}</div>` : '';
+    const line = q.hz
+      ? (result.ok ? `✓ Chặn được một đòn${coins}` : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}.`) + hzEnd
+      : q.fix
+        ? (result.ok ? `✓ Tầng được xây lại thẳng${coins}` : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng này không xây lại được, nhưng không mất mạng.`)
+      : result.ok && result.tilt
+        ? `↗️ Đúng rồi, nhưng phải gõ lại nên tầng bị lệch (${twTilts(g)}/${TW_TILT_MAX})${coins}`
+      : result.ok
       ? (result.reward ? `✓ Xây thêm một tầng, và trứng vàng cho ${result.reward}${coins}` : `✓ Xây thêm một tầng${coins}`)
       : q.golden
         ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Trứng vỡ, nhưng không mất mạng.`
@@ -17443,7 +17718,7 @@ function twRenderCard(result) {
           : g.collapsed
             ? `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>. Hết mạng, cả toà nhà sập.`
             : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng trên cùng bị rơi.`;
-    const next = g.revivable
+    const next = g.revivable && !q.hz && !q.fix
       ? `<button class="vb-start-btn" id="tw-revive" onclick="twRevive()">💖 Hồi sinh · còn ${walCount('revive')}</button>
          <button class="vb-secondary-btn" onclick="twLetFall()">Để toà nhà sập</button>`
       : `<button class="vb-start-btn" id="tw-next" onclick="twAfter()"${g.collapsed ? ' disabled' : ''}>${g.collapsed ? 'Xem kết quả' : 'Câu tiếp →'}</button>`;
@@ -17460,16 +17735,21 @@ function twRenderCard(result) {
   }
   const hintsLeft = g.hints + walCount('hint');
   const canHint = !done && hintsLeft > 0 && !q.hinted;
-  card.className = 'tw-card' + (q.golden ? ' tw-card--gold' : '');
+  const special = q.hz || q.fix;
+  const hz = g.hz || (result && result.hzEnd);
+  card.className = 'tw-card' + (q.golden ? ' tw-card--gold' : '') + (q.hz ? ' tw-card--hz' : '') + (q.fix ? ' tw-card--fix' : '');
   card.innerHTML = `
     <div class="tw-card-head">
-      <span class="tw-floor-no">${q.golden ? '🥚 ' : ''}Tầng ${floorNo}</span>
+      <span class="tw-floor-no">${q.hz && hz ? `${hz.icon} ${escapeHtml(hz.name)} · câu ${(g.hz ? g.hz.n : (result && result.hzEnd ? result.hzEnd.n : 0)) + (done ? 0 : 1)}/${TW_HAZARD_QS}` : q.fix ? '🔧 Xây lại tầng lệch' : `${q.golden ? '🥚 ' : ''}Tầng ${floorNo}`}</span>
       <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
       ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${hintsLeft}</button>`}
-      ${done ? '' : `<button class="tw-hint-btn tw-skip-btn${g.shield ? ' on' : ''}" onclick="twShield()" ${g.shield || walCount('shield') ? '' : 'disabled'} title="Đỡ một câu sai: không mất mạng, không rơi tầng. Mua ở cửa hàng.">🛡️ ${g.shield ? 'Khiên đang bật' : 'Khiên · ' + walCount('shield')}</button>`}
-      ${done ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
+      ${done || special ? '' : `<button class="tw-hint-btn tw-skip-btn${g.shield ? ' on' : ''}" onclick="twShield()" ${g.shield || walCount('shield') ? '' : 'disabled'} title="Đỡ một câu sai: không mất mạng, không rơi tầng. Mua ở cửa hàng.">🛡️ ${g.shield ? 'Khiên đang bật' : 'Khiên · ' + walCount('shield')}</button>`}
+      ${done || special ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
+    ${q.hz && g.hz && !done ? `<div class="tw-hz-note">${g.hz.icon} ${escapeHtml(g.hz.come)} Gõ đúng ${TW_HAZARD_QS - TW_HAZARD_FAIL + 1} câu để chặn. Sai ${TW_HAZARD_FAIL} câu là mất ${TW_HAZARD_LOSS} tầng.</div>` : ''}
+    ${q.fix && !done ? '<div class="tw-fix-note">🔧 Đúng ngay lần đầu thì tầng này được xây lại thẳng. Sai thì mất tầng này, không mất mạng.</div>' : ''}
+    ${q.typing && !special && !q.golden && !done ? `<div class="tw-tilt-note">Đúng ngay lần đầu: tầng thẳng. Phải gõ lại mới đúng: tầng bị lệch${twTilts(g) ? ` (đang lệch ${twTilts(g)}/${TW_TILT_MAX})` : ''}.</div>` : ''}
     <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
     <div class="tw-sent">${twSentence(q, done, done && result.ok)}</div>
     ${body}
@@ -17571,7 +17851,19 @@ function twSubmitTyped() {
   const inp = document.getElementById('tw-input');
   const typed = inp ? inp.value.trim() : '';
   if (!typed) { const e = document.getElementById('tw-err'); if (e) e.textContent = 'Gõ từ vào trước đã.'; return; }
-  twResolve(tsNorm(typed) === tsNorm(g.q.blank.text), { typed });
+  const q = g.q;
+  const ok = tsNorm(typed) === tsNorm(q.blank.text);
+  // Another go, but the floor will lean if this one comes right.
+  if (!ok && !q.golden && !q.hz && !q.fix && q.tries < TW_TRIES - 1) {
+    q.tries++;
+    const e = document.getElementById('tw-err');
+    if (e) e.textContent = `✗ Chưa đúng. Còn ${TW_TRIES - q.tries} lần thử, nhưng giờ có đúng thì tầng cũng bị lệch.`;
+    if (inp) { inp.classList.remove('ts-shake'); void inp.offsetWidth; inp.classList.add('ts-shake'); inp.select(); }
+    tsSfx('wrong');
+    jBuzz(40);
+    return;
+  }
+  twResolve(ok, { typed, tilt: ok && q.tries > 0 });
 }
 
 // Called after the floor count changes upward: records a milestone the
@@ -17602,14 +17894,17 @@ function twReward() {
 
 function twResolve(ok, extra) {
   const g = _tw;
+  if (g.q.hz) { twHazardAnswer(ok, extra); return; }
+  if (g.q.fix) { twFixAnswer(ok, extra); return; }
   g.answered = true;
   const q = g.q;
   let reward = '';
   let coins = 0;
+  const tilt = ok && extra && extra.tilt;
   if (ok) {
     g.right++;
     const before = twMilestone(g.floors.length).cur;
-    g.floors.push(q.show);
+    g.floors.push(tilt ? '~' + q.show : q.show);
     let dropped = 1;
     if (q.golden) {
       const n = g.floors.length;
@@ -17622,7 +17917,8 @@ function twResolve(ok, extra) {
     twRenderScene(dropped);
     const crossed = twCheckMilestone(before);
     if (reward && !crossed) twBanner('🥚 ' + reward.charAt(0).toUpperCase() + reward.slice(1));
-    coins = ((q.typing ? TW_COIN_TYPED : TW_COIN) + (q.golden ? TW_COIN_EGG : 0) + (crossed ? TW_COIN_MILESTONE : 0)) * walMult();
+    coins = ((q.typing && !tilt ? TW_COIN_TYPED : TW_COIN) + (q.golden ? TW_COIN_EGG : 0) + (crossed ? TW_COIN_MILESTONE : 0)) * walMult();
+    if (tilt) { tsSfx('wrong'); document.getElementById('tw-scene')?.classList.add('shake'); }
     g.coins += coins;
     walEarn(coins);
     jBuzz(crossed ? [30, 40, 30, 40, 90] : 15);
@@ -17656,6 +17952,185 @@ function twResolve(ok, extra) {
   g.lastResult = { ok, reward, coins, ...extra };
   twRenderCard(g.lastResult);
   if (ok && !g.collapsed) g.timer = setTimeout(twAfter, reward ? 2000 : 1400);
+}
+
+/* ── Hazards ── */
+function twHazardStart() {
+  const g = _tw;
+  const h = TW_HAZARDS[Math.floor(Math.random() * TW_HAZARDS.length)];
+  g.hz = { ...h, n: 0, right: 0, wrong: 0 };
+  tsSfx('boss');
+  jBuzz([60, 40, 60]);
+  twHazardScene();
+  const b = document.getElementById('tw-banner');
+  if (b) { b.textContent = `${h.icon} ${h.come}`; b.classList.remove('hidden', 'show'); void b.offsetWidth; b.classList.add('show'); }
+}
+// The hazard on screen, a step closer after every answer.
+function twHazardScene(end) {
+  const g = _tw;
+  const scene = document.getElementById('tw-scene');
+  if (!scene) return;
+  let el = document.getElementById('tw-hz');
+  const hz = g.hz;
+  if (end) {
+    if (el) { el.classList.add(end === 'lose' ? 'tw-hz--hit' : 'tw-hz--gone'); el.id = ''; setTimeout(() => el.remove(), 900); }
+    return;
+  }
+  if (!hz) return;
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'tw-hz';
+    scene.appendChild(el);
+  }
+  el.className = 'tw-hz tw-hz--' + hz.id;
+  el.style.setProperty('--p', (hz.n / TW_HAZARD_QS).toFixed(2));
+  el.innerHTML = `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.icon}</span><span class="tw-hz-tag">${hz.wrong ? '❌'.repeat(hz.wrong) : ''} còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
+}
+function twHazardAnswer(ok, extra) {
+  const g = _tw;
+  const q = g.q;
+  const hz = g.hz;
+  g.answered = true;
+  hz.n++;
+  let coins = 0;
+  if (ok) {
+    hz.right++;
+    g.right++;
+    coins = TW_COIN_TYPED * walMult();
+    g.coins += coins;
+    walEarn(coins);
+    tsSfx('kill');
+    jBuzz(15);
+  } else {
+    hz.wrong++;
+    g.wrong++;
+    if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
+    tsSfx('wrong');
+    jBuzz(60);
+  }
+  const over = hz.wrong >= TW_HAZARD_FAIL || hz.right >= TW_HAZARD_QS - TW_HAZARD_FAIL + 1;
+  let hzEnd = null;
+  if (over) hzEnd = twHazardEnd();
+  else twHazardScene();
+  g.lastResult = { ok, coins, hzEnd, ...extra };
+  twRenderCard(g.lastResult);
+  if (ok && !over) g.timer = setTimeout(twAfter, 1200);
+}
+function twHazardEnd() {
+  const g = _tw;
+  const hz = g.hz;
+  g.hz = null;
+  const lost = hz.wrong >= TW_HAZARD_FAIL;
+  twHazardScene(lost ? 'lose' : 'win');
+  if (lost) {
+    const n = Math.min(TW_HAZARD_LOSS, g.floors.length);
+    const stack = document.getElementById('tw-stack');
+    const scene = document.getElementById('tw-scene');
+    if (scene) { scene.classList.remove('shake'); void scene.offsetWidth; scene.classList.add('shake'); }
+    if (stack) [...stack.children].slice(-n).forEach((f, i) => { f.style.animationDelay = (i * 0.08) + 's'; f.classList.add('tw-fall'); });
+    g.floors.splice(g.floors.length - n, n);
+    setTimeout(() => { if (_tw === g && !g.collapsed) twRenderScene(false); }, 800);
+    tsSfx('boss');
+    jBuzz([90, 40, 90]);
+    twSave(g);
+    return { lost: true, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.lose} Mất ${n} tầng.` };
+  }
+  const bonus = TW_COIN_EGG * walMult();
+  g.coins += bonus;
+  walEarn(bonus);
+  twBanner(`${hz.icon} ${hz.win} +${bonus} 🪙`);
+  twSave(g);
+  return { lost: false, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.win} +${bonus} 🪙` };
+}
+
+/* ── Leaning floors and the wrecking ball ── */
+function twFixAnswer(ok, extra) {
+  const g = _tw;
+  const q = g.q;
+  g.answered = true;
+  let coins = 0;
+  if (ok) {
+    g.right++;
+    const before = twMilestone(g.floors.length).cur;
+    g.floors.push(q.show);
+    g.best = Math.max(g.best, g.floors.length);
+    g.peak = Math.max(g.peak, g.floors.length);
+    tsSfx('kill');
+    twRenderScene(1);
+    twCheckMilestone(before);
+    coins = TW_COIN_TYPED * walMult();
+    g.coins += coins;
+    walEarn(coins);
+  } else {
+    g.wrong++;
+    if (!g.missed.some(m => m.en === q.en)) g.missed.push(q);
+    tsSfx('wrong');
+  }
+  twSave(g);
+  g.lastResult = { ok, coins, ...extra };
+  twRenderCard(g.lastResult);
+  if (ok) g.timer = setTimeout(twAfter, 1300);
+}
+function twTiltBlock() {
+  const g = _tw;
+  const card = document.getElementById('tw-card');
+  if (!g || !card) return;
+  g.blocked = true;
+  g.answered = true;
+  const n = twTilts(g);
+  const price = (SHOP_ITEMS.find(i => i.id === 'wreck') || {}).price || 30;
+  const have = walCount('wreck');
+  card.className = 'tw-card tw-card--tilt';
+  card.innerHTML = `
+    <div class="tw-card-head"><span class="tw-floor-no">🏗️ Tháp nghiêng quá!</span></div>
+    <div class="tw-tilt-msg">Đã có <b>${n} tầng lệch</b> nên không xây lên cao được nữa. Dùng <b>quả tạ phá</b> để đập các tầng lệch, rồi trả lời lại ${n} câu đó: đúng ngay lần đầu thì tầng được xây lại thẳng.</div>
+    <div class="tw-after">
+      ${have
+        ? `<button class="vb-start-btn" id="tw-wreck" onclick="twWreck(false)">🏗️ Dùng quả tạ phá · còn ${have}</button>`
+        : `<button class="vb-start-btn" id="tw-wreck" onclick="twWreck(true)" ${walCoins() < price ? 'disabled' : ''}>🏗️ Mua quả tạ phá · ${price} 🪙</button>`}
+      <button class="vb-secondary-btn" onclick="twTiltFall()">Để tầng lệch tự đổ</button>
+    </div>
+    <div class="vb-hint-text">Để tự đổ thì mất luôn ${n} tầng, không được trả lời lại. Đang có 🪙 ${walCoins()} xu${!have && walCoins() < price ? ', chưa đủ để mua' : ''}.</div>`;
+  document.getElementById('tw-wreck')?.focus();
+}
+async function twWreck(buy) {
+  const g = _tw;
+  if (!g || !g.blocked) return;
+  const btn = document.getElementById('tw-wreck');
+  if (btn) btn.disabled = true;
+  if (buy && !walCount('wreck')) await walBuy('wreck');
+  if (_tw !== g || !walUse('wreck')) { if (_tw === g) twTiltBlock(); return; }
+  const scene = document.getElementById('tw-scene');
+  const stack = document.getElementById('tw-stack');
+  if (scene) {
+    const ball = document.createElement('div');
+    ball.className = 'tw-wreck';
+    ball.innerHTML = '<div class="tw-wreck-rope"></div><div class="tw-wreck-ball"></div>';
+    scene.appendChild(ball);
+    setTimeout(() => ball.remove(), 1500);
+  }
+  tsSfx('boss');
+  setTimeout(() => {
+    if (_tw !== g) return;
+    if (stack) [...stack.children].forEach((el, i) => { if (twIsTilt(g.floors[i])) el.classList.add('tw-fall'); });
+    const find = s => g.all.find(w => w.show === s) || g.pool.find(w => w.show === s);
+    g.fixQ = g.floors.filter(twIsTilt).map(f => find(twPlate(f))).filter(Boolean);
+    g.floors = g.floors.filter(f => !twIsTilt(f));
+    scene?.classList.remove('shake'); void scene?.offsetWidth; scene?.classList.add('shake');
+    jBuzz([60, 30, 90]);
+    twSave(g);
+    setTimeout(() => { if (_tw !== g) return; twRenderScene(false); twBanner(`🔧 Trả lời lại ${g.fixQ.length} câu để xây lại cho thẳng`); twNext(); }, 800);
+  }, 650);
+}
+function twTiltFall() {
+  const g = _tw;
+  if (!g || !g.blocked) return;
+  const stack = document.getElementById('tw-stack');
+  if (stack) [...stack.children].forEach((el, i) => { if (twIsTilt(g.floors[i])) el.classList.add('tw-fall'); });
+  g.floors = g.floors.filter(f => !twIsTilt(f));
+  tsSfx('miss');
+  twSave(g);
+  setTimeout(() => { if (_tw !== g) return; twRenderScene(false); twNext(); }, 700);
 }
 
 // Saved as if it had already fallen, so closing the tab while the revive
@@ -17777,6 +18252,7 @@ function twBindKeys() {
     const view = document.getElementById('view-lesson-vocab');
     if (!view || view.classList.contains('hidden') || !_tw || !document.getElementById('tw-card')) { twStop(); return; }
     const g = _tw;
+    if (g.blocked) return;
     if (g.answered) {
       if ((e.key === 'Enter' || e.key === ' ') && !document.getElementById('tw-next')?.disabled) { e.preventDefault(); twAfter(); }
       return;
