@@ -20204,7 +20204,7 @@ function raidMove(id) {
 function raidMoveTip(id) {
   if (id === 'light') return 'Đòn nhẹ x0.6: hiện nửa từ hoặc kho còn 2 từ, thêm thời gian.';
   if (id === 'atk') return 'Đòn thường x1: gợi ý như bình thường.';
-  if (id === 'heavy') return 'Đòn mạnh x2: không gợi ý, ít thời gian hơn, gõ sai thì quái đánh đau gấp rưỡi. Đã xem gợi ý dễ hơn thì bấm để dùng từ lượt sau.';
+  if (id === 'heavy') return 'Đòn mạnh x2: chỉ hiện 1–2 chữ cái, không kho từ, ít thời gian hơn, gõ sai thì quái đánh đau gấp rưỡi. Đã xem gợi ý dễ hơn thì bấm để dùng từ lượt sau.';
   if (id === 'sig') return raidMove('sig').desc + ' Sát thương x0.8, dùng lại sau 3 lượt.';
   if (id === 'heal') return `Hồi ${RAID_POTION} máu.`;
   return raidUlt(_rd.look).desc;
@@ -21159,6 +21159,24 @@ function raidSeeClue(rank) {
   raidClock();
 }
 
+// Letters shown in a typed blank, by the move's rank. A heavy hit gets one
+// or two first letters, a normal hit the first letter of every word (on
+// levels that give first letters), a light hit half the phrase as well.
+function raidMaskOpen(ans, rank, lv) {
+  const starts = [];
+  for (let i = 0; i < ans.length; i++) if (ans[i] !== ' ' && (i === 0 || ans[i - 1] === ' ')) starts.push(i);
+  const words = ans.split(' ');
+  const heavy = new Set([0]);
+  if (ans.length > 8 && words.length > 1) {
+    let best = 1;
+    words.forEach((w, k) => { if (k && w.length > words[best].length) best = k; });
+    heavy.add(starts[best]);
+  }
+  if (rank === 2) return heavy;
+  const open = lv.firstLetter ? new Set(starts) : heavy;
+  if (rank === 0) { starts.forEach(i => open.add(i)); for (let i = 0; i < Math.ceil(ans.length / 2); i++) open.add(i); }
+  return open;
+}
 function raidRenderPanel() {
   const g = _rd;
   const f = g.fight;
@@ -21175,8 +21193,8 @@ function raidRenderPanel() {
   const bank = b.bank && rank < 2;
   let clue = `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(b.hint)}</div>`;
   if (!bank && !copied) {
-    const shown = Math.max(rank === 0 ? Math.ceil(b.ans.length / 2) : rank === 1 && lv.firstLetter ? 1 : 0, b.reveal);
-    const mask = b.ans.split('').map((ch, i) => (i < shown || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
+    const open = raidMaskOpen(b.ans, rank, lv);
+    const mask = b.ans.split('').map((ch, i) => (i < b.reveal || open.has(i) || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
     clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
   }
   if (bank && !copied) {
