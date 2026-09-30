@@ -8219,3 +8219,19 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .cv-head { grid-template-columns: 1fr; }
   .cv-bars { grid-column: 1; grid-row: auto; }
 }
+
+/* ── Hầm ngục: model introduction under a template, and the six specials ── */
+.rd-tpl-ex { margin: 0.7rem 0 0.4rem; padding: 0.6rem 0.8rem; border-radius: 12px; background: #F3FBF5; border: 1px dashed #7CC99A; }
+.rd-tpl-ex-h { font-weight: 800; font-size: 0.85rem; color: #1F8A4C; margin-bottom: 0.3rem; }
+.rd-tpl-ex p { margin: 0.25rem 0; line-height: 1.55; }
+.rd-pick-udesc { font-size: 0.82rem; opacity: 0.9; margin-top: 0.25rem; max-width: 16rem; line-height: 1.35; }
+.rd-pick-cult small { display: block; font-size: 0.7rem; opacity: 0.8; font-weight: 600; }
+.rd-rain--big { font-size: 2.6rem; }
+.rd-clone { position: absolute; pointer-events: none; filter: brightness(0.25) drop-shadow(0 0 6px var(--c, #9AA0FF)); z-index: 6; }
+.rd-holybeam { position: absolute; top: 0; bottom: 0; width: 70px; transform: translateX(-50%); pointer-events: none; z-index: 6;
+  background: linear-gradient(90deg, transparent, rgba(255, 244, 194, 0.95), transparent); animation: rd-beam 0.9s ease-out forwards; }
+@keyframes rd-beam { 0% { opacity: 0; transform: translateX(-50%) scaleX(0.2); } 30% { opacity: 1; transform: translateX(-50%) scaleX(1); } 100% { opacity: 0; transform: translateX(-50%) scaleX(1.4); } }
+.rd-bigslash { position: absolute; width: 220px; height: 10px; border-radius: 8px; pointer-events: none; z-index: 6;
+  background: linear-gradient(90deg, transparent, #fff, #7FD3FF, transparent); box-shadow: 0 0 18px #7FD3FF;
+  transform: translate(-50%, -50%) rotate(-35deg) scaleX(0); animation: rd-bigslash 0.6s ease-out forwards; }
+@keyframes rd-bigslash { 0% { transform: translate(-50%, -50%) rotate(-35deg) scaleX(0); opacity: 1; } 50% { transform: translate(-50%, -50%) rotate(-35deg) scaleX(1); opacity: 1; } 100% { transform: translate(-50%, -50%) rotate(-35deg) scaleX(1.1); opacity: 0; } }
