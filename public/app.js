@@ -14630,6 +14630,12 @@ function lvRenderHub() {
           <span class="lv-mode-desc">Nghĩa tiếng Việt rơi xuống kèm chữ cái đầu. Gõ từ tiếng Anh để bắn.</span>
           <span class="lv-mode-best">🏆 ${tsGetBest('meaning')}</span>
         </button>
+        <button class="lv-mode" onclick="tsStart('colloc')">
+          <span class="lv-mode-icon">🧩</span>
+          <span class="lv-mode-name">Bắn chữ, ghép cụm từ</span>
+          <span class="lv-mode-desc">Cụm từ rơi xuống thiếu một từ chính. Gõ đúng từ còn thiếu để bắn. Luyện collocation cho Writing.</span>
+          <span class="lv-mode-best">🏆 ${tsGetBest('colloc')}</span>
+        </button>
         <button class="lv-mode" onclick="twStart()">
           <span class="lv-mode-icon">🏗️</span>
           <span class="lv-mode-name">Xây tháp</span>
@@ -14658,6 +14664,7 @@ const LV_MODES = [
   { id: 'test',    icon: '📝', name: 'Kiểm tra' },
   { id: 'copy',    icon: '🚀', name: 'Bắn chữ, nhìn tiếng Anh' },
   { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
+  { id: 'colloc',  icon: '🧩', name: 'Bắn chữ, ghép cụm từ' },
   { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
   { id: 'raid',    icon: '⚔️', name: 'Hầm ngục chữ' },
 ];
@@ -15970,7 +15977,26 @@ async function lbLoad() {
 const TS_MODES = {
   copy:    { label: 'Nhìn tiếng Anh', fall: 20, gap: 3.2, gapMin: 1.4, maxOn: 7 },
   meaning: { label: 'Nhìn nghĩa Việt', fall: 30, gap: 4.6, gapMin: 2.2, maxOn: 5 },
+  colloc:  { label: 'Ghép cụm từ', fall: 28, gap: 4.2, gapMin: 2, maxOn: 5 },
 };
+// Ghép cụm từ: a phrase from the list falls with its key word missing: the
+// first word that is not a little function word, which is usually the verb
+// or adjective the rest of the phrase collocates with.
+const TS_SMALL_WORDS = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'for', 'with', 'at', 'by', 'from', 'and', 'or', 'as', 'into', 'up', 'out', 'sth', 'sb', 'one\'s', 'be']);
+function tsCollocOf(w) {
+  const words = w.show.split(' ');
+  if (words.length < 2) return null;
+  let k = -1;
+  words.forEach((x, i) => { if (k < 0 && !TS_SMALL_WORDS.has(x.toLowerCase()) && x.length >= 3) k = i; });
+  if (k < 0) return null;
+  const key = tsNorm(words[k]);
+  if (!key) return null;
+  return { ...w, answers: [key], before: words.slice(0, k).join(' '), after: words.slice(k + 1).join(' '), key: words[k] };
+}
+function tsCollocHtml(it, typed) {
+  const gap = typed && tsNorm(it.key).startsWith(typed) ? `<span class="ts-hit">${escapeHtml(it.key.slice(0, typed.length))}</span>${'_'.repeat(Math.max(0, it.key.length - typed.length))}` : `${escapeHtml(it.key[0])}${'_'.repeat(it.key.length - 1)}`;
+  return `<div class="ts-word ts-colloc">${escapeHtml(it.before)} <span class="ts-gap">${gap}</span> ${escapeHtml(it.after)}</div><div class="ts-vi">${escapeHtml(it.vi)}</div>`;
+}
 const TS_MAX_LIVES = 5;
 // Speed levels. "Vừa" is the tuning students already had; "Dễ" is for those
 // who still found it too fast, with fewer words on screen and two more lives.
@@ -16121,8 +16147,10 @@ function tsStart(mode, list) {
   lvUnbindKeys();
   const pool = (list && list.length ? list : lvPool())
     .map(w => ({ ...w, show: tsDisplay(w.en), answers: tsAnswers(w.en) }))
-    .filter(w => w.show && w.answers.length && w.show.length <= 30);
+    .filter(w => w.show && w.answers.length && w.show.length <= 30)
+    .map(w => (mode === 'colloc' ? tsCollocOf(w) : w)).filter(Boolean);
   const root = document.getElementById('lesson-vocab-root');
+  if (mode === 'colloc' && pool.length < 5) { showToast('Phần đang chọn có quá ít cụm từ để ghép. Chọn thêm buổi hoặc unit.'); return; }
   if (!pool.length || !root || !TS_MODES[mode]) return;
   root.innerHTML = `
     <div class="ts-wrap" id="ts-wrap">
@@ -16345,7 +16373,11 @@ function tsGap() {
 
 function tsItemHtml(it, typed) {
   const pack = walLook('drop');
-  const icon = it.boss ? pack.icons[1] : it.egg ? pack.icons[2] : pack.icons[0];
+  const icon = it.boss ? pack.icons[1] : it.egg ? `${pack.icons[2]}<b class="ts-egg-pw">${TS_EGG_POWERS[it.power] || ''}</b>` : pack.icons[0];
+  if (_ts.mode === 'colloc') {
+    const body = tsCollocHtml(it, typed);
+    return it.fixed ? `<div class="ts-cell-w">${body}</div>` : `<span class="ts-chick">${icon}</span>${body}`;
+  }
   if (it.fixed) {
     const onTrack = typed && it.answers.some(x => x.startsWith(typed));
     const word = _ts.mode === 'copy'
@@ -16401,7 +16433,7 @@ function tsSpawn() {
   }
   const el = document.createElement('div');
   el.className = 'ts-item' + (boss ? ' ts-boss' : '') + (egg ? ' ts-egg' : '') + (g.boss ? ' ts-shot' : '');
-  const it = { ...pick, boss, egg, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: tsFallTime(boss), dead: false };
+  const it = { ...pick, boss, egg, power: egg ? tsEggPower() : null, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: tsFallTime(boss), dead: false };
   el.dataset.id = it.id;
   arena.appendChild(el);
   tsRender(it, '');
@@ -16423,6 +16455,7 @@ function tsFrame(now) {
   if (!g.paused) {
     if (g.slow > 0 && (g.slow -= dt) <= 0) document.getElementById('ts-arena')?.classList.remove('slowed');
     if (g.dbl > 0 && (g.dbl -= dt) <= 0) document.getElementById('ts-ship')?.classList.remove('ts-ship--double');
+    if (g.x2 > 0 && (g.x2 -= dt) <= 0) document.getElementById('ts-arena')?.classList.remove('ts-x2');
     tsPowers();
     // The slow beam slows the arrivals as well, so words do not pile up.
     const k = g.slow > 0 ? TS_SLOW_RATE : 1;
@@ -16571,7 +16604,7 @@ function tsAim(it) {
 
 function tsPoints(it) {
   const mult = 1 + Math.min(4, Math.floor(_ts.combo / 5));
-  return it.show.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss || it.core ? 3 : it.fixed ? 2 : 1);
+  return it.show.replace(/[^a-z]/gi, '').length * 10 * mult * (it.boss || it.core ? 3 : it.fixed ? 2 : 1) * (_ts.x2 > 0 ? 2 : 1);
 }
 
 function tsExplode(it, withLaser) {
@@ -16630,7 +16663,7 @@ function tsKill(it, second) {
   if (ar) jCoinFly(ar.left + it.x + it.w / 2, ar.top + it.y + it.h / 2, 'ts-coins');
   if (TS_CALLOUTS[g.combo]) tsCallout(TS_CALLOUTS[g.combo]);
   if (it.boss) tsShakeArena();
-  if (it.egg) tsPower();
+  if (it.egg) tsPower(it.power);
   // Double shot: the second beam takes the lowest word still falling. A boss
   // still has to be typed out.
   if (g.dbl > 0 && !second) {
@@ -16662,12 +16695,54 @@ function tsKill(it, second) {
 
 // A golden egg gives one of three rewards. Extra life is offered only while
 // there is room for it.
-function tsPower() {
+// Each golden egg shows its power, so it is worth aiming for.
+const TS_EGG_POWERS = {
+  freeze: '❄️', bomb: '💣', life: '❤️', slow: '🐢', double: '🔱', shield: '🛡️', coins: '🪙', x2: '✖️2',
+};
+function tsEggPower() {
   const g = _ts;
-  const opts = ['freeze', 'bomb'];
+  const opts = ['freeze', 'bomb', 'slow', 'double', 'shield', 'coins', 'x2'];
   if (g.lives < Math.max(TS_MAX_LIVES, g.diff.lives)) opts.push('life');
-  const pick = opts[Math.floor(Math.random() * opts.length)];
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+function tsPower(kind) {
+  const g = _ts;
+  const pick = kind || tsEggPower();
   tsSfx('power');
+  if (pick === 'slow') {
+    g.slow = Math.max(g.slow, 8);
+    document.getElementById('ts-arena')?.classList.add('slowed');
+    tsFloat('🐢 Làm chậm 8 giây, miễn phí!', g.W / 2, g.H / 2, 'big');
+    tsPowers();
+    return;
+  }
+  if (pick === 'double') {
+    g.dbl = Math.max(g.dbl, 10);
+    document.getElementById('ts-ship')?.classList.add('ts-ship--double');
+    tsFloat('🔱 Bắn 2 tia 10 giây!', g.W / 2, g.H / 2, 'big');
+    tsPowers();
+    return;
+  }
+  if (pick === 'shield') {
+    g.shield = true;
+    document.getElementById('ts-bubble')?.classList.add('on');
+    tsFloat('🛡️ Khiên miễn phí!', g.W / 2, g.H / 2, 'big');
+    tsPowers();
+    return;
+  }
+  if (pick === 'coins') {
+    const n = 15 * walMult();
+    g.coins += n;
+    tsFloat(`🪙 Mưa xu +${n}!`, g.W / 2, g.H / 2, 'big');
+    tsHud();
+    return;
+  }
+  if (pick === 'x2') {
+    g.x2 = 10;
+    document.getElementById('ts-arena')?.classList.add('ts-x2');
+    tsFloat('✖️2 Điểm gấp đôi 10 giây!', g.W / 2, g.H / 2, 'big');
+    return;
+  }
   if (pick === 'freeze') {
     g.freeze = 4;
     document.getElementById('ts-arena')?.classList.add('frozen');
@@ -17562,6 +17637,14 @@ const TW_MILESTONES = [
 // Below the first milestone the tower is a shack; each milestone rebuilds the
 // whole tower in a better style (tw-stage-N on the scene, free skin only).
 const TW_STAGE0 = { name: 'Nhà tạm xập xệ', icon: '🛖' };
+// The neighbourhood: each entry appears once the tower is that tall, on
+// the left or right of it.
+const TW_CITY = [
+  [0, '🌱', 'l'], [0, '🪨', 'r'], [2, '🌳', 'l'], [4, '🚲', 'r'], [6, '🐕', 'l'], [8, '🏪', 'r'],
+  [10, '🚶', 'l'], [13, '🌳', 'r'], [16, '☕', 'l'], [20, '🚗', 'r'], [24, '🌷', 'l'], [28, '🏫', 'r'],
+  [32, '🚌', 'l'], [36, '⛲', 'r'], [40, '🌳', 'l'], [45, '🚕', 'r'], [50, '🎡', 'l'], [56, '🏥', 'r'],
+  [62, '🚆', 'l'], [68, '🏟️', 'r'], [74, '🎠', 'l'], [81, '🎆', 'r'],
+];
 const twStage = h => TW_MILESTONES.filter(m => h >= m.at).length;
 const TW_FLOOR_H = 40;
 // Typed answers get TW_TRIES goes, but only a first go builds a straight
@@ -17746,6 +17829,7 @@ async function twStart(list) {
         <span class="tw-hearts" id="tw-hearts"></span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
         <button class="ts-icon-btn" onclick="gameShop('tw')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
+        <button class="ts-icon-btn" onclick="twSkyline()" title="Tháp của cả lớp" aria-label="Tháp của cả lớp">🌆</button>
         <button class="ts-icon-btn" onclick="twSkinModal()" title="Đổi kiểu nhà" aria-label="Đổi kiểu nhà">🎨</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
@@ -17760,7 +17844,9 @@ async function twStart(list) {
           </div>
           <div class="tw-world" id="tw-world">
             <div class="tw-stack" id="tw-stack"></div>
-            <div class="tw-ground"><span>🌳</span><span>🏡</span><span>🌳</span><span class="tw-ground-r">🌲</span><span>🚲</span></div>
+            <div class="tw-ground"></div>
+            <div class="tw-city tw-city--l" id="tw-city-l"></div>
+            <div class="tw-city tw-city--r" id="tw-city-r"></div>
           </div>
           <div class="tw-meter" id="tw-meter"></div>
           <div class="tw-banner hidden" id="tw-banner"></div>
@@ -17829,6 +17915,16 @@ function twRenderScene(animateTop) {
   scene.classList.toggle('tw-leaning', lean >= TW_TILT_MAX);
   // The look follows the height: up a stage is a rebuild with a flash, down
   // a stage (floors lost) quietly drops back.
+  // The neighbourhood fills in as the tower climbs; what just arrived pops.
+  const city = TW_CITY.filter(c => h >= c[0]);
+  if (g.cityN !== city.length) {
+    const fresh = g.cityN !== undefined && city.length > g.cityN ? city.slice(g.cityN) : [];
+    ['l', 'r'].forEach(side => {
+      const el = document.getElementById('tw-city-' + side);
+      if (el) el.innerHTML = city.filter(c => c[2] === side).map(c => `<span class="${fresh.includes(c) ? 'new' : ''}">${c[1]}</span>`).join('');
+    });
+    g.cityN = city.length;
+  }
   const stage = twStage(h);
   if (g.stage !== stage) {
     [...scene.classList].filter(c => c.startsWith('tw-stage-')).forEach(c => scene.classList.remove(c));
@@ -18048,6 +18144,48 @@ function twSkinSync() {
       <div class="lv-modal-title">🎨 Đổi kiểu nhà</div>
       <div class="wal-items">${COSMETICS.tower.map(c => walLookCard('tower', c)).join('')}</div>
       <div class="lv-modal-note">Đang có 🪙 ${walCoins()} xu.</div>
+      <div class="lv-modal-btns"><button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">▶ Xây tiếp</button></div>
+    </div>`;
+}
+
+// Every classmate's best tower side by side, the student's own lit up.
+// It reads the tower ranking, one class at a time.
+const TW_STAGE_COLORS = ['#8A6A4A', '#F2C57C', '#FCE3C4', '#C9C2B5', '#3E6E9E', '#B8C7D1', '#1F2A44'];
+async function twSkyline(scope) {
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  el.innerHTML = '<div class="lv-modal-card lv-modal-card--wide"><div class="loading">Đang dựng đường chân trời…</div></div>';
+  document.body.appendChild(el);
+  let r;
+  try {
+    r = await api('/api/game/leaderboard?board=tower' + (scope ? '&scope=' + scope : ''));
+    if (!scope && r.classes && r.classes.length) { scope = r.classes[0].id; r = await api('/api/game/leaderboard?board=tower&scope=' + scope); }
+  } catch (e) {
+    el.innerHTML = `<div class="lv-modal-card"><div class="lv-modal-title">🌆 Tháp của lớp</div><div class="lv-modal-note">${escapeHtml(e.message || 'Chưa tải được.')}</div><div class="lv-modal-btns"><button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">Đóng</button></div></div>`;
+    return;
+  }
+  if (!document.getElementById('lv-modal')) return;
+  const rows = [...(r.rows || [])];
+  if (r.me && !rows.some(x => x.me)) rows.push(r.me);
+  const top = Math.max(TW_MILESTONES[TW_MILESTONES.length - 1].at, ...rows.map(x => x.value));
+  const cls = (r.classes || []).find(c => c.id === r.scope);
+  el.innerHTML = `
+    <div class="lv-modal-card lv-modal-card--wide tw-sky-card">
+      <div class="lv-modal-title">🌆 Tháp của ${cls ? 'lớp ' + escapeHtml(cls.name) : 'cả trường'}</div>
+      ${(r.classes || []).length > 1 ? `<div class="tw-sky-tabs">${r.classes.map(c => `<button class="vb-chip${c.id === r.scope ? ' active' : ''}" onclick="twSkyline(${c.id})">${escapeHtml(c.name)}</button>`).join('')}</div>` : ''}
+      ${rows.length ? `<div class="tw-sky">${rows.map(x => {
+        const st = twStage(x.value);
+        const m = st ? TW_MILESTONES[st - 1] : TW_STAGE0;
+        return `<div class="tw-sky-col${x.me ? ' me' : ''}" title="${escapeHtml(x.name)}: ${x.value} tầng · ${escapeHtml(m.name)}">
+          <span class="tw-sky-n">${x.value}</span>
+          <div class="tw-sky-bld" style="height:${Math.max(4, Math.round(x.value / top * 100))}%; background-color:${TW_STAGE_COLORS[st]}"><span>${m.icon}</span></div>
+          <span class="tw-sky-name">${x.me ? '⭐ ' : ''}${escapeHtml(x.name)}</span>
+        </div>`;
+      }).join('')}</div>` : '<div class="lv-modal-note">Lớp chưa ai xây tháp. Em xây đầu tiên nhé!</div>'}
+      <div class="lv-modal-note">Tính tầng cao nhất từng xây được. ${r.total > rows.length ? `Hiện ${rows.length} bạn cao nhất.` : ''}</div>
       <div class="lv-modal-btns"><button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">▶ Xây tiếp</button></div>
     </div>`;
 }

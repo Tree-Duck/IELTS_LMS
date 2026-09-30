@@ -8560,3 +8560,27 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .rd-ev-title { font-size: 1.35rem; }
   .rd-ev-text { font-size: 1.05rem; }
 }
+
+/* ── Xây tháp: the neighbourhood and the class skyline ── */
+.tw-city { position: absolute; bottom: 46px; display: flex; flex-wrap: wrap-reverse; align-items: flex-end; justify-content: space-evenly; gap: 0 4px; font-size: 1.45rem; line-height: 1.1; pointer-events: none; }
+.tw-city--l { left: 1%; right: calc(50% + 96px); }
+.tw-city--r { left: calc(50% + 96px); right: 1%; }
+.tw-city span { display: inline-block; }
+.tw-city span.new { animation: twCityPop .7s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes twCityPop { 0% { transform: scale(0) translateY(20px); } 100% { transform: none; } }
+.tw-sky-card { max-width: 760px; }
+.tw-sky-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-bottom: 0.6rem; }
+.tw-sky { display: flex; align-items: flex-end; gap: 6px; height: 320px; padding: 0.6rem 0.5rem 0; overflow-x: auto; border-radius: 14px; background: linear-gradient(180deg, #7ec8e3 0%, #d6f0f7 80%, #7BBF4E 80%, #5E9E3A 100%); }
+.tw-sky-col { flex: 1 0 54px; max-width: 90px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 0; }
+.tw-sky-n { font-size: 0.78rem; font-weight: 700; color: #16324A; }
+.tw-sky-bld { position: relative; width: 70%; border: 2px solid rgba(0, 0, 0, 0.45); border-bottom: 0; border-radius: 4px 4px 0 0; background-image: repeating-linear-gradient(0deg, transparent 0 6px, rgba(255, 244, 190, 0.55) 6px 9px), repeating-linear-gradient(90deg, transparent 0 5px, rgba(0, 0, 0, 0.12) 5px 7px); transition: height .8s cubic-bezier(.3, .8, .3, 1); }
+.tw-sky-bld span { position: absolute; top: -1.35em; left: 50%; translate: -50% 0; font-size: 1rem; }
+.tw-sky-name { width: 100%; margin: 3px 0 4px; font-size: 0.7rem; font-weight: 700; color: #fff; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.tw-sky-col.me .tw-sky-bld { box-shadow: 0 0 0 3px #FFD34D, 0 0 16px rgba(255, 211, 77, 0.9); }
+.tw-sky-col.me .tw-sky-name { color: #FFE08A; }
+
+/* ── Bắn Chữ: eggs show their power; collocation mode ── */
+.ts-egg-pw { position: absolute; right: -6px; bottom: -4px; font-size: 0.8rem; font-weight: 700; line-height: 1; background: #fff; border-radius: 99px; padding: 1px 3px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.ts-chick { position: relative; }
+.ts-arena.ts-x2 { box-shadow: inset 0 0 0 3px #FFD34D, inset 0 0 30px rgba(255, 211, 77, 0.45); }
+.ts-colloc .ts-gap { display: inline-block; padding: 0 4px; border-radius: 6px; background: rgba(255, 211, 77, 0.25); letter-spacing: 1px; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; }

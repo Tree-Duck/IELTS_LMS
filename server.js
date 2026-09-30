@@ -4182,7 +4182,7 @@ app.post('/api/game/merchant', authenticate, walletRoute((w, b) => {
 // ─── Game rankings ──────────────────────────────────────────────────────────
 // Bắn Chữ records used to live only in the browser; they are sent here too so
 // they can be ranked. Only the best per mode and speed is kept.
-const SHOOT_MODES = ['copy', 'meaning'];
+const SHOOT_MODES = ['copy', 'meaning', 'colloc'];
 const SHOOT_DIFFS = ['easy', 'medium', 'hard'];
 app.post('/api/game/score', authenticate, (req, res) => {
   try {
