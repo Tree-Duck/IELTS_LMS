@@ -14390,6 +14390,8 @@ let _lvSrc = 'lesson';
 const _lvSelBy = { lesson: new Set(), unit: new Set() };
 let _lvFront = 'en';
 let _lvSkipKnown = false;
+// Which box of the 25 units: 'basic' (B1–B2) or 'adv' (C1 plus the original items).
+let _lvTier = 'basic';
 let _fc = null;
 let _fcKeyHandler = null;
 
@@ -14402,6 +14404,7 @@ let _fcKeyHandler = null;
     _lvSrc = localStorage.getItem('lvSrc') === 'unit' ? 'unit' : 'lesson';
     _lvFront = localStorage.getItem('lvFront') === 'vi' ? 'vi' : 'en';
     _lvSkipKnown = localStorage.getItem('lvSkipKnown') === '1';
+    _lvTier = localStorage.getItem('lvTier') === 'adv' ? 'adv' : 'basic';
   } catch (e) {}
 })();
 
@@ -14418,20 +14421,11 @@ function lvSel() { return _lvSelBy[_lvSrc]; }
 // and the 25 vocabulary units (VOCAB_BANK, fetched from the server).
 function lvTopics() {
   if (_lvSrc === 'unit') {
-    return Object.keys(VOCAB_BANK).map((topic, i) => ({
+    return (_vocabUnits || []).map((u, i) => ({
       id: i + 1,
       label: 'Unit ' + (i + 1),
-      title: topic,
-      items: ((VOCAB_BANK[topic] || {}).all || [])
-        // Two Crime & Justice rows hold Vietnamese where the English verb should be.
-        .filter(w => w.word && w.vietnamese && !/[^\x00-\x7F]/.test(w.word))
-        .map(w => ({
-          en: w.word,
-          vi: w.vietnamese,
-          use: w.kind === 'verb' && w.definition ? 'Hay ' + w.definition : '',
-          ex: w.example || '',
-          group: w.kind === 'verb' ? 'Động từ' : 'Cụm từ',
-        })),
+      title: u.topic,
+      items: lvUnitItems(u),
     }));
   }
   return LESSON_VOCAB.map(t => ({
@@ -14440,6 +14434,35 @@ function lvTopics() {
     title: t.title,
     items: t.groups.flatMap(g => g.items.map(([en, vi, use, ex]) => ({ en, vi, use, ex, group: g.name }))),
   }));
+}
+
+// One unit's cards in the chosen box. Cơ bản: B1 and B2 words and easy
+// phrases. Nâng cao: C1 words, harder phrases (Strong and Precise in the
+// teacher's handbook), then the unit's original collocations and verbs.
+function lvUnitItems(u) {
+  const row = (group, lvl) => ([en, pos, vi, ex]) => ({ en, vi, use: [lvl, pos].filter(Boolean).join(' · '), ex: ex || '', group });
+  if (_lvTier === 'basic') {
+    const b = u.basic || {};
+    return [...(b.B1 || []).map(row('Từ B1', 'B1')), ...(b.B2 || []).map(row('Từ B2', 'B2')), ...(b.colloc || []).map(row('Cụm từ', 'B1–B2'))];
+  }
+  const adv = u.advanced || {};
+  const old = ((VOCAB_BANK[u.topic] || {}).all || [])
+    // Two Crime & Justice rows hold Vietnamese where the English verb should be.
+    .filter(w => w.word && w.vietnamese && !/[^\x00-\x7F]/.test(w.word))
+    .map(w => ({
+      en: w.word,
+      vi: w.vietnamese,
+      use: w.kind === 'verb' && w.definition ? 'Hay ' + w.definition : '',
+      ex: w.example || '',
+      group: w.kind === 'verb' ? 'Động từ' : 'Cụm từ',
+    }));
+  return [...(adv.C1 || []).map(row('Từ C1', 'C1')), ...(adv.colloc || []).map(row('Cụm nâng cao', 'C1')), ...old];
+}
+function lvSetTier(t) {
+  _lvTier = t === 'adv' ? 'adv' : 'basic';
+  lvSave('lvTier', _lvTier);
+  tsSfx('key');
+  lvRenderHub();
 }
 
 // Words repeat across topics (erode appears in four lessons). When topics are
@@ -14486,7 +14509,7 @@ function lvRenderHub() {
     return `<button class="lv-topic${sel.has(t.id) ? ' active' : ''}" onclick="lvToggle(${t.id})">
       <span class="lv-topic-n">${escapeHtml(t.label)}</span>
       <span class="lv-topic-name">${escapeHtml(t.title)}</span>
-      <span class="lv-topic-known">${k}/${t.items.length} đã nhớ</span>
+      <span class="lv-topic-known">${t.items.length ? `${k}/${t.items.length} đã nhớ` : 'đang soạn'}</span>
     </button>`;
   }).join('');
   root.innerHTML = `
@@ -14498,6 +14521,10 @@ function lvRenderHub() {
           <button class="vb-chip${_lvSrc === 'lesson' ? ' active' : ''}" onclick="lvSetSrc('lesson')">${LESSON_VOCAB.length} buổi Writing Task 2</button>
           <button class="vb-chip${_lvSrc === 'unit' ? ' active' : ''}" onclick="lvSetSrc('unit')">25 unit từ vựng</button>
         </div>
+        ${_lvSrc === 'unit' ? `<div class="lv-tier">
+          <button class="lv-tier-btn lv-tier-btn--basic${_lvTier === 'basic' ? ' active' : ''}" onclick="lvSetTier('basic')">🌱 Cơ bản<small>B1–B2 · từ và cụm dễ</small></button>
+          <button class="lv-tier-btn lv-tier-btn--adv${_lvTier === 'adv' ? ' active' : ''}" onclick="lvSetTier('adv')">🚀 Nâng cao<small>C1 · cụm học thuật</small></button>
+        </div>` : ''}
         <div class="vb-tagline">Chọn một ${unitWord} để học riêng, hoặc chọn nhiều ${unitWord} để trộn. Không chọn ${unitWord} nào là trộn tất cả.</div>
       </div>
       <div class="lv-topics">${chips}</div>
@@ -14516,6 +14543,12 @@ function lvRenderHub() {
           <span class="lv-mode-icon">🃏</span>
           <span class="lv-mode-name">Flashcard</span>
           <span class="lv-mode-desc">Lật thẻ xem nghĩa, cách dùng và câu mẫu. Tự đánh dấu nhớ hay chưa.</span>
+        </button>
+        <button class="lv-mode" onclick="qtSetup()">
+          <span class="lv-mode-icon">📝</span>
+          <span class="lv-mode-name">Kiểm tra</span>
+          <span class="lv-mode-desc">Bài kiểm tra kiểu Quizlet trên các thẻ đã nhớ: đúng sai, trắc nghiệm, tự gõ, nối từ. Nộp một lần, xem ngay từ sai.</span>
+          <span class="lv-mode-best">✓ ${lvKnownCount(pool)} thẻ đã nhớ</span>
         </button>
         <button class="lv-mode" onclick="tsStart('copy')">
           <span class="lv-mode-icon">🚀</span>
@@ -14551,6 +14584,7 @@ function lvRenderHub() {
 /* ─── Quay về và đổi chế độ, từ giữa bất kỳ game nào ─────────────────────── */
 const LV_MODES = [
   { id: 'flash',   icon: '🃏', name: 'Flashcard' },
+  { id: 'test',    icon: '📝', name: 'Kiểm tra' },
   { id: 'copy',    icon: '🚀', name: 'Bắn chữ, nhìn tiếng Anh' },
   { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
   { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
@@ -14560,6 +14594,7 @@ const LV_MODES = [
 // Which game is on screen right now, if any.
 function lvCurrentMode() {
   if (_rd) return 'raid';
+  if (document.querySelector('#lesson-vocab-root .qt-wrap, #lesson-vocab-root .qt-setup')) return 'test';
   if (_ts) return _ts.mode;
   if (_tw && document.getElementById('tw-card')) return 'tower';
   if (document.querySelector('#lesson-vocab-root .lv-fc-top')) return 'flash';
@@ -14602,6 +14637,7 @@ function lvSwitch(mode) {
   lvLeaveGame();
   tsSfx('equip');
   if (mode === 'flash') lvStartFlash();
+  else if (mode === 'test') qtSetup();
   else if (mode === 'tower') twStart();
   else if (mode === 'raid') raidMap();
   else tsStart(mode, list);
@@ -14787,6 +14823,263 @@ function lvRenderFlashDone() {
         </div>
       </div>
     </div>`;
+}
+
+/* ─── Kiểm tra: a Quizlet-style test over the cards marked "Nhớ rồi" ─────── */
+// One page of questions in up to four sections (true/false, multiple
+// choice, written, matching), marked together at the end. Wrong answers can
+// go straight back into Flashcard. Settings live in localStorage.
+let _qt = null;
+const QT_TYPES = [
+  { id: 'tf', name: 'Đúng / Sai' },
+  { id: 'mc', name: 'Trắc nghiệm' },
+  { id: 'wr', name: 'Tự gõ từ' },
+  { id: 'match', name: 'Nối từ' },
+];
+let _qtOpt = { n: 20, ans: 'en', types: ['tf', 'mc', 'wr', 'match'], all: false };
+try { const o = JSON.parse(localStorage.getItem('qtOpt') || 'null'); if (o && Array.isArray(o.types)) _qtOpt = { ..._qtOpt, ...o }; } catch (e) {}
+
+// The cards to test: the known ones in the current selection, or every card
+// when the student asks for the whole set.
+function qtDeck() {
+  const pool = lvPool();
+  if (_qtOpt.all) return pool;
+  const k = lvKnownSet();
+  return pool.filter(w => k.has(w.en.toLowerCase()));
+}
+
+function qtSetup() {
+  lvLeaveGame();
+  _qt = null;
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  const known = qtDeck();
+  const pool = lvPool();
+  const enough = known.length >= 4;
+  const opt = (k, v, label) => `<button class="vb-chip${_qtOpt[k] === v ? ' active' : ''}" onclick="qtOpt('${k}', ${JSON.stringify(v).replace(/"/g, '&quot;')})">${label}</button>`;
+  root.innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow">
+      <div class="lv-fc-top">
+        <button class="btn-back-plain" onclick="lvRenderHub()">← Chọn ${_lvSrc === 'unit' ? 'unit' : 'buổi'}</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
+      </div>
+      <div class="qt-setup">
+        <div class="vb-logo">📝 Kiểm tra</div>
+        <div class="vb-tagline">Kiểm tra những thẻ em đã bấm <b>✓ Nhớ rồi</b> trong Flashcard. Làm hết rồi nộp một lần, như Quizlet.</div>
+        <div class="qt-row"><span>Nguồn thẻ</span>
+          ${opt('all', false, `Thẻ đã nhớ (${lvKnownCount(pool)})`)}${opt('all', true, `Cả bộ đang chọn (${pool.length})`)}</div>
+        <div class="qt-row"><span>Số câu</span>
+          ${[10, 20, 40].map(n => opt('n', n, n + ' câu')).join('')}${opt('n', 0, 'Tất cả')}</div>
+        <div class="qt-row"><span>Trả lời bằng</span>
+          ${opt('ans', 'en', 'Tiếng Anh')}${opt('ans', 'vi', 'Tiếng Việt')}${opt('ans', 'mix', 'Trộn cả hai')}</div>
+        <div class="qt-row"><span>Dạng câu hỏi</span>
+          ${QT_TYPES.map(t => `<button class="vb-chip${_qtOpt.types.includes(t.id) ? ' active' : ''}" onclick="qtType('${t.id}')">${t.name}</button>`).join('')}</div>
+        ${enough
+          ? `<button class="vb-start-btn qt-go" onclick="qtStart()">Bắt đầu · ${Math.min(known.length, _qtOpt.n || known.length)} câu</button>`
+          : `<div class="qt-empty">Mới có ${known.length} thẻ đã nhớ trong phần đang chọn. Cần ít nhất 4 thẻ.<br>
+              <button class="vb-start-btn" onclick="lvStartFlash()">🃏 Học Flashcard trước</button>
+              <button class="vb-secondary-btn" onclick="qtOpt('all', true)">Kiểm tra cả bộ</button></div>`}
+      </div>
+    </div>`;
+}
+function lvKnownCount(pool) { const k = lvKnownSet(); return pool.filter(w => k.has(w.en.toLowerCase())).length; }
+function qtOpt(k, v) { _qtOpt[k] = v; lvSave('qtOpt', JSON.stringify(_qtOpt)); tsSfx('key'); qtSetup(); }
+function qtType(id) {
+  const t = _qtOpt.types;
+  if (t.includes(id)) { if (t.length > 1) t.splice(t.indexOf(id), 1); } else t.push(id);
+  lvSave('qtOpt', JSON.stringify(_qtOpt));
+  tsSfx('key');
+  qtSetup();
+}
+
+// Builds the paper. Cards are shared out across the chosen sections in
+// order; matching takes groups of up to five.
+function qtStart(list) {
+  const deck = vbShuffle((list || qtDeck()).slice());
+  const n = list ? deck.length : Math.min(deck.length, _qtOpt.n || deck.length);
+  const cards = deck.slice(0, n);
+  if (cards.length < 1) return;
+  const distract = lvPool();
+  const types = _qtOpt.types.slice().sort((a, b) => QT_TYPES.findIndex(t => t.id === a) - QT_TYPES.findIndex(t => t.id === b));
+  const per = Math.ceil(cards.length / types.length);
+  const qs = [];
+  let at = 0;
+  types.forEach(type => {
+    const part = cards.slice(at, at + per);
+    at += per;
+    if (type === 'match') {
+      for (let i = 0; i < part.length; i += 5) {
+        const g = part.slice(i, i + 5);
+        if (g.length < 2) { g.forEach(w => qs.push(qtQuestion('mc', w, distract))); continue; }
+        qs.push({ type: 'match', cards: g, order: vbShuffle(g.map((_, j) => j)), pick: g.map(() => ''), ask: qtAsk() });
+      }
+    } else part.forEach(w => qs.push(qtQuestion(type, w, distract)));
+  });
+  _qt = { qs, list: cards, done: false };
+  qtRender();
+  window.scrollTo(0, 0);
+}
+// Which side the student answers in: 'en' means the prompt is Vietnamese.
+function qtAsk() { return _qtOpt.ans === 'mix' ? (Math.random() < 0.5 ? 'en' : 'vi') : _qtOpt.ans; }
+function qtOthers(w, pool, n) {
+  const same = pool.filter(x => x.en !== w.en && x.vi !== w.vi && x.group === w.group);
+  const rest = pool.filter(x => x.en !== w.en && x.vi !== w.vi && x.group !== w.group);
+  return [...vbShuffle(same), ...vbShuffle(rest)].slice(0, n);
+}
+function qtQuestion(type, w, pool) {
+  const ask = type === 'wr' ? 'en' : qtAsk();
+  const q = { type, w, ask, pick: null };
+  if (type === 'mc') q.opts = vbShuffle([w, ...qtOthers(w, pool, 3)]);
+  if (type === 'tf') { q.truth = Math.random() < 0.5; q.shown = q.truth ? w : (qtOthers(w, pool, 1)[0] || w); if (q.shown === w) q.truth = true; }
+  return q;
+}
+const qtSide = (w, side) => (side === 'en' ? w.en : w.vi);
+
+function qtRender() {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root || !_qt) return;
+  const g = _qt;
+  const answered = g.qs.filter(qtAnswered).length;
+  const body = g.qs.map((q, i) => qtRenderQ(q, i)).join('');
+  root.innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow qt-wrap">
+      <div class="lv-fc-top">
+        <button class="btn-back-plain" onclick="qtSetup()">← Cài đặt</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
+      </div>
+      ${g.done ? qtScoreCard() : `<div class="qt-bar"><span>📝 ${g.qs.length} câu · đã làm <b id="qt-count">${answered}</b></span></div>`}
+      <div class="qt-list">${body}</div>
+      ${g.done ? qtAfterBtns() : `<button class="vb-start-btn qt-submit" onclick="qtSubmit()">Nộp bài</button>`}
+    </div>`;
+}
+function qtAnswered(q) {
+  if (q.type === 'match') return q.pick.every(Boolean);
+  if (q.type === 'wr') return !!(q.pick && q.pick.trim());
+  return q.pick !== null;
+}
+function qtHead(q, i, label) {
+  const mark = !_qt.done ? '' : q.ok ? '<span class="qt-ok">✓ Đúng</span>' : '<span class="qt-bad">✗ Sai</span>';
+  return `<div class="qt-qhead"><span>${i + 1}. ${label}</span>${mark}</div>`;
+}
+function qtRenderQ(q, i) {
+  const done = _qt.done;
+  const other = q.ask === 'en' ? 'vi' : 'en';
+  const cls = `qt-q${done ? (q.ok ? ' qt-q--ok' : ' qt-q--bad') : ''}`;
+  if (q.type === 'tf') {
+    return `<div class="${cls}">${qtHead(q, i, 'Đúng hay sai?')}
+      <div class="qt-pair"><b>${escapeHtml(qtSide(q.w, other))}</b><span>=</span><span>${escapeHtml(qtSide(q.shown, q.ask))}</span></div>
+      <div class="qt-opts qt-opts--2">${[true, false].map(v => `<button class="qt-opt${q.pick === v ? ' on' : ''}${done && v === q.truth ? ' right' : ''}" onclick="qtPick(${i}, ${v})" ${done ? 'disabled' : ''}>${v ? 'Đúng' : 'Sai'}</button>`).join('')}</div>
+      ${done && !q.ok ? `<div class="qt-fix">Đáp án: <b>${escapeHtml(q.w.en)}</b> = ${escapeHtml(q.w.vi)}</div>` : ''}</div>`;
+  }
+  if (q.type === 'mc') {
+    return `<div class="${cls}">${qtHead(q, i, 'Chọn đáp án đúng')}
+      <div class="qt-prompt">${escapeHtml(qtSide(q.w, other))}</div>
+      <div class="qt-opts">${q.opts.map((o, j) => `<button class="qt-opt${q.pick === j ? ' on' : ''}${done && o === q.w ? ' right' : ''}" onclick="qtPick(${i}, ${j})" ${done ? 'disabled' : ''}>${escapeHtml(qtSide(o, q.ask))}</button>`).join('')}</div></div>`;
+  }
+  if (q.type === 'wr') {
+    return `<div class="${cls}">${qtHead(q, i, 'Gõ từ tiếng Anh')}
+      <div class="qt-prompt">${escapeHtml(q.w.vi)}</div>
+      <input class="ts-input qt-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" value="${escapeHtml(q.pick || '')}" oninput="qtType2(${i}, this.value)" ${done ? 'disabled' : ''} placeholder="Gõ từ tiếng Anh">
+      ${done && !q.ok ? `<div class="qt-fix">Đáp án: <b>${escapeHtml(q.w.en)}</b></div>` : done && q.near ? '<div class="qt-fix">Gần đúng, sai một chữ cái.</div>' : ''}</div>`;
+  }
+  // Matching: prompts on the left, lettered answers on the right.
+  const letters = 'ABCDE';
+  const other2 = q.ask === 'en' ? 'vi' : 'en';
+  return `<div class="${cls}">${qtHead(q, i, 'Nối mỗi dòng với đáp án')}
+    <div class="qt-match">
+      <div>${q.cards.map((c, j) => {
+        const right = done && q.pick[j] === letters[q.order.indexOf(j)];
+        return `<div class="qt-mrow"><select onchange="qtMatch(${i}, ${j}, this.value)" ${done ? 'disabled' : ''} class="${done ? (right ? 'right' : 'wrong') : ''}"><option value="">?</option>${q.cards.map((_, k) => `<option${q.pick[j] === letters[k] ? ' selected' : ''}>${letters[k]}</option>`).join('')}</select><span>${escapeHtml(qtSide(c, other2))}</span>${done && !right ? `<small>→ ${letters[q.order.indexOf(j)]}</small>` : ''}</div>`;
+      }).join('')}</div>
+      <div>${q.order.map((j, k) => `<div class="qt-mans"><b>${letters[k]}</b> ${escapeHtml(qtSide(q.cards[j], q.ask))}</div>`).join('')}</div>
+    </div></div>`;
+}
+function qtPick(i, v) {
+  if (!_qt || _qt.done) return;
+  _qt.qs[i].pick = v;
+  tsSfx('key');
+  const y = window.scrollY;
+  qtRender();
+  window.scrollTo(0, y);
+}
+function qtType2(i, v) {
+  if (!_qt || _qt.done) return;
+  _qt.qs[i].pick = v;
+  const c = document.getElementById('qt-count');
+  if (c) c.textContent = _qt.qs.filter(qtAnswered).length;
+}
+function qtMatch(i, j, v) {
+  if (!_qt || _qt.done) return;
+  _qt.qs[i].pick[j] = v;
+  const c = document.getElementById('qt-count');
+  if (c) c.textContent = _qt.qs.filter(qtAnswered).length;
+}
+// "work-life balance / balance" style answers: any listed form counts, and
+// words in brackets are optional.
+function qtForms(en) {
+  return String(en).split('/').map(s => raidNorm(s.replace(/\(.*?\)/g, ' '))).filter(Boolean);
+}
+function qtSubmit() {
+  const g = _qt;
+  if (!g || g.done) return;
+  const left = g.qs.filter(q => !qtAnswered(q)).length;
+  if (left && !confirm(`Còn ${left} câu chưa làm. Vẫn nộp bài?`)) return;
+  const letters = 'ABCDE';
+  g.wrong = [];
+  let right = 0, total = 0;
+  g.qs.forEach(q => {
+    if (q.type === 'match') {
+      const oks = q.cards.map((c, j) => q.pick[j] === letters[q.order.indexOf(j)]);
+      oks.forEach((ok, j) => { total++; if (ok) right++; else g.wrong.push(q.cards[j]); });
+      q.ok = oks.every(Boolean);
+      return;
+    }
+    total++;
+    if (q.type === 'tf') q.ok = q.pick === q.truth;
+    else if (q.type === 'mc') q.ok = q.pick !== null && q.opts[q.pick] === q.w;
+    else {
+      const typed = raidNorm(q.pick || '');
+      const forms = qtForms(q.w.en);
+      q.ok = forms.includes(typed);
+      if (!q.ok && typed && forms.some(f => raidNear(f, typed))) { q.ok = true; q.near = true; }
+    }
+    if (q.ok) right++; else g.wrong.push(q.w);
+  });
+  g.right = right; g.total = total; g.done = true;
+  g.wrong = [...new Set(g.wrong)];
+  const coins = Math.round(right * walMult());
+  g.coins = coins;
+  if (coins) walEarn(coins, true);
+  tsSfx(right === total ? 'rankup' : 'level');
+  if (right === total) jConfetti(90);
+  qtRender();
+  window.scrollTo(0, 0);
+}
+function qtScoreCard() {
+  const g = _qt;
+  const pct = Math.round(g.right / g.total * 100);
+  const msg = pct === 100 ? 'Tuyệt đối! 🎉' : pct >= 80 ? 'Rất tốt, ôn nốt vài từ sai là chắc.' : pct >= 50 ? 'Ổn. Ôn lại các từ sai rồi làm lại nhé.' : 'Cần ôn thêm. Học lại Flashcard các từ sai trước.';
+  return `<div class="qt-score">
+    <div class="qt-ring" style="--p:${pct}"><span>${pct}%</span></div>
+    <div><div class="qt-score-n">${g.right} / ${g.total} đúng</div><div class="qt-score-msg">${msg}</div>${g.coins ? `<div class="qt-score-coin">+${g.coins} 🪙</div>` : ''}</div>
+  </div>`;
+}
+function qtAfterBtns() {
+  const w = _qt.wrong.length;
+  return `<div class="vb-results-btns qt-after">
+    ${w ? `<button class="vb-start-btn" onclick="qtStart(_qt.wrong.slice())">↺ Kiểm tra lại ${w} từ sai</button>
+    <button class="vb-secondary-btn" onclick="qtRelearn()">🃏 Học lại ${w} từ sai</button>` : ''}
+    <button class="vb-secondary-btn" onclick="qtStart()">📝 Làm bài mới</button>
+    <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn ${_lvSrc === 'unit' ? 'unit' : 'buổi'}</button>
+  </div>`;
+}
+// Wrong answers lose their "Nhớ rồi" mark, so Flashcard shows them again.
+function qtRelearn() {
+  const list = _qt.wrong.slice();
+  const k = lvKnownSet();
+  list.forEach(w => k.delete(w.en.toLowerCase()));
+  lvSaveKnown(k);
+  lvStartFlash(list);
 }
 
 function lvBindKeys() {

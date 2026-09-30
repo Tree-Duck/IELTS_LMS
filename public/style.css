@@ -8125,3 +8125,48 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .rd-lvcard-meta { width: 100%; }
   .rd-door { font-size: 0.92rem; padding: 0.6rem 0.7rem; }
 }
+
+/* ── Từ vựng: two boxes per unit, and the Kiểm tra test ── */
+.lv-tier { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-width: 30rem; margin: 0.6rem auto 0.2rem; }
+.lv-tier-btn { padding: 0.55rem 0.6rem; border-radius: 14px; border: 2px solid #D9CFB5; background: #FFFDF6; color: #3A3220; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: inherit; }
+.lv-tier-btn small { display: block; font-weight: 500; font-size: 0.75rem; opacity: 0.8; }
+.lv-tier-btn--basic.active { background: #2E8B4E; border-color: #2E8B4E; color: #fff; }
+.lv-tier-btn--adv.active { background: #A8740A; border-color: #A8740A; color: #fff; }
+.qt-setup { text-align: center; }
+.qt-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; justify-content: center; margin: 0.7rem 0; }
+.qt-row > span { width: 100%; font-size: 0.78rem; font-weight: 700; color: var(--moss, #5E6B62); text-transform: uppercase; letter-spacing: 0.05em; }
+.qt-go { margin-top: 0.8rem; }
+.qt-empty { margin-top: 1rem; color: #6B5B3A; line-height: 1.8; }
+.qt-empty button { margin: 0.3rem; }
+.qt-bar { position: sticky; top: 0; z-index: 3; background: var(--cream, #FBF6EA); padding: 0.4rem 0; font-size: 0.9rem; color: #5E6B62; }
+.qt-list { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.4rem 0 1rem; }
+.qt-q { background: #fff; border: 2px solid #E4D8BC; border-radius: 16px; padding: 0.8rem 0.9rem; }
+.qt-q--ok { border-color: #7CC99A; background: #F3FBF5; }
+.qt-q--bad { border-color: #E89A8C; background: #FFF6F4; }
+.qt-qhead { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.78rem; font-weight: 700; color: #8C7B55; margin-bottom: 0.4rem; }
+.qt-ok { color: #1F8A4C; } .qt-bad { color: #C0392B; }
+.qt-prompt { font-size: 1.1rem; font-weight: 700; color: #1E2A22; margin-bottom: 0.5rem; }
+.qt-pair { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: baseline; font-size: 1.02rem; margin-bottom: 0.5rem; }
+.qt-pair span:first-of-type { color: #A8966A; }
+.qt-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+.qt-opt { text-align: left; padding: 0.55rem 0.7rem; border-radius: 12px; border: 2px solid #E4D8BC; background: #FFFDF6; color: #2A2A2A; font-size: 0.92rem; cursor: pointer; font-family: inherit; line-height: 1.35; }
+.qt-opt.on { border-color: #2F5FC8; background: #EAF0FD; }
+.qt-opt.right { border-color: #2E8B4E; background: #DDF2E3; }
+.qt-opt:disabled { cursor: default; }
+.qt-opt.on:disabled:not(.right) { border-color: #D9534F; background: #FDE7E4; }
+.qt-opts--2 .qt-opt { text-align: center; font-weight: 700; }
+.qt-input { width: 100%; box-sizing: border-box; }
+.qt-fix { margin-top: 0.4rem; font-size: 0.88rem; color: #6B3A2E; }
+.qt-match { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.9rem; }
+.qt-mrow { display: flex; align-items: center; gap: 0.4rem; margin: 0.3rem 0; }
+.qt-mrow select { font: inherit; padding: 0.2rem; border-radius: 8px; border: 2px solid #E4D8BC; }
+.qt-mrow select.right { border-color: #2E8B4E; } .qt-mrow select.wrong { border-color: #D9534F; }
+.qt-mrow small { color: #C0392B; font-weight: 700; }
+.qt-mans { margin: 0.3rem 0; padding: 0.3rem 0.5rem; background: #FFFDF6; border: 1px solid #E4D8BC; border-radius: 8px; }
+.qt-submit { display: block; margin: 0.5rem auto 1.5rem; }
+.qt-score { display: flex; align-items: center; gap: 1rem; justify-content: center; background: #fff; border: 2px solid #E4D8BC; border-radius: 18px; padding: 0.9rem; margin: 0.4rem 0; }
+.qt-ring { --p: 0; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#2E8B4E calc(var(--p) * 1%), #EFE6CF 0); flex: none; }
+.qt-ring span { width: 64px; height: 64px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; color: #1E2A22; }
+.qt-score-n { font-weight: 800; font-size: 1.15rem; } .qt-score-msg { color: #5E6B62; font-size: 0.9rem; } .qt-score-coin { font-weight: 700; color: #8A6100; }
+.qt-after { margin-bottom: 1.5rem; }
+@media (max-width: 520px) { .qt-opts, .qt-match { grid-template-columns: 1fr; } }

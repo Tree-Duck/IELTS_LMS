@@ -540,6 +540,8 @@ app.get('/api/vocab-units', authenticate, (req, res) => {
     verbs: u.verbs || [],
     synonyms: u.synonyms || [],
     samples: u.samples || [],
+    basic: u.basic || null,
+    advanced: u.advanced || null,
   })));
 });
 
