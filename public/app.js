@@ -20143,6 +20143,98 @@ const RAID_BRUTES = [
 const RAID_PESTS = [
   { icon: '🐀', name: 'Chuột gặm chữ' }, { icon: '🦟', name: 'Muỗi vo ve' }, { icon: '🐸', name: 'Ếch ồn ào' }, { icon: '🪲', name: 'Bọ cánh cứng' },
 ];
+// Each boss fights with a skill of its own; the guard before it wears stone.
+const RAID_SKILLS = {
+  regen:   { icon: '💚', name: 'Tự hồi máu', desc: 'Mỗi lượt tự hồi 5% máu. Đánh nhanh, đừng để nó hồi.' },
+  fog:     { icon: '🌫️', name: 'Sương mù', desc: 'Che bớt chữ trong phần nghĩa. Nhớ bài thì vẫn đoán được.' },
+  haste:   { icon: '⏩', name: 'Thúc giờ', desc: 'Đồng hồ mỗi lượt ngắn đi một phần tư.' },
+  shuffle: { icon: '🌀', name: 'Kho từ nhiễu', desc: 'Kho từ có thêm một từ gây nhiễu; ô tự gõ mất chữ cái gợi ý.' },
+  armor:   { icon: '🪨', name: 'Giáp đá', desc: '4 đòn đầu chỉ ăn nửa sát thương.' },
+  rage:    { icon: '😡', name: 'Nổi điên', desc: 'Còn dưới nửa máu thì đánh mạnh gấp rưỡi.' },
+};
+const RAID_BOSS_SKILL = { 1: 'regen', 2: 'fog', 3: 'haste', 4: 'shuffle', 5: 'fog', 6: 'armor', 7: 'haste', 8: 'rage', 9: 'regen', 10: 'rage', 11: 'regen', 12: 'shuffle', 13: 'armor', 14: 'fog' };
+// Vẹt nói sai: one mistake per sentence. {right|hint} is the blank, the
+// second item the wrong words shown struck out. The hint names the kind of
+// mistake without giving the answer away.
+const RAID_FIX = {
+  1: [
+    ['Many grandparents {take care of|Sai giới từ sau take care} their grandchildren while both parents work.', 'take care for'],
+    ['Strong family ties {provide|Chủ ngữ số nhiều thì động từ chia sao?} emotional support in difficult times.', 'provides'],
+    ['Parents should spend more {quality time|Cụm cố định, time ở đây không đếm được} with their children.', 'quality times'],
+  ],
+  2: [
+    ['Fast food chains have had a huge {impact on|Sai giới từ sau impact} local eating habits.', 'impact to'],
+    ['Many young people are {interested in|Sai giới từ sau interested} foreign music and films.', 'interested about'],
+    ['Traditional festivals help to {preserve|Chỗ này cần động từ, không phải danh từ} a country\'s cultural identity.', 'preservation'],
+  ],
+  3: [
+    ['Students who {do|Sai động từ đi với homework} their homework regularly tend to perform better.', 'make'],
+    ['Exam pressure can harm students\' {mental health|Health không đếm được}.', 'mental healths'],
+    ['Many university students {depend on|Sai giới từ sau depend} their parents for money.', 'depend of'],
+  ],
+  4: [
+    ['Advertising makes people buy things they do not really {need|Sau do not thì động từ ở dạng nào?}.', 'needs'],
+    ['Online shopping has become {increasingly|Bổ nghĩa cho tính từ popular cần từ loại gì?} popular.', 'increasing'],
+    ['Many families struggle to {make ends meet|Thành ngữ: ___ ends meet} when prices rise.', 'do ends meet'],
+  ],
+  5: [
+    ['Social media allows people to {keep in touch with|Sai giới từ sau keep in touch} friends abroad.', 'keep in touch to'],
+    ['Much of the {information|Information không đếm được} online is not reliable.', 'informations'],
+    ['Teenagers spend too much time {on|Spend time ___ something} their phones.', 'in'],
+  ],
+  6: [
+    ['The government should {invest in|Sai giới từ sau invest} public transport.', 'invest to'],
+    ['Free healthcare {is|Healthcare không đếm được, động từ chia sao?} funded by taxes.', 'are'],
+    ['Governments have a {responsibility to|Responsibility + ___ + động từ nguyên mẫu} protect vulnerable citizens.', 'responsibility for'],
+  ],
+  7: [
+    ['Many employees work {overtime|Overtime không đếm được} without extra pay.', 'overtimes'],
+    ['A good salary is not the only factor in {job satisfaction|Chỗ này cần danh từ}.', 'job satisfy'],
+    ['Unemployment {has risen|Rise hay raise? Phía sau không có tân ngữ} sharply in recent years.', 'has raised'],
+  ],
+  8: [
+    ['Burning fossil fuels {contributes to|Sai giới từ sau contribute} climate change.', 'contributes for'],
+    ['Governments should do more to {reduce|Chỗ này cần động từ} carbon emissions.', 'reduction'],
+    ['Air pollution {has|Pollution không đếm được, động từ chia sao?} serious effects on public health.', 'have'],
+  ],
+  9: [
+    ['Automation could {lead to|Sai giới từ sau lead} job losses in many industries.', 'lead for'],
+    ['Many people are {worried about|Sai giới từ sau worried} their privacy online.', 'worried of'],
+    ['Technology has made our lives much {easier|So sánh hơn của easy viết sao?}.', 'more easy'],
+  ],
+  10: [
+    ['Traffic {congestion|Chỗ này cần danh từ} is a major problem in big cities.', 'congested'],
+    ['Many young people cannot {afford|Afford không đi với giới từ} a flat in the city centre.', 'afford for'],
+    ['Cheaper fares would {encourage|Chỗ này cần động từ} people to leave their cars at home.', 'encouragement'],
+  ],
+  11: [
+    ['A balanced diet {plays|Sai động từ đi với role} an important role in staying healthy.', 'makes'],
+    ['People who {do|Sai động từ đi với exercise} regular exercise tend to live longer.', 'make'],
+    ['Fast food is often high {in|High ___ sugar} sugar and fat.', 'of'],
+  ],
+  12: [
+    ['Watching live sport can be an {exciting|-ed hay -ing khi mô tả sự việc?} experience.', 'excited'],
+    ['The government should {spend|Động từ nào đi với money on?} more money on the arts.', 'pay'],
+    ['Many children {take part in|Sai giới từ sau take part} sports clubs after school.', 'take part on'],
+  ],
+  13: [
+    ['Harsher punishments do not always {deter|Chỗ này cần động từ} crime.', 'deterrent'],
+    ['Many prisoners {commit|Động từ nào đi với crime?} another crime after they are released.', 'make'],
+    ['Young offenders need support {rather than|Cụm: rather ___} punishment.', 'rather of'],
+  ],
+  14: [
+    ['Everyone should have equal {access to|Sai giới từ sau access} education.', 'access for'],
+    ['The gap between the rich and the poor {has widened|Gap là số ít, động từ chia sao?} in many countries.', 'have widened'],
+    ['Women are still paid less {than|So sánh hơn (less) đi với từ gì?} men for the same work.', 'as'],
+  ],
+};
+const RAID_FIX_FOE = { icon: '🦜', name: 'Vẹt nói sai' };
+// Between fights: sometimes a spring, a merchant or a locked chest.
+const RAID_EVENT_CHANCE = 0.35;
+const RAID_EVENT_MAX = 2;
+const RAID_SPRING = 0.3;
+const RAID_MERCHANT = ['hint', 'shield', 'revive'];
+const RAID_MERCHANT_OFF = 0.6;
 const RAID_GATE_FOE = { icon: '🗿', name: 'Tượng gác cổng đoạn' };
 const RAID_CONCL_FOE = { icon: '🏰', name: 'Cổng thành kết bài' };
 const RAID_TPL_FOE = { icon: '📕', name: 'Sách khung bài' };
@@ -20156,6 +20248,7 @@ const RAID_TIERS = {
   3: { label: 'Viết đoạn', hp: 300, hit: 15, every: 2, coin: 40, bg: 'lava' },
   4: { label: 'Kết bài', hp: 120, hit: 20, every: 3, coin: 20, bg: 'dusk' },
   5: { label: 'Khung bài', hp: 80, hit: 10, every: 4, coin: 6, bg: 'forest' },
+  6: { label: 'Sửa lỗi sai', hp: 90, hit: 15, every: 3, coin: 12, bg: 'dusk' },
 };
 const RAID_POTION = 30;   // health back from the heal move
 const RAID_MANA = { atk: 25, crit: 35, heal: 15, copied: 10 };
@@ -20373,6 +20466,7 @@ function heroReset() {
 const raidFoeId = i => 'rd-foe-' + i;
 const raidTid = () => raidFoeId(_rd && _rd.fight ? _rd.fight.t : 0);
 const raidAlive = f => f.foes.filter(x => x.hp > 0);
+const raidSkillOn = k => !!(_rd && _rd.fight && _rd.fight.foes.some(x => x.hp > 0 && x.skill === k));
 let _raidLevel = 'd';
 try { const p = localStorage.getItem('raidLevel'); if (RAID_LEVELS[p]) _raidLevel = p; } catch (e) {}
 let _rd = null;
@@ -20461,6 +20555,7 @@ function raidEnemy(n, fi, tier, finalBoss) {
   if (tier === 2) return RAID_GATE_FOE;
   if (tier === 4) return RAID_CONCL_FOE;
   if (tier === 5) return RAID_TPL_FOE;
+  if (tier === 6) return RAID_FIX_FOE;
   const list = tier === 0 ? RAID_PESTS : RAID_MINIONS;
   return list[(n + fi) % list.length];
 }
@@ -20479,6 +20574,7 @@ function raidFights(L, lv) {
   f.push({ tier: 5, kind: 'tpl', prompt: `Khung mở bài dạng ${T.name}. Gõ các cụm khung, ô vàng là nội dung em tự viết.`, label: 'Khung mở bài · ' + T.name, lines: T[lv.id].intro.map(line), ex: T[lv.id].ex, given: [] });
   const words = raidWordLines(L.n, lv.words);
   if (words.length) f.push({ tier: 0, kind: 'words', prompt: 'Các câu ví dụ trong danh sách từ vựng của buổi này.', label: 'Từ vựng của buổi', lines: words, given: [] });
+  if (RAID_FIX[L.n]) f.push({ tier: 6, kind: 'fix', prompt: 'Vẹt nói sai! Mỗi câu có một chỗ sai, gạch đỏ. Gõ lại chỗ đó cho đúng để hạ nó.', label: 'Sửa lỗi sai', lines: RAID_FIX[L.n].map(([t, wrong]) => ({ t, wrong, vi: '' })), given: [] });
   f.push({ tier: 1, prompt, label: 'Mở bài', lines: E.intro.map(line), given: [] });
   L.paras.forEach((p, i) => {
     const gate = raidGate(L.n, i, lv.id);
@@ -20876,6 +20972,8 @@ function raidBeginFight() {
     if (F.kind === 'tpl') {
       const texts = Object.values(RAID_TEMPLATES).flatMap(T => ['intro', 'body', 'concl'].flatMap(k => T[lv.id][k].map(l => l[0])));
       pool = [...new Set(texts.flatMap(t => raidParse(t).filter(p => typeof p !== 'string').map(p => p.ans)))];
+    } else if (F.kind === 'fix') {
+      pool = Object.values(RAID_FIX).flat().map(([t]) => raidParse(t).find(p => typeof p !== 'string').ans);
     } else if (F.kind === 'words') {
       // Other entries from the same lesson make the word bank.
       const L = LESSON_VOCAB.find(x => x.n === g.L.n);
@@ -20902,6 +21000,11 @@ function raidBeginFight() {
     const hp = Math.round(tier.hp / many);
     return { icon: e.icon, name: e.name, hp, max: hp, hit: Math.round(tier.hit * [1, 1, 0.65, 0.5][many]), cd: tier.every + i, stun: false, burn: 0, poison: 0 };
   });
+  if (F.tier === 3 && !g.practice) {
+    const skill = F.final ? RAID_BOSS_SKILL[g.L.n] || 'rage' : 'armor';
+    foes[0].skill = skill;
+    foes[0].armorHits = skill === 'armor' ? 4 : 0;
+  }
   g.fight = { F, tier, blanks, bi: 0, foes, t: 0, dmg: Math.ceil(tier.hp / blanks.length), pool, own: blanks.filter(b => !b.door).map(b => b.ans) };
   g.busy = false;
   const firstOpen = blanks.find(b => !b.door);
@@ -20910,6 +21013,8 @@ function raidBeginFight() {
   g.hp += catHeal;
   raidRenderArena();
   if (catHeal) setTimeout(() => { if (_rd === g) { raidDamage('rd-hero', `🐱 +${catHeal}`, 'heal'); raidSparkle('rd-pet', '💗', 4); } }, 300);
+  const sk = foes[0].skill && RAID_SKILLS[foes[0].skill];
+  if (sk) setTimeout(() => { if (_rd === g) raidBanner(`${sk.icon} ${sk.name}: ${sk.desc}`, 'reveal'); }, 700);
   raidNextTurn();
 }
 function raidResetBlank(b) {
@@ -20932,7 +21037,7 @@ function raidChoices(b) {
   const len = b.ans.split(' ').length;
   const others = [...new Set([...f.own, ...vbShuffle(f.pool)])].filter(a => raidNorm(a) !== raidNorm(b.ans));
   others.sort((x, y) => Math.abs(x.split(' ').length - len) - Math.abs(y.split(' ').length - len));
-  return vbShuffle([b.ans, ...vbShuffle(others.slice(0, 10)).slice(0, 3)]);
+  return vbShuffle([b.ans, ...vbShuffle(others.slice(0, 10)).slice(0, raidSkillOn('shuffle') ? 4 : 3)]);
 }
 
 function raidRenderArena() {
@@ -20979,8 +21084,8 @@ function raidRenderArena() {
       </div>
       <div class="rd-scroll">
         <details class="rd-prompt"><summary>📜 ${F.kind === 'words' ? '' : 'Đề bài · '}${escapeHtml(F.label)} <span class="rd-lvtag">${raidLv().icon} ${raidLv().name}</span></summary><div>${escapeHtml(F.prompt)}</div></details>
-        <div class="rd-text${F.kind === 'words' ? ' rd-text--list' : ''}" id="rd-text"></div>
-        ${F.kind === 'tpl' ? `<details class="rd-vibox" open><summary>Mỗi câu làm gì</summary>${F.lines.map((l, i) => `<p><b>${i + 1}.</b> ${escapeHtml(l.vi)}</p>`).join('')}</details>` : raidLv().showVi ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
+        <div class="rd-text${F.kind === 'words' || F.kind === 'fix' ? ' rd-text--list' : ''}" id="rd-text"></div>
+        ${F.kind === 'tpl' ? `<details class="rd-vibox" open><summary>Mỗi câu làm gì</summary>${F.lines.map((l, i) => `<p><b>${i + 1}.</b> ${escapeHtml(l.vi)}</p>`).join('')}</details>` : raidLv().showVi && F.kind !== 'fix' ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
       </div>
       </div>
       <div class="rd-panel" id="rd-panel"></div>
@@ -21010,7 +21115,9 @@ function raidRenderBars() {
     cb.classList.toggle('hot', g.combo >= RAID_COMBO_CAP + 1);
   }
   const nm = document.getElementById('rd-foe-name');
-  if (nm) nm.innerHTML = `${many ? '🎯 ' : ''}${escapeHtml(foe.name)} <small>· ${many ? `còn ${raidAlive(f).length}/${f.foes.length} con` : escapeHtml(f.tier.label)}</small>`;
+  const sk = foe.skill && RAID_SKILLS[foe.skill];
+  if (nm) nm.innerHTML = `${many ? '🎯 ' : ''}${escapeHtml(foe.name)} <small>· ${many ? `còn ${raidAlive(f).length}/${f.foes.length} con` : escapeHtml(f.tier.label)}</small>`
+    + (sk ? `<span class="rd-skill" title="${escapeHtml(sk.desc)}">${sk.icon} ${escapeHtml(sk.name)}${foe.skill === 'armor' && foe.armorHits ? ` · còn ${foe.armorHits}` : ''}</span>` : '');
   document.getElementById('rd-mp')?.classList.toggle('full', g.mana >= 100);
   document.getElementById('rd-shield-fx')?.classList.toggle('on', g.shield || g.parry);
   if (many) f.foes.forEach((x, i) => {
@@ -21070,10 +21177,11 @@ function raidRenderText() {
     const b = f.blanks.find(x => x.li === li && x.pi === pi);
     if (!b) return escapeHtml(p.ans);
     if (b.done) return `<span class="rd-word${b.shown ? ' rd-word--shown' : ''}">${escapeHtml(b.ans)}</span>`;
+    if (f.F.kind === 'fix') return `<span class="rd-slot rd-slot--fix${b === active ? ' now' : ''}"><s>${escapeHtml(line.wrong)}</s></span>`;
     const n = f.blanks.indexOf(b) + 1;
     return `<span class="rd-slot${b === active ? ' now' : ''}" data-n="${n}">${b === active ? '?' : n}</span>`;
   }).join(''));
-  el.innerHTML = f.F.kind === 'words' || f.F.kind === 'tpl'
+  el.innerHTML = f.F.kind === 'words' || f.F.kind === 'tpl' || f.F.kind === 'fix'
     ? lines.map(l => `<div class="rd-line">${l}</div>`).join('')
     : (given ? given + ' ' : '') + lines.join(' ');
   el.querySelector('.rd-slot.now')?.scrollIntoView({ block: 'nearest' });
@@ -21194,9 +21302,14 @@ function raidRenderPanel() {
   // the meaning only, a light one half the word or a bank of two.
   const rank = g.seen;
   const bank = b.bank && rank < 2;
-  let clue = `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(b.hint)}</div>`;
+  const fog = raidSkillOn('fog') && !copied;
+  const hint = fog ? b.hint.split(' ').map((w, i) => (i % 2 ? '▒▒' : w)).join(' ') : b.hint;
+  const wrongWords = f.F.kind === 'fix' ? f.F.lines[b.li].wrong : '';
+  let clue = wrongWords
+    ? `<div class="rd-hint-vi rd-hint-fix"><span>Chỗ sai:</span> <s>${escapeHtml(wrongWords)}</s> → <b>?</b><small>${escapeHtml(b.hint)}</small></div>`
+    : `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(hint)}${fog ? ' <small class="rd-fog">🌫️ sương mù</small>' : ''}</div>`;
   if (!bank && !copied) {
-    const open = raidMaskOpen(b.ans, rank, lv);
+    const open = raidSkillOn('shuffle') ? new Set() : raidMaskOpen(b.ans, rank, lv);
     const mask = b.ans.split('').map((ch, i) => (i < b.reveal || open.has(i) || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
     clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
   }
@@ -21291,7 +21404,7 @@ function raidNextTurn() {
   g.seen = b.door ? 1 : RAID_MOVE_BASE[g.action].rank;
   if (b.wrongs >= 3) { g.action = 'light'; g.seen = 0; }
   const lv = raidLv();
-  g.tBase = (b.bank || b.door ? lv.bank : lv.type) + (raidPerk('turtle') ? 4 : 0);
+  g.tBase = Math.round((b.bank || b.door ? lv.bank : lv.type) * (raidSkillOn('haste') ? 0.75 : 1)) + (raidPerk('turtle') ? 4 : 0);
   g.tMax = g.tBase * RAID_CLUE_TIME[g.seen];
   g.tLeft = g.tMax;
   raidRenderText();
@@ -21464,6 +21577,7 @@ function raidHurt(i, n, cls, tag) {
   const f = _rd.fight;
   const x = f.foes[i];
   if (!x || x.hp <= 0) return;
+  if (x.armorHits > 0 && !tag) { n = Math.max(1, Math.ceil(n / 2)); x.armorHits--; tag = '🪨'; }
   x.hp = Math.max(0, x.hp - n);
   raidAnim(raidFoeId(i), 'hurt');
   raidDamage(raidFoeId(i), `${tag || ''}-${n}`, cls);
@@ -21520,6 +21634,12 @@ function raidEnemyTurn() {
     if (x.hp > 0 && x.poison > 0) { x.poison--; raidHurt(i, tick, 'crit', '🧪'); }
   });
   if (!raidAlive(f).length) { raidWinFight(); return; }
+  f.foes.forEach((x, i) => {
+    if (x.hp <= 0 || x.skill !== 'regen' || x.hp >= x.max) return;
+    const got = Math.min(x.max - x.hp, Math.max(1, Math.round(x.max * 0.05)));
+    x.hp += got;
+    raidDamage(raidFoeId(i), `💚+${got}`, 'heal');
+  });
   const strikers = [];
   f.foes.forEach((x, i) => {
     if (x.hp <= 0) return;
@@ -21543,7 +21663,9 @@ function raidStrike(i, then, mul) {
   const g = _rd;
   const f = g.fight;
   const x = f.foes[i];
-  const n = Math.max(1, Math.round(x.hit * (mul || 1)));
+  const angry = x.skill === 'rage' && x.hp < x.max / 2;
+  if (angry && !x.raged) { x.raged = true; raidBanner(`😡 ${x.name} nổi điên!`, 'miss'); }
+  const n = Math.max(1, Math.round(x.hit * (mul || 1) * (angry ? 1.5 : 1)));
   raidAnim(raidFoeId(i), 'lunge-l');
   setTimeout(() => {
     if (_rd !== g) return;
@@ -21859,7 +21981,9 @@ function raidWinFight() {
       <div class="rd-win">
         <div class="rd-win-title">${f.foes.length > 1 ? `${f.foes.map(x => x.icon).join('')} Cả bầy quái đã gục!` : `${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục!`} <span class="rd-loot">+${bonus} 🪙</span> <span class="rd-loot rd-loot--xp">+${xp} XP</span></div>
         ${up ? `<div class="rd-lvup">⬆️ Lên cấp ${up}! Có điểm nâng cấp mới, bấm vào thẻ cấp ở bản đồ để cộng điểm.</div>` : ''}
-        <div class="rd-win-text">${lines.map(l => F.kind === 'tpl'
+        <div class="rd-win-text">${lines.map(l => F.kind === 'fix'
+          ? `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span><span class="rd-vi">✗ <s>${escapeHtml(l.wrong)}</s> → ✓ <b>${escapeHtml(raidParse(l.t).find(p => typeof p !== 'string').ans)}</b></span></p>`
+          : F.kind === 'tpl'
           ? `<p><span class="rd-en">${raidSlots(raidPlain(l.t))}</span><span class="rd-vi">${escapeHtml(l.vi)}</span></p>`
           : `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span>${l.vi ? `<span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span>` : ''}</p>`).join('')}</div>
         ${chest ? '<div class="rd-chest" id="rd-chest"><button class="rd-chest-btn" onclick="raidChest()"><span class="rd-chest-ic">🎁</span> Mở rương báu của boss</button></div>' : ''}
@@ -21873,6 +21997,136 @@ function raidWinFight() {
     document.getElementById('rd-next')?.focus();
     raidRenderBars();
   }, 700);
+}
+
+// A stop on the road between two fights.
+function raidEvent(kind) {
+  const g = _rd;
+  g.events = (g.events || 0) + 1;
+  const k = kind || ['spring', 'merchant', 'chest'][Math.floor(Math.random() * 3)];
+  g.ev = { kind: k, done: false };
+  if (k === 'chest') {
+    const L = LESSON_VOCAB.find(x => x.n === (g.L && g.L.n));
+    const items = L ? vbShuffle(L.groups.flatMap(gr => gr.items)).slice(0, 3) : [];
+    g.ev.qs = items.map(it => ({ en: it[0].replace(/\s*\(.*?\)\s*/g, ' ').split('/')[0].trim(), vi: it[1] }));
+    g.ev.i = 0;
+    g.ev.right = 0;
+  }
+  tsSfx('equip');
+  raidEventRender();
+}
+function raidEventRender(note) {
+  const g = _rd;
+  const ev = g && g.ev;
+  const panel = document.getElementById('rd-panel');
+  if (!ev || !panel) return;
+  const go = `<button class="vb-start-btn" id="rd-evgo" onclick="raidEventGo()">Đi tiếp → ${escapeHtml(g.fights[g.fi].enemy.name)}</button>`;
+  let body = '';
+  if (ev.kind === 'spring') {
+    body = `<div class="rd-ev-title">⛲ Suối hồi máu</div>
+      <div class="rd-ev-text">Dòng suối trong vắt giữa hầm. Uống một ngụm để hồi ${Math.round(RAID_SPRING * 100)}% máu.</div>
+      ${ev.done ? `<div class="rd-ev-got">💧 ${escapeHtml(note || 'Đã uống.')}</div>` : `<button class="vb-start-btn" onclick="raidSpring()" ${g.hp >= g.maxHp ? 'disabled' : ''}>💧 Uống nước</button>${g.hp >= g.maxHp ? ' <small>Máu đang đầy.</small>' : ''}`}`;
+  } else if (ev.kind === 'merchant') {
+    body = `<div class="rd-ev-title">🧙‍♂️ Nhà buôn lang thang <span class="gs-coins">🪙 ${walCoins()}</span></div>
+      <div class="rd-ev-text">Bán rẻ hơn cửa hàng ${Math.round((1 - RAID_MERCHANT_OFF) * 100)}%, chỉ hôm nay.</div>
+      <div class="gs-list">${RAID_MERCHANT.map(id => {
+        const it = SHOP_ITEMS.find(x => x.id === id);
+        const price = Math.ceil(it.price * RAID_MERCHANT_OFF);
+        return `<div class="gs-item"><span class="gs-icon">${it.icon}</span><span class="gs-t"><b>${escapeHtml(it.name)} <small>· đang có ${walCount(id)}</small></b><span><s>${it.price}</s> → ${price} 🪙</span></span>
+          <button class="vb-start-btn gs-buy" onclick="raidMerchantBuy('${id}', this)" ${walCoins() < price ? 'disabled' : ''}>${price} 🪙</button></div>`;
+      }).join('')}</div>
+      ${note ? `<div class="rd-ev-got">${escapeHtml(note)}</div>` : ''}`;
+  } else {
+    const q = ev.qs && ev.qs[ev.i];
+    body = `<div class="rd-ev-title">🔒 Rương khoá</div>
+      <div class="rd-ev-text">Gõ đúng cả ${ev.qs.length} từ theo nghĩa để mở khoá. Sai một từ là rương khoá luôn.</div>
+      ${q && !ev.done ? `<div class="rd-hint-vi"><span>Từ ${ev.i + 1}/${ev.qs.length}:</span> ${escapeHtml(q.vi)}</div>
+        <div class="rd-mask">${escapeHtml(q.en.split('').map((ch, i) => (i === 0 || /[\s\-']/.test(ch) ? ch : '_')).join(''))}</div>
+        <div class="rd-typebar"><input class="ts-input rd-input" id="rd-evin" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="Gõ từ tiếng Anh rồi Enter"><button class="vb-start-btn rd-go" onclick="raidChestAnswer()">🔑 Thử</button></div>` : ''}
+      ${note ? `<div class="rd-ev-got${ev.done && ev.right < ev.qs.length ? ' off' : ''}">${note}</div>` : ''}`;
+  }
+  panel.innerHTML = `<div class="rd-ev">${body}<div class="rd-win-btns">${go}</div></div>`;
+  const inp = document.getElementById('rd-evin');
+  if (inp) {
+    inp.focus();
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); raidChestAnswer(); } });
+  } else document.getElementById('rd-evgo')?.focus();
+}
+function raidSpring() {
+  const g = _rd;
+  if (!g || !g.ev || g.ev.done) return;
+  const got = Math.min(g.maxHp - g.hp, Math.round(g.maxHp * RAID_SPRING));
+  g.hp += got;
+  g.ev.done = true;
+  raidDamage('rd-hero', `+${got}`, 'heal');
+  raidSparkle('rd-hero', '💧', 6);
+  tsSfx('power');
+  raidRenderBars();
+  raidEventRender(`Hồi ${got} máu.`);
+}
+async function raidMerchantBuy(id, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    if (_walPending) await walFlush();
+    walSet(await api('/api/game/merchant', { method: 'POST', body: JSON.stringify({ item: id }) }));
+    const it = SHOP_ITEMS.find(x => x.id === id);
+    tsSfx('buy');
+    raidEventRender(`${it.icon} +1 ${it.name}`);
+  } catch (e) {
+    raidEventRender(e.message);
+  }
+}
+async function raidChestAnswer() {
+  const g = _rd;
+  const ev = g && g.ev;
+  const inp = document.getElementById('rd-evin');
+  if (!ev || ev.done || !inp || !inp.value.trim()) return;
+  const q = ev.qs[ev.i];
+  if (raidNorm(inp.value) !== raidNorm(q.en)) {
+    ev.done = true;
+    tsSfx('wrong');
+    raidEventRender(`🔒 Sai rồi, đáp án là <b>${escapeHtml(q.en)}</b>. Rương khoá luôn.`);
+    return;
+  }
+  ev.right++;
+  ev.i++;
+  tsSfx('key');
+  if (ev.i < ev.qs.length) { raidEventRender(`✓ Đúng! Còn ${ev.qs.length - ev.i} từ.`); return; }
+  ev.done = true;
+  raidEventRender('🔓 Mở khoá!');
+  let r;
+  try {
+    if (_walPending) await walFlush();
+    r = await api('/api/game/chest', { method: 'POST', body: '{}' });
+  } catch (e) {
+    raidEventRender(`🔓 Mở được rồi nhưng: ${escapeHtml(e.message)}`);
+    return;
+  }
+  walSet(r);
+  raidEventRender(`🎁 ${escapeHtml(raidLootText(r.loot))} <small>· còn ${r.chest_left} rương hôm nay</small>`);
+  jConfetti(30);
+}
+function raidLootText(L) {
+  L = L || {};
+  if (L.kind === 'look') {
+    const c = walLookById(L.id);
+    if (c) jUnbox(c, 'Trúng từ rương báu! Vào 🛒 Cửa hàng để trang bị.');
+    return c ? `✨ ${c.name}!` : '✨ Đồ hiếm!';
+  }
+  if (L.kind === 'item') {
+    const it = SHOP_ITEMS.find(i => i.id === L.id);
+    tsSfx('buy');
+    return `${it ? it.icon : '🎁'} +1 ${it ? it.name : L.id}`;
+  }
+  tsSfx('coin');
+  return `🪙 +${L.n || 0} xu`;
+}
+function raidEventGo() {
+  const g = _rd;
+  if (!g || !g.ev) return;
+  g.ev = null;
+  tsSfx('boss');
+  raidBeginFight();
 }
 
 // The boss's chest. The server rolls it: mostly coins, sometimes an item,
@@ -21896,19 +22150,7 @@ async function raidChest() {
   await new Promise(res => setTimeout(res, 900));
   walSet(r);
   const L = r.loot || {};
-  let text;
-  if (L.kind === 'look') {
-    const c = walLookById(L.id);
-    text = c ? `✨ ${c.name}!` : '✨ Đồ hiếm!';
-    if (c) jUnbox(c, 'Trúng từ rương báu! Vào 🛒 Cửa hàng để trang bị.');
-  } else if (L.kind === 'item') {
-    const it = SHOP_ITEMS.find(i => i.id === L.id);
-    text = `${it ? it.icon : '🎁'} +1 ${it ? it.name : L.id}`;
-    tsSfx('buy');
-  } else {
-    text = `🪙 +${L.n || 0} xu`;
-    tsSfx('coin');
-  }
+  const text = raidLootText(L);
   box.innerHTML = `<div class="rd-chest-got">🎁 ${escapeHtml(text)} <small>· còn ${r.chest_left} rương hôm nay</small></div>`;
   jConfetti(L.kind === 'look' ? 0 : 30);
 }
@@ -21916,7 +22158,13 @@ async function raidChest() {
 function raidAfterWin() {
   const g = _rd;
   if (!g) return;
-  if (g.fi < g.fights.length - 1) { g.fi++; tsSfx('boss'); raidBeginFight(); return; }
+  if (g.fi < g.fights.length - 1) {
+    g.fi++;
+    if (!g.practice && (g.events || 0) < RAID_EVENT_MAX && Math.random() < RAID_EVENT_CHANCE) { raidEvent(); return; }
+    tsSfx('boss');
+    raidBeginFight();
+    return;
+  }
   raidCleared();
 }
 

@@ -4159,6 +4159,26 @@ app.post('/api/game/chest', authenticate, walletRoute((w, b, extra) => {
   return null;
 }));
 
+// ─── Dungeon merchant ───────────────────────────────────────────────────────
+// Met at random between dungeon fights: three items below shop price, a few
+// purchases a day.
+const MERCHANT_ITEMS = ['hint', 'shield', 'revive'];
+const MERCHANT_OFF = 0.6;
+const MERCHANT_DAY_MAX = 6;
+app.post('/api/game/merchant', authenticate, walletRoute((w, b) => {
+  if (!MERCHANT_ITEMS.includes(b.item)) return 'Nhà buôn không bán món này.';
+  const today = walletDay();
+  if (w.merch_day !== today) { w.merch_day = today; w.merch_n = 0; }
+  if (w.merch_n >= MERCHANT_DAY_MAX) return `Hôm nay nhà buôn đã bán cho em đủ ${MERCHANT_DAY_MAX} món.`;
+  const price = Math.ceil(SHOP_PRICES[b.item] * MERCHANT_OFF);
+  if ((w.coins || 0) < price) return 'Chưa đủ xu để mua.';
+  if ((w.inv[b.item] || 0) >= WALLET_INV_MAX) return `Mỗi món giữ tối đa ${WALLET_INV_MAX} cái.`;
+  w.coins -= price;
+  w.inv[b.item] = (w.inv[b.item] || 0) + 1;
+  w.merch_n += 1;
+  return null;
+}));
+
 // ─── Game rankings ──────────────────────────────────────────────────────────
 // Bắn Chữ records used to live only in the browser; they are sent here too so
 // they can be ranked. Only the best per mode and speed is kept.

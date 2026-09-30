@@ -8540,3 +8540,23 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .rd-win-title { font-size: 1.3rem; }
   .rd-win-text { font-size: 1.1rem; }
 }
+
+/* ── Hầm ngục: boss skills, the parrot, events on the road ── */
+.rd-skill { display: inline-block; margin-left: 0.35rem; padding: 0 0.45rem; border-radius: 99px; background: rgba(0, 0, 0, 0.45); font-size: 0.72rem; font-weight: 700; color: #FFE08A; text-shadow: none; vertical-align: 1px; }
+.rd-fog { font-weight: 400; color: #7A8A99; }
+.rd-hint-fix s { color: #C0392B; }
+.rd-hint-fix small { display: block; margin-top: 0.2rem; font-weight: 400; font-size: 0.85em; color: var(--moss); }
+.rd-slot--fix { color: #C0392B; border-color: #E8A0A0; background: #FFF2F2; }
+.rd-slot--fix.now { color: #C0392B; border-color: #E0483B; background: #FFE3E0; }
+.rd-slot--fix s { text-decoration-thickness: 2px; }
+.rd-ev { padding: 0.8rem 0.9rem; border-radius: 16px; border: 2px solid #E4D3A8; background: #FFF8E7; }
+.rd-ev-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem; color: #4A2A0A; }
+.rd-ev-text { font-size: 0.92rem; color: #6B5A3A; margin-bottom: 0.6rem; }
+.rd-ev-got { display: inline-block; margin: 0.5rem 0; padding: 0.4rem 0.8rem; border-radius: 12px; background: #EAF6EF; color: #1F6B3A; font-weight: 700; }
+.rd-ev-got.off { background: #FDECEA; color: #A8281A; }
+.rd-ev .rd-win-btns { margin-top: 0.7rem; }
+@media (min-width: 1280px) {
+  .rd-skill { font-size: 0.85rem; }
+  .rd-ev-title { font-size: 1.35rem; }
+  .rd-ev-text { font-size: 1.05rem; }
+}
