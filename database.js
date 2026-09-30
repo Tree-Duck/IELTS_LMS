@@ -1516,6 +1516,23 @@ const db = {
     return r;
   },
 
+  // ── Từ vựng: each student's known cards and test history ─────────────────
+  // known holds lowercase English headwords; tests keeps the latest 100.
+  getVocabProgress(userId) {
+    const data = load();
+    return (data.vocab_progress || {})[userId] || { known: [], tests: [] };
+  },
+  updateVocabProgress(userId, fn) {
+    const data = load();
+    if (!data.vocab_progress) data.vocab_progress = {};
+    const p = data.vocab_progress[userId] || { known: [], tests: [] };
+    fn(p);
+    p.updated_at = new Date().toISOString();
+    data.vocab_progress[userId] = p;
+    save(data);
+    return p;
+  },
+
   getNotificationCount(userId) {
     const data = load();
     const gradedCount = (data.submissions || [])

@@ -4074,6 +4074,62 @@ app.put('/api/game/raid', authenticate, (req, res) => {
   }
 });
 
+// ─── Từ vựng progress: known cards and Kiểm tra results per student ─────────
+// Kept on the server so each account has its own record on any device, and so
+// a teacher can follow a class.
+const VP_KNOWN_MAX = 6000;
+const VP_TESTS_MAX = 100;
+const vpWord = w => String(w || '').toLowerCase().trim().slice(0, 80);
+app.get('/api/vocab/progress', authenticate, (req, res) => {
+  try { res.json(db.getVocabProgress(req.user.id)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load progress' }); }
+});
+// add and remove are merged into what is stored, so two devices do not
+// overwrite each other.
+app.post('/api/vocab/progress/known', authenticate, (req, res) => {
+  try {
+    const b = req.body || {};
+    const add = (Array.isArray(b.add) ? b.add : []).slice(0, VP_KNOWN_MAX).map(vpWord).filter(Boolean);
+    const remove = new Set((Array.isArray(b.remove) ? b.remove : []).slice(0, VP_KNOWN_MAX).map(vpWord));
+    const p = db.updateVocabProgress(req.user.id, p => {
+      const set = new Set(p.known.filter(w => !remove.has(w)));
+      add.forEach(w => set.add(w));
+      p.known = [...set].slice(0, VP_KNOWN_MAX);
+    });
+    res.json({ known: p.known });
+  } catch (err) { res.status(500).json({ error: 'Failed to save progress' }); }
+});
+app.post('/api/vocab/progress/test', authenticate, (req, res) => {
+  try {
+    const b = req.body || {};
+    const int = (v, hi) => Math.max(0, Math.min(hi, parseInt(v, 10) || 0));
+    const test = {
+      at: new Date().toISOString(),
+      src: b.src === 'lesson' ? 'lesson' : 'unit',
+      tier: b.tier === 'adv' ? 'adv' : 'basic',
+      topics: (Array.isArray(b.topics) ? b.topics : []).slice(0, 50).map(n => int(n, 100)),
+      right: int(b.right, 1000),
+      total: int(b.total, 1000),
+      wrong: (Array.isArray(b.wrong) ? b.wrong : []).slice(0, 60).map(vpWord).filter(Boolean),
+    };
+    if (test.right > test.total) test.right = test.total;
+    const p = db.updateVocabProgress(req.user.id, p => { p.tests = [...(p.tests || []), test].slice(-VP_TESTS_MAX); });
+    res.json({ tests: p.tests });
+  } catch (err) { res.status(500).json({ error: 'Failed to save test' }); }
+});
+// Teacher view: every student of one class with their record.
+app.get('/api/vocab/progress/class/:id', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const cls = db.getClassById(parseInt(req.params.id, 10));
+    if (!cls) return res.status(404).json({ error: 'Class not found' });
+    if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
+    res.json(db.getClassStudents(cls.id).map(s => {
+      const p = db.getVocabProgress(s.user_id);
+      return { id: s.user_id, name: s.name, known: p.known, tests: p.tests || [], updated_at: p.updated_at || null };
+    }));
+  } catch (err) { res.status(500).json({ error: 'Failed to load class progress' }); }
+});
+
 // Boards: coins this week, coins all time, tallest tower, and Bắn Chữ at one
 // speed (best of the two modes). Students only; a class board is open to its
 // own students and to teachers.
