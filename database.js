@@ -1537,6 +1537,25 @@ const db = {
     return h;
   },
 
+  // ── Sổ khung: { key: { m, day } } per student, beside the hero ───────────
+  getFrames(userId) {
+    const data = load();
+    const r = (data.game_raids || {})[userId];
+    return (r && r.frames) || {};
+  },
+  updateFrames(userId, fn) {
+    const data = load();
+    const r = (data.game_raids || {})[userId];
+    const old = (r && r.frames) || {};
+    const fr = { ...old };
+    if (fn(fr) === false) return old;
+    if (!data.game_raids) data.game_raids = {};
+    const row = data.game_raids[userId] || (data.game_raids[userId] = { stars: {} });
+    row.frames = fr;
+    save(data);
+    return fr;
+  },
+
   // ── Từ vựng: each student's known cards and test history ─────────────────
   // known holds lowercase English headwords; tests keeps the latest 100.
   getVocabProgress(userId) {

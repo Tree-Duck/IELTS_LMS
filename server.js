@@ -4352,6 +4352,41 @@ app.post('/api/game/hero/alloc', authenticate, (req, res) => {
   }
 });
 
+// ─── Sổ khung: how well each student knows each template frame ─────────────
+// A frame climbs one rank (m 0 → 4) with each run typed without a mistake.
+// From rank 2 up a step needs a new day since the last one, so the last two
+// ranks only come from coming back to it.
+const FRAME_KEY = /^[a-z]{2,10}:[adl]:(intro|body|concl):\d{1,2}$/;
+const FRAME_TOP = 4;
+const FRAME_KEYS_MAX = 600;
+app.get('/api/game/frames', authenticate, (req, res) => {
+  try { res.json({ frames: db.getFrames(req.user.id), day: walletDay() }); }
+  catch (err) { res.status(500).json({ error: 'Failed to load frames' }); }
+});
+app.post('/api/game/frames', authenticate, (req, res) => {
+  try {
+    const list = Array.isArray((req.body || {}).results) ? req.body.results.slice(0, 20) : [];
+    const today = walletDay();
+    const up = [], wait = [];
+    const frames = db.updateFrames(req.user.id, fr => {
+      list.forEach(r => {
+        const key = String((r && r.key) || '');
+        if (!FRAME_KEY.test(key) || r.clean !== true || up.includes(key)) return;
+        const cur = fr[key] || { m: 0, day: '' };
+        if (!fr[key] && Object.keys(fr).length >= FRAME_KEYS_MAX) return;
+        if (cur.m >= FRAME_TOP) return;
+        if (cur.m >= 2 && cur.day === today) { wait.push(key); return; }
+        fr[key] = { m: cur.m + 1, day: today };
+        up.push(key);
+      });
+      if (!up.length) return false;
+    });
+    res.json({ frames, up, wait, day: today });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save frames' });
+  }
+});
+
 // ─── Từ vựng progress: known cards and Kiểm tra results per student ─────────
 // Kept on the server so each account has its own record on any device, and so
 // a teacher can follow a class.

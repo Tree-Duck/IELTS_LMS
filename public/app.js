@@ -20843,7 +20843,7 @@ function raidFights(L, lv) {
   const line = ([t, vi]) => ({ t, vi });
   const prompt = L.paras[0].prompt;
   const T = RAID_TEMPLATES[raidType(L.n)];
-  f.push({ tier: 5, kind: 'tpl', prompt: `Khung mở bài dạng ${T.name}. Gõ các cụm khung, ô vàng là nội dung em tự viết.`, label: 'Khung mở bài · ' + T.name, lines: T[lv.id].intro.map(line), ex: T[lv.id].ex, given: [] });
+  f.push({ tier: 5, kind: 'tpl', prompt: `Khung mở bài dạng ${T.name}. Gõ các cụm khung, ô vàng là nội dung em tự viết.`, label: 'Khung mở bài · ' + T.name, lines: frameLines(raidType(L.n), lv.id, 'intro'), ex: T[lv.id].ex, given: [] });
   const words = raidWordLines(L.n, lv.words);
   if (words.length) f.push({ tier: 0, kind: 'words', prompt: 'Các câu ví dụ trong danh sách từ vựng của buổi này.', label: 'Từ vựng của buổi', lines: words, given: [] });
   if (RAID_FIX[L.n]) f.push({ tier: 6, kind: 'fix', prompt: 'Vẹt nói sai! Mỗi câu có một chỗ sai, gạch đỏ. Gõ lại chỗ đó cho đúng để hạ nó.', label: 'Sửa lỗi sai', lines: RAID_FIX[L.n].map(([t, wrong]) => ({ t, wrong, vi: '' })), given: [] });
@@ -21061,7 +21061,7 @@ async function raidMap() {
   if (!root) return;
   if (!raidGender()) { raidHeroPick(); return; }
   root.innerHTML = '<div class="loading">Đang mở bản đồ…</div>';
-  const [stars] = await Promise.all([raidLoadStars(), walLoad(), heroLoad(), questLoad()]);
+  const [stars] = await Promise.all([raidLoadStars(), walLoad(), heroLoad(), questLoad(), frameLoad()]);
   if (!document.getElementById('lesson-vocab-root')) return;
   const total = Object.values(stars).reduce((a, b) => a + b, 0);
   const titles = Object.fromEntries(LESSON_VOCAB.map(l => [l.n, l.title]));
@@ -21089,6 +21089,7 @@ async function raidMap() {
         <div class="rd-map-sub">Mỗi lượt: chọn đòn rồi gõ từ còn thiếu. Đòn nhẹ có nhiều gợi ý nhưng sát thương thấp, đòn mạnh không gợi ý mà sát thương gấp đôi. Mỗi nhân vật còn có một chiêu riêng, cùng <b>💚 Hồi máu</b> và <b>✨ Tuyệt kỹ</b> khi đầy mana. Trận từ vựng và mở bài có 2–3 con quái, bấm vào con nào để đánh con đó. Hạ quái được XP, lên cấp thì cộng điểm vào máu, sát thương, mana hoặc giáp. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục là một bài văn trọn vẹn từ mở bài tới kết bài, có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
         <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 9} sao</div>
         <button class="rd-tpl-open" onclick="raidTplRoom()">📖 Phòng luyện khung <small>Học khung mở bài, thân bài, kết bài của 6 dạng đề trước khi vào hầm</small></button>
+        <button class="rd-tpl-open rd-fb-open" onclick="frameBook()">📒 Sổ khung · ${frameCount().top}/${frameCount().all} thuộc${frameCount().due ? ` · <b>${frameCount().due} đến hạn ôn</b>` : ''} <small>Khung gõ đúng không sai được lưu vào sổ, ôn lại qua nhiều ngày để lên 💎</small></button>
       </div>
       <div class="quest-box" id="quest-box"></div>
       <div class="rd-path">${RAID_LESSONS.map((L, i) => {
@@ -21107,20 +21108,225 @@ async function raidMap() {
   questRenderBox();
 }
 
+/* ── Sổ khung: fading frames, the role puzzle, the collection ── */
+// Each template frame with frame words has a rank on the server (m 0-4).
+// The rank sets how much of the frame a fight shows: all of it, the first
+// letters, only the meaning, only its role in the paragraph.
+let _frames = null, _framesFor = null, _framesDay = '';
+async function frameLoad() {
+  if (_frames && _framesFor === walWho()) return _frames;
+  try { const r = await api('/api/game/frames'); _frames = r.frames || {}; _framesDay = r.day || ''; }
+  catch (e) { _frames = _frames || {}; }
+  _framesFor = walWho();
+  return _frames;
+}
+const FRAME_TIERS = [
+  { icon: '🔒', name: 'Chưa có' }, { icon: '🥉', name: 'Đồng' }, { icon: '🥈', name: 'Bạc' }, { icon: '🥇', name: 'Vàng' }, { icon: '💎', name: 'Đã thuộc' },
+];
+const FRAME_FADE = ['Lần 1: chép theo chữ mờ', 'Lần 2: còn chữ cái đầu', 'Lần 3: chỉ còn nghĩa', 'Lần 4: tự gõ theo vai câu'];
+const FRAME_PARTS = [['intro', 'Mở bài'], ['body', 'Thân bài'], ['concl', 'Kết bài']];
+function frameKey(type, lvId, part, i) { return `${type}:${lvId}:${part}:${i}`; }
+function frameM(key) { return ((_frames || {})[key] || {}).m || 0; }
+// Due: started, not yet 💎, and allowed to rank up today.
+function frameDue(key) { const x = (_frames || {})[key]; return !!x && x.m >= 1 && x.m < 4 && (x.m < 2 || x.day !== _framesDay); }
+function frameLines(type, lvId, part) {
+  return RAID_TEMPLATES[type][lvId][part].map(([t, vi], i) => ({ t, vi, key: /\{/.test(t) ? frameKey(type, lvId, part, i) : '' }));
+}
+function frameAll() {
+  const out = [];
+  Object.keys(RAID_TEMPLATES).forEach(type => Object.keys(RAID_LEVELS).forEach(lvId => FRAME_PARTS.forEach(([part]) =>
+    frameLines(type, lvId, part).forEach(l => { if (l.key) out.push({ ...l, type, lvId, part }); }))));
+  return out;
+}
+function frameCount() {
+  const all = frameAll();
+  return { all: all.length, top: all.filter(l => frameM(l.key) >= 4).length, due: all.filter(l => frameDue(l.key)).length };
+}
+function frameFadeOpen(ans, fade) {
+  const open = new Set();
+  for (let i = 0; i < ans.length; i++) if (fade === 0 || (fade === 1 && ans[i] !== ' ' && (i === 0 || ans[i - 1] === ' '))) open.add(i);
+  return open;
+}
+// After a frame fight: each line typed in full, with no mistake and no hint,
+// ranks up (the server decides, with its one-step-a-day rule from 🥈 up).
+function frameReport(F, blanks) {
+  const results = F.lines.map((l, li) => {
+    if (!l.key) return null;
+    const bs = blanks.filter(b => b.li === li);
+    if (!bs.length || bs.some(b => !b.done || b.shown)) return null;
+    return { key: l.key, clean: bs.every(b => !b.ever && !b.slip) };
+  }).filter(Boolean);
+  if (!results.length) return;
+  const g = _rd;
+  api('/api/game/frames', { method: 'POST', body: JSON.stringify({ results }) }).then(r => {
+    _frames = r.frames || _frames;
+    _framesDay = r.day || _framesDay;
+    const note = r.up && r.up.length ? [`📒 ${r.up.length} khung lên hạng trong sổ!`, 'ult'] : r.wait && r.wait.length ? ['📒 Mai ôn lại để khung lên hạng tiếp', 'reveal'] : null;
+    if (note) setTimeout(() => { if (_rd === g) raidBanner(note[0], note[1]); }, 1300);
+  }).catch(() => {});
+}
+
+// The book: every frame of one question type, with its rank.
+let _fbType = null;
+async function frameBook(type) {
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  el.innerHTML = '<div class="lv-modal-card lv-modal-card--wide"><div class="loading">Đang mở sổ khung…</div></div>';
+  document.body.appendChild(el);
+  await frameLoad();
+  _fbType = type || _fbType || _raidTpl.type;
+  frameBookRender();
+}
+function frameBookRender() {
+  const el = document.getElementById('lv-modal');
+  if (!el) return;
+  const c = frameCount();
+  const all = frameAll();
+  const mine = all.filter(l => l.type === _fbType);
+  const T = RAID_TEMPLATES[_fbType];
+  el.innerHTML = `
+    <div class="lv-modal-card lv-modal-card--wide fb">
+      <div class="lv-modal-title">📒 Sổ khung · ${c.top}/${c.all} đã thuộc</div>
+      <div class="fb-legend">${FRAME_TIERS.map(x => `<span>${x.icon} ${x.name}</span>`).join('')}</div>
+      <div class="fb-note">Gõ đúng cả khung, không sai và không dùng gợi ý, là khung lên một hạng. Từ 🥈 trở lên mỗi ngày lên được một hạng, nên phải quay lại ôn vào hôm sau.</div>
+      <button class="vb-start-btn fb-review" onclick="frameReview()" ${c.due ? '' : 'disabled'}>🔁 Ôn ${c.due ? c.due + ' khung đến hạn' : 'khung đến hạn (chưa có)'}</button>
+      <div class="rd-tpl-tabs">${Object.entries(RAID_TEMPLATES).map(([id, x]) => {
+        const got = all.filter(l => l.type === id && frameM(l.key) >= 4).length;
+        return `<button class="rd-tpl-tab${id === _fbType ? ' on' : ''}" onclick="_fbType='${id}';frameBookRender()">${x.icon} ${escapeHtml(x.name)} <small>${got}/${all.filter(l => l.type === id).length}</small></button>`;
+      }).join('')}</div>
+      ${Object.values(RAID_LEVELS).map(lv => `
+        <div class="fb-lv">${lv.icon} ${lv.name} <small>${lv.band}</small></div>
+        <div class="fb-grid">${mine.filter(l => l.lvId === lv.id).map(l => {
+          const m = frameM(l.key);
+          const x = (_frames || {})[l.key];
+          const state = m >= 4 ? 'Đã thuộc' : !m ? 'Gõ đúng không sai để nhận' : frameDue(l.key) ? '🔁 Đến hạn ôn' : '⏳ Mai ôn tiếp';
+          return `<div class="fb-card fb-card--${m}"><span class="fb-ic">${FRAME_TIERS[m].icon}</span><span class="fb-t">${rpFrame(l.t)}</span><small>${escapeHtml(FRAME_PARTS.find(p => p[0] === l.part)[1])} · ${escapeHtml(l.vi.split('·')[0].trim())}</small><small class="fb-state">${state}</small></div>`;
+        }).join('')}</div>`).join('')}
+      <div class="lv-modal-btns">
+        <button class="vb-secondary-btn" onclick="document.getElementById('lv-modal')?.remove();raidTplRoom('${_fbType}')">📖 Luyện khung ${escapeHtml(T.name)}</button>
+        <button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">Đóng</button>
+      </div>
+    </div>`;
+}
+// One fight over the frames due today, the least known first.
+function frameReview() {
+  const due = frameAll().filter(l => frameDue(l.key)).sort((x, y) => frameM(x.key) - frameM(y.key)).slice(0, 6);
+  if (!due.length) return;
+  document.getElementById('lv-modal')?.remove();
+  raidStop();
+  const lv = raidLv();
+  const fights = [{ tier: 5, kind: 'tpl', prompt: 'Ôn các khung đến hạn trong sổ. Gõ chữ khung, ô vàng là nội dung em tự viết.', label: 'Ôn khung đến hạn', lines: due.map(l => ({ t: l.t, vi: l.vi, key: l.key })), ex: null, given: [], enemy: RAID_TPL_FOE }];
+  _rd = {
+    L: null, practice: 'review', lv: lv.id, fights, fi: 0, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
+    gender: raidGender() || 'm', look: raidHeroLook(),
+  };
+  document.addEventListener('keydown', raidOnKey);
+  tsSfx('boss');
+  raidBeginFight();
+}
+
+// Xếp vai câu: the roles of one part in order, its frames shuffled; each
+// frame goes to the role it plays.
+let _rp = null;
+function rpFrame(t) { return raidSlots(t).replace(/\{([^|{}]+)\|[^{}]+\}/g, '<b class="rd-tf">$1</b>'); }
+function rolePuzzleLines(type, lvId, part) {
+  return RAID_TEMPLATES[type][lvId][part].map(([t, vi]) => ({ t, role: vi.split('·')[0].trim() })).filter(x => !/^tuỳ chọn/i.test(x.role));
+}
+function rolePuzzle(hostId, lines, onDone) {
+  let order = lines.map((_, i) => i);
+  for (let k = 0; k < 6 && order.every((v, i) => v === i); k++) order = vbShuffle(order);
+  _rp = { hostId, lines, order, slots: lines.map(() => null), tries: 0, bad: [], ok: false, onDone };
+  rolePuzzleRender();
+}
+function rolePuzzleRender() {
+  const p = _rp;
+  const host = p && document.getElementById(p.hostId);
+  if (!host) return;
+  const used = new Set(p.slots.filter(x => x !== null));
+  const full = p.slots.every(x => x !== null);
+  host.innerHTML = `<div class="rp${p.ok ? ' rp--ok' : ''}">
+    <div class="rp-h">🧩 Xếp vai câu${p.ok ? ` · ✅ Đúng hết${p.tries === 1 ? ' ngay lần đầu!' : '!'}` : ' · bấm từng câu khung để đặt vào vai đang trống'}</div>
+    <ol class="rp-slots">${p.lines.map((l, i) => {
+      const s = p.slots[i];
+      return `<li class="rp-slot${s !== null ? ' full' : ''}${p.bad.includes(i) ? ' bad' : ''}"${s !== null && !p.ok ? ` onclick="rolePuzzleOut(${i})" title="Bấm để bỏ ra"` : ''}><span class="rp-role">${escapeHtml(l.role)}</span>${s !== null ? `<span class="rp-t">${rpFrame(p.lines[s].t)}</span>` : '<span class="rp-empty">…</span>'}</li>`;
+    }).join('')}</ol>
+    ${p.ok ? '' : `<div class="rp-bank">${p.order.filter(i => !used.has(i)).map(i => `<button class="rp-card" onclick="rolePuzzleIn(${i})">${rpFrame(p.lines[i].t)}</button>`).join('')}</div>
+    <div class="rp-btns"><button class="vb-start-btn" onclick="rolePuzzleCheck()" ${full ? '' : 'disabled'}>Kiểm tra</button>${p.bad.length ? '<span class="rp-bad-note">Vai tô đỏ bị xếp sai, câu đã trả về dưới.</span>' : ''}</div>`}
+  </div>`;
+}
+function rolePuzzleIn(i) {
+  const p = _rp;
+  if (!p || p.ok) return;
+  const k = p.slots.indexOf(null);
+  if (k < 0) return;
+  p.slots[k] = i;
+  p.bad = p.bad.filter(x => x !== k);
+  tsSfx('key');
+  rolePuzzleRender();
+}
+function rolePuzzleOut(k) {
+  const p = _rp;
+  if (!p || p.ok) return;
+  p.slots[k] = null;
+  rolePuzzleRender();
+}
+// Same role, same place: two frames with one role text count either way.
+function rolePuzzleCheck() {
+  const p = _rp;
+  if (!p || p.ok || p.slots.some(x => x === null)) return;
+  p.tries++;
+  p.bad = p.slots.map((s, k) => (p.lines[s].role === p.lines[k].role ? -1 : k)).filter(k => k >= 0);
+  if (!p.bad.length) {
+    p.ok = true;
+    tsSfx('level');
+    jConfetti(30);
+    rolePuzzleRender();
+    if (p.onDone) p.onDone(p.tries === 1);
+    return;
+  }
+  tsSfx('wrong');
+  p.bad.forEach(k => { p.slots[k] = null; });
+  rolePuzzleRender();
+}
+function roleRoom(part) {
+  const host = document.getElementById('rp-room-' + part);
+  if (!host) return;
+  // The frame list right above would give the answer away: hidden meanwhile.
+  const list = host.previousElementSibling && host.previousElementSibling.previousElementSibling;
+  const open = !!host.innerHTML;
+  document.querySelectorAll('[id^="rp-room-"]').forEach(x => { x.innerHTML = ''; });
+  document.querySelectorAll('.rd-tpl-card ol.rp-cover').forEach(x => x.classList.remove('rp-cover'));
+  if (open) return;
+  if (list && list.tagName === 'OL') list.classList.add('rp-cover');
+  rolePuzzle('rp-room-' + part, rolePuzzleLines(_raidTpl.type, _raidTpl.lv, part), () => {
+    document.querySelectorAll('.rd-tpl-card ol.rp-cover').forEach(x => x.classList.remove('rp-cover'));
+  });
+}
+
 /* ── Phòng luyện khung ── */
 // Read a question type's template at one level, then drill it: one fight
 // each for the introduction, the body and the conclusion, typing the frame
 // words. No stars; a few coins.
 let _raidTpl = { type: 'agree', lv: null };
-function raidTplRoom(type, lvId) {
+async function raidTplRoom(type, lvId) {
   raidStop();
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
+  if (!_frames || _framesFor !== walWho()) { root.innerHTML = '<div class="loading">Đang mở phòng luyện khung…</div>'; await frameLoad(); }
   if (type) _raidTpl.type = type;
   _raidTpl.lv = lvId || _raidTpl.lv || _raidLevel;
   const T = RAID_TEMPLATES[_raidTpl.type];
   const lv = RAID_LEVELS[_raidTpl.lv];
-  const lines = rows => rows.map(([t, vi]) => `<li><span class="rd-tpl-en">${raidSlots(t).replace(/\{([^|{}]+)\|[^{}]+\}/g, '<b class="rd-tf">$1</b>')}</span><small>${escapeHtml(vi)}</small></li>`).join('');
+  const lines = (rows, part) => rows.map(([t, vi], i) => {
+    const key = /\{/.test(t) ? frameKey(_raidTpl.type, lv.id, part, i) : '';
+    return `<li><span class="rd-tpl-en">${key ? `<i class="fb-rank" title="${FRAME_TIERS[frameM(key)].name}">${FRAME_TIERS[frameM(key)].icon}</i>` : ''}${rpFrame(t)}</span><small>${escapeHtml(vi)}</small></li>`;
+  }).join('');
+  const puzzle = part => rolePuzzleLines(_raidTpl.type, lv.id, part).length >= 3
+    ? `<button class="rp-open" onclick="roleRoom('${part}')">🧩 Xếp vai câu</button><div id="rp-room-${part}"></div>` : '';
   const used = RAID_LESSONS.filter(L => raidType(L.n) === _raidTpl.type).map(L => 'B' + L.n);
   root.innerHTML = `
     <div class="lv-wrap rd-mapwrap">
@@ -21130,16 +21336,17 @@ function raidTplRoom(type, lvId) {
       </div>
       <div class="rd-map-head">
         <div class="rd-map-title">📖 Phòng luyện khung</div>
-        <div class="rd-map-sub">Chữ <b class="rd-tf">đậm</b> là khung, học thuộc để gõ lại. Ô <span class="rd-tslot">vàng</span> là nội dung em tự viết theo đề.</div>
+        <div class="rd-map-sub">Chữ <b class="rd-tf">đậm</b> là khung, học thuộc để gõ lại. Ô <span class="rd-tslot">vàng</span> là nội dung em tự viết theo đề. Mỗi lần gõ đúng không sai, khung mờ đi một bậc: 🥉 còn chữ cái đầu, 🥈 chỉ còn nghĩa, 🥇 tự gõ, 💎 đã thuộc.</div>
+        <button class="rd-tpl-open rd-fb-open" onclick="frameBook('${_raidTpl.type}')">📒 Sổ khung · ${frameCount().top}/${frameCount().all} thuộc${frameCount().due ? ` · <b>${frameCount().due} đến hạn ôn</b>` : ''}</button>
       </div>
       <div class="rd-tpl-tabs">${Object.entries(RAID_TEMPLATES).map(([id, x]) => `<button class="rd-tpl-tab${id === _raidTpl.type ? ' on' : ''}" onclick="raidTplRoom('${id}')">${x.icon} ${escapeHtml(x.name)}</button>`).join('')}</div>
       <div class="rd-tpl-tabs rd-tpl-tabs--lv">${Object.values(RAID_LEVELS).map(x => `<button class="rd-tpl-tab rd-tpl-tab--${x.id}${x.id === lv.id ? ' on' : ''}" onclick="raidTplRoom(null, '${x.id}')">${x.icon} ${x.name} <small>${x.band}</small></button>`).join('')}</div>
       <div class="rd-tpl-card">
         <div class="rd-tpl-ask">Đề dạng này hỏi: <i>${escapeHtml(T.ask)}</i>${used.length ? ` · Hầm ngục: ${used.join(', ')}` : ''}</div>
-        <div class="rd-tpl-part">Mở bài</div><ol>${lines(T[lv.id].intro)}</ol>
+        <div class="rd-tpl-part">Mở bài</div><ol>${lines(T[lv.id].intro, 'intro')}</ol>${puzzle('intro')}
         ${raidTplEx(T[lv.id].intro.map(([t]) => ({ t })), T[lv.id].ex)}
-        <div class="rd-tpl-part">Thân bài</div><ol>${lines(T[lv.id].body)}</ol>
-        <div class="rd-tpl-part">Kết bài</div><ol>${lines(T[lv.id].concl)}</ol>
+        <div class="rd-tpl-part">Thân bài</div><ol>${lines(T[lv.id].body, 'body')}</ol>${puzzle('body')}
+        <div class="rd-tpl-part">Kết bài</div><ol>${lines(T[lv.id].concl, 'concl')}</ol>${puzzle('concl')}
         <button class="vb-start-btn rd-tpl-go" onclick="raidTplStart('${_raidTpl.type}', '${lv.id}')">⚔️ Luyện khung này</button>
       </div>
     </div>`;
@@ -21149,9 +21356,8 @@ function raidTplStart(type, lvId) {
   const lv = RAID_LEVELS[lvId];
   raidStop();
   _raidLevel = lv.id;
-  const line = ([t, vi]) => ({ t, vi });
   const parts = [['intro', 'Khung mở bài'], ['body', 'Khung thân bài'], ['concl', 'Khung kết bài']];
-  const fights = parts.map(([k, label]) => ({ tier: 5, kind: 'tpl', prompt: `${T.name} · ${T.ask}`, label: `${label} · ${T.name}`, lines: T[lv.id][k].map(line), ex: k === 'intro' ? T[lv.id].ex : null, given: [], enemy: RAID_TPL_FOE }));
+  const fights = parts.map(([k, label]) => ({ tier: 5, kind: 'tpl', prompt: `${T.name} · ${T.ask}`, label: `${label} · ${T.name}`, lines: frameLines(type, lv.id, k), ex: k === 'intro' ? T[lv.id].ex : null, given: [], enemy: RAID_TPL_FOE }));
   _rd = {
     L: null, practice: type, lv: lv.id, fights, fi: 0, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
     shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
@@ -21185,7 +21391,7 @@ function raidPartCleared(g) {
   jConfetti(g.misses ? 30 : 60);
 }
 function raidTplCleared(g) {
-  const T = RAID_TEMPLATES[g.practice];
+  const T = RAID_TEMPLATES[g.practice] || { name: 'đến hạn' };
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
   root.innerHTML = `
@@ -21196,7 +21402,7 @@ function raidTplCleared(g) {
         <div class="rd-clear-lv">${raidLv().icon} Cấp ${raidLv().name} · hợp với band ${raidLv().band}</div>
         <div class="vb-results-score-lbl">Sai ${g.misses} lần${g.misses ? ' · luyện lại để gõ không sai lần nào' : ' · không sai lần nào!'}</div>
         <div class="vb-results-btns">
-          <button class="vb-start-btn" onclick="raidTplStart('${g.practice}', '${g.lv}')">↺ Luyện lại</button>
+          ${g.practice === 'review' ? `<button class="vb-start-btn" onclick="frameBook()">📒 Sổ khung</button>` : `<button class="vb-start-btn" onclick="raidTplStart('${g.practice}', '${g.lv}')">↺ Luyện lại</button>`}
           <button class="vb-secondary-btn" onclick="raidTplRoom()">📖 Phòng luyện khung</button>
           <button class="vb-secondary-btn" onclick="raidMap()">🗺️ Bản đồ</button>
         </div>
@@ -21266,6 +21472,7 @@ function raidStart(n, lvId, part) {
 function raidBeginFight() {
   const g = _rd;
   const F = g.fights[g.fi];
+  if (F.kind === 'tpl') F.lines.forEach(l => { if (l.key) l.fade = Math.min(3, frameM(l.key)); });
   const lv = raidLv();
   const tier = { ...RAID_TIERS[F.tier] };
   tier.hit = Math.round(tier.hit * lv.hitMul);
@@ -21356,6 +21563,8 @@ function raidResetBlank(b) {
   const lv = raidLv();
   const tier = _rd && _rd.fights ? _rd.fights[_rd.fi].tier : 1;
   b.bank = !b.door && (lv.bankAll || (!lv.noBank && tier !== 3));
+  const F = _rd && _rd.fights ? _rd.fights[_rd.fi] : null;
+  if (F && F.kind === 'tpl' && F.lines[b.li] && F.lines[b.li].key) b.bank = false;
 }
 
 // Four words to read from: the answer and three others, closest in length
@@ -21660,15 +21869,21 @@ function raidRenderPanel() {
   // The help follows the lightest move looked at this turn: a heavy hit gets
   // the meaning only, a light one half the word or a bank of two.
   const rank = g.seen;
-  const bank = b.bank && rank < 2;
+  // A frame fades as the student learns it; a light hit gives one step back.
+  const fl = f.F.kind === 'tpl' && f.F.lines[b.li] && f.F.lines[b.li].key ? f.F.lines[b.li] : null;
+  const fade = fl ? Math.max(0, fl.fade - (rank === 0 ? 1 : 0)) : -1;
+  const bank = b.bank && rank < 2 && !fl;
   const fog = raidSkillOn('fog') && !copied;
   const hint = fog ? b.hint.split(' ').map((w, i) => (i % 2 ? '▒▒' : w)).join(' ') : b.hint;
   const wrongWords = f.F.kind === 'fix' ? f.F.lines[b.li].wrong : '';
   let clue = wrongWords
     ? `<div class="rd-hint-vi rd-hint-fix"><span>Chỗ sai:</span> <s>${escapeHtml(wrongWords)}</s> → <b>?</b><small>${escapeHtml(b.hint)}</small></div>`
+    : fade === 3
+    ? `<div class="rd-hint-vi"><span>Vai câu:</span> ${escapeHtml(fl.vi)}</div>`
     : `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(hint)}${fog ? ' <small class="rd-fog">🌫️ sương mù</small>' : ''}</div>`;
+  if (fl) clue = `<div class="rd-fade">📒 ${FRAME_TIERS[frameM(fl.key)].icon} Khung mờ dần · ${FRAME_FADE[fade]}</div>` + clue;
   if (!bank && !copied) {
-    const open = raidSkillOn('shuffle') ? new Set() : raidMaskOpen(b.ans, rank, lv);
+    const open = fl ? frameFadeOpen(b.ans, fade) : raidSkillOn('shuffle') ? new Set() : raidMaskOpen(b.ans, rank, lv);
     const mask = b.ans.split('').map((ch, i) => (i < b.reveal || open.has(i) || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
     clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
   }
@@ -22273,6 +22488,7 @@ function raidMiss(timeout, typed) {
   clearInterval(g.timer);
   b.wrongs++;
   b.missed = true;
+  b.ever = true;
   g.misses++;
   const heavy = g.action === 'heavy';
   if (g.combo >= 3) raidDamage('rd-hero', `💔 mất combo ${g.combo}`, 'block');
@@ -22472,6 +22688,7 @@ function raidHint() {
   const b = g.fight.blanks[g.fight.bi];
   if (!b || b.hinted || b.wrongs >= 3 || !walUse('hint')) return;
   b.hinted = true;
+  b.ever = true;
   if (g.seen > 1) { g.seen = 1; g.tMax = g.tBase * RAID_CLUE_TIME[1]; if (g.action === 'heavy') g.action = 'atk'; }
   const inp = document.getElementById('rd-input');
   const typed = inp ? inp.value : '';
@@ -22508,6 +22725,7 @@ function raidWinFight() {
   const f = g.fight;
   const F = f.F;
   clearInterval(g.timer);
+  if (F.kind === 'tpl') frameReport(F, f.blanks);
   // A monster felled early leaves its last blanks filled in, in blue.
   f.blanks.forEach(b => { if (!b.done) { b.done = true; b.shown = true; } });
   raidRenderText();
@@ -22746,9 +22964,22 @@ function raidPhaseGate(was, now) {
       <div class="rd-phgate-map">${g.phases.map((x, k) => `<span class="${k < now ? 'done' : k === now ? 'now' : ''}">${k < now ? '✓' : x.icon} ${escapeHtml(x.short)}</span>`).join('<i>›</i>')}</div>
       <div class="rd-phgate-next">Tiếp theo: ${q.icon} <b>${escapeHtml(q.name)}</b> · ${escapeHtml(q.sub)}</div>
       <ul class="rd-phgate-job">${raidPhaseJob(g, now).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+      <div id="rd-rp"></div>
       <button class="vb-start-btn" id="rd-phgo" onclick="raidPhaseGo()">Vào ${escapeHtml(q.name)} → ${next.enemy.icon}</button>
     </div>`;
-  document.getElementById('rd-phgo')?.focus();
+  // Into a body paragraph: put the body frames in their roles first. Right
+  // the first time is worth some mana; it can also be skipped.
+  const rp = now < g.phases.length - 1 ? rolePuzzleLines(raidType(g.L.n), g.lv, 'body') : [];
+  if (rp.length >= 3) {
+    document.getElementById('rd-phgo').textContent = `Bỏ qua, vào ${q.name} →`;
+    rolePuzzle('rd-rp', rp, first => {
+      if (_rd !== g) return;
+      if (first) { g.mana = Math.min(100, g.mana + 20); raidRenderBars(); raidBanner('🧩 Xếp đúng ngay lần đầu! +20 mana', 'ult'); }
+      else raidBanner('🧩 Xếp xong!', 'reveal');
+      const go = document.getElementById('rd-phgo');
+      if (go) { go.textContent = `Vào ${q.name} → ${next.enemy.icon}`; go.focus(); }
+    });
+  } else document.getElementById('rd-phgo')?.focus();
 }
 function raidPhaseGo() {
   const g = _rd;

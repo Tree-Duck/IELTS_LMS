@@ -8708,3 +8708,44 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .rd-top { flex-wrap: wrap; }
   .rd-top .rd-progress { order: 10; flex-basis: 100%; }
 }
+
+/* ── Sổ khung, khung mờ dần, xếp vai câu ── */
+.rd-fade { display: inline-block; margin-bottom: 0.4rem; padding: 0.15rem 0.6rem; border-radius: 999px; background: #EEF3FF; border: 1px solid #B9C8F0; color: #2B3E7A; font-size: 0.82rem; font-weight: 700; }
+.rd-fb-open { margin-top: 0.4rem; }
+.rd-fb-open b { color: #C0392B; }
+.fb-rank { font-style: normal; margin-right: 0.35rem; }
+.fb-legend { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.fb-note { font-size: 0.85rem; color: var(--moss); text-align: center; margin-bottom: 0.6rem; }
+.fb-review { display: block; margin: 0 auto 0.8rem; }
+.fb-lv { margin: 0.8rem 0 0.4rem; font-weight: 700; }
+.fb-lv small { font-weight: 400; color: var(--moss); }
+.fb-grid { display: grid; gap: 0.45rem; }
+.fb-card { display: grid; grid-template-columns: 2rem 1fr; column-gap: 0.4rem; align-items: start; padding: 0.5rem 0.6rem; border-radius: 12px; border: 2px solid var(--line); background: var(--surface, #fff); font-size: 0.9rem; }
+.fb-card small { grid-column: 2; color: var(--moss); font-size: 0.75rem; }
+.fb-ic { grid-row: span 3; font-size: 1.4rem; line-height: 1; }
+.fb-card--0 { opacity: 0.55; filter: grayscale(0.6); }
+.fb-card--1 { border-color: #C58B5A; }
+.fb-card--2 { border-color: #9AA7B4; }
+.fb-card--3 { border-color: #E0B53A; background: #FFFBEA; }
+.fb-card--4 { border-color: #5AB6E0; background: #EEF8FF; }
+.fb-state { font-weight: 700; }
+.rp-open { margin: 0.3rem 0 0.6rem; padding: 0.35rem 0.8rem; border-radius: 999px; border: 2px solid #9C8BC0; background: #F7F3FF; color: #2A1F3D; font: inherit; font-weight: 700; cursor: pointer; }
+.rp { margin: 0.4rem 0 0.8rem; padding: 0.7rem; border-radius: 14px; border: 2px dashed #9C8BC0; background: #FBF9FF; width: 100%; box-sizing: border-box; }
+.rp--ok { border-style: solid; border-color: #1F8A4C; background: #F1FAF4; }
+.rp-h { font-weight: 700; margin-bottom: 0.5rem; }
+.rp-slots { margin: 0 0 0.6rem; padding-left: 1.4rem; display: grid; gap: 0.35rem; }
+.rp-slot { padding: 0.35rem 0.55rem; border-radius: 10px; border: 2px solid var(--line); background: var(--surface, #fff); }
+.rp-slot.full { cursor: pointer; border-color: #9C8BC0; }
+.rp--ok .rp-slot { cursor: default; border-color: #1F8A4C; }
+.rp-slot.bad { border-color: #D64545; background: #FFF1F1; }
+.rp-role { display: block; font-size: 0.75rem; font-weight: 700; color: #6B5A94; }
+.rp-empty { color: var(--moss); }
+.rp-t { font-size: 0.9rem; }
+.rp-bank { display: grid; gap: 0.35rem; margin-bottom: 0.6rem; }
+.rp-card { text-align: left; padding: 0.45rem 0.6rem; border-radius: 10px; border: 2px solid #9C8BC0; background: #F7F3FF; color: inherit; font: inherit; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 0 #9C8BC0; }
+.rp-card:active { transform: translateY(2px); box-shadow: none; }
+.rp-btns { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.rp-bad-note { font-size: 0.85rem; color: #D64545; }
+@media (min-width: 1280px) { .rp-t, .rp-card { font-size: 1rem; } .rd-fade { font-size: 0.9rem; } }
+.rp-btns .vb-start-btn:disabled { opacity: 0.45; cursor: default; }
+.rd-tpl-card ol.rp-cover { filter: blur(6px); user-select: none; pointer-events: none; }
