@@ -20851,13 +20851,37 @@ function raidFights(L, lv) {
   L.paras.forEach((p, i) => {
     const gate = raidGate(L.n, i, lv.id);
     const first = { t: gate.chunks.join(' '), vi: gate.vi };
-    f.push({ tier: 2, kind: 'gate', gate, pi: i, prompt: p.prompt, label: 'Câu mở đoạn · ' + (p.label || 'Thân bài'), lines: [first], rest: p.s.slice(1), given: [] });
+    f.push({ tier: 2, kind: 'gate', gate, pi: i, para: i, prompt: p.prompt, label: 'Câu mở đoạn · ' + (p.label || 'Thân bài'), lines: [first], rest: p.s.slice(1), given: [] });
     const own = lv.id !== 'l' && RAID_BODY[L.n][lv.id][i];
     const rest = own ? own.map(line) : p.s.slice(1).map(s => (lv.extra ? { ...s, t: raidWithExtra(s.t, `${L.n}:${i}:${s.step}`) } : s));
-    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: rest, given: [first], final: i === L.paras.length - 1 });
+    f.push({ tier: 3, para: i, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: rest, given: [first], final: i === L.paras.length - 1 });
   });
   f.push({ tier: 4, prompt, label: 'Kết bài', lines: E.concl.map(line), given: [] });
-  return f.map((x, i) => ({ ...x, enemy: raidEnemy(L.n, i, x.tier, x.final) }));
+  // Four or five parts, in essay order: the introduction (with the frame,
+  // the word list and the parrot as its warm-up), each body paragraph, the
+  // conclusion.
+  const ph = x => x.tier === 4 ? L.paras.length + 1 : x.para !== undefined ? x.para + 1 : 0;
+  return f.map((x, i) => ({ ...x, ph: ph(x), enemy: raidEnemy(L.n, i, x.tier, x.final) }));
+}
+// The parts of one dungeon, with the scene each is fought in.
+function raidPhases(L) {
+  const body = L.paras.map((p, i) => ({ icon: '⚔️', name: `Đoạn ${i + 1}`, short: `Đ${i + 1}`, sub: p.label || 'Thân bài', bg: i % 2 ? 'lava' : 'cave' }));
+  return [{ icon: '🌅', name: 'Mở bài', short: 'MB', sub: 'khung + từ vựng + mở bài', bg: 'forest' }, ...body, { icon: '🏁', name: 'Kết bài', short: 'KB', sub: 'tóm lại + ý kiến', bg: 'dusk' }];
+}
+let _raidPhase = -1;
+function raidPickPhase(i, n) {
+  _raidPhase = i;
+  document.querySelectorAll('.rd-phpick button').forEach((b, k) => b.classList.toggle('on', k - 1 === i));
+  tsSfx('key');
+}
+function raidPhaseDone(n, lvId) {
+  try { return JSON.parse(localStorage.getItem('raidPh_' + walWho() + '_' + raidStarKey(n, lvId)) || '[]'); } catch (e) { return []; }
+}
+function raidPhaseSave(n, lvId, i) {
+  const got = raidPhaseDone(n, lvId);
+  if (got.includes(i)) return;
+  got.push(i);
+  try { localStorage.setItem('raidPh_' + walWho() + '_' + raidStarKey(n, lvId), JSON.stringify(got)); } catch (e) {}
 }
 // The opener typed at a gate: the level's own version for Học việc and
 // Dũng sĩ, the model paragraph's first sentence for Huyền thoại. The trap
@@ -21137,6 +21161,29 @@ function raidTplStart(type, lvId) {
   tsSfx('boss');
   raidBeginFight();
 }
+// One part played on its own: coins and XP were paid per fight; stars stay
+// for the whole dungeon.
+function raidPartCleared(g) {
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  const p = g.phases[g.only];
+  const nx = g.only + 1 < g.phases.length ? g.phases[g.only + 1] : null;
+  const done = raidPhaseDone(g.L.n, g.lv);
+  root.innerHTML = `
+    <div class="vb-wrap">
+      <div class="vb-results rd-clear">
+        <div class="vb-results-title">✅ Xong ${p.icon} ${escapeHtml(p.name)} · Buổi ${g.L.n}</div>
+        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${done.length}/${g.phases.length} phần đã qua${done.length === g.phases.length ? ' · thử cả hầm ngục để lấy sao!' : ''}</div>
+        <div class="rd-phgate-map">${g.phases.map((x, k) => `<span class="${done.includes(k) ? 'done' : ''}">${done.includes(k) ? '✓' : x.icon} ${escapeHtml(x.short)}</span>`).join('<i>›</i>')}</div>
+        <div class="vb-results-btns">
+          ${nx ? `<button class="vb-start-btn" onclick="raidStart(${g.L.n}, '${g.lv}', ${g.only + 1})">${nx.icon} ${escapeHtml(nx.name)} →</button>` : ''}
+          <button class="vb-secondary-btn" onclick="raidStart(${g.L.n}, '${g.lv}', ${g.only})">↺ Chơi lại phần này</button>
+          <button class="vb-secondary-btn" onclick="raidStart(${g.L.n}, '${g.lv}', -1)">🏰 Cả hầm ngục</button>
+        </div>
+      </div>
+    </div>`;
+  jConfetti(g.misses ? 30 : 60);
+}
 function raidTplCleared(g) {
   const T = RAID_TEMPLATES[g.practice];
   const root = document.getElementById('lesson-vocab-root');
@@ -21162,6 +21209,10 @@ function raidTplCleared(g) {
 // Picking a level for one dungeon: three cards, the last level chosen first.
 function raidPickLevel(n) {
   const stars = _raidStars || {};
+  const L = RAID_LESSONS.find(x => x.n === n);
+  const phases = L ? raidPhases(L) : [];
+  if (_raidPhase >= phases.length) _raidPhase = -1;
+  const done = raidPhaseDone(n, _raidLevel);
   document.getElementById('rd-lvmodal')?.remove();
   const el = document.createElement('div');
   el.id = 'rd-lvmodal';
@@ -21169,9 +21220,13 @@ function raidPickLevel(n) {
   el.innerHTML = `
     <div class="rd-lvbox" role="dialog" aria-label="Chọn cấp độ">
       <div class="rd-lvhead"><span>${RAID_BOSSES[n].icon} Buổi ${n} · chọn cấp độ</span><button class="ts-icon-btn" onclick="document.getElementById('rd-lvmodal').remove()" aria-label="Đóng">✕</button></div>
+      <div class="rd-phpick" role="group" aria-label="Chơi phần nào">
+        <button class="${_raidPhase < 0 ? 'on' : ''}" onclick="raidPickPhase(-1, ${n})">🏰 Cả hầm ngục<small>tính sao</small></button>
+        ${phases.map((p, i) => `<button class="${_raidPhase === i ? 'on' : ''}" onclick="raidPickPhase(${i}, ${n})">${p.icon} ${p.name}${done.includes(i) ? ' ✓' : ''}<small>${escapeHtml(p.sub)}</small></button>`).join('')}
+      </div>
       <div class="rd-lvcards">${Object.values(RAID_LEVELS).map(lv => {
         const s = stars[raidStarKey(n, lv.id)] || 0;
-        return `<button class="rd-lvcard rd-lvcard--${lv.id}${lv.id === _raidLevel ? ' last' : ''}" onclick="raidStart(${n}, '${lv.id}')">
+        return `<button class="rd-lvcard rd-lvcard--${lv.id}${lv.id === _raidLevel ? ' last' : ''}" onclick="raidStart(${n}, '${lv.id}', _raidPhase)">
           <span class="rd-lvcard-icon">${lv.icon}</span>
           <span class="rd-lvcard-name">${lv.name}</span>
           <span class="rd-lvcard-band">Hợp với band ${lv.band}</span>
@@ -21187,15 +21242,19 @@ function raidPickLevel(n) {
 }
 
 /* ── A dungeon run ── */
-function raidStart(n, lvId) {
+function raidStart(n, lvId, part) {
   const L = RAID_LESSONS.find(x => x.n === n);
   if (!L) return;
   raidStop();
+  document.getElementById('rd-lvmodal')?.remove();
   const lv = RAID_LEVELS[lvId] || raidLv();
   _raidLevel = lv.id;
   lvSave('raidLevel', lv.id);
+  const phases = raidPhases(L);
+  const only = part >= 0 && part < phases.length ? part : -1;
+  const all = raidFights(L, lv);
   _rd = {
-    L, lv: lv.id, fights: raidFights(L, lv), fi: 0, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    L, lv: lv.id, fights: only < 0 ? all : all.filter(x => x.ph === only), fi: 0, phases, only, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
     shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
     gender: raidGender() || 'm', look: raidHeroLook(),
   };
@@ -21315,6 +21374,20 @@ function raidChoices(b) {
   return vbShuffle([b.ans, ...vbShuffle(others.slice(0, 10)).slice(0, raidSkillOn('shuffle') ? 4 : 3)]);
 }
 
+// The fights in groups, one per part of the essay; the part being fought
+// shows its full name, the others a short tag.
+function raidProgressHtml(g) {
+  const pip = (x, i) => `<span class="rd-pip${i < g.fi ? ' done' : i === g.fi ? ' now' : ''}" title="${escapeHtml(RAID_TIERS[x.tier].label)}">${i < g.fi ? '✓' : x.enemy.icon}</span>`;
+  if (!g.phases) return g.fights.map(pip).join('');
+  const cur = g.fights[g.fi].ph;
+  return g.phases.map((p, k) => {
+    const idx = g.fights.map((x, i) => i).filter(i => g.fights[i].ph === k);
+    if (!idx.length) return '';
+    const state = idx[idx.length - 1] < g.fi ? ' done' : k === cur ? ' now' : '';
+    return `<span class="rd-phase${state}" title="${escapeHtml(p.name + ' · ' + p.sub)}"><b>${k === cur ? `${p.icon} ${p.name}` : state ? `✓ ${p.short}` : p.short}</b>${k === cur ? idx.map(i => pip(g.fights[i], i)).join('') : ''}</span>`;
+  }).join('<i class="rd-phase-sep">›</i>');
+}
+
 function raidRenderArena() {
   const g = _rd;
   const f = g.fight;
@@ -21325,14 +21398,14 @@ function raidRenderArena() {
     <div class="rd-wrap">
       <div class="rd-top">
         <button class="ts-icon-btn" onclick="raidQuit()" title="Về bản đồ" aria-label="Về bản đồ">←</button>
-        <span class="rd-progress">${g.fights.map((x, i) => `<span class="rd-pip${i < g.fi ? ' done' : i === g.fi ? ' now' : ''}" title="${escapeHtml(RAID_TIERS[x.tier].label)}">${i < g.fi ? '✓' : x.enemy.icon}</span>`).join('')}</span>
+        <span class="rd-progress">${raidProgressHtml(g)}</span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
         <button class="ts-icon-btn" onclick="gameShop('rd')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
         <button class="ts-icon-btn" id="rd-mute" onclick="raidMute()" title="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ">🔀</button>
       </div>
       <div class="rd-body"><div class="rd-main">
-      <div class="rd-stage rd-bg--${f.tier.bg}" id="rd-stage">
+      <div class="rd-stage rd-bg--${g.phases && F.ph !== undefined ? g.phases[F.ph].bg : f.tier.bg}" id="rd-stage">
         <div class="rd-scene" aria-hidden="true"><span class="rd-torch rd-torch--l"></span><span class="rd-torch rd-torch--r"></span><span class="rd-deco rd-deco--a"></span><span class="rd-deco rd-deco--b"></span><span class="rd-deco rd-deco--c"></span></div>
         <div class="rd-embers"></div>
         <div class="rd-side rd-hero-side">
@@ -22641,6 +22714,8 @@ function raidAfterWin() {
   if (!g) return;
   if (g.fi < g.fights.length - 1) {
     g.fi++;
+    const was = g.fights[g.fi - 1].ph, now = g.fights[g.fi].ph;
+    if (g.phases && was !== now) { raidPhaseGate(was, now); return; }
     if (!g.practice && (g.events || 0) < RAID_EVENT_MAX && Math.random() < RAID_EVENT_CHANCE) { raidEvent(); return; }
     tsSfx('boss');
     raidBeginFight();
@@ -22649,11 +22724,46 @@ function raidAfterWin() {
   raidCleared();
 }
 
+// What each part of an essay does, shown on the way into it.
+function raidPhaseJob(g, k) {
+  const last = g.phases.length - 1;
+  if (k === 0) return ['Nhắc lại đề bằng từ của em', 'Nói rõ bài sẽ bàn gì hoặc em nghĩ gì'];
+  if (k === last) return ['Mở bằng In conclusion / To sum up', 'Tóm lại ý hai đoạn thân bài, nhắc lại quan điểm', 'Không đưa ý mới'];
+  return ['Câu chủ đề: nêu ý chính của đoạn', 'Giải thích: vì sao, dẫn tới đâu', 'Ví dụ cụ thể, rồi chốt lại ý'];
+}
+function raidPhaseGate(was, now) {
+  const g = _rd;
+  const p = g.phases[was], q = g.phases[now];
+  if (g.L && was !== undefined) raidPhaseSave(g.L.n, g.lv, was);
+  const next = g.fights[g.fi];
+  const panel = document.getElementById('rd-panel');
+  tsSfx('rankup');
+  jConfetti(30);
+  if (!panel) { raidBeginFight(); return; }
+  panel.innerHTML = `
+    <div class="rd-phgate">
+      <div class="rd-phgate-done">✅ Xong ${p.icon} ${escapeHtml(p.name)}!</div>
+      <div class="rd-phgate-map">${g.phases.map((x, k) => `<span class="${k < now ? 'done' : k === now ? 'now' : ''}">${k < now ? '✓' : x.icon} ${escapeHtml(x.short)}</span>`).join('<i>›</i>')}</div>
+      <div class="rd-phgate-next">Tiếp theo: ${q.icon} <b>${escapeHtml(q.name)}</b> · ${escapeHtml(q.sub)}</div>
+      <ul class="rd-phgate-job">${raidPhaseJob(g, now).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+      <button class="vb-start-btn" id="rd-phgo" onclick="raidPhaseGo()">Vào ${escapeHtml(q.name)} → ${next.enemy.icon}</button>
+    </div>`;
+  document.getElementById('rd-phgo')?.focus();
+}
+function raidPhaseGo() {
+  const g = _rd;
+  if (!g) return;
+  tsSfx('boss');
+  raidBeginFight();
+}
+
 function raidCleared() {
   const g = _rd;
   g.done = true;
   clearInterval(g.timer);
   if (g.practice) { raidTplCleared(g); return; }
+  if (g.L && g.phases) raidPhaseSave(g.L.n, g.lv, g.fights[g.fights.length - 1].ph);
+  if (g.only >= 0) { raidPartCleared(g); return; }
   // Stars count the misses over the whole dungeon: wrong words and clocks
   // that ran out.
   const stars = g.misses <= 2 ? 3 : g.misses <= 5 ? 2 : 1;

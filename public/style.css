@@ -8672,3 +8672,39 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 
 /* ── Hầm ngục: a crisper hero ── */
 .rd-hero-svg { filter: drop-shadow(1.2px 0 0 rgba(43, 33, 64, 0.55)) drop-shadow(-1.2px 0 0 rgba(43, 33, 64, 0.55)) drop-shadow(0 1.2px 0 rgba(43, 33, 64, 0.55)) drop-shadow(0 -1.2px 0 rgba(43, 33, 64, 0.55)); }
+
+/* ── Hầm ngục: the parts of the essay ── */
+.rd-progress { align-items: center; }
+.rd-phase { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.5rem; border-radius: 999px; border: 2px solid var(--line); background: var(--surface-2, #f5eddc); opacity: 0.6; font-size: 0.8rem; }
+.rd-phase b { font-weight: 700; white-space: nowrap; }
+.rd-phase.now { opacity: 1; border-color: #F5C542; background: #FFF8E1; padding: 0.15rem 0.3rem 0.15rem 0.6rem; }
+.rd-phase.done { opacity: 1; background: var(--forest); border-color: var(--forest); color: #fff; }
+.rd-phase .rd-pip { width: 26px; height: 26px; font-size: 0.85rem; }
+.rd-phase-sep { font-style: normal; color: var(--moss); opacity: 0.6; }
+.rd-phpick { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.8rem; }
+.rd-phpick button { display: flex; flex-direction: column; align-items: flex-start; padding: 0.4rem 0.7rem; border-radius: 12px; border: 2px solid var(--line); background: var(--surface, #fff); color: var(--ink, #1c2b22); font: inherit; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+.rd-phpick button small { font-weight: 400; font-size: 0.72rem; color: var(--moss); }
+.rd-phpick button.on { border-color: #F5C542; background: #FFF8E1; box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.3); }
+.rd-phgate { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+.rd-phgate-done { font-size: 1.25rem; font-weight: 700; color: var(--forest); }
+.rd-phgate-map, .rd-clear .rd-phgate-map { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; font-size: 0.85rem; justify-content: inherit; }
+.rd-phgate-map span { padding: 0.2rem 0.55rem; border-radius: 999px; border: 2px solid var(--line); opacity: 0.6; font-weight: 700; }
+.rd-phgate-map span.done { opacity: 1; background: var(--forest); border-color: var(--forest); color: #fff; }
+.rd-phgate-map span.now { opacity: 1; border-color: #F5C542; background: #FFF8E1; }
+.rd-phgate-map i { font-style: normal; opacity: 0.5; }
+.rd-phgate-next { font-size: 1.05rem; }
+.rd-phgate-job { margin: 0; padding: 0.6rem 0.8rem 0.6rem 1.8rem; border-radius: 12px; background: #FFFDF6; border: 2px dashed #CDB98A; line-height: 1.6; }
+.rd-clear .rd-phgate-map { justify-content: center; margin: 0.6rem 0; }
+@media (min-width: 1280px) { .rd-phase { font-size: 0.95rem; } .rd-phgate-next, .rd-phgate-job { font-size: 1.15rem; } }
+.rd-progress { min-width: 0; }
+.rd-phase { flex-wrap: wrap; justify-content: center; }
+@media (max-width: 600px) {
+  .rd-progress { gap: 0.2rem; }
+  .rd-phase { padding: 0.1rem 0.35rem; font-size: 0.72rem; }
+  .rd-phase .rd-pip { width: 22px; height: 22px; font-size: 0.75rem; }
+  .rd-phase-sep { display: none; }
+}
+@media (max-width: 600px) {
+  .rd-top { flex-wrap: wrap; }
+  .rd-top .rd-progress { order: 10; flex-basis: 100%; }
+}
