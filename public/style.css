@@ -8308,3 +8308,87 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw-wreck-rope { position: absolute; left: 0; top: 0; width: 3px; height: 200px; background: #3A3A3A; }
 .tw-wreck-ball { position: absolute; left: -26px; top: 196px; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8A8A8A, #222 70%); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); }
 @keyframes twWreckSwing { 0% { transform: rotate(75deg); } 50% { transform: rotate(-20deg); } 70% { transform: rotate(-8deg); } 100% { transform: rotate(-60deg); opacity: 0; } }
+
+/* ── Hầm ngục: six moves, packs of monsters, hero levels ── */
+.rd-act--light.on { border-color: #2E8FD6; background: #EAF5FD; box-shadow: 0 3px 0 #2E8FD6; }
+.rd-act--heavy.on { border-color: #A8281A; background: #FFE6E0; box-shadow: 0 3px 0 #A8281A; }
+.rd-act--sig.on { border-color: var(--c); background: #F2EEFF; box-shadow: 0 3px 0 var(--c); }
+.rd-act { padding: 0.4rem 0.5rem; }
+.rd-act-i { font-size: 1.3rem; }
+.rd-lvbadge { display: inline-block; font-size: 0.66rem; font-weight: 700; background: #7A5AF8; color: #fff; border-radius: 6px; padding: 0 5px; vertical-align: 1px; text-shadow: none; }
+.rd-foes { display: flex; align-items: flex-end; justify-content: center; gap: 0.35rem; }
+.rd-foes--many .rd-fighter { font-size: 46px; cursor: pointer; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
+.rd-foes--many .rd-fighter.target { filter: drop-shadow(0 0 8px #FFD34D) drop-shadow(0 8px 6px rgba(0, 0, 0, 0.5)); }
+.rd-foes--many .rd-fighter.target::before { content: ''; position: absolute; left: 50%; top: 0.95em; width: 1.2em; height: 0.3em; translate: -50% 0; border-radius: 50%; background: radial-gradient(rgba(255, 211, 77, 0.9), rgba(255, 211, 77, 0)); z-index: -1; }
+.rd-foes--many .rd-fighter.dead { pointer-events: none; }
+.rd-foe-mini { display: block; width: 46px; height: 5px; margin-top: 3px; background: rgba(0, 0, 0, 0.5); border-radius: 99px; overflow: hidden; }
+.rd-foe-mini i { display: block; width: 100%; height: 100%; background: #E0483B; transition: width .3s; }
+.rd-foe-cd { font-size: 11px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, 0.55); border-radius: 99px; padding: 0 6px; margin-top: 2px; line-height: 1.5; white-space: nowrap; }
+.rd-foe-cd.soon { background: #D7263D; }
+.rd-foe-cd:empty { display: none; }
+.rd-loot--xp { background: #7A5AF8; color: #fff; }
+.rd-lvup { margin: 0.3rem 0 0.4rem; padding: 0.45rem 0.7rem; border-radius: 12px; background: #F2EEFF; color: #4A2A96; font-weight: 700; font-size: 0.88rem; }
+.rd-herolv { display: flex; flex-direction: column; align-items: stretch; gap: 3px; width: min(280px, 100%); margin: 0.2rem auto 0.4rem; padding: 0.45rem 0.8rem; border-radius: 14px; border: 2px solid #3A2D52; background: #2A1F3D; color: #F3EAFF; cursor: pointer; box-shadow: 0 3px 0 #0B0712; text-align: left; }
+.rd-herolv b { font-size: 0.95rem; }
+.rd-herolv small { font-size: 0.74rem; color: #C9B6F0; }
+.rd-herolv.has { border-color: #FFD34D; animation: rdReady 1s ease-in-out infinite alternate; }
+.rd-xpbar { display: block; height: 8px; border-radius: 99px; background: rgba(0, 0, 0, 0.35); overflow: hidden; }
+.rd-xpbar i { display: block; height: 100%; background: linear-gradient(90deg, #7A5AF8, #C3A6FF); }
+.hero-box { max-width: 460px; }
+.hero-lv { display: flex; flex-direction: column; gap: 4px; padding: 0.6rem 0.8rem; border-radius: 14px; background: #2A1F3D; color: #F3EAFF; }
+.hero-lv small { color: #C9B6F0; font-size: 0.78rem; }
+.hero-free { margin: 0.6rem 0 0.2rem; font-size: 0.88rem; color: var(--moss); }
+.hero-free.on { color: #4A2A96; font-weight: 700; }
+.hero-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.7rem; padding: 0.55rem 0.2rem; border-bottom: 1px solid var(--line); color: var(--gray-800); }
+.hero-ic { font-size: 1.6rem; }
+.hero-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hero-t b small { font-weight: 400; color: var(--moss); }
+.hero-t > span { font-size: 0.8rem; color: var(--moss); }
+.hero-pips { display: flex; flex-wrap: wrap; gap: 2px; }
+.hero-pips i { width: 9px; height: 6px; border-radius: 2px; background: var(--line); }
+.hero-pips i.on { background: #7A5AF8; }
+.hero-plus { width: 42px; height: 42px; border-radius: 12px; border: 2px solid #4A2A96; background: #7A5AF8; color: #fff; font-size: 1.4rem; font-weight: 700; cursor: pointer; box-shadow: 0 3px 0 #4A2A96; touch-action: manipulation; }
+.hero-plus:disabled { opacity: 0.35; cursor: default; }
+.hero-plus:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #4A2A96; }
+.hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.7rem; font-size: 0.78rem; color: var(--moss); }
+@media (max-width: 600px) {
+  .rd-foes { gap: 0.1rem; }
+  .rd-foes--many .rd-fighter { font-size: 28px; }
+  .rd-foe-mini { width: 28px; }
+  .rd-foe-cd { font-size: 10px; padding: 0 4px; }
+  .rd-act { padding: 0.35rem 0.2rem; }
+  .rd-act-i { font-size: 1.15rem; }
+  .rd-act-t b { font-size: 0.8rem; }
+  .rd-act-t small { font-size: 0.64rem; }
+}
+@media (prefers-reduced-motion: reduce) { .rd-herolv.has { animation: none !important; } }
+
+/* ── Xây tháp: more hazards ── */
+.tw-hz--bolt { left: 50%; top: calc(4% + var(--p) * 10%); margin-left: -24px; animation: twHzWobble 1s ease-in-out infinite; }
+.tw-hz--twister { left: calc(3% + var(--p) * 24%); bottom: 50px; animation: twHzWobble 0.45s ease-in-out infinite; }
+.tw-hz--ufo { right: calc(6% + var(--p) * 22%); top: calc(8% + var(--p) * 14%); animation: twHzWobble 1.3s ease-in-out infinite; }
+.tw-hz--dragon { right: calc(4% + var(--p) * 22%); top: calc(18% + var(--p) * 16%); animation: twHzWobble 0.9s ease-in-out infinite; }
+.tw-hz--quake { left: 50%; bottom: 14px; margin-left: -34px; animation: twHzTick 0.25s ease-in-out infinite; }
+.tw-hz--termite { left: calc(5% + var(--p) * 20%); bottom: 44px; animation: twHzWalk 0.4s steps(2) infinite; }
+.tw-hz--termite .tw-hz-icon { font-size: 1.6rem; }
+.tw-floor.tw-steal { animation: twSteal .9s ease-in forwards; }
+.tw-floor.tw-burn { animation: twBurn .9s ease-in forwards; }
+@keyframes twSteal { 30% { transform: translateY(-20px); } to { transform: translateY(-360px) scale(0.3); opacity: 0; } }
+@keyframes twBurn { 35% { filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-25deg); } to { filter: brightness(0.15); transform: scaleY(0.2); opacity: 0; } }
+.tw-scene.tw-flash::after { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: #FFF6B0; animation: twFlash .6s ease-out forwards; }
+@keyframes twFlash { 0%, 30% { opacity: 0.9; } to { opacity: 0; } }
+
+/* ── Shop inside a game ── */
+.gs-card { max-width: 520px; }
+.gs-coins { float: right; font-size: 0.95rem; }
+.gs-list { display: flex; flex-direction: column; gap: 0.45rem; max-height: min(60vh, 460px); overflow-y: auto; margin: 0.4rem 0; text-align: left; }
+.gs-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border: 2px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--gray-800); }
+.gs-icon { font-size: 1.6rem; }
+.gs-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gs-t b { font-size: 0.92rem; }
+.gs-t b small { font-weight: 400; color: var(--moss); }
+.gs-t > span { font-size: 0.76rem; color: var(--moss); }
+.gs-btns { display: flex; flex-direction: column; gap: 0.3rem; }
+.gs-buy { padding: 0.4rem 0.7rem; font-size: 0.85rem; white-space: nowrap; }
+.rd-act.locked { opacity: 0.6; border-style: dashed; box-shadow: none; }
+.rd-act.locked.next { opacity: 1; border-color: #A8281A; background: #FFF3F0; }

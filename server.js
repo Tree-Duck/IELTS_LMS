@@ -4074,6 +4074,61 @@ app.put('/api/game/raid', authenticate, (req, res) => {
   }
 });
 
+// Hầm ngục chữ hero: XP from fights and the points spent from it. The level
+// comes from the XP by the same curve the page uses, one point per level.
+const HERO_MAX_LEVEL = 30;
+const HERO_STAT_MAX = { hp: 20, atk: 15, mp: 5, arm: 8 };
+const HERO_XP_MAX = 200;    // no single fight gives more
+const HERO_DAY_MAX = 3000;
+const heroLevel = xp => {
+  let level = 1, left = xp || 0;
+  while (level < HERO_MAX_LEVEL && left >= 60 + 40 * level) { left -= 60 + 40 * level; level++; }
+  return level;
+};
+const heroOut = h => ({ xp: h.xp || 0, alloc: h.alloc || {} });
+app.get('/api/game/hero', authenticate, (req, res) => {
+  try {
+    res.json(heroOut(db.getHero(req.user.id)));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load hero' });
+  }
+});
+app.post('/api/game/hero/xp', authenticate, (req, res) => {
+  try {
+    const want = Math.max(0, Math.min(HERO_XP_MAX, parseInt((req.body || {}).xp, 10) || 0));
+    const h = db.updateHero(req.user.id, h => {
+      const today = walletDay();
+      if (h.day !== today) { h.day = today; h.day_xp = 0; }
+      const add = Math.min(want, HERO_DAY_MAX - h.day_xp);
+      if (add <= 0) return false;
+      h.xp = (h.xp || 0) + add;
+      h.day_xp += add;
+    });
+    res.json(heroOut(h));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save XP' });
+  }
+});
+app.post('/api/game/hero/alloc', authenticate, (req, res) => {
+  try {
+    const b = req.body || {};
+    let refusal = null;
+    const h = db.updateHero(req.user.id, h => {
+      if (b.reset) { h.alloc = {}; return; }
+      const alloc = h.alloc || {};
+      if (!HERO_STAT_MAX[b.stat]) { refusal = 'Không có chỉ số này.'; return false; }
+      const used = Object.keys(HERO_STAT_MAX).reduce((sum, k) => sum + (alloc[k] || 0), 0);
+      if (used >= heroLevel(h.xp) - 1) { refusal = 'Hết điểm nâng cấp. Lên cấp để có thêm.'; return false; }
+      if ((alloc[b.stat] || 0) >= HERO_STAT_MAX[b.stat]) { refusal = 'Chỉ số này đã tối đa.'; return false; }
+      h.alloc = { ...alloc, [b.stat]: (alloc[b.stat] || 0) + 1 };
+    });
+    if (refusal) return res.status(400).json({ error: refusal, ...heroOut(h) });
+    res.json(heroOut(h));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save upgrade' });
+  }
+});
+
 // ─── Từ vựng progress: known cards and Kiểm tra results per student ─────────
 // Kept on the server so each account has its own record on any device, and so
 // a teacher can follow a class.

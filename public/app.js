@@ -15318,7 +15318,7 @@ const SHOP_ITEMS = [
   { id: 'shield', icon: '🛡️', name: 'Khiên',        price: 30, where: 'Cả hai game · phím 3 ở Bắn Chữ', desc: 'Bật lên là khiên chờ sẵn. Bắn Chữ: từ đầu tiên chạm đất vỡ vào khiên. Xây tháp: đỡ một câu sai, không mất mạng, không rơi tầng.' },
   { id: 'revive', icon: '💖', name: 'Hồi sinh',     price: 40, where: 'Cả hai game', desc: 'Hết mạng thì được sống lại. Bắn Chữ: 3 mạng và dọn sạch màn. Xây tháp: toà nhà không sập, hồi đủ mạng.' },
   { id: 'boost',  icon: '⏱️', name: 'Nhân đôi xu',  price: 50, where: 'Cả hai game · 10 phút', desc: 'Mọi xu kiếm được nhân đôi trong 10 phút. Bật ở đây, đồng hồ vẫn chạy khi đổi game.' },
-  { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
+  { id: 'hint',   icon: '💡', name: 'Gợi ý',        price: 15, where: 'Xây tháp · Hầm ngục', desc: 'Bỏ 2 đáp án sai, hoặc hiện nửa đầu của từ khi phải tự gõ.' },
   { id: 'skip',   icon: '🔁', name: 'Đổi câu',      price: 10, where: 'Xây tháp', desc: 'Bỏ câu đang làm, lấy câu khác. Không mất mạng, không mất tầng.' },
   { id: 'wreck',  icon: '🏗️', name: 'Quả tạ phá',   price: 30, where: 'Xây tháp', desc: 'Đập bỏ các tầng bị lệch, rồi được trả lời lại các câu đó để xây lại cho thẳng.' },
 ];
@@ -15501,6 +15501,86 @@ function walBoost() {
   jPop('⏱️ Nhân đôi xu trong 10 phút!');
   jConfetti(30);
   walBar();
+}
+
+// The shop inside a game: the game pauses, and only the items that game
+// uses are on the shelf. Bought items show up in the game straight away.
+const GAME_SHOP = {
+  ts: ['slow', 'double', 'shield', 'revive', 'boost'],
+  tw: ['hint', 'skip', 'shield', 'wreck', 'revive', 'boost'],
+  rd: ['hint', 'shield', 'revive', 'boost'],
+};
+function gameShop(game) {
+  if (game === 'ts') {
+    if (!_ts || _ts.reviving) return;
+    if (_ts.running && !_ts.paused) tsPause();
+  }
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.dataset.shop = game;
+  el.addEventListener('click', e => { if (e.target === el) gameShopClose(); });
+  document.body.appendChild(el);
+  gameShopRender();
+  walLoad().then(gameShopRender).catch(() => {});
+  tsSfx('key');
+}
+function gameShopRender() {
+  const el = document.getElementById('lv-modal');
+  if (!el || !el.dataset.shop) return;
+  const game = el.dataset.shop;
+  el.innerHTML = `
+    <div class="lv-modal-card lv-modal-card--wide gs-card">
+      <div class="lv-modal-title">🛒 Mua nhanh <span class="gs-coins">🪙 ${walCoins()}</span></div>
+      <div class="gs-list">${GAME_SHOP[game].map(id => {
+        const it = SHOP_ITEMS.find(i => i.id === id);
+        if (!it) return '';
+        const have = walCount(id);
+        return `<div class="gs-item">
+          <span class="gs-icon">${it.icon}</span>
+          <span class="gs-t"><b>${escapeHtml(it.name)} <small>· đang có ${have}</small></b><span>${escapeHtml(it.desc)}</span></span>
+          <span class="gs-btns">
+            <button class="vb-start-btn gs-buy" onclick="gameShopBuy('${id}', this)" ${walCoins() < it.price ? 'disabled' : ''}>${it.price} 🪙</button>
+            ${id === 'boost' && have ? `<button class="vb-secondary-btn gs-buy" onclick="walBoost(); gameShopRender()">Bật ngay</button>` : ''}
+          </span>
+        </div>`;
+      }).join('')}</div>
+      <div class="lv-modal-note">${game === 'tw' ? 'Mua xong đóng lại là dùng được ngay.' : 'Game đang tạm dừng. Mua xong đóng lại là dùng được ngay.'}${walBoostLeft() > 0 ? ' · ⏱️ Đang nhân đôi xu.' : ''}</div>
+      <div class="lv-modal-btns"><button class="vb-start-btn" onclick="gameShopClose()">▶ Chơi tiếp</button></div>
+    </div>`;
+}
+async function gameShopBuy(id, btn) {
+  await walBuy(id, btn);
+  gameShopRender();
+}
+function gameShopClose() {
+  const el = document.getElementById('lv-modal');
+  const game = el && el.dataset.shop;
+  el?.remove();
+  if (game === 'ts' && _ts) {
+    _ts.powersShown = null;
+    tsPowers();
+    if (_ts.paused && !_ts.reviving) tsResume();
+  }
+  if (game === 'tw' && _tw) {
+    if (_tw.blocked) twTiltBlock();
+    else if (!_tw.answered && _tw.q) {
+      const typed = document.getElementById('tw-input')?.value || '';
+      twRenderCard();
+      const inp = document.getElementById('tw-input');
+      if (inp) inp.value = typed;
+    }
+  }
+  if (game === 'rd' && _rd && _rd.fight && !_rd.busy && document.getElementById('rd-input')) {
+    const typed = document.getElementById('rd-input').value;
+    const action = _rd.action;
+    raidRenderPanel();
+    _rd.action = action;
+    raidRenderActs();
+    const inp = document.getElementById('rd-input');
+    if (inp) { inp.value = typed; inp.focus(); }
+  }
 }
 
 function walToggleShop() { _walShopOpen = !_walShopOpen; tsSfx('equip'); walBar(); }
@@ -15945,6 +16025,7 @@ function tsStart(mode, list) {
         <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
         <span class="ts-stat">🪙 <strong id="ts-coins">0</strong></span>
         <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
+        <button class="ts-icon-btn" onclick="gameShop('ts')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
         <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">⏸</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
       </div>
@@ -17381,11 +17462,24 @@ const TW_HAZARD_FROM = 3;
 const TW_HAZARD_QS = 3;
 const TW_HAZARD_FAIL = 2;
 const TW_HAZARD_LOSS = 3;
+// loss: what a lost hazard costs. floors come off the top, tilt leans that
+// many straight floors, life takes a heart but never the last one.
 const TW_HAZARDS = [
-  { id: 'meteor', icon: '☄️', name: 'Thiên thạch', come: 'Thiên thạch đang lao tới!', win: 'Bắn nát thiên thạch!', lose: 'Thiên thạch đâm trúng tháp!' },
-  { id: 'bandit', icon: '🥷', name: 'Thổ phỉ', come: 'Thổ phỉ kéo tới phá nhà!', win: 'Đuổi được thổ phỉ!', lose: 'Thổ phỉ phá mất mấy tầng!' },
-  { id: 'bomb', icon: '💣', name: 'Bom', come: 'Có bom gài trên nóc tháp!', win: 'Gỡ bom thành công!', lose: 'Bom nổ!' },
+  { id: 'meteor',  icon: '☄️', name: 'Thiên thạch', come: 'Thiên thạch đang lao tới!', win: 'Bắn nát thiên thạch!', lose: 'Thiên thạch đâm trúng tháp!', loss: { floors: 3 } },
+  { id: 'bandit',  icon: '🥷', name: 'Thổ phỉ', come: 'Thổ phỉ kéo tới phá nhà!', win: 'Đuổi được thổ phỉ!', lose: 'Thổ phỉ phá mất mấy tầng!', loss: { floors: 3 } },
+  { id: 'bomb',    icon: '💣', name: 'Bom', come: 'Có bom gài trên nóc tháp!', win: 'Gỡ bom thành công!', lose: 'Bom nổ!', loss: { floors: 3 } },
+  { id: 'bolt',    icon: '⚡', name: 'Sét', come: 'Mây đen kéo tới, sắp có sét đánh!', win: 'Cột thu lôi đỡ được sét!', lose: 'Sét đánh trúng nóc tháp!', loss: { floors: 2 } },
+  { id: 'twister', icon: '🌪️', name: 'Lốc xoáy', come: 'Lốc xoáy đang cuốn tới!', win: 'Lốc xoáy đi chệch hướng!', lose: 'Lốc xoáy thổi lệch tháp!', loss: { tilt: 1 } },
+  { id: 'ufo',     icon: '🛸', name: 'Đĩa bay', come: 'Đĩa bay lượn quanh nóc tháp!', win: 'Đuổi được đĩa bay!', lose: 'Đĩa bay hút mất tầng!', loss: { floors: 2 } },
+  { id: 'dragon',  icon: '🐉', name: 'Rồng lửa', come: 'Rồng lửa đang bay tới!', win: 'Rồng bỏ đi chỗ khác!', lose: 'Rồng phun lửa thiêu tầng!', loss: { floors: 3 } },
+  { id: 'quake',   icon: '🌋', name: 'Động đất', come: 'Mặt đất bắt đầu rung!', win: 'Tháp đứng vững qua động đất!', lose: 'Động đất làm sập tầng!', loss: { floors: 3 } },
+  { id: 'termite', icon: '🐜', name: 'Đàn mối', come: 'Đàn mối đang gặm chân tháp!', win: 'Diệt sạch đàn mối!', lose: 'Mối gặm sập tầng!', loss: { floors: 1, life: 1 } },
 ];
+function twHzLossText(hz) {
+  const L = hz.loss || { floors: TW_HAZARD_LOSS };
+  if (L.tilt) return `tháp bị lệch thêm ${L.tilt} tầng`;
+  return `mất ${L.floors} tầng${L.life ? ' và 1 mạng' : ''}`;
+}
 const twIsTilt = f => typeof f === 'string' && f.startsWith('~');
 const twPlate = f => (twIsTilt(f) ? f.slice(1) : f);
 const twTilts = g => g.floors.filter(twIsTilt).length;
@@ -17535,6 +17629,7 @@ async function twStart(list) {
         <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
         <span class="tw-hearts" id="tw-hearts"></span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+        <button class="ts-icon-btn" onclick="gameShop('tw')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
         <button class="ts-icon-btn" onclick="twSkinModal()" title="Đổi kiểu nhà" aria-label="Đổi kiểu nhà">🎨</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
@@ -17747,7 +17842,7 @@ function twRenderCard(result) {
       ${done || special ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
-    ${q.hz && g.hz && !done ? `<div class="tw-hz-note">${g.hz.icon} ${escapeHtml(g.hz.come)} Gõ đúng ${TW_HAZARD_QS - TW_HAZARD_FAIL + 1} câu để chặn. Sai ${TW_HAZARD_FAIL} câu là mất ${TW_HAZARD_LOSS} tầng.</div>` : ''}
+    ${q.hz && g.hz && !done ? `<div class="tw-hz-note">${g.hz.icon} ${escapeHtml(g.hz.come)} Gõ đúng ${TW_HAZARD_QS - TW_HAZARD_FAIL + 1} câu để chặn. Sai ${TW_HAZARD_FAIL} câu là ${twHzLossText(g.hz)}.</div>` : ''}
     ${q.fix && !done ? '<div class="tw-fix-note">🔧 Đúng ngay lần đầu thì tầng này được xây lại thẳng. Sai thì mất tầng này, không mất mạng.</div>' : ''}
     ${q.typing && !special && !q.golden && !done ? `<div class="tw-tilt-note">Đúng ngay lần đầu: tầng thẳng. Phải gõ lại mới đúng: tầng bị lệch${twTilts(g) ? ` (đang lệch ${twTilts(g)}/${TW_TILT_MAX})` : ''}.</div>` : ''}
     <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
@@ -17984,7 +18079,7 @@ function twHazardScene(end) {
   }
   el.className = 'tw-hz tw-hz--' + hz.id;
   el.style.setProperty('--p', (hz.n / TW_HAZARD_QS).toFixed(2));
-  el.innerHTML = `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.icon}</span><span class="tw-hz-tag">${hz.wrong ? '❌'.repeat(hz.wrong) : ''} còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
+  el.innerHTML = `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.id === 'termite' ? '🐜🐜🐜' : hz.icon}</span><span class="tw-hz-tag">${hz.wrong ? '❌'.repeat(hz.wrong) : ''} còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
 }
 function twHazardAnswer(ok, extra) {
   const g = _tw;
@@ -18023,17 +18118,37 @@ function twHazardEnd() {
   const lost = hz.wrong >= TW_HAZARD_FAIL;
   twHazardScene(lost ? 'lose' : 'win');
   if (lost) {
-    const n = Math.min(TW_HAZARD_LOSS, g.floors.length);
+    const L = hz.loss || { floors: TW_HAZARD_LOSS };
     const stack = document.getElementById('tw-stack');
     const scene = document.getElementById('tw-scene');
-    if (scene) { scene.classList.remove('shake'); void scene.offsetWidth; scene.classList.add('shake'); }
-    if (stack) [...stack.children].slice(-n).forEach((f, i) => { f.style.animationDelay = (i * 0.08) + 's'; f.classList.add('tw-fall'); });
-    g.floors.splice(g.floors.length - n, n);
-    setTimeout(() => { if (_tw === g && !g.collapsed) twRenderScene(false); }, 800);
+    if (scene) {
+      scene.classList.remove('shake', 'tw-flash'); void scene.offsetWidth;
+      scene.classList.add('shake');
+      if (hz.id === 'bolt') scene.classList.add('tw-flash');
+    }
+    let text;
+    if (L.tilt) {
+      // The wind leans the highest straight floors; the star floors stay.
+      let t = 0;
+      for (let i = g.floors.length - 1; i >= 0 && t < L.tilt; i--) {
+        if (!twIsTilt(g.floors[i]) && g.floors[i] !== '⭐') { g.floors[i] = '~' + g.floors[i]; t++; }
+      }
+      twRenderScene(false);
+      text = `${hz.lose} ${t ? `Lệch thêm ${t} tầng (${twTilts(g)}/${TW_TILT_MAX}).` : 'May mà không còn tầng nào để lệch.'}`;
+    } else {
+      const n = Math.min(L.floors, g.floors.length);
+      const cls = hz.id === 'ufo' ? 'tw-steal' : hz.id === 'dragon' ? 'tw-burn' : 'tw-fall';
+      if (stack) [...stack.children].slice(-n).forEach((f, i) => { f.style.animationDelay = (i * 0.08) + 's'; f.classList.add(cls); });
+      g.floors.splice(g.floors.length - n, n);
+      text = `${hz.lose} Mất ${n} tầng`;
+      if (L.life && g.lives > 1) { g.lives--; text += ' và 1 mạng'; }
+      text += '.';
+      setTimeout(() => { if (_tw === g && !g.collapsed) twRenderScene(false); }, 800);
+    }
     tsSfx('boss');
     jBuzz([90, 40, 90]);
     twSave(g);
-    return { lost: true, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.lose} Mất ${n} tầng.` };
+    return { lost: true, n: hz.n, icon: hz.icon, name: hz.name, text };
   }
   const bonus = TW_COIN_EGG * walMult();
   g.coins += bonus;
@@ -18252,7 +18367,7 @@ function twBindKeys() {
     const view = document.getElementById('view-lesson-vocab');
     if (!view || view.classList.contains('hidden') || !_tw || !document.getElementById('tw-card')) { twStop(); return; }
     const g = _tw;
-    if (g.blocked) return;
+    if (g.blocked || document.getElementById('lv-modal')) return;
     if (g.answered) {
       if ((e.key === 'Enter' || e.key === ' ') && !document.getElementById('tw-next')?.disabled) { e.preventDefault(); twAfter(); }
       return;
@@ -19925,11 +20040,169 @@ const RAID_ULTS = {
 const raidUlt = look => RAID_ULTS[(look && look.ultKind) || 'slash'] || RAID_ULTS.slash;
 const RAID_BURN = 0.5;    // each burning turn takes this share of a normal hit
 const RAID_HOLY_HEAL = 35;
-const RAID_ACTIONS = [
-  { id: 'atk',  icon: '⚔️', name: 'Tấn công', go: '⚔️ Chém' },
-  { id: 'heal', icon: '💚', name: 'Hồi máu',  go: '💚 Hồi máu' },
-  { id: 'ult',  icon: '✨', name: 'Tuyệt kỹ', go: '✨ Tung chiêu' },
+// Attack moves. Every hero has a light, a normal and a heavy hit plus a
+// signature move of their own. A heavier hit shows less help and gives less
+// time, and a heavy hit that misses makes the monster hit harder. rank orders
+// the help: once a lighter clue has been seen this turn, the heavier hits
+// lock, so the help cannot be read first and the big hit taken after.
+const RAID_MOVE_BASE = {
+  light: { mult: 0.6, mana: 15, rank: 0 },
+  atk:   { mult: 1,   mana: 25, rank: 1 },
+  heavy: { mult: 2,   mana: 35, rank: 2, missMul: 1.5 },
+  sig:   { mult: 0.8, mana: 20, rank: 1, cd: 3 },
+};
+const RAID_CLUE_TIME = [1.4, 1, 0.7];   // the clock, by the clue's rank
+const RAID_MOVES = {
+  slash:  { light: ['🗡️', 'Đâm nhanh'], atk: ['⚔️', 'Chém'], heavy: ['🪓', 'Bổ đôi'], sig: ['🛡️', 'Thủ thế', 'chặn + dội', 'Đòn đánh kế tiếp của quái bị chặn và dội ngược vào nó.'] },
+  meteor: { light: ['✦', 'Tia phép'], atk: ['🔮', 'Cầu lửa'], heavy: ['⚡', 'Sét giáng'], sig: ['❄️', 'Băng giá', 'quái chờ +2', 'Quái bị đóng băng, phải chờ thêm 2 lượt mới đánh được.'] },
+  volley: { light: ['🎯', 'Bắn nhanh'], atk: ['🏹', 'Mũi tên'], heavy: ['🎇', 'Tên xuyên giáp'], sig: ['🧪', 'Tên độc', 'độc 3 lượt', 'Quái trúng độc, mất thêm máu trong 3 lượt.'] },
+  clone:  { light: ['✴️', 'Phi tiêu'], atk: ['🗡️', 'Chém lướt'], heavy: ['🌑', 'Ám sát'], sig: ['💨', 'Tàng hình', 'né 1 đòn', 'Né được đòn đánh kế tiếp của quái.'] },
+  burn:   { light: ['👊', 'Đấm lửa'], atk: ['🔥', 'Chém lửa'], heavy: ['🐲', 'Long trảo'], sig: ['🩸', 'Hút máu', 'hồi = sát thương', 'Hồi lại số máu bằng đúng sát thương vừa gây ra.'] },
+  holy:   { light: ['✨', 'Đâm sáng'], atk: ['⚔️', 'Chém thánh'], heavy: ['⚖️', 'Phán xét'], sig: ['🙏', 'Ban phước', '+15 máu +20 mana', 'Hồi 15 máu và được thêm 20 mana.'] },
+};
+const RAID_ACTIONS = ['light', 'atk', 'heavy', 'sig', 'heal', 'ult'];
+function raidMove(id) {
+  const g = _rd;
+  if (id === 'heal') return { id, icon: '💚', name: 'Hồi máu', rank: 1, mana: RAID_MANA.heal };
+  if (id === 'ult') return { id, icon: g.look.rain, name: 'Tuyệt kỹ', rank: 1, mana: 0 };
+  const set = RAID_MOVES[(g && g.look && g.look.ultKind) || 'slash'] || RAID_MOVES.slash;
+  const [icon, name, short, desc] = set[id];
+  return { id, icon, name, short, desc, ...RAID_MOVE_BASE[id] };
+}
+function raidMoveTip(id) {
+  if (id === 'light') return 'Đòn nhẹ x0.6: hiện nửa từ hoặc kho còn 2 từ, thêm thời gian.';
+  if (id === 'atk') return 'Đòn thường x1: gợi ý như bình thường.';
+  if (id === 'heavy') return 'Đòn mạnh x2: không gợi ý, ít thời gian hơn, gõ sai thì quái đánh đau gấp rưỡi. Đã xem gợi ý dễ hơn thì bấm để dùng từ lượt sau.';
+  if (id === 'sig') return raidMove('sig').desc + ' Sát thương x0.8, dùng lại sau 3 lượt.';
+  if (id === 'heal') return `Hồi ${RAID_POTION} máu.`;
+  return raidUlt(_rd.look).desc;
+}
+
+// Hero levels: XP from each monster felled, one point per level to spend on
+// the stats below. The server holds XP and points and checks the sums.
+const HERO_STATS = [
+  { id: 'hp',  icon: '❤️', name: 'Máu',           step: '+10 máu tối đa',          max: 20 },
+  { id: 'atk', icon: '⚔️', name: 'Sát thương',    step: '+8% sát thương mọi đòn',  max: 15 },
+  { id: 'mp',  icon: '✨', name: 'Mana khởi đầu', step: '+10 mana lúc vào hầm',    max: 5 },
+  { id: 'arm', icon: '🛡️', name: 'Giáp',          step: 'quái đánh nhẹ đi 5%',      max: 8 },
 ];
+const HERO_MAX_LEVEL = 30;
+const heroNeed = lvl => 60 + 40 * lvl;   // XP from this level to the next
+function heroLevelOf(xp) {
+  let level = 1, left = xp || 0;
+  while (level < HERO_MAX_LEVEL && left >= heroNeed(level)) { left -= heroNeed(level); level++; }
+  return { level, into: left, need: level < HERO_MAX_LEVEL ? heroNeed(level) : 0 };
+}
+let _hero = null;
+let _heroFor = null;
+function heroData() { return _hero && _heroFor === walWho() ? _hero : { xp: 0, alloc: {} }; }
+async function heroLoad() {
+  if (_hero && _heroFor === walWho()) return _hero;
+  try { _hero = await api('/api/game/hero'); } catch (e) { _hero = { xp: 0, alloc: {} }; }
+  if (!_hero.alloc) _hero.alloc = {};
+  _heroFor = walWho();
+  return _hero;
+}
+function heroPts(stat) { return (heroData().alloc || {})[stat] || 0; }
+function heroFree() {
+  const used = HERO_STATS.reduce((s, x) => s + heroPts(x.id), 0);
+  return Math.max(0, heroLevelOf(heroData().xp).level - 1 - used);
+}
+// Returns the new level when the XP crosses one, else 0.
+function heroGainXp(n) {
+  if (!n) return 0;
+  if (!_hero || _heroFor !== walWho()) { _hero = { xp: 0, alloc: {} }; _heroFor = walWho(); }
+  const before = heroLevelOf(_hero.xp).level;
+  _hero.xp = (_hero.xp || 0) + n;
+  const who = walWho();
+  api('/api/game/hero/xp', { method: 'POST', body: JSON.stringify({ xp: n }) })
+    .then(r => { if (r && typeof r.xp === 'number' && _heroFor === who) _hero = { xp: r.xp, alloc: r.alloc || {} }; }).catch(() => {});
+  const after = heroLevelOf(_hero.xp).level;
+  return after > before ? after : 0;
+}
+// What the hero walks into a dungeon with.
+function raidHeroStats() {
+  const maxHp = 100 + 10 * heroPts('hp');
+  let move = 'atk';
+  try { const m = localStorage.getItem('raidMove'); if (['light', 'atk', 'heavy'].includes(m)) move = m; } catch (e) {}
+  return { hp: maxHp, maxHp, mana: Math.min(100, 10 * heroPts('mp')), atkMul: 1 + 0.08 * heroPts('atk'), armor: 0.05 * heroPts('arm'), move, sigCd: 0, parry: false, xp: 0 };
+}
+function heroModal() {
+  document.getElementById('hero-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'hero-modal';
+  el.className = 'rd-lvmodal';
+  el.addEventListener('click', e => { if (e.target === el) heroClose(); });
+  document.body.appendChild(el);
+  heroRender();
+  tsSfx('equip');
+}
+function heroClose() {
+  document.getElementById('hero-modal')?.remove();
+  if (document.querySelector('.rd-mapwrap')) raidMap();
+}
+function heroRender() {
+  const el = document.getElementById('hero-modal');
+  if (!el) return;
+  const h = heroData();
+  const L = heroLevelOf(h.xp);
+  const free = heroFree();
+  const used = HERO_STATS.some(s => heroPts(s.id));
+  el.innerHTML = `
+    <div class="rd-lvbox hero-box" role="dialog" aria-label="Nâng cấp nhân vật">
+      <div class="rd-lvhead"><span>⬆️ Nâng cấp nhân vật</span><button class="ts-icon-btn" onclick="heroClose()" aria-label="Đóng">✕</button></div>
+      <div class="hero-lv">
+        <b>Cấp ${L.level}</b>
+        <span class="rd-xpbar"><i style="width:${L.need ? Math.round(L.into / L.need * 100) : 100}%"></i></span>
+        <small>${L.need ? `${L.into}/${L.need} XP tới cấp ${L.level + 1}` : 'Đã đạt cấp tối đa'}</small>
+      </div>
+      <div class="hero-free${free ? ' on' : ''}">${free ? `Còn <b>${free}</b> điểm nâng cấp` : 'Hết điểm. Hạ quái để lấy XP, mỗi cấp mới được 1 điểm.'}</div>
+      ${HERO_STATS.map(s => {
+        const p = heroPts(s.id);
+        return `<div class="hero-row">
+          <span class="hero-ic">${s.icon}</span>
+          <span class="hero-t"><b>${s.name} <small>${p}/${s.max}</small></b><span>${s.step}</span><span class="hero-pips">${Array.from({ length: s.max }, (_, i) => `<i class="${i < p ? 'on' : ''}"></i>`).join('')}</span></span>
+          <button class="hero-plus" onclick="heroAlloc('${s.id}')" ${free && p < s.max ? '' : 'disabled'} aria-label="Nâng ${s.name}">+</button>
+        </div>`;
+      }).join('')}
+      <div class="hero-foot">
+        <span>Chỉ số mới có hiệu lực từ trận vào hầm tiếp theo.</span>
+        ${used ? '<button class="vb-secondary-btn" onclick="heroReset()">↺ Chia lại điểm</button>' : ''}
+      </div>
+    </div>`;
+}
+async function heroSend(body) {
+  try {
+    const r = await api('/api/game/hero/alloc', { method: 'POST', body: JSON.stringify(body) });
+    _hero = { xp: r.xp, alloc: r.alloc || {} };
+    _heroFor = walWho();
+  } catch (e) {
+    showToast(e.message);
+    _hero = null;
+    await heroLoad();
+  }
+  heroRender();
+}
+function heroAlloc(stat) {
+  const s = HERO_STATS.find(x => x.id === stat);
+  if (!s || !heroFree() || heroPts(stat) >= s.max) return;
+  _hero.alloc[stat] = heroPts(stat) + 1;
+  tsSfx('buy');
+  jBuzz(15);
+  heroRender();
+  heroSend({ stat });
+}
+function heroReset() {
+  if (!_hero) return;
+  _hero.alloc = {};
+  tsSfx('equip');
+  heroRender();
+  heroSend({ reset: true });
+}
+
+const raidFoeId = i => 'rd-foe-' + i;
+const raidTid = () => raidFoeId(_rd && _rd.fight ? _rd.fight.t : 0);
+const raidAlive = f => f.foes.filter(x => x.hp > 0);
 let _raidLevel = 'd';
 try { const p = localStorage.getItem('raidLevel'); if (RAID_LEVELS[p]) _raidLevel = p; } catch (e) {}
 let _rd = null;
@@ -20223,11 +20496,13 @@ async function raidMap() {
   if (!root) return;
   if (!raidGender()) { raidHeroPick(); return; }
   root.innerHTML = '<div class="loading">Đang mở bản đồ…</div>';
-  const [stars] = await Promise.all([raidLoadStars(), walLoad()]);
+  const [stars] = await Promise.all([raidLoadStars(), walLoad(), heroLoad()]);
   if (!document.getElementById('lesson-vocab-root')) return;
   const total = Object.values(stars).reduce((a, b) => a + b, 0);
   const titles = Object.fromEntries(LESSON_VOCAB.map(l => [l.n, l.title]));
   const look = raidHeroLook();
+  const HL = heroLevelOf(heroData().xp);
+  const free = heroFree();
   root.innerHTML = `
     <div class="lv-wrap rd-mapwrap">
       <div class="rd-map-top">
@@ -20240,7 +20515,12 @@ async function raidMap() {
           <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
           <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
         </button>
-        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục là một bài văn trọn vẹn từ mở bài tới kết bài, có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
+        <button class="rd-herolv${free ? ' has' : ''}" onclick="heroModal()" title="Nâng cấp nhân vật">
+          <b>Cấp ${HL.level}</b>
+          <span class="rd-xpbar"><i style="width:${HL.need ? Math.round(HL.into / HL.need * 100) : 100}%"></i></span>
+          <small>${HL.need ? `${HL.into}/${HL.need} XP` : 'Cấp tối đa'} · ${free ? `⬆️ ${free} điểm chưa cộng` : '⬆️ Nâng cấp'}</small>
+        </button>
+        <div class="rd-map-sub">Mỗi lượt: chọn đòn rồi gõ từ còn thiếu. Đòn nhẹ có nhiều gợi ý nhưng sát thương thấp, đòn mạnh không gợi ý mà sát thương gấp đôi. Mỗi nhân vật còn có một chiêu riêng, cùng <b>💚 Hồi máu</b> và <b>✨ Tuyệt kỹ</b> khi đầy mana. Trận từ vựng và mở bài có 2–3 con quái, bấm vào con nào để đánh con đó. Hạ quái được XP, lên cấp thì cộng điểm vào máu, sát thương, mana hoặc giáp. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục là một bài văn trọn vẹn từ mở bài tới kết bài, có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
         <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 9} sao</div>
         <button class="rd-tpl-open" onclick="raidTplRoom()">📖 Phòng luyện khung <small>Học khung mở bài, thân bài, kết bài của 6 dạng đề trước khi vào hầm</small></button>
       </div>
@@ -20305,7 +20585,7 @@ function raidTplStart(type, lvId) {
   const parts = [['intro', 'Khung mở bài'], ['body', 'Khung thân bài'], ['concl', 'Khung kết bài']];
   const fights = parts.map(([k, label]) => ({ tier: 5, kind: 'tpl', prompt: `${T.name} · ${T.ask}`, label: `${label} · ${T.name}`, lines: T[lv.id][k].map(line), ex: k === 'intro' ? T[lv.id].ex : null, given: [], enemy: RAID_TPL_FOE }));
   _rd = {
-    L: null, practice: type, lv: lv.id, fights, fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    L: null, practice: type, lv: lv.id, fights, fi: 0, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
     shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
     gender: raidGender() || 'm', look: raidHeroLook(),
   };
@@ -20371,7 +20651,7 @@ function raidStart(n, lvId) {
   _raidLevel = lv.id;
   lvSave('raidLevel', lv.id);
   _rd = {
-    L, lv: lv.id, fights: raidFights(L, lv), fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    L, lv: lv.id, fights: raidFights(L, lv), fi: 0, ...raidHeroStats(), misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
     shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
     gender: raidGender() || 'm', look: raidHeroLook(),
   };
@@ -20437,8 +20717,19 @@ function raidBeginFight() {
     }
   }
   blanks.forEach(raidResetBlank);
-  // Attacking on every turn brings the monster down on the last blank.
-  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, dmg: Math.ceil(tier.hp / blanks.length), cd: tier.every, stun: false, pool, own: blanks.filter(b => !b.door).map(b => b.ans) };
+  // The word list and the introduction bring a pack of two or three that
+  // share the fight's health, each on its own clock and hitting softer.
+  // Attacking on every turn brings the last monster down about on the last
+  // blank.
+  const many = F.tier === 0 || F.tier === 1 ? (blanks.length >= 6 ? 3 : 2) : 1;
+  const list = F.tier === 0 ? RAID_PESTS : RAID_MINIONS;
+  const first = Math.max(0, list.indexOf(F.enemy));
+  const foes = Array.from({ length: many }, (_, i) => {
+    const e = many === 1 ? F.enemy : list[(first + i) % list.length];
+    const hp = Math.round(tier.hp / many);
+    return { icon: e.icon, name: e.name, hp, max: hp, hit: Math.round(tier.hit * [1, 1, 0.65, 0.5][many]), cd: tier.every + i, stun: false, burn: 0, poison: 0 };
+  });
+  g.fight = { F, tier, blanks, bi: 0, foes, t: 0, dmg: Math.ceil(tier.hp / blanks.length), pool, own: blanks.filter(b => !b.door).map(b => b.ans) };
   g.busy = false;
   raidRenderArena();
   raidNextTurn();
@@ -20478,6 +20769,7 @@ function raidRenderArena() {
         <button class="ts-icon-btn" onclick="raidQuit()" title="Về bản đồ" aria-label="Về bản đồ">←</button>
         <span class="rd-progress">${g.fights.map((x, i) => `<span class="rd-pip${i < g.fi ? ' done' : i === g.fi ? ' now' : ''}" title="${escapeHtml(RAID_TIERS[x.tier].label)}">${i < g.fi ? '✓' : x.enemy.icon}</span>`).join('')}</span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
+        <button class="ts-icon-btn" onclick="gameShop('rd')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
         <button class="ts-icon-btn" id="rd-mute" onclick="raidMute()" title="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ">🔀</button>
       </div>
@@ -20485,7 +20777,7 @@ function raidRenderArena() {
         <div class="rd-embers"></div>
         <div class="rd-side rd-hero-side">
           <div class="rd-bar">
-            <div class="rd-bar-name">${escapeHtml((currentUser && currentUser.name) || g.look.name)}</div>
+            <div class="rd-bar-name"><span class="rd-lvbadge">Lv ${heroLevelOf(heroData().xp).level}</span> ${escapeHtml((currentUser && currentUser.name) || g.look.name)}</div>
             <div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--hero" id="rd-hero-hp"></div><span class="rd-hp-num" id="rd-hero-num"></span></div>
             <div class="rd-mp" id="rd-mp"><div class="rd-mp-fill" id="rd-mana"></div><span class="rd-hp-num" id="rd-mana-num"></span></div>
           </div>
@@ -20494,11 +20786,13 @@ function raidRenderArena() {
         <div class="rd-clock" id="rd-clock"><span id="rd-clock-n"></span></div>
         <div class="rd-side rd-enemy-side">
           <div class="rd-bar">
-            <div class="rd-bar-name">${escapeHtml(F.enemy.name)} <small>· ${escapeHtml(f.tier.label)}</small></div>
+            <div class="rd-bar-name" id="rd-foe-name"></div>
             <div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--enemy" id="rd-enemy-hp"></div><span class="rd-hp-num" id="rd-enemy-num"></span></div>
             <div class="rd-intent" id="rd-intent"></div>
           </div>
-          <div class="rd-fighter rd-enemy${F.tier === 3 ? ' rd-enemy--boss' : ''}" id="rd-enemy">${F.enemy.icon}</div>
+          <div class="rd-foes${f.foes.length > 1 ? ' rd-foes--many' : ''}">${f.foes.map((x, i) => (f.foes.length > 1
+            ? `<div class="rd-fighter rd-enemy" id="${raidFoeId(i)}" onclick="raidTarget(${i})" role="button" title="Chọn đánh ${escapeHtml(x.name)}">${x.icon}<span class="rd-foe-mini"><i></i></span><span class="rd-foe-cd"></span></div>`
+            : `<div class="rd-fighter rd-enemy${F.tier === 3 ? ' rd-enemy--boss' : ''}" id="${raidFoeId(i)}">${x.icon}</div>`)).join('')}</div>
         </div>
         <div class="rd-banner hidden" id="rd-banner"></div>
       </div>
@@ -20519,21 +20813,50 @@ function raidRenderBars() {
   if (!f) return;
   const set = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = Math.max(0, Math.min(100, pct)) + '%'; };
   const txt = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
-  set('rd-hero-hp', g.hp);
-  set('rd-enemy-hp', f.enemyHp / f.tier.hp * 100);
+  const foe = f.foes[f.t];
+  const many = f.foes.length > 1;
+  set('rd-hero-hp', g.hp / g.maxHp * 100);
+  set('rd-enemy-hp', foe.hp / foe.max * 100);
   set('rd-mana', g.mana);
-  txt('rd-hero-num', `${Math.max(0, g.hp)}/100`);
-  txt('rd-enemy-num', `${Math.max(0, Math.round(f.enemyHp))}/${f.tier.hp}`);
+  txt('rd-hero-num', `${Math.max(0, g.hp)}/${g.maxHp}`);
+  txt('rd-enemy-num', `${Math.max(0, Math.round(foe.hp))}/${foe.max}`);
   txt('rd-mana-num', g.mana >= 100 ? '✨ ĐẦY' : `✨ ${g.mana}`);
+  const nm = document.getElementById('rd-foe-name');
+  if (nm) nm.innerHTML = `${many ? '🎯 ' : ''}${escapeHtml(foe.name)} <small>· ${many ? `còn ${raidAlive(f).length}/${f.foes.length} con` : escapeHtml(f.tier.label)}</small>`;
   document.getElementById('rd-mp')?.classList.toggle('full', g.mana >= 100);
-  document.getElementById('rd-shield-fx')?.classList.toggle('on', g.shield);
+  document.getElementById('rd-shield-fx')?.classList.toggle('on', g.shield || g.parry);
+  if (many) f.foes.forEach((x, i) => {
+    const el = document.getElementById(raidFoeId(i));
+    if (!el) return;
+    el.classList.toggle('target', i === f.t && x.hp > 0);
+    el.classList.toggle('dead', x.hp <= 0);
+    const bar = el.querySelector('.rd-foe-mini i');
+    if (bar) bar.style.width = Math.max(0, x.hp / x.max * 100) + '%';
+    const cd = el.querySelector('.rd-foe-cd');
+    if (cd) {
+      cd.textContent = x.hp <= 0 ? '' : x.stun ? '💫' : '💢' + x.cd;
+      cd.classList.toggle('soon', x.hp > 0 && !x.stun && x.cd <= 1);
+    }
+  });
   const it = document.getElementById('rd-intent');
   if (it) {
-    it.className = 'rd-intent' + (f.stun ? ' stun' : f.cd <= 1 ? ' soon' : '');
-    it.textContent = (f.stun ? '💫 Choáng, bỏ lượt đánh' : f.cd <= 1 ? '💢 Lượt sau quái đánh!' : `💢 Quái đánh sau ${f.cd} lượt`)
-      + (f.burn ? ` · 🔥 cháy ${f.burn} lượt` : '') + (g.dodge ? ` · 👤 né ${g.dodge} đòn` : '');
+    it.className = 'rd-intent' + (foe.stun ? ' stun' : foe.cd <= 1 ? ' soon' : '');
+    it.textContent = (foe.stun ? '💫 Choáng, bỏ lượt đánh' : foe.cd <= 1 ? '💢 Lượt sau quái đánh!' : `💢 Quái đánh sau ${foe.cd} lượt`)
+      + (foe.burn ? ` · 🔥 ${foe.burn}` : '') + (foe.poison ? ` · 🧪 ${foe.poison}` : '')
+      + (g.dodge ? ` · 👤 né ${g.dodge}` : '') + (g.parry ? ' · 🛡️ thủ thế' : '');
   }
   raidRenderActs();
+}
+// Tapping a monster in a pack makes it the one the next move hits.
+function raidTarget(i) {
+  const g = _rd;
+  if (!g || !g.fight || g.busy) return;
+  const x = g.fight.foes[i];
+  if (!x || x.hp <= 0 || g.fight.t === i) return;
+  g.fight.t = i;
+  tsSfx('key');
+  raidRenderBars();
+  document.getElementById('rd-input')?.focus();
 }
 
 function raidRenderText() {
@@ -20568,39 +20891,87 @@ function raidRenderText() {
   el.querySelector('.rd-slot.now')?.scrollIntoView({ block: 'nearest' });
 }
 
-// The three moves. The special only opens with a full mana bar, and healing
-// is closed while health is full.
+// The special only opens with a full mana bar, healing while health is not
+// full, the signature once its wait is over. A hit heavier than the lightest
+// clue seen this turn stays locked.
 function raidActOpen(id) {
   const g = _rd;
   if (id === 'ult') return g.mana >= 100;
-  if (id === 'heal') return g.hp < 100;
-  return true;
+  if (id === 'heal') return g.hp < g.maxHp;
+  if (id === 'sig') return !(g.sigCd > 0);
+  return RAID_MOVE_BASE[id].rank <= g.seen;
 }
 function raidRenderActs() {
   const g = _rd;
   const el = document.getElementById('rd-acts');
   if (!g || !el) return;
-  if (!raidActOpen(g.action)) g.action = 'atk';
+  if (!raidActOpen(g.action)) g.action = RAID_ACTIONS.find(raidActOpen);
   const f = g.fight;
-  const sub = { atk: `-${f.dmg} máu quái · +${RAID_MANA.atk} mana`, heal: `+${RAID_POTION} máu · +${RAID_MANA.heal} mana`, ult: g.mana >= 100 ? `${g.look.ult} · ${raidUlt(g.look).short}` : `cần đầy mana (${g.mana}/100)` };
-  el.innerHTML = RAID_ACTIONS.map(a => `
-    <button class="rd-act rd-act--${a.id}${g.action === a.id ? ' on' : ''}${a.id === 'ult' && g.mana >= 100 ? ' ready' : ''}" onclick="raidSetAction('${a.id}')" ${raidActOpen(a.id) ? '' : 'disabled'} style="--c: ${g.look.fx}">
-      <span class="rd-act-i">${a.id === 'ult' ? g.look.rain : a.icon}</span>
-      <span class="rd-act-t"><b>${a.name}</b><small>${escapeHtml(sub[a.id])}</small></span>
-    </button>`).join('');
+  const hit = m => Math.round(f.dmg * g.atkMul * m);
+  const sub = id => {
+    const m = raidMove(id);
+    if (id === 'heal') return `+${RAID_POTION} máu`;
+    if (id === 'ult') return g.mana >= 100 ? raidUlt(g.look).short : `mana ${g.mana}/100`;
+    if (id === 'sig') return g.sigCd > 0 ? `⏳ chờ ${g.sigCd} lượt` : m.short;
+    if (!raidActOpen(id)) return g.nextMove === id ? '⏭️ lượt sau' : '🔒 để lượt sau';
+    return `-${hit(m.mult)} · ${id === 'light' ? 'dễ' : id === 'atk' ? 'vừa' : 'khó'}`;
+  };
+  el.innerHTML = RAID_ACTIONS.map(id => {
+    const m = raidMove(id);
+    const later = !raidActOpen(id) && raidLater(id);
+    return `<button class="rd-act rd-act--${id}${g.action === id ? ' on' : ''}${later ? ' locked' : ''}${g.nextMove === id ? ' next' : ''}${id === 'ult' && g.mana >= 100 ? ' ready' : ''}" onclick="raidSetAction('${id}')" ${raidActOpen(id) || later ? '' : 'disabled'} title="${escapeHtml(raidMoveTip(id))}" style="--c: ${g.look.fx}">
+      <span class="rd-act-i">${m.icon}</span>
+      <span class="rd-act-t"><b>${escapeHtml(m.name)}</b><small>${escapeHtml(sub(id))}</small></span>
+    </button>`;
+  }).join('');
   const go = document.getElementById('rd-go');
   if (go) {
-    go.textContent = RAID_ACTIONS.find(a => a.id === g.action).go;
+    const m = raidMove(g.action);
+    go.textContent = g.action === 'ult' ? `✨ ${g.look.ult}` : `${m.icon} ${m.name}`;
     go.className = 'vb-start-btn rd-go rd-go--' + g.action;
   }
 }
+// A heavier hit locked for this turn can still be picked for the next one.
+function raidLater(id) {
+  const g = _rd;
+  const b = g.fight && g.fight.blanks[g.fight.bi];
+  return ['atk', 'heavy'].includes(id) && b && !b.door && b.wrongs < 3;
+}
 function raidSetAction(id) {
   const g = _rd;
+  if (g && !g.busy && !raidActOpen(id) && raidLater(id)) {
+    g.nextMove = g.nextMove === id ? null : id;
+    tsSfx('key');
+    if (g.nextMove) raidBanner(`⏭️ Lượt sau mở bằng ${raidMove(id).name}`, 'reveal');
+    raidRenderActs();
+    document.getElementById('rd-input')?.focus();
+    return;
+  }
   if (!g || g.busy || !raidActOpen(id)) return;
   if (g.action !== id) tsSfx(id === 'ult' ? 'double' : 'equip');
   g.action = id;
-  raidRenderActs();
+  const rank = raidMove(id).rank;
+  if (rank < g.seen) raidSeeClue(rank);
+  else raidRenderActs();
   document.getElementById('rd-input')?.focus();
+}
+// A lighter move opens more help and adds the extra time it comes with.
+function raidSeeClue(rank) {
+  const g = _rd;
+  if (rank >= g.seen) return;
+  const now = RAID_CLUE_TIME[rank], was = RAID_CLUE_TIME[g.seen];
+  g.tMax = g.tBase * now;
+  g.tLeft = Math.min(g.tMax, g.tLeft + g.tBase * (now - was));
+  g.seen = rank;
+  const inp = document.getElementById('rd-input');
+  const typed = inp ? inp.value : '';
+  const action = g.action;
+  raidRenderPanel();
+  g.action = action;
+  raidRenderActs();
+  const again = document.getElementById('rd-input');
+  if (again) again.value = typed;
+  raidClock();
 }
 
 function raidRenderPanel() {
@@ -20613,19 +20984,27 @@ function raidRenderPanel() {
   if (b.door) { raidRenderDoors(panel, b); return; }
   const lv = raidLv();
   const copied = b.wrongs >= 3;
+  // The help follows the lightest move looked at this turn: a heavy hit gets
+  // the meaning only, a light one half the word or a bank of two.
+  const rank = g.seen;
+  const bank = b.bank && rank < 2;
   let clue = `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(b.hint)}</div>`;
-  if (!b.bank && !copied) {
-    const shown = Math.max(lv.firstLetter ? 1 : 0, b.reveal);
+  if (!bank && !copied) {
+    const shown = Math.max(rank === 0 ? Math.ceil(b.ans.length / 2) : rank === 1 && lv.firstLetter ? 1 : 0, b.reveal);
     const mask = b.ans.split('').map((ch, i) => (i < shown || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
     clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
   }
-  if (b.bank && !copied) {
+  if (bank && !copied) {
     if (!b.choices) b.choices = raidChoices(b);
+    if (rank === 0) {
+      const wrong = b.choices.map((c, i) => (raidNorm(c) === raidNorm(b.ans) || b.removed.includes(i) ? -1 : i)).filter(i => i >= 0);
+      b.removed.push(...vbShuffle(wrong).slice(1));
+    }
     clue += `<div class="rd-opts" title="Gõ lại từ đúng vào ô bên dưới">${b.choices.map((c, i) => `<span class="rd-opt${b.removed.includes(i) ? ' off' : ''}">${escapeHtml(c)}</span>`).join('')}</div>`;
   }
-  if (copied) clue += `<div class="rd-answer">Đáp án là <b>${escapeHtml(b.ans)}</b>. Gõ lại đúng từ này để ra đòn.</div>`;
+  if (copied) clue += `<div class="rd-answer">Đáp án là <b>${escapeHtml(b.ans)}</b>. Gõ lại đúng từ này để ra đòn nhẹ.</div>`;
   panel.innerHTML = `
-    <div class="rd-turn">${b.review ? '🔁 Ôn lại · ' : ''}${b.chunk ? `Cụm ${b.ci + 1} / ${f.F.gate.chunks.length}` : `Ô số ${f.bi + 1}`} · ${copied ? 'gõ lại đáp án' : b.bank ? `nhìn kho ${b.chunk ? 'cụm' : 'từ'} rồi gõ ${b.chunk ? 'cụm tiếp theo' : 'từ đúng'}` : b.chunk ? 'gõ cụm tiếp theo' : 'gõ từ tiếng Anh'}</div>
+    <div class="rd-turn">${b.review ? '🔁 Ôn lại · ' : ''}${b.chunk ? `Cụm ${b.ci + 1} / ${f.F.gate.chunks.length}` : `Ô số ${f.bi + 1}`} · ${copied ? 'gõ lại đáp án' : bank ? `nhìn kho ${b.chunk ? 'cụm' : 'từ'} rồi gõ ${b.chunk ? 'cụm tiếp theo' : 'từ đúng'}` : b.chunk ? 'gõ cụm tiếp theo' : 'gõ từ tiếng Anh'}</div>
     ${clue}
     <div class="rd-acts" id="rd-acts"></div>
     <div class="rd-typebar">
@@ -20646,7 +21025,7 @@ function raidRenderPanel() {
       if (e.key === 'Enter') { e.preventDefault(); raidSubmit(); return; }
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault();
-        const open = RAID_ACTIONS.filter(a => raidActOpen(a.id)).map(a => a.id);
+        const open = RAID_ACTIONS.filter(raidActOpen);
         const i = open.indexOf(g.action);
         raidSetAction(open[(i + (e.key === 'ArrowDown' ? 1 : open.length - 1)) % open.length]);
       }
@@ -20699,9 +21078,16 @@ function raidNextTurn() {
   raidNextBlank();
   const b = g.fight.blanks[g.fight.bi];
   g.busy = false;
-  g.action = 'atk';
+  if (g.sigCd > 0) g.sigCd--;
+  if (g.nextMove) { g.move = g.nextMove; g.nextMove = null; lvSave('raidMove', g.move); }
+  // Each turn starts on the hit the student used last. An answer shown
+  // after three misses only allows the light hit.
+  g.action = b.door ? 'atk' : g.move || 'atk';
+  g.seen = b.door ? 1 : RAID_MOVE_BASE[g.action].rank;
+  if (b.wrongs >= 3) { g.action = 'light'; g.seen = 0; }
   const lv = raidLv();
-  g.tMax = b.bank || b.door ? lv.bank : lv.type;
+  g.tBase = b.bank || b.door ? lv.bank : lv.type;
+  g.tMax = g.tBase * RAID_CLUE_TIME[g.seen];
   g.tLeft = g.tMax;
   raidRenderText();
   raidRenderPanel();
@@ -20752,38 +21138,44 @@ function raidSubmit() {
   else raidMiss(false, typed);
 }
 
-// Right words: the chosen move lands. A fast answer is a critical. A word
-// typed from the shown answer still lands, for less mana and no coins.
+// Right words: the chosen move lands on the monster in the crosshair. A fast
+// answer is a critical. A word typed from the shown answer still lands, for
+// less mana and no coins.
 function raidAct() {
   const g = _rd;
   const f = g.fight;
   const b = f.blanks[f.bi];
-  const kind = raidActOpen(g.action) ? g.action : 'atk';
+  const kind = raidActOpen(g.action) ? g.action : 'light';
+  const move = raidMove(kind);
+  const ti = f.t;
+  const fid = raidFoeId(ti);
   g.busy = true;
   clearInterval(g.timer);
   const copied = b.wrongs >= 3;
   b.done = true;
   if (copied) b.shown = true;
+  if (!b.door && ['light', 'atk', 'heavy'].includes(kind) && !g.nextMove) { g.move = kind; lvSave('raidMove', kind); }
   const crit = !copied && !b.slip && g.tLeft > g.tMax * 0.6;
   const coin = copied ? 0 : Math.round((crit ? 2 : 1) * raidLv().coinMul * walMult());
   g.coins += coin;
   if (crit) g.crits++;
   const manaBefore = g.mana;
-  const gain = kind === 'ult' ? 0 : copied ? RAID_MANA.copied : kind === 'heal' ? RAID_MANA.heal : crit ? RAID_MANA.crit : RAID_MANA.atk;
+  const gain = kind === 'ult' ? 0 : copied ? RAID_MANA.copied : move.mana + (crit ? 10 : 0);
   g.mana = kind === 'ult' ? 0 : Math.min(100, g.mana + gain);
+  if (kind === 'sig') g.sigCd = RAID_MOVE_BASE.sig.cd + 1;
   const coinFly = () => {
-    const e = document.getElementById('rd-enemy')?.getBoundingClientRect();
+    const e = document.getElementById(fid)?.getBoundingClientRect();
     if (e && coin) jCoinFly(e.left + e.width / 2, e.top + e.height / 2, 'wal-mini');
   };
   const after = wait => setTimeout(() => {
     if (_rd !== g) return;
     if (g.mana >= 100 && manaBefore < 100) { raidBanner('✨ Đầy mana! Tuyệt kỹ sẵn sàng', 'ult'); tsSfx('double'); }
-    if (f.enemyHp <= 0) { raidWinFight(); return; }
+    if (!raidAlive(f).length) { raidWinFight(); return; }
     raidEnemyTurn();
   }, wait);
 
   if (kind === 'heal') {
-    const got = Math.min(RAID_POTION, 100 - g.hp);
+    const got = Math.min(RAID_POTION, g.maxHp - g.hp);
     g.hp += got;
     raidAnim('rd-hero', 'heal');
     raidDamage('rd-hero', `+${got}`, 'heal');
@@ -20798,31 +21190,36 @@ function raidAct() {
     return;
   }
   const ult = kind === 'ult' ? raidUlt(g.look) : null;
-  const dmg = Math.round(f.dmg * (ult ? ult.mult : crit ? 1.5 : 1));
-  const hit = (n, cls) => {
-    f.enemyHp = Math.max(0, f.enemyHp - n);
-    raidAnim('rd-enemy', 'hurt');
-    raidDamage('rd-enemy', `-${n}`, cls);
-    raidRenderBars();
-  };
+  const dmg = Math.max(1, Math.round(f.dmg * g.atkMul * (ult ? ult.mult : move.mult) * (crit && !ult ? 1.5 : 1)));
   const land = () => {
     if (_rd !== g) return;
     if (ult && ult.hits) {
-      // The volley: the damage comes in several arrows, the last one takes
+      // The volley: the arrows spread over the pack, the last one takes
       // what rounding left over.
+      const alive = f.foes.map((x, i) => i).filter(i => f.foes[i].hp > 0);
       const each = Math.floor(dmg / ult.hits);
-      for (let i = 0; i < ult.hits; i++) {
-        const n = i === ult.hits - 1 ? dmg - each * (ult.hits - 1) : each;
-        setTimeout(() => { if (_rd === g) { hit(n, 'ult'); tsSfx('kill', 8); } }, i * 130);
+      for (let k = 0; k < ult.hits; k++) {
+        const n = k === ult.hits - 1 ? dmg - each * (ult.hits - 1) : each;
+        const want = alive[k % alive.length];
+        setTimeout(() => {
+          if (_rd !== g) return;
+          const i = f.foes[want].hp > 0 ? want : f.foes.findIndex(y => y.hp > 0);
+          if (i >= 0) { raidHurt(i, n, 'ult'); tsSfx('kill', 8); }
+        }, k * 130);
       }
     } else {
-      hit(dmg, ult ? 'ult' : crit ? 'crit' : '');
-      if (!ult) raidSlash();
+      raidHurt(ti, dmg, ult ? 'ult' : crit || kind === 'heavy' ? 'crit' : '');
+      // The meteors splash the rest of a pack.
+      if (ult && g.look.ultKind === 'meteor') f.foes.forEach((x, i) => { if (i !== ti && x.hp > 0) raidHurt(i, Math.round(dmg * 0.4), 'ult'); });
+      if (!ult) raidSlash(ti);
+      if (kind === 'heavy') raidAnim('rd-stage', 'quake');
     }
-    if (ult) raidUltAfter(g, f, ult);
+    if (ult) raidUltAfter(g, f, ult, ti);
+    if (kind === 'sig') raidSigAfter(g, f, ti, dmg);
     if (crit && kind !== 'ult') raidBanner('CHÍ MẠNG! ⚡', 'crit');
-    tsSfx(crit || kind === 'ult' ? 'callout' : 'kill', 8);
-    jBuzz(kind === 'ult' ? [40, 30, 60, 30, 90] : crit ? [20, 30, 40] : 15);
+    else if (kind === 'heavy' || kind === 'sig') raidBanner(`${move.icon} ${move.name}!`, 'crit');
+    tsSfx(crit || kind === 'ult' || kind === 'heavy' ? 'callout' : 'kill', 8);
+    jBuzz(kind === 'ult' ? [40, 30, 60, 30, 90] : crit || kind === 'heavy' ? [20, 30, 40] : 15);
     raidRenderBars();
     raidRenderText();
     coinFly();
@@ -20835,22 +21232,55 @@ function raidAct() {
   }
   if (g.look.shot) {
     raidAnim('rd-hero', 'cast');
-    raidShoot(g.look.shot, g.look.fx, land);
+    raidShoot(kind === 'atk' ? g.look.shot : move.icon, g.look.fx, land);
   } else {
     raidAnim('rd-hero', 'lunge');
     setTimeout(land, 180);
   }
-  after(crit ? 1100 : 850);
+  after(crit || kind === 'heavy' ? 1100 : 850);
+}
+// Damage on one monster of the fight. A monster of a pack that falls drops
+// out, and the crosshair moves to one still standing.
+function raidHurt(i, n, cls, tag) {
+  const f = _rd.fight;
+  const x = f.foes[i];
+  if (!x || x.hp <= 0) return;
+  x.hp = Math.max(0, x.hp - n);
+  raidAnim(raidFoeId(i), 'hurt');
+  raidDamage(raidFoeId(i), `${tag || ''}-${n}`, cls);
+  if (x.hp <= 0 && f.foes.length > 1) {
+    raidAnim(raidFoeId(i), 'die');
+    if (f.t === i) { const next = f.foes.findIndex(y => y.hp > 0); if (next >= 0) f.t = next; }
+  }
+  raidRenderBars();
+}
+// What each hero's signature does on top of its hit.
+function raidSigAfter(g, f, ti, dmg) {
+  const k = (g.look && g.look.ultKind) || 'slash';
+  const x = f.foes[ti];
+  const id = raidFoeId(ti);
+  const heal = n => { const got = Math.min(n, g.maxHp - g.hp); g.hp += got; if (got) raidDamage('rd-hero', `+${got}`, 'heal'); };
+  if (k === 'slash') { g.parry = true; raidSparkle('rd-hero', '🛡️', 4); }
+  if (k === 'meteor' && x.hp > 0) { x.cd += 2; raidSparkle(id, '❄️', 6); setTimeout(() => { if (_rd === g) raidDamage(id, '❄️ +2 lượt', 'block'); }, 500); }
+  if (k === 'volley' && x.hp > 0) { x.poison = 3; raidSparkle(id, '🧪', 5); }
+  if (k === 'clone') { g.dodge = (g.dodge || 0) + 1; raidSparkle('rd-hero', '💨', 5); }
+  if (k === 'burn') { heal(dmg); raidSparkle('rd-hero', '🩸', 5); }
+  if (k === 'holy') { heal(15); g.mana = Math.min(100, g.mana + 20); raidSparkle('rd-hero', '🙏', 5); }
+  raidRenderBars();
 }
 
-function raidUltAfter(g, f, ult) {
+function raidUltAfter(g, f, ult, ti) {
   const k = (g.look && g.look.ultKind) || 'slash';
-  if (k === 'slash' || k === 'holy') f.stun = true;
-  if (k === 'volley') { f.cd += 2; setTimeout(() => { if (_rd === g) raidDamage('rd-enemy', '⏳ +2 lượt', 'block'); }, 700); }
+  const x = f.foes[ti];
+  if ((k === 'slash' || k === 'holy') && x.hp > 0) x.stun = true;
+  if (k === 'volley') {
+    f.foes.forEach(y => { if (y.hp > 0) y.cd += 2; });
+    setTimeout(() => { if (_rd === g) raidDamage(raidTid(), '⏳ +2 lượt', 'block'); }, 700);
+  }
   if (k === 'clone') { g.dodge = (g.dodge || 0) + 2; raidSparkle('rd-hero', '👤', 5); }
-  if (k === 'burn') { f.burn = 3; raidSparkle('rd-enemy', '🔥', 7); }
+  if (k === 'burn' && x.hp > 0) { x.burn = 3; raidSparkle(raidFoeId(ti), '🔥', 7); }
   if (k === 'holy') {
-    const got = Math.min(RAID_HOLY_HEAL, 100 - g.hp);
+    const got = Math.min(RAID_HOLY_HEAL, g.maxHp - g.hp);
     g.hp += got;
     if (got) raidDamage('rd-hero', `+${got}`, 'heal');
     raidSparkle('rd-hero', '🌟', 6);
@@ -20858,43 +21288,53 @@ function raidUltAfter(g, f, ult) {
   raidRenderBars();
 }
 
-// The monster's side of a turn: it counts down to its strike. A stunned
-// monster loses its strike and starts counting again. A burning one loses
-// some health first, which can finish it.
+// The monsters' side of a turn: each counts down to its strike. A stunned
+// monster loses its strike and starts counting again. A burning or poisoned
+// one loses some health first, which can finish it. Those whose count runs
+// out strike one after another.
 function raidEnemyTurn() {
   const g = _rd;
   const f = g.fight;
-  if (f.burn > 0) {
-    f.burn--;
-    const n = Math.max(1, Math.round(f.dmg * RAID_BURN));
-    f.enemyHp = Math.max(0, f.enemyHp - n);
-    raidAnim('rd-enemy', 'hurt');
-    raidDamage('rd-enemy', `🔥-${n}`, 'crit');
-    raidRenderBars();
-    if (f.enemyHp <= 0) { raidWinFight(); return; }
-  }
-  if (f.stun) {
-    f.stun = false;
-    f.cd = f.tier.every;
-    raidDamage('rd-enemy', '💫', 'block');
-    raidNextTurn();
-    return;
-  }
-  f.cd--;
+  const tick = Math.max(1, Math.round(f.dmg * RAID_BURN));
+  f.foes.forEach((x, i) => {
+    if (x.hp > 0 && x.burn > 0) { x.burn--; raidHurt(i, tick, 'crit', '🔥'); }
+    if (x.hp > 0 && x.poison > 0) { x.poison--; raidHurt(i, tick, 'crit', '🧪'); }
+  });
+  if (!raidAlive(f).length) { raidWinFight(); return; }
+  const strikers = [];
+  f.foes.forEach((x, i) => {
+    if (x.hp <= 0) return;
+    if (x.stun) { x.stun = false; x.cd = f.tier.every; raidDamage(raidFoeId(i), '💫', 'block'); return; }
+    x.cd--;
+    if (x.cd <= 0) { x.cd = f.tier.every; strikers.push(i); }
+  });
   raidRenderBars();
-  if (f.cd > 0) { raidNextTurn(); return; }
-  f.cd = f.tier.every;
-  raidStrike(() => raidNextTurn());
+  const next = () => {
+    if (_rd !== g) return;
+    const i = strikers.shift();
+    if (i === undefined || f.foes[i].hp <= 0) { if (i === undefined) raidNextTurn(); else next(); return; }
+    raidStrike(i, next);
+  };
+  next();
 }
 
-// One monster strike, which a shield soaks up.
-function raidStrike(then) {
+// One monster strike. A parry sends it back, a clone takes it, a shield
+// soaks it up; otherwise armour takes its share off.
+function raidStrike(i, then, mul) {
   const g = _rd;
   const f = g.fight;
-  raidAnim('rd-enemy', 'lunge-l');
+  const x = f.foes[i];
+  const n = Math.max(1, Math.round(x.hit * (mul || 1)));
+  raidAnim(raidFoeId(i), 'lunge-l');
   setTimeout(() => {
     if (_rd !== g) return;
-    if (g.dodge > 0) {
+    if (g.parry) {
+      g.parry = false;
+      raidDamage('rd-hero', '🛡️ Chặn!', 'block');
+      raidAnim('rd-hero', 'lunge');
+      tsSfx('shield');
+      raidHurt(i, n, 'crit', '↩️');
+    } else if (g.dodge > 0) {
       g.dodge--;
       raidDamage('rd-hero', '👤 Né!', 'block');
       raidAnim('rd-hero', 'lunge');
@@ -20905,11 +21345,12 @@ function raidStrike(then) {
       tsSfx('shield');
       jBuzz([40, 30, 40]);
     } else {
-      g.hp -= f.tier.hit;
+      const took = Math.max(1, Math.round(n * (1 - g.armor)));
+      g.hp -= took;
       g.hitsTaken++;
       raidAnim('rd-hero', 'hurt');
       raidAnim('rd-stage', 'quake');
-      raidDamage('rd-hero', `-${f.tier.hit}`, 'hero');
+      raidDamage('rd-hero', `-${took}`, 'hero');
       tsSfx('miss');
       jBuzz(90);
     }
@@ -20918,12 +21359,13 @@ function raidStrike(then) {
   setTimeout(() => {
     if (_rd !== g) return;
     if (g.hp <= 0) { raidDown(); return; }
+    if (!raidAlive(f).length) { raidWinFight(); return; }
     then();
   }, 900);
 }
 
 // Wrong words or the clock running out: the move fails and the monster
-// strikes at once. The blank stays; the third miss shows the answer, which
+// closest to its strike hits at once, harder after a missed heavy hit. The blank stays; the third miss shows the answer, which
 // then has to be typed.
 function raidMiss(timeout, typed) {
   const g = _rd;
@@ -20935,21 +21377,25 @@ function raidMiss(timeout, typed) {
   b.wrongs++;
   b.missed = true;
   g.misses++;
+  const heavy = g.action === 'heavy';
   if (!b.bank && !b.door) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
   const near = typed && raidNear(typed, b.ans);
-  raidBanner(timeout ? '⌛ Hết giờ! Quái đánh' : near ? '✏️ Suýt đúng, sai chính tả!' : '✗ Chưa đúng! Quái đánh', 'miss');
+  raidBanner(timeout ? '⌛ Hết giờ! Quái đánh' : near ? '✏️ Suýt đúng, sai chính tả!' : heavy ? '💥 Đòn mạnh hụt! Quái đánh đau' : '✗ Chưa đúng! Quái đánh', 'miss');
   if (typed) {
     const inp = document.getElementById('rd-input');
     if (inp) { inp.classList.remove('ts-shake'); void inp.offsetWidth; inp.classList.add('ts-shake'); }
   }
   tsSfx('wrong');
-  f.cd = f.tier.every;
+  const alive = f.foes.map((x, i) => i).filter(i => f.foes[i].hp > 0);
+  alive.sort((p, q) => (f.foes[p].stun - f.foes[q].stun) || (f.foes[p].cd - f.foes[q].cd));
+  const i = alive[0];
+  f.foes[i].cd = f.tier.every;
   setTimeout(() => {
     if (_rd !== g) return;
-    raidStrike(() => {
+    raidStrike(i, () => {
       if (b.wrongs === 3) raidBanner(`Đáp án: ${b.ans}`, 'reveal');
       raidNextTurn();
-    });
+    }, heavy ? RAID_MOVE_BASE.heavy.missMul : 1);
   }, 500);
 }
 
@@ -20962,8 +21408,8 @@ function raidAnim(id, cls) {
   el.classList.add(cls);
   if (cls !== 'die') setTimeout(() => el.classList.remove(cls), 700);
 }
-function raidSlash() {
-  const e = document.getElementById('rd-enemy');
+function raidSlash(i) {
+  const e = document.getElementById(i === undefined ? raidTid() : raidFoeId(i));
   if (!e) return;
   const s = document.createElement('div');
   s.className = 'rd-slash';
@@ -21011,7 +21457,7 @@ function raidSparkle(id, icon, n) {
 }
 // A bolt, orb or arrow from the hero to the monster.
 function raidShoot(icon, color, done) {
-  const h = raidSpot('rd-hero'), e = raidSpot('rd-enemy');
+  const h = raidSpot('rd-hero'), e = raidSpot(raidTid());
   if (!h || !e) { done(); return; }
   const p = document.createElement('div');
   p.className = 'rd-proj';
@@ -21056,7 +21502,7 @@ function raidUltFx(look, land) {
 
 // The part of the special that differs by hero.
 function raidUltShow(look, st) {
-  const e = raidSpot('rd-enemy'), h = raidSpot('rd-hero');
+  const e = raidSpot(raidTid()), h = raidSpot('rd-hero');
   if (!e) return;
   const k = look.ultKind || 'slash';
   const ex = e.x + e.w / 2, ey = e.y + e.h * 0.5;
@@ -21125,6 +21571,7 @@ function raidHint() {
   const b = g.fight.blanks[g.fight.bi];
   if (!b || b.hinted || b.wrongs >= 3 || !walUse('hint')) return;
   b.hinted = true;
+  if (g.seen > 1) { g.seen = 1; g.tMax = g.tBase * RAID_CLUE_TIME[1]; if (g.action === 'heavy') g.action = 'atk'; }
   const inp = document.getElementById('rd-input');
   const typed = inp ? inp.value : '';
   if (b.bank) {
@@ -21163,7 +21610,7 @@ function raidWinFight() {
   // A monster felled early leaves its last blanks filled in, in blue.
   f.blanks.forEach(b => { if (!b.done) { b.done = true; b.shown = true; } });
   raidRenderText();
-  raidAnim('rd-enemy', 'die');
+  if (f.foes.length === 1) raidAnim(raidFoeId(0), 'die');
   tsSfx('level');
   jBuzz([30, 40, 30, 40, 90]);
   const lv = raidLv();
@@ -21171,15 +21618,20 @@ function raidWinFight() {
   g.coins += bonus;
   walEarn(g.coins, true);
   g.coins = 0;
+  const xp = Math.max(1, Math.round(f.tier.coin * lv.coinMul * (g.practice ? 0.5 : 1)));
+  g.xp += xp;
+  const up = heroGainXp(xp);
+  if (up) setTimeout(() => { if (_rd === g) { raidBanner(`⬆️ Lên cấp ${up}!`, 'ult'); tsSfx('rankup'); jConfetti(40); } }, 900);
   const lastFight = g.fi === g.fights.length - 1;
-  if (!lastFight) g.hp = Math.min(100, g.hp + lv.heal);
+  if (!lastFight) g.hp = Math.min(g.maxHp, g.hp + lv.heal);
   setTimeout(() => {
     if (_rd !== g) return;
     const panel = document.getElementById('rd-panel');
     const lines = [...F.given, ...F.lines];
     if (panel) panel.innerHTML = `
       <div class="rd-win">
-        <div class="rd-win-title">${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục! <span class="rd-loot">+${bonus} 🪙</span></div>
+        <div class="rd-win-title">${f.foes.length > 1 ? `${f.foes.map(x => x.icon).join('')} Cả bầy quái đã gục!` : `${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục!`} <span class="rd-loot">+${bonus} 🪙</span> <span class="rd-loot rd-loot--xp">+${xp} XP</span></div>
+        ${up ? `<div class="rd-lvup">⬆️ Lên cấp ${up}! Có điểm nâng cấp mới, bấm vào thẻ cấp ở bản đồ để cộng điểm.</div>` : ''}
         <div class="rd-win-text">${lines.map(l => F.kind === 'tpl'
           ? `<p><span class="rd-en">${raidSlots(raidPlain(l.t))}</span><span class="rd-vi">${escapeHtml(l.vi)}</span></p>`
           : `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span>${l.vi ? `<span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span>` : ''}</p>`).join('')}</div>
@@ -21225,7 +21677,7 @@ function raidCleared() {
         <div class="rd-clear-title">Hầm ngục Buổi ${g.L.n} đã sạch bóng quái!</div>
         <div class="rd-clear-lv">${raidLv().icon} Cấp ${raidLv().name} · hợp với band ${raidLv().band}</div>
         <div class="rd-clear-stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.3 + i * 0.25}s">★</span>`).join('')}</div>
-        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu${stars > prev ? ' · kỷ lục mới!' : ''}</div>
+        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu · +${g.xp} XP${stars > prev ? ' · kỷ lục mới!' : ''}</div>
         ${stars < 3 ? `<div class="rd-clear-tip">Sai không quá ${stars === 1 ? 5 : 2} lần để lên ${stars + 1} sao.</div>` : ''}
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="raidStart(${g.L.n}, '${g.lv}')">↺ Đánh lại</button>
@@ -21250,7 +21702,7 @@ function raidDown() {
   if (!panel) return;
   panel.innerHTML = `
     <div class="rd-lose">
-      <div class="rd-lose-title">💀 Em đã gục trước ${escapeHtml(g.fight.F.enemy.name)}</div>
+      <div class="rd-lose-title">💀 Em đã gục trước ${escapeHtml(g.fight.foes[g.fight.t].name)}</div>
       <div class="rd-lose-btns">
         ${walCount('revive') ? `<button class="vb-start-btn" onclick="raidRevive()">💖 Hồi sinh · còn ${walCount('revive')}</button>` : ''}
         <button class="${walCount('revive') ? 'vb-secondary-btn' : 'vb-start-btn'}" onclick="raidRetry()">↺ Đánh lại trận này</button>
@@ -21262,7 +21714,7 @@ function raidDown() {
 function raidRevive() {
   const g = _rd;
   if (!g || !walUse('revive')) return;
-  g.hp = 60;
+  g.hp = Math.round(g.maxHp * 0.6);
   document.getElementById('rd-hero')?.classList.remove('die');
   tsSfx('power');
   jConfetti(30);
@@ -21273,7 +21725,7 @@ function raidRevive() {
 function raidRetry() {
   const g = _rd;
   if (!g) return;
-  g.hp = 100;
+  g.hp = g.maxHp;
   raidBeginFight();
 }
 

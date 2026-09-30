@@ -1516,6 +1516,27 @@ const db = {
     return r;
   },
 
+  // Hầm ngục chữ hero: XP and spent points, kept beside the dungeon stars.
+  // fn changes a copy; returning false leaves the saved hero as it was.
+  getHero(userId) {
+    const data = load();
+    const r = (data.game_raids || {})[userId];
+    return (r && r.hero) || { xp: 0, alloc: {} };
+  },
+  updateHero(userId, fn) {
+    const data = load();
+    const r = (data.game_raids || {})[userId];
+    const old = (r && r.hero) || { xp: 0, alloc: {} };
+    const h = { ...old, alloc: { ...(old.alloc || {}) } };
+    if (fn(h) === false) return old;
+    if (!data.game_raids) data.game_raids = {};
+    const row = data.game_raids[userId] || (data.game_raids[userId] = { stars: {} });
+    h.updated_at = new Date().toISOString();
+    row.hero = h;
+    save(data);
+    return h;
+  },
+
   // ── Từ vựng: each student's known cards and test history ─────────────────
   // known holds lowercase English headwords; tests keeps the latest 100.
   getVocabProgress(userId) {
