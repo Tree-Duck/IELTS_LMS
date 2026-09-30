@@ -20545,17 +20545,18 @@ const RAID_MOVE_BASE = {
   atk:   { mult: 1,   mana: 25, rank: 1 },
   heavy: { mult: 2,   mana: 35, rank: 2, missMul: 1.5 },
   sig:   { mult: 0.8, mana: 20, rank: 1, cd: 3 },
+  aoe:   { mult: 0.7, mana: 20, rank: 1, cd: 3 },
 };
 const RAID_CLUE_TIME = [1.4, 1, 0.7];   // the clock, by the clue's rank
 const RAID_MOVES = {
-  slash:  { light: ['🗡️', 'Đâm nhanh'], atk: ['⚔️', 'Chém'], heavy: ['🪓', 'Bổ đôi'], sig: ['🛡️', 'Thủ thế', 'chặn + dội', 'Đòn đánh kế tiếp của quái bị chặn và dội ngược vào nó.'] },
-  meteor: { light: ['✦', 'Tia phép'], atk: ['🔮', 'Cầu lửa'], heavy: ['⚡', 'Sét giáng'], sig: ['❄️', 'Băng giá', 'quái chờ +2', 'Quái bị đóng băng, phải chờ thêm 2 lượt mới đánh được.'] },
-  volley: { light: ['🎯', 'Bắn nhanh'], atk: ['🏹', 'Mũi tên'], heavy: ['🎇', 'Tên xuyên giáp'], sig: ['🧪', 'Tên độc', 'độc 3 lượt', 'Quái trúng độc, mất thêm máu trong 3 lượt.'] },
-  clone:  { light: ['✴️', 'Phi tiêu'], atk: ['🗡️', 'Chém lướt'], heavy: ['🌑', 'Ám sát'], sig: ['💨', 'Tàng hình', 'né 1 đòn', 'Né được đòn đánh kế tiếp của quái.'] },
-  burn:   { light: ['👊', 'Đấm lửa'], atk: ['🔥', 'Chém lửa'], heavy: ['🐲', 'Long trảo'], sig: ['🩸', 'Hút máu', 'hồi = sát thương', 'Hồi lại số máu bằng đúng sát thương vừa gây ra.'] },
-  holy:   { light: ['✨', 'Đâm sáng'], atk: ['⚔️', 'Chém thánh'], heavy: ['⚖️', 'Phán xét'], sig: ['🙏', 'Ban phước', '+15 máu +20 mana', 'Hồi 15 máu và được thêm 20 mana.'] },
+  slash:  { aoe: ['🌀', 'Chém xoáy', 'xếp câu · trúng cả bầy'], light: ['🗡️', 'Đâm nhanh'], atk: ['⚔️', 'Chém'], heavy: ['🪓', 'Bổ đôi'], sig: ['🛡️', 'Thủ thế', 'chặn + dội', 'Đòn đánh kế tiếp của quái bị chặn và dội ngược vào nó.'] },
+  meteor: { aoe: ['🔥', 'Vòng lửa', 'xếp câu · trúng cả bầy'], light: ['✦', 'Tia phép'], atk: ['🔮', 'Cầu lửa'], heavy: ['⚡', 'Sét giáng'], sig: ['❄️', 'Băng giá', 'quái chờ +2', 'Quái bị đóng băng, phải chờ thêm 2 lượt mới đánh được.'] },
+  volley: { aoe: ['🎆', 'Tên chùm', 'xếp câu · trúng cả bầy'], light: ['🎯', 'Bắn nhanh'], atk: ['🏹', 'Mũi tên'], heavy: ['🎇', 'Tên xuyên giáp'], sig: ['🧪', 'Tên độc', 'độc 3 lượt', 'Quái trúng độc, mất thêm máu trong 3 lượt.'] },
+  clone:  { aoe: ['🌪️', 'Phi tiêu xoáy', 'xếp câu · trúng cả bầy'], light: ['✴️', 'Phi tiêu'], atk: ['🗡️', 'Chém lướt'], heavy: ['🌑', 'Ám sát'], sig: ['💨', 'Tàng hình', 'né 1 đòn', 'Né được đòn đánh kế tiếp của quái.'] },
+  burn:   { aoe: ['🐉', 'Hơi thở rồng', 'xếp câu · trúng cả bầy'], light: ['👊', 'Đấm lửa'], atk: ['🔥', 'Chém lửa'], heavy: ['🐲', 'Long trảo'], sig: ['🩸', 'Hút máu', 'hồi = sát thương', 'Hồi lại số máu bằng đúng sát thương vừa gây ra.'] },
+  holy:   { aoe: ['☀️', 'Hào quang', 'xếp câu · trúng cả bầy'], light: ['✨', 'Đâm sáng'], atk: ['⚔️', 'Chém thánh'], heavy: ['⚖️', 'Phán xét'], sig: ['🙏', 'Ban phước', '+15 máu +20 mana', 'Hồi 15 máu và được thêm 20 mana.'] },
 };
-const RAID_ACTIONS = ['light', 'atk', 'heavy', 'sig', 'heal', 'ult'];
+const RAID_ACTIONS = ['light', 'atk', 'heavy', 'sig', 'aoe', 'heal', 'ult'];
 function raidMove(id) {
   const g = _rd;
   if (id === 'heal') return { id, icon: '💚', name: 'Hồi máu', rank: 1, mana: RAID_MANA.heal };
@@ -20569,6 +20570,7 @@ function raidMoveTip(id) {
   if (id === 'atk') return 'Đòn thường x1: gợi ý như bình thường.';
   if (id === 'heavy') return 'Đòn mạnh x2: chỉ hiện 1–2 chữ cái, không kho từ, ít thời gian hơn, gõ sai thì quái đánh đau gấp rưỡi. Đã xem gợi ý dễ hơn thì bấm để dùng từ lượt sau.';
   if (id === 'sig') return raidMove('sig').desc + ' Sát thương x0.8, dùng lại sau 3 lượt.';
+  if (id === 'aoe') return 'Đòn lan: xếp lại các mảnh của câu đang làm cho đúng thứ tự, trúng tất cả quái (x0.7 mỗi con). Dùng lại sau 3 lượt.';
   if (id === 'heal') return `Hồi ${RAID_POTION} máu.`;
   return raidUlt(_rd.look).desc;
 }
@@ -20881,7 +20883,7 @@ function raidHeroSvg(g, c) {
   const k = (c && c.look) || COSMETICS.hero[0].look;
   const f = g === 'f';
   const skin = '#FFD9B8', skinD = '#F2B88F', ink = '#2B2140', boot = '#4A3326';
-  const P = [];
+  const P = [`<ellipse cx="60" cy="115" rx="25" ry="4.5" fill="#000" opacity=".28"/>`];
   if (k.glow) P.push(`<circle cx="58" cy="62" r="50" fill="#FFE27A" opacity=".1"/><circle cx="58" cy="62" r="38" fill="#FFE27A" opacity=".14"/><path d="M58 4 V16 M58 108 V120 M4 62 H16 M100 62 H112 M20 24 l8 8 M96 24 l-8 8" stroke="#FFE27A" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>`);
   if (k.cape) P.push(`<path d="M48 63 C30 76 25 98 29 116 L54 110 L58 68 Z" fill="${k.cape}"/><path d="M48 63 C38 80 36 98 38 113 L44 111 C43 96 46 80 52 66 Z" fill="#000" opacity=".12"/>`);
   if (k.wpn === 'bow') P.push(`<g transform="rotate(-18 40 76)"><rect x="35" y="58" width="10" height="32" rx="3" fill="#8B5A2B"/><path d="M37 58 l2 -8 l2 8 M41 58 l2 -9 l2 9" stroke="#E04848" stroke-width="2.4" fill="none"/></g>`);
@@ -20892,13 +20894,16 @@ function raidHeroSvg(g, c) {
   if (k.robe) P.push(`<path d="M43 63 Q57 57 71 63 L79 111 Q57 117 35 111 Z" fill="${k.body}"/><path d="M57 60 V114" stroke="${k.trim}" stroke-width="3"/><path d="M37 106 Q57 112 78 106" stroke="${k.trim}" stroke-width="3" fill="none"/>`);
   else if (f) P.push(`<path d="M43 63 Q57 57 71 63 L77 96 Q57 102 37 96 Z" fill="${k.body}"/><rect x="41" y="82" width="32" height="5" rx="2" fill="${k.trim}"/><circle cx="62" cy="73" r="3.5" fill="${k.trim}"/>`);
   else P.push(`<path d="M43 63 Q57 57 71 63 L73 92 Q57 97 41 92 Z" fill="${k.body}"/><rect x="41" y="84" width="32" height="5" rx="2" fill="${k.trim}"/><circle cx="62" cy="74" r="3.5" fill="${k.trim}"/>`);
+  // Light from the top left: the lower right of the body sits in shade.
+  P.push(`<path d="M60 62 Q68 62 71 64 L74 92 Q66 96 58 96 Q64 80 60 62 Z" fill="#000" opacity=".13"/><path d="M46 64 Q50 62 54 62 L50 80 Z" fill="#fff" opacity=".16"/>`);
   P.push(`<circle cx="58" cy="40" r="22" fill="${skin}"/><ellipse cx="50" cy="44" rx="3.6" ry="5" fill="${skinD}"/>`);
-  P.push(`<ellipse cx="67" cy="42" rx="3" ry="4.3" fill="${ink}"/><circle cx="68.2" cy="40.3" r="1.3" fill="#fff"/>`);
+  P.push(`<path d="M40 38 Q41 52 56 60 Q46 60 40 52 Z" fill="#000" opacity=".07"/><ellipse cx="67" cy="42" rx="3.4" ry="4.8" fill="${ink}"/><circle cx="68.4" cy="40.2" r="1.5" fill="#fff"/><circle cx="66.2" cy="44.2" r=".8" fill="#fff" opacity=".8"/>`);
   P.push(f ? `<path d="M62.5 38.2 Q67 35.4 71.8 37.8 L74 36.4" stroke="${ink}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
            : `<path d="M62.5 34.6 L71.5 33.4" stroke="${k.hair}" stroke-width="2.4" stroke-linecap="round"/>`);
   P.push(`<circle cx="69" cy="50" r="3.3" fill="#FF9AA2" opacity=".55"/><path d="M72.5 51.5 Q75 53.5 77 51" stroke="#9A4A3A" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
   P.push(f ? `<path d="M38 58 C30 40 36 20 54 15 C70 11 82 20 81 34 C74 27 66 27 60 31 C56 27 50 29 48 38 L46 58 Z" fill="${k.hair}"/><circle cx="43" cy="28" r="3.6" fill="${k.trim}"/>`
            : `<path d="M38 54 C32 40 36 22 52 16 C66 11 80 18 81 32 L76 28 L73 34 L68 26 L63 32 L58 25 L54 31 L50 27 L48 38 L46 54 Z" fill="${k.hair}"/>`);
+  P.push(`<path d="M46 22 Q56 15 68 17" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".3"/>`);
   if (k.gear === 'hat') P.push(`<path d="M41 30 C45 12 41 1 28 -7 C53 -5 67 9 75 29 Z" fill="${k.body}"/><path d="M31 31 Q58 38 85 29 L86 33 Q58 43 30 35 Z" fill="${k.dark}"/><path d="M42 27 Q58 32 74 27 L75 31 Q58 36 41 31 Z" fill="${k.trim}"/><path d="M52 11 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5 Z" fill="${k.trim}"/>`);
   if (k.gear === 'cap') P.push(`<path d="M35 31 Q38 12 59 11 Q79 12 83 28 Q60 21 35 31 Z" fill="${k.body}"/><path d="M42 20 C30 9 22 10 16 3 C27 5 36 8 46 17 Z" fill="#E04848"/>`);
   if (k.gear === 'band') P.push(`<path d="M36 29 Q58 23 81 29 L81 35 Q58 29 36 36 Z" fill="${k.trim}"/><path d="M38 31 C28 33 21 41 14 43 C23 37 28 33 37 29 Z M38 34 C30 40 26 48 19 54 C25 44 29 38 37 33 Z" fill="${k.trim}"/><path d="M61 48 Q71 46.5 80.5 45 L80 51 Q72 61 62 59 Q58 53 61 48 Z" fill="${k.body}"/>`);
@@ -21328,6 +21333,7 @@ function raidRenderArena() {
       </div>
       <div class="rd-body"><div class="rd-main">
       <div class="rd-stage rd-bg--${f.tier.bg}" id="rd-stage">
+        <div class="rd-scene" aria-hidden="true"><span class="rd-torch rd-torch--l"></span><span class="rd-torch rd-torch--r"></span><span class="rd-deco rd-deco--a"></span><span class="rd-deco rd-deco--b"></span><span class="rd-deco rd-deco--c"></span></div>
         <div class="rd-embers"></div>
         <div class="rd-side rd-hero-side">
           <div class="rd-bar">
@@ -21465,6 +21471,11 @@ function raidActOpen(id) {
   if (id === 'ult') return g.mana >= 100;
   if (id === 'heal') return g.hp < g.maxHp;
   if (id === 'sig') return !(g.sigCd > 0);
+  if (id === 'aoe') {
+    const f = g.fight;
+    const b = f && f.blanks[f.bi];
+    return !(g.aoeCd > 0) && !!b && !b.door && !b.chunk && raidOrderText(b).split(' ').length >= 4;
+  }
   return RAID_MOVE_BASE[id].rank <= g.seen;
 }
 function raidRenderActs() {
@@ -21479,6 +21490,7 @@ function raidRenderActs() {
     if (id === 'heal') return `+${RAID_POTION} máu`;
     if (id === 'ult') return g.mana >= 100 ? raidUlt(g.look).short : `mana ${g.mana}/100`;
     if (id === 'sig') return g.sigCd > 0 ? `⏳ chờ ${g.sigCd} lượt` : m.short;
+    if (id === 'aoe') return g.aoeCd > 0 ? `⏳ chờ ${g.aoeCd} lượt` : `-${hit(m.mult)} mỗi con · xếp câu`;
     if (!raidActOpen(id)) return g.nextMove === id ? '⏭️ lượt sau' : '🔒 để lượt sau';
     return `-${hit(m.mult)} · ${id === 'light' ? 'dễ' : id === 'atk' ? 'vừa' : 'khó'}`;
   };
@@ -21515,7 +21527,10 @@ function raidSetAction(id) {
   }
   if (!g || g.busy || !raidActOpen(id)) return;
   if (g.action !== id) tsSfx(id === 'ult' ? 'double' : 'equip');
+  const prev = g.action;
   g.action = id;
+  if (id === 'aoe') { raidOrderEnter(); return; }
+  if (prev === 'aoe') raidOrderEnter();
   const rank = raidMove(id).rank;
   if (rank < g.seen) raidSeeClue(rank);
   else raidRenderActs();
@@ -21566,6 +21581,7 @@ function raidRenderPanel() {
   const b = f.blanks[f.bi];
   if (!b) { panel.innerHTML = ''; return; }
   if (b.door) { raidRenderDoors(panel, b); return; }
+  if (g.action === 'aoe' && g.ord) { raidRenderOrder(panel); return; }
   const lv = raidLv();
   const copied = b.wrongs >= 3;
   // The help follows the lightest move looked at this turn: a heavy hit gets
@@ -21667,6 +21683,9 @@ function raidNextTurn() {
   const b = g.fight.blanks[g.fight.bi];
   g.busy = false;
   if (g.sigCd > 0) g.sigCd--;
+  if (g.aoeCd > 0) g.aoeCd--;
+  g.ord = null;
+  g.ordTime = false;
   if (g.nextMove) { g.move = g.nextMove; g.nextMove = null; lvSave('raidMove', g.move); }
   // Each turn starts on the hit the student used last. An answer shown
   // after three misses only allows the light hit.
@@ -21739,8 +21758,10 @@ function raidAct() {
   const fid = raidFoeId(ti);
   g.busy = true;
   clearInterval(g.timer);
-  const copied = b.wrongs >= 3;
-  b.done = true;
+  const aoe = kind === 'aoe';
+  const copied = !aoe && b.wrongs >= 3;
+  // The sweep answers the ordering, not the blank, which stays for later.
+  if (!aoe) b.done = true;
   if (copied) b.shown = true;
   if (!b.door && ['light', 'atk', 'heavy'].includes(kind) && !g.nextMove) { g.move = kind; lvSave('raidMove', kind); }
   const crit = !copied && !b.slip && g.tLeft > g.tMax * 0.6;
@@ -21760,6 +21781,7 @@ function raidAct() {
   const gain = kind === 'ult' ? 0 : (copied ? RAID_MANA.copied : move.mana + (crit ? 10 : 0)) + (raidPerk('fairy') && !copied ? 5 : 0);
   g.mana = kind === 'ult' ? 0 : Math.min(100, g.mana + gain);
   if (kind === 'sig') g.sigCd = RAID_MOVE_BASE.sig.cd + 1;
+  if (aoe) { g.aoeCd = RAID_MOVE_BASE.aoe.cd + 1; g.ord = null; }
   const coinFly = () => {
     const e = document.getElementById(fid)?.getBoundingClientRect();
     if (e && coin) jCoinFly(e.left + e.width / 2, e.top + e.height / 2, 'wal-mini');
@@ -21804,11 +21826,16 @@ function raidAct() {
           if (i >= 0) { raidHurt(i, n, 'ult'); tsSfx('kill', 8); }
         }, k * 130);
       }
+    } else if (aoe) {
+      // The sweep reaches every monster standing, one after another.
+      f.foes.map((x, i) => i).filter(i => f.foes[i].hp > 0).forEach((i, k) => setTimeout(() => {
+        if (_rd === g) { raidHurt(i, dmg, 'crit'); raidSlash(i, 'aoe'); tsSfx('kill', 6 + k); }
+      }, k * 120));
     } else {
       raidHurt(ti, dmg, ult ? 'ult' : crit || kind === 'heavy' ? 'crit' : '');
       // The meteors splash the rest of a pack.
       if (ult && g.look.ultKind === 'meteor') f.foes.forEach((x, i) => { if (i !== ti && x.hp > 0) raidHurt(i, Math.round(dmg * 0.4), 'ult'); });
-      if (!ult) raidSlash(ti);
+      if (!ult && kind !== 'heavy') raidSlash(ti, kind);
       if (kind === 'heavy') raidAnim('rd-stage', 'quake');
     }
     if (ult) raidUltAfter(g, f, ult, ti);
@@ -21819,7 +21846,7 @@ function raidAct() {
       raidHurt(f.t, Math.max(1, Math.round(f.dmg * 0.3)), '', '🐶');
     }, 250);
     if (crit && kind !== 'ult') raidBanner('CHÍ MẠNG! ⚡', 'crit');
-    else if (kind === 'heavy' || kind === 'sig') raidBanner(`${move.icon} ${move.name}!`, 'crit');
+    else if (kind === 'heavy' || kind === 'sig' || aoe) raidBanner(`${move.icon} ${move.name}!`, 'crit');
     tsSfx(crit || kind === 'ult' || kind === 'heavy' ? 'callout' : 'kill', 8);
     jBuzz(kind === 'ult' ? [40, 30, 60, 30, 90] : crit || kind === 'heavy' ? [20, 30, 40] : 15);
     raidRenderBars();
@@ -21832,14 +21859,196 @@ function raidAct() {
     after(ult.hits ? 2300 : 2000);
     return;
   }
-  if (g.look.shot) {
-    raidAnim('rd-hero', 'cast');
-    raidShoot(kind === 'atk' ? g.look.shot : move.icon, g.look.fx, land);
-  } else {
-    raidAnim('rd-hero', 'lunge');
-    setTimeout(land, 180);
+  raidMoveFx(kind, move, ti, land);
+  after(kind === 'heavy' || aoe ? 1350 : crit ? 1100 : 850);
+}
+
+// Each move looks different: a quick jab, the normal hit, a wind-up and a
+// crushing blow, an aura for the signature, a sweep across the pack. Heroes
+// with a ranged attack throw what the move is instead of swinging.
+function raidMoveFx(kind, move, ti, land) {
+  const g = _rd;
+  const ranged = !!g.look.shot;
+  const tid = raidFoeId(ti);
+  if (kind === 'aoe') {
+    raidAnim('rd-hero', ranged ? 'cast' : 'spin');
+    raidWave(g.look.fx, move.icon);
+    setTimeout(land, 380);
+    return;
   }
-  after(crit || kind === 'heavy' ? 1100 : 850);
+  if (kind === 'heavy') {
+    raidAnim('rd-hero', 'charge');
+    raidAura(g.look.fx);
+    setTimeout(() => {
+      if (_rd !== g) return;
+      if (ranged) raidShoot(move.icon, g.look.fx, () => { raidBoom(tid, g.look.fx); land(); }, { scale: 2.4, dur: 360 });
+      else { raidBigHit(tid, g.look.fx); land(); }
+    }, 360);
+    return;
+  }
+  if (kind === 'sig') {
+    raidAura(g.look.fx);
+    raidSparkle('rd-hero', move.icon, 4);
+    setTimeout(() => {
+      if (_rd !== g) return;
+      if (ranged) raidShoot(move.icon, g.look.fx, land, { dur: 300 });
+      else { raidAnim('rd-hero', 'lunge'); setTimeout(land, 180); }
+    }, 320);
+    return;
+  }
+  if (kind === 'light') {
+    if (ranged) { raidAnim('rd-hero', 'cast'); raidShoot(move.icon, g.look.fx, land, { scale: 0.8, dur: 170 }); }
+    else { raidAnim('rd-hero', 'jab'); setTimeout(land, 110); }
+    return;
+  }
+  if (ranged) { raidAnim('rd-hero', 'cast'); raidShoot(kind === 'heal' ? move.icon : g.look.shot, g.look.fx, land); }
+  else { raidAnim('rd-hero', 'lunge'); setTimeout(land, 180); }
+}
+// A glowing ring around the hero.
+function raidAura(color) {
+  const p = raidSpot('rd-hero');
+  if (!p) return;
+  const r = document.createElement('div');
+  r.className = 'rd-aura';
+  r.style.setProperty('--c', color);
+  r.style.left = (p.x + p.w / 2) + 'px';
+  r.style.top = (p.y + p.h * 0.55) + 'px';
+  p.st.appendChild(r);
+  setTimeout(() => r.remove(), 800);
+}
+// A burst on the monster.
+function raidBoom(id, color) {
+  const p = raidSpot(id);
+  if (!p) return;
+  const b = document.createElement('div');
+  b.className = 'rd-boom';
+  b.style.setProperty('--c', color);
+  b.style.left = (p.x + p.w / 2) + 'px';
+  b.style.top = (p.y + p.h / 2) + 'px';
+  b.innerHTML = '<span>💥</span>';
+  p.st.appendChild(b);
+  setTimeout(() => b.remove(), 700);
+}
+// Two big crossing slashes and a burst.
+function raidBigHit(id, color) {
+  const p = raidSpot(id);
+  if (!p) return;
+  [-35, 35].forEach((deg, i) => {
+    const s = document.createElement('div');
+    s.className = 'rd-bigslash';
+    s.style.left = (p.x + p.w / 2) + 'px';
+    s.style.top = (p.y + p.h / 2) + 'px';
+    s.style.setProperty('--r', deg + 'deg');
+    s.style.animationDelay = (i * 90) + 'ms';
+    p.st.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  });
+  raidBoom(id, color);
+}
+// A wave that runs from the hero across the whole pack.
+function raidWave(color, icon) {
+  const h = raidSpot('rd-hero');
+  if (!h) return;
+  const w = document.createElement('div');
+  w.className = 'rd-wave';
+  w.style.setProperty('--c', color);
+  w.style.left = (h.x + h.w * 0.7) + 'px';
+  w.style.setProperty('--run', (h.st.clientWidth - h.x - h.w * 0.7) + 'px');
+  w.innerHTML = `<span>${icon}</span><span>${icon}</span><span>${icon}</span>`;
+  h.st.appendChild(w);
+  tsSfx('slow');
+  setTimeout(() => w.remove(), 900);
+}
+
+/* ── Đòn lan: put the sentence back together ── */
+// The sentence of the current blank, cut into 3 to 6 pieces. Blanks still
+// open stay as ___, so the ordering never gives an answer away.
+function raidOrderText(b) {
+  const f = _rd.fight;
+  const li = b.li || 0;
+  const line = f.F.lines && f.F.lines[li];
+  if (!line || typeof line.t !== 'string') return '';
+  return raidParse(line.t).map((p, pi) => {
+    if (typeof p === 'string') return p;
+    const x = f.blanks.find(y => y.li === li && y.pi === pi);
+    return x && !x.done ? '___' : p.ans;
+  }).join('').replace(/\s+/g, ' ').trim();
+}
+function raidOrderParts(text) {
+  const w = text.split(' ').filter(Boolean);
+  const k = Math.max(3, Math.min(6, Math.ceil(w.length / 3)));
+  const parts = [];
+  for (let i = 0; i < k; i++) parts.push(w.slice(Math.round(i * w.length / k), Math.round((i + 1) * w.length / k)).join(' '));
+  return parts.filter(Boolean);
+}
+function raidOrderEnter() {
+  const g = _rd;
+  const f = g.fight;
+  const b = f.blanks[f.bi];
+  if (g.action === 'aoe' && !g.ord) {
+    const parts = raidOrderParts(raidOrderText(b));
+    let order = parts.map((_, i) => i);
+    for (let t = 0; t < 6 && order.every((v, i) => v === i); t++) order = vbShuffle(order);
+    g.ord = { parts, order, picked: [] };
+    // Putting a sentence together takes longer than one word.
+    if (!g.ordTime) { g.ordTime = true; g.tMax += g.tBase * 0.5; g.tLeft += g.tBase * 0.5; }
+  }
+  const action = g.action;
+  raidRenderPanel();
+  g.action = action;
+  raidRenderActs();
+  raidClock();
+}
+function raidRenderOrder(panel) {
+  const g = _rd;
+  const o = g.ord;
+  const m = raidMove('aoe');
+  const left = o.order.filter(i => !o.picked.includes(i));
+  panel.innerHTML = `
+    <div class="rd-turn">${m.icon} ${escapeHtml(m.name)} · xếp lại câu cho đúng để đánh cả bầy</div>
+    <div class="rd-ord-line">${o.picked.length ? o.picked.map(i => `<span class="rd-ord-chip on">${escapeHtml(o.parts[i])}</span>`).join('') : '<span class="rd-ord-hint">Bấm các mảnh theo đúng thứ tự của câu…</span>'}</div>
+    <div class="rd-ord-bank">${left.map((i, k) => `<button class="rd-ord-chip" onclick="raidOrderPick(${i})"><kbd>${k + 1}</kbd>${escapeHtml(o.parts[i])}</button>`).join('')}</div>
+    <div class="rd-acts" id="rd-acts"></div>
+    <div class="rd-typebar">
+      <button class="vb-secondary-btn" onclick="raidOrderUndo()" ${o.picked.length ? '' : 'disabled'}>↩ Bỏ mảnh cuối</button>
+      <button class="vb-start-btn rd-go" id="rd-go" onclick="raidOrderGo()"></button>
+    </div>
+    <div class="rd-items"><span class="rd-keys">Phím 1–6 chọn mảnh · Backspace bỏ · Enter ra đòn · ↑ ↓ đổi đòn</span></div>`;
+  raidRenderActs();
+}
+function raidOrderPick(i) {
+  const g = _rd;
+  if (!g || g.busy || !g.ord || g.ord.picked.includes(i)) return;
+  g.ord.picked.push(i);
+  tsSfx('key');
+  if (g.ord.picked.length === g.ord.parts.length) { raidOrderGo(); return; }
+  raidRenderPanel();
+}
+function raidOrderUndo() {
+  const g = _rd;
+  if (!g || g.busy || !g.ord || !g.ord.picked.length) return;
+  g.ord.picked.pop();
+  raidRenderPanel();
+}
+function raidOrderGo() {
+  const g = _rd;
+  const o = g && g.ord;
+  if (!o || g.busy) return;
+  if (o.picked.length < o.parts.length) { document.querySelector('.rd-ord-line')?.classList.add('ts-shake'); return; }
+  if (o.picked.map(i => o.parts[i]).join(' ') === o.parts.join(' ')) { raidAct(); return; }
+  // Wrong order: the monster closest to its strike hits, the pieces reset.
+  const f = g.fight;
+  g.busy = true;
+  clearInterval(g.timer);
+  g.misses++;
+  if (g.combo >= 3) raidDamage('rd-hero', `💔 mất combo ${g.combo}`, 'block');
+  g.combo = 0;
+  raidBanner('✗ Sai thứ tự! Quái đánh', 'miss');
+  tsSfx('wrong');
+  o.picked = [];
+  const alive = f.foes.map((x, i) => i).filter(i => f.foes[i].hp > 0).sort((p, q) => f.foes[p].cd - f.foes[q].cd);
+  f.foes[alive[0]].cd = f.tier.every;
+  setTimeout(() => { if (_rd === g) raidStrike(alive[0], () => raidNextTurn()); }, 500);
 }
 // Damage on one monster of the fight. A monster of a pack that falls drops
 // out, and the crosshair moves to one still standing.
@@ -22025,11 +22234,12 @@ function raidAnim(id, cls) {
   el.classList.add(cls);
   if (cls !== 'die') setTimeout(() => el.classList.remove(cls), 700);
 }
-function raidSlash(i) {
+function raidSlash(i, kind) {
   const e = document.getElementById(i === undefined ? raidTid() : raidFoeId(i));
   if (!e) return;
   const s = document.createElement('div');
-  s.className = 'rd-slash';
+  s.className = 'rd-slash' + (kind ? ' rd-slash--' + kind : '');
+  if (_rd && _rd.look) s.style.setProperty('--c', _rd.look.fx);
   e.appendChild(s);
   setTimeout(() => s.remove(), 450);
 }
@@ -22073,7 +22283,8 @@ function raidSparkle(id, icon, n) {
   }
 }
 // A bolt, orb or arrow from the hero to the monster.
-function raidShoot(icon, color, done) {
+function raidShoot(icon, color, done, opt) {
+  opt = opt || {};
   const h = raidSpot('rd-hero'), e = raidSpot(raidTid());
   if (!h || !e) { done(); return; }
   const p = document.createElement('div');
@@ -22087,8 +22298,8 @@ function raidShoot(icon, color, done) {
   tsSfx('slow');
   const a = p.animate([
     { transform: 'translate(-50%, -50%) scale(0.6)' },
-    { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(1.25)` },
-  ], { duration: 280, easing: 'ease-in' });
+    { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(${1.25 * (opt.scale || 1)})` },
+  ], { duration: opt.dur || 280, easing: 'ease-in' });
   a.onfinish = () => { p.remove(); done(); };
 }
 // The special: a cut-in with the hero, a flash, then a rain on the monster.
@@ -22518,6 +22729,19 @@ function raidRetry() {
 function raidOnKey(e) {
   const g = _rd;
   if (!g || document.getElementById('lv-modal') || (e.target && e.target.id === 'rd-input')) return;
+  if (g.action === 'aoe' && g.ord && !g.busy && document.querySelector('.rd-ord-bank')) {
+    const k = parseInt(e.key, 10);
+    if (k >= 1 && k <= 9) { const left = g.ord.order.filter(i => !g.ord.picked.includes(i)); if (left[k - 1] !== undefined) { e.preventDefault(); raidOrderPick(left[k - 1]); } return; }
+    if (e.key === 'Backspace') { e.preventDefault(); raidOrderUndo(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); raidOrderGo(); return; }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const open = RAID_ACTIONS.filter(raidActOpen);
+      const i = open.indexOf(g.action);
+      raidSetAction(open[(i + (e.key === 'ArrowDown' ? 1 : open.length - 1)) % open.length]);
+      return;
+    }
+  }
   if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); return; }
   const b = g.fight && g.fight.blanks[g.fight.bi];
   const k = 'abc'.indexOf(String(e.key).toLowerCase());

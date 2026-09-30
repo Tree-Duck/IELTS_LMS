@@ -8600,3 +8600,75 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .bd-card.got .bd-ic { filter: none; opacity: 1; }
 .bd-ok { font-size: 0.75rem; font-weight: 700; color: #1F8A4C; }
 .lb-badges { display: inline-block; margin-left: 0.2rem; padding: 0 0.35rem; border-radius: 99px; background: #FFF6D8; color: #6B4E00; font-size: 0.72rem; font-weight: 700; vertical-align: 1px; }
+
+/* ── Bắn Chữ: the chicken or egg sits above its word ── */
+.ts-item { padding: 0.3rem 0.7rem 0.35rem; display: flex; flex-direction: column; align-items: center; }
+.ts-item.ts-boss { padding: 0.45rem 1rem 0.6rem; }
+.ts-chick, .ts-item.ts-boss .ts-chick { position: relative; left: auto; top: auto; transform: none; display: block; font-size: 1.35rem; line-height: 1; margin-bottom: 0.15rem; }
+.ts-item.ts-boss .ts-chick { font-size: 1.8rem; }
+.ts-egg-pw { right: -12px; bottom: -2px; }
+
+/* ── Hầm ngục: the ordering for Đòn lan ── */
+.rd-ord-line { min-height: 3rem; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; padding: 0.5rem 0.6rem; margin-bottom: 0.5rem; border-radius: 12px; border: 2px dashed #CDB98A; background: #FFFDF6; }
+.rd-ord-hint { color: var(--moss); font-size: 0.9rem; }
+.rd-ord-bank { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.6rem; }
+.rd-ord-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; border-radius: 12px; border: 2px solid #9C8BC0; background: #F7F3FF; color: #2A1F3D; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 3px 0 #9C8BC0; touch-action: manipulation; }
+.rd-ord-chip kbd { font-size: 0.7rem; padding: 0 5px; border-radius: 5px; background: #2A1F3D; color: #fff; font-family: inherit; }
+.rd-ord-chip.on { cursor: default; border-color: #1F8A4C; background: #EAF6EF; box-shadow: none; }
+.rd-ord-chip:active:not(.on) { transform: translateY(2px); box-shadow: 0 1px 0 #9C8BC0; }
+.rd-act--aoe.on { border-color: var(--c); background: #EEF6FF; box-shadow: 0 3px 0 var(--c); }
+@media (min-width: 1280px) { .rd-ord-chip { font-size: 1.15rem; padding: 0.55rem 0.9rem; } .rd-ord-line { min-height: 3.6rem; } }
+
+/* ── Hầm ngục: a different look for each move ── */
+.rd-fighter.jab { animation: rdJab .22s ease-out; }
+.rd-fighter.charge { animation: rdCharge .66s ease-in-out; }
+.rd-fighter.spin { animation: rdSpin .6s ease-in-out; }
+@keyframes rdJab { 45% { translate: 34px -4px; } }
+@keyframes rdCharge { 40% { translate: -16px 6px; scale: 1.06 0.9; } 75% { translate: 96px -34px; scale: 1; } }
+@keyframes rdSpin { 50% { translate: 40px -10px; rotate: y 180deg; } 100% { rotate: y 360deg; } }
+.rd-slash { background: linear-gradient(90deg, transparent, #fff, var(--c, #FFE27A), transparent); box-shadow: 0 0 14px var(--c, #fff); }
+.rd-slash--light { height: 4px; width: 90%; margin-left: -45%; animation-duration: .25s; }
+.rd-slash--sig { height: 8px; box-shadow: 0 0 20px var(--c), 0 0 30px var(--c); }
+.rd-slash--aoe { height: 7px; transform: rotate(10deg) scaleX(0); }
+.rd-aura { position: absolute; z-index: 2; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 4px solid var(--c); box-shadow: 0 0 22px var(--c), inset 0 0 22px var(--c); pointer-events: none; animation: rdAura .8s ease-out forwards; }
+@keyframes rdAura { from { scale: 0.3; opacity: 1; } to { scale: 1.5; opacity: 0; } }
+.rd-boom { position: absolute; z-index: 6; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, var(--c) 45%, transparent 70%); pointer-events: none; animation: rdBoom .7s ease-out forwards; }
+.rd-boom span { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-size: 26px; }
+@keyframes rdBoom { 0% { scale: 0.5; opacity: 1; } 60% { scale: 7; opacity: 0.9; } 100% { scale: 9; opacity: 0; } }
+.rd-bigslash { --r: -35deg; rotate: var(--r); translate: -50% -50%; background: linear-gradient(90deg, transparent, #fff 30%, #FFE27A 60%, transparent); box-shadow: 0 0 24px #fff, 0 0 40px #FFE27A; }
+.rd-wave { position: absolute; z-index: 5; top: 18%; height: 64%; width: 70px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; font-size: 26px; border-radius: 50%; background: radial-gradient(ellipse at left, var(--c), transparent 70%); filter: drop-shadow(0 0 10px var(--c)); pointer-events: none; animation: rdWave .8s ease-in forwards; }
+@keyframes rdWave { from { translate: 0 0; opacity: 0.2; } 20% { opacity: 1; } to { translate: var(--run) 0; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .rd-fighter.jab, .rd-fighter.charge, .rd-fighter.spin, .rd-aura, .rd-wave { animation: none !important; } }
+
+/* ── Hầm ngục: the dungeon around the fight ── */
+.rd-scene { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.rd-scene::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 74%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.28) 2px, transparent 2px), linear-gradient(90deg, rgba(0, 0, 0, 0.22) 2px, transparent 2px), linear-gradient(90deg, rgba(0, 0, 0, 0.22) 2px, transparent 2px);
+  background-size: 64px 28px, 64px 56px, 64px 56px; background-position: 0 0, 0 0, 32px 28px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15)); mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15)); }
+.rd-scene::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 70px), linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.45)); }
+.rd-torch { position: absolute; top: 16%; width: 10px; height: 34px; border-radius: 3px; background: linear-gradient(#6B4A2B, #3E2A18); }
+.rd-torch--l { left: 30%; } .rd-torch--r { right: 30%; }
+.rd-torch::before { content: ''; position: absolute; left: 50%; top: -30px; width: 140px; height: 140px; margin-left: -70px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 170, 60, 0.35), transparent 65%); animation: rdTorchGlow 1.8s ease-in-out infinite alternate; }
+.rd-torch::after { content: '🔥'; position: absolute; left: 50%; top: -22px; translate: -50% 0; font-size: 22px; animation: rdFlame .35s ease-in-out infinite alternate; }
+@keyframes rdFlame { from { scale: 1 1; } to { scale: 0.9 1.12; } }
+@keyframes rdTorchGlow { from { opacity: 0.7; } to { opacity: 1; } }
+.rd-deco { position: absolute; font-size: 26px; line-height: 1; opacity: 0.9; }
+.rd-deco--a { left: 4%; top: 2%; } .rd-deco--b { right: 4%; top: 2%; } .rd-deco--c { left: 50%; bottom: 4%; translate: -50% 0; font-size: 20px; opacity: 0.7; }
+.rd-bg--forest .rd-deco--a::after { content: '🌿'; } .rd-bg--forest .rd-deco--b::after { content: '🌿'; }
+.rd-bg--forest .rd-deco--c::after { content: '🍄 🌱 🍄'; }
+.rd-bg--cave .rd-deco--a::after { content: '🦇'; } .rd-bg--cave .rd-deco--b::after { content: '🕸️'; }
+.rd-bg--cave .rd-deco--c::after { content: '💎 🪨 💎'; }
+.rd-bg--lava .rd-deco--a::after { content: '⛓️'; } .rd-bg--lava .rd-deco--b::after { content: '⛓️'; }
+.rd-bg--lava .rd-deco--c::after { content: '🔥 💀 🔥'; }
+.rd-bg--lava .rd-scene::after { background: repeating-linear-gradient(100deg, transparent 0 40px, rgba(255, 110, 30, 0.55) 40px 43px, transparent 43px 90px), linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(120, 20, 0, 0.55)); }
+.rd-bg--dusk .rd-deco--a::after { content: '🌙'; } .rd-bg--dusk .rd-deco--b::after { content: '🚩'; }
+.rd-bg--dusk .rd-deco--c::after { content: '🪨 🌾 🪨'; }
+.rd-bg--dusk .rd-scene::before { opacity: 0.5; }
+.rd-bg--dusk .rd-torch { display: none; }
+@media (max-width: 600px) { .rd-torch--l { left: 22%; } .rd-torch--r { right: 22%; } .rd-deco { font-size: 20px; } }
+@media (prefers-reduced-motion: reduce) { .rd-torch::before, .rd-torch::after { animation: none !important; } }
+
+/* ── Hầm ngục: a crisper hero ── */
+.rd-hero-svg { filter: drop-shadow(1.2px 0 0 rgba(43, 33, 64, 0.55)) drop-shadow(-1.2px 0 0 rgba(43, 33, 64, 0.55)) drop-shadow(0 1.2px 0 rgba(43, 33, 64, 0.55)) drop-shadow(0 -1.2px 0 rgba(43, 33, 64, 0.55)); }
