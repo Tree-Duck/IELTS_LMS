@@ -17659,13 +17659,13 @@ const RAID_LESSONS = [
 const RAID_LEVELS = {
   a: { id: 'a', icon: '🌱', name: 'Học việc', band: '4.0–5.0', bank: 45, type: 60, hitMul: 0.6, every: 4, heal: 60, coinMul: 1, words: 5, bossBlanks: 4,
        bankAll: true, showVi: true, slack: true, firstLetter: true,
-       blurb: ['Từ vựng của buổi, có kho từ ở mọi trận', 'Có sẵn bản dịch tiếng Việt', 'Sai một chữ cái vẫn tính đúng'] },
+       blurb: ['Mở bài, mở đoạn, kết bài theo khung cụm mồi', 'Kho từ ở mọi trận, có sẵn bản dịch', 'Sai một chữ cái vẫn tính đúng'] },
   d: { id: 'd', icon: '⚔️', name: 'Dũng sĩ', band: '5.5–6.5', bank: 30, type: 45, hitMul: 1, every: 0, heal: 40, coinMul: 1.5, words: 4, bossBlanks: 8,
        firstLetter: true,
-       blurb: ['Cụm từ trong câu mở bài, câu mở đoạn, cả đoạn', 'Boss chỉ có nghĩa tiếng Việt', 'Chính tả phải đúng'] },
+       blurb: ['Mở bài, mở đoạn, kết bài theo khung của dạng đề', 'Boss chỉ có nghĩa tiếng Việt', 'Chính tả phải đúng'] },
   l: { id: 'l', icon: '👑', name: 'Huyền thoại', band: '7.0+', bank: 20, type: 30, hitMul: 1.3, every: 0, heal: 20, coinMul: 2, words: 3, bossBlanks: 12,
        noBank: true, extra: true,
-       blurb: ['Điền cả cụm dài, động từ chính xác, cụm nối', 'Không kho từ, không chữ cái đầu', 'Quái đánh mạnh hơn, chỉ hồi 20 máu giữa trận'] },
+       blurb: ['Mở bài có câu chọn tiêu chí, thân bài điền cả cụm dài', 'Không kho từ, không chữ cái đầu', 'Quái đánh mạnh hơn, chỉ hồi 20 máu giữa trận'] },
 };
 
 // The opening sentence of each model paragraph, cut into the chunks typed at
@@ -17708,21 +17708,18 @@ const RAID_TRAP_WHY = 'Câu này mở bằng từ nối chung chung và nói đi
 const RAID_OTHER_WHY = 'Câu này thuộc một đề khác, không khớp với các câu phía sau.';
 
 // Huyền thoại only: longer phrases blanked on top of the marked words.
-// Key: lesson:t for the thesis, lesson:paragraph:step for a sentence.
+// Key: lesson:paragraph:step.
 const RAID_EXTRA = {
-  '1:t': ['the real test of such a law|phép thử thực sự của một luật như vậy', 'who is blamed when it fails|ai bị đổ lỗi khi nó thất bại'],
   '1:0:B': ['since they are the ones the hospital calls first|vì họ là người bệnh viện gọi đầu tiên'],
   '1:0:C': ['at the age when they most need to be saving|đúng độ tuổi họ cần tiết kiệm nhất'],
   '1:0:D': ['by paying someone to help|bằng cách thuê người giúp'],
   '1:0:D+': ['had the least to begin with|vốn đã có ít nhất ngay từ đầu'],
   '1:0:E': ['asks the most of|đòi hỏi nhiều nhất ở'],
-  '2:t': ['take the old ones away|lấy đi những lựa chọn cũ', 'large enough to buy up the space|đủ lớn để thâu tóm chỗ đứng'],
   '2:0:B': ['even when their members share no workplace|ngay cả khi các thành viên không chung nơi làm việc'],
   '2:0:C': ['which neighbor owns a ladder|hàng xóm nào có cái thang'],
   '2:0:D': ['People pay a shop for the same small jobs|người ta trả tiền cho cửa hàng làm những việc vặt ấy'],
   '2:0:D+': ['become rare enough that|trở nên hiếm đến mức'],
   '2:0:E': ['the wrong test to judge it by|phép thử sai để đánh giá nó'],
-  '3:t': ['push this hard|thúc ép mạnh như vậy', 'once nobody is watching|khi không còn ai theo dõi'],
   '3:0:B': ['walks into a class that moves at|bước vào một lớp học có nhịp'],
   '3:0:C': ['well before the first half hour is over|từ lâu trước khi hết nửa giờ đầu'],
   '3:0:D': ['in the same period|trong cùng khoảng thời gian'],
@@ -17731,7 +17728,6 @@ const RAID_EXTRA = {
   '3:1:C': ['that used to go into|vốn trước đây dành cho'],
   '3:1:D': ['is short of|đang thiếu'],
   '3:1:E': ['the weaker of the two responses|cách ứng phó yếu hơn trong hai cách'],
-  '4:t': ['a craft with no apprentices left|một nghề thủ công không còn người học việc', 'keeping those things alive|giữ cho những thứ đó còn tồn tại'],
   '4:0:B': ['because there is no cost to weigh|vì chẳng có chi phí nào để cân nhắc'],
   '4:0:C': ['a degree nobody in the house has seen work|một tấm bằng chưa ai trong nhà thấy có ích'],
   '4:0:D': ['draw from|tuyển chọn từ'],
@@ -17739,60 +17735,50 @@ const RAID_EXTRA = {
   '4:1:C': ['runs from the lower earner to the higher one|chảy từ người thu nhập thấp sang người thu nhập cao'],
   '4:1:D+': ['usually loses|thường thua'],
   '4:1:E': ['the heavier side|bên nặng ký hơn'],
-  '5:t': ['keeps some relationships alive|giữ cho một số mối quan hệ còn sống', 'not how much people talk|không phải người ta nói chuyện nhiều bao nhiêu'],
   '5:0:B': ['the route home as the risky part of the day|đường về nhà là phần nguy hiểm trong ngày'],
   '5:0:C': ['pays for a ride instead|trả tiền đi xe thay vì đi bộ'],
   '5:0:D': ['close earlier|đóng cửa sớm hơn'],
   '5:0:D+': ['long before it shows up in|từ lâu trước khi nó hiện ra trong'],
   '5:0:E': ['rather than no reporting|thay vì không đưa tin'],
-  '6:t': ['the case only holds if|lập luận chỉ đứng vững nếu', 'rely on this winter|trông cậy vào mùa đông này'],
   '6:0:B': ['have no appointment to attend|không có lịch hẹn nào phải đến'],
   '6:0:C': ['at a stage that costs|ở giai đoạn chỉ tốn'],
   '6:0:D': ['stops lengthening|ngừng dài thêm'],
   '6:0:D+': ['runs on a Thursday|hoạt động vào thứ Năm'],
   '6:0:E': ['cannot wait for a program to work|không thể chờ một chương trình phát huy tác dụng'],
-  '7:t': ['the claim fails at the word only|lập luận sụp đổ ở chữ "only"', 'no bonus can reliably buy|không khoản thưởng nào mua chắc được'],
   '7:0:B': ['a hairline crack|một vết nứt nhỏ như sợi tóc', 'at the end of a shift|cuối ca làm'],
   '7:0:C': ['earns her nothing|chẳng mang lại cho cô ấy gì'],
   '7:0:D': ['leaves it where nobody has|bỏ qua ở nơi chưa ai hỏi'],
   '7:0:D+': ['how often a line stops|dây chuyền dừng thường xuyên đến đâu'],
   '7:0:E': ['a condition for the work rather than|điều kiện để làm việc chứ không phải'],
-  '8:t': ['falls on whoever comes next|đổ lên bất kỳ ai đến sau', 'cannot price a river|không thể định giá một dòng sông'],
   '8:0:B': ['in a district with no bus before six|ở một quận không có xe buýt trước sáu giờ'],
   '8:0:C': ['It removes something else from the same week|nó cắt bỏ thứ khác trong cùng tuần đó'],
   '8:0:D': ['feels the tax as a saving|coi khoản thuế như một khoản tiết kiệm'],
   '8:0:D+': ['thinner shopping baskets|giỏ hàng vơi đi'],
   '8:0:E': ['cannot be the best single answer|không thể là câu trả lời tốt nhất duy nhất'],
-  '9:t': ['from opposite ends|từ hai đầu ngược nhau', 'displaces crime rather than reducing it|dời tội phạm sang chỗ khác chứ không giảm nó'],
   '9:0:B': ['the picking work|công việc nhặt hàng'],
   '9:0:C': ['keep their jobs|giữ được việc'],
   '9:0:D': ['Five years on|năm năm sau', 'has trained nobody|chẳng đào tạo được ai'],
   '9:0:D+': ['of the shop floor|của xưởng'],
   '9:0:E': ['quietly removed|lặng lẽ xoá bỏ'],
-  '10:t': ['is better understood as|nên được hiểu là', 'an event to repeat each year|một sự kiện lặp lại mỗi năm'],
   '10:0:B': ['within a week of the price going up|trong vòng một tuần sau khi giá tăng'],
   '10:0:C': ['before the first bus runs|trước khi chuyến xe buýt đầu tiên chạy'],
   '10:0:D': ['taxes the trips that were hardest|đánh thuế vào những chuyến khó thay thế nhất'],
   '10:0:D+': ['long before it shows up|từ lâu trước khi nó hiện ra'],
   '10:0:E': ['at the hours people actually travel|vào đúng giờ người ta đi lại'],
-  '11:t': ['understood that way|hiểu theo cách đó', 'measured over a decade|được đo trong cả một thập kỷ'],
   '11:0:B': ['after a nine-hour shift|sau ca làm chín tiếng', 'has already used up|đã dùng cạn'],
   '11:0:C': ['without taking the choice away from anyone|mà không tước lựa chọn của ai'],
   '11:0:D': ['hands opponents an easy argument|trao cho phe phản đối một lý lẽ dễ dàng'],
   '11:0:D+': ['tends not to|thường không làm được vậy'],
   '11:0:E': ['do not require the state to decide|không đòi hỏi nhà nước phải quyết định'],
-  '12:t': ['from different distances|từ những khoảng cách khác nhau', 'one of the few remaining reasons|một trong số ít lý do còn lại'],
   '12:0:B': ['is there to sell something|có mặt để bán thứ gì đó'],
   '12:0:C': ['long before anyone explains it to them|từ lâu trước khi có ai giải thích cho chúng'],
   '12:0:D': ['does not end up with|rốt cuộc không có được'],
   '12:0:D+': ['simply disappears|đơn giản là biến mất'],
   '12:0:E': ['is supposed to attract|được cho là sẽ thu hút'],
-  '13:t': ['is meant to achieve|nhằm đạt được', 'on that second ground|dựa trên lý do thứ hai đó'],
   '13:0:B': ['is not weighing the size of|không cân nhắc mức'],
   '13:0:C': ['reaches only the small number of drivers|chỉ chạm tới số ít tài xế'],
   '13:0:D': ['without requiring the driver to agree|mà không cần tài xế đồng ý'],
   '13:0:E': ['the last step in the chain|bước cuối cùng của chuỗi'],
-  '14:t': ['reaches further where need is greatest|đi xa hơn, tới nơi cần nhất', 'the other cannot match|bên kia không sánh được'],
   '14:0:B': ['than people who spend none|so với người không chơi chút nào'],
   '14:0:C': ['to begin with|ngay từ đầu'],
   '14:0:D': ['the honest answer is that|câu trả lời thành thật là'],
@@ -17800,10 +17786,521 @@ const RAID_EXTRA = {
   '14:0:E': ['ignores the smaller effects|bỏ qua những tác động nhỏ hơn'],
 };
 
+// Mở bài, câu mở đoạn and kết bài for each dungeon, one version per level,
+// written to the Task 2 master sheet: Học việc uses the section A frames with
+// simple content, Dũng sĩ the question type's own tầng nền frames, Huyền
+// thoại the tầng nâng intro (general statement, criterion, verdict). Openers
+// are chunks typed at the gate; Huyền thoại keeps the model opener in
+// RAID_GATES. The prompt is always the model paragraph's prompt.
+const RAID_ESSAY = {
+  1: {
+    a: {
+      intro: [
+        ['The issue of {caring for elderly parents|chăm sóc cha mẹ già} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề chăm sóc cha mẹ già đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While children should help their parents, I {largely disagree|phần lớn không đồng ý} that the law should force them to do so, {mainly because|chủ yếu vì} many families cannot afford it and a law does not create more care.', 'Dù con cái nên giúp đỡ cha mẹ, tôi phần lớn không đồng ý rằng luật pháp nên bắt họ làm vậy, chủ yếu vì nhiều gia đình không đủ khả năng và một đạo luật không tạo thêm sự chăm sóc.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'a law does not give old people more care;', 'it only decides who must give it.'], vi: 'Lý do chính là một đạo luật không mang lại cho người già thêm sự chăm sóc; nó chỉ quyết định ai phải chăm sóc.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, the law should not make adult children look after their old parents.', 'Tóm lại, luật pháp không nên bắt con cái đã trưởng thành chăm sóc cha mẹ già.'],
+        ['A legal duty {both|vừa (từ mở đầu vế thứ nhất)} puts pressure on poor families and does little to improve care.', 'Một nghĩa vụ pháp lý vừa gây áp lực lên các gia đình nghèo vừa chẳng cải thiện được bao nhiêu sự chăm sóc.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether adult children should be {legally required|bị pháp luật bắt buộc} to support parents who can no longer {look after themselves|tự chăm sóc bản thân}.', 'Có nhiều ý kiến trái chiều về việc con cái trưởng thành có nên bị pháp luật bắt buộc phụng dưỡng cha mẹ không còn tự chăm sóc được bản thân hay không.'],
+        ['While families clearly have a {moral duty|bổn phận đạo đức} to help, I largely disagree that this should become a law, because such a rule {shifts the burden|dồn gánh nặng} onto the poorest households and does nothing to {raise the quality of care|nâng chất lượng chăm sóc}.', 'Dù gia đình rõ ràng có bổn phận đạo đức phải giúp đỡ, tôi phần lớn không đồng ý rằng điều này nên thành luật, vì quy định như vậy dồn gánh nặng lên những hộ nghèo nhất và không nâng được chất lượng chăm sóc.'],
+      ],
+      open: [{ c: ['The strongest argument against a legal duty is that', 'it adds no new care', 'but simply decides who must provide it.'], vi: 'Lập luận mạnh nhất chống lại nghĩa vụ pháp lý là nó không tạo thêm sự chăm sóc nào mà chỉ quyết định ai phải cung cấp.' }],
+      concl: [
+        ['In conclusion, turning family support into a legal obligation would {punish|trừng phạt} the households least able to cope.', 'Tóm lại, biến việc phụng dưỡng thành nghĩa vụ pháp lý sẽ trừng phạt chính những hộ ít khả năng xoay xở nhất.'],
+        ['A law of this kind both {pushes carers out of full-time work|đẩy người chăm sóc ra khỏi công việc toàn thời gian} and leaves the care itself no better than before.', 'Một đạo luật như vậy vừa đẩy người chăm sóc ra khỏi công việc toàn thời gian, vừa để bản thân sự chăm sóc chẳng tốt hơn trước.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['As populations age, governments are looking for someone other than the state to {carry the cost of care|gánh chi phí chăm sóc}.', 'Khi dân số già đi, các chính phủ tìm một ai đó ngoài nhà nước để gánh chi phí chăm sóc.'],
+        ['Whether families should be legally bound to provide it depends on what the law is judged by: {who is blamed|ai bị quy trách nhiệm} when care fails, or {how much care|bao nhiêu sự chăm sóc} older people actually receive.', 'Việc gia đình có nên bị luật ràng buộc phải chăm sóc hay không tuỳ vào việc ta đánh giá luật theo tiêu chí nào: ai bị quy trách nhiệm khi việc chăm sóc thất bại, hay người già thực sự nhận được bao nhiêu sự chăm sóc.'],
+        ['By the second measure, a legal duty {achieves very little|đạt được rất ít}.', 'Xét theo tiêu chí thứ hai, một nghĩa vụ pháp lý đạt được rất ít.'],
+      ],
+      concl: [
+        ['A legal duty, then, {redistributes|phân bổ lại} the work of caring without adding to it.', 'Vậy nên, một nghĩa vụ pháp lý chỉ phân bổ lại việc chăm sóc mà không làm nó nhiều thêm.'],
+        ['Governments that want better care for the elderly would do better to fund {respite services|dịch vụ chăm sóc thay thế tạm thời} than to {write obligations into law|ghi nghĩa vụ vào luật}.', 'Chính phủ nào muốn người già được chăm sóc tốt hơn thì nên chi tiền cho dịch vụ chăm sóc thay thế tạm thời hơn là ghi nghĩa vụ vào luật.'],
+      ],
+    },
+  },
+  2: {
+    a: {
+      intro: [
+        ['The issue of {old customs|phong tục cũ} in modern life {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề phong tục cũ trong đời sống hiện đại đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While some traditions look old-fashioned, I {largely disagree|phần lớn không đồng ý} that they are not worth keeping, {mainly because|chủ yếu vì} they bring people together and help neighbors support each other.', 'Dù một số truyền thống trông lỗi thời, tôi phần lớn không đồng ý rằng chúng không đáng giữ, chủ yếu vì chúng gắn kết mọi người và giúp hàng xóm hỗ trợ nhau.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'a custom brings people together,', 'not just the ritual itself.'], vi: 'Lý do chính là một phong tục gắn kết mọi người lại với nhau, chứ không chỉ là bản thân nghi lễ.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, many old customs are still useful today.', 'Tóm lại, nhiều phong tục cũ ngày nay vẫn còn hữu ích.'],
+        ['A tradition like a New Year gathering {both|vừa (từ mở đầu vế thứ nhất)} brings families together and helps neighbors know each other.', 'Một truyền thống như buổi họp mặt ngày Tết vừa gắn kết gia đình vừa giúp hàng xóm hiểu nhau hơn.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Recent years have seen a {marked rise|sự gia tăng rõ rệt} in the number of people who see traditional customs as {out of step with|lạc nhịp với} modern life.', 'Những năm gần đây, số người coi phong tục truyền thống là lạc nhịp với đời sống hiện đại tăng lên rõ rệt.'],
+        ['While some rituals have clearly lost their original meaning, I largely disagree that they are not worth keeping, because many of them still {bring communities together|gắn kết cộng đồng} and quietly support practical help between neighbors.', 'Dù một số nghi lễ rõ ràng đã mất ý nghĩa ban đầu, tôi phần lớn không đồng ý rằng chúng không đáng giữ, vì nhiều nghi lễ vẫn gắn kết cộng đồng và lặng lẽ duy trì sự giúp đỡ thiết thực giữa hàng xóm.'],
+      ],
+      open: [{ c: ['The strongest argument for keeping customs is that', 'they matter less for the ritual itself', 'than for the meetings they create.'], vi: 'Lập luận mạnh nhất cho việc giữ phong tục là chúng quan trọng không phải ở nghi lễ mà ở những cuộc gặp gỡ chúng tạo ra.' }],
+      concl: [
+        ['In conclusion, judging customs only by whether they look modern {misses|bỏ sót} what many of them actually do.', 'Tóm lại, chỉ đánh giá phong tục qua việc chúng trông có hiện đại không là bỏ sót điều nhiều phong tục thực sự làm được.'],
+        ['A shared festival both {strengthens family ties|thắt chặt tình thân} and keeps alive the {small favors|những giúp đỡ nhỏ} that neighbors depend on.', 'Một lễ hội chung vừa thắt chặt tình thân vừa giữ lại những giúp đỡ nhỏ mà hàng xóm trông cậy vào.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Traditions that once filled the calendar are {quietly disappearing|lặng lẽ biến mất} from many modern households.', 'Những truyền thống từng lấp kín lịch năm đang lặng lẽ biến mất khỏi nhiều gia đình hiện đại.'],
+        ['Whether a custom is still worth keeping depends on what it is judged by: {how modern it looks|trông nó hiện đại đến đâu}, or {what it still does|nó còn làm được gì} for the people who observe it.', 'Một phong tục có còn đáng giữ hay không tuỳ vào việc ta đánh giá nó theo tiêu chí nào: trông nó hiện đại đến đâu, hay nó còn làm được gì cho những người giữ nó.'],
+        ['Judged by the second, many customs that look purely decorative are {far from obsolete|còn lâu mới lỗi thời}.', 'Xét theo tiêu chí thứ hai, nhiều phong tục trông chỉ để trang trí thật ra còn lâu mới lỗi thời.'],
+      ],
+      concl: [
+        ['Customs, then, often survive as {meeting points|điểm gặp gỡ} long after their rituals have lost their meaning.', 'Vậy nên, phong tục thường còn tồn tại như những điểm gặp gỡ rất lâu sau khi nghi lễ đã mất ý nghĩa.'],
+        ['Communities tempted to {abandon them on appearance alone|bỏ chúng chỉ vì vẻ bề ngoài} would do better to ask what practical work would {go undone|bị bỏ dở} without them.', 'Cộng đồng nào muốn bỏ phong tục chỉ vì vẻ bề ngoài thì nên tự hỏi việc thiết thực nào sẽ bị bỏ dở nếu không còn chúng.'],
+      ],
+    },
+  },
+  3: {
+    a: {
+      intro: [
+        ['The issue of {children losing focus|trẻ em mất tập trung} at school {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề trẻ em mất tập trung ở trường đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['This problem {stems mainly from|bắt nguồn chủ yếu từ} mobile phones, and {the most workable response|cách ứng phó khả thi nhất} is making lessons shorter.', 'Vấn đề này bắt nguồn chủ yếu từ điện thoại di động, và cách ứng phó khả thi nhất là làm bài học ngắn lại.'],
+      ],
+      open: [
+        { c: ['The main cause here is', 'the fast pace of phones and games.'], vi: 'Nguyên nhân chính ở đây là nhịp độ nhanh của điện thoại và trò chơi.' },
+        { c: ['The most workable response is', 'to make lessons shorter.'], vi: 'Cách ứng phó khả thi nhất là làm bài học ngắn lại.' },
+      ],
+      concl: [
+        ['{In conclusion|Tóm lại}, children lose focus mainly because phones are much faster than lessons.', 'Tóm lại, trẻ mất tập trung chủ yếu vì điện thoại nhanh hơn bài học rất nhiều.'],
+        ['Shorter lessons with more activities can help them {pay attention|chú ý} again.', 'Bài học ngắn hơn và có nhiều hoạt động hơn có thể giúp các em chú ý trở lại.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Losing focus in class is now {a routine part of|một phần quen thuộc của} school life for many children.', 'Mất tập trung trong lớp giờ là một phần quen thuộc trong đời sống học đường của nhiều trẻ.'],
+        ['This problem stems mainly from the gap between {fast-moving screens|màn hình thay đổi liên tục} and slow lessons, and the most workable response is to break lessons into {shorter segments|các phần ngắn hơn} rather than to demand more willpower.', 'Vấn đề này bắt nguồn chủ yếu từ khoảng chênh giữa màn hình thay đổi liên tục và bài học chậm, và cách ứng phó khả thi nhất là chia bài học thành các phần ngắn hơn thay vì đòi hỏi thêm ý chí.'],
+      ],
+      open: [
+        { c: ['The main cause here is', 'the speed of the screens', 'children use every evening.'], vi: 'Nguyên nhân chính ở đây là tốc độ của những màn hình trẻ dùng mỗi tối.' },
+        { c: ['The most workable response is', 'to change the pace of lessons', 'rather than the child.'], vi: 'Cách ứng phó khả thi nhất là thay đổi nhịp độ bài học chứ không phải thay đổi đứa trẻ.' },
+      ],
+      concl: [
+        ['In conclusion, children struggle to concentrate mainly because lessons now {compete with|phải cạnh tranh với} much faster screens.', 'Tóm lại, trẻ khó tập trung chủ yếu vì bài học giờ phải cạnh tranh với những màn hình nhanh hơn nhiều.'],
+        ['Schools can respond most effectively by breaking lessons into shorter segments instead of simply telling students to {try harder|cố gắng hơn}.', 'Nhà trường có thể ứng phó hiệu quả nhất bằng cách chia bài học thành các phần ngắn hơn thay vì chỉ bảo học sinh cố gắng hơn.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Teachers increasingly report that pupils {drift off|lơ đãng} within minutes of a lesson starting.', 'Giáo viên ngày càng thấy học sinh lơ đãng chỉ vài phút sau khi bài học bắt đầu.'],
+        ["The cause lies less in children's willpower than in {the pace they have grown used to|nhịp độ các em đã quen}, which is why the remedy has to change {the rhythm of lessons|nhịp của bài học} rather than the child.", 'Nguyên nhân nằm ở nhịp độ các em đã quen hơn là ở ý chí, vì vậy cách chữa phải thay đổi nhịp của bài học chứ không phải đứa trẻ.'],
+      ],
+      concl: [
+        ['Attention, then, has not disappeared {so much as|mà đúng hơn là} adjusted to a faster pace.', 'Vậy nên, sự chú ý không hẳn biến mất mà đúng hơn là đã chỉnh theo một nhịp nhanh hơn.'],
+        ['Lessons rebuilt around shorter segments {meet that pace where it is|bắt kịp nhịp đó ở đúng chỗ của nó}, whereas urging children to try harder changes nothing about the pace itself.', 'Những bài học được dựng lại quanh các phần ngắn bắt kịp nhịp đó ở đúng chỗ của nó, còn việc giục trẻ cố gắng hơn chẳng thay đổi gì bản thân nhịp độ.'],
+      ],
+    },
+  },
+  4: {
+    a: {
+      intro: [
+        ['The issue of {who should pay university fees|ai nên trả học phí đại học} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề ai nên trả học phí đại học đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['Although taxpayers carry the cost, I believe the benefits of free university, particularly more chances for poor students, {clearly outweigh|rõ ràng lớn hơn} this drawback.', 'Dù người đóng thuế phải gánh chi phí, tôi tin lợi ích của đại học miễn phí, nhất là thêm cơ hội cho sinh viên nghèo, rõ ràng lớn hơn điểm hạn chế này.'],
+      ],
+      open: [
+        { c: ['The clearest benefit is that', 'poor students can go to university', 'without worrying about the cost.'], vi: 'Lợi ích rõ nhất là sinh viên nghèo có thể học đại học mà không lo chi phí.' },
+        { c: ['The clearest drawback is that', 'all taxpayers pay for these degrees,', 'even those who never go to university.'], vi: 'Hạn chế rõ nhất là mọi người đóng thuế đều trả tiền cho những tấm bằng này, kể cả người không bao giờ học đại học.' },
+      ],
+      concl: [
+        ['{In conclusion|Tóm lại}, the government should pay university fees, even though it costs taxpayers money.', 'Tóm lại, chính phủ nên trả học phí đại học, dù việc này tốn tiền của người đóng thuế.'],
+        ['Free education {both|vừa (từ mở đầu vế thứ nhất)} helps poor students study and gives employers more skilled workers.', 'Giáo dục miễn phí vừa giúp sinh viên nghèo được học vừa cho doanh nghiệp thêm người lao động có tay nghề.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether {higher education|giáo dục đại học} should be funded by the state or by students themselves.', 'Có nhiều ý kiến trái chiều về việc giáo dục đại học nên do nhà nước hay do chính sinh viên chi trả.'],
+        ['Although this spending places a real burden on {ordinary taxpayers|người đóng thuế bình thường}, I believe the benefits, particularly the chance it gives students from {low-income families|gia đình thu nhập thấp}, clearly outweigh it, provided vocational training is funded at the same time.', 'Dù khoản chi này là gánh nặng thật sự với người đóng thuế bình thường, tôi tin lợi ích của nó, nhất là cơ hội cho sinh viên từ gia đình thu nhập thấp, rõ ràng lớn hơn, miễn là đào tạo nghề cũng được cấp tiền cùng lúc.'],
+      ],
+      open: [
+        { c: ['The strongest argument for state funding is that', 'it helps most the students', 'who would otherwise never apply.'], vi: 'Lập luận mạnh nhất cho việc nhà nước chi trả là nó giúp nhiều nhất những sinh viên mà nếu không thì đã chẳng bao giờ nộp đơn.' },
+        { c: ['The clearest drawback is that', 'the cost falls on taxpayers', 'who will never hold a degree themselves.'], vi: 'Hạn chế rõ nhất là chi phí đổ lên những người đóng thuế sẽ không bao giờ có bằng đại học.' },
+      ],
+      concl: [
+        ['In conclusion, state-funded university {does more good than harm|mang lại nhiều lợi hơn hại}, as long as it does not {drain money from|rút tiền khỏi} vocational courses.', 'Tóm lại, đại học do nhà nước chi trả mang lại nhiều lợi hơn hại, miễn là nó không rút tiền khỏi các khoá học nghề.'],
+        ['Free tuition both {widens access|mở rộng cơ hội tiếp cận} for poorer students and gives local employers a wider pool of graduates.', 'Miễn học phí vừa mở rộng cơ hội cho sinh viên nghèo vừa cho doanh nghiệp địa phương nguồn sinh viên tốt nghiệp rộng hơn.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Whether students or taxpayers should {bear the cost|gánh chi phí} of a degree is a question most governments {revisit|xem xét lại} with every budget.', 'Sinh viên hay người đóng thuế nên gánh chi phí một tấm bằng là câu hỏi mà phần lớn chính phủ xem xét lại mỗi kỳ ngân sách.'],
+        ['The advantages and disadvantages here can only be weighed by asking {who gains|ai được lợi} and {who pays|ai trả tiền}.', 'Lợi và hại ở đây chỉ có thể cân được khi ta hỏi ai được lợi và ai trả tiền.'],
+        ['On that measure, public funding comes out ahead, but only {on one condition|với một điều kiện}: that vocational training is protected at the same time.', 'Theo tiêu chí đó, nhà nước chi trả thắng thế, nhưng chỉ với một điều kiện: đào tạo nghề phải được bảo vệ cùng lúc.'],
+      ],
+      concl: [
+        ['State funding, then, {repays its cost|bù lại chi phí của nó} by reaching students no loan would have reached.', 'Vậy nên, tiền nhà nước bù lại chi phí của nó bằng cách chạm tới những sinh viên mà không khoản vay nào chạm tới được.'],
+        ['Governments that adopt it would do better to {ring-fence|dành riêng, bảo vệ} vocational budgets than to let degrees and apprenticeships compete for the same money.', 'Chính phủ nào áp dụng chính sách này nên dành riêng ngân sách học nghề hơn là để bằng đại học và học việc tranh nhau cùng một khoản tiền.'],
+      ],
+    },
+  },
+  5: {
+    a: {
+      intro: [
+        ['The issue of {crime news|tin tức tội phạm} on TV and in newspapers {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề tin tức tội phạm trên truyền hình và báo chí đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While crime news can make people afraid, I {largely disagree|phần lớn không đồng ý} that it should be banned, {mainly because|chủ yếu vì} people need this information and better reporting can reduce the fear.', 'Dù tin tội phạm có thể làm người ta sợ, tôi phần lớn không đồng ý rằng nên cấm nó, chủ yếu vì người dân cần thông tin này và đưa tin tốt hơn có thể giảm nỗi sợ.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'crime news does not create fear;', 'it changes where people think danger is.'], vi: 'Lý do chính là tin tội phạm không tạo ra nỗi sợ; nó thay đổi chỗ người ta nghĩ là nguy hiểm.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, crime news should not be banned.', 'Tóm lại, không nên cấm tin tức tội phạm.'],
+        ['Better reporting {both|vừa (từ mở đầu vế thứ nhất)} gives people the facts and makes them less afraid.', 'Đưa tin tốt hơn vừa cho người dân biết sự thật vừa giúp họ bớt sợ.'],
+      ],
+    },
+    d: {
+      intro: [
+        ["{Media coverage|việc đưa tin của truyền thông} of violent crime continues to divide opinion, with some calling for a ban and others defending the {public's right to know|quyền được biết của công chúng}.", 'Việc truyền thông đưa tin về tội phạm bạo lực vẫn gây chia rẽ ý kiến, người thì đòi cấm, người thì bảo vệ quyền được biết của công chúng.'],
+        ['While such reports can clearly frighten viewers, I largely disagree that they should be banned, because the problem lies in {how crime is reported|cách tội phạm được đưa tin} rather than in whether it is reported at all.', 'Dù những bản tin như vậy rõ ràng có thể làm người xem sợ hãi, tôi phần lớn không đồng ý rằng nên cấm chúng, vì vấn đề nằm ở cách đưa tin chứ không phải ở việc có đưa tin hay không.'],
+      ],
+      open: [{ c: ['The strongest argument against a ban is that', 'coverage does not create fear', 'so much as move it to the wrong places.'], vi: 'Lập luận mạnh nhất chống lại lệnh cấm là việc đưa tin không tạo ra nỗi sợ mà đúng hơn là dời nó sang sai chỗ.' }],
+      concl: [
+        ['In conclusion, removing crime stories from the news would {hide useful information|che giấu thông tin hữu ích} without making anyone safer.', 'Tóm lại, gỡ tin tội phạm khỏi bản tin sẽ che giấu thông tin hữu ích mà chẳng làm ai an toàn hơn.'],
+        ['{Responsible reporting|đưa tin có trách nhiệm} both keeps the public informed and stops people from avoiding streets that are actually safe.', 'Đưa tin có trách nhiệm vừa giúp công chúng nắm thông tin vừa khiến người ta không tránh né những con phố thật ra an toàn.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Newspapers and television have long {relied on|dựa vào} violent crime to hold their audience.', 'Báo chí và truyền hình từ lâu đã dựa vào tội phạm bạo lực để giữ chân khán giả.'],
+        ['Whether such coverage should be banned depends on what harm is being measured: {the fear itself|bản thân nỗi sợ}, or {where that fear leads people|nỗi sợ đẩy người ta đi đâu}.', 'Có nên cấm việc đưa tin như vậy hay không tuỳ vào việc ta đo cái hại nào: bản thân nỗi sợ, hay nỗi sợ đó đẩy người ta đi đâu.'],
+        ['Measured by the second, a ban {treats the wrong problem|chữa sai bệnh}.', 'Đo theo tiêu chí thứ hai, lệnh cấm là chữa sai bệnh.'],
+      ],
+      concl: [
+        ["Coverage, then, does its damage by {redrawing|vẽ lại} people's map of danger, not by creating danger.", 'Vậy nên, việc đưa tin gây hại bằng cách vẽ lại bản đồ nguy hiểm trong đầu người dân, chứ không phải bằng cách tạo ra nguy hiểm.'],
+        ['Regulators would do better to {set standards for|đặt tiêu chuẩn cho} crime reporting than to remove it from the screen.', 'Cơ quan quản lý nên đặt tiêu chuẩn cho việc đưa tin tội phạm hơn là gỡ nó khỏi màn hình.'],
+      ],
+    },
+  },
+  6: {
+    a: {
+      intro: [
+        ['The issue of {how to spend public money on health|cách chi tiền công cho y tế} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề chi tiền công cho y tế thế nào đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While sick people must be treated, I {largely agree|phần lớn đồng ý} that preventing illness is more important, {mainly because|chủ yếu vì} it costs less and keeps hospital beds free.', 'Dù người bệnh phải được chữa trị, tôi phần lớn đồng ý rằng phòng bệnh quan trọng hơn, chủ yếu vì nó tốn ít tiền hơn và giữ cho giường bệnh còn trống.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'prevention and treatment use the same money,', 'so one grows only when the other loses.'], vi: 'Lý do chính là phòng bệnh và chữa bệnh dùng chung một khoản tiền, nên bên này chỉ tăng khi bên kia mất.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, spending on prevention is usually the better choice.', 'Tóm lại, chi tiền cho phòng bệnh thường là lựa chọn tốt hơn.'],
+        ['A healthy lifestyle program {both|vừa (từ mở đầu vế thứ nhất)} saves money and makes waiting lists shorter.', 'Một chương trình lối sống lành mạnh vừa tiết kiệm tiền vừa rút ngắn danh sách chờ.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether {public health budgets|ngân sách y tế công} should {prioritize|ưu tiên} prevention or treatment.', 'Có nhiều ý kiến trái chiều về việc ngân sách y tế công nên ưu tiên phòng bệnh hay chữa bệnh.'],
+        ['While people who are already ill cannot be ignored, I largely agree that prevention deserves more funding, because it {catches conditions early|phát hiện bệnh sớm} and frees up hospital capacity for those who need it.', 'Dù không thể bỏ mặc người đang bệnh, tôi phần lớn đồng ý rằng phòng bệnh xứng đáng được cấp nhiều tiền hơn, vì nó phát hiện bệnh sớm và giải phóng năng lực bệnh viện cho người cần.'],
+      ],
+      open: [{ c: ['The strongest argument for prevention is that', 'it draws on the same budget as treatment', 'but saves far more of it.'], vi: 'Lập luận mạnh nhất cho phòng bệnh là nó dùng chung ngân sách với chữa bệnh nhưng tiết kiệm được nhiều hơn hẳn.' }],
+      concl: [
+        ['In conclusion, prevention is the better use of public money, provided hospitals can already {meet current demand|đáp ứng nhu cầu hiện tại}.', 'Tóm lại, phòng bệnh là cách dùng tiền công tốt hơn, miễn là bệnh viện đã đáp ứng được nhu cầu hiện tại.'],
+        ['Early screening both {cuts the cost of treatment|giảm chi phí điều trị} and shortens waiting lists for planned surgery.', 'Khám sàng lọc sớm vừa giảm chi phí điều trị vừa rút ngắn danh sách chờ mổ theo lịch.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Health ministries face the same choice every year: fund the clinic, or fund {the habits that keep people out of it|những thói quen giữ người ta tránh xa phòng khám}.', 'Năm nào bộ y tế cũng đứng trước cùng một lựa chọn: chi tiền cho phòng khám, hay cho những thói quen giữ người ta tránh xa phòng khám.'],
+        ['Which matters more depends on the measure chosen: {lives saved this year|số người được cứu trong năm nay}, or {illness avoided over a decade|bệnh tật tránh được trong cả thập kỷ}.', 'Bên nào quan trọng hơn tuỳ vào tiêu chí được chọn: số người được cứu trong năm nay, hay bệnh tật tránh được trong cả thập kỷ.'],
+        ['By the longer measure, prevention is the stronger case, though only where treatment capacity is {already adequate|đã đủ đáp ứng}.', 'Xét theo tiêu chí dài hạn, phòng bệnh có lý hơn, nhưng chỉ ở nơi năng lực điều trị đã đủ đáp ứng.'],
+      ],
+      concl: [
+        ['Prevention, then, {pays for itself|tự bù chi phí} in beds and operating time that treatment would otherwise consume.', 'Vậy nên, phòng bệnh tự bù chi phí bằng số giường và giờ mổ mà việc chữa bệnh lẽ ra sẽ dùng hết.'],
+        ['Governments would do better to expand screening once wards can meet today\'s demand than to {starve|cắt nguồn, bỏ đói} the clinics that patients need now.', 'Chính phủ nên mở rộng khám sàng lọc một khi các khoa đáp ứng được nhu cầu hôm nay, hơn là cắt nguồn của những phòng khám bệnh nhân đang cần.'],
+      ],
+    },
+  },
+  7: {
+    a: {
+      intro: [
+        ['The issue of {what motivates employees|điều gì thúc đẩy nhân viên} at work {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề điều gì thúc đẩy nhân viên trong công việc đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While money is important for every worker, I {largely disagree|phần lớn không đồng ý} that it is the main factor, {mainly because|chủ yếu vì} people work harder when their opinions matter and when they enjoy their tasks.', 'Dù tiền quan trọng với mọi người lao động, tôi phần lớn không đồng ý rằng đó là yếu tố chính, chủ yếu vì người ta làm việc chăm hơn khi ý kiến của họ được coi trọng và khi họ thích công việc của mình.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'money makes people take a job,', 'but it does not make them work well.'], vi: 'Lý do chính là tiền khiến người ta nhận việc, nhưng không khiến họ làm việc tốt.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, money is not the most important thing that makes employees work hard.', 'Tóm lại, tiền không phải là điều quan trọng nhất khiến nhân viên làm việc chăm chỉ.'],
+        ['A good workplace {both|vừa (từ mở đầu vế thứ nhất)} listens to its workers and gives them interesting tasks.', 'Một nơi làm việc tốt vừa lắng nghe nhân viên vừa giao cho họ những việc thú vị.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether pay is what really {drives people to work hard|thúc đẩy người ta làm việc chăm chỉ}.', 'Có nhiều ý kiến trái chiều về việc tiền lương có thật sự là thứ thúc đẩy người ta làm việc chăm chỉ hay không.'],
+        ['While a fair salary is what persuades people to accept a job, I largely disagree that money is the {primary motivator|động lực chính}, because the effort people give depends far more on whether their opinions are valued and whether their work feels {meaningful|có ý nghĩa}.', 'Dù mức lương hợp lý là thứ thuyết phục người ta nhận việc, tôi phần lớn không đồng ý rằng tiền là động lực chính, vì công sức người ta bỏ ra phụ thuộc nhiều hơn vào việc ý kiến của họ có được coi trọng không và công việc có ý nghĩa không.'],
+      ],
+      open: [{ c: ['The strongest argument against relying on pay is that', 'a salary decides who takes a job,', 'not how well it is done.'], vi: 'Lập luận mạnh nhất chống lại việc dựa vào lương là tiền lương quyết định ai nhận việc, chứ không quyết định việc được làm tốt đến đâu.' }],
+      concl: [
+        ['In conclusion, money explains why people turn up for work but not why they {go beyond their job description|làm vượt phạm vi công việc được giao}.', 'Tóm lại, tiền giải thích vì sao người ta đi làm, nhưng không giải thích vì sao họ làm vượt phạm vi công việc được giao.'],
+        ['A manager who both listens to staff and gives them meaningful work gets more effort than {a pay rise alone|chỉ riêng việc tăng lương} can buy.', 'Một người quản lý vừa lắng nghe nhân viên vừa giao việc có ý nghĩa sẽ nhận được nhiều công sức hơn mức mà chỉ riêng việc tăng lương mua được.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Employers have long assumed that the quickest way to {raise effort|tăng công sức làm việc} is to raise pay.', 'Giới chủ từ lâu đã mặc định rằng cách nhanh nhất để tăng công sức làm việc là tăng lương.'],
+        ['Whether money is the primary motivator depends on what is being measured: {the decision to take a job|quyết định nhận việc}, or {the effort given|công sức bỏ ra} once it has been taken.', 'Tiền có phải động lực chính hay không tuỳ vào điều đang được đo: quyết định nhận việc, hay công sức bỏ ra sau khi đã nhận việc.'],
+        ['Judged by the second, which is what employers actually need, money matters {far less than the claim suggests|ít hơn nhiều so với nhận định}.', 'Xét theo tiêu chí thứ hai, cũng là thứ giới chủ thực sự cần, tiền quan trọng ít hơn nhiều so với nhận định trong đề.'],
+      ],
+      concl: [
+        ['Money, then, is a condition for work rather than {the force behind it|động lực đằng sau nó}.', 'Vậy nên, tiền là điều kiện để làm việc chứ không phải động lực đằng sau công việc.'],
+        ['Firms that want more than attendance would do better to change {who is asked for an opinion|ai được hỏi ý kiến} than to change the figure on a pay stub.', 'Công ty nào muốn nhiều hơn sự có mặt của nhân viên thì nên thay đổi việc ai được hỏi ý kiến hơn là thay con số trên phiếu lương.'],
+      ],
+    },
+  },
+  8: {
+    a: {
+      intro: [
+        ['The issue of {fuel prices and the environment|giá nhiên liệu và môi trường} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề giá nhiên liệu và môi trường đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While higher fuel prices can reduce driving, I {largely disagree|phần lớn không đồng ý} that they are the best solution, {mainly because|chủ yếu vì} many people have no other way to travel and poor families suffer most.', 'Dù giá nhiên liệu cao hơn có thể giảm việc lái xe, tôi phần lớn không đồng ý rằng đó là giải pháp tốt nhất, chủ yếu vì nhiều người không có cách đi lại nào khác và gia đình nghèo chịu thiệt nhất.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'a higher price cannot give people', 'another way to get to work.'], vi: 'Lý do chính là giá cao hơn không thể cho người ta một cách khác để đi làm.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, making fuel more expensive is not the best way to protect the environment.', 'Tóm lại, làm nhiên liệu đắt hơn không phải là cách tốt nhất để bảo vệ môi trường.'],
+        ['A fuel tax {both|vừa (từ mở đầu vế thứ nhất)} hurts poor workers and does little where there are no buses or trains.', 'Thuế nhiên liệu vừa làm khổ người lao động nghèo vừa chẳng có tác dụng mấy ở nơi không có xe buýt hay tàu.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether raising the {cost of fuel|chi phí nhiên liệu} is the most effective way to tackle environmental damage.', 'Có nhiều ý kiến trái chiều về việc tăng chi phí nhiên liệu có phải là cách hiệu quả nhất để xử lý thiệt hại môi trường hay không.'],
+        ['While higher prices do {discourage unnecessary driving|hạn chế việc lái xe không cần thiết}, I largely disagree that this is the best solution, because it only works where public transport exists and otherwise punishes {low-income workers|người lao động thu nhập thấp}.', 'Dù giá cao hơn quả thật hạn chế việc lái xe không cần thiết, tôi phần lớn không đồng ý rằng đây là giải pháp tốt nhất, vì nó chỉ hiệu quả ở nơi có giao thông công cộng, còn ở nơi khác thì trừng phạt người lao động thu nhập thấp.'],
+      ],
+      open: [{ c: ['The strongest argument against a fuel tax is that', 'it decides how much driving costs,', 'not whether people have another option.'], vi: 'Lập luận mạnh nhất chống lại thuế nhiên liệu là nó quyết định lái xe tốn bao nhiêu, chứ không quyết định người ta có lựa chọn khác hay không.' }],
+      concl: [
+        ['In conclusion, fuel taxes can only be {one part of the answer|một phần của lời giải}.', 'Tóm lại, thuế nhiên liệu chỉ có thể là một phần của lời giải.'],
+        ['Such a policy both succeeds where alternatives exist and {shifts hardship onto|đẩy khó khăn sang} families that have none.', 'Chính sách như vậy vừa thành công ở nơi có lựa chọn thay thế vừa đẩy khó khăn sang những gia đình không có lựa chọn nào.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Governments searching for a single {environmental lever|đòn bẩy môi trường} often reach first for the price of fuel.', 'Các chính phủ khi tìm một đòn bẩy môi trường duy nhất thường nghĩ ngay tới giá nhiên liệu.'],
+        ["Whether it is the best one depends on what 'best' is measured by: {emissions cut on paper|lượng khí thải giảm trên giấy}, or {journeys that actually change|những chuyến đi thực sự thay đổi}.", "Nó có phải đòn bẩy tốt nhất hay không tuỳ vào việc 'tốt nhất' được đo bằng gì: lượng khí thải giảm trên giấy, hay những chuyến đi thực sự thay đổi."],
+        ['By the second measure, a fuel tax works only where people have {somewhere else to go|nơi khác để chuyển sang}.', 'Xét theo tiêu chí thứ hai, thuế nhiên liệu chỉ hiệu quả ở nơi người ta có lựa chọn khác để chuyển sang.'],
+      ],
+      concl: [
+        ['Fuel pricing, then, {rewards|thưởng cho} those who already have alternatives and taxes those who do not.', 'Vậy nên, định giá nhiên liệu thưởng cho người đã có lựa chọn thay thế và đánh thuế người không có.'],
+        ['Governments would do better to build the {bus routes and rail links|tuyến xe buýt và đường sắt} first and raise the price second.', 'Chính phủ nên xây tuyến xe buýt và đường sắt trước rồi mới tăng giá sau.'],
+      ],
+    },
+  },
+  9: {
+    a: {
+      intro: [
+        ['The issue of {robots in our future|robot trong tương lai của chúng ta} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề robot trong tương lai của chúng ta đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While some people think robots are dangerous, I am {more convinced|tin hơn} that they are useful, because they do boring work and companies can still train new workers.', 'Dù một số người cho rằng robot nguy hiểm, tôi tin hơn rằng chúng hữu ích, vì chúng làm những việc nhàm chán và doanh nghiệp vẫn có thể đào tạo người mới.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'the real question is not whether robots are dangerous', 'but which jobs they take first.'], vi: 'Lý do chính là câu hỏi thật sự không phải robot có nguy hiểm không, mà là chúng lấy đi những việc nào trước.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, although robots can take some jobs, they are more helpful than harmful.', 'Tóm lại, dù robot có thể lấy đi một số việc làm, chúng có lợi nhiều hơn có hại.'],
+        ['Companies should {both|vừa (từ mở đầu vế thứ nhất)} use robots and keep training young workers.', 'Doanh nghiệp nên vừa dùng robot vừa tiếp tục đào tạo lao động trẻ.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Robots are now {a routine part of|một phần quen thuộc của} working life for many factory and warehouse staff.', 'Robot giờ là một phần quen thuộc trong công việc của nhiều nhân viên nhà máy và kho hàng.'],
+        ['While some argue that machines threaten jobs and society, I am more convinced that they are {worth adopting|đáng áp dụng}, because the real risk lies not in the machines themselves but in the {entry-level training|đào tạo cho người mới vào nghề} they quietly remove, and that training can be rebuilt.', 'Dù có người cho rằng máy móc đe doạ việc làm và xã hội, tôi tin hơn rằng chúng đáng áp dụng, vì rủi ro thật không nằm ở bản thân máy móc mà ở việc chúng lặng lẽ xoá bỏ sự đào tạo người mới vào nghề, và sự đào tạo đó có thể dựng lại được.'],
+      ],
+      open: [{ c: ['Having weighed both views,', 'I find the more useful question', 'to be which part of a job robots take first.'], vi: 'Sau khi cân nhắc cả hai quan điểm, tôi thấy câu hỏi hữu ích hơn là robot lấy đi phần nào của công việc trước.' }],
+      concl: [
+        ['In conclusion, robots are neither the danger their critics fear nor a {guaranteed benefit|lợi ích chắc chắn}, but on balance they are worth adopting.', 'Tóm lại, robot không phải mối nguy như người phản đối lo, cũng không phải lợi ích chắc chắn, nhưng nhìn chung vẫn đáng áp dụng.'],
+        ['Their value depends on whether firms both {automate routine tasks|tự động hoá việc lặp lại} and rebuild the training that newcomers need.', 'Giá trị của chúng phụ thuộc vào việc doanh nghiệp vừa tự động hoá việc lặp lại vừa dựng lại sự đào tạo mà người mới cần.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Debates about robots tend to {swing between|dao động giữa} promise and threat.', 'Các cuộc tranh luận về robot thường dao động giữa lời hứa và mối đe doạ.'],
+        ['Both sides, however, judge the machines by what they can do, when the more telling measure is {which tasks they remove first|chúng lấy đi việc nào trước} and who used to learn from those tasks.', 'Tuy vậy, cả hai phía đều đánh giá máy móc qua việc chúng làm được gì, trong khi tiêu chí nói lên nhiều hơn là chúng lấy đi việc nào trước và ai từng học nghề nhờ những việc đó.'],
+        ['On that measure, robots are valuable, but only for firms that {replace the training they erase|bù lại sự đào tạo mà chúng xoá mất}.', 'Theo tiêu chí đó, robot có giá trị, nhưng chỉ với những doanh nghiệp bù lại được sự đào tạo mà chúng xoá mất.'],
+      ],
+      concl: [
+        ['Robots, then, are {neither the danger nor the promise|không phải mối nguy cũng chẳng phải lời hứa} that each side describes.', 'Vậy nên, robot không phải mối nguy cũng chẳng phải lời hứa như mỗi phía mô tả.'],
+        ['Firms would do better to treat the lost {first rung|nấc thang đầu tiên} of the career ladder as a cost of automation than to discover it five years later.', 'Doanh nghiệp nên coi nấc thang nghề nghiệp đầu tiên bị mất là một chi phí của tự động hoá, hơn là năm năm sau mới phát hiện ra.'],
+      ],
+    },
+  },
+  10: {
+    a: {
+      intro: [
+        ['The issue of {making fuel more expensive|làm nhiên liệu đắt hơn} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề làm nhiên liệu đắt hơn đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['I {agree only to a limited extent|chỉ đồng ý ở mức hạn chế}, as higher fuel prices help only people who can take a bus or train instead.', 'Tôi chỉ đồng ý ở mức hạn chế, vì giá nhiên liệu cao hơn chỉ có tác dụng với những người có thể đi xe buýt hoặc tàu thay thế.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'only some drivers can change', 'when the price goes up.'], vi: 'Lý do chính là chỉ một số tài xế thay đổi được khi giá tăng.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, higher fuel prices are not the best way to solve environmental problems.', 'Tóm lại, giá nhiên liệu cao hơn không phải cách tốt nhất để giải quyết vấn đề môi trường.'],
+        ['This policy {both|vừa (từ mở đầu vế thứ nhất)} helps city workers who live near trains and hurts workers who must drive early in the morning.', 'Chính sách này vừa giúp người đi làm sống gần ga tàu vừa làm khổ người phải lái xe từ sáng sớm.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['{Rising fuel prices|giá nhiên liệu tăng} are often presented as the simplest answer to traffic pollution.', 'Giá nhiên liệu tăng thường được coi là câu trả lời đơn giản nhất cho ô nhiễm do giao thông.'],
+        ['I agree only to a limited extent, as a higher price changes behavior only for commuters who have a {realistic alternative|lựa chọn thay thế khả thi}, while those without one simply {pay more|trả nhiều tiền hơn}.', 'Tôi chỉ đồng ý ở mức hạn chế, vì giá cao hơn chỉ thay đổi hành vi của những người có lựa chọn thay thế khả thi, còn người không có thì đành trả nhiều tiền hơn.'],
+      ],
+      open: [{ c: ['The strongest argument against relying on price is that', 'only some drivers are actually able', 'to respond to it.'], vi: 'Lập luận mạnh nhất chống lại việc dựa vào giá là chỉ một số tài xế thực sự có thể thích ứng với nó.' }],
+      concl: [
+        ['In conclusion, fuel pricing is a useful tool but not the best {single solution|giải pháp duy nhất}.', 'Tóm lại, định giá nhiên liệu là công cụ hữu ích nhưng không phải giải pháp duy nhất tốt nhất.'],
+        ['It both {removes the easiest trips|loại bỏ những chuyến đi dễ thay thế nhất} and leaves the hardest ones to be paid for by the households with the fewest options.', 'Nó vừa loại bỏ những chuyến đi dễ thay thế nhất vừa để những chuyến khó nhất cho các hộ ít lựa chọn nhất gánh tiền.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Raising the price of fuel is attractive to governments because it {costs nothing to build|không tốn chi phí xây dựng}.', 'Tăng giá nhiên liệu hấp dẫn các chính phủ vì nó không tốn chi phí xây dựng.'],
+        ['How well it works, however, depends less on the size of the increase than on {which drivers can respond|những tài xế nào có thể thích ứng}.', 'Tuy vậy, nó hiệu quả đến đâu phụ thuộc vào việc những tài xế nào có thể thích ứng hơn là vào mức tăng.'],
+        ['For that reason I agree only in part: fuel pricing is {worth using|đáng dùng}, but not as the first or only measure.', 'Vì thế tôi chỉ đồng ý một phần: định giá nhiên liệu đáng dùng, nhưng không phải là biện pháp đầu tiên hay duy nhất.'],
+      ],
+      concl: [
+        ['Fuel pricing, then, changes behavior only where a {usable alternative|lựa chọn thay thế dùng được} already runs.', 'Vậy nên, định giá nhiên liệu chỉ thay đổi hành vi ở nơi đã có lựa chọn thay thế dùng được.'],
+        ['Cities would do better to {extend early-morning bus services|mở rộng các chuyến xe buýt sáng sớm} before raising the price than to tax the trips no one can replace.', 'Các thành phố nên mở rộng các chuyến xe buýt sáng sớm trước khi tăng giá, hơn là đánh thuế những chuyến đi không ai thay thế được.'],
+      ],
+    },
+  },
+  11: {
+    a: {
+      intro: [
+        ['The issue of {unhealthy food in shops|thực phẩm không lành mạnh trong cửa hàng} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề thực phẩm không lành mạnh trong cửa hàng đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While unhealthy food is a real problem, I {largely disagree|phần lớn không đồng ý} that shops should be banned from selling it, {mainly because|chủ yếu vì} a ban creates a black market and cheaper measures can change what people buy.', 'Dù thực phẩm không lành mạnh là vấn đề thật, tôi phần lớn không đồng ý rằng nên cấm cửa hàng bán nó, chủ yếu vì lệnh cấm tạo ra chợ đen và những biện pháp ít tốn kém hơn cũng thay đổi được thứ người ta mua.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'a ban is only one choice,', 'and cheaper measures can work better.'], vi: 'Lý do chính là lệnh cấm chỉ là một lựa chọn, và những biện pháp ít tốn kém hơn có thể hiệu quả hơn.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, shops should not be stopped from selling unhealthy food.', 'Tóm lại, không nên cấm cửa hàng bán thực phẩm không lành mạnh.'],
+        ['Higher prices and clearer labels {both|vừa (từ mở đầu vế thứ nhất)} help people choose healthier food and still let adults decide for themselves.', 'Giá cao hơn và nhãn rõ hơn vừa giúp người ta chọn đồ ăn lành mạnh hơn vừa vẫn để người lớn tự quyết định.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether shops should be {prohibited from selling|bị cấm bán} food and drinks that are proven to harm health.', 'Có nhiều ý kiến trái chiều về việc cửa hàng có nên bị cấm bán đồ ăn thức uống đã được chứng minh là có hại cho sức khoẻ hay không.'],
+        ['While the aim of protecting public health is {entirely reasonable|hoàn toàn hợp lý}, I largely disagree with an outright ban, because it invites a black market and because milder measures such as pricing and {product placement|cách bày hàng} change behavior at a lower cost.', 'Dù mục tiêu bảo vệ sức khoẻ cộng đồng hoàn toàn hợp lý, tôi phần lớn không đồng ý với lệnh cấm hoàn toàn, vì nó dẫn tới chợ đen, và vì những biện pháp nhẹ hơn như định giá và cách bày hàng thay đổi hành vi với chi phí thấp hơn.'],
+      ],
+      open: [{ c: ['The strongest argument against a ban is that', 'it is only one point on a scale', 'of possible measures.'], vi: 'Lập luận mạnh nhất chống lại lệnh cấm là nó chỉ là một điểm trên thang các biện pháp có thể dùng.' }],
+      concl: [
+        ['In conclusion, the goal behind a ban is sound, but {prohibition is the wrong tool|cấm đoán là công cụ sai}.', 'Tóm lại, mục tiêu đằng sau lệnh cấm là đúng, nhưng cấm đoán là công cụ sai.'],
+        ['Price, placement and labeling both {shift what goes into the basket|thay đổi thứ được bỏ vào giỏ} and survive changes of government far better than a ban.', 'Giá cả, cách bày hàng và nhãn mác vừa thay đổi thứ được bỏ vào giỏ vừa tồn tại qua các lần đổi chính phủ tốt hơn nhiều so với lệnh cấm.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Few foods are banned outright, yet many are {quietly discouraged|được lặng lẽ hạn chế} through price and shelf position.', 'Hiếm có thực phẩm nào bị cấm hẳn, nhưng nhiều loại được lặng lẽ hạn chế qua giá cả và vị trí trên kệ.'],
+        ['Whether shops should be forbidden to sell harmful products depends on what a policy is judged by: {how strongly it signals disapproval|nó thể hiện sự phản đối mạnh đến đâu}, or {how cheaply it changes behavior|nó thay đổi hành vi với chi phí thấp đến đâu}.', 'Có nên cấm cửa hàng bán sản phẩm có hại hay không tuỳ vào việc ta đánh giá chính sách theo tiêu chí nào: nó thể hiện sự phản đối mạnh đến đâu, hay nó thay đổi hành vi với chi phí thấp đến đâu.'],
+        ['By the second test, a ban is {the most expensive option|lựa chọn tốn kém nhất} on the scale.', 'Theo phép thử thứ hai, lệnh cấm là lựa chọn tốn kém nhất trên thang.'],
+      ],
+      concl: [
+        ['Prohibition, then, reaches the right goal by {the most costly route|con đường tốn kém nhất}.', 'Vậy nên, cấm đoán đạt đúng mục tiêu nhưng bằng con đường tốn kém nhất.'],
+        ['Governments would do better to move the product two shelves down and {raise its price slightly|tăng giá nó một chút} than to hand opponents an easy argument about freedom.', 'Chính phủ nên dời sản phẩm xuống hai kệ và tăng giá nó một chút, hơn là trao cho phe phản đối một lý lẽ dễ dàng về quyền tự do.'],
+      ],
+    },
+  },
+  12: {
+    a: {
+      intro: [
+        ['The issue of {public art|nghệ thuật công cộng} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề nghệ thuật công cộng đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While public money is limited, I {largely agree|phần lớn đồng ý} that governments should pay for sculptures in public places, {mainly because|chủ yếu vì} they make streets more pleasant and give people a place to meet.', 'Dù tiền công có hạn, tôi phần lớn đồng ý rằng chính phủ nên trả tiền cho tượng ở nơi công cộng, chủ yếu vì chúng làm đường phố dễ chịu hơn và cho mọi người một nơi để gặp nhau.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'without public art,', 'everything on a street is there to sell something.'], vi: 'Lý do chính là nếu không có nghệ thuật công cộng, mọi thứ trên phố đều có mặt để bán thứ gì đó.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, governments should spend some money on public art.', 'Tóm lại, chính phủ nên chi một phần tiền cho nghệ thuật công cộng.'],
+        ['A sculpture {both|vừa (từ mở đầu vế thứ nhất)} makes a street more beautiful and gives people a free place to meet.', 'Một bức tượng vừa làm con phố đẹp hơn vừa cho mọi người một nơi gặp gỡ miễn phí.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Opinions are divided on whether {large sculptures|những tác phẩm điêu khắc lớn} in public spaces are a {worthwhile use|cách dùng đáng giá} of government money.', 'Có nhiều ý kiến trái chiều về việc những tác phẩm điêu khắc lớn ở nơi công cộng có phải là cách dùng tiền nhà nước đáng giá hay không.'],
+        ['While there are clearly more urgent demands on the budget, I largely agree that such art deserves funding, because it offers something on a {commercial street|phố thương mại} that asks for nothing and becomes a natural {meeting point|điểm hẹn}.', 'Dù rõ ràng còn những nhu cầu chi ngân sách cấp bách hơn, tôi phần lớn đồng ý rằng nghệ thuật như vậy đáng được cấp tiền, vì nó mang tới cho phố thương mại một thứ không đòi hỏi gì và tự nhiên trở thành điểm hẹn.'],
+      ],
+      open: [{ c: ['The strongest argument for public art is that', 'it changes what a street looks like', 'when nothing else in it is paid for by the public.'], vi: 'Lập luận mạnh nhất cho nghệ thuật công cộng là nó thay đổi diện mạo con phố khi không có thứ gì khác trên đó do công chúng chi trả.' }],
+      concl: [
+        ['In conclusion, public sculptures are worth funding, though not for the reason {usually given|thường được nêu ra}.', 'Tóm lại, tượng nơi công cộng đáng được cấp tiền, dù không phải vì lý do thường được nêu ra.'],
+        ['A funded artwork both keeps a street from being {composed entirely of advertising|chỉ toàn là quảng cáo} and gives residents a place that belongs to everyone.', 'Một tác phẩm được nhà nước tài trợ vừa giữ cho con phố không chỉ toàn quảng cáo vừa cho cư dân một nơi thuộc về tất cả mọi người.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Public sculptures are usually defended by the visitors they are supposed to {attract|thu hút}.', 'Người ta thường bênh vực tượng nơi công cộng bằng lượng khách mà chúng được cho là sẽ thu hút.'],
+        ['A more useful measure is {what a street becomes without them|con phố trở thành gì khi không có chúng}.', 'Một tiêu chí hữu ích hơn là con phố trở thành gì khi không có chúng.'],
+        ['Judged that way, I agree that governments should fund them, since the alternative is not a neutral street but a {purely commercial one|con phố thuần thương mại}.', 'Xét theo cách đó, tôi đồng ý rằng chính phủ nên tài trợ, vì thứ thay thế không phải một con phố trung lập mà là một con phố thuần thương mại.'],
+      ],
+      concl: [
+        ['Public art, then, earns its place by what its {absence|sự vắng mặt} would leave behind.', 'Vậy nên, nghệ thuật công cộng xứng đáng có chỗ vì những gì sự vắng mặt của nó sẽ để lại.'],
+        ['Councils would do better to defend the {line item|khoản mục ngân sách} on those grounds than to promise tourist numbers a sculpture may never deliver.', 'Hội đồng thành phố nên bảo vệ khoản mục ngân sách này bằng lý do đó, hơn là hứa hẹn lượng khách du lịch mà một bức tượng có thể không bao giờ mang lại.'],
+      ],
+    },
+  },
+  13: {
+    a: {
+      intro: [
+        ['The issue of {road safety|an toàn giao thông} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề an toàn giao thông đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While strict punishments can stop some bad drivers, I {largely disagree|phần lớn không đồng ý} that they are the only way, {mainly because|chủ yếu vì} cameras work faster and better road design makes cars slow down.', 'Dù hình phạt nghiêm có thể ngăn một số tài xế ẩu, tôi phần lớn không đồng ý rằng đó là cách duy nhất, chủ yếu vì camera có tác dụng nhanh hơn và thiết kế đường tốt hơn buộc xe chạy chậm lại.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'punishment is only one tool,', 'and it works last.'], vi: 'Lý do chính là hình phạt chỉ là một công cụ, và nó có tác dụng sau cùng.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, stricter punishment is not the only way to make roads safer.', 'Tóm lại, hình phạt nặng hơn không phải cách duy nhất để đường sá an toàn hơn.'],
+        ['Cameras and safer road design {both|vừa (từ mở đầu vế thứ nhất)} stop dangerous driving earlier and work even when no police officer is there.', 'Camera và thiết kế đường an toàn hơn vừa ngăn lái xe nguy hiểm sớm hơn vừa có tác dụng cả khi không có cảnh sát.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Recent years have seen a marked rise in calls for {harsher penalties|hình phạt nặng hơn} for dangerous driving.', 'Những năm gần đây, lời kêu gọi phạt nặng hơn việc lái xe nguy hiểm tăng lên rõ rệt.'],
+        ['While tougher punishment clearly has a place, I strongly disagree that it is the only way to improve road safety, because {traffic cameras|camera giao thông} and road design change drivers\' behavior long before {any court is involved|toà án phải vào cuộc}.', 'Dù hình phạt nặng hơn rõ ràng có vai trò, tôi hoàn toàn không đồng ý rằng đó là cách duy nhất để cải thiện an toàn giao thông, vì camera giao thông và thiết kế đường thay đổi hành vi tài xế từ lâu trước khi toà án phải vào cuộc.'],
+      ],
+      open: [{ c: ['The strongest argument against this claim is that', 'punishment is one of at least three tools,', 'and it is the one that works last.'], vi: 'Lập luận mạnh nhất chống lại nhận định này là hình phạt chỉ là một trong ít nhất ba công cụ, và là công cụ có tác dụng sau cùng.' }],
+      concl: [
+        ['In conclusion, harsher punishment can support road safety but cannot {deliver it alone|một mình mang lại điều đó}.', 'Tóm lại, hình phạt nặng hơn có thể hỗ trợ an toàn giao thông nhưng không thể một mình mang lại điều đó.'],
+        ["Cameras and narrower lanes both change drivers' decisions immediately and work at hours when {no officer is on duty|không có cảnh sát trực}.", 'Camera và làn đường hẹp hơn vừa thay đổi quyết định của tài xế ngay lập tức vừa có tác dụng vào những giờ không có cảnh sát trực.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Calls for tougher driving penalties tend to follow every {serious accident|vụ tai nạn nghiêm trọng}.', 'Lời kêu gọi phạt lái xe nặng hơn thường xuất hiện sau mỗi vụ tai nạn nghiêm trọng.'],
+        ['The claim that punishment is the only way, however, treats the last step in a chain as the whole of it, since a driver weighs {the chance of being seen|khả năng bị nhìn thấy} long before the size of the fine.', 'Tuy vậy, nhận định rằng hình phạt là cách duy nhất đã coi bước cuối của một chuỗi là toàn bộ chuỗi, vì tài xế cân nhắc khả năng bị nhìn thấy từ lâu trước khi nghĩ tới mức phạt.'],
+        ['For that reason I {disagree with it|không đồng ý với nó}.', 'Vì lý do đó, tôi không đồng ý với nhận định này.'],
+      ],
+      concl: [
+        ['Stricter punishment, then, has a place, but only {at the end of the chain|ở cuối chuỗi}.', 'Vậy nên, hình phạt nặng hơn có vai trò, nhưng chỉ ở cuối chuỗi.'],
+        ['Governments would do better to install cameras at the {worst intersections|những ngã tư nguy hiểm nhất} and narrow the lanes that invite speeding than to raise fines that few drivers ever pay.', 'Chính phủ nên lắp camera ở những ngã tư nguy hiểm nhất và thu hẹp những làn đường dễ khiến người ta phóng nhanh, hơn là tăng những khoản phạt mà ít tài xế nào phải trả.'],
+      ],
+    },
+  },
+  14: {
+    a: {
+      intro: [
+        ['The issue of {violent films and games|phim và game bạo lực} {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} in recent years.', 'Vấn đề phim và game bạo lực đã trở thành chủ đề gây tranh cãi nhiều trong những năm gần đây.'],
+        ['While some people think violent games are harmful, I am {more convinced|tin hơn} that they should not be banned, because there is little proof that they cause crime, although they are not completely harmless.', 'Dù có người cho rằng game bạo lực có hại, tôi tin hơn rằng không nên cấm chúng, vì có rất ít bằng chứng cho thấy chúng gây ra tội phạm, dù chúng không hoàn toàn vô hại.'],
+      ],
+      open: [{ c: ['The main reason for this is that', 'both sides look at the same facts', 'but read them in opposite ways.'], vi: 'Lý do chính là cả hai phía nhìn cùng một dữ kiện nhưng hiểu theo hai hướng ngược nhau.' }],
+      concl: [
+        ['{In conclusion|Tóm lại}, although violent games may have small effects, banning them is not the answer.', 'Tóm lại, dù game bạo lực có thể có một số ảnh hưởng nhỏ, cấm chúng không phải là lời giải.'],
+        ['Parents should {both|vừa (từ mở đầu vế thứ nhất)} allow these games and watch how much time their children spend on them.', 'Cha mẹ nên vừa cho phép các trò chơi này vừa để ý con dành bao nhiêu thời gian cho chúng.'],
+      ],
+    },
+    d: {
+      intro: [
+        ['Violent films and games continue to divide opinion, with some calling for a ban and others seeing them as {harmless relaxation|thư giãn vô hại}.', 'Phim và game bạo lực vẫn gây chia rẽ ý kiến, người thì đòi cấm, người thì coi chúng là thư giãn vô hại.'],
+        ['While critics point to a real link between these games and {aggressive behavior|hành vi hung hăng}, I am more convinced that a ban is unjustified, because the evidence shows only small effects and cannot separate {cause from choice|nguyên nhân khỏi sự lựa chọn}.', 'Dù người phản đối chỉ ra mối liên hệ có thật giữa các trò chơi này và hành vi hung hăng, tôi tin hơn rằng lệnh cấm là không chính đáng, vì bằng chứng chỉ cho thấy ảnh hưởng nhỏ và không tách được nguyên nhân khỏi sự lựa chọn.'],
+      ],
+      open: [{ c: ['Having weighed both views,', 'I find that both sides read the same pattern', 'in opposite directions.'], vi: 'Sau khi cân nhắc cả hai quan điểm, tôi thấy cả hai phía đọc cùng một xu hướng theo hai hướng ngược nhau.' }],
+      concl: [
+        ['In conclusion, violent games are neither as dangerous as their critics claim nor {entirely harmless|hoàn toàn vô hại}.', 'Tóm lại, game bạo lực không nguy hiểm như người phản đối nói, cũng không hoàn toàn vô hại.'],
+        ['The evidence both {fails to justify a ban|không đủ để biện minh cho lệnh cấm} and shows effects small enough to leave to parental judgment.', 'Bằng chứng vừa không đủ để biện minh cho lệnh cấm vừa cho thấy ảnh hưởng đủ nhỏ để cha mẹ tự đánh giá.'],
+      ],
+    },
+    l: {
+      intro: [
+        ['Few forms of entertainment have been blamed for as much as {violent video games|trò chơi điện tử bạo lực}.', 'Hiếm hình thức giải trí nào bị đổ lỗi nhiều như trò chơi điện tử bạo lực.'],
+        ['Both the case for a ban and the claim that such games are harmless {rest on the same pattern|dựa trên cùng một xu hướng}: heavy players are, on average, more aggressive.', 'Cả lập luận đòi cấm lẫn nhận định rằng các trò chơi này vô hại đều dựa trên cùng một xu hướng: người chơi nhiều, tính trung bình, hung hăng hơn.'],
+        ['Read carefully, that pattern supports {neither view as stated|không quan điểm nào như cách chúng được phát biểu}.', 'Đọc kỹ thì xu hướng đó không ủng hộ quan điểm nào như cách chúng được phát biểu.'],
+      ],
+      concl: [
+        ['The link, then, is real but {far weaker than a ban would require|yếu hơn nhiều so với mức cần để ra lệnh cấm}.', 'Vậy nên, mối liên hệ là có thật nhưng yếu hơn nhiều so với mức cần để ra lệnh cấm.'],
+        ['Governments would do better to fund {long-term studies of individual players|các nghiên cứu dài hạn về từng người chơi} than to settle the question from a pattern that cannot settle it.', 'Chính phủ nên tài trợ các nghiên cứu dài hạn về từng người chơi, hơn là kết luận vấn đề từ một xu hướng vốn không thể kết luận được.'],
+      ],
+    },
+  },
+};
+
 /* ─── Hầm ngục chữ ─────────────────────────────────────────────────────────
-   One player, turn-based. Each lesson is a dungeon: a goblin guards the
-   thesis (mở bài), a brute guards the opening line of a model paragraph
-   (mở đầu đoạn), and the boss guards the rest of that paragraph (viết đoạn).
+   One player, turn-based. Each lesson is a dungeon laid out as one essay:
+   pests guard the lesson's word list, a goblin the introduction (mở bài),
+   a statue the opening line of each model paragraph (mở đầu đoạn), the boss
+   the rest of that paragraph (viết đoạn), and a castle gate the conclusion.
    Every turn is one blank with its own clock. The student picks a move
    (attack, heal, or the special once mana is full), then types the missing
    words: the move only lands if the words are right. Word banks are shown
@@ -17835,13 +18332,15 @@ const RAID_PESTS = [
   { icon: '🐀', name: 'Chuột gặm chữ' }, { icon: '🦟', name: 'Muỗi vo ve' }, { icon: '🐸', name: 'Ếch ồn ào' }, { icon: '🪲', name: 'Bọ cánh cứng' },
 ];
 const RAID_GATE_FOE = { icon: '🗿', name: 'Tượng gác cổng đoạn' };
+const RAID_CONCL_FOE = { icon: '🏰', name: 'Cổng thành kết bài' };
 // hit: what one monster strike takes; every: turns between its strikes.
-// Tier 0 is the lesson's word list, 2 the paragraph gate.
+// Tier 0 is the lesson's word list, 2 the paragraph gate, 4 the conclusion.
 const RAID_TIERS = {
   0: { label: 'Từ vựng buổi', hp: 80, hit: 15, every: 3, coin: 8, bg: 'forest' },
   1: { label: 'Mở bài', hp: 100, hit: 20, every: 3, coin: 10, bg: 'forest' },
   2: { label: 'Cổng đoạn', hp: 150, hit: 20, every: 3, coin: 15, bg: 'cave' },
   3: { label: 'Viết đoạn', hp: 300, hit: 15, every: 2, coin: 40, bg: 'lava' },
+  4: { label: 'Kết bài', hp: 120, hit: 20, every: 3, coin: 20, bg: 'dusk' },
 };
 const RAID_POTION = 30;   // health back from the heal move
 const RAID_MANA = { atk: 25, crit: 35, heal: 15, copied: 10 };
@@ -17922,25 +18421,41 @@ function raidNear(a, b) {
 function raidEnemy(n, fi, tier, finalBoss) {
   if (tier === 3) return finalBoss ? RAID_BOSSES[n] : { icon: '🐗', name: 'Hộ vệ của ' + RAID_BOSSES[n].name };
   if (tier === 2) return RAID_GATE_FOE;
+  if (tier === 4) return RAID_CONCL_FOE;
   const list = tier === 0 ? RAID_PESTS : RAID_MINIONS;
   return list[(n + fi) % list.length];
 }
 
 // The fights of one lesson at one level, in order: the word list, the
-// thesis, then a gate and a boss for each model paragraph.
+// introduction, a gate and a boss for each model paragraph, then the
+// conclusion. Intro and conclusion answer the model paragraph's prompt, so
+// the dungeon reads as one essay.
 function raidFights(L, lv) {
   const f = [];
+  const E = RAID_ESSAY[L.n][lv.id];
+  const line = ([t, vi]) => ({ t, vi });
+  const prompt = L.paras[0].prompt;
   const words = raidWordLines(L.n, lv.words);
   if (words.length) f.push({ tier: 0, kind: 'words', prompt: 'Các câu ví dụ trong danh sách từ vựng của buổi này.', label: 'Từ vựng của buổi', lines: words, given: [] });
-  const thesis = lv.extra ? { ...L.thesis, t: raidWithExtra(L.thesis.t, L.n + ':t') } : L.thesis;
-  f.push({ tier: 1, prompt: L.thesis.prompt, label: 'Câu cuối của mở bài', lines: [thesis], given: [] });
+  f.push({ tier: 1, prompt, label: 'Mở bài', lines: E.intro.map(line), given: [] });
   L.paras.forEach((p, i) => {
-    const gate = RAID_GATES[L.n + ':' + i];
-    if (gate) f.push({ tier: 2, kind: 'gate', gate, pi: i, prompt: p.prompt, label: 'Câu mở đoạn · ' + (p.label || 'Thân bài'), lines: [p.s[0]], rest: p.s.slice(1), given: [] });
+    const gate = raidGate(L.n, i, lv.id);
+    const first = { t: gate.chunks.join(' '), vi: gate.vi };
+    f.push({ tier: 2, kind: 'gate', gate, pi: i, prompt: p.prompt, label: 'Câu mở đoạn · ' + (p.label || 'Thân bài'), lines: [first], rest: p.s.slice(1), given: [] });
     const rest = p.s.slice(1).map(s => (lv.extra ? { ...s, t: raidWithExtra(s.t, `${L.n}:${i}:${s.step}`) } : s));
-    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: rest, given: [p.s[0]], final: i === L.paras.length - 1 });
+    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: rest, given: [first], final: i === L.paras.length - 1 });
   });
+  f.push({ tier: 4, prompt, label: 'Kết bài', lines: E.concl.map(line), given: [] });
   return f.map((x, i) => ({ ...x, enemy: raidEnemy(L.n, i, x.tier, x.final) }));
+}
+// The opener typed at a gate: the level's own version for Học việc and
+// Dũng sĩ, the model paragraph's first sentence for Huyền thoại. The trap
+// door is the same empty opener at every level.
+function raidGate(n, pi, lvId) {
+  const model = RAID_GATES[n + ':' + pi];
+  const own = lvId !== 'l' && RAID_ESSAY[n][lvId].open[pi];
+  if (own) return { chunks: own.c, vi: own.vi, trap: model.trap };
+  return { ...model, vi: RAID_LESSONS.find(x => x.n === n).paras[pi].s[0].vi };
 }
 function raidLv() { return RAID_LEVELS[(_rd && _rd.lv) || _raidLevel] || RAID_LEVELS.d; }
 function raidStarKey(n, lvId) { return lvId === 'd' ? String(n) : n + lvId; }
@@ -18124,7 +18639,7 @@ async function raidMap() {
           <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
           <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
         </button>
-        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
+        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục là một bài văn trọn vẹn từ mở bài tới kết bài, có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
         <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 9} sao</div>
       </div>
       <div class="rd-path">${RAID_LESSONS.map((L, i) => {
@@ -18198,15 +18713,16 @@ function raidBeginFight() {
   let pool;
   if (F.kind === 'gate') {
     // One door to pick, then the opening sentence typed chunk by chunk.
-    const others = Object.entries(RAID_GATES).filter(([k]) => k !== g.L.n + ':' + F.pi).map(([, v]) => v.chunks.join(' '));
+    const mine = F.gate.chunks.join(' ');
+    const others = RAID_LESSONS.flatMap(x => x.paras.map((_, i) => raidGate(x.n, i, lv.id))).filter(v => v.chunks.join(' ') !== mine);
     const doors = vbShuffle([
-      { text: F.gate.chunks.join(' '), ok: true },
+      { text: mine, ok: true },
       { text: F.gate.trap, why: RAID_TRAP_WHY },
-      { text: others[Math.floor(Math.random() * others.length)], why: RAID_OTHER_WHY },
+      { text: others[Math.floor(Math.random() * others.length)].chunks.join(' '), why: RAID_OTHER_WHY },
     ]);
     blanks.push({ door: true, doors, ans: '', hint: '' });
     F.gate.chunks.forEach((c, i) => blanks.push({ li: 0, ci: i, ans: c, hint: F.lines[0].vi, chunk: true }));
-    pool = Object.values(RAID_GATES).flatMap(v => v.chunks).filter(c => !F.gate.chunks.includes(c));
+    pool = others.flatMap(v => v.chunks).filter(c => !F.gate.chunks.includes(c));
   } else {
     // Every marked word in the fight is a blank, then the level trims them:
     // Học việc keeps the shortest few of the boss's, Dũng sĩ spreads its
@@ -18231,7 +18747,11 @@ function raidBeginFight() {
       const L = LESSON_VOCAB.find(x => x.n === g.L.n);
       pool = L ? L.groups.flatMap(gr => gr.items.map(it => it[0].replace(/\s*\(.*?\)\s*/g, ' ').split('/')[0].trim())) : [];
     } else {
-      pool = [...new Set(RAID_LESSONS.flatMap(x => [x.thesis, ...x.paras.flatMap(p => p.s)]).flatMap(line => raidParse(line.t).filter(p => typeof p !== 'string').map(p => p.ans)))];
+      const texts = [
+        ...RAID_LESSONS.flatMap(x => x.paras.flatMap(p => p.s)).map(l => l.t),
+        ...Object.values(RAID_ESSAY).flatMap(e => [...e[lv.id].intro, ...e[lv.id].concl]).map(l => l[0]),
+      ];
+      pool = [...new Set(texts.flatMap(t => raidParse(t).filter(p => typeof p !== 'string').map(p => p.ans)))];
     }
   }
   blanks.forEach(raidResetBlank);
@@ -18245,7 +18765,7 @@ function raidResetBlank(b) {
   b.done = false; b.wrongs = 0; b.removed = []; b.reveal = 0; b.choices = null; b.hinted = false; b.shown = false;
   const lv = raidLv();
   const tier = _rd && _rd.fights ? _rd.fights[_rd.fi].tier : 1;
-  b.bank = !b.door && (lv.bankAll || (!lv.noBank && tier < 3));
+  b.bank = !b.door && (lv.bankAll || (!lv.noBank && tier !== 3));
 }
 
 // Four words to read from: the answer and three others, closest in length
