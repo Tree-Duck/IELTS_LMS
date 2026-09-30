@@ -14603,6 +14603,7 @@ function lvRenderHub() {
         <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
         ${sel.size ? '<button class="lv-link" onclick="lvClearSel()">Bỏ chọn, trộn tất cả</button>' : ''}
       </div>
+      <div class="quest-box" id="quest-box"></div>
       <div class="wal-bar" id="wal-bar"></div>
       <div class="wal-shop hidden" id="wal-shop"></div>
       <div class="lv-modes">
@@ -14646,6 +14647,8 @@ function lvRenderHub() {
   twHubProgress();
   walBar();
   walLoad().then(walBar);
+  questRenderBox();
+  questLoad(true).then(questRenderBox);
   if (!lvProgFor().loaded) lvLoadProgress().then(p => { if (p.loaded && document.querySelector('#lesson-vocab-root .lv-topics')) lvRenderHub(); });
 }
 
@@ -15116,6 +15119,7 @@ function qtSubmit() {
   g.right = right; g.total = total; g.done = true;
   g.wrong = [...new Set(g.wrong)];
   lvLogTest(g);
+  questBump('vocab_test', 1);
   const coins = Math.round(right * walMult());
   g.coins = coins;
   if (coins) walEarn(coins, true);
@@ -15383,12 +15387,23 @@ const COSMETICS = {
       look: { body: '#F5C542', dark: '#B8860B', trim: '#FFFFFF', guard: '#B8860B', cape: '#FFFFFF', hair: '#F2E3B3', wpn: 'sword', blade: '#FFF4C2', gear: 'crown', pad: true, glow: true } },
   ],
 };
+// Pets follow the hero in Hầm ngục chữ; perk is read by the dungeon code.
+COSMETICS.pet = [
+  { id: null, name: 'Đi một mình', icon: '', desc: 'Không mang thú cưng.' },
+  { id: 'pet_cat',    rarity: 'common',    price: 80,  name: 'Mèo mướp',      icon: '🐱', perk: 'cat',    desc: 'Đầu mỗi trận hồi 8 máu.' },
+  { id: 'pet_dog',    rarity: 'common',    price: 80,  name: 'Cún con',       icon: '🐶', perk: 'dog',    desc: 'Cứ 3 câu đúng liền, cún cắn quái thêm một phát.' },
+  { id: 'pet_turtle', rarity: 'rare',      price: 150, name: 'Rùa già',       icon: '🐢', perk: 'turtle', desc: 'Mỗi lượt có thêm 4 giây.' },
+  { id: 'pet_owl',    rarity: 'rare',      price: 150, name: 'Cú thông thái', icon: '🦉', perk: 'owl',    desc: 'Ô đầu tiên mỗi trận: hiện thêm 2 chữ cái, hoặc gạch 1 từ sai trong kho.' },
+  { id: 'pet_fairy',  rarity: 'epic',      price: 300, name: 'Tiên nhỏ',      icon: '🧚', perk: 'fairy',  desc: 'Mỗi câu đúng được thêm 5 mana.' },
+  { id: 'pet_dragon', rarity: 'legendary', price: 600, name: 'Rồng con',      icon: '🐲', perk: 'dragon', desc: 'Mỗi đòn của quái có 15% bị rồng con chặn lại.' },
+];
 const SHOP_TABS = [
   { id: 'items', label: '⚡ Vật phẩm' },
   { id: 'ship',  label: '🚀 Tàu bắn' },
   { id: 'drop',  label: '🐔 Vật rơi' },
   { id: 'tower', label: '🏰 Toà nhà' },
   { id: 'hero',  label: '⚔️ Nhân vật' },
+  { id: 'pet',   label: '🐾 Thú cưng' },
   { id: 'badge', label: '🏷️ Danh hiệu' },
 ];
 let _wal = null;
@@ -15501,6 +15516,100 @@ function walBoost() {
   jPop('⏱️ Nhân đôi xu trong 10 phút!');
   jConfetti(30);
   walBar();
+}
+
+/* ─── Nhiệm vụ hằng ngày ───
+   Three a day, picked and rewarded by the server. The games report
+   progress through questBump; the reward is claimed from the box. */
+const QUEST_INFO = {
+  raid_kill:  { icon: '⚔️', text: 'Hạ 10 quái trong Hầm ngục' },
+  raid_heavy: { icon: '💥', text: 'Ra 5 đòn mạnh trúng đích' },
+  raid_combo: { icon: '🔥', text: 'Đạt combo 8 trong Hầm ngục' },
+  raid_clear: { icon: '🏆', text: 'Phá đảo 1 hầm ngục' },
+  tw_floors:  { icon: '🏗️', text: 'Xây 15 tầng tháp' },
+  tw_hazard:  { icon: '🛡️', text: 'Chặn được 1 tai họa ở Xây tháp' },
+  ts_words:   { icon: '🚀', text: 'Bắn trúng 50 chữ' },
+  ts_boss:    { icon: '👾', text: 'Hạ 1 boss Bắn Chữ' },
+  vocab_test: { icon: '📝', text: 'Làm 1 bài Kiểm tra từ vựng' },
+};
+let _quests = null;
+let _questsFor = null;
+let _questPend = {};
+let _questTimer = 0;
+async function questLoad(force) {
+  if (!currentUser) return null;
+  if (_quests && _questsFor === walWho() && !force) return _quests;
+  try {
+    const r = await api('/api/game/quests');
+    _quests = r.quests;
+    _questsFor = walWho();
+  } catch (e) { /* the box just stays empty */ }
+  return _quests;
+}
+function questMine() { return _quests && _questsFor === walWho() ? _quests : null; }
+// max: the count is a best so far (a combo), not something to add up.
+function questBump(id, n, max) {
+  const Q = questMine();
+  const q = Q && Q.list.find(x => x.id === id);
+  if (!q || q.n >= q.goal) return;
+  q.n = Math.min(q.goal, max ? Math.max(q.n, n) : q.n + n);
+  const p = _questPend[id] || (_questPend[id] = { add: 0, max: 0 });
+  if (max) p.max = Math.max(p.max, n); else p.add += n;
+  if (q.n >= q.goal) {
+    const info = QUEST_INFO[id] || {};
+    jPop(`✅ Xong nhiệm vụ: ${info.text || id}`);
+    tsSfx('level');
+  }
+  clearTimeout(_questTimer);
+  _questTimer = setTimeout(questFlush, q.n >= q.goal ? 100 : 2000);
+  questRenderBox();
+}
+async function questFlush() {
+  const pend = _questPend;
+  _questPend = {};
+  for (const [id, p] of Object.entries(pend)) {
+    try {
+      const r = await api('/api/game/quests/progress', { method: 'POST', body: JSON.stringify({ id, add: p.add, max: p.max }) });
+      if (r && r.quests) { _quests = r.quests; _questsFor = walWho(); }
+    } catch (e) { /* the next report carries on from the server's count */ }
+  }
+  questRenderBox();
+}
+async function questClaim(id, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    if (_questPend[id]) { clearTimeout(_questTimer); await questFlush(); }
+    const r = await api('/api/game/quests/claim', { method: 'POST', body: JSON.stringify({ id }) });
+    walSet(r);
+    _quests = r.quests;
+    if (r.hero && _hero && _heroFor === walWho()) _hero = { xp: r.hero.xp, alloc: r.hero.alloc || {} };
+    const q = _quests.list.find(x => x.id === id);
+    jPop(`🎁 +${q ? q.coins : 0} 🪙 · +${q ? q.xp : 0} XP`);
+    tsSfx('coin');
+    jConfetti(40);
+  } catch (e) {
+    showToast(e.message);
+  }
+  questRenderBox();
+  walBar();
+}
+function questRenderBox() {
+  const el = document.getElementById('quest-box');
+  if (!el) return;
+  const Q = questMine();
+  if (!Q) { el.innerHTML = ''; return; }
+  const done = Q.list.filter(q => q.claimed).length;
+  el.innerHTML = `
+    <div class="quest-head"><b>📋 Nhiệm vụ hôm nay</b><span>${done}/${Q.list.length} đã nhận · làm mới lúc 0 giờ</span></div>
+    ${Q.list.map(q => {
+      const info = QUEST_INFO[q.id] || { icon: '⭐', text: q.id };
+      const ready = q.n >= q.goal && !q.claimed;
+      return `<div class="quest-row${q.claimed ? ' claimed' : ready ? ' ready' : ''}">
+        <span class="quest-ic">${info.icon}</span>
+        <span class="quest-t"><b>${escapeHtml(info.text)}</b>${lvBar(q.n, q.goal, true)}<small>${q.n}/${q.goal} · thưởng 🪙 ${q.coins} + ${q.xp} XP</small></span>
+        ${q.claimed ? '<span class="quest-done">✓</span>' : `<button class="vb-start-btn quest-btn" onclick="questClaim('${q.id}', this)" ${ready ? '' : 'disabled'}>Nhận</button>`}
+      </div>`;
+    }).join('')}`;
 }
 
 // The shop inside a game: the game pauses, and only the items that game
@@ -15641,7 +15750,7 @@ function walBar() {
       <div class="wal-sec">Khung tên</div>
       <div class="wal-items">${COSMETICS.frame.map(c => walLookCard('frame', c)).join('')}</div>`;
   } else {
-    const note = { ship: 'Đổi hình tàu và màu tia laser trong Bắn Chữ.', drop: 'Đổi thứ rơi xuống trong Bắn Chữ, cả con trùm và trứng vàng.', tower: 'Đổi kiểu toà nhà trong Xây tháp.', hero: 'Đổi trang phục, vũ khí và tuyệt kỹ của nhân vật trong ⚔️ Hầm ngục chữ. Nam hay nữ thì chọn trong phòng nhân vật của trò chơi.' }[_walTab];
+    const note = { ship: 'Đổi hình tàu và màu tia laser trong Bắn Chữ.', drop: 'Đổi thứ rơi xuống trong Bắn Chữ, cả con trùm và trứng vàng.', tower: 'Đổi kiểu toà nhà trong Xây tháp.', hero: 'Đổi trang phục, vũ khí và tuyệt kỹ của nhân vật trong ⚔️ Hầm ngục chữ. Nam hay nữ thì chọn trong phòng nhân vật của trò chơi.', pet: 'Thú cưng đi theo nhân vật trong ⚔️ Hầm ngục chữ, mỗi con giúp một kiểu.' }[_walTab];
     body = `<div class="wal-earn-note">${note}</div><div class="wal-items">${COSMETICS[_walTab].map(c => walLookCard(_walTab, c)).join('')}</div>`;
   }
   shop.innerHTML = `
@@ -15673,6 +15782,7 @@ function walPreview(slot, c) {
   if (slot === 'drop') return `<div class="wal-prev-drop">${c.icons.map(i => `<span>${i}</span>`).join('')}</div>`;
   if (slot === 'tower') return `<div class="wal-prev-tower${c.id ? ' tw-skin-' + c.id : ''}">${[0, 1, 2, 3].map(i => `<div class="tw-floor tw-floor--${i}"></div>`).join('')}</div>`;
   if (slot === 'hero') return `<div class="wal-prev-hero">${raidHeroSvg(raidGender() || 'm', c)}</div>`;
+  if (slot === 'pet') return `<div class="wal-prev-pet"><span>${c.icon || '🚶'}</span><small>${escapeHtml(c.desc)}</small></div>`;
   if (slot === 'title') return `<div class="wal-prev-title">${c.text ? `<span class="lb-title">${escapeHtml(c.text)}</span>` : '<span class="wal-prev-none">Không hiện gì</span>'}</div>`;
   return `<div class="lb-row wal-prev-frame${c.id ? ' lb-' + c.id : ''}"><span class="lb-rank">🥇</span><span class="lb-name">Tên em</span></div>`;
 }
@@ -15756,7 +15866,7 @@ function jCountUp(el, to) {
   }, 45);
 }
 // Opening a new look: light rays, the item popping in, confetti by rarity.
-function jUnbox(c) {
+function jUnbox(c, note) {
   const r = c.rarity || 'common';
   const el = document.createElement('div');
   el.className = 'j-unbox j-r-' + r;
@@ -15765,7 +15875,7 @@ function jUnbox(c) {
       <div class="j-unbox-rarity">${RARITY[r].label}</div>
       <div class="j-unbox-icon">${walBigIcon(c)}</div>
       <div class="j-unbox-name">${escapeHtml(c.name)}</div>
-      <div class="j-unbox-note">Đã trang bị. Vào game là thấy ngay.</div>
+      <div class="j-unbox-note">${escapeHtml(note || 'Đã trang bị. Vào game là thấy ngay.')}</div>
       <button class="vb-start-btn" onclick="this.closest('.j-unbox').remove()">Tuyệt vời!</button>
     </div>`;
   el.addEventListener('click', e => { if (e.target === el) el.remove(); });
@@ -16506,6 +16616,7 @@ function tsExplode(it, withLaser) {
 function tsKill(it, second) {
   const g = _ts;
   g.kills++;
+  if (!it.fixed || it.core) questBump('ts_words', 1);
   g.combo++;
   g.bestCombo = Math.max(g.bestCombo, g.combo);
   g.coins += g.diff.coin * (it.boss ? 3 : 1) * walMult();
@@ -16769,6 +16880,7 @@ function tsCoreWord() {
 function tsBossDown() {
   const g = _ts;
   const b = g.boss;
+  questBump('ts_boss', 1);
   g.boss = null;
   g.items.filter(x => x.fixed).forEach(x => { x.dead = true; });
   g.items = g.items.filter(x => !x.dead);
@@ -18000,6 +18112,7 @@ function twResolve(ok, extra) {
     g.right++;
     const before = twMilestone(g.floors.length).cur;
     g.floors.push(tilt ? '~' + q.show : q.show);
+    questBump('tw_floors', 1);
     let dropped = 1;
     if (q.golden) {
       const n = g.floors.length;
@@ -18153,6 +18266,7 @@ function twHazardEnd() {
   const bonus = TW_COIN_EGG * walMult();
   g.coins += bonus;
   walEarn(bonus);
+  questBump('tw_hazard', 1);
   twBanner(`${hz.icon} ${hz.win} +${bonus} 🪙`);
   twSave(g);
   return { lost: false, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.win} +${bonus} 🪙` };
@@ -18168,6 +18282,7 @@ function twFixAnswer(ok, extra) {
     g.right++;
     const before = twMilestone(g.floors.length).cur;
     g.floors.push(q.show);
+    questBump('tw_floors', 1);
     g.best = Math.max(g.best, g.floors.length);
     g.peak = Math.max(g.peak, g.floors.length);
     tsSfx('kill');
@@ -20125,8 +20240,46 @@ function raidHeroStats() {
   const maxHp = 100 + 10 * heroPts('hp');
   let move = 'atk';
   try { const m = localStorage.getItem('raidMove'); if (['light', 'atk', 'heavy'].includes(m)) move = m; } catch (e) {}
-  return { hp: maxHp, maxHp, mana: Math.min(100, 10 * heroPts('mp')), atkMul: 1 + 0.08 * heroPts('atk'), armor: 0.05 * heroPts('arm'), move, sigCd: 0, parry: false, xp: 0 };
+  return { hp: maxHp, maxHp, mana: Math.min(100, 10 * heroPts('mp')), atkMul: 1 + 0.08 * heroPts('atk'), armor: 0.05 * heroPts('arm'), move, sigCd: 0, parry: false, xp: 0, combo: 0, bestCombo: 0, pet: walLook('pet') };
 }
+const raidPerk = k => !!(_rd && _rd.pet && _rd.pet.perk === k);
+// Right answers in a row add damage: x1.1 for two, up to x1.5 from six.
+const RAID_COMBO_STEP = 0.1;
+const RAID_COMBO_CAP = 5;
+function raidComboMul(g) { return 1 + RAID_COMBO_STEP * Math.min(RAID_COMBO_CAP, Math.max(0, g.combo - 1)); }
+function raidPetModal() {
+  document.getElementById('hero-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'hero-modal';
+  el.className = 'rd-lvmodal';
+  el.addEventListener('click', e => { if (e.target === el) heroClose(); });
+  document.body.appendChild(el);
+  raidPetRender();
+  tsSfx('equip');
+}
+function raidPetRender() {
+  const el = document.getElementById('hero-modal');
+  if (!el) return;
+  const worn = walLook('pet').id;
+  el.innerHTML = `
+    <div class="rd-lvbox hero-box" role="dialog" aria-label="Thú cưng">
+      <div class="rd-lvhead"><span>🐾 Thú cưng <small class="gs-coins">🪙 ${walCoins()}</small></span><button class="ts-icon-btn" onclick="heroClose()" aria-label="Đóng">✕</button></div>
+      ${COSMETICS.pet.map(c => {
+        const own = walOwns(c.id);
+        const arg = c.id ? `'${c.id}'` : 'null';
+        const btn = worn === c.id ? '<button class="vb-secondary-btn gs-buy" disabled>✓ Đang mang</button>'
+          : own ? `<button class="vb-start-btn gs-buy" onclick="raidPetWear(${arg})">Mang theo</button>`
+          : `<button class="vb-start-btn gs-buy" onclick="raidPetBuy('${c.id}', this)" ${walCoins() < c.price ? 'disabled' : ''}>${c.price} 🪙</button>`;
+        return `<div class="hero-row">
+          <span class="hero-ic">${c.icon || '🚶'}</span>
+          <span class="hero-t"><b>${escapeHtml(c.name)} ${c.id ? `<small>${RARITY[c.rarity].label}</small>` : ''}</b><span>${escapeHtml(c.desc)}</span></span>
+          ${btn}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+async function raidPetBuy(id, btn) { await walBuy(id, btn); raidPetRender(); }
+async function raidPetWear(id) { await walEquip('pet', id); raidPetRender(); }
 function heroModal() {
   document.getElementById('hero-modal')?.remove();
   const el = document.createElement('div');
@@ -20496,7 +20649,7 @@ async function raidMap() {
   if (!root) return;
   if (!raidGender()) { raidHeroPick(); return; }
   root.innerHTML = '<div class="loading">Đang mở bản đồ…</div>';
-  const [stars] = await Promise.all([raidLoadStars(), walLoad(), heroLoad()]);
+  const [stars] = await Promise.all([raidLoadStars(), walLoad(), heroLoad(), questLoad()]);
   if (!document.getElementById('lesson-vocab-root')) return;
   const total = Object.values(stars).reduce((a, b) => a + b, 0);
   const titles = Object.fromEntries(LESSON_VOCAB.map(l => [l.n, l.title]));
@@ -20515,6 +20668,7 @@ async function raidMap() {
           <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
           <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
         </button>
+        <button class="rd-petbtn" onclick="raidPetModal()" title="Thú cưng">${walLook('pet').id ? `${walLook('pet').icon} ${escapeHtml(walLook('pet').name)} · đổi` : '🐾 Chọn thú cưng'}</button>
         <button class="rd-herolv${free ? ' has' : ''}" onclick="heroModal()" title="Nâng cấp nhân vật">
           <b>Cấp ${HL.level}</b>
           <span class="rd-xpbar"><i style="width:${HL.need ? Math.round(HL.into / HL.need * 100) : 100}%"></i></span>
@@ -20524,6 +20678,7 @@ async function raidMap() {
         <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 9} sao</div>
         <button class="rd-tpl-open" onclick="raidTplRoom()">📖 Phòng luyện khung <small>Học khung mở bài, thân bài, kết bài của 6 dạng đề trước khi vào hầm</small></button>
       </div>
+      <div class="quest-box" id="quest-box"></div>
       <div class="rd-path">${RAID_LESSONS.map((L, i) => {
         const any = Object.keys(RAID_LEVELS).some(id => stars[raidStarKey(L.n, id)]);
         const b = RAID_BOSSES[L.n];
@@ -20537,6 +20692,7 @@ async function raidMap() {
         </button>`;
       }).join('')}</div>
     </div>`;
+  questRenderBox();
 }
 
 /* ── Phòng luyện khung ── */
@@ -20731,7 +20887,12 @@ function raidBeginFight() {
   });
   g.fight = { F, tier, blanks, bi: 0, foes, t: 0, dmg: Math.ceil(tier.hp / blanks.length), pool, own: blanks.filter(b => !b.door).map(b => b.ans) };
   g.busy = false;
+  const firstOpen = blanks.find(b => !b.door);
+  if (raidPerk('owl') && firstOpen) { firstOpen.reveal = 2; firstOpen.owl = true; }
+  const catHeal = raidPerk('cat') ? Math.min(8, g.maxHp - g.hp) : 0;
+  g.hp += catHeal;
   raidRenderArena();
+  if (catHeal) setTimeout(() => { if (_rd === g) { raidDamage('rd-hero', `🐱 +${catHeal}`, 'heal'); raidSparkle('rd-pet', '💗', 4); } }, 300);
   raidNextTurn();
 }
 function raidResetBlank(b) {
@@ -20780,8 +20941,10 @@ function raidRenderArena() {
             <div class="rd-bar-name"><span class="rd-lvbadge">Lv ${heroLevelOf(heroData().xp).level}</span> ${escapeHtml((currentUser && currentUser.name) || g.look.name)}</div>
             <div class="rd-hp"><div class="rd-hp-fill rd-hp-fill--hero" id="rd-hero-hp"></div><span class="rd-hp-num" id="rd-hero-num"></span></div>
             <div class="rd-mp" id="rd-mp"><div class="rd-mp-fill" id="rd-mana"></div><span class="rd-hp-num" id="rd-mana-num"></span></div>
+            <div class="rd-combo" id="rd-combo"></div>
           </div>
           <div class="rd-fighter rd-hero" id="rd-hero">${raidHeroSvg(g.gender, g.look)}<div class="rd-shield-fx" id="rd-shield-fx"></div></div>
+          ${g.pet && g.pet.id ? `<div class="rd-pet" id="rd-pet" title="${escapeHtml(g.pet.name + ': ' + g.pet.desc)}">${g.pet.icon}</div>` : ''}
         </div>
         <div class="rd-clock" id="rd-clock"><span id="rd-clock-n"></span></div>
         <div class="rd-side rd-enemy-side">
@@ -20821,6 +20984,11 @@ function raidRenderBars() {
   txt('rd-hero-num', `${Math.max(0, g.hp)}/${g.maxHp}`);
   txt('rd-enemy-num', `${Math.max(0, Math.round(foe.hp))}/${foe.max}`);
   txt('rd-mana-num', g.mana >= 100 ? '✨ ĐẦY' : `✨ ${g.mana}`);
+  const cb = document.getElementById('rd-combo');
+  if (cb) {
+    cb.textContent = g.combo >= 2 ? `🔥 Combo ${g.combo} · ×${raidComboMul(g).toFixed(1)}` : '';
+    cb.classList.toggle('hot', g.combo >= RAID_COMBO_CAP + 1);
+  }
   const nm = document.getElementById('rd-foe-name');
   if (nm) nm.innerHTML = `${many ? '🎯 ' : ''}${escapeHtml(foe.name)} <small>· ${many ? `còn ${raidAlive(f).length}/${f.foes.length} con` : escapeHtml(f.tier.label)}</small>`;
   document.getElementById('rd-mp')?.classList.toggle('full', g.mana >= 100);
@@ -20996,10 +21164,9 @@ function raidRenderPanel() {
   }
   if (bank && !copied) {
     if (!b.choices) b.choices = raidChoices(b);
-    if (rank === 0) {
-      const wrong = b.choices.map((c, i) => (raidNorm(c) === raidNorm(b.ans) || b.removed.includes(i) ? -1 : i)).filter(i => i >= 0);
-      b.removed.push(...vbShuffle(wrong).slice(1));
-    }
+    const wrong = () => b.choices.map((c, i) => (raidNorm(c) === raidNorm(b.ans) || b.removed.includes(i) ? -1 : i)).filter(i => i >= 0);
+    if (b.owl && !b.owlCut) { b.owlCut = true; b.removed.push(...vbShuffle(wrong()).slice(0, 1)); }
+    if (rank === 0) b.removed.push(...vbShuffle(wrong()).slice(1));
     clue += `<div class="rd-opts" title="Gõ lại từ đúng vào ô bên dưới">${b.choices.map((c, i) => `<span class="rd-opt${b.removed.includes(i) ? ' off' : ''}">${escapeHtml(c)}</span>`).join('')}</div>`;
   }
   if (copied) clue += `<div class="rd-answer">Đáp án là <b>${escapeHtml(b.ans)}</b>. Gõ lại đúng từ này để ra đòn nhẹ.</div>`;
@@ -21086,7 +21253,7 @@ function raidNextTurn() {
   g.seen = b.door ? 1 : RAID_MOVE_BASE[g.action].rank;
   if (b.wrongs >= 3) { g.action = 'light'; g.seen = 0; }
   const lv = raidLv();
-  g.tBase = b.bank || b.door ? lv.bank : lv.type;
+  g.tBase = (b.bank || b.door ? lv.bank : lv.type) + (raidPerk('turtle') ? 4 : 0);
   g.tMax = g.tBase * RAID_CLUE_TIME[g.seen];
   g.tLeft = g.tMax;
   raidRenderText();
@@ -21159,8 +21326,17 @@ function raidAct() {
   const coin = copied ? 0 : Math.round((crit ? 2 : 1) * raidLv().coinMul * walMult());
   g.coins += coin;
   if (crit) g.crits++;
+  if (!copied && !b.door) {
+    g.combo++;
+    g.bestCombo = Math.max(g.bestCombo, g.combo);
+    questBump('raid_combo', g.combo, true);
+    if (g.combo === RAID_COMBO_CAP + 1 || g.combo % 10 === 0) setTimeout(() => { if (_rd === g) raidBanner(`🔥 Combo ${g.combo}! ×${raidComboMul(g).toFixed(1)}`, 'ult'); }, 350);
+  }
+  if (kind === 'heavy') questBump('raid_heavy', 1);
+  const combo = raidComboMul(g);
+  const bite = raidPerk('dog') && !copied && g.combo > 0 && g.combo % 3 === 0 && kind !== 'heal';
   const manaBefore = g.mana;
-  const gain = kind === 'ult' ? 0 : copied ? RAID_MANA.copied : move.mana + (crit ? 10 : 0);
+  const gain = kind === 'ult' ? 0 : (copied ? RAID_MANA.copied : move.mana + (crit ? 10 : 0)) + (raidPerk('fairy') && !copied ? 5 : 0);
   g.mana = kind === 'ult' ? 0 : Math.min(100, g.mana + gain);
   if (kind === 'sig') g.sigCd = RAID_MOVE_BASE.sig.cd + 1;
   const coinFly = () => {
@@ -21190,7 +21366,7 @@ function raidAct() {
     return;
   }
   const ult = kind === 'ult' ? raidUlt(g.look) : null;
-  const dmg = Math.max(1, Math.round(f.dmg * g.atkMul * (ult ? ult.mult : move.mult) * (crit && !ult ? 1.5 : 1)));
+  const dmg = Math.max(1, Math.round(f.dmg * g.atkMul * combo * (ult ? ult.mult : move.mult) * (crit && !ult ? 1.5 : 1)));
   const land = () => {
     if (_rd !== g) return;
     if (ult && ult.hits) {
@@ -21216,6 +21392,11 @@ function raidAct() {
     }
     if (ult) raidUltAfter(g, f, ult, ti);
     if (kind === 'sig') raidSigAfter(g, f, ti, dmg);
+    if (bite) setTimeout(() => {
+      if (_rd !== g || !raidAlive(f).length) return;
+      raidAnim('rd-pet', 'lunge');
+      raidHurt(f.t, Math.max(1, Math.round(f.dmg * 0.3)), '', '🐶');
+    }, 250);
     if (crit && kind !== 'ult') raidBanner('CHÍ MẠNG! ⚡', 'crit');
     else if (kind === 'heavy' || kind === 'sig') raidBanner(`${move.icon} ${move.name}!`, 'crit');
     tsSfx(crit || kind === 'ult' || kind === 'heavy' ? 'callout' : 'kill', 8);
@@ -21328,7 +21509,11 @@ function raidStrike(i, then, mul) {
   raidAnim(raidFoeId(i), 'lunge-l');
   setTimeout(() => {
     if (_rd !== g) return;
-    if (g.parry) {
+    if (raidPerk('dragon') && Math.random() < 0.15) {
+      raidDamage('rd-hero', '🐲 Chặn!', 'block');
+      raidAnim('rd-pet', 'lunge');
+      tsSfx('shield');
+    } else if (g.parry) {
       g.parry = false;
       raidDamage('rd-hero', '🛡️ Chặn!', 'block');
       raidAnim('rd-hero', 'lunge');
@@ -21378,6 +21563,8 @@ function raidMiss(timeout, typed) {
   b.missed = true;
   g.misses++;
   const heavy = g.action === 'heavy';
+  if (g.combo >= 3) raidDamage('rd-hero', `💔 mất combo ${g.combo}`, 'block');
+  g.combo = 0;
   if (!b.bank && !b.door) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
   const near = typed && raidNear(typed, b.ans);
   raidBanner(timeout ? '⌛ Hết giờ! Quái đánh' : near ? '✏️ Suýt đúng, sai chính tả!' : heavy ? '💥 Đòn mạnh hụt! Quái đánh đau' : '✗ Chưa đúng! Quái đánh', 'miss');
@@ -21618,6 +21805,8 @@ function raidWinFight() {
   g.coins += bonus;
   walEarn(g.coins, true);
   g.coins = 0;
+  if (!g.practice) questBump('raid_kill', f.foes.length);
+  const chest = F.tier === 3 && !g.practice;
   const xp = Math.max(1, Math.round(f.tier.coin * lv.coinMul * (g.practice ? 0.5 : 1)));
   g.xp += xp;
   const up = heroGainXp(xp);
@@ -21635,6 +21824,7 @@ function raidWinFight() {
         <div class="rd-win-text">${lines.map(l => F.kind === 'tpl'
           ? `<p><span class="rd-en">${raidSlots(raidPlain(l.t))}</span><span class="rd-vi">${escapeHtml(l.vi)}</span></p>`
           : `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span>${l.vi ? `<span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span>` : ''}</p>`).join('')}</div>
+        ${chest ? '<div class="rd-chest" id="rd-chest"><button class="rd-chest-btn" onclick="raidChest()"><span class="rd-chest-ic">🎁</span> Mở rương báu của boss</button></div>' : ''}
         ${F.kind === 'tpl' ? raidTplEx(F.lines, F.ex) : ''}
         ${lastFight ? '' : `<div class="rd-heal">${lv.heal ? `💚 Hồi ${lv.heal} máu trước trận sau` : '👑 Huyền thoại: không hồi máu giữa trận'} · ✨ mana giữ nguyên</div>`}
         <div class="rd-win-btns">
@@ -21645,6 +21835,44 @@ function raidWinFight() {
     document.getElementById('rd-next')?.focus();
     raidRenderBars();
   }, 700);
+}
+
+// The boss's chest. The server rolls it: mostly coins, sometimes an item,
+// rarely a look, and only so many a day.
+async function raidChest() {
+  const box = document.getElementById('rd-chest');
+  if (!box || box.dataset.open) return;
+  box.dataset.open = '1';
+  box.innerHTML = '<div class="rd-chest-shake">🎁</div>';
+  tsSfx('boss');
+  jBuzz([20, 40, 20, 40]);
+  let r;
+  try {
+    if (_walPending) await walFlush();
+    r = await api('/api/game/chest', { method: 'POST', body: '{}' });
+  } catch (e) {
+    await new Promise(res => setTimeout(res, 700));
+    box.innerHTML = `<div class="rd-chest-got off">🔒 ${escapeHtml(e.message || 'Chưa mở được rương.')}</div>`;
+    return;
+  }
+  await new Promise(res => setTimeout(res, 900));
+  walSet(r);
+  const L = r.loot || {};
+  let text;
+  if (L.kind === 'look') {
+    const c = walLookById(L.id);
+    text = c ? `✨ ${c.name}!` : '✨ Đồ hiếm!';
+    if (c) jUnbox(c, 'Trúng từ rương báu! Vào 🛒 Cửa hàng để trang bị.');
+  } else if (L.kind === 'item') {
+    const it = SHOP_ITEMS.find(i => i.id === L.id);
+    text = `${it ? it.icon : '🎁'} +1 ${it ? it.name : L.id}`;
+    tsSfx('buy');
+  } else {
+    text = `🪙 +${L.n || 0} xu`;
+    tsSfx('coin');
+  }
+  box.innerHTML = `<div class="rd-chest-got">🎁 ${escapeHtml(text)} <small>· còn ${r.chest_left} rương hôm nay</small></div>`;
+  jConfetti(L.kind === 'look' ? 0 : 30);
 }
 
 function raidAfterWin() {
@@ -21662,6 +21890,7 @@ function raidCleared() {
   // Stars count the misses over the whole dungeon: wrong words and clocks
   // that ran out.
   const stars = g.misses <= 2 ? 3 : g.misses <= 5 ? 2 : 1;
+  questBump('raid_clear', 1);
   const prev = (_raidStars && _raidStars[raidStarKey(g.L.n, g.lv)]) || 0;
   const key = raidStarKey(g.L.n, g.lv);
   raidSaveStars(key, stars);
@@ -21677,7 +21906,7 @@ function raidCleared() {
         <div class="rd-clear-title">Hầm ngục Buổi ${g.L.n} đã sạch bóng quái!</div>
         <div class="rd-clear-lv">${raidLv().icon} Cấp ${raidLv().name} · hợp với band ${raidLv().band}</div>
         <div class="rd-clear-stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.3 + i * 0.25}s">★</span>`).join('')}</div>
-        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu · +${g.xp} XP${stars > prev ? ' · kỷ lục mới!' : ''}</div>
+        <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu · combo cao nhất ${g.bestCombo} · +${g.xp} XP${stars > prev ? ' · kỷ lục mới!' : ''}</div>
         ${stars < 3 ? `<div class="rd-clear-tip">Sai không quá ${stars === 1 ? 5 : 2} lần để lên ${stars + 1} sao.</div>` : ''}
         <div class="vb-results-btns">
           <button class="vb-start-btn" onclick="raidStart(${g.L.n}, '${g.lv}')">↺ Đánh lại</button>

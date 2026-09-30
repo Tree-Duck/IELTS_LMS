@@ -8392,3 +8392,39 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .gs-buy { padding: 0.4rem 0.7rem; font-size: 0.85rem; white-space: nowrap; }
 .rd-act.locked { opacity: 0.6; border-style: dashed; box-shadow: none; }
 .rd-act.locked.next { opacity: 1; border-color: #A8281A; background: #FFF3F0; }
+
+/* ── Combo, pets, boss chest, daily quests ── */
+.rd-combo { min-height: 1.1em; margin-top: 3px; font-size: 0.72rem; font-weight: 700; color: #FFD34D; text-shadow: 0 1px 2px #000; white-space: nowrap; }
+.rd-combo.hot { color: #FF7A3D; animation: rdLate .5s ease-in-out infinite alternate; }
+.rd-hero-side { position: relative; }
+.rd-pet { position: absolute; left: 4px; bottom: 2px; z-index: 2; font-size: 30px; line-height: 1; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)); animation: rdPet 1.6s ease-in-out infinite; }
+.rd-pet.lunge { animation: rdLunge .35s ease-out; }
+@keyframes rdPet { 50% { translate: 0 -6px; } }
+.rd-petbtn { display: block; margin: 0.1rem auto 0.3rem; padding: 0.3rem 0.8rem; border-radius: 999px; border: 2px solid #3A2D52; background: #1E1630; color: #F3EAFF; font-size: 0.8rem; cursor: pointer; }
+.wal-prev-pet { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0 6px; text-align: center; }
+.wal-prev-pet span { font-size: 2.4rem; line-height: 1; }
+.wal-prev-pet small { font-size: 0.68rem; color: var(--moss); line-height: 1.25; }
+.rd-chest { margin: 0.5rem 0; text-align: center; }
+.rd-chest-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1.1rem; border-radius: 14px; border: 2px solid #8B5A2B; background: linear-gradient(135deg, #FFE08A, #F5B642); color: #4A2A0A; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 3px 0 #8B5A2B; animation: rdReady 1s ease-in-out infinite alternate; }
+.rd-chest-ic { font-size: 1.5rem; }
+.rd-chest-shake { font-size: 2.6rem; display: inline-block; animation: rdChest .15s linear infinite alternate; }
+@keyframes rdChest { from { rotate: -8deg; } to { rotate: 8deg; } }
+.rd-chest-got { display: inline-block; padding: 0.45rem 0.9rem; border-radius: 12px; background: #FFF4D6; color: #6B3E0A; font-weight: 700; animation: jCard .35s cubic-bezier(.2, 1.4, .4, 1); }
+.rd-chest-got small { font-weight: 400; }
+.rd-chest-got.off { background: var(--line); color: var(--moss); }
+.quest-box:empty { display: none; }
+.quest-box { margin: 0.6rem 0; padding: 0.6rem 0.75rem; border-radius: 16px; border: 2px solid var(--line); background: var(--surface); color: var(--gray-800); text-align: left; }
+.rd-mapwrap .quest-box { max-width: 560px; margin: 0.6rem auto; }
+.quest-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+.quest-head span { font-size: 0.74rem; color: var(--moss); }
+.quest-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-top: 1px solid var(--line); }
+.quest-ic { font-size: 1.4rem; }
+.quest-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.quest-t b { font-size: 0.86rem; }
+.quest-t small { font-size: 0.72rem; color: var(--moss); }
+.quest-row.ready .quest-btn { animation: rdReady 1s ease-in-out infinite alternate; }
+.quest-row.claimed { opacity: 0.55; }
+.quest-btn { padding: 0.35rem 0.8rem; font-size: 0.82rem; }
+.quest-done { font-size: 1.2rem; color: #1F8A4C; font-weight: 700; }
+@media (max-width: 600px) { .rd-pet { font-size: 22px; } }
+@media (prefers-reduced-motion: reduce) { .rd-pet, .rd-combo.hot, .rd-chest-btn, .quest-row.ready .quest-btn { animation: none !important; } }

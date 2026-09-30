@@ -3929,8 +3929,9 @@ const COSMETIC_PRICES = {
   title_hunter: 60, title_typer: 150, title_architect: 150, title_wordlord: 300, title_band9: 600,
   frame_gold: 150, frame_fire: 300, frame_rainbow: 600,
   hero_mage: 60, hero_archer: 60, hero_ninja: 150, hero_dragon: 300, hero_gold: 600,
+  pet_cat: 80, pet_dog: 80, pet_turtle: 150, pet_owl: 150, pet_fairy: 300, pet_dragon: 600,
 };
-const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame', 'hero'];
+const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame', 'hero', 'pet'];
 const BOOST_MS = 10 * 60 * 1000;
 const WALLET_EARN_MAX = 500;
 const WALLET_DAY_MAX = 2000;
@@ -4032,6 +4033,129 @@ app.post('/api/game/wallet/equip', authenticate, walletRoute((w, b) => {
   if (!COSMETIC_PRICES[b.item] || b.item.split('_')[0] !== b.slot) return 'Món này không hợp ô này.';
   if (!w.owned[b.item]) return 'Em chưa có món này.';
   w.equip[b.slot] = b.item;
+  return null;
+}));
+
+// ─── Daily quests ───────────────────────────────────────────────────────────
+// Three a day from this list, kept on the wallet. The games report progress;
+// the reward is paid here, coins to the wallet and XP to the dungeon hero.
+const QUESTS = {
+  raid_kill:  { goal: 10, coins: 40, xp: 60 },
+  raid_heavy: { goal: 5,  coins: 40, xp: 60 },
+  raid_combo: { goal: 8,  coins: 50, xp: 80, max: true },
+  raid_clear: { goal: 1,  coins: 60, xp: 100 },
+  tw_floors:  { goal: 15, coins: 40, xp: 40 },
+  tw_hazard:  { goal: 1,  coins: 40, xp: 40 },
+  ts_words:   { goal: 50, coins: 40, xp: 40 },
+  ts_boss:    { goal: 1,  coins: 50, xp: 50 },
+  vocab_test: { goal: 1,  coins: 40, xp: 40 },
+};
+const QUEST_COUNT = 3;
+// Today's quests, drawn fresh on a new day: at most two from one game.
+function questsToday(w) {
+  const today = walletDay();
+  if (w.quests && w.quests.day === today && Array.isArray(w.quests.list)) return w.quests;
+  const ids = Object.keys(QUESTS).sort(() => Math.random() - 0.5);
+  const list = [];
+  for (const id of ids) {
+    const game = id.split('_')[0];
+    if (list.filter(q => q.id.split('_')[0] === game).length >= 2) continue;
+    const Q = QUESTS[id];
+    list.push({ id, goal: Q.goal, coins: Q.coins, xp: Q.xp, n: 0, claimed: false });
+    if (list.length >= QUEST_COUNT) break;
+  }
+  w.quests = { day: today, list };
+  return w.quests;
+}
+app.get('/api/game/quests', authenticate, (req, res) => {
+  try {
+    let quests;
+    // Saved only when a new day draws new quests.
+    db.updateWallet(req.user.id, w => {
+      const fresh = !(w.quests && w.quests.day === walletDay());
+      quests = questsToday(w);
+      return fresh;
+    });
+    res.json({ quests });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load quests' });
+  }
+});
+app.post('/api/game/quests/progress', authenticate, walletRoute((w, b, extra) => {
+  const Q = questsToday(w);
+  extra.quests = Q;
+  const q = Q.list.find(x => x.id === b.id);
+  if (!q) return null;
+  const def = QUESTS[q.id];
+  const add = Math.max(0, Math.min(q.goal, parseInt(b.add, 10) || 0));
+  const max = Math.max(0, Math.min(q.goal, parseInt(b.max, 10) || 0));
+  q.n = Math.min(q.goal, def.max ? Math.max(q.n, max, add) : q.n + add);
+  return null;
+}));
+app.post('/api/game/quests/claim', authenticate, (req, res) => {
+  try {
+    let refusal = null;
+    let paid = null;
+    const extra = {};
+    const w = db.updateWallet(req.user.id, w => {
+      const Q = questsToday(w);
+      extra.quests = Q;
+      const q = Q.list.find(x => x.id === (req.body || {}).id);
+      if (!q) { refusal = 'Hôm nay không có nhiệm vụ này.'; return false; }
+      if (q.claimed) { refusal = 'Em đã nhận thưởng nhiệm vụ này rồi.'; return false; }
+      if (q.n < q.goal) { refusal = 'Nhiệm vụ chưa xong.'; return false; }
+      q.claimed = true;
+      w.coins = (w.coins || 0) + q.coins;
+      w.earned = (w.earned || 0) + q.coins;
+      const week = walletWeek();
+      if (w.week !== week) { w.week = week; w.week_earned = 0; }
+      w.week_earned += q.coins;
+      paid = q;
+    });
+    if (refusal) return res.status(400).json({ error: refusal, ...walletOut(w), ...extra });
+    const h = db.updateHero(req.user.id, h => { h.xp = (h.xp || 0) + paid.xp; });
+    res.json({ ...walletOut(w), ...extra, hero: heroOut(h) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to claim the reward' });
+  }
+});
+
+// ─── Boss chest ─────────────────────────────────────────────────────────────
+// Opened after a dungeon boss. Mostly coins, sometimes an item, rarely a
+// look the student does not own yet; a few a day.
+const CHEST_DAY_MAX = 10;
+const CHEST_ITEMS = ['hint', 'shield', 'revive', 'skip', 'slow', 'double'];
+app.post('/api/game/chest', authenticate, walletRoute((w, b, extra) => {
+  const today = walletDay();
+  if (w.chest_day !== today) { w.chest_day = today; w.chest_n = 0; }
+  if (w.chest_n >= CHEST_DAY_MAX) return `Hôm nay em đã mở đủ ${CHEST_DAY_MAX} rương. Mai quay lại nhé!`;
+  w.chest_n += 1;
+  const coins = n => {
+    w.coins = (w.coins || 0) + n;
+    w.earned = (w.earned || 0) + n;
+    const week = walletWeek();
+    if (w.week !== week) { w.week = week; w.week_earned = 0; }
+    w.week_earned += n;
+    return { kind: 'coins', n };
+  };
+  const r = Math.random();
+  let loot;
+  if (r < 0.04) {
+    const looks = Object.keys(COSMETIC_PRICES).filter(id => COSMETIC_PRICES[id] <= 150 && !w.owned[id]);
+    if (looks.length) {
+      const id = looks[Math.floor(Math.random() * looks.length)];
+      w.owned[id] = true;
+      loot = { kind: 'look', id };
+    } else loot = coins(100);
+  } else if (r < 0.39) {
+    const id = CHEST_ITEMS[Math.floor(Math.random() * CHEST_ITEMS.length)];
+    if ((w.inv[id] || 0) >= WALLET_INV_MAX) loot = coins(30);
+    else { w.inv[id] = (w.inv[id] || 0) + 1; loot = { kind: 'item', id }; }
+  } else {
+    loot = coins(15 + Math.floor(Math.random() * 26));
+  }
+  extra.loot = loot;
+  extra.chest_left = CHEST_DAY_MAX - w.chest_n;
   return null;
 }));
 
