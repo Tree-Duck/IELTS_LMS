@@ -4881,10 +4881,28 @@ const io = new SocketIOServer(httpServer, {
   cors: { origin: 'https://tintinlab.com', methods: ['GET', 'POST'] }
 });
 
+// Live whiteboard rooms: only signed-in accounts may connect, a room name is
+// a plain code, and a socket can only draw into the room it joined.
+const WB_ROOM = /^[A-Z0-9]{6,16}$/;
+io.use((socket, next) => {
+  try {
+    const t = socket.handshake.auth && socket.handshake.auth.token;
+    const d = jwt.verify(String(t || ''), JWT_SECRET);
+    const u = db.getUserById(d.id);
+    if (!u || (u.pwd_changed_at && d.iat < Math.floor(u.pwd_changed_at / 1000))) return next(new Error('auth'));
+    socket.data.uid = u.id;
+    next();
+  } catch (e) {
+    next(new Error('auth'));
+  }
+});
+
 io.on('connection', (socket) => {
   let currentRoom = null;
 
-  socket.on('join-room', ({ room }) => {
+  socket.on('join-room', (msg) => {
+    const room = msg && typeof msg.room === 'string' ? msg.room : '';
+    if (!WB_ROOM.test(room)) return;
     if (currentRoom) socket.leave(currentRoom);
     currentRoom = room;
     socket.join(room);
@@ -4892,8 +4910,9 @@ io.on('connection', (socket) => {
     io.to(room).emit('peer-count', { count: size });
   });
 
-  socket.on('canvas-update', ({ room, objects, tabId }) => {
-    socket.to(room).emit('canvas-update', { objects, tabId });
+  socket.on('canvas-update', (msg) => {
+    if (!currentRoom || !msg || !Array.isArray(msg.objects)) return;
+    socket.to(currentRoom).emit('canvas-update', { objects: msg.objects, tabId: msg.tabId });
   });
 
   socket.on('disconnect', () => {

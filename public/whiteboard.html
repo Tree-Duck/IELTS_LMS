@@ -2259,13 +2259,23 @@ resizeCanvases();
 window.addEventListener('beforeunload', autosave);
 
 // ─── Real-time Collab ───────────────────────────────────────────────────────
+// Ten characters from a secure source: not something anyone can guess.
 function genRoomId() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => abc[b % abc.length]).join('');
+}
+function wbToken() {
+  try { return localStorage.getItem('ielts_token'); } catch (e) { return null; }
+}
+function wbNeedLogin() {
+  const el = document.getElementById('room-indicator');
+  if (el) { el.textContent = '🔒 Đăng nhập tintinlab.com rồi mở lại link để vào phòng'; el.style.display = 'inline-block'; el.style.background = '#5a1f1f'; el.style.color = '#ffb4b4'; }
 }
 
 function initSocket() {
   if (socket) return;
-  socket = io();
+  socket = io({ auth: { token: wbToken() } });
+  socket.on('connect_error', () => { wbNeedLogin(); });
   socket.on('canvas-update', ({ objects, tabId }) => {
     const tab = state.tabs.find(t => t.id === tabId) || activeTab();
     if (tab) { tab.objects = objects; redraw(); }
@@ -2282,6 +2292,7 @@ function initSocket() {
 }
 
 function openShareModal() {
+  if (!wbToken()) { alert('Đăng nhập tintinlab.com trước để mở phòng bảng trắng trực tiếp.'); return; }
   if (!roomId) {
     roomId = genRoomId();
     initSocket();
@@ -2308,6 +2319,7 @@ function copyShareLink() {
   const r = new URLSearchParams(location.search).get('room');
   if (r) {
     roomId = r;
+    if (!wbToken()) { wbNeedLogin(); return; }
     initSocket();
     socket.emit('join-room', { room: roomId });
     const el = document.getElementById('room-indicator');
