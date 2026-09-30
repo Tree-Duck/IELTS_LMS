@@ -8086,6 +8086,26 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .rd-gate-a { font-size: 1.05rem; line-height: 2.1; }
 .rd-gate-a > b, .rd-gate-rest > b { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #7A5A00; margin-right: 0.3rem; }
 .rd-slot--chunk { min-width: 5em; }
+.rd-tslot { display: inline-block; padding: 0 0.4em; margin: 0 0.05em; border-radius: 6px; background: #FFF1C2; color: #6B4E00; font-style: italic; font-size: 0.9em; line-height: 1.45; }
+.rd-tf { color: #0E4D3C; font-weight: 800; }
+.rd-tpl-open { display: block; margin: 0.8rem auto 0; padding: 0.6rem 1.1rem; border-radius: 16px; border: 2px solid #0E4D3C; background: #E8F5EC; color: #0E4D3C; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: inherit; box-shadow: 0 3px 0 #0E4D3C; max-width: 30rem; }
+.rd-tpl-open small { display: block; font-weight: 500; font-size: 0.8rem; color: #3F6B55; margin-top: 0.1rem; }
+.rd-tpl-open:hover { transform: translateY(-2px); }
+.rd-tpl-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.4rem; max-width: 46rem; margin: 0.4rem auto; }
+.rd-tpl-tabs--lv { grid-template-columns: repeat(3, 1fr); }
+.rd-tpl-tab { padding: 0.35rem 0.5rem; border-radius: 12px; border: 2px solid #CDB98A; background: #FFFDF6; color: #4A3B1A; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit; }
+.rd-tpl-tab small { display: block; font-weight: 500; opacity: 0.75; font-size: 0.75rem; }
+.rd-tpl-tab.on { background: #0E4D3C; border-color: #0E4D3C; color: #fff; }
+.rd-tpl-tab--a.on { background: #2E8B4E; border-color: #2E8B4E; }
+.rd-tpl-tab--d.on { background: #2F5FC8; border-color: #2F5FC8; }
+.rd-tpl-tab--l.on { background: #A8740A; border-color: #A8740A; }
+.rd-tpl-card { max-width: 46rem; margin: 0.6rem auto 1.5rem; background: #FFFDF6; border: 2px solid #E4D8BC; border-radius: 18px; padding: 0.9rem 1rem; }
+.rd-tpl-ask { font-size: 0.88rem; color: #6B5B3A; margin-bottom: 0.3rem; }
+.rd-tpl-part { margin-top: 0.7rem; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #8C7B55; }
+.rd-tpl-card ol { margin: 0.2rem 0 0; padding-left: 1.4rem; }
+.rd-tpl-card li { margin: 0.35rem 0; line-height: 1.5; color: #2A2A2A; }
+.rd-tpl-card li small { display: block; color: #7A7057; font-size: 0.8rem; }
+.rd-tpl-go { display: block; margin: 1rem auto 0.2rem; }
 .rd-gate-rest { margin-top: 0.4rem; color: #6B5A35; font-size: 0.95rem; line-height: 1.6; }
 .rd-door-note { font-size: 0.88rem; color: var(--moss); margin-bottom: 0.5rem; }
 .rd-why { font-size: 0.9rem; color: #9A2A1F; background: #FFF0EE; border-radius: 10px; padding: 0.5rem 0.7rem; margin-bottom: 0.5rem; }
