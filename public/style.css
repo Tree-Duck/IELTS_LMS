@@ -8428,3 +8428,56 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .quest-done { font-size: 1.2rem; color: #1F8A4C; font-weight: 700; }
 @media (max-width: 600px) { .rd-pet { font-size: 22px; } }
 @media (prefers-reduced-motion: reduce) { .rd-pet, .rd-combo.hot, .rd-chest-btn, .quest-row.ready .quest-btn { animation: none !important; } }
+
+/* ── Xây tháp: the tower rebuilds itself at each milestone (free skin) ── */
+.tw-floor { transition: background-color .6s, border-color .6s; }
+.tw-stack::after { display: block; flex: none; margin: 0 -10px; pointer-events: none; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor:not(.tw-floor--star) { border-color: #4A3524; background-image: linear-gradient(#B08A5E, #B08A5E), repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 21px); background-size: 22px 14px, 100% 100%; background-position: 14px 6px, 0 0; background-repeat: no-repeat;  }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--0:not(.tw-floor--star) { background-color: #8A6A4A; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--1:not(.tw-floor--star) { background-color: #7A5C3E; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--2:not(.tw-floor--star) { background-color: #96755A; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--3:not(.tw-floor--star) { background-color: #6E5238; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-stack::after { content: ''; height: 16px; background: repeating-linear-gradient(90deg, #8E4E26 0 7px, #B0663A 7px 13px); clip-path: polygon(0 55%, 100% 0, 100% 100%, 0 100%); margin: 0 -6px; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--1:not(.tw-floor--tilt) { rotate: -1.5deg; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor--3:not(.tw-floor--tilt) { rotate: 1.2deg; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-0 .tw-floor:not(.tw-floor--star)::before { content: ''; position: absolute; right: 12px; bottom: 5px; width: 26px; height: 2px; background: #3A2818; rotate: -18deg; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-floor:not(.tw-floor--star) { border-color: #7A5230; background-image: linear-gradient(#8FC6E8, #8FC6E8), linear-gradient(#8FC6E8, #8FC6E8), linear-gradient(#FFFFFF, #FFFFFF), linear-gradient(#FFFFFF, #FFFFFF); background-size: 16px 20px, 16px 20px, 22px 26px, 22px 26px; background-position: 13px 8px, calc(100% - 13px) 8px, 10px 5px, calc(100% - 10px) 5px; background-repeat: no-repeat;  }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-floor--0:not(.tw-floor--star) { background-color: #F2C57C; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-floor--1:not(.tw-floor--star) { background-color: #EFA48B; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-floor--2:not(.tw-floor--star) { background-color: #A8D5BA; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-floor--3:not(.tw-floor--star) { background-color: #F7E1A0; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-1 .tw-stack::after { content: ''; height: 20px; background: repeating-linear-gradient(0deg, #A8321F 0 5px, #C94A36 5px 9px); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-floor:not(.tw-floor--star) { border-color: #6B4F2A; background-image: linear-gradient(#6FB1DE, #6FB1DE), linear-gradient(#6FB1DE, #6FB1DE), linear-gradient(#6FB1DE, #6FB1DE), repeating-linear-gradient(90deg, #4A4A4A 0 2px, transparent 2px 7px), linear-gradient(#4A4A4A, #4A4A4A); background-size: 16px 18px, 16px 18px, 16px 18px, 100% 8px, 100% 2px; background-position: 10px 6px, center 6px, calc(100% - 10px) 6px, 0 100%, 0 calc(100% - 8px); background-repeat: no-repeat;  }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-floor--0:not(.tw-floor--star) { background-color: #FFF4E0; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-floor--1:not(.tw-floor--star) { background-color: #FCE3C4; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-floor--2:not(.tw-floor--star) { background-color: #FFF0D6; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-floor--3:not(.tw-floor--star) { background-color: #F7DDB8; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-2 .tw-stack::after { content: ''; content: '★ HOTEL ★'; height: 20px; line-height: 20px; text-align: center; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; color: #FFD34D; background: #2C3E50; border-radius: 4px 4px 0 0; text-shadow: 0 0 6px rgba(255, 211, 77, 0.8); margin: 0 6px; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-floor:not(.tw-floor--star) { border-color: #5E5A52; background-image: radial-gradient(circle at 50% 50%, #3E8E4E 0 4px, transparent 5px), repeating-linear-gradient(90deg, transparent 0 6px, #7FB3D5 6px 20px, transparent 20px 26px), linear-gradient(#8A847A, #8A847A); background-size: 26px 10px, 100% 16px, 100% 3px; background-position: 0 calc(100% - 4px), 0 7px, 0 calc(100% - 4px); background-repeat: no-repeat; background-repeat: repeat-x, no-repeat, no-repeat; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-floor--0:not(.tw-floor--star) { background-color: #D5CFC4; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-floor--1:not(.tw-floor--star) { background-color: #C9C2B5; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-floor--2:not(.tw-floor--star) { background-color: #DDD7CC; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-floor--3:not(.tw-floor--star) { background-color: #BFB8AA; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-3 .tw-stack::after { content: ''; height: 16px; background: linear-gradient(#9AA4AE, #9AA4AE) 22px 0 / 22px 14px no-repeat, linear-gradient(#9AA4AE, #9AA4AE) calc(100% - 22px) 0 / 22px 14px no-repeat, linear-gradient(#5E5A52, #5E5A52) 0 100% / 100% 3px no-repeat; margin: 0 4px; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-floor:not(.tw-floor--star) { border-color: #1F3A5A; background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 65%), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0 2px, transparent 2px 17px); background-size: 100% 100%, 100% 100%; background-position: 0 0, 0 0; background-repeat: no-repeat;  }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-floor--0:not(.tw-floor--star) { background-color: #3E6E9E; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-floor--1:not(.tw-floor--star) { background-color: #4A7FB2; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-floor--2:not(.tw-floor--star) { background-color: #35628E; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-floor--3:not(.tw-floor--star) { background-color: #5588BA; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-4 .tw-stack::after { content: ''; content: 'H'; height: 16px; line-height: 16px; text-align: center; font-size: 0.7rem; font-weight: 700; color: #fff; background: #2B3E52; border-radius: 50% 50% 0 0; margin: 0 24px; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-floor:not(.tw-floor--star) { border-color: #C9A227; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(255, 206, 84, 0.75) 5px 13px, transparent 13px 18px), linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 70%); background-size: 100% 12px, 100% 100%; background-position: 0 8px, 0 0; background-repeat: no-repeat;  }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-floor--0:not(.tw-floor--star) { background-color: #C9D6DF; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-floor--1:not(.tw-floor--star) { background-color: #B8C7D1; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-floor--2:not(.tw-floor--star) { background-color: #D3DEE6; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-floor--3:not(.tw-floor--star) { background-color: #AEBFCB; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-5 .tw-stack::after { content: ''; height: 38px; background: linear-gradient(90deg, #9FB1BF, #E9F0F5 50%, #9FB1BF); clip-path: polygon(50% 0, 56% 60%, 70% 60%, 76% 100%, 24% 100%, 30% 60%, 44% 60%); margin: 0 30px; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-floor:not(.tw-floor--star) { border-color: #D4AF37; background-image: repeating-linear-gradient(90deg, #D4AF37 0 2px, transparent 2px 17px), repeating-linear-gradient(90deg, transparent 0 5px, rgba(255, 221, 128, 0.55) 5px 12px, transparent 12px 17px); background-size: 100% 100%, 100% 10px; background-position: 0 0, 0 9px; background-repeat: no-repeat; box-shadow: 0 0 10px rgba(212, 175, 55, 0.35); }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-floor--0:not(.tw-floor--star) { background-color: #1F2A44; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-floor--1:not(.tw-floor--star) { background-color: #26345A; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-floor--2:not(.tw-floor--star) { background-color: #1A2440; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-floor--3:not(.tw-floor--star) { background-color: #2C3B63; }
+.tw-scene:not([class*="tw-skin-"]).tw-stage-6 .tw-stack::after { content: ''; height: 46px; background: linear-gradient(90deg, #B8912A, #FFE8A3 50%, #B8912A); clip-path: polygon(50% 0, 55% 40%, 66% 100%, 34% 100%, 45% 40%); margin: 0 24px; filter: drop-shadow(0 0 8px rgba(255, 215, 90, 0.9)); }
+.tw-scene.tw-upgrade .tw-stack { animation: twUpgrade 1.2s ease-out; }
+.tw-scene.tw-upgrade::after { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(circle at 50% 70%, rgba(255, 244, 190, 0.95), rgba(255, 244, 190, 0) 60%); animation: twFlash 1.2s ease-out forwards; }
+@keyframes twUpgrade { 0% { filter: brightness(2.2) saturate(0.3); } 25% { transform: scale(1.04); } 100% { filter: none; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tw-scene.tw-upgrade .tw-stack, .tw-scene.tw-upgrade::after { animation: none !important; } }

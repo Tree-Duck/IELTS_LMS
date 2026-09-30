@@ -17559,6 +17559,10 @@ const TW_MILESTONES = [
   { at: 68, name: 'Bitexco', icon: '🗼' },
   { at: 81, name: 'Landmark 81', icon: '🌆' },
 ];
+// Below the first milestone the tower is a shack; each milestone rebuilds the
+// whole tower in a better style (tw-stage-N on the scene, free skin only).
+const TW_STAGE0 = { name: 'Nhà tạm xập xệ', icon: '🛖' };
+const twStage = h => TW_MILESTONES.filter(m => h >= m.at).length;
 const TW_FLOOR_H = 40;
 // Typed answers get TW_TRIES goes, but only a first go builds a straight
 // floor. A floor built on a later go leans, and TW_TILT_MAX leaning floors
@@ -17823,6 +17827,19 @@ function twRenderScene(animateTop) {
     return `<div class="tw-floor tw-floor--${i % 4}${i >= h - drop ? ' tw-drop' : ''}${f === '⭐' ? ' tw-floor--star' : ''}${tilt ? ' tw-floor--tilt' : ''}"${style}><span class="tw-plate">${escapeHtml(twPlate(f))}</span></div>`;
   }).join('');
   scene.classList.toggle('tw-leaning', lean >= TW_TILT_MAX);
+  // The look follows the height: up a stage is a rebuild with a flash, down
+  // a stage (floors lost) quietly drops back.
+  const stage = twStage(h);
+  if (g.stage !== stage) {
+    [...scene.classList].filter(c => c.startsWith('tw-stage-')).forEach(c => scene.classList.remove(c));
+    scene.classList.add('tw-stage-' + stage);
+    if (g.stage !== undefined && stage > g.stage) {
+      scene.classList.remove('tw-upgrade'); void scene.offsetWidth; scene.classList.add('tw-upgrade');
+      setTimeout(() => scene.classList.remove('tw-upgrade'), 1300);
+      tsSfx('rankup');
+    }
+    g.stage = stage;
+  }
   // Keep the top of the tower in view: the world slides down as it grows.
   const room = scene.clientHeight - 200;
   const lift = Math.max(0, h * TW_FLOOR_H - room);
@@ -17837,7 +17854,7 @@ function twRenderScene(animateTop) {
   const { cur, next } = twMilestone(h);
   const meter = document.getElementById('tw-meter');
   if (meter) meter.innerHTML = `<div class="tw-meter-h">${h}<small> tầng</small></div>` +
-    (cur ? `<div class="tw-meter-cur">${cur.icon} ${escapeHtml(cur.name)}</div>` : '') +
+    `<div class="tw-meter-cur">${(cur || TW_STAGE0).icon} ${escapeHtml((cur || TW_STAGE0).name)}</div>` +
     (next ? `<div class="tw-meter-next">còn ${next.at - h} tầng tới ${next.icon} ${escapeHtml(next.name)}</div>` : '<div class="tw-meter-next">Đã lên đỉnh 🎉</div>');
   const hearts = document.getElementById('tw-hearts');
   if (hearts) hearts.innerHTML = '❤️'.repeat(Math.max(0, g.lives)) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, TW_LIVES - g.lives))}</span>`;
@@ -18080,7 +18097,7 @@ function twCheckMilestone(before) {
   const after = twMilestone(g.floors.length).cur;
   if (after && after !== before) {
     if (after.at > g.checkpoint) { g.checkpoint = after.at; g.ckFloors = g.floors.slice(0, after.at); }
-    twBanner(`${after.icon} ${after.name}, ${after.at} tầng!`);
+    twBanner(`${after.icon} Nâng cấp thành ${after.name}! ${after.at} tầng`);
     return true;
   }
   return false;
