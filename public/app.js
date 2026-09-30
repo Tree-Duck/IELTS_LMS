@@ -8144,18 +8144,20 @@ async function openClassDetail(classId) {
     document.getElementById('class-detail-title').textContent = 'Class';
   }
 
+  document.getElementById('class-tab-vocab').classList.toggle('hidden', !currentUser || currentUser.role === 'student');
   // Default to calendar tab
   switchClassTab('calendar');
 }
 
 function switchClassTab(tab) {
-  ['calendar','roster','stats'].forEach(t => {
+  ['calendar','roster','stats','vocab'].forEach(t => {
     document.getElementById(`class-panel-${t}`).classList.toggle('hidden', t !== tab);
     document.getElementById(`class-tab-${t}`).classList.toggle('active', t === tab);
   });
   if (tab === 'calendar') renderClassCalendar();
   else if (tab === 'roster') loadClassRoster();
   else if (tab === 'stats') loadClassStats();
+  else if (tab === 'vocab') loadClassVocab();
 }
 
 async function renderClassCalendar() {
@@ -14410,22 +14412,84 @@ let _fcKeyHandler = null;
 
 function lvSave(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
 
-function lvKnownSet() {
-  try { return new Set(JSON.parse(localStorage.getItem('lvKnown') || '[]')); } catch (e) { return new Set(); }
+// "Nhớ rồi" marks belong to the account, not the browser. The server holds
+// them with the student's Kiểm tra history; this is a cache of the signed-in
+// student's copy, and changes go up in small batches.
+let _lvProg = { uid: undefined, loaded: false, loading: null, known: new Set(), tests: [] };
+let _lvPend = { add: new Set(), remove: new Set(), timer: null };
+const lvCacheKey = () => 'lvKnown:' + (currentUser ? currentUser.id : '');
+function lvProgFor() {
+  const uid = currentUser ? currentUser.id : null;
+  if (_lvProg.uid !== uid) {
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem(lvCacheKey()) || '[]'); } catch (e) {}
+    _lvProg = { uid, loaded: false, loading: null, known: new Set(cached), tests: [] };
+    clearTimeout(_lvPend.timer);
+    _lvPend = { add: new Set(), remove: new Set(), timer: null };
+  }
+  return _lvProg;
 }
-function lvSaveKnown(set) { lvSave('lvKnown', JSON.stringify([...set])); }
+function lvKnownSet() { return new Set(lvProgFor().known); }
+function lvSaveKnown(set) {
+  const p = lvProgFor();
+  set.forEach(w => { if (!p.known.has(w)) { _lvPend.add.add(w); _lvPend.remove.delete(w); } });
+  p.known.forEach(w => { if (!set.has(w)) { _lvPend.remove.add(w); _lvPend.add.delete(w); } });
+  p.known = new Set(set);
+  lvSave(lvCacheKey(), JSON.stringify([...set]));
+  clearTimeout(_lvPend.timer);
+  _lvPend.timer = setTimeout(lvFlushKnown, 1500);
+}
+async function lvFlushKnown() {
+  const add = [..._lvPend.add], remove = [..._lvPend.remove];
+  if (!add.length && !remove.length) return;
+  _lvPend.add = new Set();
+  _lvPend.remove = new Set();
+  try {
+    await api('/api/vocab/progress/known', { method: 'POST', body: JSON.stringify({ add, remove }) });
+  } catch (e) {
+    // Offline or the server hiccuped: keep them and try again later.
+    add.forEach(w => { if (!_lvPend.remove.has(w)) _lvPend.add.add(w); });
+    remove.forEach(w => { if (!_lvPend.add.has(w)) _lvPend.remove.add(w); });
+    clearTimeout(_lvPend.timer);
+    _lvPend.timer = setTimeout(lvFlushKnown, 15000);
+  }
+}
+window.addEventListener('pagehide', () => { lvFlushKnown(); });
+function lvLoadProgress() {
+  const p = lvProgFor();
+  if (p.loaded) return Promise.resolve(p);
+  if (p.loading) return p.loading;
+  p.loading = api('/api/vocab/progress').then(r => {
+    // Marks made in this browser before they were kept per account go to the
+    // first account that opens the games here, once.
+    let old = [];
+    try { if (!localStorage.getItem('lvKnownMoved')) old = JSON.parse(localStorage.getItem('lvKnown') || '[]'); } catch (e) {}
+    const set = new Set(r.known || []);
+    old.forEach(w => { if (w && !set.has(w)) { set.add(w); _lvPend.add.add(w); } });
+    _lvPend.add.forEach(w => set.add(w));
+    _lvPend.remove.forEach(w => set.delete(w));
+    p.known = set;
+    p.tests = r.tests || [];
+    p.loaded = true;
+    lvSave(lvCacheKey(), JSON.stringify([...set]));
+    try { localStorage.setItem('lvKnownMoved', '1'); localStorage.removeItem('lvKnown'); } catch (e) {}
+    if (_lvPend.add.size || _lvPend.remove.size) lvFlushKnown();
+    return p;
+  }).catch(() => { p.loading = null; return p; });
+  return p.loading;
+}
 
 function lvSel() { return _lvSelBy[_lvSrc]; }
 
 // Two word sources behind one picker: the 12 lesson handouts (LESSON_VOCAB)
 // and the 25 vocabulary units (VOCAB_BANK, fetched from the server).
-function lvTopics() {
-  if (_lvSrc === 'unit') {
+function lvTopics(src = _lvSrc, tier = _lvTier) {
+  if (src === 'unit') {
     return (_vocabUnits || []).map((u, i) => ({
       id: i + 1,
       label: 'Unit ' + (i + 1),
       title: u.topic,
-      items: lvUnitItems(u),
+      items: lvUnitItems(u, tier),
     }));
   }
   return LESSON_VOCAB.map(t => ({
@@ -14439,9 +14503,9 @@ function lvTopics() {
 // One unit's cards in the chosen box. Cơ bản: B1 and B2 words and easy
 // phrases. Nâng cao: C1 words, harder phrases (Strong and Precise in the
 // teacher's handbook), then the unit's original collocations and verbs.
-function lvUnitItems(u) {
+function lvUnitItems(u, tier = _lvTier) {
   const row = (group, lvl) => ([en, pos, vi, ex]) => ({ en, vi, use: [lvl, pos].filter(Boolean).join(' · '), ex: ex || '', group });
-  if (_lvTier === 'basic') {
+  if (tier === 'basic') {
     const b = u.basic || {};
     return [...(b.B1 || []).map(row('Từ B1', 'B1')), ...(b.B2 || []).map(row('Từ B2', 'B2')), ...(b.colloc || []).map(row('Cụm từ', 'B1–B2'))];
   }
@@ -14510,8 +14574,10 @@ function lvRenderHub() {
       <span class="lv-topic-n">${escapeHtml(t.label)}</span>
       <span class="lv-topic-name">${escapeHtml(t.title)}</span>
       <span class="lv-topic-known">${t.items.length ? `${k}/${t.items.length} đã nhớ` : 'đang soạn'}</span>
+      ${t.items.length ? lvBar(k, t.items.length, true) : ''}
     </button>`;
   }).join('');
+  const all = lvSetCount(topics, known);
   root.innerHTML = `
     <div class="lv-wrap">
       <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
@@ -14527,6 +14593,11 @@ function lvRenderHub() {
         </div>` : ''}
         <div class="vb-tagline">Chọn một ${unitWord} để học riêng, hoặc chọn nhiều ${unitWord} để trộn. Không chọn ${unitWord} nào là trộn tất cả.</div>
       </div>
+      <button class="lvp-hubbar" onclick="lvShowProgress()">
+        <span class="lvp-hubbar-top"><strong>📊 Tiến độ ${_lvSrc === 'unit' ? (_lvTier === 'adv' ? '🚀 Nâng cao' : '🌱 Cơ bản') : LESSON_VOCAB.length + ' buổi'}</strong><span>${all.k}/${all.n} thẻ · ${lvPct(all.k, all.n)}%</span></span>
+        ${lvBar(all.k, all.n)}
+        <span class="lvp-hubbar-link">Xem tiến độ từng chủ đề và lịch sử kiểm tra →</span>
+      </button>
       <div class="lv-topics">${chips}</div>
       <div class="lv-selbar">
         <span>Đang chọn <strong>${selLabel}</strong> · ${pool.length} từ</span>
@@ -14579,6 +14650,7 @@ function lvRenderHub() {
   twHubProgress();
   walBar();
   walLoad().then(walBar);
+  if (!lvProgFor().loaded) lvLoadProgress().then(p => { if (p.loaded && document.querySelector('#lesson-vocab-root .lv-topics')) lvRenderHub(); });
 }
 
 /* ─── Quay về và đổi chế độ, từ giữa bất kỳ game nào ─────────────────────── */
@@ -15047,6 +15119,7 @@ function qtSubmit() {
   });
   g.right = right; g.total = total; g.done = true;
   g.wrong = [...new Set(g.wrong)];
+  lvLogTest(g);
   const coins = Math.round(right * walMult());
   g.coins = coins;
   if (coins) walEarn(coins, true);
@@ -15080,6 +15153,142 @@ function qtRelearn() {
   list.forEach(w => k.delete(w.en.toLowerCase()));
   lvSaveKnown(k);
   lvStartFlash(list);
+}
+
+/* ─── Tiến độ từ vựng: per topic, per set, and the Kiểm tra history ───────
+   One renderer for the student's own page and for the teacher's view of any
+   student, fed a known set and a list of tests. */
+const lvPct = (k, n) => (n ? Math.round(k / n * 100) : 0);
+function lvBar(k, n, thin) {
+  const p = lvPct(k, n);
+  const tone = p >= 80 ? 'hi' : p >= 40 ? 'mid' : 'lo';
+  return `<span class="lvp-bar${thin ? ' lvp-bar--thin' : ''}"><i class="lvp-bar-${tone}" style="width:${p}%"></i></span>`;
+}
+// Words shared by two topics count once in a set's total.
+function lvSetCount(topics, known) {
+  const all = new Set();
+  topics.forEach(t => t.items.forEach(w => all.add(w.en.toLowerCase())));
+  let k = 0;
+  all.forEach(w => { if (known.has(w)) k++; });
+  return { k, n: all.size };
+}
+function lvProgSets() {
+  return [
+    { id: 'basic', icon: '🌱', label: 'Cơ bản · 25 unit', topics: lvTopics('unit', 'basic') },
+    { id: 'adv', icon: '🚀', label: 'Nâng cao · 25 unit', topics: lvTopics('unit', 'adv') },
+    { id: 'lesson', icon: '📘', label: LESSON_VOCAB.length + ' buổi Writing', topics: lvTopics('lesson') },
+  ];
+}
+function lvTestLabel(t) {
+  const set = t.src === 'lesson' ? '📘 Buổi' : t.tier === 'adv' ? '🚀 Nâng cao' : '🌱 Cơ bản';
+  const tops = (t.topics || []).length ? (t.src === 'lesson' ? 'buổi ' : 'unit ') + t.topics.join(', ') : 'tất cả';
+  return `${set} · ${tops}`;
+}
+const lvWhen = iso => { try { return new Date(iso).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+function lvProgressHTML(known, tests) {
+  const sets = lvProgSets();
+  const tsts = (tests || []).slice().reverse();
+  const avg = tsts.length ? Math.round(tsts.reduce((s, t) => s + lvPct(t.right, t.total), 0) / tsts.length) : 0;
+  const best = tsts.reduce((b, t) => Math.max(b, lvPct(t.right, t.total)), 0);
+  const cards = sets.map(s => {
+    const c = lvSetCount(s.topics, known);
+    const rows = s.topics.filter(t => t.items.length).map(t => {
+      const k = t.items.filter(w => known.has(w.en.toLowerCase())).length;
+      return `<div class="lvp-row"><span class="lvp-row-name"><b>${escapeHtml(t.label)}</b> ${escapeHtml(t.title)}</span>${lvBar(k, t.items.length, true)}<span class="lvp-row-n">${k}/${t.items.length}</span></div>`;
+    }).join('');
+    return `<details class="lvp-set">
+      <summary><span class="lvp-set-top"><strong>${s.icon} ${escapeHtml(s.label)}</strong><span>${c.k}/${c.n} · ${lvPct(c.k, c.n)}%</span></span>${lvBar(c.k, c.n)}<span class="lvp-more">Xem từng chủ đề</span></summary>
+      <div class="lvp-rows">${rows}</div>
+    </details>`;
+  }).join('');
+  const hist = tsts.length ? tsts.slice(0, 50).map(t => {
+    const p = lvPct(t.right, t.total);
+    return `<div class="lvp-test">
+      <div class="lvp-test-top"><span class="lvp-test-when">${lvWhen(t.at)}</span><span class="lvp-test-score">${t.right}/${t.total} · ${p}%</span></div>
+      <div class="lvp-test-what">${escapeHtml(lvTestLabel(t))}</div>
+      ${lvBar(t.right, t.total, true)}
+      ${(t.wrong || []).length ? `<div class="lvp-test-wrong">Sai: ${t.wrong.map(w => escapeHtml(w)).join(', ')}</div>` : ''}
+    </div>`;
+  }).join('') : '<div class="lvp-empty">Chưa làm bài Kiểm tra nào.</div>';
+  return `<div class="lvp">
+    <div class="lvp-sum">
+      <div><b>${known.size}</b><span>thẻ đã nhớ</span></div>
+      <div><b>${tsts.length}</b><span>bài kiểm tra</span></div>
+      <div><b>${tsts.length ? avg + '%' : '–'}</b><span>điểm trung bình</span></div>
+      <div><b>${tsts.length ? best + '%' : '–'}</b><span>cao nhất</span></div>
+    </div>
+    <div class="lvp-sets">${cards}</div>
+    <h3 class="lvp-h">📝 Lịch sử kiểm tra</h3>
+    <div class="lvp-hist">${hist}</div>
+  </div>`;
+}
+async function lvShowProgress() {
+  lvLeaveGame();
+  const root = document.getElementById('lesson-vocab-root');
+  if (!root) return;
+  root.innerHTML = '<div class="loading">Đang tải tiến độ…</div>';
+  const p = await lvLoadProgress();
+  try { await ensureVocabBank(); } catch (e) {}
+  if (!document.getElementById('lesson-vocab-root')) return;
+  root.innerHTML = `<div class="lv-wrap">
+    <button class="btn-back-plain" onclick="lvRenderHub()">← Về Flashcard và Bắn Chữ</button>
+    <div class="vb-logo">📊 Tiến độ từ vựng của em</div>
+    ${p.loaded ? '' : '<div class="lvp-empty">Chưa tải được dữ liệu từ máy chủ, đang hiện bản lưu trên máy này.</div>'}
+    ${lvProgressHTML(p.known, p.tests)}
+  </div>`;
+  window.scrollTo(0, 0);
+}
+function lvLogTest(g) {
+  const t = {
+    at: new Date().toISOString(),
+    src: _lvSrc,
+    tier: _lvTier,
+    topics: [...lvSel()].sort((x, y) => x - y),
+    right: g.right,
+    total: g.total,
+    wrong: g.wrong.map(w => w.en.toLowerCase()),
+  };
+  const p = lvProgFor();
+  p.tests = [...p.tests, t].slice(-100);
+  api('/api/vocab/progress/test', { method: 'POST', body: JSON.stringify(t) }).catch(() => {});
+}
+
+/* Teacher: every student of the class, one row each, open a row for the
+   same page the student sees. */
+let _cvRows = [];
+async function loadClassVocab() {
+  const el = document.getElementById('class-vocab-content');
+  el.innerHTML = '<div class="loading">Đang tải tiến độ từ vựng…</div>';
+  try {
+    const [rows] = await Promise.all([api(`/api/vocab/progress/class/${currentClassId}`), ensureVocabBank()]);
+    _cvRows = rows;
+    if (!rows.length) { el.innerHTML = '<div class="empty-state">Lớp chưa có học sinh.</div>'; return; }
+    const sets = lvProgSets();
+    const last = r => [r.updated_at, ...(r.tests || []).map(t => t.at)].filter(Boolean).sort().pop();
+    el.innerHTML = `<div class="cv-note">Bấm vào tên học sinh để xem từng chủ đề và lịch sử kiểm tra.</div>
+      <div class="cv-list">${rows.map((r, i) => {
+        const known = new Set(r.known || []);
+        const tests = r.tests || [];
+        const avg = tests.length ? Math.round(tests.reduce((s, t) => s + lvPct(t.right, t.total), 0) / tests.length) : null;
+        const l = last(r);
+        return `<div class="cv-row" id="cv-row-${i}">
+          <button class="cv-head" onclick="cvToggle(${i})">
+            <span class="cv-name">${escapeHtml(r.name)}</span>
+            <span class="cv-meta">${tests.length} bài KT${avg !== null ? ` · TB ${avg}%` : ''} · ${l ? 'hoạt động ' + lvWhen(l) : 'chưa học'}</span>
+            <span class="cv-bars">${sets.map(s => { const c = lvSetCount(s.topics, known); return `<span class="cv-bar"><small>${s.icon} ${lvPct(c.k, c.n)}%</small>${lvBar(c.k, c.n, true)}</span>`; }).join('')}</span>
+          </button>
+          <div class="cv-detail hidden" id="cv-detail-${i}"></div>
+        </div>`;
+      }).join('')}</div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg" style="display:block">${escapeHtml(err.message)}</div>`;
+  }
+}
+function cvToggle(i) {
+  const d = document.getElementById('cv-detail-' + i);
+  if (!d) return;
+  const open = d.classList.toggle('hidden') === false;
+  if (open && !d.innerHTML) { const r = _cvRows[i]; d.innerHTML = lvProgressHTML(new Set(r.known || []), r.tests || []); }
 }
 
 function lvBindKeys() {
