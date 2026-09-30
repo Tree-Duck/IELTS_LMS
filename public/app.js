@@ -15525,6 +15525,126 @@ function walBoost() {
   walBar();
 }
 
+/* ─── Huy hiệu và chuỗi ngày ───
+   The games' counts go to the server with questBump; badges come back
+   worked out, and a new one gets its own moment. */
+const BADGE_INFO = {
+  kill10:    { icon: '⚔️', name: 'Tân binh', text: 'Hạ 10 quái trong Hầm ngục' },
+  kill100:   { icon: '🗡️', name: 'Thợ săn quái', text: 'Hạ 100 quái' },
+  kill500:   { icon: '🐉', name: 'Diệt quái huyền thoại', text: 'Hạ 500 quái' },
+  combo10:   { icon: '🔥', name: 'Liên hoàn', text: 'Combo 10 trong Hầm ngục' },
+  combo20:   { icon: '🌪️', name: 'Bão combo', text: 'Combo 20 trong Hầm ngục' },
+  heavy50:   { icon: '🔨', name: 'Búa tạ', text: 'Ra 50 đòn mạnh trúng đích' },
+  clear1:    { icon: '🏆', name: 'Phá đảo đầu tiên', text: 'Phá đảo 1 hầm ngục' },
+  clear14:   { icon: '👑', name: 'Chinh phục hầm ngục', text: 'Phá đảo 14 lần' },
+  tower20:   { icon: '🏢', name: 'Chung cư của tôi', text: 'Xây tháp cao 20 tầng' },
+  tower81:   { icon: '🌆', name: 'Chạm mây', text: 'Xây tháp cao 81 tầng' },
+  hazard10:  { icon: '🛡️', name: 'Người gác tháp', text: 'Chặn 10 tai họa' },
+  words500:  { icon: '🎯', name: 'Xạ thủ', text: 'Bắn trúng 500 chữ' },
+  words3000: { icon: '🚀', name: 'Thần bắn', text: 'Bắn trúng 3000 chữ' },
+  boss5:     { icon: '👾', name: 'Diệt boss', text: 'Hạ 5 boss Bắn Chữ' },
+  test10:    { icon: '📝', name: 'Chăm kiểm tra', text: 'Làm 10 bài Kiểm tra' },
+  chest20:   { icon: '🎁', name: 'Săn kho báu', text: 'Mở 20 rương' },
+  quest20:   { icon: '📋', name: 'Chăm chỉ', text: 'Xong 20 nhiệm vụ ngày' },
+  streak7:   { icon: '📅', name: 'Lửa bền', text: 'Chơi 7 ngày liên tiếp' },
+  streak30:  { icon: '🌟', name: 'Không bỏ ngày nào', text: 'Chơi 30 ngày liên tiếp' },
+};
+const STAT_MAX_KEYS = new Set(['raid_combo', 'tw_best']);
+let _badges = null;
+let _badgesFor = null;
+let _statPend = { add: {}, max: {} };
+let _statTimer = 0;
+let _streak = null;
+function statBump(id, n) {
+  if (!currentUser || !n) return;
+  if (STAT_MAX_KEYS.has(id)) _statPend.max[id] = Math.max(_statPend.max[id] || 0, n);
+  else _statPend.add[id] = (_statPend.add[id] || 0) + n;
+  clearTimeout(_statTimer);
+  _statTimer = setTimeout(statFlush, 3000);
+}
+async function statFlush() {
+  const body = _statPend;
+  _statPend = { add: {}, max: {} };
+  if (!Object.keys(body.add).length && !Object.keys(body.max).length) return;
+  try {
+    const r = await api('/api/game/stats', { method: 'POST', body: JSON.stringify(body) });
+    const had = _badges && _badgesFor === walWho() ? new Set(_badges.filter(b => b.got).map(b => b.id)) : null;
+    _badges = r.badges;
+    _badgesFor = walWho();
+    _streak = r.streak;
+    if (had) r.badges.filter(b => b.got && !had.has(b.id)).forEach((b, i) => setTimeout(() => badgePop(b.id), i * 1800));
+    questRenderBox();
+  } catch (e) { /* counts are best effort */ }
+}
+function badgePop(id) {
+  const info = BADGE_INFO[id];
+  if (!info) return;
+  const el = document.createElement('div');
+  el.className = 'j-unbox j-r-epic';
+  el.innerHTML = `<div class="j-unbox-rays"></div>
+    <div class="j-unbox-card">
+      <div class="j-unbox-rarity">Huy hiệu mới</div>
+      <div class="j-unbox-icon">${info.icon}</div>
+      <div class="j-unbox-name">${escapeHtml(info.name)}</div>
+      <div class="j-unbox-note">${escapeHtml(info.text)}. Cả lớp thấy số huy hiệu của em trên bảng xếp hạng.</div>
+      <button class="vb-start-btn" onclick="this.closest('.j-unbox').remove()">Tuyệt vời!</button>
+    </div>`;
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  document.body.appendChild(el);
+  tsSfx('unbox', 'epic');
+  jConfetti(70);
+}
+async function badgeModal() {
+  document.getElementById('lv-modal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'lv-modal';
+  el.className = 'lv-modal';
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  el.innerHTML = '<div class="lv-modal-card lv-modal-card--wide"><div class="loading">Đang mở tủ huy hiệu…</div></div>';
+  document.body.appendChild(el);
+  try {
+    const r = await api('/api/game/badges');
+    _badges = r.badges;
+    _badgesFor = walWho();
+    _streak = r.streak;
+  } catch (e) { /* show what we have */ }
+  if (!document.getElementById('lv-modal')) return;
+  const list = _badges || [];
+  const got = list.filter(b => b.got).length;
+  el.innerHTML = `
+    <div class="lv-modal-card lv-modal-card--wide">
+      <div class="lv-modal-title">🏅 Huy hiệu · ${got}/${list.length}</div>
+      <div class="bd-grid">${list.map(b => {
+        const info = BADGE_INFO[b.id] || { icon: '🏅', name: b.id, text: '' };
+        return `<div class="bd-card${b.got ? ' got' : ''}">
+          <span class="bd-ic">${info.icon}</span>
+          <b>${escapeHtml(info.name)}</b>
+          <small>${escapeHtml(info.text)}</small>
+          ${b.got ? '<span class="bd-ok">✓ Đã có</span>' : `${lvBar(b.have, b.goal, true)}<small>${b.have}/${b.goal}</small>`}
+        </div>`;
+      }).join('')}</div>
+      <div class="lv-modal-btns"><button class="vb-start-btn" onclick="document.getElementById('lv-modal')?.remove()">Đóng</button></div>
+    </div>`;
+}
+async function streakClaim(btn) {
+  if (btn) btn.disabled = true;
+  try {
+    if (_walPending) await walFlush();
+    const r = await api('/api/game/streak/claim', { method: 'POST', body: '{}' });
+    walSet(r);
+    _streak = r.streak;
+    _badges = r.badges;
+    _badgesFor = walWho();
+    jPop(`🔥 +${r.paid} 🪙 thưởng chuỗi ${r.streak.n} ngày`);
+    tsSfx('coin');
+    jConfetti(r.streak.n % 7 === 0 ? 90 : 40);
+  } catch (e) {
+    showToast(e.message);
+  }
+  questRenderBox();
+  walBar();
+}
+
 /* ─── Nhiệm vụ hằng ngày ───
    Three a day, picked and rewarded by the server. The games report
    progress through questBump; the reward is claimed from the box. */
@@ -15550,12 +15670,16 @@ async function questLoad(force) {
     const r = await api('/api/game/quests');
     _quests = r.quests;
     _questsFor = walWho();
+    if (r.streak) _streak = r.streak;
+    // Known badges, so the first one earned this visit still gets its moment.
+    if (!_badges || _badgesFor !== walWho()) api('/api/game/badges').then(b => { _badges = b.badges; _badgesFor = walWho(); }).catch(() => {});
   } catch (e) { /* the box just stays empty */ }
   return _quests;
 }
 function questMine() { return _quests && _questsFor === walWho() ? _quests : null; }
 // max: the count is a best so far (a combo), not something to add up.
 function questBump(id, n, max) {
+  statBump(id, n);
   const Q = questMine();
   const q = Q && Q.list.find(x => x.id === id);
   if (!q || q.n >= q.goal) return;
@@ -15606,8 +15730,15 @@ function questRenderBox() {
   const Q = questMine();
   if (!Q) { el.innerHTML = ''; return; }
   const done = Q.list.filter(q => q.claimed).length;
+  const st = _streak;
+  const streak = st ? `<div class="quest-streak${st.played && !st.paid ? ' ready' : ''}">
+      <span class="quest-fire">🔥</span>
+      <span class="quest-t"><b>Chuỗi ${st.n} ngày${st.best > st.n ? ` <small>· kỷ lục ${st.best}</small>` : ''}</b><small>${st.played ? (st.paid ? 'Đã nhận thưởng hôm nay. Mai chơi tiếp để giữ chuỗi.' : `Hôm nay đã chơi. Thưởng: 🪙 ${st.reward}${(st.n % 7 === 0 && st.n) ? ' (ngày thứ 7, thưởng lớn!)' : ''}`) : `Chơi một ván hôm nay để ${st.n ? 'giữ' : 'bắt đầu'} chuỗi · thưởng 🪙 ${st.reward}`}</small></span>
+      ${st.played && !st.paid ? '<button class="vb-start-btn quest-btn" onclick="streakClaim(this)">Nhận</button>' : st.paid ? '<span class="quest-done">✓</span>' : ''}
+    </div>` : '';
   el.innerHTML = `
-    <div class="quest-head"><b>📋 Nhiệm vụ hôm nay</b><span>${done}/${Q.list.length} đã nhận · làm mới lúc 0 giờ</span></div>
+    <div class="quest-head"><b>📋 Nhiệm vụ hôm nay</b><span>${done}/${Q.list.length} đã nhận · làm mới lúc 0 giờ</span><button class="quest-badges" onclick="badgeModal()">🏅 Huy hiệu</button></div>
+    ${streak}
     ${Q.list.map(q => {
       const info = QUEST_INFO[q.id] || { icon: '⭐', text: q.id };
       const ready = q.n >= q.goal && !q.claimed;
@@ -15947,7 +16078,7 @@ async function lbLoad() {
   const title = r => { const t = r.title && walLookById(r.title); return t ? `<span class="lb-title">${escapeHtml(t.text)}</span>` : ''; };
   const row = (r, i) => `<div class="lb-row${r.me ? ' me' : ''}${r.rank <= 3 ? ' top' : ''}${r.frame && walLookById(r.frame) ? ' lb-' + r.frame : ''}" style="animation-delay: ${Math.min(i, 12) * 45}ms">
       <span class="lb-rank">${medal(r)}</span>
-      <span class="lb-name"><span class="lb-name-t">${escapeHtml(r.name)}${r.me ? ' <em>(em)</em>' : ''}</span>${title(r)}</span>
+      <span class="lb-name"><span class="lb-name-t">${escapeHtml(r.name)}${r.me ? ' <em>(em)</em>' : ''}${r.badges ? ` <span class="lb-badges" title="${r.badges} huy hiệu">🏅${r.badges}</span>` : ''}</span>${title(r)}</span>
       <span class="lb-val">${r.value.toLocaleString('vi-VN')} <small>${b.unit}</small></span>
     </div>`;
   const mineShown = data.rows.some(r => r.me);
@@ -18268,6 +18399,7 @@ function twResolve(ok, extra) {
     const before = twMilestone(g.floors.length).cur;
     g.floors.push(tilt ? '~' + q.show : q.show);
     questBump('tw_floors', 1);
+    statBump('tw_best', g.floors.length);
     let dropped = 1;
     if (q.golden) {
       const n = g.floors.length;

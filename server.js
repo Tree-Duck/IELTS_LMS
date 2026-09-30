@@ -4036,6 +4036,81 @@ app.post('/api/game/wallet/equip', authenticate, walletRoute((w, b) => {
   return null;
 }));
 
+// ─── Game stats, badges and the play streak ─────────────────────────────────
+// The games report counts (added) and bests (kept at the highest), each
+// capped per report. Badges are worked out from them; the streak counts days
+// in a row with any play, and each day's streak reward is claimed once.
+const STAT_ADD = { raid_kill: 30, raid_heavy: 30, raid_clear: 2, tw_floors: 60, tw_hazard: 5, ts_words: 300, ts_boss: 5, vocab_test: 3 };
+const STAT_MAX = { raid_combo: 200, tw_best: 500 };
+const BADGES = [
+  ['kill10', 'raid_kill', 10], ['kill100', 'raid_kill', 100], ['kill500', 'raid_kill', 500],
+  ['combo10', 'raid_combo', 10], ['combo20', 'raid_combo', 20], ['heavy50', 'raid_heavy', 50],
+  ['clear1', 'raid_clear', 1], ['clear14', 'raid_clear', 14],
+  ['tower20', 'tw_best', 20], ['tower81', 'tw_best', 81], ['hazard10', 'tw_hazard', 10],
+  ['words500', 'ts_words', 500], ['words3000', 'ts_words', 3000], ['boss5', 'ts_boss', 5],
+  ['test10', 'vocab_test', 10], ['chest20', 'chests', 20], ['quest20', 'quests', 20],
+  ['streak7', 'streak_best', 7], ['streak30', 'streak_best', 30],
+];
+const dayBefore = day => new Date(Date.parse(day + 'T00:00:00Z') - 86400e3).toISOString().slice(0, 10);
+// The streak as it stands today: yesterday's still counts until today ends.
+function streakNow(w) {
+  const today = walletDay();
+  const alive = w.play_day === today || w.play_day === dayBefore(today);
+  return { n: alive ? w.streak || 0 : 0, best: w.streak_best || 0, played: w.play_day === today, paid: w.streak_paid === today };
+}
+const streakReward = n => 10 * Math.min(Math.max(n, 1), 7) + (n > 0 && n % 7 === 0 ? 50 : 0);
+function badgesOf(w) {
+  const st = { ...(w.stats || {}), streak_best: w.streak_best || 0 };
+  return BADGES.map(([id, key, goal]) => ({ id, have: Math.min(goal, st[key] || 0), goal, got: (st[key] || 0) >= goal }));
+}
+const badgeCount = w => badgesOf(w || {}).filter(b => b.got).length;
+function statsOut(w) {
+  const st = streakNow(w);
+  return { stats: w.stats || {}, badges: badgesOf(w), streak: { ...st, reward: streakReward(st.played ? st.n : st.n + 1) } };
+}
+app.get('/api/game/badges', authenticate, (req, res) => {
+  try {
+    res.json(statsOut(db.getWallet(req.user.id) || {}));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load badges' });
+  }
+});
+app.post('/api/game/stats', authenticate, walletRoute((w, b, extra) => {
+  if (!w.stats) w.stats = {};
+  for (const [k, cap] of Object.entries(STAT_ADD)) {
+    const n = Math.max(0, Math.min(cap, parseInt((b.add || {})[k], 10) || 0));
+    if (n) w.stats[k] = (w.stats[k] || 0) + n;
+  }
+  for (const [k, cap] of Object.entries(STAT_MAX)) {
+    const n = Math.max(0, Math.min(cap, parseInt((b.max || {})[k], 10) || 0));
+    if (n > (w.stats[k] || 0)) w.stats[k] = n;
+  }
+  // Any report is play: it moves the streak on to today.
+  const today = walletDay();
+  if (w.play_day !== today) {
+    w.streak = w.play_day === dayBefore(today) ? (w.streak || 0) + 1 : 1;
+    w.play_day = today;
+    w.streak_best = Math.max(w.streak_best || 0, w.streak);
+  }
+  Object.assign(extra, statsOut(w));
+  return null;
+}));
+app.post('/api/game/streak/claim', authenticate, walletRoute((w, b, extra) => {
+  const st = streakNow(w);
+  if (!st.played) return 'Chơi một ván hôm nay trước đã, rồi nhận thưởng chuỗi.';
+  if (st.paid) return 'Hôm nay em đã nhận thưởng chuỗi rồi.';
+  const n = streakReward(st.n);
+  w.coins = (w.coins || 0) + n;
+  w.earned = (w.earned || 0) + n;
+  const week = walletWeek();
+  if (w.week !== week) { w.week = week; w.week_earned = 0; }
+  w.week_earned += n;
+  w.streak_paid = walletDay();
+  extra.paid = n;
+  Object.assign(extra, statsOut(w));
+  return null;
+}));
+
 // ─── Daily quests ───────────────────────────────────────────────────────────
 // Three a day from this list, kept on the wallet. The games report progress;
 // the reward is paid here, coins to the wallet and XP to the dungeon hero.
@@ -4076,7 +4151,7 @@ app.get('/api/game/quests', authenticate, (req, res) => {
       quests = questsToday(w);
       return fresh;
     });
-    res.json({ quests });
+    res.json({ quests, streak: statsOut(db.getWallet(req.user.id) || {}).streak });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load quests' });
   }
@@ -4105,6 +4180,8 @@ app.post('/api/game/quests/claim', authenticate, (req, res) => {
       if (q.claimed) { refusal = 'Em đã nhận thưởng nhiệm vụ này rồi.'; return false; }
       if (q.n < q.goal) { refusal = 'Nhiệm vụ chưa xong.'; return false; }
       q.claimed = true;
+      if (!w.stats) w.stats = {};
+      w.stats.quests = (w.stats.quests || 0) + 1;
       w.coins = (w.coins || 0) + q.coins;
       w.earned = (w.earned || 0) + q.coins;
       const week = walletWeek();
@@ -4130,6 +4207,8 @@ app.post('/api/game/chest', authenticate, walletRoute((w, b, extra) => {
   if (w.chest_day !== today) { w.chest_day = today; w.chest_n = 0; }
   if (w.chest_n >= CHEST_DAY_MAX) return `Hôm nay em đã mở đủ ${CHEST_DAY_MAX} rương. Mai quay lại nhé!`;
   w.chest_n += 1;
+  if (!w.stats) w.stats = {};
+  w.stats.chests = (w.stats.chests || 0) + 1;
   const coins = n => {
     w.coins = (w.coins || 0) + n;
     w.earned = (w.earned || 0) + n;
@@ -4365,7 +4444,7 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
     ranked.forEach((r, i) => { r.rank = i && r.value === ranked[i - 1].value ? ranked[i - 1].rank : i + 1; });
     const mine = ranked.find(r => r.id === me);
     const look = uid => ((g.wallets[uid] || {}).equip) || {};
-    const out = r => ({ rank: r.rank, name: r.name, value: r.value, me: r.id === me, title: look(r.id).title || null, frame: look(r.id).frame || null });
+    const out = r => ({ rank: r.rank, name: r.name, value: r.value, me: r.id === me, title: look(r.id).title || null, frame: look(r.id).frame || null, badges: badgeCount(g.wallets[r.id]) });
     res.json({
       board, diff, scope: scope || 'all', classes, total: ranked.length,
       rows: ranked.slice(0, RANK_TOP).map(out),

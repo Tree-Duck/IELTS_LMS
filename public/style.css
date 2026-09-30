@@ -8584,3 +8584,19 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .ts-chick { position: relative; }
 .ts-arena.ts-x2 { box-shadow: inset 0 0 0 3px #FFD34D, inset 0 0 30px rgba(255, 211, 77, 0.45); }
 .ts-colloc .ts-gap { display: inline-block; padding: 0 4px; border-radius: 6px; background: rgba(255, 211, 77, 0.25); letter-spacing: 1px; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; }
+
+/* ── Badges and the play streak ── */
+.quest-badges { margin-left: auto; padding: 0.2rem 0.7rem; border-radius: 99px; border: 2px solid #D4AF37; background: #FFF6D8; color: #6B4E00; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.quest-streak { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.6rem; padding: 0.45rem 0.5rem; margin-bottom: 0.2rem; border-radius: 12px; background: #FFF1E6; }
+.quest-streak.ready { box-shadow: 0 0 0 2px #FF9A3D; }
+.quest-fire { font-size: 1.5rem; }
+.bd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.55rem; max-height: min(62vh, 520px); overflow-y: auto; margin: 0.5rem 0; text-align: center; }
+.bd-card { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0.6rem 0.5rem; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--gray-800); opacity: 0.75; }
+.bd-card .bd-ic { font-size: 2rem; filter: grayscale(1); opacity: 0.55; }
+.bd-card b { font-size: 0.86rem; }
+.bd-card small { font-size: 0.72rem; color: var(--moss); }
+.bd-card .lvp-bar, .bd-card [class*="lv-bar"] { width: 100%; }
+.bd-card.got { opacity: 1; border-color: #D4AF37; background: #FFFBEA; box-shadow: 0 3px 0 #D4AF37; }
+.bd-card.got .bd-ic { filter: none; opacity: 1; }
+.bd-ok { font-size: 0.75rem; font-weight: 700; color: #1F8A4C; }
+.lb-badges { display: inline-block; margin-left: 0.2rem; padding: 0 0.35rem; border-radius: 99px; background: #FFF6D8; color: #6B4E00; font-size: 0.72rem; font-weight: 700; vertical-align: 1px; }
