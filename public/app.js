@@ -14539,7 +14539,7 @@ function lvRenderHub() {
         <button class="lv-mode lv-mode--raid" onclick="raidMap()">
           <span class="lv-mode-icon">⚔️</span>
           <span class="lv-mode-name">Hầm ngục chữ</span>
-          <span class="lv-mode-desc">Chọn nhân vật nam hoặc nữ, đánh theo lượt với quái và boss bằng văn mẫu của từng buổi. Chọn chém, hồi máu hay tuyệt kỹ, rồi gõ từ còn thiếu để ra đòn.</span>
+          <span class="lv-mode-desc">Chọn nhân vật và cấp theo band, đánh theo lượt với quái và boss bằng từ vựng và văn mẫu của từng buổi. Chọn chém, hồi máu hay tuyệt kỹ, rồi gõ từ còn thiếu để ra đòn.</span>
         </button>
       </div>
     </div>`;
@@ -15202,7 +15202,7 @@ const LB_BOARDS = [
   { id: 'tower', label: '🏗️ Tháp cao nhất', unit: 'tầng', note: 'Kỷ lục số tầng Xây tháp.' },
   { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Điểm cao nhất của một lượt, lấy chế độ tốt hơn trong hai chế độ.' },
   { id: 'coins', label: '💰 Tổng xu',       unit: 'xu',   note: 'Tất cả xu từng kiếm được. Mua đồ không làm tụt hạng.' },
-  { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục. Mỗi hầm ngục tối đa 3 sao (sai không quá 2 lần), tính lần đánh tốt nhất.' },
+  { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục, cả 3 cấp Học việc, Dũng sĩ, Huyền thoại. Mỗi cấp tối đa 3 sao (sai không quá 2 lần), tính lần đánh tốt nhất.' },
 ];
 let _lb = { board: 'week', diff: null, scope: 'all' };
 
@@ -17651,6 +17651,155 @@ const RAID_LESSONS = [
     ] },
 ];
 
+/* ─── Hầm ngục chữ: levels, paragraph gates, legend blanks ─────────────────
+   Three levels matched to band ranges. They change what is blanked as well
+   as the clock: Học việc drills the lesson's own word list with a word bank
+   everywhere; Dũng sĩ is the model-essay game; Huyền thoại adds phrase-level
+   blanks (RAID_EXTRA) and takes the word banks away. */
+const RAID_LEVELS = {
+  a: { id: 'a', icon: '🌱', name: 'Học việc', band: '4.0–5.0', bank: 45, type: 60, hitMul: 0.6, every: 4, heal: 60, coinMul: 1, words: 5, bossBlanks: 4,
+       bankAll: true, showVi: true, slack: true, firstLetter: true,
+       blurb: ['Từ vựng của buổi, có kho từ ở mọi trận', 'Có sẵn bản dịch tiếng Việt', 'Sai một chữ cái vẫn tính đúng'] },
+  d: { id: 'd', icon: '⚔️', name: 'Dũng sĩ', band: '5.5–6.5', bank: 30, type: 45, hitMul: 1, every: 0, heal: 40, coinMul: 1.5, words: 4, bossBlanks: 8,
+       firstLetter: true,
+       blurb: ['Cụm từ trong câu mở bài, câu mở đoạn, cả đoạn', 'Boss chỉ có nghĩa tiếng Việt', 'Chính tả phải đúng'] },
+  l: { id: 'l', icon: '👑', name: 'Huyền thoại', band: '7.0+', bank: 20, type: 30, hitMul: 1.3, every: 0, heal: 20, coinMul: 2, words: 3, bossBlanks: 12,
+       noBank: true, extra: true,
+       blurb: ['Điền cả cụm dài, động từ chính xác, cụm nối', 'Không kho từ, không chữ cái đầu', 'Quái đánh mạnh hơn, chỉ hồi 20 máu giữa trận'] },
+};
+
+// The opening sentence of each model paragraph, cut into the chunks typed at
+// the gate, plus an empty opener used as the wrong door. Key: lesson:paragraph.
+const RAID_GATES = {
+  '1:0': { chunks: ['Making family support a legal duty', 'does not create any extra care.', 'It only decides', 'who provides it.'],
+           trap: 'Firstly, there are many reasons why children should look after their old parents.' },
+  '2:0': { chunks: ['A custom is often less about', 'the ritual itself', 'than about the meeting', 'it forces people to attend.'],
+           trap: 'Firstly, traditions are very important because they are part of our culture.' },
+  '3:0': { chunks: ['The clearest reason is that', 'a lesson now competes with', 'a screen that answers faster', 'than any teacher can.'],
+           trap: 'There are many reasons why children cannot concentrate, such as phones, games and stress.' },
+  '3:1': { chunks: ['Any fix therefore has to work', 'on that gap in pace', "rather than on the child's willpower."],
+           trap: 'However, there are several solutions that the government and schools should take.' },
+  '4:0': { chunks: ['When the state pays,', 'the people who gain most', 'are the ones who would otherwise', 'not have applied at all.'],
+           trap: 'Firstly, free university education has many advantages for students and society.' },
+  '4:1': { chunks: ['The cost of that decision', 'also lands on a group,', 'and it is worth naming which one.'],
+           trap: 'On the other hand, free education also has some disadvantages.' },
+  '5:0': { chunks: ['Coverage does not create the fear', 'so much as change', 'where people think the danger is.'],
+           trap: 'Firstly, the media has both positive and negative effects on society.' },
+  '6:0': { chunks: ['Prevention and treatment draw on the same budget,', 'so the real question is', 'which one loses', 'when the other grows.'],
+           trap: "Firstly, health is the most important thing in everyone's life." },
+  '7:0': { chunks: ['Pay decides whether someone takes the job,', 'but rarely decides', 'how they behave', 'once the day is underway.'],
+           trap: 'Firstly, money is very important because everyone needs money to live.' },
+  '8:0': { chunks: ['A fuel price decides how much driving costs,', 'but it cannot decide', 'whether a person has another way', 'to get to work.'],
+           trap: 'Firstly, the environment is a serious problem that everyone should care about.' },
+  '9:0': { chunks: ['The useful question is not', 'whether machines are dangerous', 'but which part of a job', 'they take first.'],
+           trap: 'Firstly, robots have both advantages and disadvantages in our modern life.' },
+  '10:0': { chunks: ['The useful question is not', 'whether higher fuel prices reduce driving', 'but which drivers', 'are actually able to respond.'],
+            trap: 'Firstly, increasing the price of fuel is a good way to protect the environment.' },
+  '11:0': { chunks: ['A ban is only one point on a scale', 'that runs from doing nothing', 'to removing a product entirely,', 'and the interesting question is', 'which point changes behavior at the lowest cost.'],
+            trap: 'Firstly, unhealthy food is bad for our health, so it should be banned.' },
+  '12:0': { chunks: ['The question is not whether', 'a sculpture is worth its price', 'but what a street looks like', 'once nothing in it was paid for', 'by anyone other than a shop.'],
+            trap: 'Firstly, art is very important for the culture of a country.' },
+  '13:0': { chunks: ['The phrase "the only way"', 'is the weakest part of this claim,', 'because punishment is one of at least three levers', 'and it is the one that works last.'],
+            trap: 'Firstly, road safety is a serious problem in many countries nowadays.' },
+  '14:0': { chunks: ['Both sides are reading the same pattern', 'in opposite directions,', 'and neither side can settle it', 'from the pattern alone.'],
+            trap: "Firstly, violent games have a negative effect on children's behavior." },
+};
+const RAID_TRAP_WHY = 'Câu này mở bằng từ nối chung chung và nói điều ai cũng biết. Dán sang đề khác vẫn hợp, nên chưa ăn điểm. Câu mở tốt báo trước đúng điều các câu sau sẽ giải thích.';
+const RAID_OTHER_WHY = 'Câu này thuộc một đề khác, không khớp với các câu phía sau.';
+
+// Huyền thoại only: longer phrases blanked on top of the marked words.
+// Key: lesson:t for the thesis, lesson:paragraph:step for a sentence.
+const RAID_EXTRA = {
+  '1:t': ['the real test of such a law|phép thử thực sự của một luật như vậy', 'who is blamed when it fails|ai bị đổ lỗi khi nó thất bại'],
+  '1:0:B': ['since they are the ones the hospital calls first|vì họ là người bệnh viện gọi đầu tiên'],
+  '1:0:C': ['at the age when they most need to be saving|đúng độ tuổi họ cần tiết kiệm nhất'],
+  '1:0:D': ['by paying someone to help|bằng cách thuê người giúp'],
+  '1:0:D+': ['had the least to begin with|vốn đã có ít nhất ngay từ đầu'],
+  '1:0:E': ['asks the most of|đòi hỏi nhiều nhất ở'],
+  '2:t': ['take the old ones away|lấy đi những lựa chọn cũ', 'large enough to buy up the space|đủ lớn để thâu tóm chỗ đứng'],
+  '2:0:B': ['even when their members share no workplace|ngay cả khi các thành viên không chung nơi làm việc'],
+  '2:0:C': ['which neighbor owns a ladder|hàng xóm nào có cái thang'],
+  '2:0:D': ['People pay a shop for the same small jobs|người ta trả tiền cho cửa hàng làm những việc vặt ấy'],
+  '2:0:D+': ['become rare enough that|trở nên hiếm đến mức'],
+  '2:0:E': ['the wrong test to judge it by|phép thử sai để đánh giá nó'],
+  '3:t': ['push this hard|thúc ép mạnh như vậy', 'once nobody is watching|khi không còn ai theo dõi'],
+  '3:0:B': ['walks into a class that moves at|bước vào một lớp học có nhịp'],
+  '3:0:C': ['well before the first half hour is over|từ lâu trước khi hết nửa giờ đầu'],
+  '3:0:D': ['in the same period|trong cùng khoảng thời gian'],
+  '3:0:E': ['The problem is less that|vấn đề không nằm nhiều ở chỗ'],
+  '3:1:B': ['give attention a place to|cho sự chú ý một chỗ để'],
+  '3:1:C': ['that used to go into|vốn trước đây dành cho'],
+  '3:1:D': ['is short of|đang thiếu'],
+  '3:1:E': ['the weaker of the two responses|cách ứng phó yếu hơn trong hai cách'],
+  '4:t': ['a craft with no apprentices left|một nghề thủ công không còn người học việc', 'keeping those things alive|giữ cho những thứ đó còn tồn tại'],
+  '4:0:B': ['because there is no cost to weigh|vì chẳng có chi phí nào để cân nhắc'],
+  '4:0:C': ['a degree nobody in the house has seen work|một tấm bằng chưa ai trong nhà thấy có ích'],
+  '4:0:D': ['draw from|tuyển chọn từ'],
+  '4:1:B': ['left school at sixteen|bỏ học năm mười sáu tuổi', 'he will never hold|anh ấy sẽ không bao giờ có'],
+  '4:1:C': ['runs from the lower earner to the higher one|chảy từ người thu nhập thấp sang người thu nhập cao'],
+  '4:1:D+': ['usually loses|thường thua'],
+  '4:1:E': ['the heavier side|bên nặng ký hơn'],
+  '5:t': ['keeps some relationships alive|giữ cho một số mối quan hệ còn sống', 'not how much people talk|không phải người ta nói chuyện nhiều bao nhiêu'],
+  '5:0:B': ['the route home as the risky part of the day|đường về nhà là phần nguy hiểm trong ngày'],
+  '5:0:C': ['pays for a ride instead|trả tiền đi xe thay vì đi bộ'],
+  '5:0:D': ['close earlier|đóng cửa sớm hơn'],
+  '5:0:D+': ['long before it shows up in|từ lâu trước khi nó hiện ra trong'],
+  '5:0:E': ['rather than no reporting|thay vì không đưa tin'],
+  '6:t': ['the case only holds if|lập luận chỉ đứng vững nếu', 'rely on this winter|trông cậy vào mùa đông này'],
+  '6:0:B': ['have no appointment to attend|không có lịch hẹn nào phải đến'],
+  '6:0:C': ['at a stage that costs|ở giai đoạn chỉ tốn'],
+  '6:0:D': ['stops lengthening|ngừng dài thêm'],
+  '6:0:D+': ['runs on a Thursday|hoạt động vào thứ Năm'],
+  '6:0:E': ['cannot wait for a program to work|không thể chờ một chương trình phát huy tác dụng'],
+  '7:t': ['the claim fails at the word only|lập luận sụp đổ ở chữ "only"', 'no bonus can reliably buy|không khoản thưởng nào mua chắc được'],
+  '7:0:B': ['a hairline crack|một vết nứt nhỏ như sợi tóc', 'at the end of a shift|cuối ca làm'],
+  '7:0:C': ['earns her nothing|chẳng mang lại cho cô ấy gì'],
+  '7:0:D': ['leaves it where nobody has|bỏ qua ở nơi chưa ai hỏi'],
+  '7:0:D+': ['how often a line stops|dây chuyền dừng thường xuyên đến đâu'],
+  '7:0:E': ['a condition for the work rather than|điều kiện để làm việc chứ không phải'],
+  '8:t': ['falls on whoever comes next|đổ lên bất kỳ ai đến sau', 'cannot price a river|không thể định giá một dòng sông'],
+  '8:0:B': ['in a district with no bus before six|ở một quận không có xe buýt trước sáu giờ'],
+  '8:0:C': ['It removes something else from the same week|nó cắt bỏ thứ khác trong cùng tuần đó'],
+  '8:0:D': ['feels the tax as a saving|coi khoản thuế như một khoản tiết kiệm'],
+  '8:0:D+': ['thinner shopping baskets|giỏ hàng vơi đi'],
+  '8:0:E': ['cannot be the best single answer|không thể là câu trả lời tốt nhất duy nhất'],
+  '9:t': ['from opposite ends|từ hai đầu ngược nhau', 'displaces crime rather than reducing it|dời tội phạm sang chỗ khác chứ không giảm nó'],
+  '9:0:B': ['the picking work|công việc nhặt hàng'],
+  '9:0:C': ['keep their jobs|giữ được việc'],
+  '9:0:D': ['Five years on|năm năm sau', 'has trained nobody|chẳng đào tạo được ai'],
+  '9:0:D+': ['of the shop floor|của xưởng'],
+  '9:0:E': ['quietly removed|lặng lẽ xoá bỏ'],
+  '10:t': ['is better understood as|nên được hiểu là', 'an event to repeat each year|một sự kiện lặp lại mỗi năm'],
+  '10:0:B': ['within a week of the price going up|trong vòng một tuần sau khi giá tăng'],
+  '10:0:C': ['before the first bus runs|trước khi chuyến xe buýt đầu tiên chạy'],
+  '10:0:D': ['taxes the trips that were hardest|đánh thuế vào những chuyến khó thay thế nhất'],
+  '10:0:D+': ['long before it shows up|từ lâu trước khi nó hiện ra'],
+  '10:0:E': ['at the hours people actually travel|vào đúng giờ người ta đi lại'],
+  '11:t': ['understood that way|hiểu theo cách đó', 'measured over a decade|được đo trong cả một thập kỷ'],
+  '11:0:B': ['after a nine-hour shift|sau ca làm chín tiếng', 'has already used up|đã dùng cạn'],
+  '11:0:C': ['without taking the choice away from anyone|mà không tước lựa chọn của ai'],
+  '11:0:D': ['hands opponents an easy argument|trao cho phe phản đối một lý lẽ dễ dàng'],
+  '11:0:D+': ['tends not to|thường không làm được vậy'],
+  '11:0:E': ['do not require the state to decide|không đòi hỏi nhà nước phải quyết định'],
+  '12:t': ['from different distances|từ những khoảng cách khác nhau', 'one of the few remaining reasons|một trong số ít lý do còn lại'],
+  '12:0:B': ['is there to sell something|có mặt để bán thứ gì đó'],
+  '12:0:C': ['long before anyone explains it to them|từ lâu trước khi có ai giải thích cho chúng'],
+  '12:0:D': ['does not end up with|rốt cuộc không có được'],
+  '12:0:D+': ['simply disappears|đơn giản là biến mất'],
+  '12:0:E': ['is supposed to attract|được cho là sẽ thu hút'],
+  '13:t': ['is meant to achieve|nhằm đạt được', 'on that second ground|dựa trên lý do thứ hai đó'],
+  '13:0:B': ['is not weighing the size of|không cân nhắc mức'],
+  '13:0:C': ['reaches only the small number of drivers|chỉ chạm tới số ít tài xế'],
+  '13:0:D': ['without requiring the driver to agree|mà không cần tài xế đồng ý'],
+  '13:0:E': ['the last step in the chain|bước cuối cùng của chuỗi'],
+  '14:t': ['reaches further where need is greatest|đi xa hơn, tới nơi cần nhất', 'the other cannot match|bên kia không sánh được'],
+  '14:0:B': ['than people who spend none|so với người không chơi chút nào'],
+  '14:0:C': ['to begin with|ngay từ đầu'],
+  '14:0:D': ['the honest answer is that|câu trả lời thành thật là'],
+  '14:0:D+': ['spread widely|lan rộng'],
+  '14:0:E': ['ignores the smaller effects|bỏ qua những tác động nhỏ hơn'],
+};
+
 /* ─── Hầm ngục chữ ─────────────────────────────────────────────────────────
    One player, turn-based. Each lesson is a dungeon: a goblin guards the
    thesis (mở bài), a brute guards the opening line of a model paragraph
@@ -17682,20 +17831,18 @@ const RAID_MINIONS = [
 const RAID_BRUTES = [
   { icon: '👹', name: 'Quỷ đầu đàn' }, { icon: '🐺', name: 'Sói xám' }, { icon: '🦂', name: 'Bọ cạp khổng lồ' }, { icon: '🕷️', name: 'Nhện độc' },
 ];
+const RAID_PESTS = [
+  { icon: '🐀', name: 'Chuột gặm chữ' }, { icon: '🦟', name: 'Muỗi vo ve' }, { icon: '🐸', name: 'Ếch ồn ào' }, { icon: '🪲', name: 'Bọ cánh cứng' },
+];
+const RAID_GATE_FOE = { icon: '🗿', name: 'Tượng gác cổng đoạn' };
 // hit: what one monster strike takes; every: turns between its strikes.
+// Tier 0 is the lesson's word list, 2 the paragraph gate.
 const RAID_TIERS = {
+  0: { label: 'Từ vựng buổi', hp: 80, hit: 15, every: 3, coin: 8, bg: 'forest' },
   1: { label: 'Mở bài', hp: 100, hit: 20, every: 3, coin: 10, bg: 'forest' },
-  2: { label: 'Mở đầu đoạn', hp: 150, hit: 20, every: 3, coin: 15, bg: 'cave' },
+  2: { label: 'Cổng đoạn', hp: 150, hit: 20, every: 3, coin: 15, bg: 'cave' },
   3: { label: 'Viết đoạn', hp: 300, hit: 15, every: 2, coin: 40, bg: 'lava' },
 };
-// Seconds per turn: with a word bank, and with only the Vietnamese meaning.
-const RAID_PACES = {
-  calm:   { label: 'Thong thả', bank: 45, type: 60 },
-  normal: { label: 'Vừa',       bank: 30, type: 45 },
-  quick:  { label: 'Gấp',       bank: 20, type: 30 },
-};
-const RAID_BOSS_BLANKS = 8;
-const RAID_HEAL = 40;     // health back between fights
 const RAID_POTION = 30;   // health back from the heal move
 const RAID_MANA = { atk: 25, crit: 35, heal: 15, copied: 10 };
 const RAID_ULT = 2.5;     // the special hits this many times as hard
@@ -17704,8 +17851,8 @@ const RAID_ACTIONS = [
   { id: 'heal', icon: '💚', name: 'Hồi máu',  go: '💚 Hồi máu' },
   { id: 'ult',  icon: '✨', name: 'Tuyệt kỹ', go: '✨ Tung chiêu' },
 ];
-let _raidPace = 'normal';
-try { const p = localStorage.getItem('raidPace'); if (RAID_PACES[p]) _raidPace = p; } catch (e) {}
+let _raidLevel = 'd';
+try { const p = localStorage.getItem('raidLevel'); if (RAID_LEVELS[p]) _raidLevel = p; } catch (e) {}
 let _rd = null;
 let _raidStars = null;
 let _raidStarsFor = null;
@@ -17719,14 +17866,50 @@ function raidParse(t) {
   let m;
   while ((m = re.exec(t))) {
     if (m.index > last) parts.push(t.slice(last, m.index));
-    parts.push({ ans: m[1], hint: m[2] });
+    // "{answer|meaning|x}" marks a blank added for Huyền thoại only.
+    const extra = /\|x$/.test(m[2]);
+    parts.push({ ans: m[1], hint: extra ? m[2].slice(0, -2) : m[2], extra });
     last = re.lastIndex;
   }
   if (last < t.length) parts.push(t.slice(last));
   return parts;
 }
 function raidPlain(t) { return t.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'); }
-function raidNorm(s) { return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/[.,;:!?]+$/, '').replace(/\s+/g, ' ').trim(); }
+// Case, quotes and punctuation never decide an answer; the letters do.
+function raidNorm(s) { return String(s).toLowerCase().replace(/[‘’]/g, "'").replace(/[“”".,;:!?]/g, '').replace(/\s+/g, ' ').trim(); }
+// A line's text for the Huyền thoại level: its RAID_EXTRA phrases become
+// blanks too. The phrases sit only in unmarked text (checked when written).
+function raidWithExtra(t, key) {
+  (RAID_EXTRA[key] || []).forEach(e => {
+    const [ans, hint] = e.split('|');
+    const parts = t.split(/(\{[^{}]+\})/);
+    const i = parts.findIndex(p => !p.startsWith('{') && p.includes(ans));
+    if (i >= 0) { parts[i] = parts[i].replace(ans, `{${ans}|${hint}|x}`); t = parts.join(''); }
+  });
+  return t;
+}
+
+// Sentences from the lesson's own word list, each with its entry blanked.
+// Entries whose sentence does not contain them (after -s, -ed, -ing) are left out.
+function raidWordLines(n, count) {
+  const L = LESSON_VOCAB.find(x => x.n === n);
+  if (!L) return [];
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const out = [];
+  L.groups.forEach(g => g.items.forEach(([word, vi, , ex]) => {
+    if (!ex) return;
+    const w = word.replace(/\s*\(.*?\)\s*/g, ' ').split('/')[0].trim();
+    if (!w) return;
+    const words = w.split(/\s+/);
+    const lastW = words.pop();
+    const stem = /e$/.test(lastW) ? esc(lastW.slice(0, -1)) + '(?:e|es|ed|ing)' : /y$/.test(lastW) ? esc(lastW.slice(0, -1)) + '(?:y|ies|ied|ying)' : esc(lastW) + '(?:s|es|ed|d|ing)?';
+    const re = new RegExp('\\b' + [...words.map(esc), stem].join('\\s+') + '\\b', 'i');
+    const m = ex.match(re);
+    if (!m) return;
+    out.push({ t: ex.slice(0, m.index) + `{${m[0]}|${vi}}` + ex.slice(m.index + m[0].length), vi: (typeof TW_VI !== 'undefined' && TW_VI[ex]) || '' });
+  }));
+  return vbShuffle(out).slice(0, count);
+}
 // One letter off counts as a spelling slip, which gets a gentler message.
 function raidNear(a, b) {
   a = raidNorm(a); b = raidNorm(b);
@@ -17738,19 +17921,29 @@ function raidNear(a, b) {
 
 function raidEnemy(n, fi, tier, finalBoss) {
   if (tier === 3) return finalBoss ? RAID_BOSSES[n] : { icon: '🐗', name: 'Hộ vệ của ' + RAID_BOSSES[n].name };
-  const list = tier === 1 ? RAID_MINIONS : RAID_BRUTES;
+  if (tier === 2) return RAID_GATE_FOE;
+  const list = tier === 0 ? RAID_PESTS : RAID_MINIONS;
   return list[(n + fi) % list.length];
 }
 
-// The fights of one lesson, in order.
-function raidFights(L) {
-  const f = [{ tier: 1, prompt: L.thesis.prompt, label: 'Câu cuối của mở bài', lines: [L.thesis], given: [] }];
+// The fights of one lesson at one level, in order: the word list, the
+// thesis, then a gate and a boss for each model paragraph.
+function raidFights(L, lv) {
+  const f = [];
+  const words = raidWordLines(L.n, lv.words);
+  if (words.length) f.push({ tier: 0, kind: 'words', prompt: 'Các câu ví dụ trong danh sách từ vựng của buổi này.', label: 'Từ vựng của buổi', lines: words, given: [] });
+  const thesis = lv.extra ? { ...L.thesis, t: raidWithExtra(L.thesis.t, L.n + ':t') } : L.thesis;
+  f.push({ tier: 1, prompt: L.thesis.prompt, label: 'Câu cuối của mở bài', lines: [thesis], given: [] });
   L.paras.forEach((p, i) => {
-    f.push({ tier: 2, prompt: p.prompt, label: p.label || 'Câu mở đoạn', lines: [p.s[0]], given: [] });
-    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: p.s.slice(1), given: [p.s[0]], final: i === L.paras.length - 1 });
+    const gate = RAID_GATES[L.n + ':' + i];
+    if (gate) f.push({ tier: 2, kind: 'gate', gate, pi: i, prompt: p.prompt, label: 'Câu mở đoạn · ' + (p.label || 'Thân bài'), lines: [p.s[0]], rest: p.s.slice(1), given: [] });
+    const rest = p.s.slice(1).map(s => (lv.extra ? { ...s, t: raidWithExtra(s.t, `${L.n}:${i}:${s.step}`) } : s));
+    f.push({ tier: 3, prompt: p.prompt, label: p.label || 'Cả đoạn', lines: rest, given: [p.s[0]], final: i === L.paras.length - 1 });
   });
   return f.map((x, i) => ({ ...x, enemy: raidEnemy(L.n, i, x.tier, x.final) }));
 }
+function raidLv() { return RAID_LEVELS[(_rd && _rd.lv) || _raidLevel] || RAID_LEVELS.d; }
+function raidStarKey(n, lvId) { return lvId === 'd' ? String(n) : n + lvId; }
 
 /* ── The hero ── */
 function raidGender() {
@@ -17895,11 +18088,13 @@ async function raidLoadStars() {
   _raidStarsFor = who;
   return merged;
 }
-function raidSaveStars(n, stars) {
+// key is the lesson number for Dũng sĩ (the level the stars first counted
+// for), and the lesson number plus "a" or "l" for the other two.
+function raidSaveStars(key, stars) {
   if (!_raidStars) _raidStars = {};
-  _raidStars[n] = Math.max(stars, _raidStars[n] || 0);
+  _raidStars[key] = Math.max(stars, _raidStars[key] || 0);
   lvSave(raidKey(), JSON.stringify(_raidStars));
-  api('/api/game/raid', { method: 'PUT', body: JSON.stringify({ stars: { [n]: stars } }) }).catch(() => {});
+  api('/api/game/raid', { method: 'PUT', body: JSON.stringify({ stars: { [key]: stars } }) }).catch(() => {});
 }
 
 /* ── Map ── */
@@ -17929,34 +18124,61 @@ async function raidMap() {
           <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
           <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
         </button>
-        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Sai không quá 2 lần cả hầm ngục là được 3 sao.</div>
-        <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 3} sao</div>
-        <div class="rd-pace"><span>Thời gian mỗi lượt</span>${Object.entries(RAID_PACES).map(([k, p]) => `<button class="vb-chip${_raidPace === k ? ' active' : ''}" onclick="raidSetPace('${k}')">${p.label} · ${p.bank}s</button>`).join('')}</div>
+        <div class="rd-map-sub">Mỗi lượt: chọn <b>⚔️ Tấn công</b>, <b>💚 Hồi máu</b> hoặc <b>✨ Tuyệt kỹ</b>, rồi gõ từ còn thiếu. Gõ đúng thì ra đòn và được mana, đầy mana thì tung tuyệt kỹ. Quái đánh lại sau vài lượt, và đánh ngay khi em gõ sai hoặc hết giờ. Mỗi hầm ngục có 3 cấp theo band, sai không quá 2 lần là được 3 sao ở cấp đó.</div>
+        <div class="rd-map-stats">⭐ ${total} / ${RAID_LESSONS.length * 9} sao</div>
       </div>
       <div class="rd-path">${RAID_LESSONS.map((L, i) => {
-        const s = stars[L.n] || 0;
+        const any = Object.keys(RAID_LEVELS).some(id => stars[raidStarKey(L.n, id)]);
         const b = RAID_BOSSES[L.n];
-        return `<button class="rd-node rd-node--${i % 2 ? 'r' : 'l'}${s ? ' done' : ''}" onclick="raidStart(${L.n})" style="animation-delay:${i * 40}ms">
+        return `<button class="rd-node rd-node--${i % 2 ? 'r' : 'l'}${any ? ' done' : ''}" onclick="raidPickLevel(${L.n})" style="animation-delay:${i * 40}ms">
           <span class="rd-node-boss">${b.icon}</span>
           <span class="rd-node-body">
             <span class="rd-node-n">Buổi ${L.n}</span>
             <span class="rd-node-t">${escapeHtml(titles[L.n] || '')}</span>
-            <span class="rd-node-b">Boss: ${escapeHtml(b.name)}</span>
+            <span class="rd-node-lv">${Object.values(RAID_LEVELS).map(lv => { const s = stars[raidStarKey(L.n, lv.id)] || 0; return `<span class="rd-lvpip${s ? ' on' : ''}" title="${lv.name}">${lv.icon}<b>${'★'.repeat(s)}<i>${'★'.repeat(3 - s)}</i></b></span>`; }).join('')}</span>
           </span>
-          <span class="rd-node-stars">${'★'.repeat(s)}<span class="rd-star-off">${'★'.repeat(3 - s)}</span></span>
         </button>`;
       }).join('')}</div>
     </div>`;
 }
-function raidSetPace(k) { if (RAID_PACES[k]) { _raidPace = k; lvSave('raidPace', k); tsSfx('key'); raidMap(); } }
+
+// Picking a level for one dungeon: three cards, the last level chosen first.
+function raidPickLevel(n) {
+  const stars = _raidStars || {};
+  document.getElementById('rd-lvmodal')?.remove();
+  const el = document.createElement('div');
+  el.id = 'rd-lvmodal';
+  el.className = 'rd-lvmodal';
+  el.innerHTML = `
+    <div class="rd-lvbox" role="dialog" aria-label="Chọn cấp độ">
+      <div class="rd-lvhead"><span>${RAID_BOSSES[n].icon} Buổi ${n} · chọn cấp độ</span><button class="ts-icon-btn" onclick="document.getElementById('rd-lvmodal').remove()" aria-label="Đóng">✕</button></div>
+      <div class="rd-lvcards">${Object.values(RAID_LEVELS).map(lv => {
+        const s = stars[raidStarKey(n, lv.id)] || 0;
+        return `<button class="rd-lvcard rd-lvcard--${lv.id}${lv.id === _raidLevel ? ' last' : ''}" onclick="raidStart(${n}, '${lv.id}')">
+          <span class="rd-lvcard-icon">${lv.icon}</span>
+          <span class="rd-lvcard-name">${lv.name}</span>
+          <span class="rd-lvcard-band">Hợp với band ${lv.band}</span>
+          <span class="rd-lvcard-stars">${'★'.repeat(s)}<i>${'★'.repeat(3 - s)}</i></span>
+          <ul>${lv.blurb.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+          <span class="rd-lvcard-meta">⏱️ ${lv.bank}–${lv.type} giây · 🪙 ×${lv.coinMul}</span>
+        </button>`;
+      }).join('')}</div>
+    </div>`;
+  el.addEventListener('click', e => { if (e.target === el) el.remove(); });
+  document.body.appendChild(el);
+  tsSfx('equip');
+}
 
 /* ── A dungeon run ── */
-function raidStart(n) {
+function raidStart(n, lvId) {
   const L = RAID_LESSONS.find(x => x.n === n);
   if (!L) return;
   raidStop();
+  const lv = RAID_LEVELS[lvId] || raidLv();
+  _raidLevel = lv.id;
+  lvSave('raidLevel', lv.id);
   _rd = {
-    L, fights: raidFights(L), fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
+    L, lv: lv.id, fights: raidFights(L, lv), fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
     shield: false, action: 'atk', fight: null, timer: 0, busy: false, done: false,
     gender: raidGender() || 'm', look: raidHeroLook(),
   };
@@ -17968,32 +18190,74 @@ function raidStart(n) {
 function raidBeginFight() {
   const g = _rd;
   const F = g.fights[g.fi];
-  const tier = RAID_TIERS[F.tier];
-  // Every marked word in the fight is a blank; the boss keeps at most
-  // RAID_BOSS_BLANKS of them, spread across its sentences.
+  const lv = raidLv();
+  const tier = { ...RAID_TIERS[F.tier] };
+  tier.hit = Math.round(tier.hit * lv.hitMul);
+  tier.every = lv.every || tier.every;
   let blanks = [];
-  F.lines.forEach((line, li) => raidParse(line.t).forEach((p, pi) => { if (typeof p !== 'string') blanks.push({ li, pi, ans: p.ans, hint: p.hint }); }));
-  if (F.tier === 3 && blanks.length > RAID_BOSS_BLANKS) {
-    const step = blanks.length / RAID_BOSS_BLANKS;
-    blanks = Array.from({ length: RAID_BOSS_BLANKS }, (_, i) => blanks[Math.floor(i * step)]);
+  let pool;
+  if (F.kind === 'gate') {
+    // One door to pick, then the opening sentence typed chunk by chunk.
+    const others = Object.entries(RAID_GATES).filter(([k]) => k !== g.L.n + ':' + F.pi).map(([, v]) => v.chunks.join(' '));
+    const doors = vbShuffle([
+      { text: F.gate.chunks.join(' '), ok: true },
+      { text: F.gate.trap, why: RAID_TRAP_WHY },
+      { text: others[Math.floor(Math.random() * others.length)], why: RAID_OTHER_WHY },
+    ]);
+    blanks.push({ door: true, doors, ans: '', hint: '' });
+    F.gate.chunks.forEach((c, i) => blanks.push({ li: 0, ci: i, ans: c, hint: F.lines[0].vi, chunk: true }));
+    pool = Object.values(RAID_GATES).flatMap(v => v.chunks).filter(c => !F.gate.chunks.includes(c));
+  } else {
+    // Every marked word in the fight is a blank, then the level trims them:
+    // Học việc keeps the shortest few of the boss's, Dũng sĩ spreads its
+    // share across the paragraph, Huyền thoại keeps every added phrase first.
+    F.lines.forEach((line, li) => raidParse(line.t).forEach((p, pi) => { if (typeof p !== 'string') blanks.push({ li, pi, ans: p.ans, hint: p.hint, extra: p.extra }); }));
+    const cap = lv.bossBlanks;
+    if (F.tier === 3 && blanks.length > cap) {
+      const order = b => blanks.indexOf(b);
+      if (lv.id === 'a') {
+        blanks = [...blanks].sort((x, y) => x.ans.length - y.ans.length).slice(0, cap).sort((x, y) => order(x) - order(y));
+      } else {
+        const keep = blanks.filter(b => b.extra).slice(0, cap);
+        const rest = blanks.filter(b => !b.extra);
+        const room = cap - keep.length;
+        const step = rest.length / Math.max(1, room);
+        const spread = Array.from({ length: Math.min(room, rest.length) }, (_, i) => rest[Math.floor(i * step)]);
+        blanks = [...keep, ...spread].sort((x, y) => order(x) - order(y));
+      }
+    }
+    if (F.kind === 'words') {
+      // Other entries from the same lesson make the word bank.
+      const L = LESSON_VOCAB.find(x => x.n === g.L.n);
+      pool = L ? L.groups.flatMap(gr => gr.items.map(it => it[0].replace(/\s*\(.*?\)\s*/g, ' ').split('/')[0].trim())) : [];
+    } else {
+      pool = [...new Set(RAID_LESSONS.flatMap(x => [x.thesis, ...x.paras.flatMap(p => p.s)]).flatMap(line => raidParse(line.t).filter(p => typeof p !== 'string').map(p => p.ans)))];
+    }
   }
   blanks.forEach(raidResetBlank);
-  const pool = [...new Set(RAID_LESSONS.flatMap(x => [x.thesis, ...x.paras.flatMap(p => p.s)]).flatMap(line => raidParse(line.t).filter(p => typeof p !== 'string').map(p => p.ans)))];
   // Attacking on every turn brings the monster down on the last blank.
-  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, dmg: Math.ceil(tier.hp / blanks.length), cd: tier.every, stun: false, pool, own: blanks.map(b => b.ans) };
+  g.fight = { F, tier, blanks, bi: 0, enemyHp: tier.hp, dmg: Math.ceil(tier.hp / blanks.length), cd: tier.every, stun: false, pool, own: blanks.filter(b => !b.door).map(b => b.ans) };
   g.busy = false;
   raidRenderArena();
   raidNextTurn();
 }
 function raidResetBlank(b) {
   b.done = false; b.wrongs = 0; b.removed = []; b.reveal = 0; b.choices = null; b.hinted = false; b.shown = false;
-  b.bank = !_rd || !_rd.fights || _rd.fights[_rd.fi].tier < 3;
+  const lv = raidLv();
+  const tier = _rd && _rd.fights ? _rd.fights[_rd.fi].tier : 1;
+  b.bank = !b.door && (lv.bankAll || (!lv.noBank && tier < 3));
 }
 
 // Four words to read from: the answer and three others, closest in length
 // first, taken from this fight before the rest of the lessons.
 function raidChoices(b) {
   const f = _rd.fight;
+  // At a gate the bank is the chunks still to type, in any order, plus one
+  // from another opener, so the order has to come from the student.
+  if (b.chunk) {
+    const left = f.blanks.filter(x => x.chunk && !x.done).map(x => x.ans);
+    return vbShuffle([...left, vbShuffle(f.pool)[0]].filter(Boolean));
+  }
   const len = b.ans.split(' ').length;
   const others = [...new Set([...f.own, ...vbShuffle(f.pool)])].filter(a => raidNorm(a) !== raidNorm(b.ans));
   others.sort((x, y) => Math.abs(x.split(' ').length - len) - Math.abs(y.split(' ').length - len));
@@ -18037,8 +18301,9 @@ function raidRenderArena() {
         <div class="rd-banner hidden" id="rd-banner"></div>
       </div>
       <div class="rd-scroll">
-        <details class="rd-prompt"><summary>📜 Đề bài · ${escapeHtml(F.label)}</summary><div>${escapeHtml(F.prompt)}</div></details>
-        <div class="rd-text" id="rd-text"></div>
+        <details class="rd-prompt"><summary>📜 ${F.kind === 'words' ? '' : 'Đề bài · '}${escapeHtml(F.label)} <span class="rd-lvtag">${raidLv().icon} ${raidLv().name}</span></summary><div>${escapeHtml(F.prompt)}</div></details>
+        <div class="rd-text${F.kind === 'words' ? ' rd-text--list' : ''}" id="rd-text"></div>
+        ${raidLv().showVi ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
       </div>
       <div class="rd-panel" id="rd-panel"></div>
     </div>`;
@@ -18074,6 +18339,16 @@ function raidRenderText() {
   const el = document.getElementById('rd-text');
   if (!el) return;
   const active = f.blanks[f.bi];
+  if (f.F.kind === 'gate') {
+    // The opening sentence as a row of chunk slots, then the rest of the
+    // paragraph it has to introduce.
+    const slots = f.blanks.filter(b => b.chunk).map((b, i) => (b.done
+      ? `<span class="rd-word${b.shown ? ' rd-word--shown' : ''}">${escapeHtml(b.ans)}</span>`
+      : `<span class="rd-slot rd-slot--chunk${b === active ? ' now' : ''}">${b === active ? '?' : i + 1}</span>`)).join(' ');
+    el.innerHTML = `<div class="rd-gate-a"><b>Câu mở đoạn:</b> ${active && active.door ? '<span class="rd-slot rd-slot--chunk now">? ? ?</span>' : slots}</div>
+      <div class="rd-gate-rest"><b>Các câu sau:</b> ${f.F.rest.map(l => escapeHtml(raidPlain(l.t))).join(' ')}</div>`;
+    return;
+  }
   const given = f.F.given.map(line => `<span class="rd-given">${escapeHtml(raidPlain(line.t))}</span>`).join(' ');
   const lines = f.F.lines.map((line, li) => raidParse(line.t).map((p, pi) => {
     if (typeof p === 'string') return escapeHtml(p);
@@ -18082,8 +18357,10 @@ function raidRenderText() {
     if (b.done) return `<span class="rd-word${b.shown ? ' rd-word--shown' : ''}">${escapeHtml(b.ans)}</span>`;
     const n = f.blanks.indexOf(b) + 1;
     return `<span class="rd-slot${b === active ? ' now' : ''}" data-n="${n}">${b === active ? '?' : n}</span>`;
-  }).join('')).join(' ');
-  el.innerHTML = (given ? given + ' ' : '') + lines;
+  }).join(''));
+  el.innerHTML = f.F.kind === 'words'
+    ? lines.map(l => `<div class="rd-line">${l}</div>`).join('')
+    : (given ? given + ' ' : '') + lines.join(' ');
   el.querySelector('.rd-slot.now')?.scrollIntoView({ block: 'nearest' });
 }
 
@@ -18129,12 +18406,14 @@ function raidRenderPanel() {
   if (!panel) return;
   const b = f.blanks[f.bi];
   if (!b) { panel.innerHTML = ''; return; }
+  if (b.door) { raidRenderDoors(panel, b); return; }
+  const lv = raidLv();
   const copied = b.wrongs >= 3;
-  let clue = '';
-  if (f.F.tier === 3) {
-    const mask = b.ans.split('').map((ch, i) => (i < Math.max(1, b.reveal) || ch === ' ' || ch === '-' || ch === "'" ? ch : '_')).join('');
-    clue += `<div class="rd-hint-vi"><span>Nghĩa:</span> ${escapeHtml(b.hint)}</div>`;
-    if (!copied) clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
+  let clue = `<div class="rd-hint-vi"><span>${b.chunk ? 'Nghĩa cả câu:' : 'Nghĩa:'}</span> ${escapeHtml(b.hint)}</div>`;
+  if (!b.bank && !copied) {
+    const shown = Math.max(lv.firstLetter ? 1 : 0, b.reveal);
+    const mask = b.ans.split('').map((ch, i) => (i < shown || /[\s\-'",.]/.test(ch) ? ch : '_')).join('');
+    clue += `<div class="rd-mask">${escapeHtml(mask)}</div>`;
   }
   if (b.bank && !copied) {
     if (!b.choices) b.choices = raidChoices(b);
@@ -18142,11 +18421,11 @@ function raidRenderPanel() {
   }
   if (copied) clue += `<div class="rd-answer">Đáp án là <b>${escapeHtml(b.ans)}</b>. Gõ lại đúng từ này để ra đòn.</div>`;
   panel.innerHTML = `
-    <div class="rd-turn">${b.review ? '🔁 Ôn lại · ' : ''}Ô số ${f.bi + 1} · ${b.bank && !copied ? 'nhìn kho từ rồi gõ từ đúng' : copied ? 'gõ lại đáp án' : 'gõ từ tiếng Anh'}</div>
+    <div class="rd-turn">${b.review ? '🔁 Ôn lại · ' : ''}${b.chunk ? `Cụm ${b.ci + 1} / ${f.F.gate.chunks.length}` : `Ô số ${f.bi + 1}`} · ${copied ? 'gõ lại đáp án' : b.bank ? `nhìn kho ${b.chunk ? 'cụm' : 'từ'} rồi gõ ${b.chunk ? 'cụm tiếp theo' : 'từ đúng'}` : b.chunk ? 'gõ cụm tiếp theo' : 'gõ từ tiếng Anh'}</div>
     ${clue}
     <div class="rd-acts" id="rd-acts"></div>
     <div class="rd-typebar">
-      <input class="ts-input rd-input" id="rd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="Gõ từ còn thiếu rồi Enter" aria-label="Gõ từ còn thiếu">
+      <input class="ts-input rd-input" id="rd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="${b.chunk ? 'Gõ cụm tiếp theo rồi Enter' : 'Gõ từ còn thiếu rồi Enter'}" aria-label="Gõ phần còn thiếu">
       <button class="vb-start-btn rd-go" id="rd-go" onclick="raidSubmit()"></button>
     </div>
     <div class="rd-items">
@@ -18171,6 +18450,26 @@ function raidRenderPanel() {
   }
 }
 
+// The gate's first turn: three openers, one of which leads into the
+// sentences below. The wrong ones stay crossed out with the reason.
+function raidRenderDoors(panel, b) {
+  panel.innerHTML = `
+    <div class="rd-turn">🚪 Chọn câu mở đúng cho đoạn này</div>
+    ${b.why ? `<div class="rd-why">✗ ${escapeHtml(b.why)}</div>` : '<div class="rd-door-note">Đọc các câu sau của đoạn, rồi chọn câu mở báo trước đúng điều các câu đó giải thích. Chọn xong em sẽ gõ lại câu mở theo từng cụm.</div>'}
+    <div class="rd-doors">${b.doors.map((d, i) => `<button class="rd-door" onclick="raidDoor(${i})" ${b.removed.includes(i) ? 'disabled' : ''}><span class="rd-door-k">${'ABC'[i]}</span><span>${escapeHtml(d.text)}</span></button>`).join('')}</div>`;
+}
+function raidDoor(i) {
+  const g = _rd;
+  if (!g || g.busy) return;
+  const b = g.fight.blanks[g.fight.bi];
+  if (!b || !b.door || b.removed.includes(i)) return;
+  g.action = 'atk';
+  if (b.doors[i].ok) { raidAct(); return; }
+  b.removed.push(i);
+  b.why = b.doors[i].why;
+  raidMiss(false);
+}
+
 /* ── Turns ── */
 // The next open blank, in order. Once every blank is filled and the monster
 // still stands, the words that went wrong come back for another go.
@@ -18178,9 +18477,10 @@ function raidNextBlank() {
   const f = _rd.fight;
   let i = f.blanks.findIndex(b => !b.done);
   if (i < 0) {
-    const weak = f.blanks.filter(b => b.missed);
-    const from = (weak.length ? weak : f.blanks).filter(b => f.blanks.indexOf(b) !== f.bi);
-    const b = (from.length ? from : f.blanks)[Math.floor(Math.random() * (from.length || f.blanks.length))];
+    const open = f.blanks.filter(b => !b.door);
+    const weak = open.filter(b => b.missed);
+    const from = (weak.length ? weak : open).filter(b => f.blanks.indexOf(b) !== f.bi);
+    const b = (from.length ? from : open)[Math.floor(Math.random() * (from.length || open.length))];
     raidResetBlank(b);
     b.review = true;
     b.missed = false;
@@ -18196,8 +18496,8 @@ function raidNextTurn() {
   const b = g.fight.blanks[g.fight.bi];
   g.busy = false;
   g.action = 'atk';
-  const pace = RAID_PACES[_raidPace];
-  g.tMax = b.bank ? pace.bank : pace.type;
+  const lv = raidLv();
+  g.tMax = b.bank || b.door ? lv.bank : lv.type;
   g.tLeft = g.tMax;
   raidRenderText();
   raidRenderPanel();
@@ -18243,6 +18543,8 @@ function raidSubmit() {
   const typed = inp.value.trim();
   if (!typed) { inp.focus(); return; }
   if (raidNorm(typed) === raidNorm(b.ans)) raidAct();
+  // Học việc lets one wrong letter through, and shows the spelling.
+  else if (raidLv().slack && raidNear(typed, b.ans)) { b.slip = true; raidBanner(`✏️ Gần đúng! Viết là: ${b.ans}`, 'reveal'); raidAct(); }
   else raidMiss(false, typed);
 }
 
@@ -18258,8 +18560,8 @@ function raidAct() {
   const copied = b.wrongs >= 3;
   b.done = true;
   if (copied) b.shown = true;
-  const crit = !copied && g.tLeft > g.tMax * 0.6;
-  const coin = copied ? 0 : (crit ? 2 : 1) * walMult();
+  const crit = !copied && !b.slip && g.tLeft > g.tMax * 0.6;
+  const coin = copied ? 0 : Math.round((crit ? 2 : 1) * raidLv().coinMul * walMult());
   g.coins += coin;
   if (crit) g.crits++;
   const manaBefore = g.mana;
@@ -18384,7 +18686,7 @@ function raidMiss(timeout, typed) {
   b.wrongs++;
   b.missed = true;
   g.misses++;
-  if (f.F.tier === 3) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
+  if (!b.bank && !b.door) b.reveal = Math.max(b.reveal, Math.ceil(b.ans.length * Math.min(1, b.wrongs * 0.35)));
   const near = typed && raidNear(typed, b.ans);
   raidBanner(timeout ? '⌛ Hết giờ! Quái đánh' : near ? '✏️ Suýt đúng, sai chính tả!' : '✗ Chưa đúng! Quái đánh', 'miss');
   if (typed) {
@@ -18565,12 +18867,13 @@ function raidWinFight() {
   raidAnim('rd-enemy', 'die');
   tsSfx('level');
   jBuzz([30, 40, 30, 40, 90]);
-  const bonus = f.tier.coin * walMult();
+  const lv = raidLv();
+  const bonus = Math.round(f.tier.coin * lv.coinMul * walMult());
   g.coins += bonus;
   walEarn(g.coins, true);
   g.coins = 0;
   const lastFight = g.fi === g.fights.length - 1;
-  if (!lastFight) g.hp = Math.min(100, g.hp + RAID_HEAL);
+  if (!lastFight) g.hp = Math.min(100, g.hp + lv.heal);
   setTimeout(() => {
     if (_rd !== g) return;
     const panel = document.getElementById('rd-panel');
@@ -18578,8 +18881,8 @@ function raidWinFight() {
     if (panel) panel.innerHTML = `
       <div class="rd-win">
         <div class="rd-win-title">${F.enemy.icon} ${escapeHtml(F.enemy.name)} đã gục! <span class="rd-loot">+${bonus} 🪙</span></div>
-        <div class="rd-win-text">${lines.map(l => `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span><span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span></p>`).join('')}</div>
-        ${lastFight ? '' : `<div class="rd-heal">💚 Hồi ${RAID_HEAL} máu trước trận sau · ✨ mana giữ nguyên</div>`}
+        <div class="rd-win-text">${lines.map(l => `<p><span class="rd-en">${escapeHtml(raidPlain(l.t))}</span>${l.vi ? `<span class="rd-vi"><b>Dịch:</b> ${escapeHtml(l.vi)}</span>` : ''}</p>`).join('')}</div>
+        ${lastFight ? '' : `<div class="rd-heal">${lv.heal ? `💚 Hồi ${lv.heal} máu trước trận sau` : '👑 Huyền thoại: không hồi máu giữa trận'} · ✨ mana giữ nguyên</div>`}
         <div class="rd-win-btns">
           <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(lines.map(l => raidPlain(l.t)).join(' ')))})" title="Nghe cả đoạn">🔊</button>
           <button class="vb-start-btn" id="rd-next" onclick="raidAfterWin()">${lastFight ? '🏆 Nhận thưởng' : 'Đánh tiếp →'}</button>
@@ -18604,8 +18907,9 @@ function raidCleared() {
   // Stars count the misses over the whole dungeon: wrong words and clocks
   // that ran out.
   const stars = g.misses <= 2 ? 3 : g.misses <= 5 ? 2 : 1;
-  const prev = (_raidStars && _raidStars[g.L.n]) || 0;
-  raidSaveStars(g.L.n, stars);
+  const prev = (_raidStars && _raidStars[raidStarKey(g.L.n, g.lv)]) || 0;
+  const key = raidStarKey(g.L.n, g.lv);
+  raidSaveStars(key, stars);
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
   root.innerHTML = `
@@ -18616,12 +18920,13 @@ function raidCleared() {
           <div class="rd-clear-boss">${RAID_BOSSES[g.L.n].icon}</div>
         </div>
         <div class="rd-clear-title">Hầm ngục Buổi ${g.L.n} đã sạch bóng quái!</div>
+        <div class="rd-clear-lv">${raidLv().icon} Cấp ${raidLv().name} · hợp với band ${raidLv().band}</div>
         <div class="rd-clear-stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.3 + i * 0.25}s">★</span>`).join('')}</div>
         <div class="vb-results-score-lbl">Sai ${g.misses} lần · ${g.crits} chí mạng · ${g.ults} tuyệt kỹ · còn ${Math.max(0, g.hp)} máu${stars > prev ? ' · kỷ lục mới!' : ''}</div>
         ${stars < 3 ? `<div class="rd-clear-tip">Sai không quá ${stars === 1 ? 5 : 2} lần để lên ${stars + 1} sao.</div>` : ''}
         <div class="vb-results-btns">
-          <button class="vb-start-btn" onclick="raidStart(${g.L.n})">↺ Đánh lại</button>
-          ${RAID_LESSONS.some(x => x.n > g.L.n) ? `<button class="vb-secondary-btn" onclick="raidStart(${RAID_LESSONS.find(x => x.n > g.L.n).n})">Hầm ngục tiếp theo →</button>` : ''}
+          <button class="vb-start-btn" onclick="raidStart(${g.L.n}, '${g.lv}')">↺ Đánh lại</button>
+          ${RAID_LESSONS.some(x => x.n > g.L.n) ? `<button class="vb-secondary-btn" onclick="raidStart(${RAID_LESSONS.find(x => x.n > g.L.n).n}, '${g.lv}')">Hầm ngục tiếp theo →</button>` : ''}
           <button class="vb-secondary-btn" onclick="raidMap()">🗺️ Bản đồ</button>
           <button class="vb-secondary-btn" onclick="lbOpen('raid')">🏆 Xếp hạng</button>
         </div>
@@ -18669,16 +18974,20 @@ function raidRetry() {
   raidBeginFight();
 }
 
-// Enter moves on after a win.
+// Enter moves on after a win; A, B and C pick a door at a gate.
 function raidOnKey(e) {
   const g = _rd;
   if (!g || document.getElementById('lv-modal') || (e.target && e.target.id === 'rd-input')) return;
-  if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); }
+  if (document.getElementById('rd-next') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); raidAfterWin(); return; }
+  const b = g.fight && g.fight.blanks[g.fight.bi];
+  const k = 'abc'.indexOf(String(e.key).toLowerCase());
+  if (b && b.door && k >= 0 && !g.busy) { e.preventDefault(); raidDoor(k); }
 }
 
 function raidQuit() { raidMap(); }
 function raidStop() {
   document.removeEventListener('keydown', raidOnKey);
+  document.getElementById('rd-lvmodal')?.remove();
   if (_rd) { clearInterval(_rd.timer); if (_rd.coins) { walEarn(_rd.coins, true); _rd.coins = 0; } }
   _rd = null;
 }

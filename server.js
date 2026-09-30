@@ -4049,7 +4049,8 @@ app.post('/api/game/score', authenticate, (req, res) => {
   }
 });
 
-// Hầm ngục chữ: stars per lesson dungeon, 0 to 3, keyed by lesson number.
+// Hầm ngục chữ: stars per lesson dungeon and level, 0 to 3. The key is the
+// lesson number for Dũng sĩ, plus "a" for Học việc or "l" for Huyền thoại.
 app.get('/api/game/raid', authenticate, (req, res) => {
   try {
     res.json(db.getRaid(req.user.id));
@@ -4061,8 +4062,9 @@ app.put('/api/game/raid', authenticate, (req, res) => {
   try {
     const stars = {};
     for (const [k, v] of Object.entries((req.body && req.body.stars) || {})) {
-      const n = parseInt(k, 10);
-      if (n >= 1 && n <= 50) stars[n] = Math.max(0, Math.min(3, parseInt(v, 10) || 0));
+      const m = /^(\d{1,2})([al]?)$/.exec(k);
+      const n = m ? parseInt(m[1], 10) : 0;
+      if (n >= 1 && n <= 50) stars[n + m[2]] = Math.max(0, Math.min(3, parseInt(v, 10) || 0));
     }
     res.json(db.saveRaid(req.user.id, stars));
   } catch (err) {
