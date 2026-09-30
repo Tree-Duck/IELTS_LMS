@@ -8493,3 +8493,50 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .rd-panel { position: sticky; top: 0.5rem; margin-top: 0; max-height: calc(100vh - 1rem); overflow-y: auto; padding: 0 0.2rem 0.4rem; }
   .rd-panel:empty { display: none; }
 }
+
+/* ── Hầm ngục on a big screen: use the width, scale everything up together ── */
+.main-content:has(.rd-wrap) { max-width: 1760px; }
+@media (min-width: 1280px) {
+  .rd-wrap { max-width: 1680px; }
+  .rd-body { grid-template-columns: minmax(0, 1.25fr) minmax(440px, 1fr); gap: 1.4rem; }
+  .rd-stage { height: 350px; padding: 1rem 1.4rem 1.2rem; }
+  .rd-fighter { font-size: 86px; }
+  .rd-enemy--boss { font-size: 120px; }
+  .rd-hero { width: 132px; }
+  .rd-foes--many .rd-fighter { font-size: 62px; }
+  .rd-foe-mini { width: 62px; height: 7px; }
+  .rd-foe-cd { font-size: 13px; }
+  .rd-pet { font-size: 42px; }
+  .rd-bar { max-width: 320px; }
+  .rd-bar-name { font-size: 1.05rem; }
+  .rd-hp { height: 18px; }
+  .rd-mp { height: 16px; }
+  .rd-hp .rd-hp-num, .rd-mp .rd-hp-num { font-size: 0.8rem; }
+  .rd-intent { font-size: 0.85rem; padding: 0.15rem 0.7rem; }
+  .rd-combo { font-size: 0.9rem; }
+  .rd-clock { width: 88px; height: 88px; }
+  .rd-clock::before { inset: 9px; }
+  .rd-clock span { font-size: 1.9rem; }
+  .rd-dmg { font-size: 1.8rem; }
+  .rd-scroll { padding: 0.9rem 1.2rem; }
+  .rd-prompt summary { font-size: 1.05rem; }
+  .rd-text { font-size: 1.28rem; max-height: 380px; }
+  .rd-slot { font-size: 1rem; }
+  .rd-vibox { font-size: 1.05rem; }
+  .rd-turn { font-size: 0.95rem; margin-bottom: 0.55rem; }
+  .rd-hint-vi { font-size: 1.3rem; padding: 0.7rem 1rem; margin-bottom: 0.7rem; }
+  .rd-mask { font-size: 1.5rem; }
+  .rd-opts { gap: 0.6rem; }
+  .rd-opt { font-size: 1.18rem; padding: 0.6rem 1rem; }
+  .rd-acts { gap: 0.6rem; margin-bottom: 0.75rem; }
+  .rd-act { padding: 0.75rem 0.85rem; gap: 0.6rem; }
+  .rd-act-i { font-size: 1.9rem; }
+  .rd-act-t b { font-size: 1.12rem; }
+  .rd-act-t small { font-size: 0.84rem; }
+  .rd-input { font-size: 1.25rem; padding: 0.85rem 1rem; }
+  .rd-go { font-size: 1.2rem; min-width: 10rem; }
+  .rd-keys { font-size: 0.9rem; }
+  .rd-item { font-size: 1.15rem; padding: 0.35rem 1rem; }
+  .rd-win-title { font-size: 1.3rem; }
+  .rd-win-text { font-size: 1.1rem; }
+}
