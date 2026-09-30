@@ -14,7 +14,12 @@ const path = require('path');
 const fs = require('fs');
 
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 const app = express();
+// Railway puts one proxy in front of the app: trust that hop so req.ip (and
+// with it every rate limit) is the student's address, not the proxy's.
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3000;
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET env var is not set. Refusing to start.');
@@ -38,6 +43,15 @@ const client = new Anthropic({
 });
 
 app.use(cors({ origin: 'https://tintinlab.com' }));
+// Basic hardening headers. No CSP yet: the pages still use inline scripts
+// and handlers, which a policy would have to allow anyway.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (req.secure) res.setHeader('Strict-Transport-Security', 'max-age=15552000');
+  next();
+});
 app.use(express.json({ limit: '15mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -76,8 +90,18 @@ async function sendEmailSafe(sendFn) {
 }
 
 function generateCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
+// Anything a user typed that ends up inside an email's HTML.
+function escMail(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// A display name: no markup characters, no control characters, one line,
+// at most 60 characters. Empty means refuse.
+function cleanName(v) {
+  return String(v == null ? '' : v).replace(/[<>"'`\\]/g, '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+}
+const EMAIL_RE = /^[^\s@<>"'`()\[\],;:\\]+@[^\s@<>"'`()\[\],;:\\]+\.[A-Za-z]{2,}$/;
 
 async function sendVerificationEmail(email, name, code) {
   const { error } = await getResend().emails.send({
@@ -87,7 +111,7 @@ async function sendVerificationEmail(email, name, code) {
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
         <h2 style="color:#0E4D3C;margin-bottom:8px">🌿 SSP IELTS</h2>
-        <p style="color:#374151">Hi <strong>${name}</strong>, thanks for registering!</p>
+        <p style="color:#374151">Hi <strong>${escMail(name)}</strong>, thanks for registering!</p>
         <p style="color:#374151">Your email verification code is:</p>
         <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#0E4D3C;text-align:center;padding:28px 0;background:#FFF7E9;border:2px solid #0E4D3C;border-radius:14px;margin:16px 0">${code}</div>
         <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't register, you can safely ignore this email.</p>
@@ -105,7 +129,7 @@ async function sendPasswordResetEmail(email, name, code) {
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
         <h2 style="color:#0E4D3C;margin-bottom:8px">🌿 SSP IELTS</h2>
-        <p style="color:#374151">Hi <strong>${name}</strong>,</p>
+        <p style="color:#374151">Hi <strong>${escMail(name)}</strong>,</p>
         <p style="color:#374151">We received a request to reset your password. Your reset code is:</p>
         <div style="font-size:2.8rem;font-weight:700;letter-spacing:0.35em;color:#0E4D3C;text-align:center;padding:28px 0;background:#FFF7E9;border:2px solid #0E4D3C;border-radius:14px;margin:16px 0">${code}</div>
         <p style="color:#6b7280;font-size:14px">This code expires in <strong>30 minutes</strong>. If you didn't request a password reset, you can safely ignore this email.</p>
@@ -224,6 +248,9 @@ function authenticate(req, res, next) {
     // if an admin changed the user's role after the token was issued.
     const dbUser = db.getUserById(decoded.id);
     if (!dbUser) return res.status(401).json({ error: 'User not found' });
+    if (dbUser.pwd_changed_at && decoded.iat < Math.floor(dbUser.pwd_changed_at / 1000)) {
+      return res.status(401).json({ error: 'Session ended after a password change. Please sign in again.' });
+    }
     const liveRole = adminRole(dbUser.email) === 'admin' ? 'admin' : (dbUser.role || 'student');
     req.user = { ...decoded, role: liveRole, name: dbUser.name };
     next();
@@ -251,11 +278,31 @@ const authLooseLimiter = rateLimit({
   message: { error: 'Too many requests. Please try again in 15 minutes.' }
 });
 
+// AI calls cost money per request: each student gets 40 every 10 minutes,
+// counted by account. Teachers and admins are not limited.
+const aiLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 40,
+  keyGenerator: req => 'u' + req.user.id,
+  skip: req => !req.user || req.user.role !== 'student',
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Em gọi AI hơi nhiều, nghỉ vài phút rồi thử lại nhé.' }
+});
+
 // ─── Auth Routes ──────────────────────────────────────────────────────────────
 app.post('/api/register', authLooseLimiter, async (req, res) => {
-  const { name, email, password } = req.body;
+  const { password } = req.body;
+  const name = cleanName(req.body.name);
+  const email = String(req.body.email || '').trim();
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+  if (email.length > 254 || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address' });
+  }
+  if (typeof password !== 'string' || password.length > 200) {
+    return res.status(400).json({ error: 'Invalid password' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });
@@ -295,7 +342,9 @@ app.post('/api/login', authStrictLimiter, async (req, res) => {
       return res.json({ needsVerification: true, email: user.email });
     }
     // Email failed to send — since the user already proved their password, let them in
-    // and auto-verify so they aren't locked out
+    // and auto-verify so they aren't locked out. Not for an address that could
+    // never receive mail: that would skip verification altogether.
+    if (!EMAIL_RE.test(user.email)) return res.status(400).json({ error: 'This account has an invalid email address. Ask your teacher.' });
     db.verifyUser(user.id);
   }
   // Admin email env var always wins; otherwise preserve the DB role (teacher/student)
@@ -332,8 +381,8 @@ app.post('/api/auth/google', authLooseLimiter, async (req, res) => {
     let user = db.getUserByEmail(email);
     if (!user) {
       // First Google login → create a verified account with an unusable password
-      const placeholder = await bcrypt.hash('google:' + Math.random().toString(36) + Date.now(), 10);
-      const name = payload.name || payload.given_name || email.split('@')[0];
+      const placeholder = await bcrypt.hash('google:' + crypto.randomBytes(24).toString('hex'), 10);
+      const name = cleanName(payload.name || payload.given_name) || cleanName(email.split('@')[0]) || 'Student';
       const result = db.insertUser(name, email, placeholder, adminRole(email));
       user = db.getUserById(result.lastInsertRowid);
       db.verifyUser(user.id);
@@ -355,7 +404,10 @@ app.post('/api/verify-email', authLooseLimiter, async (req, res) => {
     if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
     const user = db.getUserByEmail(email.toLowerCase());
     if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.verification_code !== code) return res.status(400).json({ error: 'Invalid code' });
+    if (!user.verification_code || user.verification_code !== String(code)) {
+      db.codeMiss(user.id, 'verification');
+      return res.status(400).json({ error: 'Invalid code' });
+    }
     if (new Date(user.verification_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
     db.verifyUser(user.id);
     const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
@@ -403,7 +455,7 @@ app.get('/api/balance', authenticate, (req, res) => {
 });
 
 // ─── Submission Routes ────────────────────────────────────────────────────────
-app.post('/api/submissions', authenticate, async (req, res) => {
+app.post('/api/submissions', authenticate, aiLimiter, async (req, res) => {
   try {
     const { task_type, prompt, essay, image_base64, image_media_type, grading_mode, paste_stats } = req.body;
     if (!task_type || !prompt || !essay) {
@@ -621,7 +673,7 @@ app.get('/api/truc/:n', authenticate, (req, res) => {
 
 // Mark a student's attempt at the gapped chain, using the marking rubric the
 // teacher wrote into the file rather than a generic "is this good" prompt.
-app.post('/api/truc/check-chain', authenticate, async (req, res) => {
+app.post('/api/truc/check-chain', authenticate, aiLimiter, async (req, res) => {
   const { axis_n, answers } = req.body;
   const axis = (TRUC_BANK.axes || []).find(a => a.n === parseInt(axis_n, 10));
   if (!axis) return res.status(400).json({ error: 'Không có trục này' });
@@ -1269,7 +1321,7 @@ For sentence_analysis: include one entry per sentence in order. Types are: simpl
 }
 
 // ─── Task Generation (Task 2 only — Task 1 uses admin-uploaded topics) ───────
-app.post('/api/generate-task', authenticate, async (req, res) => {
+app.post('/api/generate-task', authenticate, aiLimiter, async (req, res) => {
   const { task_type, topic } = req.body;
   if (task_type === 'task1') {
     return res.status(400).json({ error: 'Task 1 uses admin-uploaded topics. Use GET /api/task1-topics/random instead.' });
@@ -1320,7 +1372,7 @@ app.post('/api/generate-task', authenticate, async (req, res) => {
 });
 
 // ─── Hints ────────────────────────────────────────────────────────────────────
-app.post('/api/hint', authenticate, async (req, res) => {
+app.post('/api/hint', authenticate, aiLimiter, async (req, res) => {
   const { task_type, prompt, essay, hint_type, student_ideas, level } = req.body;
   if (!['task1', 'task2'].includes(task_type)) {
     return res.status(400).json({ error: 'Invalid task_type' });
@@ -1423,7 +1475,7 @@ app.post('/api/hint', authenticate, async (req, res) => {
 
 // ─── Essay Rewrite ────────────────────────────────────────────────────────────
 // Translate a task prompt into Vietnamese (client caches the result per question)
-app.post('/api/translate-prompt', authenticate, async (req, res) => {
+app.post('/api/translate-prompt', authenticate, aiLimiter, async (req, res) => {
   const { prompt } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
@@ -1793,7 +1845,7 @@ const LEVEL_NOTE = {
 };
 
 // ── Stage 1: multiple-choice planning ────────────────────────────────────────
-app.post('/api/outline/options', authenticate, async (req, res) => {
+app.post('/api/outline/options', authenticate, aiLimiter, async (req, res) => {
   const { task_type, prompt, level, chart_type, question_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
@@ -1887,7 +1939,7 @@ RULES:
 // Quick feedback on the student's own idea, before they look at any suggestion.
 // Deliberately cheap: hard word floor on the client, small max_tokens, no vocab
 // bank, no outline — just "is this provable, and which chain step is missing".
-app.post('/api/check-idea', authenticate, async (req, res) => {
+app.post('/api/check-idea', authenticate, aiLimiter, async (req, res) => {
   const { task_type, prompt, idea, level } = req.body;
   if (!idea || idea.trim().split(/\s+/).filter(Boolean).length < 8) {
     return res.status(400).json({ error: 'Viết dài hơn một chút rồi tôi soi cho.' });
@@ -1960,7 +2012,7 @@ RULES: never rewrite the idea for them, never hand them a replacement argument, 
 });
 
 // ── Stage 2: the outline itself ──────────────────────────────────────────────
-app.post('/api/outline', authenticate, async (req, res) => {
+app.post('/api/outline', authenticate, aiLimiter, async (req, res) => {
   const { task_type, prompt, level, choices, student_ideas, chart_type, question_type } = req.body;
   if (!prompt || !prompt.trim()) return res.status(400).json({ error: 'prompt is required' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
@@ -2076,7 +2128,7 @@ RULES:
   }
 });
 
-app.post('/api/rewrite', authenticate, async (req, res) => {
+app.post('/api/rewrite', authenticate, aiLimiter, async (req, res) => {
   const { submission_id } = req.body;
   if (!submission_id) return res.status(400).json({ error: 'submission_id is required' });
 
@@ -2148,12 +2200,14 @@ app.post('/api/forgot-password', authStrictLimiter, async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
     const user = db.getUserByEmail(email.toLowerCase());
-    // Always return success to avoid user enumeration
-    if (!user) return res.json({ sent: true });
+    // Same answer whether or not the account exists, so the form cannot be
+    // used to find out who has an account.
+    const typed = String(email).trim().toLowerCase();
+    if (!user) return res.json({ sent: true, email: typed });
     const code = generateCode();
     db.setResetCode(user.id, code, new Date(Date.now() + 30 * 60 * 1000).toISOString());
     await sendEmailSafe(() => sendPasswordResetEmail(user.email, user.name, code));
-    res.json({ sent: true, email: user.email });
+    res.json({ sent: true, email: typed });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: 'Failed to send reset email' });
@@ -2166,8 +2220,11 @@ app.post('/api/reset-password', authStrictLimiter, async (req, res) => {
     if (!email || !code || !new_password) return res.status(400).json({ error: 'Email, code, and new password are required' });
     if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
     const user = db.getUserByEmail(email.toLowerCase());
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (!user.reset_code || user.reset_code !== code) return res.status(400).json({ error: 'Invalid reset code' });
+    if (!user) return res.status(400).json({ error: 'Invalid reset code' });
+    if (!user.reset_code || user.reset_code !== String(code)) {
+      db.codeMiss(user.id, 'reset');
+      return res.status(400).json({ error: 'Invalid reset code' });
+    }
     if (new Date(user.reset_expires) < new Date()) return res.status(400).json({ error: 'Code expired. Request a new one.' });
     const hashed = await bcrypt.hash(new_password, 10);
     db.resetPassword(user.id, hashed);
@@ -2192,7 +2249,9 @@ app.post('/api/change-password', authenticate, async (req, res) => {
     if (!match) return res.status(400).json({ error: 'Current password is incorrect' });
     const hashed = await bcrypt.hash(new_password, 10);
     db.updatePassword(user.id, hashed);
-    res.json({ success: true });
+    const role = adminRole(user.email) === 'admin' ? 'admin' : (user.role || 'student');
+    const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token });
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: 'Failed to change password' });
@@ -2200,7 +2259,7 @@ app.post('/api/change-password', authenticate, async (req, res) => {
 });
 
 // ─── Test Email (temporary public debug endpoint) ─────────────────────────────
-app.get('/api/test-email', async (req, res) => {
+app.get('/api/test-email', authenticate, adminOnly, async (req, res) => {
   const to = process.env.ADMIN_EMAIL;
   if (!process.env.RESEND_API_KEY) return res.json({ ok: false, error: 'RESEND_API_KEY not set' });
   if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
@@ -3202,7 +3261,7 @@ app.post('/api/assignments/:id/complete', authenticate, async (req, res) => {
 });
 
 // ─── Retry Grading ────────────────────────────────────────────────────────────
-app.post('/api/submissions/:id/retry', authenticate, async (req, res) => {
+app.post('/api/submissions/:id/retry', authenticate, aiLimiter, async (req, res) => {
   const submissionId = parseInt(req.params.id);
   const submission = db.getSubmissionById(submissionId, req.user.id);
   if (!submission) return res.status(404).json({ error: 'Submission not found' });
@@ -3220,7 +3279,7 @@ app.post('/api/submissions/:id/retry', authenticate, async (req, res) => {
 });
 
 // ─── Vocabulary Flashcards ─────────────────────────────────────────────────────
-app.post('/api/submissions/:id/flashcards', authenticate, async (req, res) => {
+app.post('/api/submissions/:id/flashcards', authenticate, aiLimiter, async (req, res) => {
   const submissionId = parseInt(req.params.id);
   const submission = db.getSubmissionById(submissionId, req.user.id);
   if (!submission) return res.status(404).json({ error: 'Submission not found' });
@@ -3412,6 +3471,9 @@ app.get('/api/classes/:id/sessions', authenticate, (req, res) => {
   const classId = parseInt(req.params.id);
   const cls = db.getClassById(classId);
   if (!cls) return res.status(404).json({ error: 'Class not found' });
+  if (req.user.role === 'student' && !db.getStudentClasses(req.user.id).find(c => c.class_id === classId)) {
+    return res.status(403).json({ error: 'Not enrolled' });
+  }
   res.json(db.getSessionsByClass(classId));
 });
 
@@ -4499,7 +4561,7 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
 // that the student believes they fixed something; this is what tells them
 // whether they actually did — and catches the errors a rewrite introduces,
 // which is the usual way a "corrected" paragraph ends up worse.
-app.post('/api/practice/paragraph-revise', authenticate, async (req, res) => {
+app.post('/api/practice/paragraph-revise', authenticate, aiLimiter, async (req, res) => {
   const { original, revised, errors, topic, claim, checked } = req.body || {};
   if (!original || !revised) return res.status(400).json({ error: 'Thiếu bản gốc hoặc bản sửa' });
   if (revised.trim() === original.trim()) return res.status(400).json({ error: 'Bản sửa chưa khác gì bản cũ.' });
@@ -4624,7 +4686,7 @@ function locateParagraphErrors(paragraph, rawErrors) {
   return out.sort((a, b) => a.start - b.start || a.end - b.end);
 }
 
-app.post('/api/practice/paragraph-feedback', authenticate, async (req, res) => {
+app.post('/api/practice/paragraph-feedback', authenticate, aiLimiter, async (req, res) => {
   try {
     const { paragraph, topic, starter } = req.body;
     if (!paragraph || paragraph.trim().length < 20) {
@@ -4701,7 +4763,7 @@ statistics.`;
 });
 
 // ─── Game: Para Lab (Pixel RPG Paragraph Battle) ─────────────────────────────
-app.post('/api/game/para-lab', async (req, res) => {
+app.post('/api/game/para-lab', authenticate, aiLimiter, async (req, res) => {
   try {
     const { stage, sentence, question, thesis, previousSentences = [], currentBand = 5, targetBand = 6.5 } = req.body;
     if (!sentence || sentence.trim().length < 5) {
@@ -4776,7 +4838,7 @@ Return ONLY valid JSON, no markdown:
 });
 
 // ─── Speaking practice: AI score a spoken answer (from its transcript) ──────────
-app.post('/api/speaking/score', authenticate, async (req, res) => {
+app.post('/api/speaking/score', authenticate, aiLimiter, async (req, res) => {
   try {
     const { part, question, transcript, durationSec } = req.body;
     if (!transcript || !transcript.trim()) return res.status(400).json({ error: 'Transcript is empty.' });
@@ -4845,7 +4907,7 @@ io.on('connection', (socket) => {
 });
 
 // ── AI: Grade Writing Essay ────────────────────────────────────────────────
-app.post('/api/ai/grade-writing', authenticate, async (req, res) => {
+app.post('/api/ai/grade-writing', authenticate, aiLimiter, async (req, res) => {
   const { prompt, essay, type } = req.body;
   if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
@@ -4878,7 +4940,7 @@ Be encouraging but honest. Keep total response under 350 words.`;
 });
 
 // Rewrite the student's OWN essay up to a Band 8+ standard (model improvement)
-app.post('/api/ai/improve-writing', authenticate, async (req, res) => {
+app.post('/api/ai/improve-writing', authenticate, aiLimiter, async (req, res) => {
   const { prompt, essay, type } = req.body;
   if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
@@ -4910,7 +4972,7 @@ RULES:
   }
 });
 
-app.post('/api/ai/grade-paragraph', authenticate, async (req, res) => {
+app.post('/api/ai/grade-paragraph', authenticate, aiLimiter, async (req, res) => {
   const { vi, modelEn, userEn, topic } = req.body;
   if (!vi || !userEn) return res.status(400).json({ error: 'Missing fields' });
   if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });

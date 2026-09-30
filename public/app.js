@@ -1546,8 +1546,8 @@ async function loadAdminUsers() {
               <tr data-uid="${u.id}">
                 ${isAdmin ? `<td>${canAct ? `<input type="checkbox" class="user-select-cb" data-uid="${u.id}" onchange="onUserCheckChange()">` : ''}</td>` : `<td>${i + 1}</td>`}
                 <td>${i + 1}</td>
-                <td>${u.name}</td>
-                <td>${u.email}</td>
+                <td>${escapeHtml(u.name)}</td>
+                <td>${escapeHtml(u.email)}</td>
                 <td>${u.verified
                   ? '<span class="badge badge-green">✓ Verified</span>'
                   : '<span class="badge badge-red">✗ Pending</span>'}</td>
@@ -1558,13 +1558,13 @@ async function loadAdminUsers() {
                 <td>${u.submission_count}</td>
                 <td>${u.avg_band !== null ? u.avg_band : '—'}</td>
                 <td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-                  <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, '${u.name.replace(/'/g, "\\'")}')">View History</button>
+                  <button class="btn btn-secondary btn-xs" onclick="viewStudentHistory(${u.id}, ${escapeHtml(JSON.stringify(u.name))})">View History</button>
                   ${canAct ? `
                     <button class="btn btn-xs ${u.role === 'teacher' ? 'btn-secondary' : 'btn-teacher'}"
                       onclick="setUserRole(${u.id}, '${u.role === 'teacher' ? 'student' : 'teacher'}', this)">
                       ${u.role === 'teacher' ? '→ Student' : '→ Teacher'}
                     </button>
-                    <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Delete</button>
+                    <button class="btn btn-danger btn-xs" onclick="confirmDeleteUser(${u.id}, ${escapeHtml(JSON.stringify(u.name))})">Delete</button>
                   ` : ''}
                 </td>
               </tr>`;
@@ -1781,10 +1781,12 @@ async function handleChangePassword() {
   if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
   if (newPw !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
   try {
-    await api('/api/change-password', {
+    const cp = await api('/api/change-password', {
       method: 'POST',
       body: JSON.stringify({ current_password: current, new_password: newPw })
     });
+    // Other devices are signed out by the change; this one keeps going.
+    if (cp && cp.token) { token = cp.token; localStorage.setItem('ielts_token', cp.token); }
     okEl.textContent = '✓ Mật khẩu đã cập nhật thành công!';
     okEl.classList.remove('hidden');
     document.getElementById('cp-current').value = '';
@@ -8091,9 +8093,9 @@ async function loadClassList() {
     container.innerHTML = classes.map(c => `
       <div class="class-card">
         <div class="class-card-info">
-          <div class="class-card-name">${c.name}</div>
-          ${c.description ? `<div class="class-card-desc">${c.description}</div>` : ''}
-          <div class="class-card-meta">Teacher: ${c.teacher_name || 'Unknown'} · ${c.student_count || 0} students</div>
+          <div class="class-card-name">${escapeHtml(c.name)}</div>
+          ${c.description ? `<div class="class-card-desc">${escapeHtml(c.description)}</div>` : ''}
+          <div class="class-card-meta">Teacher: ${escapeHtml(c.teacher_name || 'Unknown')} · ${c.student_count || 0} students</div>
         </div>
         <div class="class-card-actions">
           <button class="btn btn-primary btn-sm" onclick="openClassDetail(${c.id})">Open →</button>
@@ -8135,7 +8137,7 @@ async function openClassDetail(classId) {
     const actions = document.getElementById('class-detail-actions');
     if (currentUser.role === 'admin' || cls.teacher_id === currentUser.id) {
       actions.innerHTML = `
-        <button class="btn btn-secondary btn-sm" onclick="promptEditClass(${cls.id}, '${cls.name.replace(/'/g,"\\'")}', '${(cls.description||'').replace(/'/g,"\\'")}')">✏️ Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="promptEditClass(${cls.id}, ${escapeHtml(JSON.stringify(cls.name))}, ${escapeHtml(JSON.stringify(cls.description || ''))})">✏️ Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteClass(${cls.id})">🗑 Delete</button>`;
     } else {
       actions.innerHTML = '';
@@ -8257,7 +8259,7 @@ async function openAttendanceSheet(classId, dateStr) {
               const currentStatus = rec.status || 'absent';
               if (canMark) {
                 return `<tr>
-                  <td>${s.name}</td>
+                  <td>${escapeHtml(s.name)}</td>
                   <td>
                     <select class="form-input att-status-select" data-uid="${s.user_id}" style="padding:4px 8px;font-size:.85rem">
                       ${statuses.map(st => `<option value="${st}" ${currentStatus===st?'selected':''}>${st.charAt(0).toUpperCase()+st.slice(1)}</option>`).join('')}
@@ -8267,7 +8269,7 @@ async function openAttendanceSheet(classId, dateStr) {
                 </tr>`;
               } else {
                 return `<tr>
-                  <td>${s.name}</td>
+                  <td>${escapeHtml(s.name)}</td>
                   <td><span class="status-badge att-${currentStatus}">${currentStatus}</span></td>
                   <td style="white-space:pre-wrap;font-size:.85rem;line-height:1.5">${escHtml(rec.notes||'—')}</td>
                 </tr>`;
@@ -8352,8 +8354,8 @@ async function loadClassRoster() {
               ${students.map((s, i) => `
                 <tr>
                   <td>${i+1}</td>
-                  <td>${s.name}</td>
-                  <td>${s.email}</td>
+                  <td>${escapeHtml(s.name)}</td>
+                  <td>${escapeHtml(s.email)}</td>
                   ${canManage ? `<td><button class="btn btn-xs btn-danger" onclick="unenrollStudent(${s.user_id})">Remove</button></td>` : ''}
                 </tr>`).join('')}
             </tbody>
@@ -8371,7 +8373,7 @@ async function loadClassRoster() {
         const selectEl = document.getElementById('enroll-student-select');
         if (selectEl) {
           allStudents.filter(s => !enrolledIds.has(s.id)).forEach(s => {
-            selectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.email})</option>`;
+            selectEl.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)} (${escapeHtml(s.email)})</option>`;
           });
         }
       } catch (_) {}
@@ -8432,7 +8434,7 @@ async function loadClassStats() {
               const rate = parseFloat(s.attendance_rate||0).toFixed(0);
               const rateColor = rate >= 80 ? '#16a34a' : rate >= 50 ? '#ca8a04' : '#dc2626';
               return `<tr>
-                <td>${s.name}</td>
+                <td>${escapeHtml(s.name)}</td>
                 <td><span class="status-badge att-present">${s.present||0}</span></td>
                 <td><span class="status-badge att-late">${s.late||0}</span></td>
                 <td><span class="status-badge att-absent">${s.absent||0}</span></td>
@@ -8492,7 +8494,7 @@ async function loadMyAttendance() {
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <label style="font-weight:600">Class:</label>
         <select id="my-att-class-select" class="form-input" style="width:auto" onchange="renderMyAttendanceCalendar(this.value)">
-          ${classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+          ${classes.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
         </select>
       </div>`;
 
@@ -23256,7 +23258,7 @@ async function submitBcSentence() {
   try {
     const res = await fetch('/api/game/para-lab', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({
         stage: BC_STAGES[_bcStage].key,
         sentence,

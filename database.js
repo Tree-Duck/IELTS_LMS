@@ -436,7 +436,19 @@ const db = {
   setVerificationCode(userId, code, expires) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
-    if (u) { u.verification_code = code; u.verification_expires = expires; save(data); }
+    if (u) { u.verification_code = code; u.verification_expires = expires; u.verification_tries = 0; save(data); }
+  },
+
+  // A wrong code counts; the fifth wrong one wipes the code, so a new one
+  // has to be requested (and emailed) before guessing can go on.
+  codeMiss(userId, kind) {
+    const data = load();
+    const u = data.users.find(u => u.id === userId);
+    if (!u) return;
+    const f = kind === 'reset' ? 'reset' : 'verification';
+    u[f + '_tries'] = (u[f + '_tries'] || 0) + 1;
+    if (u[f + '_tries'] >= 5) { u[f + '_code'] = null; u[f + '_expires'] = null; u[f + '_tries'] = 0; }
+    save(data);
   },
 
   verifyUser(userId) {
@@ -456,19 +468,19 @@ const db = {
   setResetCode(userId, code, expires) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
-    if (u) { u.reset_code = code; u.reset_expires = expires; save(data); }
+    if (u) { u.reset_code = code; u.reset_expires = expires; u.reset_tries = 0; save(data); }
   },
 
   resetPassword(userId, hashedPassword) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
-    if (u) { u.password = hashedPassword; u.reset_code = null; u.reset_expires = null; save(data); }
+    if (u) { u.password = hashedPassword; u.reset_code = null; u.reset_expires = null; u.pwd_changed_at = Date.now(); save(data); }
   },
 
   updatePassword(userId, hashedPassword) {
     const data = load();
     const u = data.users.find(u => u.id === userId);
-    if (u) { u.password = hashedPassword; save(data); }
+    if (u) { u.password = hashedPassword; u.pwd_changed_at = Date.now(); save(data); }
   },
 
   setUserRole(userId, role) {
