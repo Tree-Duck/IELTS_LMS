@@ -19508,44 +19508,44 @@ const RAID_BODY = {
 // Essay templates, one per question type and level: Học việc keeps to the
 // basic frames, Dũng sĩ uses the type's own frames, Huyền thoại the chain
 // for band 7+. {frame|meaning} is typed; [slot] is the student's own content
-// and stays on screen. The second item of each line says what the sentence
-// does, in English like the rest of the template. ex is a model introduction
+// and stays on screen; frames and slots are in English, the note on what
+// each sentence does in Vietnamese. ex is a model introduction
 // on one topic per type, shown once the template is cleared; every frame of a
 // line appears word for word in its model sentence.
 const RAID_TPL_A_BODY = [
-  ['{The main reason for this is that|lý do chính là} [clause].', 'P · topic sentence: your first reason'],
-  ['{This matters because|điều này quan trọng vì} [clause].', 'E1 · explain why the reason is true'],
-  ['{Consider|hãy xem} [group of people, plural] {who|những người} [plural verb].', 'E2 · example: one specific group of people'],
-  ['{This is why|đây là lý do} [restate your position].', 'L · link back: same idea as the thesis'],
-  ['{A further reason is that|một lý do nữa là} [clause].', 'P of body paragraph 2 · your second reason'],
+  ['{The main reason for this is that|lý do chính là} [clause].', 'P · câu mở đoạn, nêu lý do một'],
+  ['{This matters because|điều này quan trọng vì} [clause].', 'E1 · giải thích vì sao lý do đó đúng'],
+  ['{Consider|hãy xem} [group of people, plural] {who|những người} [plural verb].', 'E2 · dẫn chứng: một nhóm người cụ thể'],
+  ['{This is why|đây là lý do} [restate your position].', 'L · chốt đoạn, nói cùng ý với thesis'],
+  ['{A further reason is that|một lý do nữa là} [clause].', 'P của thân bài 2 · lý do hai'],
 ];
-const RAID_TPL_A_GS = ['{The issue of|vấn đề} [noun phrase] {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} {in recent years|trong những năm gần đây}.', 'Sentence 1 · general statement: introduce the topic, no opinion yet'];
+const RAID_TPL_A_GS = ['{The issue of|vấn đề} [noun phrase] {has become a subject of considerable debate|đã trở thành chủ đề gây tranh cãi nhiều} {in recent years|trong những năm gần đây}.', 'Câu 1 · general statement: giới thiệu chủ đề, chưa nói ý kiến'];
 const RAID_TPL_A_CONCL = [
-  ['{In conclusion|tóm lại}, [your position, reworded].', 'Restate your position without copying the thesis'],
-  ['[Singular subject] {both|vừa} [verb-s, reason 1] {and|và} [verb-s, reason 2].', 'Sum up the reasons of both body paragraphs'],
+  ['{In conclusion|tóm lại}, [your position, reworded].', 'Nói lại lập trường, không chép thesis'],
+  ['[Singular subject] {both|vừa} [verb-s, reason 1] {and|và} [verb-s, reason 2].', 'Gộp hai lý do của hai đoạn thân bài'],
 ];
 const RAID_TPL_L_BODY = [
-  ['[Claim: what is changing, in the words of the question].', 'Claim · no ready-made opener in this sentence'],
-  ['[Group of people] {who|những người} [situation] [visible action].', 'A scene you can picture, which is also the example'],
-  ['[Something] {rises while|tăng lên trong khi} [something else] {falls|giảm đi}.', 'What goes up and what goes down'],
-  ['[Another group] {then|sau đó} [plain verb].', 'Who is affected next: a different subject from the scene'],
-  ['[Real-world thing] [plain verb: close, cut, fill, disappear].', 'What changes in the real world. Avoid shows up as, leads to'],
-  ['{This holds where|điều này đúng ở nơi} [condition], {and not where|và không đúng ở nơi} [opposite condition].', 'Optional · limit where the claim is true'],
-  ['[Topic] {is therefore|vì vậy là} [answer, reusing the judging word of the question].', 'Answer the question'],
+  ['[Claim: what is changing, in the words of the question].', 'Luận điểm · không dùng cụm mồi ở câu này'],
+  ['[Group of people] {who|những người} [situation] [visible action].', 'Một cảnh nhìn thấy được, cũng là ví dụ'],
+  ['[Something] {rises while|tăng lên trong khi} [something else] {falls|giảm đi}.', 'Cái gì tăng, cái gì giảm'],
+  ['[Another group] {then|sau đó} [plain verb].', 'Nhóm chịu ảnh hưởng tiếp theo, chủ ngữ khác câu cảnh ở trên'],
+  ['[Real-world thing] [plain verb: close, cut, fill, disappear].', 'Cái gì ngoài đời khác đi. Không dùng shows up as, leads to'],
+  ['{This holds where|điều này đúng ở nơi} [condition], {and not where|và không đúng ở nơi} [opposite condition].', 'Tuỳ chọn · khoanh phạm vi mà luận điểm đúng'],
+  ['[Topic] {is therefore|vì vậy là} [answer, reusing the judging word of the question].', 'Trả lời đề'],
 ];
 const RAID_TPL_L_CONCL = [
-  ['[Topic], {then|vậy thì}, {is|là} [short verdict: X rather than Y].', 'Restate the answer in new words'],
-  ['[Plural subject] {that|mà} [situation] {would do better to|nên} [verb] {than to|hơn là} [verb].', 'Advice that follows from the argument, no new idea'],
+  ['[Topic], {then|vậy thì}, {is|là} [short verdict: X rather than Y].', 'Nói lại câu trả lời bằng từ khác'],
+  ['[Plural subject] {that|mà} [situation] {would do better to|nên} [verb] {than to|hơn là} [verb].', 'Lời khuyên rút ra từ chuỗi ý, không thêm ý mới'],
 ];
-const RAID_TPL_L_F = ['{Whether|việc có … hay không} [restate the question] {depends on what|tuỳ vào việc} [judging word] {is measured by|được đo bằng}: [measure 1], {or|hay} [measure 2].', 'Measure sentence · choose what the judging word in the question is measured by'];
-const RAID_TPL_L_GS = ['[Short context sentence: real subject, real verb].', 'Short general statement. Do not open with Nowadays; leave room for the measure sentence'];
+const RAID_TPL_L_F = ['{Whether|việc có … hay không} [restate the question] {depends on what|tuỳ vào việc} [judging word] {is measured by|được đo bằng}: [measure 1], {or|hay} [measure 2].', 'Câu tiêu chí · chọn thước đo cho chữ đánh giá trong đề'];
+const RAID_TPL_L_GS = ['[Short context sentence: real subject, real verb].', 'General statement ngắn, không mở bằng Nowadays, để có chỗ cho câu tiêu chí'];
 
 const RAID_TEMPLATES = {
   agree: {
     name: 'Agree or Disagree', icon: '⚖️', ask: 'To what extent do you agree or disagree?',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['{While|dù} [what the other side gets right], {I largely agree that|tôi phần lớn đồng ý rằng} [restate the question], {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Sentence 2 · thesis. If you disagree, write I largely disagree that'],
+        ['{While|dù} [what the other side gets right], {I largely agree that|tôi phần lớn đồng ý rằng} [restate the question], {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Câu 2 · thesis. Không đồng ý thì đổi thành I largely disagree that'],
       ],
       ex: [
         'The issue of free university education has become a subject of considerable debate in recent years.',
@@ -19555,29 +19555,29 @@ const RAID_TEMPLATES = {
     },
     d: {
       intro: [
-        ['{Opinions are divided on whether|có nhiều ý kiến trái chiều về việc} [clause].', 'Sentence 1 · general statement'],
-        ['{While|dù} [concession], {I largely disagree that|tôi phần lớn không đồng ý rằng} [restate the question], {because|vì} [reason 1] {and|và} [reason 2].', 'Sentence 2 · thesis with a degree word: completely, largely, only to a limited extent'],
+        ['{Opinions are divided on whether|có nhiều ý kiến trái chiều về việc} [clause].', 'Câu 1 · general statement'],
+        ['{While|dù} [concession], {I largely disagree that|tôi phần lớn không đồng ý rằng} [restate the question], {because|vì} [reason 1] {and|và} [reason 2].', 'Câu 2 · thesis có từ chỉ mức độ: completely, largely, only to a limited extent'],
       ],
       ex: [
         'Opinions are divided on whether university education should be free for everyone.',
         'While free tuition would help some poorer students, I largely disagree that university should be free for all, because the cost falls on taxpayers who never attend and the money would do more good in primary schools.',
       ],
       body: [
-        ['{The strongest argument for|lập luận mạnh nhất ủng hộ} [V-ing] {is that|là} [clause].', 'P · your strongest reason'],
-        ['{The reason is that|lý do là} [clause].', 'E1 · explain'],
-        ['{As a result|kết quả là}, [clause].', 'Push the idea one step further: who or what changes next'],
-        ['{In|ở} [place] {where|mà} [clause], [group of people] [verb].', 'E2 · one specific place and group of people'],
-        ['{That is the core of the argument for|đó là cốt lõi của lập luận ủng hộ} [noun phrase].', 'L · close the paragraph, same idea as the thesis'],
-        ['{Just as important|quan trọng không kém}, [clause].', 'P of body paragraph 2 · your second reason'],
+        ['{The strongest argument for|lập luận mạnh nhất ủng hộ} [V-ing] {is that|là} [clause].', 'P · lý do mạnh nhất'],
+        ['{The reason is that|lý do là} [clause].', 'E1 · giải thích'],
+        ['{As a result|kết quả là}, [clause].', 'Đẩy ý thêm một bước: ai hay cái gì thay đổi tiếp'],
+        ['{In|ở} [place] {where|mà} [clause], [group of people] [verb].', 'E2 · một nơi và một nhóm người cụ thể'],
+        ['{That is the core of the argument for|đó là cốt lõi của lập luận ủng hộ} [noun phrase].', 'L · chốt đoạn, cùng ý với thesis'],
+        ['{Just as important|quan trọng không kém}, [clause].', 'P của thân bài 2 · lý do hai'],
       ],
       concl: [
-        ['{To conclude|tóm lại}, [your position, reworded].', 'Restate your position'],
-        ['{Whether judged by|dù xét theo} [measure 1] {or by|hay theo} [measure 2], [your position].', 'Turn your two reasons into two measures'],
+        ['{To conclude|tóm lại}, [your position, reworded].', 'Nói lại lập trường'],
+        ['{Whether judged by|dù xét theo} [measure 1] {or by|hay theo} [measure 2], [your position].', 'Gộp hai lý do thành hai tiêu chí'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS, RAID_TPL_L_F,
-        ['{Judged by the second|xét theo tiêu chí thứ hai}, [answer with a degree].', 'Thesis · answer the question by the measure you chose'],
+        ['{Judged by the second|xét theo tiêu chí thứ hai}, [answer with a degree].', 'Thesis · trả lời đề theo tiêu chí vừa chọn'],
       ],
       ex: [
         'Most countries now expect young people to spend three or four years at university.',
@@ -19591,46 +19591,46 @@ const RAID_TEMPLATES = {
     name: 'Discuss both views', icon: '🗣️', ask: 'Discuss both views and give your own opinion.',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['{While I understand why some people support|dù tôi hiểu vì sao một số người ủng hộ} [view A], {I am more convinced by|tôi bị thuyết phục hơn bởi} [view B] {because|vì} [reason].', 'Sentence 2 · thesis: say straight away which side you lean toward'],
+        ['{While I understand why some people support|dù tôi hiểu vì sao một số người ủng hộ} [view A], {I am more convinced by|tôi bị thuyết phục hơn bởi} [view B] {because|vì} [reason].', 'Câu 2 · thesis: nói luôn ta nghiêng về bên nào'],
       ],
       ex: [
         'The issue of working from home has become a subject of considerable debate in recent years.',
         'While I understand why some people support working in an office, I am more convinced by the case for working from home because it saves workers hours of commuting every week.',
       ],
       body: [
-        ['{Those who support|những người ủng hộ} [view A] {point to|dẫn ra} [noun phrase].', 'P of body paragraph 1 · present view A, do not attack it yet'],
+        ['{Those who support|những người ủng hộ} [view A] {point to|dẫn ra} [noun phrase].', 'P thân bài 1 · trình bày phía A, chưa bác'],
         ...RAID_TPL_A_BODY.slice(1, 3),
-        ['{This is why|đây là lý do} [view A] {makes sense for|hợp lý với} [group of people].', 'L · who view A is right for'],
-        ['{The more persuasive view rests on|quan điểm thuyết phục hơn dựa trên} [noun phrase].', 'P of body paragraph 2 · view B, the side you choose'],
+        ['{This is why|đây là lý do} [view A] {makes sense for|hợp lý với} [group of people].', 'L · phía A đúng với ai'],
+        ['{The more persuasive view rests on|quan điểm thuyết phục hơn dựa trên} [noun phrase].', 'P thân bài 2 · phía B, phía ta chọn'],
       ],
       concl: RAID_TPL_A_CONCL,
     },
     d: {
       intro: [
-        ['[Topic] {continues to divide opinion, with some favoring|vẫn gây chia rẽ ý kiến, người thì ủng hộ} [view A] {and others|người khác thì ủng hộ} [view B].', 'Sentence 1 · general statement that already names both sides'],
-        ['{While some argue that|dù có người cho rằng} [view A], {I am more convinced that|tôi tin hơn rằng} [view B], {because|vì} [reason].', 'Sentence 2 · thesis'],
+        ['[Topic] {continues to divide opinion, with some favoring|vẫn gây chia rẽ ý kiến, người thì ủng hộ} [view A] {and others|người khác thì ủng hộ} [view B].', 'Câu 1 · general statement nêu sẵn hai phía'],
+        ['{While some argue that|dù có người cho rằng} [view A], {I am more convinced that|tôi tin hơn rằng} [view B], {because|vì} [reason].', 'Câu 2 · thesis'],
       ],
       ex: [
         'Remote work continues to divide opinion, with some favoring the freedom of working from home and others the teamwork of the office.',
         'While some argue that offices build stronger teams, I am more convinced that most staff work better at home, because they lose less time to travel and interruptions.',
       ],
       body: [
-        ['{Those who support|những người ủng hộ} [view A] {point to|dẫn ra} [noun phrase].', 'P of body paragraph 1 · view A'],
-        ['{Their reasoning is that|lập luận của họ là} [clause].', 'E1 · explain their reasoning'],
-        ['{Take a|lấy ví dụ một} [place] {where|nơi mà} [subject + verb].', 'E2 · one specific place'],
-        ['{This is why|đây là lý do} [view A] {carries weight for|có sức nặng với} [group of people].', 'L of body paragraph 1 · who view A holds for; do not call it wrong'],
-        ['{The more persuasive view rests on|quan điểm thuyết phục hơn dựa trên} [noun phrase].', 'P of body paragraph 2 · view B'],
-        ['{This is the position I take, because|đây là quan điểm tôi chọn, vì} [short reason].', 'L of body paragraph 2 · confirm the side you take'],
+        ['{Those who support|những người ủng hộ} [view A] {point to|dẫn ra} [noun phrase].', 'P thân bài 1 · phía A'],
+        ['{Their reasoning is that|lập luận của họ là} [clause].', 'E1 · giải thích lý lẽ của họ'],
+        ['{Take a|lấy ví dụ một} [place] {where|nơi mà} [subject + verb].', 'E2 · một nơi cụ thể'],
+        ['{This is why|đây là lý do} [view A] {carries weight for|có sức nặng với} [group of people].', 'L thân bài 1 · phía A đúng với ai, không nói phía A sai'],
+        ['{The more persuasive view rests on|quan điểm thuyết phục hơn dựa trên} [noun phrase].', 'P thân bài 2 · phía B'],
+        ['{This is the position I take, because|đây là quan điểm tôi chọn, vì} [short reason].', 'L thân bài 2 · chốt phía ta theo'],
       ],
       concl: [
-        ['{In conclusion, although|tóm lại, dù} [where view A has a point], [view B] {is the more convincing view|là quan điểm thuyết phục hơn}.', 'Both sides in one sentence, ending on the side you chose'],
-        ['[Singular subject] {both|vừa} [verb-s, reason 1] {and|và} [verb-s, reason 2].', 'Sum up the reasons for your side'],
+        ['{In conclusion, although|tóm lại, dù} [where view A has a point], [view B] {is the more convincing view|là quan điểm thuyết phục hơn}.', 'Nhắc hai phía trong một câu, chốt phía ta chọn'],
+        ['[Singular subject] {both|vừa} [verb-s, reason 1] {and|và} [verb-s, reason 2].', 'Gộp lý do của phía ta chọn'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS,
-        ['{Both sides|cả hai phía} {judge|đánh giá} [topic] {by|theo} [usual measure], {when the more telling measure is|trong khi tiêu chí nói lên nhiều hơn là} [your measure].', 'Measure sentence · show that both sides measure the wrong thing'],
-        ['{On that measure|theo tiêu chí đó}, [conditional answer].', 'Thesis · give your own opinion'],
+        ['{Both sides|cả hai phía} {judge|đánh giá} [topic] {by|theo} [usual measure], {when the more telling measure is|trong khi tiêu chí nói lên nhiều hơn là} [your measure].', 'Câu tiêu chí · chỉ ra cả hai phía đang đo sai chỗ'],
+        ['{On that measure|theo tiêu chí đó}, [conditional answer].', 'Thesis · nêu ý kiến riêng'],
       ],
       ex: [
         'Millions of office workers now spend part of the week at home.',
@@ -19644,49 +19644,49 @@ const RAID_TEMPLATES = {
     name: 'Advantages outweigh', icon: '🏋️', ask: 'Do the advantages outweigh the disadvantages?',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['{In my view, the benefits of|theo tôi, lợi ích của} [noun phrase] {clearly outweigh the drawbacks|rõ ràng lớn hơn tác hại}, {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Sentence 2 · thesis: say clearly which side is heavier'],
+        ['{In my view, the benefits of|theo tôi, lợi ích của} [noun phrase] {clearly outweigh the drawbacks|rõ ràng lớn hơn tác hại}, {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Câu 2 · thesis: phải nói rõ bên nào nặng hơn'],
       ],
       ex: [
         'The issue of online learning has become a subject of considerable debate in recent years.',
         'In my view, the benefits of online learning clearly outweigh the drawbacks, mainly because it reaches students in remote areas and it lets adults study around their jobs.',
       ],
       body: [
-        ['{The clearest drawback is that|hạn chế rõ nhất là} [clause].', 'P of body paragraph 1 · the weaker side, admitted as real'],
+        ['{The clearest drawback is that|hạn chế rõ nhất là} [clause].', 'P thân bài 1 · bên yếu hơn, thừa nhận là có thật'],
         ...RAID_TPL_A_BODY.slice(1, 3),
-        ['{This concern is outweighed by|mối lo này bị lấn át bởi} [noun phrase].', 'P of body paragraph 2 · the side you choose'],
-        ['{On balance|cân nhắc cả hai mặt}, [which side is heavier].', 'L · the result of weighing both sides'],
+        ['{This concern is outweighed by|mối lo này bị lấn át bởi} [noun phrase].', 'P thân bài 2 · bên ta chọn'],
+        ['{On balance|cân nhắc cả hai mặt}, [which side is heavier].', 'L · chốt kết quả cân hai bên'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [noun phrase] {does more good than harm|mang lại nhiều lợi hơn hại}.', 'Repeat your verdict'],
+        ['{In conclusion|tóm lại}, [noun phrase] {does more good than harm|mang lại nhiều lợi hơn hại}.', 'Nhắc lại phán quyết'],
         RAID_TPL_A_CONCL[1],
       ],
     },
     d: {
       intro: [
-        ['{Recent years have seen a marked rise in|những năm gần đây chứng kiến sự gia tăng rõ rệt của} [noun phrase].', 'Sentence 1 · general statement'],
-        ['{Although|mặc dù} [the harm] {is a real concern|là mối lo có thật}, {I believe the benefits, particularly|tôi tin rằng lợi ích, nhất là} [the main benefit], {clearly outweigh it|rõ ràng lớn hơn nó}.', 'Sentence 2 · thesis; a verdict word is required'],
+        ['{Recent years have seen a marked rise in|những năm gần đây chứng kiến sự gia tăng rõ rệt của} [noun phrase].', 'Câu 1 · general statement'],
+        ['{Although|mặc dù} [the harm] {is a real concern|là mối lo có thật}, {I believe the benefits, particularly|tôi tin rằng lợi ích, nhất là} [the main benefit], {clearly outweigh it|rõ ràng lớn hơn nó}.', 'Câu 2 · thesis, bắt buộc có từ phán quyết'],
       ],
       ex: [
         'Recent years have seen a marked rise in online courses.',
         'Although the lack of face-to-face contact is a real concern, I believe the benefits, particularly cheaper access to good teachers, clearly outweigh it.',
       ],
       body: [
-        ['{The clearest drawback is that|hạn chế rõ nhất là} [clause].', 'P of body paragraph 1 · the weaker side'],
-        ['{The reason is that|lý do là} [clause].', 'E1 · explain'],
-        ['{This concern is outweighed by|mối lo này bị lấn át bởi} [noun phrase].', 'P of body paragraph 2 · the side you choose'],
-        ['{Consider|hãy xem} [group of people] {who|những người} [verb + situation].', 'E2 · a specific group of people'],
-        ['[What is lost] {is offset by|được bù lại bởi} [what is gained].', 'Compare directly with the weaker side'],
-        ['{This is the heavier side because|đây là bên nặng hơn vì} [clause].', 'L · the result of weighing both sides'],
+        ['{The clearest drawback is that|hạn chế rõ nhất là} [clause].', 'P thân bài 1 · bên yếu'],
+        ['{The reason is that|lý do là} [clause].', 'E1 · giải thích'],
+        ['{This concern is outweighed by|mối lo này bị lấn át bởi} [noun phrase].', 'P thân bài 2 · bên ta chọn'],
+        ['{Consider|hãy xem} [group of people] {who|những người} [verb + situation].', 'E2 · nhóm người cụ thể'],
+        ['[What is lost] {is offset by|được bù lại bởi} [what is gained].', 'So sánh thẳng với bên yếu'],
+        ['{This is the heavier side because|đây là bên nặng hơn vì} [clause].', 'L · chốt kết quả cân hai bên'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [your verdict, reworded].', 'Repeat the verdict word'],
-        ['[Singular subject] {both|vừa} [verb-s, benefit 1] {and|và} [verb-s, benefit 2].', 'Sum up the reasons for the side you chose'],
+        ['{In conclusion|tóm lại}, [your verdict, reworded].', 'Nhắc lại từ phán quyết'],
+        ['[Singular subject] {both|vừa} [verb-s, benefit 1] {and|và} [verb-s, benefit 2].', 'Gộp lý do của bên ta chọn'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS,
-        ['{The advantages and disadvantages here can only be weighed by asking|lợi và hại ở đây chỉ cân được khi hỏi} [measure].', 'Measure sentence · what the advantages and disadvantages are weighed by'],
-        ['{On that measure|theo tiêu chí đó}, [winning side], {but only|nhưng chỉ} [condition].', 'Thesis · a verdict with a condition'],
+        ['{The advantages and disadvantages here can only be weighed by asking|lợi và hại ở đây chỉ cân được khi hỏi} [measure].', 'Câu tiêu chí · lợi và hại so bằng thước đo nào'],
+        ['{On that measure|theo tiêu chí đó}, [winning side], {but only|nhưng chỉ} [condition].', 'Thesis · phán quyết có điều kiện'],
       ],
       ex: [
         'Many universities now teach part of their courses online.',
@@ -19700,7 +19700,7 @@ const RAID_TEMPLATES = {
     name: 'Positive or Negative', icon: '➕', ask: 'Is this a positive or negative development?',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['{I regard this as a largely positive development|tôi coi đây là một thay đổi phần lớn tích cực}, {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Sentence 2 · thesis: pick one direction, do not sit in the middle'],
+        ['{I regard this as a largely positive development|tôi coi đây là một thay đổi phần lớn tích cực}, {mainly because|chủ yếu vì} [reason 1] {and|và} [reason 2].', 'Câu 2 · thesis: chọn một hướng, không đứng giữa'],
       ],
       ex: [
         'The issue of more people living alone has become a subject of considerable debate in recent years.',
@@ -19710,29 +19710,29 @@ const RAID_TEMPLATES = {
     },
     d: {
       intro: [
-        ['{Recent years have seen a marked rise in|những năm gần đây chứng kiến sự gia tăng rõ rệt của} [noun phrase].', 'Sentence 1 · general statement'],
-        ['{I regard this trend as|tôi coi xu hướng này là} {a largely negative development|một thay đổi phần lớn tiêu cực}, {mainly because|chủ yếu vì} [reason: say who it harms or in what way].', 'Sentence 2 · thesis'],
+        ['{Recent years have seen a marked rise in|những năm gần đây chứng kiến sự gia tăng rõ rệt của} [noun phrase].', 'Câu 1 · general statement'],
+        ['{I regard this trend as|tôi coi xu hướng này là} {a largely negative development|một thay đổi phần lớn tiêu cực}, {mainly because|chủ yếu vì} [reason: say who it harms or in what way].', 'Câu 2 · thesis'],
       ],
       ex: [
         'Recent years have seen a marked rise in the number of people living alone.',
         'I regard this trend as a largely negative development, mainly because it leaves many older people isolated and without daily help.',
       ],
       body: [
-        ['{There is a real case for calling this|có lý do thật để gọi đây là} [the other side].', 'P of body paragraph 1 · admit the other side'],
-        ['{This concern is not imaginary, since|mối lo này không phải tưởng tượng, vì} [clause].', 'E1 of the concession paragraph'],
-        ['{The stronger reading is that|cách hiểu mạnh hơn là} [clause].', 'P of body paragraph 2 · the side you choose'],
-        ['{What this misses is that|điều này bỏ sót là} [clause].', 'E1 after the concession'],
-        ['{In workplaces where|ở những nơi làm việc mà} [subject + verb], [subject + verb].', 'E2 · one specific place and group of people'],
-        ['{That is the sense in which|đó là lý do mà theo đó} [restate your direction].', 'L · link back to the thesis'],
+        ['{There is a real case for calling this|có lý do thật để gọi đây là} [the other side].', 'P thân bài 1 · thừa nhận mặt còn lại'],
+        ['{This concern is not imaginary, since|mối lo này không phải tưởng tượng, vì} [clause].', 'E1 của đoạn nhượng bộ'],
+        ['{The stronger reading is that|cách hiểu mạnh hơn là} [clause].', 'P thân bài 2 · bên ta chọn'],
+        ['{What this misses is that|điều này bỏ sót là} [clause].', 'E1 sau nhượng bộ'],
+        ['{In workplaces where|ở những nơi làm việc mà} [subject + verb], [subject + verb].', 'E2 · một nơi và một nhóm người cụ thể'],
+        ['{That is the sense in which|đó là lý do mà theo đó} [restate your direction].', 'L · nối về thesis'],
       ],
       concl: [
-        ['{On balance|nhìn chung}, [the trend] {is a largely negative development|là một thay đổi phần lớn tiêu cực}.', 'Repeat exactly the direction you chose'],
-        ['{Whether judged by|dù xét theo} [measure 1] {or by|hay theo} [measure 2], [your direction].', 'Sum up the reasons'],
+        ['{On balance|nhìn chung}, [the trend] {is a largely negative development|là một thay đổi phần lớn tiêu cực}.', 'Nhắc lại đúng hướng đã chọn'],
+        ['{Whether judged by|dù xét theo} [measure 1] {or by|hay theo} [measure 2], [your direction].', 'Gộp lý do'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS,
-        ['[Measure 1] {and|và} [measure 2] {are not the same measure, and the second is the one worth applying here|không phải cùng một thước đo, và thước đo thứ hai mới đáng dùng ở đây}.', 'Measure sentence · choose what to judge the trend by'],
+        ['[Measure 1] {and|và} [measure 2] {are not the same measure, and the second is the one worth applying here|không phải cùng một thước đo, và thước đo thứ hai mới đáng dùng ở đây}.', 'Câu tiêu chí · chọn thước đo để đánh giá xu hướng'],
         ['{By that measure|theo thước đo đó}, [the trend] {is largely|phần lớn là} [positive or negative].', 'Thesis'],
       ],
       ex: [
@@ -19747,49 +19747,49 @@ const RAID_TEMPLATES = {
     name: 'Problem and Solution', icon: '🛠️', ask: 'What are the causes and what solutions can you suggest?',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['{This problem stems mainly from|vấn đề này bắt nguồn chủ yếu từ} [cause], {and the most workable response is|và cách ứng phó khả thi nhất là} [V-ing].', 'Sentence 2 · thesis: the main cause and the main solution'],
+        ['{This problem stems mainly from|vấn đề này bắt nguồn chủ yếu từ} [cause], {and the most workable response is|và cách ứng phó khả thi nhất là} [V-ing].', 'Câu 2 · thesis: nêu nguyên nhân chính và giải pháp chính'],
       ],
       ex: [
         'The issue of traffic congestion has become a subject of considerable debate in recent years.',
         'This problem stems mainly from the growing number of private cars, and the most workable response is improving public transport.',
       ],
       body: [
-        ['{The main cause is that|nguyên nhân chính là} [clause].', 'P of body paragraph 1 · the cause'],
-        ['{This happens because|điều này xảy ra vì} [clause].', 'E1 · explain'],
+        ['{The main cause is that|nguyên nhân chính là} [clause].', 'P thân bài 1 · nguyên nhân'],
+        ['{This happens because|điều này xảy ra vì} [clause].', 'E1 · giải thích'],
         RAID_TPL_A_BODY[2],
-        ['{The most effective solution is to|giải pháp hiệu quả nhất là} [base verb].', 'P of body paragraph 2 · a solution that tackles the cause'],
-        ['{This works because|cách này hiệu quả vì} [clause].', 'E1 of the solution paragraph'],
+        ['{The most effective solution is to|giải pháp hiệu quả nhất là} [base verb].', 'P thân bài 2 · giải pháp, giải quyết đúng nguyên nhân'],
+        ['{This works because|cách này hiệu quả vì} [clause].', 'E1 của đoạn giải pháp'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [the problem] {happens mainly because|xảy ra chủ yếu vì} [cause].', 'Sum up the main cause'],
-        ['[Solution] {can help|có thể giúp} [result].', 'Sum up the main solution'],
+        ['{In conclusion|tóm lại}, [the problem] {happens mainly because|xảy ra chủ yếu vì} [cause].', 'Tóm nguyên nhân chính'],
+        ['[Solution] {can help|có thể giúp} [result].', 'Tóm giải pháp chính'],
       ],
     },
     d: {
       intro: [
-        ['[Singular noun] {is now a routine part of|giờ là một phần quen thuộc của} [the lives of a group].', 'Sentence 1 · general statement'],
-        ['[Problem] {stems mainly from|bắt nguồn chủ yếu từ} [cause], {and the most workable response is|và cách ứng phó khả thi nhất là} [solution].', 'Sentence 2 · thesis; no strong opinion needed'],
+        ['[Singular noun] {is now a routine part of|giờ là một phần quen thuộc của} [the lives of a group].', 'Câu 1 · general statement'],
+        ['[Problem] {stems mainly from|bắt nguồn chủ yếu từ} [cause], {and the most workable response is|và cách ứng phó khả thi nhất là} [solution].', 'Câu 2 · thesis, không cần lập trường mạnh'],
       ],
       ex: [
         'A long, slow drive to work is now a routine part of life in most large cities.',
         'Traffic congestion stems mainly from cities built around cars, and the most workable response is a cheap and reliable bus and metro network.',
       ],
       body: [
-        ['{The main cause here is|nguyên nhân chính ở đây là} [noun phrase].', 'P of body paragraph 1 · the cause'],
-        ['{This happens because|điều này xảy ra vì} [clause].', 'E1 of the cause paragraph'],
-        ['{A second and less visible cause is|nguyên nhân thứ hai, khó thấy hơn, là} [noun phrase].', 'Move on to the second cause'],
-        ['{The most workable response is to|cách ứng phó khả thi nhất là} [base verb].', 'P of body paragraph 2 · the solution'],
-        ['{This works because it removes|cách này hiệu quả vì nó loại bỏ} [noun phrase].', 'E1 of the solution paragraph'],
-        ['{Addressing|giải quyết} [cause] {directly is what makes this work|trực tiếp là điều giúp giải pháp hiệu quả}.', 'L · the solution matches the cause'],
+        ['{The main cause here is|nguyên nhân chính ở đây là} [noun phrase].', 'P thân bài 1 · nguyên nhân'],
+        ['{This happens because|điều này xảy ra vì} [clause].', 'E1 của đoạn nguyên nhân'],
+        ['{A second and less visible cause is|nguyên nhân thứ hai, khó thấy hơn, là} [noun phrase].', 'Chuyển sang nguyên nhân 2'],
+        ['{The most workable response is to|cách ứng phó khả thi nhất là} [base verb].', 'P thân bài 2 · giải pháp'],
+        ['{This works because it removes|cách này hiệu quả vì nó loại bỏ} [noun phrase].', 'E1 của đoạn giải pháp'],
+        ['{Addressing|giải quyết} [cause] {directly is what makes this work|trực tiếp là điều giúp giải pháp hiệu quả}.', 'L · giải pháp khớp nguyên nhân'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [the problem] {mainly because|chủ yếu vì} [cause].', 'Sum up the main cause'],
-        ['[Who] {can respond most effectively by|có thể ứng phó hiệu quả nhất bằng cách} [V-ing].', 'Sum up the main solution, with someone to carry it out'],
+        ['{In conclusion|tóm lại}, [the problem] {mainly because|chủ yếu vì} [cause].', 'Tóm nguyên nhân chính'],
+        ['[Who] {can respond most effectively by|có thể ứng phó hiệu quả nhất bằng cách} [V-ing].', 'Tóm giải pháp chính, có người đứng ra làm'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS,
-        ['[Cause] {lies less in|nằm ở … ít hơn} [the common view] {than in|mà nằm ở} [the real mechanism], {which is why|vì vậy} [what the solution must target].', 'Thesis · no judging word in the question, so no measure sentence. Give the cause and the solution at once'],
+        ['[Cause] {lies less in|nằm ở … ít hơn} [the common view] {than in|mà nằm ở} [the real mechanism], {which is why|vì vậy} [what the solution must target].', 'Thesis · đề không có chữ đánh giá nên không cần câu tiêu chí. Câu này nêu luôn nguyên nhân và giải pháp'],
       ],
       ex: [
         'Rush-hour traffic in large cities now moves more slowly than a bicycle.',
@@ -19797,8 +19797,8 @@ const RAID_TEMPLATES = {
       ],
       body: RAID_TPL_L_BODY,
       concl: [
-        ['[Problem], {then|vậy thì}, [the real cause] {rather than|chứ không phải} [the common view].', 'Sum up the cause'],
-        ['[Solution] {meets|nhắm đúng vào} [cause], {whereas|trong khi} [weaker solution] {changes nothing about|chẳng thay đổi gì} [cause].', 'Sum up the solution against a weaker one'],
+        ['[Problem], {then|vậy thì}, [the real cause] {rather than|chứ không phải} [the common view].', 'Tóm nguyên nhân'],
+        ['[Solution] {meets|nhắm đúng vào} [cause], {whereas|trong khi} [weaker solution] {changes nothing about|chẳng thay đổi gì} [cause].', 'Tóm giải pháp, so với giải pháp yếu hơn'],
       ],
     },
   },
@@ -19806,46 +19806,46 @@ const RAID_TEMPLATES = {
     name: 'Two-part question', icon: '❓', ask: 'Why is this happening? What are the effects?',
     a: {
       intro: [RAID_TPL_A_GS,
-        ['[Answer to question 1], {and|và} [answer to question 2].', 'Sentence 2 · thesis: answer both questions'],
+        ['[Answer to question 1], {and|và} [answer to question 2].', 'Câu 2 · thesis: trả lời cả hai câu hỏi'],
       ],
       ex: [
         'The issue of young people leaving the countryside has become a subject of considerable debate in recent years.',
         'Young people move to cities mainly for better-paid jobs, and this leaves many villages with too few workers.',
       ],
       body: [
-        ['{The main reason for|lý do chính của} [the trend] {is that|là} [clause].', 'P of body paragraph 1 · answer question 1'],
+        ['{The main reason for|lý do chính của} [the trend] {is that|là} [clause].', 'P thân bài 1 · trả lời câu hỏi 1'],
         ...RAID_TPL_A_BODY.slice(1, 4),
-        ['{As for|còn về} [the topic of question 2], [subject + verb].', 'P of body paragraph 2 · answer question 2'],
+        ['{As for|còn về} [the topic of question 2], [subject + verb].', 'P thân bài 2 · trả lời câu hỏi 2'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [answer to question 1].', 'Short answer to question 1'],
-        ['{As for|còn về} [question 2], [answer to question 2].', 'Short answer to question 2'],
+        ['{In conclusion|tóm lại}, [answer to question 1].', 'Trả lời gọn câu hỏi 1'],
+        ['{As for|còn về} [question 2], [answer to question 2].', 'Trả lời gọn câu hỏi 2'],
       ],
     },
     d: {
       intro: [
-        ['{In many countries|ở nhiều nước}, [clause].', 'Sentence 1 · general statement'],
-        ['[Answer 1] {mainly because|chủ yếu vì} [reason], {and|và} {the heaviest cost falls on|thiệt hại nặng nhất đổ lên} [group of people].', 'Sentence 2 · thesis; keep the two answers clearly apart'],
+        ['{In many countries|ở nhiều nước}, [clause].', 'Câu 1 · general statement'],
+        ['[Answer 1] {mainly because|chủ yếu vì} [reason], {and|và} {the heaviest cost falls on|thiệt hại nặng nhất đổ lên} [group of people].', 'Câu 2 · thesis, tách rõ hai câu trả lời'],
       ],
       ex: [
         'In many countries, young people are leaving rural areas for the cities.',
         'They move mainly because city jobs pay far more, and the heaviest cost falls on the older people left behind in the villages.',
       ],
       body: [
-        ['{The main reason for|lý do chính của} [the trend] {is that|là} [clause].', 'P of body paragraph 1'],
-        ['{This is largely a matter of|đây phần lớn là chuyện} [noun phrase].', 'E1 for the question about causes'],
+        ['{The main reason for|lý do chính của} [the trend] {is that|là} [clause].', 'P thân bài 1'],
+        ['{This is largely a matter of|đây phần lớn là chuyện} [noun phrase].', 'E1 của câu hỏi nguyên nhân'],
         ['{Take a|lấy ví dụ một} [place] {where|nơi mà} [subject + verb].', 'E2'],
-        ['{That is the answer to the first question, and|đó là câu trả lời cho câu hỏi thứ nhất, và} [subject + verb].', 'L of body paragraph 1'],
-        ['{As for|còn về} [the topic of question 2], [subject + verb].', 'P of body paragraph 2'],
-        ['{On the second question|về câu hỏi thứ hai}, [subject + verb].', 'L of body paragraph 2'],
+        ['{That is the answer to the first question, and|đó là câu trả lời cho câu hỏi thứ nhất, và} [subject + verb].', 'L thân bài 1'],
+        ['{As for|còn về} [the topic of question 2], [subject + verb].', 'P thân bài 2'],
+        ['{On the second question|về câu hỏi thứ hai}, [subject + verb].', 'L thân bài 2'],
       ],
       concl: [
-        ['{In conclusion|tóm lại}, [answer 1], {while|còn} [answer 2].', 'Short answers to both questions, one clause each'],
+        ['{In conclusion|tóm lại}, [answer 1], {while|còn} [answer 2].', 'Trả lời gọn cả hai câu hỏi, mỗi câu một vế'],
       ],
     },
     l: {
       intro: [RAID_TPL_L_GS,
-        ['[Answer 1] {lies less in|nằm ở … ít hơn} [the common view] {than in|mà nằm ở} [the real mechanism], {and|và} {the cost falls mainly on|thiệt hại chủ yếu đổ lên} [group of people].', 'Thesis · no judging word in the question, so no measure sentence. Answer both questions'],
+        ['[Answer 1] {lies less in|nằm ở … ít hơn} [the common view] {than in|mà nằm ở} [the real mechanism], {and|và} {the cost falls mainly on|thiệt hại chủ yếu đổ lên} [group of people].', 'Thesis · đề không có chữ đánh giá nên không cần câu tiêu chí. Câu này trả lời cả hai câu hỏi'],
       ],
       ex: [
         'Villages across the region are losing their young people to the cities.',
@@ -19853,7 +19853,7 @@ const RAID_TEMPLATES = {
       ],
       body: RAID_TPL_L_BODY,
       concl: [
-        ['[The trend], {then|vậy thì}, [answer 1], {and|và} [answer 2].', 'Short answers to both questions'],
+        ['[The trend], {then|vậy thì}, [answer 1], {and|và} [answer 2].', 'Trả lời gọn cả hai câu hỏi'],
       ],
     },
   },
@@ -19964,7 +19964,7 @@ function raidTplEx(lines, ex) {
     });
     return `<p>${h}</p>`;
   }).join('');
-  return `<div class="rd-tpl-ex"><div class="rd-tpl-ex-h">✍️ Model introduction</div>${rows}</div>`;
+  return `<div class="rd-tpl-ex"><div class="rd-tpl-ex-h">✍️ Đoạn mở bài mẫu</div>${rows}</div>`;
 }
 function raidPlain(t) { return t.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'); }
 // A template's [slot] is the student's own content: a chip, never a blank.
@@ -20033,7 +20033,7 @@ function raidFights(L, lv) {
   const line = ([t, vi]) => ({ t, vi });
   const prompt = L.paras[0].prompt;
   const T = RAID_TEMPLATES[raidType(L.n)];
-  f.push({ tier: 5, kind: 'tpl', prompt: `Introduction template: ${T.name}. Type the frame words; the yellow boxes are your own content.`, label: 'Introduction template · ' + T.name, lines: T[lv.id].intro.map(line), ex: T[lv.id].ex, given: [] });
+  f.push({ tier: 5, kind: 'tpl', prompt: `Khung mở bài dạng ${T.name}. Gõ các cụm khung, ô vàng là nội dung em tự viết.`, label: 'Khung mở bài · ' + T.name, lines: T[lv.id].intro.map(line), ex: T[lv.id].ex, given: [] });
   const words = raidWordLines(L.n, lv.words);
   if (words.length) f.push({ tier: 0, kind: 'words', prompt: 'Các câu ví dụ trong danh sách từ vựng của buổi này.', label: 'Từ vựng của buổi', lines: words, given: [] });
   f.push({ tier: 1, prompt, label: 'Mở bài', lines: E.intro.map(line), given: [] });
@@ -20287,11 +20287,11 @@ function raidTplRoom(type, lvId) {
       <div class="rd-tpl-tabs">${Object.entries(RAID_TEMPLATES).map(([id, x]) => `<button class="rd-tpl-tab${id === _raidTpl.type ? ' on' : ''}" onclick="raidTplRoom('${id}')">${x.icon} ${escapeHtml(x.name)}</button>`).join('')}</div>
       <div class="rd-tpl-tabs rd-tpl-tabs--lv">${Object.values(RAID_LEVELS).map(x => `<button class="rd-tpl-tab rd-tpl-tab--${x.id}${x.id === lv.id ? ' on' : ''}" onclick="raidTplRoom(null, '${x.id}')">${x.icon} ${x.name} <small>${x.band}</small></button>`).join('')}</div>
       <div class="rd-tpl-card">
-        <div class="rd-tpl-ask">This question type asks: <i>${escapeHtml(T.ask)}</i>${used.length ? ` · Dungeons: ${used.join(', ')}` : ''}</div>
-        <div class="rd-tpl-part">Introduction</div><ol>${lines(T[lv.id].intro)}</ol>
+        <div class="rd-tpl-ask">Đề dạng này hỏi: <i>${escapeHtml(T.ask)}</i>${used.length ? ` · Hầm ngục: ${used.join(', ')}` : ''}</div>
+        <div class="rd-tpl-part">Mở bài</div><ol>${lines(T[lv.id].intro)}</ol>
         ${raidTplEx(T[lv.id].intro.map(([t]) => ({ t })), T[lv.id].ex)}
-        <div class="rd-tpl-part">Body</div><ol>${lines(T[lv.id].body)}</ol>
-        <div class="rd-tpl-part">Conclusion</div><ol>${lines(T[lv.id].concl)}</ol>
+        <div class="rd-tpl-part">Thân bài</div><ol>${lines(T[lv.id].body)}</ol>
+        <div class="rd-tpl-part">Kết bài</div><ol>${lines(T[lv.id].concl)}</ol>
         <button class="vb-start-btn rd-tpl-go" onclick="raidTplStart('${_raidTpl.type}', '${lv.id}')">⚔️ Luyện khung này</button>
       </div>
     </div>`;
@@ -20302,7 +20302,7 @@ function raidTplStart(type, lvId) {
   raidStop();
   _raidLevel = lv.id;
   const line = ([t, vi]) => ({ t, vi });
-  const parts = [['intro', 'Introduction template'], ['body', 'Body template'], ['concl', 'Conclusion template']];
+  const parts = [['intro', 'Khung mở bài'], ['body', 'Khung thân bài'], ['concl', 'Khung kết bài']];
   const fights = parts.map(([k, label]) => ({ tier: 5, kind: 'tpl', prompt: `${T.name} · ${T.ask}`, label: `${label} · ${T.name}`, lines: T[lv.id][k].map(line), ex: k === 'intro' ? T[lv.id].ex : null, given: [], enemy: RAID_TPL_FOE }));
   _rd = {
     L: null, practice: type, lv: lv.id, fights, fi: 0, hp: 100, mana: 0, misses: 0, hitsTaken: 0, coins: 0, crits: 0, ults: 0,
@@ -20505,7 +20505,7 @@ function raidRenderArena() {
       <div class="rd-scroll">
         <details class="rd-prompt"><summary>📜 ${F.kind === 'words' ? '' : 'Đề bài · '}${escapeHtml(F.label)} <span class="rd-lvtag">${raidLv().icon} ${raidLv().name}</span></summary><div>${escapeHtml(F.prompt)}</div></details>
         <div class="rd-text${F.kind === 'words' ? ' rd-text--list' : ''}" id="rd-text"></div>
-        ${F.kind === 'tpl' ? `<details class="rd-vibox" open><summary>What each sentence does</summary>${F.lines.map((l, i) => `<p><b>${i + 1}.</b> ${escapeHtml(l.vi)}</p>`).join('')}</details>` : raidLv().showVi ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
+        ${F.kind === 'tpl' ? `<details class="rd-vibox" open><summary>Mỗi câu làm gì</summary>${F.lines.map((l, i) => `<p><b>${i + 1}.</b> ${escapeHtml(l.vi)}</p>`).join('')}</details>` : raidLv().showVi ? `<details class="rd-vibox" open><summary>Dịch nghĩa</summary>${[...F.given, ...F.lines, ...(F.rest || [])].filter(l => l.vi).map(l => `<p>${escapeHtml(l.vi)}</p>`).join('')}</details>` : ''}
       </div>
       <div class="rd-panel" id="rd-panel"></div>
     </div>`;

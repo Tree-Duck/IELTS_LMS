@@ -8128,7 +8128,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 
 /* ── Từ vựng: two boxes per unit, and the Kiểm tra test ── */
 .lv-tier { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-width: 30rem; margin: 0.6rem auto 0.2rem; }
-.lv-tier-btn { padding: 0.55rem 0.6rem; border-radius: 14px; border: 2px solid #D9CFB5; background: #FFFDF6; color: #3A3220; font-weight: 800; font-size: 1rem; cursor: pointer; font-family: inherit; }
+.lv-tier-btn { padding: 0.55rem 0.6rem; border-radius: 14px; border: 2px solid #D9CFB5; background: #FFFDF6; color: #3A3220; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
 .lv-tier-btn small { display: block; font-weight: 500; font-size: 0.75rem; opacity: 0.8; }
 .lv-tier-btn--basic.active { background: #2E8B4E; border-color: #2E8B4E; color: #fff; }
 .lv-tier-btn--adv.active { background: #A8740A; border-color: #A8740A; color: #fff; }
@@ -8166,8 +8166,8 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .qt-submit { display: block; margin: 0.5rem auto 1.5rem; }
 .qt-score { display: flex; align-items: center; gap: 1rem; justify-content: center; background: #fff; border: 2px solid #E4D8BC; border-radius: 18px; padding: 0.9rem; margin: 0.4rem 0; }
 .qt-ring { --p: 0; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#2E8B4E calc(var(--p) * 1%), #EFE6CF 0); flex: none; }
-.qt-ring span { width: 64px; height: 64px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; color: #1E2A22; }
-.qt-score-n { font-weight: 800; font-size: 1.15rem; } .qt-score-msg { color: #5E6B62; font-size: 0.9rem; } .qt-score-coin { font-weight: 700; color: #8A6100; }
+.qt-ring span { width: 64px; height: 64px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-weight: 700; font-size: 1.1rem; color: #1E2A22; }
+.qt-score-n { font-weight: 700; font-size: 1.15rem; } .qt-score-msg { color: #5E6B62; font-size: 0.9rem; } .qt-score-coin { font-weight: 700; color: #8A6100; }
 .qt-after { margin-bottom: 1.5rem; }
 @media (max-width: 520px) { .qt-opts, .qt-match { grid-template-columns: 1fr; } }
 
@@ -8201,7 +8201,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .lvp-hist { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1.5rem; }
 .lvp-test { background: #fff; border: 1px solid #E4D8BC; border-radius: 12px; padding: 0.55rem 0.75rem; }
 .lvp-test-top { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.82rem; color: #6B5B3A; }
-.lvp-test-score { font-weight: 800; color: #1E2A22; }
+.lvp-test-score { font-weight: 700; color: #1E2A22; }
 .lvp-test-what { font-size: 0.9rem; margin-top: 0.15rem; }
 .lvp-test-wrong { font-size: 0.8rem; color: #A0392B; margin-top: 0.3rem; }
 .lvp-empty { color: #6B5B3A; padding: 0.6rem 0; }
@@ -8222,7 +8222,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 
 /* ── Hầm ngục: model introduction under a template, and the six specials ── */
 .rd-tpl-ex { margin: 0.7rem 0 0.4rem; padding: 0.6rem 0.8rem; border-radius: 12px; background: #F3FBF5; border: 1px dashed #7CC99A; }
-.rd-tpl-ex-h { font-weight: 800; font-size: 0.85rem; color: #1F8A4C; margin-bottom: 0.3rem; }
+.rd-tpl-ex-h { font-weight: 700; font-size: 0.85rem; color: #1F8A4C; margin-bottom: 0.3rem; }
 .rd-tpl-ex p { margin: 0.25rem 0; line-height: 1.55; }
 .rd-pick-udesc { font-size: 0.82rem; opacity: 0.9; margin-top: 0.25rem; max-width: 16rem; line-height: 1.35; }
 .rd-pick-cult small { display: block; font-size: 0.7rem; opacity: 0.8; font-weight: 600; }
@@ -8275,11 +8275,11 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .ts-cell .ts-mask { display: block; font-size: 0.72rem; }
 .ts-cell .ts-typed { font-size: 0.7rem; }
 .ts-item.ts-shot { border-color: #FF7A59; background: rgba(255, 122, 89, 0.2); z-index: 3; }
-.ts-victory { font-size: 1.25rem; font-weight: 800; color: #B8860B; margin-bottom: 0.4rem; }
+.ts-victory { font-size: 1.25rem; font-weight: 700; color: #B8860B; margin-bottom: 0.4rem; }
 
 /* ── Xây tháp: leaning floors, hazards, the wrecking ball ── */
 .tw-floor--tilt { box-shadow: inset 0 0 0 2px rgba(224, 72, 72, 0.7); }
-.tw-floor--tilt::after { content: '↗'; position: absolute; right: 6px; top: 2px; font-size: 0.8rem; color: #fff; font-weight: 800; }
+.tw-floor--tilt::after { content: '↗'; position: absolute; right: 6px; top: 2px; font-size: 0.8rem; color: #fff; font-weight: 700; }
 .tw-leaning .tw-stack { filter: drop-shadow(0 0 8px rgba(224, 72, 72, 0.6)); }
 .tw-tilt-note, .tw-fix-note, .tw-hz-note { font-size: 0.82rem; border-radius: 10px; padding: 0.35rem 0.6rem; margin: 0.3rem 0 0.4rem; }
 .tw-tilt-note { background: rgba(245, 197, 66, 0.14); color: #7A5A00; }
@@ -8289,11 +8289,11 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw-card--fix { border-color: #2F5FC8; }
 .tw-card--tilt { border-color: #E04848; }
 .tw-tilt-msg { margin: 0.6rem 0; line-height: 1.55; }
-.tw-hz-end { margin-top: 0.4rem; font-weight: 800; }
+.tw-hz-end { margin-top: 0.4rem; font-weight: 700; }
 .tw-hz-end.bad { color: #C0392B; } .tw-hz-end.ok { color: #1F8A4C; }
 .tw-hz { position: absolute; z-index: 5; pointer-events: none; display: flex; flex-direction: column; align-items: center; transition: all .6s ease; --p: 0; }
 .tw-hz-icon { font-size: 2.6rem; filter: drop-shadow(0 0 10px rgba(255, 90, 60, 0.8)); }
-.tw-hz-tag { font-size: 0.72rem; font-weight: 800; color: #fff; background: rgba(192, 57, 43, 0.85); border-radius: 99px; padding: 1px 8px; white-space: nowrap; }
+.tw-hz-tag { font-size: 0.72rem; font-weight: 700; color: #fff; background: rgba(192, 57, 43, 0.85); border-radius: 99px; padding: 1px 8px; white-space: nowrap; }
 .tw-hz--meteor { right: calc(8% + var(--p) * 22%); top: calc(14% + var(--p) * 22%); animation: twHzWobble 0.8s ease-in-out infinite; }
 .tw-hz--bandit { left: calc(4% + var(--p) * 22%); bottom: 50px; animation: twHzWalk 0.5s steps(2) infinite; }
 .tw-hz--bomb { left: 50%; top: calc(30% + var(--p) * 10%); margin-left: 60px; animation: twHzTick 0.5s ease-in-out infinite; }
