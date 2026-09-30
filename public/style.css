@@ -8481,3 +8481,6 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw-scene.tw-upgrade::after { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(circle at 50% 70%, rgba(255, 244, 190, 0.95), rgba(255, 244, 190, 0) 60%); animation: twFlash 1.2s ease-out forwards; }
 @keyframes twUpgrade { 0% { filter: brightness(2.2) saturate(0.3); } 25% { transform: scale(1.04); } 100% { filter: none; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .tw-scene.tw-upgrade .tw-stack, .tw-scene.tw-upgrade::after { animation: none !important; } }
+
+/* One game card left in the hub: keep it card-sized and centred. */
+.games-grid { max-width: 420px; margin: 0 auto; }
