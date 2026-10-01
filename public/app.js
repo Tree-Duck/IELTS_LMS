@@ -23563,11 +23563,11 @@ const T1_BLOCKS = {
     fc: 'Hình dạng đường và cụm tả xu hướng, giới từ to / by, đỉnh, đáy, vượt.',
     games: ['survive', 'rain'], warm: ['slope', 'hunt', 'build'] },
   sta: { icon: '📊', name: 'Biểu đồ tĩnh', en: 'Static',
-    sub: 'Đề chỉ có một mốc: pie chart, bar chart, table, bản đồ, quy trình. So sánh, xếp hạng, ước lượng tỉ lệ, tả thay đổi trên bản đồ và các bước quy trình.',
-    crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Ước lượng tỉ lệ', 'just over a quarter, nearly half, twice as many'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
-    lv: { a: 'phân số tròn, 4 cột, 3 thay đổi', d: 'gấp mấy lần, 5 cột, di dời, mở rộng', l: 'just over / under, 6 cột sát nhau, having been' },
+    sub: 'Đề chỉ có một mốc: pie chart, bar chart, table, bản đồ, quy trình. So sánh, xếp hạng, chia số liệu thành 2 đoạn thân bài, tả thay đổi trên bản đồ và các bước quy trình.',
+    crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Chia đoạn thân bài', 'nhóm lớn và nhóm nhỏ, bên nào cao hơn ở mục nào'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
+    lv: { a: 'nhóm cách xa, 3 thay đổi, bị động', d: 'gấp mấy lần, di dời, mở rộng', l: 'nhóm sát nhau, just over / under, having been' },
     fc: 'Phân số và tỉ lệ, xếp hạng, động từ bản đồ, bị động và từ nối quy trình.',
-    games: ['map', 'mapwrite', 'survive', 'process', 'rank', 'flash'], warm: ['compare'] },
+    games: ['map', 'mapwrite', 'group', 'survive', 'process'], warm: ['compare'] },
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
@@ -23576,8 +23576,8 @@ const T1_GAMES = {
   slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
   hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
   build:   { icon: '🧩', name: 'Ghép câu số liệu',       desc: 'Ghép từng cụm thành câu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
-  flash:   { icon: '⚡', name: 'Ước lượng chớp nhoáng',  desc: 'Biểu đồ hiện vài giây rồi tắt. Chọn nhanh: just over a quarter, nearly half, twice as many…', start: 't1FlashStart()' },
-  rank:    { icon: '🏁', name: 'Xếp hạng tốc độ',        desc: 'Các cột hiện thoáng qua rồi ẩn. Chạm theo thứ tự từ cao xuống thấp, rồi chọn cụm xếp hạng.', start: 't1RankStart()' },
+  group:   { icon: '🧩', name: 'Chia đoạn thân bài',     desc: 'Biểu đồ có đủ số liệu. Chia các mục thành 2 đoạn thân bài: nhóm lớn và nhóm nhỏ, hoặc bên nào cao hơn ở mục nào. Rồi chọn câu mở đoạn.', start: 't1GroupStart()' },
+  type:    { icon: '⌨️', name: 'Gõ nghĩa',               desc: 'Nghĩa tiếng Việt rơi xuống. Gõ đúng cụm tiếng Anh để bắn trước khi chạm đất. 3 mạng, nhanh dần.', start: 't1TypeStart()' },
   mapwrite: { icon: '✍️', name: 'Bản đồ → Bài viết',   desc: 'Tìm thay đổi trên một bản đồ rồi viết thành bài hoàn chỉnh: mở bài, overview, hai đoạn thân bài. Có bài mẫu từ chính bản đồ đó.', start: "t1MapStart('essay')" },
   map:     { icon: '🗺️', name: 'Bản đồ tìm điểm khác',   desc: 'Hai bản đồ trước và sau. Tìm chỗ thay đổi, rồi chọn câu đúng: demolished, converted into…', start: 't1MapStart()' },
   process: { icon: '⚙️', name: 'Dây chuyền quy trình',   desc: 'Các bước bị xáo trộn. Xếp lại đúng thứ tự trước khi hết giờ, rồi chọn câu bị động và từ nối.', start: 't1ProcStart()' },
@@ -23655,8 +23655,6 @@ function t1Hub() {
           <ul><li>${escapeHtml(b.lv[l.id])}</li></ul>
         </button>`).join('')}
       </div>
-      <div class="wal-bar" id="wal-bar"></div>
-      <div class="wal-shop hidden" id="wal-shop"></div>
       <h3 class="t1-sec">📚 Ôn từ vựng trước <small>làm trước khi chơi</small></h3>
       <div class="lv-modes t1-modes t1-modes--steps">
         <button class="lv-mode t1-mode t1-mode--step" onclick="t1FcStart()">
@@ -23670,8 +23668,14 @@ function t1Hub() {
           <span class="lv-mode-name">Bước 2 · Ôn lại bằng Mưa pattern</span>
           <span class="lv-mode-desc">Hình rơi xuống, bắn bằng đúng cụm vừa học. Mỗi đợt 6 hình, hết đợt thì đổi cụm ở các nút số.</span>
         </button>
+        <button class="lv-mode t1-mode t1-mode--step" onclick="t1TypeStart()">
+          <span class="lv-mode-icon">⌨️</span>
+          <span class="lv-mode-name">Bước 3 · Gõ nghĩa</span>
+          <span class="lv-mode-desc">${t1Words().length} cụm ${_t1Block === 'dyn' ? 'tả xu hướng' : 'so sánh, bản đồ, quy trình'}. Nghĩa tiếng Việt rơi xuống, gõ cụm tiếng Anh để bắn.</span>
+          <span class="lv-mode-best">🏆 ${t1GetBest('type')}</span>
+        </button>
       </div>
-      <h3 class="t1-sec" id="t1-games">🎮 Bước 3 · Trò chơi</h3>
+      <h3 class="t1-sec" id="t1-games">🎮 Bước 4 · Trò chơi</h3>
       <div class="lv-modes t1-modes">${b.games.map(id => t1GameCard(id)).join('')}</div>
       <h3 class="t1-sec">📖 Bài mẫu <small>${T1_SAMPLES.filter(x => x.block === _t1Block).length} đề, mỗi đề một bài</small></h3>
       <div class="lv-modes t1-modes"><button class="lv-mode t1-mode t1-mode--step" onclick="t1SampleList()">
@@ -23682,8 +23686,6 @@ function t1Hub() {
       <div class="lv-modes t1-modes t1-modes--warm">${b.warm.map(id => t1GameCard(id, true)).join('')}</div>
       <div class="t1-lvnote">Đang chơi cấp <strong>${lv.icon} ${lv.name}</strong>. Mỗi câu đúng được ${lv.coin} xu.</div>
     </div>`;
-  walBar();
-  walLoad().then(walBar);
 }
 
 /* ── Chart drawing ──────────────────────────────────────────────────────────
@@ -24601,10 +24603,10 @@ function t1MiniBars(vals, hi) {
 }
 function t1MiniMap(a, b) { return `<div class="t1-mini-map"><span>${a}</span><i>→</i><span>${b}</span></div>`; }
 const T1_STA_REVIEW = {
-  quarter:   { lv: 'a', p: 'a quarter', vi: '1/4, một góc vuông của hình tròn', v: [24, 26], ex: 'Transport accounted for a quarter of household spending.' },
-  third:     { lv: 'a', p: 'a third', vi: '1/3', v: [32, 34], ex: 'Coal made up a third of electricity generation.' },
-  half:      { lv: 'a', p: 'half', vi: '1/2, đúng nửa hình', v: [49, 51], ex: 'Half of the students walked to school.' },
-  threeq:    { lv: 'a', p: 'three quarters', vi: '3/4', v: [74, 76], ex: 'Three quarters of the land was used for farming.' },
+  quarter:   { lv: 'a', p: 'a quarter', vi: '1/4, một góc vuông của hình tròn', v: [25, 25], ex: 'Transport accounted for a quarter of household spending.' },
+  third:     { lv: 'a', p: 'a third', vi: '1/3', v: [33, 33], ex: 'Coal made up a third of electricity generation.' },
+  half:      { lv: 'a', p: 'half', vi: '1/2, đúng nửa hình', v: [50, 50], ex: 'Half of the students walked to school.' },
+  threeq:    { lv: 'a', p: 'three quarters', vi: '3/4', v: [75, 75], ex: 'Three quarters of the land was used for farming.' },
   nearhalf:  { lv: 'd', p: 'nearly half', vi: 'gần một nửa, hơi thiếu 50%', v: [45, 48], ex: 'Nearly half of all visitors came from Asia.' },
   majority:  { lv: 'd', p: 'the vast majority', vi: 'đại đa số, khoảng 85–95%', v: [86, 93], ex: 'The vast majority of households owned a phone.' },
   minority:  { lv: 'd', p: 'a small minority', vi: 'một phần nhỏ, dưới 10%', v: [5, 9], ex: 'Only a small minority of workers cycled to work.' },
@@ -24637,7 +24639,7 @@ function t1Source(block) {
     phrase: k => T1_STA_REVIEW[k].p,
     draw: k => {
       const r = T1_STA_REVIEW[k];
-      if (r.v) return t1MiniPie(Math.round(t1Rand(r.v[0], r.v[1])));
+      if (r.v) { const v = Math.round(t1Rand(r.v[0], r.v[1])); return `<span class="t1-mini-pv">${t1MiniPie(v)}<b>${v}%</b></span>`; }
       if (r.bars !== undefined) {
         const vals = t1Shuffle([90, 70, 52, 34]).sort((a, b) => b - a);
         const order = t1Shuffle([0, 1, 2, 3]);
@@ -25231,33 +25233,7 @@ function t1Hit(g, bonus) {
 function t1Miss(g) { g.combo = 0; g.lives--; tsSfx('wrong'); }
 function t1Shake(el) { if (!el) return; el.classList.remove('t1-shake'); void el.offsetWidth; el.classList.add('t1-shake'); }
 
-/* ── Static · Ước lượng chớp nhoáng ───────────────────────────────────────
-   A pie slice (or two bars) shows for a moment and is covered. Pick the
-   phrase that fits what you saw. Each right answer shortens the next flash;
-   three wrong answers end the run. Phrase ranges never overlap inside one
-   level, so exactly one option is true of the number. */
-const T1_FLASH_PIE = {
-  a: [['about a tenth', 9, 11], ['about a fifth', 19, 21], ['a quarter', 24, 26], ['a third', 32, 34], ['half', 49, 51], ['two thirds', 66, 68], ['three quarters', 74, 76]],
-  d: [['a small minority', 5, 9], ['just under a quarter', 21, 23], ['just over a quarter', 27, 29], ['roughly a third', 32, 34], ['nearly half', 45, 48], ['just over half', 52, 55], ['around two thirds', 65, 68], ['the vast majority', 85, 92]],
-};
-T1_FLASH_PIE.l = T1_FLASH_PIE.d;
-const T1_FLASH_RATIO = {
-  d: [['twice as many', 2], ['three times as many', 3], ['half as many', 0.5], ['roughly the same number of', 1]],
-  l: [['twice as many', 2], ['three times as many', 3], ['four times as many', 4], ['half as many', 0.5], ['one and a half times as many', 1.5], ['roughly the same number of', 1]],
-};
-const T1_FLASH_CFG = { a: { show: 4, ratio: 0 }, d: { show: 2.8, ratio: 0.3 }, l: { show: 1.8, ratio: 0.5 } };
-const T1_FLASH_CTX = [
-  { title: 'Household spending', of: 'household spending', cats: ['Housing', 'Food', 'Transport', 'Leisure', 'Clothing'] },
-  { title: 'Sources of electricity', of: 'electricity generation', cats: ['Coal', 'Gas', 'Nuclear power', 'Wind', 'Solar'] },
-  { title: 'How students travel to school', of: 'journeys to school', cats: ['Bus', 'Car', 'Bicycle', 'Walking', 'Train'] },
-  { title: 'Use of free time', of: 'free time', cats: ['Social media', 'Sport', 'Reading', 'Gaming', 'Music'] },
-];
-const T1_FLASH_PAIRS = [
-  { noun: 'students', a: 'football', b: 'tennis', unit: 'students', title: 'Students joining each club' },
-  { noun: 'visitors', a: 'the museum', b: 'the gallery', unit: 'visitors', title: 'Visitors in one week' },
-  { noun: 'cars', a: 'Japan', b: 'Italy', unit: 'thousand cars', title: 'Cars exported, 2020' },
-  { noun: 'books', a: 'novels', b: 'poetry', unit: 'books', title: 'Library loans in May' },
-];
+// Pie drawing, used by the model answers and Chia đoạn thân bài.
 function t1PieSvg(slices, size) {
   size = size || 220;
   const r = size / 2 - 6, c = size / 2;
@@ -25270,248 +25246,495 @@ function t1PieSvg(slices, size) {
   });
   return `<svg viewBox="0 0 ${size} ${size}" class="t1-pie" aria-hidden="true">${g}</svg>`;
 }
-function t1FlashRound() {
-  const g = _t1, cfg = T1_FLASH_CFG[_t1Lv];
-  if (Math.random() < cfg.ratio) {
-    const set = T1_FLASH_RATIO[_t1Lv], pick = t1Pick(set), P = t1Pick(T1_FLASH_PAIRS);
-    const b = Math.round(t1Rand(30, 60)), a = Math.round(b * pick[1] * t1Rand(0.97, 1.03));
-    const opts = t1Shuffle([pick[0], ...t1Shuffle(set.filter(x => x !== pick).map(x => x[0])).slice(0, 3)]);
-    return { kind: 'ratio', P, a, b, answer: pick[0], opts,
-      chart: t1BarChart({ title: P.title, unit: P.unit, rows: [{ name: t1Cap(P.a), v: a, hl: true }, { name: t1Cap(P.b), v: b }], fmt: () => '' }),
-      line: `${t1Cap(P.a)} had ${pick[0]} ${P.noun} as ${P.b} (${a} and ${b}).`,
-      vi: 'So hai cột: dài gấp đôi → twice as many … as; bằng nửa → half as many … as; gần bằng → roughly the same number of … as.' };
+
+/* ── Static · Chia đoạn thân bài ──────────────────────────────────────────
+   Every number is on the chart; nothing is guessed. Split the items into
+   the two body paragraphs, then pick the sentence that opens one of them.
+   Two ways to group, the two a static chart usually asks for: the big items
+   against the rest (a bar chart or a pie), and where each side is ahead (a
+   table with two columns). A bar runs down for a speed bonus but the chart
+   never hides. Eight rounds, three lives. */
+const T1_GROUP_CFG = { a: { n: 5, gap: 1.8, diff: 12 }, d: { n: 6, gap: 1.5, diff: 7 }, l: { n: 6, gap: 1.3, diff: 4 } };
+const T1_GROUP_ROUNDS = 8, T1_GROUP_SECS = 20;
+const T1_GROUP_BAR = [
+  { title: 'Tourists visiting each country, 2019', unit: 'million visitors', names: ['France', 'Spain', 'USA', 'China', 'Italy', 'Turkey', 'Mexico', 'Thailand'], hi: [60, 90] },
+  { title: 'Rice production, 2020', unit: 'million tonnes', names: ['China', 'India', 'Indonesia', 'Vietnam', 'Thailand', 'Bangladesh', 'Myanmar'], hi: [140, 210] },
+  { title: 'Coffee consumed per person each year', unit: 'kilograms', names: ['Finland', 'Norway', 'Sweden', 'Japan', 'Brazil', 'Canada', 'Italy'], hi: [9, 12.5], dec: true },
+  { title: 'Average monthly rent in city centres', unit: 'US dollars', names: ['London', 'Paris', 'Tokyo', 'Sydney', 'Berlin', 'Madrid', 'Seoul'], hi: [2000, 2600], ten: true },
+];
+const T1_GROUP_PIE = [
+  { title: 'Household spending', cats: ['Housing', 'Food', 'Transport', 'Leisure', 'Clothing', 'Health'] },
+  { title: 'Sources of electricity', cats: ['Coal', 'Gas', 'Nuclear power', 'Wind', 'Solar', 'Hydropower'] },
+  { title: 'How students travel to school', cats: ['Bus', 'Car', 'Bicycle', 'Walking', 'Train', 'Motorbike'] },
+  { title: 'Use of free time', cats: ['Social media', 'Sport', 'Reading', 'Gaming', 'Music', 'Shopping'] },
+];
+const T1_GROUP_SIDE = [
+  { title: 'Men and women taking part in each sport (%)', a: 'Men', b: 'Women', pct: true, range: [12, 60],
+    cats: ['Football', 'Swimming', 'Yoga', 'Cycling', 'Tennis', 'Aerobics', 'Running'],
+    sent: (x, y, l) => `A higher proportion of ${x} than ${y} took part in ${l}.` },
+  { title: 'Boys and girls choosing each subject (%)', a: 'Boys', b: 'Girls', pct: true, range: [10, 55],
+    cats: ['Physics', 'Biology', 'Art', 'Engineering', 'Languages', 'IT', 'History'],
+    sent: (x, y, l) => `A higher percentage of ${x} than ${y} chose ${l}.` },
+  { title: 'Exports from Vietnam and Thailand (billion USD)', a: 'Vietnam', b: 'Thailand', range: [8, 40],
+    cats: ['Rice', 'Coffee', 'Electronics', 'Textiles', 'Seafood', 'Rubber', 'Cars'],
+    sent: (x, y, l) => `${x} exported more ${l} than ${y}.` },
+];
+function t1GrpList(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]; }
+// Countries and cities keep their capital; categories go lower case mid-sentence, except acronyms.
+function t1GrpName(n, proper) { return proper ? t1Nm(n) : /^[A-Z]{2,}$/.test(n) ? n : n.toLowerCase(); }
+// Big against the rest: k items clearly ahead, gap at least cfg.gap between the groups.
+function t1GroupGap(pie) {
+  const cfg = T1_GROUP_CFG[_t1Lv], n = cfg.n, k = Math.random() < 0.5 ? 2 : 3;
+  const C = pie ? t1Pick(T1_GROUP_PIE) : t1Pick(T1_GROUP_BAR);
+  const names = t1Shuffle(pie ? C.cats : C.names).slice(0, n);
+  let vals;
+  for (let t = 0; t < 80; t++) {
+    const raw = names.map((_, i) => i < k ? t1Rand(1, 1.4) : t1Rand(0.4 / cfg.gap, 0.92 / cfg.gap));
+    if (pie) {
+      const sum = raw.reduce((a, b) => a + b, 0);
+      vals = raw.map(x => Math.max(2, Math.round(x / sum * 100)));
+      vals[0] += 100 - vals.reduce((a, b) => a + b, 0);
+    } else {
+      const top = t1Rand(C.hi[0], C.hi[1]) / Math.max(...raw.slice(0, k));
+      vals = raw.map(x => C.dec ? Math.round(x * top * 10) / 10 : C.ten ? Math.round(x * top / 10) * 10 : Math.max(2, Math.round(x * top)));
+    }
+    const minTop = Math.min(...vals.slice(0, k)), maxLow = Math.max(...vals.slice(k));
+    if (minTop / maxLow >= cfg.gap && new Set(vals).size === n) break;
   }
-  const set = T1_FLASH_PIE[_t1Lv], pick = t1Pick(set), C = t1Pick(T1_FLASH_CTX);
-  const v = Math.round(t1Rand(pick[1], pick[2]));
-  const others = t1Shuffle(C.cats.slice(1)).slice(0, 3);
-  let rest = 100 - v;
-  const parts = others.map((name, i) => { const x = i === others.length - 1 ? rest : Math.max(2, Math.round(rest * t1Rand(0.25, 0.5))); rest -= x; return { name, v: x }; });
-  const slices = [{ name: C.cats[0], v, color: T1_COLORS[1] }, ...parts.map((p, i) => ({ ...p, color: ['#9FB7AE', '#C9D6D0', '#7E9C90'][i] }))];
-  const opts = t1Shuffle([pick[0], ...t1Shuffle(set.filter(x => x !== pick && (v < x[1] - 1 || v > x[2] + 1)).map(x => x[0])).slice(0, 3)]);
-  return { kind: 'pie', C, v, answer: pick[0], opts,
-    chart: `<div class="t1-chart t1-pie-wrap"><div class="t1-chart-title">${escapeHtml(C.title)}</div>${t1PieSvg(slices)}<div class="t1-legend">${slices.map(s => `<span><i style="background:${s.color}"></i>${escapeHtml(s.name)}</span>`).join('')}</div></div>`,
-    line: `${t1Cap(C.cats[0].toLowerCase())} accounted for ${pick[0]} of ${C.of} (${v}%).`,
-    vi: 'Nhìn lát cam so với cả hình tròn: 1/4 là một góc vuông, 1/2 là nửa hình, "just over" là nhỉnh hơn một chút, "nearly" là gần tới.' };
+  const items = names.map((name, i) => ({ name, v: vals[i], g: i < k ? 1 : 2 }));
+  const top = items.filter(x => x.g === 1).sort((a, b) => b.v - a.v), low = items.filter(x => x.g === 2).sort((a, b) => b.v - a.v);
+  const N = x => t1GrpName(x.name, !pie), F = v => t1Num(v) + (pie ? '%' : '');
+  const S = list => pie
+    ? `${t1Cap(t1GrpList(list.map(N)))} accounted for the largest shares, at ${t1GrpList(list.map(x => F(x.v)))} respectively.`
+    : `${t1Cap(t1GrpList(list.map(N)))} recorded the highest figures, at ${t1GrpList(list.map(x => F(x.v)))} ${C.unit} respectively.`;
+  const right = S(top);
+  const swapVals = top.map((x, i) => ({ ...x, v: top[top.length - 1 - i].v }));
+  const wrongs = [
+    pie ? right.replace('the largest shares', 'the smallest shares') : right.replace('the highest', 'the lowest'),
+    S([...top.slice(0, -1), low[0]]),
+    S(swapVals),
+  ];
+  const range = `ranging from ${F(low[low.length - 1].v)} to ${F(low[0].v)}${pie ? '' : ' ' + C.unit}`;
+  const vi = xs => t1GrpList(xs).replace(/ and ([^,]*)$/, ' và $1');
+  const shown = t1Shuffle(items);
+  return {
+    kind: pie ? 'pie' : 'bar', items: shown,
+    chart: pie ? t1LibPie(C.title, shown.map(x => [x.name, x.v])) : t1BarChart({ title: C.title, unit: C.unit, rows: shown.map(x => ({ name: x.name, v: x.v })) }),
+    label: x => F(x.v),
+    ask: 'Which items are far ahead of the rest?',
+    ok: s1 => t1GrpSame(s1, top) || t1GrpSame(s1, low),
+    canon: x => x.g,
+    stem: 'Chọn câu mở đoạn về nhóm lớn:',
+    opts: t1Shuffle([right, ...t1Shuffle([...new Set(wrongs)].filter(x => x !== right)).slice(0, 2)]), right,
+    why: `Đoạn 1: nhóm lớn ${vi(top.map(x => x.name))}, từ ${F(top[top.length - 1].v)} trở lên. Đoạn 2: ${n - k} mục còn lại, thấp hơn hẳn (cao nhất ${F(low[0].v)}).`,
+    body2: pie ? `By contrast, the remaining categories accounted for much smaller shares, ${range}.` : `By contrast, the remaining figures were much lower, ${range}.`,
+  };
 }
-function t1FlashStart() {
+// Who is ahead where: a table with two columns, grouped by the side that leads.
+function t1GroupSide() {
+  const cfg = T1_GROUP_CFG[_t1Lv], n = cfg.n, C = t1Pick(T1_GROUP_SIDE);
+  const cats = t1Shuffle(C.cats).slice(0, n), kA = 2 + Math.floor(Math.random() * (n - 3));
+  const items = cats.map((name, i) => {
+    const base = Math.round(t1Rand(C.range[0], C.range[1])), d = Math.round(t1Rand(cfg.diff, cfg.diff + 14));
+    return i < kA ? { name, a: base + d, b: base, g: 1 } : { name, a: base, b: base + d, g: 2 };
+  });
+  const A = items.filter(x => x.g === 1), B = items.filter(x => x.g === 2);
+  const x = C.a === 'Men' || C.a === 'Boys' ? C.a.toLowerCase() : C.a, y = C.b === 'Women' || C.b === 'Girls' ? C.b.toLowerCase() : C.b;
+  const L = list => t1GrpList(list.map(i => t1GrpName(i.name)));
+  const S = (p, q, list) => t1Cap(C.sent(p, q, L(list)));
+  const right = S(x, y, A);
+  const mixed = [...A.slice(0, -1), B[0]];
+  const wrongs = [S(y, x, A), S(x, y, mixed), S(x, y, A.slice(0, -1))];
+  const unit = C.pct ? '%' : '';
+  const shown = t1Shuffle(items);
+  return {
+    kind: 'side', items: shown,
+    chart: `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(C.title)}</div><table class="t1-gtable"><thead><tr><th></th><th>${escapeHtml(C.a)}</th><th>${escapeHtml(C.b)}</th></tr></thead><tbody>${shown.map(i => `<tr><th>${escapeHtml(i.name)}</th><td>${t1Num(i.a)}${unit}</td><td>${t1Num(i.b)}${unit}</td></tr>`).join('')}</tbody></table></div>`,
+    label: i => `${t1Num(i.a)}${unit} · ${t1Num(i.b)}${unit}`,
+    ask: `Where is ${x} ahead, and where is ${y} ahead?`,
+    ok: s1 => t1GrpSame(s1, A) || t1GrpSame(s1, B),
+    canon: i => i.g,
+    stem: `Chọn câu mở đoạn về những mục ${C.a} cao hơn:`,
+    opts: t1Shuffle([right, ...t1Shuffle([...new Set(wrongs)].filter(w => w !== right)).slice(0, 2)]), right,
+    why: `Đoạn 1: các mục ${C.a} cao hơn (${t1GrpList(A.map(i => i.name)).replace(/ and ([^,]*)$/, ' và $1')}). Đoạn 2: các mục ${C.b} cao hơn (${t1GrpList(B.map(i => i.name)).replace(/ and ([^,]*)$/, ' và $1')}).`,
+    body2: S(y, x, B),
+  };
+}
+function t1GrpSame(names, items) { return names.length === items.length && items.every(i => names.includes(i.name)); }
+function t1GroupStart() {
   t1Leave();
-  const g = _t1 = { game: 'flash', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, show: T1_FLASH_CFG[_t1Lv].show, answered: false, timers: [] };
+  const kinds = [];
+  while (kinds.length < T1_GROUP_ROUNDS) kinds.push(...t1Shuffle(['bar', 'pie', 'side']));
+  const g = _t1 = { game: 'group', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, kinds, timers: [], answered: false };
   g.stop = () => { g.timers.forEach(clearTimeout); };
-  g.keyPick = i => t1FlashPick(i);
+  g.keyPick = i => { if (g.phase === 'sent') t1GroupSent(i); };
   g.pick = g.keyPick;
-  g.next = t1FlashNext;
+  // Enter checks the grouping once every item has a paragraph, then moves on.
+  g.next = () => { if (g.phase === 'group') t1GroupCheck(); else t1GroupNext(); };
   t1Bind();
   tsSfx('equip');
-  t1FlashNew();
+  t1GroupNew();
 }
-function t1FlashNew() {
-  const g = _t1;
-  g.q = t1FlashRound();
+function t1GroupNew() {
+  const g = _t1, kind = g.kinds[g.n];
+  g.q = kind === 'side' ? t1GroupSide() : t1GroupGap(kind === 'pie');
+  g.as = {};
+  g.phase = 'group';
   g.answered = false;
-  g.peeked = false;
-  g.hidden = false;
+  g.t0 = performance.now();
   t1Root().innerHTML = `
-    <div class="lv-wrap lv-wrap--narrow t1-play t1-flash">
-      ${t1ArcTop(g, `<span class="t1-stat">Câu <strong>${g.n + 1}</strong></span><span class="t1-stat">⚡ ${g.show.toFixed(1)} giây</span>`)}
-      <div class="t1-flash-stage" id="fl-stage">${g.q.chart}<div class="t1-flash-cover hidden" id="fl-cover">?</div><div class="t1-flash-bar"><i id="fl-bar"></i></div></div>
-      <p class="t1-stem" id="fl-stem">Nhìn kỹ! ${g.q.kind === 'pie' ? `Lát cam <b>${escapeHtml(g.q.C.cats[0])}</b> chiếm bao nhiêu?` : `<b>${escapeHtml(t1Cap(g.q.P.a))}</b> so với <b>${escapeHtml(g.q.P.b)}</b>?`}</p>
-      <div class="t1-opts hidden" id="fl-opts"></div>
-      <div class="t1-flash-peek hidden" id="fl-peek"><button class="vb-chip" onclick="t1FlashPeek()">👀 Xem lại 1 lần</button><small>xem lại thì không có điểm thưởng tốc độ</small></div>
-      <div id="fl-fb"></div>
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-group">
+      ${t1ArcTop(g, `<span class="t1-stat">Vòng <strong>${g.n + 1}</strong>/${T1_GROUP_ROUNDS}</span>`)}
+      ${g.q.chart}
+      <div class="t1-flash-bar"><i id="gp-bar"></i></div>
+      <p class="t1-stem">Chia các mục thành <b>2 đoạn thân bài</b>.</p>
+      <div class="t1-proc-q">💡 <i>${escapeHtml(g.q.ask)}</i></div>
+      <div class="t1-gp-rows" id="gp-rows"></div>
+      <div id="gp-fb"></div>
     </div>`;
-  const bar = document.getElementById('fl-bar');
-  bar.style.transition = `transform ${g.show}s linear`;
+  const bar = document.getElementById('gp-bar');
+  bar.style.transition = `transform ${T1_GROUP_SECS}s linear`;
   requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
-  g.timers.push(setTimeout(() => {
-    if (_t1 !== g) return;
-    g.hidden = true;
-    g.t0 = performance.now();
-    document.getElementById('fl-cover').classList.remove('hidden');
-    document.getElementById('fl-peek').classList.remove('hidden');
-    const o = document.getElementById('fl-opts');
-    o.innerHTML = t1Options(g.q.opts, null, -1);
-    o.classList.remove('hidden');
-    document.getElementById('fl-stem').innerHTML = g.q.kind === 'pie'
-      ? `${escapeHtml(t1Cap(g.q.C.cats[0].toLowerCase()))} accounted for <span class="t1-blank">______</span> of ${escapeHtml(g.q.C.of)}.`
-      : `${escapeHtml(t1Cap(g.q.P.a))} had <span class="t1-blank">______</span> ${escapeHtml(g.q.P.noun)} as ${escapeHtml(g.q.P.b)}.`;
-    tsSfx('key');
-  }, g.show * 1000));
+  t1GroupRows();
 }
-// One more look at the chart, once per question, at the cost of the speed bonus.
-function t1FlashPeek() {
+function t1GroupRows(result) {
+  const g = _t1, el = document.getElementById('gp-rows');
+  if (!el) return;
+  const all = g.q.items.every(i => g.as[i.name]);
+  el.innerHTML = g.q.items.map((it, i) => {
+    const a = g.as[it.name], tag = result ? (result(it) === a ? ' ok' : ' no') : '';
+    return `<div class="t1-gp-row${tag}">
+      <span class="t1-gp-name">${escapeHtml(it.name)} <small>${escapeHtml(g.q.label(it))}</small></span>
+      ${[1, 2].map(p => `<button class="t1-gp-b${a === p ? ' on' : ''}" ${result ? 'disabled' : ''} onclick="t1GroupSet(${i},${p})">Đoạn ${p}</button>`).join('')}
+      ${result && result(it) !== a ? `<em>→ Đoạn ${result(it)}</em>` : ''}
+    </div>`;
+  }).join('') + (result ? '' : `<button class="vb-start-btn t1-next" ${all ? '' : 'disabled'} onclick="t1GroupCheck()">Kiểm tra → <small>Enter</small></button>`);
+  if (!result) g.answered = all;
+}
+function t1GroupSet(i, p) {
   const g = _t1;
-  if (!g || g.game !== 'flash' || !g.hidden || g.answered || g.peeked) return;
-  g.peeked = true;
-  const cover = document.getElementById('fl-cover'), btn = document.getElementById('fl-peek');
-  cover.classList.add('hidden');
-  btn.classList.add('hidden');
+  if (!g || g.phase !== 'group' || !g.q.items[i]) return;
+  const name = g.q.items[i].name;
+  g.as[name] = g.as[name] === p ? 0 : p;
   tsSfx('key');
-  g.timers.push(setTimeout(() => { if (_t1 === g && !g.answered) cover.classList.remove('hidden'); }, Math.max(1200, g.show * 600)));
+  t1GroupRows();
 }
-function t1FlashPick(i) {
+function t1GroupCheck() {
   const g = _t1;
-  if (!g || g.game !== 'flash' || !g.hidden || g.answered || i < 0 || i >= g.q.opts.length) return;
-  g.answered = true;
-  const ok = g.q.opts[i] === g.q.answer, secs = (performance.now() - g.t0) / 1000;
-  if (ok) { t1Hit(g, g.peeked ? 0 : Math.max(0, Math.round(6 - secs))); g.show = Math.max(1, g.show * 0.95); }
+  if (!g || g.phase !== 'group' || !g.q.items.every(i => g.as[i.name])) return;
+  const s1 = g.q.items.filter(i => g.as[i.name] === 1).map(i => i.name);
+  const ok = g.q.ok(s1), secs = (performance.now() - g.t0) / 1000;
+  // A right grouping may put either group first; mark it against the student's own order.
+  const flip = ok && g.q.items.some(i => g.as[i.name] !== g.q.canon(i));
+  const want = i => flip ? 3 - g.q.canon(i) : g.q.canon(i);
+  if (ok) t1Hit(g, Math.max(0, Math.round((T1_GROUP_SECS - secs) / 2)));
   else {
     t1Miss(g);
-    g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.line)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s>.</div>`);
+    g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.why)}</div>`);
   }
-  document.getElementById('fl-cover').classList.add('hidden');
-  document.getElementById('fl-peek').classList.add('hidden');
-  document.getElementById('fl-opts').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.answer));
-  document.getElementById('fl-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? `Đúng! ${secs < 3 ? '⚡ Nhanh!' : ''}` : 'Chưa đúng.'}</strong><span>${escapeHtml(g.q.line)}</span><span>${escapeHtml(g.q.vi)}</span></div>
-    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>`;
+  document.getElementById('gp-bar').style.transition = 'none';
+  t1GroupRows(want);
   t1ArcHud();
-}
-function t1FlashNext() {
-  const g = _t1;
-  if (!g || !g.answered) return;
-  g.n++;
-  if (g.lives <= 0 || g.n >= 20) { g.stop(); t1Finish(g, 'flash', 'pie_chart', { big: `${g.right}/${g.n} câu đúng · chớp còn ${g.show.toFixed(1)} giây`, icon: g.right >= 16 ? '🏆' : g.right >= 10 ? '👏' : '⚡', good: g.right >= 14 }); return; }
-  t1FlashNew();
-}
-
-/* ── Static · Xếp hạng tốc độ ─────────────────────────────────────────────
-   The bars show for a moment, then their lengths are hidden. Tap the names
-   from highest to lowest; a wrong tap costs a life and flashes the bars back.
-   Then pick the ranking sentence that matches. Eight rounds. */
-const T1_RANK_CFG = { a: { n: 4, show: 3.2, gap: 0.15 }, d: { n: 5, show: 2.6, gap: 0.08 }, l: { n: 6, show: 2.1, gap: 0.035 } };
-const T1_RANK_CTX = [
-  { title: 'Tourists visiting each country, 2019', unit: 'million visitors', names: ['France', 'Spain', 'USA', 'China', 'Italy', 'Turkey', 'Mexico', 'Thailand'], base: [20, 90], what: 'the number of tourists' },
-  { title: 'Rice production, 2020', unit: 'million tonnes', names: ['China', 'India', 'Indonesia', 'Vietnam', 'Thailand', 'Bangladesh', 'Myanmar'], base: [20, 210], what: 'rice production' },
-  { title: 'Internet users per 100 people', unit: 'users per 100 people', names: ['Japan', 'Germany', 'UK', 'Brazil', 'Canada', 'Australia', 'Korea'], base: [55, 96], what: 'internet use' },
-  { title: 'Average monthly rent in city centres', unit: 'US dollars', names: ['London', 'Paris', 'Tokyo', 'Sydney', 'Berlin', 'Madrid', 'Seoul'], base: [900, 2600], what: 'rent' },
-];
-function t1RankRound() {
-  const cfg = T1_RANK_CFG[_t1Lv], C = t1Pick(T1_RANK_CTX);
-  const names = t1Shuffle(C.names).slice(0, cfg.n);
-  // Values spaced by at least the level's gap, so the order is readable but tight at Huyền thoại.
-  let v = t1Rand(C.base[1] * 0.75, C.base[1]);
-  const vals = [];
-  for (let i = 0; i < cfg.n; i++) { vals.push(Math.round(v * 10) / 10); v *= 1 - cfg.gap - Math.random() * cfg.gap * 1.5; }
-  const rows = t1Shuffle(names.map((name, i) => ({ name, v: vals[i] })));
-  const order = rows.slice().sort((a, b) => b.v - a.v).map(r => r.name);
-  const N = n => t1Nm(n);
-  const s = o => `${t1Cap(N(o[0]))} ranked first for ${C.what}, followed by ${N(o[1])} and ${N(o[2])}, while ${N(o[o.length - 1])} had the lowest figure.`;
-  const right = s(order);
-  const n = order.length;
-  const wrongs = [s([order[1], order[0], ...order.slice(2)]), s([order[0], order[2], order[1], ...order.slice(3)]), s([...order.slice(0, n - 2), order[n - 1], order[n - 2]])];
-  const opts = t1Shuffle([right, ...[...new Set(wrongs)].filter(x => x !== right).slice(0, 2)]);
-  return { C, rows, order, opts, right };
-}
-function t1RankChart(q, hide) {
-  return t1BarChart({ title: q.C.title, unit: q.C.unit, rows: q.rows.map(r => ({ name: r.name, v: r.v, hl: false })), fmt: hide ? () => '' : t1Num }).replace('t1-bars', 't1-bars' + (hide ? ' t1-bars--hidden' : ''));
-}
-function t1RankStart() {
-  t1Leave();
-  const g = _t1 = { game: 'rank', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, timers: [], answered: false };
-  g.stop = () => { g.timers.forEach(clearTimeout); };
-  g.keyPick = i => { if (g.phase === 'tap') t1RankTap(i); else if (g.phase === 'sent') t1RankSent(i); };
-  g.pick = g.keyPick;
-  g.next = t1RankNext;
-  t1Bind();
-  tsSfx('equip');
-  t1RankNew();
-}
-function t1RankNew() {
-  const g = _t1, cfg = T1_RANK_CFG[_t1Lv];
-  g.q = t1RankRound();
-  g.got = [];
-  g.phase = 'look';
-  g.answered = false;
-  g.btns = t1Shuffle(g.q.order);
-  t1Root().innerHTML = `
-    <div class="lv-wrap lv-wrap--narrow t1-play t1-rank">
-      ${t1ArcTop(g, `<span class="t1-stat">Vòng <strong>${g.n + 1}</strong>/8</span>`)}
-      <div id="rk-chart">${t1RankChart(g.q, false)}</div>
-      <div class="t1-flash-bar"><i id="rk-bar"></i></div>
-      <p class="t1-stem" id="rk-stem">Nhớ thứ tự các cột!</p>
-      <div class="t1-rank-picked" id="rk-picked"></div>
-      <div class="t1-opts t1-rank-btns hidden" id="rk-btns"></div>
-      <div id="rk-fb"></div>
-    </div>`;
-  const bar = document.getElementById('rk-bar');
-  bar.style.transition = `transform ${cfg.show}s linear`;
-  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
-  g.timers.push(setTimeout(() => {
-    if (_t1 !== g) return;
-    g.phase = 'tap';
-    g.t0 = performance.now();
-    document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, true);
-    document.getElementById('rk-stem').textContent = 'Chạm tên theo thứ tự từ cao nhất xuống thấp nhất.';
-    t1RankBtns();
-    tsSfx('key');
-  }, cfg.show * 1000));
-}
-function t1RankBtns() {
-  const g = _t1, el = document.getElementById('rk-btns');
-  el.classList.remove('hidden');
-  el.innerHTML = g.btns.map((n, i) => `<button class="t1-opt${g.got.includes(n) ? ' dim' : ''}" ${g.got.includes(n) ? 'disabled' : ''} onclick="_t1.pick(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(n)}</span></button>`).join('');
-  document.getElementById('rk-picked').innerHTML = g.got.map((n, i) => `<span><b>${i + 1}</b>${escapeHtml(n)}</span>`).join('');
-}
-function t1RankTap(i) {
-  const g = _t1;
-  if (!g || g.phase !== 'tap' || i < 0 || i >= g.btns.length) return;
-  const name = g.btns[i];
-  if (g.got.includes(name)) return;
-  if (name === g.q.order[g.got.length]) {
-    g.got.push(name);
-    tsSfx('key');
-    if (g.got.length === g.q.order.length) {
-      const secs = (performance.now() - g.t0) / 1000;
-      t1Hit(g, Math.max(0, Math.round(10 - secs)));
-      t1RankToSent();
-      return;
-    }
-    t1RankBtns();
-  } else {
-    t1Miss(g);
-    if (!g.missedRound) { g.missedRound = true; g.misses.push(`${t1RankChart(g.q, false)}<div class="t1-review-line">Thứ tự đúng: ${g.q.order.map(escapeHtml).join(' › ')}</div>`); }
-    t1Shake(document.querySelectorAll('#rk-btns .t1-opt')[i]);
-    t1ArcHud();
-    if (g.lives <= 0) { g.phase = 'over'; document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false); g.timers.push(setTimeout(() => t1RankEnd(g), 1200)); return; }
-    // Show the bars again for a moment as a hint.
-    document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false);
-    g.timers.push(setTimeout(() => { if (_t1 === g && g.phase === 'tap') document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, true); }, 700));
+  const fb = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Chia đúng!' : 'Chưa đúng cách chia.'}</strong><span>${escapeHtml(g.q.why)}</span></div>`;
+  if (g.lives <= 0) {
+    g.phase = 'done';
+    g.answered = true;
+    document.getElementById('gp-fb').innerHTML = fb + `<button class="vb-start-btn t1-next" onclick="_t1.next()">Xem kết quả → <small>Enter</small></button>`;
+    return;
   }
-  t1ArcHud();
-}
-function t1RankToSent() {
-  const g = _t1;
   g.phase = 'sent';
-  g.missedRound = false;
-  document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false);
-  document.getElementById('rk-picked').innerHTML = '';
-  document.getElementById('rk-stem').textContent = 'Đúng thứ tự! Giờ chọn câu xếp hạng đúng:';
-  const el = document.getElementById('rk-btns');
-  el.classList.add('t1-opts--long');
-  el.innerHTML = t1Options(g.q.opts, null, -1);
-  t1ArcHud();
+  g.answered = false;
+  document.getElementById('gp-fb').innerHTML = fb + `<p class="t1-stem">${escapeHtml(g.q.stem)}</p><div class="t1-opts t1-opts--long" id="gp-opts">${t1Options(g.q.opts, null, -1)}</div><div id="gp-fb2"></div>`;
 }
-function t1RankSent(i) {
+function t1GroupSent(i) {
   const g = _t1;
   if (!g || g.phase !== 'sent' || g.answered || i < 0 || i >= g.q.opts.length) return;
   g.answered = true;
   const ok = g.q.opts[i] === g.q.right;
-  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`${t1RankChart(g.q, false)}<div class="t1-review-line">${escapeHtml(g.q.right)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s></div>`); }
-  document.getElementById('rk-btns').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.right));
-  document.getElementById('rk-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>ranked first → followed by A and B (hạng 2, 3) → while X had the lowest figure (thấp nhất).</span></div>
-    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 || g.n + 1 >= 8 ? 'Xem kết quả' : 'Vòng tiếp'} → <small>Enter</small></button>`;
+  if (ok) t1Hit(g);
+  else {
+    t1Miss(g);
+    g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.right)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s></div>`);
+  }
+  document.getElementById('gp-opts').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.right));
+  document.getElementById('gp-fb2').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>Mở đoạn 2 có thể viết: <i>${escapeHtml(g.q.body2)}</i></span></div>
+    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 || g.n + 1 >= T1_GROUP_ROUNDS ? 'Xem kết quả' : 'Vòng tiếp'} → <small>Enter</small></button>`;
   t1ArcHud();
 }
-function t1RankNext() {
+function t1GroupNext() {
   const g = _t1;
   if (!g || !g.answered) return;
   g.n++;
-  if (g.lives <= 0 || g.n >= 8) { t1RankEnd(g); return; }
-  t1RankNew();
+  if (g.lives <= 0 || g.n >= T1_GROUP_ROUNDS) {
+    g.stop();
+    t1Finish(g, 'group', 'bar_chart', { big: `${g.right} lượt đúng · ${g.n} vòng`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🧩', good: g.lives > 0 });
+    return;
+  }
+  t1GroupNew();
 }
-function t1RankEnd(g) {
-  if (_t1 !== g) return;
-  g.stop();
-  t1Finish(g, 'rank', 'bar_chart', { big: `${g.right} lượt đúng · ${g.n} vòng xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🏁', good: g.lives > 0 });
+
+/* ── Task 1 word bank, from the master sheets ─────────────────────────────
+   Dynamic: verbs of direction and speed, nouns of change, degree words,
+   ready-made collocations (sheet 10.1–10.5, 3.x). Static: ranking and
+   comparison, proportion, map and process language (sheet 3.x, 4.1, 6.x,
+   7.x). [en, vi, example, level, other accepted answers]. Feeds the
+   flashcards and Gõ nghĩa. */
+const T1_WORDS = {
+  dyn: [
+    ['rise', 'tăng', 'Temperatures rose steadily over the period.', 'a', ['increase']],
+    ['fall', 'giảm', 'The birth rate fell from 1980 onward.', 'a', ['decrease', 'decline']],
+    ['grow', 'tăng trưởng, lớn dần', 'The share of renewable energy grew from 5% to 22%.', 'a'],
+    ['drop', 'giảm, sụt (trung tính)', 'Emissions dropped slightly in the final year.', 'a'],
+    ['remain stable', 'giữ ổn định, không đổi', 'The proportion remained stable at around 40%.', 'a'],
+    ['fluctuate', 'dao động lên xuống thất thường', 'Oil prices fluctuated throughout the period.', 'a'],
+    ['reach a peak', 'đạt đỉnh', 'Sales reached a peak in 2010.', 'a', ['peak']],
+    ['double', 'tăng gấp đôi', 'Registrations doubled between 2018 and 2022.', 'a'],
+    ['steadily', 'một cách đều đặn', 'The population grew steadily from 2000 onward.', 'a'],
+    ['sharply', 'mạnh và đột ngột', 'Unemployment rose sharply after the recession.', 'a'],
+    ['slightly', 'nhẹ, một chút', 'Costs fell slightly in 2015.', 'a'],
+    ['gradually', 'dần dần, từ từ', 'Prices rose gradually throughout the decade.', 'a'],
+    ['significantly', 'một cách đáng kể', 'Emissions decreased significantly after the new policy.', 'a'],
+    ['over the period', 'trong suốt giai đoạn', 'Car ownership doubled over the period.', 'a'],
+    ['overall', 'nhìn chung (mở overview)', 'Overall, all three figures increased.', 'a'],
+    ['climb', 'tăng chậm và đều', 'Unemployment climbed gradually during the recession.', 'd'],
+    ['surge', 'tăng vọt', 'Car ownership surged from 20% to 65%.', 'd'],
+    ['soar', 'tăng vọt (bay lên)', 'The number of internet users soared throughout the decade.', 'd'],
+    ['plummet', 'giảm mạnh, lao dốc', 'Sales plummeted after the product recall.', 'd', ['plunge']],
+    ['dip', 'giảm nhẹ, tạm thời', 'Profits dipped briefly in 2008 before recovering.', 'd'],
+    ['level off', 'chững lại, đi ngang', 'The unemployment rate levelled off at about 6%.', 'd', ['plateau']],
+    ['rebound', 'bật lại sau cú giảm', 'Tourist numbers rebounded to 2.8 million by 2018.', 'd', ['recover']],
+    ['overtake', 'vượt qua (đường khác)', 'Vietnam overtook Brazil in 2016.', 'd'],
+    ['a sharp rise', 'sự tăng mạnh (danh từ)', 'There was a sharp rise in unemployment.', 'd', ['a sharp increase']],
+    ['a slight drop', 'sự giảm nhẹ (danh từ)', 'There was a slight drop in attendance in the final year.', 'd', ['a slight decrease', 'a slight fall']],
+    ['a trough', 'điểm đáy', 'The figure reached a trough of just 10% in 1990.', 'd'],
+    ['considerably', 'nhiều, đáng kể', 'Oil prices fluctuated considerably.', 'd'],
+    ['marginally', 'rất ít, không đáng kể', 'Costs fell marginally in the final year.', 'd'],
+    ['consistently', 'liên tục, không đứt quãng', 'The birth rate fell consistently across all twenty years.', 'd'],
+    ['a clear upward trend', 'xu hướng tăng rõ rệt', 'There was a clear upward trend in renewable energy use.', 'd'],
+    ['followed a similar pattern', 'đi theo xu hướng tương tự', 'Germany and France followed a similar pattern.', 'd'],
+    ['more than doubled', 'tăng hơn gấp đôi', 'Registrations more than doubled between 2018 and 2022.', 'd'],
+    ['fell to a low of', 'giảm xuống mức đáy là', 'Prices fell to a low of $12 per barrel.', 'd'],
+    ['stand at', 'ở mức (điểm bắt đầu hoặc kết thúc)', 'In 2000, the figure stood at 20%.', 'd', ['stood at']],
+    ['by the end of the period', 'đến cuối giai đoạn', 'By the end of the period, the figure had doubled.', 'd'],
+    ['creep up', 'nhích lên rất chậm', 'House prices crept up by around 2% each year.', 'l', ['crept up']],
+    ['rocket', 'tăng cực nhanh', 'Streaming subscriptions rocketed after 2015.', 'l'],
+    ['stabilize', 'ổn định lại sau biến động', 'The exchange rate stabilized at around 1.15.', 'l', ['stabilise']],
+    ['contract', 'thu hẹp (dùng cho kinh tế)', 'The manufacturing sector contracted by 3%.', 'l'],
+    ['percentage points', 'điểm phần trăm', 'Car use increased by 15 percentage points.', 'l'],
+    ['subsequently', 'sau đó (thay cho then)', 'The figure subsequently fell to 30%.', 'l'],
+    ['after which', 'sau đó (nối mệnh đề)', 'Sales peaked in 2010, after which they declined.', 'l'],
+    ['having surged', 'sau khi đã tăng vọt', 'Having surged in the 1990s, coal use began to decline.', 'l'],
+    ['representing an increase', 'tương đương một mức tăng', 'The figure stood at 8.4 million, representing an increase of 45%.', 'l'],
+    ['a prolonged plateau', 'giai đoạn đi ngang kéo dài', 'Growth entered a prolonged plateau after 2005.', 'l', ['an extended plateau']],
+    ['dramatically', 'rất mạnh, đột ngột', 'Sales fell dramatically in a single year.', 'l'],
+    ['substantially', 'đáng kể, nhiều', 'Output grew substantially, more than doubling.', 'l'],
+    ['converge', 'hội tụ, gặp nhau (hai đường)', 'The two lines converged at 40% in 2015.', 'l'],
+    ['the gap narrowed', 'khoảng cách thu hẹp', 'The gap narrowed to just 5 percentage points.', 'l'],
+  ],
+  sta: [
+    ['the highest', 'cao nhất', 'Mexico records the highest figure.', 'a'],
+    ['the lowest', 'thấp nhất', 'Germany has the lowest working hours.', 'a'],
+    ['account for', 'chiếm (bao nhiêu phần)', 'Coal accounted for 62% of the total.', 'a', ['accounted for', 'make up', 'made up']],
+    ['the largest share', 'phần lớn nhất', 'Coal accounted for the largest share, at 62%.', 'a'],
+    ['the smallest proportion', 'tỉ lệ nhỏ nhất', 'Nuclear power represented the smallest proportion.', 'a'],
+    ['twice as many', 'nhiều gấp đôi (danh từ đếm được)', 'Football attracted twice as many students as tennis.', 'a'],
+    ['compared with', 'so với', 'Mexicans work 2,128 hours compared with 1,341 in Germany.', 'a', ['compared to']],
+    ['whereas', 'trong khi (hai vế đối lập)', 'Coal dominated in China, whereas nuclear power led in France.', 'a', ['while']],
+    ['a quarter', 'một phần tư', 'Transport took a quarter of the budget.', 'a'],
+    ['half', 'một nửa', 'Half of the students walked to school.', 'a'],
+    ['was demolished', 'bị phá bỏ', 'The original factory was demolished.', 'a'],
+    ['was built', 'được xây', 'A sports centre was built to the east of the park.', 'a', ['was constructed']],
+    ['was converted into', 'được chuyển đổi thành', 'The warehouse was converted into apartments.', 'a'],
+    ['remained unchanged', 'giữ nguyên, không đổi', 'The church remained unchanged.', 'a'],
+    ['to the north of', 'ở phía bắc của', 'The hotel stands to the north of the river.', 'a'],
+    ['first', 'đầu tiên (bước 1)', 'First, the leaves are picked.', 'a', ['to begin with', 'firstly']],
+    ['next', 'tiếp theo', 'Next, the mixture is shaped into bricks.', 'a', ['after that', 'then']],
+    ['finally', 'cuối cùng (bước cuối)', 'Finally, the product is packaged.', 'a', ['lastly']],
+    ['is heated', 'được làm nóng', 'The mixture is heated to 200 degrees.', 'a'],
+    ['by far the largest', 'lớn nhất, bỏ xa phần còn lại', 'Finland is by far the largest consumer.', 'd'],
+    ['ranked second', 'đứng thứ hai', 'Sweden ranked second, at 9.9 kilograms.', 'd'],
+    ['followed closely by', 'theo sát ngay sau là', 'Sweden ranks second, followed closely by Switzerland.', 'd'],
+    ['respectively', 'lần lượt (theo thứ tự vừa nêu)', 'Canada and Brazil consume 6.2 and 5.8 kilograms respectively.', 'd'],
+    ['by contrast', 'ngược lại (mở câu mới)', 'France, by contrast, relied on nuclear power.', 'd', ['in contrast']],
+    ['broadly similar', 'gần như tương đương', 'The three countries record broadly similar figures.', 'd'],
+    ['negligible', 'không đáng kể', 'The difference between the two groups is negligible.', 'd'],
+    ['three times as much', 'nhiều gấp ba (danh từ không đếm được)', 'Finland consumes three times as much coffee as Japan.', 'd'],
+    ['the remainder', 'phần còn lại', 'The other three sources accounted for the remainder.', 'd'],
+    ['a combined total', 'tổng cộng khi gộp lại', 'Coal and hydropower made up a combined total of 79%.', 'd'],
+    ['range from', 'dao động từ … đến …', 'Working hours range from 1,341 to 2,128 per year.', 'd', ['ranged from']],
+    ['nearly half', 'gần một nửa', 'Nearly half of all visitors came from Asia.', 'd', ['almost half']],
+    ['the vast majority', 'đại đa số', 'The vast majority of households owned a phone.', 'd'],
+    ['was extended', 'được mở rộng', 'The parking lot was extended southward.', 'd', ['was expanded']],
+    ['was relocated', 'được dời đi chỗ khác', 'The bus station was relocated to the northern edge.', 'd', ['was moved']],
+    ['adjacent to', 'sát ngay bên cạnh', 'The library is adjacent to the main hall.', 'd', ['next to']],
+    ['opposite', 'đối diện', 'A café now stands opposite the church.', 'd'],
+    ['on the outskirts of', 'ở vùng rìa ngoài của', 'New factories appeared on the outskirts of the town.', 'd'],
+    ['following this', 'sau bước này', 'Following this, the mixture is heated.', 'd'],
+    ['meanwhile', 'trong lúc đó, đồng thời', 'Meanwhile, the by-products are collected separately.', 'd'],
+    ['once', 'một khi (bước trước đã xong)', 'Once the grain has been dried, it is transported to the mill.', 'd'],
+    ['vary considerably', 'khác nhau nhiều', 'The figures vary considerably across the five countries.', 'l', ['varied considerably']],
+    ['comparable to', 'tương đương với', 'Coal was comparable to renewables in France.', 'l'],
+    ['made way for', 'nhường chỗ cho, bị thay bằng', 'The farmland made way for a housing estate.', 'l', ['make way for']],
+    ['in the vicinity of', 'trong khu vực lân cận', 'Several houses were built in the vicinity of the school.', 'l'],
+    ['runs parallel to', 'chạy song song với', 'A new road runs parallel to the railway line.', 'l', ['run parallel to']],
+    ['at the intersection of', 'ở chỗ giao nhau của', 'A roundabout was built at the intersection of the two roads.', 'l'],
+    ['retained its original position', 'giữ nguyên vị trí cũ', 'The church retained its original position.', 'l'],
+    ['commences with', 'bắt đầu bằng (trang trọng)', 'The process commences with the harvesting of timber.', 'l', ['begins with', 'starts with']],
+    ['concurrently', 'đồng thời, cùng lúc', 'Concurrently, the by-products are fed back into the system.', 'l', ['simultaneously']],
+    ['in the penultimate stage', 'ở bước áp chót', 'In the penultimate stage, the product is inspected.', 'l'],
+    ['culminates in', 'kết thúc bằng, đạt tới', 'The process culminates in the production of clean water.', 'l'],
+    ['the cycle begins again', 'chu trình lặp lại', 'The adult lays eggs, and the cycle begins again.', 'l'],
+    ['is dispatched', 'được gửi đi', 'Finally, the product is packaged and dispatched.', 'l'],
+    ['a negligible proportion', 'một tỉ lệ không đáng kể', 'Nuclear power made up a negligible proportion of the total.', 'l'],
+  ],
+};
+function t1Words(block) {
+  return T1_WORDS[block || _t1Block].filter(w => t1LvOk(w[3])).map(([en, vi, ex, lv, alt]) => ({ en, vi, ex, alt: alt || [] }));
+}
+
+/* ── Gõ nghĩa ─────────────────────────────────────────────────────────────
+   Vietnamese meanings fall; type the English to shoot them. Only one way
+   round, meaning to English, as Task 1 needs the phrases on demand. The
+   lowest bubble whose answer starts with what is typed is the target; a
+   full match shoots it. A bubble that lands costs a life and shows the
+   answer. Every eight hits the rain speeds up. */
+const T1_TYPE_CFG = { a: { speed: 22, spawn: 3.6, hint: true }, d: { speed: 27, spawn: 3.1, hint: false }, l: { speed: 32, spawn: 2.7, hint: false } };
+function t1TypeNorm(s) { return String(s).toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+function t1TypeStart() {
+  t1Leave();
+  const cfg = T1_TYPE_CFG[_t1Lv];
+  const g = _t1 = { game: 'type', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, kills: 0, wave: 1,
+    deck: t1Shuffle(t1Words()), di: 0, drops: [], spawnIn: 0.5, spawnEvery: cfg.spawn, speed: cfg.speed, paused: false, over: false, last: 0, id: 0 };
+  g.keyPick = () => {};
+  g.pick = g.keyPick;
+  g.next = () => {};
+  g.stop = () => { g.over = true; cancelAnimationFrame(g.raf); document.removeEventListener('visibilitychange', g.vis); };
+  g.vis = () => { if (document.hidden && !g.paused) t1TypePause(); };
+  document.addEventListener('visibilitychange', g.vis);
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-type">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat" id="ty-lives">❤️❤️❤️</span>
+        <span class="t1-stat">Đợt <strong id="ty-wave">1</strong></span>
+        <span class="t1-stat">⭐ <strong id="ty-score">0</strong></span>
+        <span class="t1-stat" id="ty-combo"></span>
+        <button class="t1-pause" onclick="t1TypePause()" aria-label="Tạm dừng">⏸</button>
+      </div>
+      <div class="t1-arena t1-type-arena" id="ty-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="ty-msg"></div></div>
+      <div class="t1-type-bar"><input id="ty-in" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ cụm tiếng Anh…" aria-label="Gõ cụm tiếng Anh" oninput="t1TypeInput()" onkeydown="if(event.key==='Escape'){this.value='';t1TypeInput()}"></div>
+      <div class="t1-hint">Nhìn nghĩa tiếng Việt, gõ cụm tiếng Anh. Gõ đúng hết cụm là bắn. Esc để xoá.</div>
+    </div>`;
+  tsSfx('equip');
+  setTimeout(() => document.getElementById('ty-in')?.focus(), 50);
+  g.raf = requestAnimationFrame(t1TypeTick);
+}
+function t1TypeSpawn() {
+  const g = _t1, arena = document.getElementById('ty-arena');
+  if (!arena) return;
+  if (g.di >= g.deck.length) { g.deck = t1Shuffle(t1Words()); g.di = 0; }
+  const w = g.deck[g.di++];
+  if (g.drops.some(d => d.w.en === w.en)) return;
+  const el = document.createElement('div');
+  el.className = 't1-tdrop';
+  el.innerHTML = `<span class="t1-tdrop-vi">${escapeHtml(w.vi)}</span><span class="t1-tdrop-hint"></span>`;
+  arena.appendChild(el);
+  const W = arena.clientWidth, dw = Math.min(220, W - 20);
+  let x = 0;
+  for (let t = 0; t < 8; t++) { x = 10 + Math.random() * Math.max(0, W - dw - 20); if (!g.drops.some(d => d.y < 110 && Math.abs(d.x - x) < dw * 0.8)) break; }
+  el.style.left = x + 'px';
+  el.style.maxWidth = dw + 'px';
+  g.drops.push({ id: ++g.id, w, el, x, y: -50, answers: [w.en, ...w.alt].map(t1TypeNorm) });
+}
+function t1TypeTick(ts) {
+  const g = _t1;
+  if (!g || g.game !== 'type' || g.over) return;
+  if (!g.last) g.last = ts;
+  const dt = Math.min(0.05, (ts - g.last) / 1000);
+  g.last = ts;
+  if (!g.paused) {
+    const arena = document.getElementById('ty-arena');
+    if (!arena) { g.stop(); return; }
+    const floor = arena.clientHeight - 60;
+    g.spawnIn -= dt;
+    if (g.spawnIn <= 0 && g.drops.length < 4) { t1TypeSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.85, 1.15); }
+    for (const d of g.drops.slice()) {
+      d.y += g.speed * dt;
+      d.el.style.transform = `translateY(${d.y}px)`;
+      // Help as it gets low: first letter at Học việc, the letter count at every level.
+      if (!d.hinted && d.y > floor * 0.55) {
+        d.hinted = true;
+        const en = d.w.en;
+        d.el.querySelector('.t1-tdrop-hint').textContent = (g.cfg.hint ? en[0] : '') + en.slice(g.cfg.hint ? 1 : 0).replace(/[a-z]/gi, '_');
+      }
+      if (d.y >= floor) t1TypeLand(d);
+      if (g.over) return;
+    }
+  }
+  g.raf = requestAnimationFrame(t1TypeTick);
+}
+function t1TypeInput() {
+  const g = _t1, inp = document.getElementById('ty-in');
+  if (!g || g.game !== 'type' || !inp) return;
+  const v = t1TypeNorm(inp.value);
+  const lowest = arr => arr.sort((a, b) => b.y - a.y)[0];
+  g.drops.forEach(d => d.el.classList.remove('lock'));
+  if (!v) return;
+  const hit = lowest(g.drops.filter(d => d.answers.includes(v)));
+  if (hit) {
+    g.drops = g.drops.filter(x => x !== hit);
+    hit.el.classList.add('hit');
+    hit.el.innerHTML = `<span class="t1-tdrop-en">${escapeHtml(hit.w.en)}</span>`;
+    setTimeout(() => hit.el.remove(), 500);
+    inp.value = '';
+    g.kills++; g.right++; g.combo++;
+    g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (hit.hinted ? 0 : 5);
+    g.coins += T1_LEVELS[_t1Lv].coin * 0.6 * walMult();
+    tsSfx('kill');
+    if (g.kills % 8 === 0) {
+      g.wave++; g.speed *= 1.1; g.spawnEvery = Math.max(1.6, g.spawnEvery * 0.92);
+      tsSfx('level');
+      const m = document.getElementById('ty-msg');
+      if (m) { m.textContent = `Đợt ${g.wave} · nhanh hơn!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1200); }
+    }
+    t1TypeHud();
+    return;
+  }
+  const lock = lowest(g.drops.filter(d => d.answers.some(a => a.startsWith(v))));
+  if (lock) lock.el.classList.add('lock');
+  else { inp.classList.remove('t1-shake'); void inp.offsetWidth; inp.classList.add('t1-shake'); }
+}
+function t1TypeLand(d) {
+  const g = _t1;
+  g.drops = g.drops.filter(x => x !== d);
+  g.lives--; g.combo = 0;
+  tsSfx('wrong');
+  g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(d.w.en)}</b> · ${escapeHtml(d.w.vi)}<br><i>${escapeHtml(d.w.ex)}</i></div>`);
+  d.el.classList.add('landed');
+  d.el.innerHTML = `<span class="t1-tdrop-vi">${escapeHtml(d.w.vi)}</span><span class="t1-tdrop-en">${escapeHtml(d.w.en)}</span>`;
+  setTimeout(() => d.el.remove(), 1400);
+  t1TypeHud();
+  if (g.lives <= 0) {
+    g.stop();
+    setTimeout(() => { if (_t1 === g) t1Finish(g, 'type', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `${g.kills} cụm gõ đúng · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '⌨️', good: g.kills >= 20 }); }, 1500);
+  }
+}
+function t1TypeHud() {
+  const g = _t1, $ = id => document.getElementById(id);
+  if (!$('ty-score')) return;
+  $('ty-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
+  $('ty-wave').textContent = g.wave;
+  $('ty-score').textContent = g.score;
+  $('ty-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
+}
+function t1TypePause() {
+  const g = _t1;
+  if (!g || g.game !== 'type' || g.over) return;
+  g.paused = !g.paused;
+  g.last = 0;
+  const m = document.getElementById('ty-msg');
+  if (m) { m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1TypePause()">▶ Chơi tiếp</button>' : ''; m.classList.toggle('hidden', !g.paused); }
+  if (!g.paused) document.getElementById('ty-in')?.focus();
 }
 
 /* ── Static · Bản đồ tìm điểm khác ────────────────────────────────────────
