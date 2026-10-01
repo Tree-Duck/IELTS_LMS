@@ -14648,7 +14648,7 @@ function lvRenderHub() {
         </button>
         <button class="lv-mode lv-mode--raid" onclick="raidMap()">
           <span class="lv-mode-icon">⚔️</span>
-          <span class="lv-mode-name">Hầm ngục chữ</span>
+          <span class="lv-mode-name">Chinh phạt hầm ngục</span>
           <span class="lv-mode-desc">Chọn nhân vật và cấp theo band, đánh theo lượt với quái và boss bằng từ vựng và văn mẫu của từng buổi. Chọn chém, hồi máu hay tuyệt kỹ, rồi gõ từ còn thiếu để ra đòn.</span>
         </button>
       </div>
@@ -14669,7 +14669,7 @@ const LV_MODES = [
   { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
   { id: 'colloc',  icon: '🧩', name: 'Bắn chữ, ghép cụm từ' },
   { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
-  { id: 'raid',    icon: '⚔️', name: 'Hầm ngục chữ' },
+  { id: 'raid',    icon: '⚔️', name: 'Chinh phạt hầm ngục' },
 ];
 
 // Which game is on screen right now, if any.
@@ -20869,7 +20869,7 @@ function raidFights(L, lv) {
 // The parts of one dungeon, with the scene each is fought in.
 function raidPhases(L) {
   const body = L.paras.map((p, i) => ({ icon: '⚔️', name: `Đoạn ${i + 1}`, short: `Đ${i + 1}`, sub: p.label || 'Thân bài', bg: i % 2 ? 'lava' : 'cave' }));
-  return [{ icon: '🌅', name: 'Mở bài', short: 'MB', sub: 'khung + từ vựng + mở bài', bg: 'forest' }, ...body, { icon: '🏁', name: 'Kết bài', short: 'KB', sub: 'tóm lại + ý kiến', bg: 'dusk' }];
+  return [{ icon: '🌅', name: 'Mở bài', short: 'MB', sub: 'khung + từ vựng + mở bài + tự viết lại', bg: 'forest' }, ...body, { icon: '🏁', name: 'Kết bài', short: 'KB', sub: 'tóm lại + ý kiến', bg: 'dusk' }];
 }
 let _raidPhase = -1;
 function raidPickPhase(i, n) {
@@ -21078,7 +21078,7 @@ async function raidMap() {
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
       </div>
       <div class="rd-map-head">
-        <div class="rd-map-title">⚔️ Hầm ngục chữ</div>
+        <div class="rd-map-title">⚔️ Chinh phạt hầm ngục</div>
         <button class="rd-hero-btn" onclick="raidHeroPick()" title="Đổi nhân vật">
           <span class="rd-hero-mini">${raidHeroSvg(raidGender(), look)}</span>
           <span><b>${escapeHtml(look.name)}</b><small>${look.rain} ${escapeHtml(look.ult)} · 🎭 Đổi nhân vật</small></span>
@@ -22936,7 +22936,11 @@ function raidAfterWin() {
   if (g.fi < g.fights.length - 1) {
     g.fi++;
     const was = g.fights[g.fi - 1].ph, now = g.fights[g.fi].ph;
-    if (g.phases && was !== now) { raidPhaseGate(was, now); return; }
+    if (g.phases && was !== now) {
+      if (was === 0 && !g.practice) { raidRewrite(g, () => raidPhaseGate(was, now)); return; }
+      raidPhaseGate(was, now);
+      return;
+    }
     if (!g.practice && (g.events || 0) < RAID_EVENT_MAX && Math.random() < RAID_EVENT_CHANCE) { raidEvent(); return; }
     tsSfx('boss');
     raidBeginFight();
@@ -22991,12 +22995,180 @@ function raidPhaseGo() {
   raidBeginFight();
 }
 
+/* ── After the introduction: the student writes it themselves ──────────────
+   Once the Mở bài part is cleared, a writing room opens before the first body
+   paragraph. Three ways in: fill the level's frame, write from the Vietnamese
+   meaning of each model sentence, or write freely. Kiểm tra runs quick checks
+   (length, a clear position, nothing copied from the question, frame slots
+   filled, phrases from the lesson reused), then shows the model to compare.
+   The text is kept per lesson and level; the first finished draft earns xu. */
+const RAID_RW_MODES = [
+  ['frame', '🧱 Theo khung', 'Khung câu có sẵn. Thay chỗ trong [ngoặc vuông] bằng nội dung của em.'],
+  ['vi', '💬 Theo ý tiếng Việt', 'Mỗi ô là ý của một câu trong bài mẫu. Viết câu tiếng Anh nói ý đó bằng từ của em.'],
+  ['free', '✍️ Tự viết', 'Ô trống. Viết cả mở bài như khi đi thi.'],
+];
+const RAID_RW_STANCE = /\b(i (largely |strongly |completely |firmly |partly |fully )?(agree|disagree|believe|think|would argue|support|oppose)|in my (view|opinion)|my (view|own view|opinion) is|this essay (will|would)|i will (argue|discuss|explain)|depends on|judged by|i (am|remain) (convinced|unconvinced)|i see (it|this) as|both .{3,60} (but|and) i)\b/i;
+function raidRwKey(g) { return 'raidRw_' + walWho() + '_' + g.L.n + g.lv; }
+function raidRwLoad(g) { try { return JSON.parse(localStorage.getItem(raidRwKey(g)) || 'null'); } catch (e) { return null; } }
+function raidRwPrompt(g) { return g.L.paras[0].prompt; }
+function raidRwModel(g) { return RAID_ESSAY[g.L.n][g.lv].intro; }
+
+function raidRewrite(g, then) {
+  document.getElementById('rd-rwmodal')?.remove();
+  const saved = raidRwLoad(g) || {};
+  const wasBusy = g.busy;
+  g.busy = true;                       // the fight clock waits while the student writes
+  g.rw = { then, wasBusy, mode: saved.mode || (g.lv === 'a' ? 'frame' : g.lv === 'd' ? 'vi' : 'free'), drafts: saved.drafts || {}, checked: false };
+  const el = document.createElement('div');
+  el.id = 'rd-rwmodal';
+  el.className = 'rd-lvmodal rd-rw';
+  document.body.appendChild(el);
+  raidRwRender();
+  tsSfx('equip');
+}
+function raidRwFields(g, mode) {
+  const T = RAID_TEMPLATES[raidType(g.L.n)][g.lv];
+  if (mode === 'frame') return T.intro.map(([t, vi]) => ({ lead: `<span class="rd-rw-frame">${raidSlots(raidPlain(t))}</span>`, note: vi, fill: raidPlain(t) }));
+  if (mode === 'vi') return raidRwModel(g).map(([t, vi], i) => ({ lead: `<b>Câu ${i + 1}.</b> ${escapeHtml(vi)}`, note: '', words: raidParse(t).filter(p => typeof p !== 'string').map(p => p.ans), fill: '' }));
+  return [{ lead: '', note: '', fill: '' }];
+}
+function raidRwRender() {
+  const g = _rd, el = document.getElementById('rd-rwmodal');
+  if (!g || !g.rw || !el) return;
+  const mode = g.rw.mode, fields = raidRwFields(g, mode);
+  const vals = g.rw.drafts[mode] || fields.map(f => f.fill);
+  const job = raidPhaseJob(g, 0);
+  el.innerHTML = `
+    <div class="rd-lvbox rd-rwbox" role="dialog" aria-label="Viết lại mở bài">
+      <div class="rd-lvhead"><span>✍️ Viết lại cả mở bài · Buổi ${g.L.n}</span><button class="ts-icon-btn" onclick="raidRwDone()" aria-label="Bỏ qua">✕</button></div>
+      <details class="rd-rw-prompt" open><summary>📜 Đề bài</summary><p>${escapeHtml(raidRwPrompt(g))}</p></details>
+      <div class="rd-rw-modes" role="tablist">${RAID_RW_MODES.map(([id, name]) => `<button role="tab" aria-selected="${id === mode}" class="${id === mode ? 'on' : ''}" onclick="raidRwMode('${id}')">${name}</button>`).join('')}</div>
+      <p class="rd-rw-how">${escapeHtml(RAID_RW_MODES.find(m => m[0] === mode)[2])}</p>
+      ${mode === 'free' ? `<ul class="rd-phgate-job rd-rw-job">${job.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>` : ''}
+      <div class="rd-rw-fields">${fields.map((f, i) => `
+        <div class="rd-rw-field">
+          ${f.lead ? `<div class="rd-rw-lead">${f.lead}</div>` : ''}
+          ${f.note ? `<div class="rd-rw-note">${escapeHtml(f.note)}</div>` : ''}
+          <textarea class="rd-rw-ta" data-i="${i}" rows="${mode === 'free' ? 7 : 3}" spellcheck="true" placeholder="${mode === 'free' ? 'Viết mở bài của em ở đây…' : 'Viết câu của em…'}" oninput="raidRwInput()">${escapeHtml(vals[i] || '')}</textarea>
+          ${f.words && f.words.length ? `<details class="rd-rw-hint"><summary>💡 Gợi ý từ</summary>${f.words.map(w => `<span>${escapeHtml(w)}</span>`).join('')}</details>` : ''}
+        </div>`).join('')}
+      </div>
+      <div class="rd-rw-count" id="rd-rw-count"></div>
+      <div class="rd-rw-out" id="rd-rw-out"></div>
+      <div class="vb-results-btns rd-rw-btns">
+        <button class="vb-start-btn" onclick="raidRwCheck()">🔍 Kiểm tra</button>
+        <button class="vb-secondary-btn" id="rd-rw-next" onclick="raidRwDone()">${g.rw.checked ? 'Xong, đi tiếp →' : 'Bỏ qua, đi tiếp →'}</button>
+      </div>
+    </div>`;
+  raidRwInput();
+  el.querySelector('.rd-rw-ta')?.focus();
+}
+function raidRwMode(id) {
+  const g = _rd;
+  if (!g || !g.rw) return;
+  raidRwStash();
+  g.rw.mode = id;
+  g.rw.checked = false;
+  tsSfx('key');
+  raidRwRender();
+}
+function raidRwStash() {
+  const g = _rd;
+  g.rw.drafts[g.rw.mode] = [...document.querySelectorAll('#rd-rwmodal .rd-rw-ta')].map(t => t.value);
+}
+function raidRwText() {
+  return [...document.querySelectorAll('#rd-rwmodal .rd-rw-ta')].map(t => t.value.trim()).filter(Boolean).join(' ').replace(/\s+/g, ' ');
+}
+function raidRwWords(s) { return (s.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length; }
+function raidRwInput() {
+  const n = raidRwWords(raidRwText()), el = document.getElementById('rd-rw-count');
+  if (el) el.textContent = `${n} từ · mở bài thường 40–70 từ`;
+}
+// The longest run of words shared with the question, to catch copying.
+function raidRwCopied(text, prompt) {
+  const a = raidNorm(text).split(' '), b = ' ' + raidNorm(prompt) + ' ';
+  let best = '';
+  for (let i = 0; i < a.length; i++) {
+    for (let j = i + best.split(' ').length; j <= a.length; j++) {
+      const run = a.slice(i, j).join(' ');
+      if (b.includes(' ' + run + ' ')) { if (j - i > (best ? best.split(' ').length : 0)) best = run; } else break;
+    }
+  }
+  return best;
+}
+function raidRwCheck() {
+  const g = _rd;
+  if (!g || !g.rw) return;
+  raidRwStash();
+  const text = raidRwText(), n = raidRwWords(text), out = document.getElementById('rd-rw-out');
+  if (n < 8) { out.innerHTML = `<div class="rd-rw-res bad">Em viết thêm đã nhé, ít nhất hai câu.</div>`; tsSfx('miss'); return; }
+  const sents = (text.match(/[^.!?]+[.!?]+/g) || [text]).length;
+  const copied = raidRwCopied(text, raidRwPrompt(g));
+  const copyN = copied ? copied.split(' ').length : 0;
+  const model = raidRwModel(g);
+  const chunks = [...new Set(model.flatMap(([t]) => raidParse(t).filter(p => typeof p !== 'string').map(p => p.ans)))];
+  const low = ' ' + raidNorm(text) + ' ';
+  const used = chunks.filter(c => low.includes(' ' + raidNorm(c) + ' '));
+  const rows = [
+    [n >= 35 && n <= 90, `Độ dài: ${n} từ`, n < 35 ? 'Hơi ngắn. Mở bài cần nhắc lại đề và nói rõ quan điểm.' : n > 90 ? 'Hơi dài. Mở bài chỉ cần 2–3 câu, để dành ý cho thân bài.' : 'Vừa đủ.'],
+    [sents >= 2 && sents <= 4, `Số câu: ${sents}`, sents < 2 ? 'Tách thành 2 câu: câu giới thiệu chủ đề và câu nêu quan điểm.' : sents > 4 ? 'Gộp lại còn 2–3 câu.' : 'Ổn.'],
+    [RAID_RW_STANCE.test(text), 'Quan điểm rõ ràng', RAID_RW_STANCE.test(text) ? 'Có câu nói rõ em nghĩ gì hoặc bài sẽ bàn gì.' : 'Chưa thấy câu nêu quan điểm. Thử: I largely agree that…, In my view…, This essay will…'],
+    [copyN < 7, 'Không chép đề', copyN >= 7 ? `Có một đoạn ${copyN} từ chép nguyên văn đề: “${copied}”. Diễn đạt lại bằng từ của em.` : 'Em đã diễn đạt lại đề.'],
+  ];
+  if (g.rw.mode === 'frame') {
+    const left = /\[[^\]]*\]/.test(text);
+    rows.push([!left, 'Đã điền hết khung', left ? 'Vẫn còn chỗ [ngoặc vuông] chưa thay bằng nội dung của em.' : 'Không còn chỗ trống.']);
+  }
+  rows.push([used.length > 0, `Cụm của bài học: ${used.length}/${chunks.length}`, used.length ? 'Em dùng: ' + used.join(', ') : 'Thử dùng lại vài cụm em vừa học trong trận.']);
+  const ok = rows.filter(r => r[0]).length;
+  out.innerHTML = `
+    <div class="rd-rw-res">
+      <div class="rd-rw-score">${ok === rows.length ? '🌟' : ok >= rows.length - 1 ? '👍' : '💪'} Đạt ${ok}/${rows.length} tiêu chí</div>
+      <ul>${rows.map(([pass, name, why]) => `<li class="${pass ? 'ok' : 'no'}"><b>${pass ? '✓' : '✗'} ${escapeHtml(name)}</b> ${escapeHtml(why)}</li>`).join('')}</ul>
+    </div>
+    <div class="rd-rw-model">
+      <div class="rd-rw-model-h">So với bài mẫu</div>
+      ${model.map(([t, vi]) => `<p>${escapeHtml(raidPlain(t))}<small>${escapeHtml(vi)}</small></p>`).join('')}
+    </div>`;
+  g.rw.checked = true;
+  const next = document.getElementById('rd-rw-next');
+  if (next) next.textContent = 'Xong, đi tiếp →';
+  raidRwSave(g, text);
+  tsSfx(ok === rows.length ? 'rankup' : 'key');
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function raidRwSave(g, text) {
+  const prev = raidRwLoad(g) || {};
+  try { localStorage.setItem(raidRwKey(g), JSON.stringify({ mode: g.rw.mode, drafts: g.rw.drafts, text, at: Date.now(), paid: prev.paid })); } catch (e) {}
+}
+function raidRwDone() {
+  const g = _rd;
+  if (!g || !g.rw) { document.getElementById('rd-rwmodal')?.remove(); return; }
+  raidRwStash();
+  const rw = g.rw, saved = raidRwLoad(g) || {};
+  // The first checked draft of each lesson and level earns xu.
+  if (rw.checked && !saved.paid) {
+    const xu = Math.round(10 * raidLv().coinMul);
+    walEarn(xu, true);
+    try { localStorage.setItem(raidRwKey(g), JSON.stringify({ ...saved, paid: 1 })); } catch (e) {}
+    showToast(`✍️ Tự viết mở bài: +${xu} 🪙`);
+  } else if (!rw.checked) {
+    try { localStorage.setItem(raidRwKey(g), JSON.stringify({ ...saved, mode: rw.mode, drafts: rw.drafts })); } catch (e) {}
+  }
+  document.getElementById('rd-rwmodal')?.remove();
+  g.busy = rw.wasBusy;
+  g.last = performance.now();
+  g.rw = null;
+  rw.then();
+}
+
 function raidCleared() {
   const g = _rd;
   g.done = true;
   clearInterval(g.timer);
   if (g.practice) { raidTplCleared(g); return; }
   if (g.L && g.phases) raidPhaseSave(g.L.n, g.lv, g.fights[g.fights.length - 1].ph);
+  if (g.only === 0) { raidRewrite(g, () => raidPartCleared(g)); return; }
   if (g.only >= 0) { raidPartCleared(g); return; }
   // Stars count the misses over the whole dungeon: wrong words and clocks
   // that ran out.
@@ -23072,7 +23244,7 @@ function raidRetry() {
 // Enter moves on after a win; A, B and C pick a door at a gate.
 function raidOnKey(e) {
   const g = _rd;
-  if (!g || document.getElementById('lv-modal') || (e.target && e.target.id === 'rd-input')) return;
+  if (!g || document.getElementById('lv-modal') || document.getElementById('rd-rwmodal') || (e.target && e.target.id === 'rd-input')) return;
   if (g.action === 'aoe' && g.ord && !g.busy && document.querySelector('.rd-ord-bank')) {
     const k = parseInt(e.key, 10);
     if (k >= 1 && k <= 9) { const left = g.ord.order.filter(i => !g.ord.picked.includes(i)); if (left[k - 1] !== undefined) { e.preventDefault(); raidOrderPick(left[k - 1]); } return; }
