@@ -25530,6 +25530,20 @@ const T1_WORDS = {
     ['substantially', 'đáng kể, nhiều', 'Output grew substantially, more than doubling.', 'l'],
     ['converge', 'hội tụ, gặp nhau (hai đường)', 'The two lines converged at 40% in 2015.', 'l'],
     ['the gap narrowed', 'khoảng cách thu hẹp', 'The gap narrowed to just 5 percentage points.', 'l'],
+    ['rose by', 'tăng thêm (một khoảng)', 'Sales rose by 10%, from 40% to 50%.', 'a', ['increased by']],
+    ['rose to', 'tăng lên tới (mức)', 'Sales rose to 50% in 2020.', 'a', ['increased to']],
+    ['peak at', 'đạt đỉnh ở mức (+ số liệu)', 'Unemployment peaked at 12% in 2010.', 'a', ['peaked at']],
+    ['triple', 'tăng gấp ba', 'Online sales tripled over the decade.', 'a', ['tripled']],
+    ['the figure for', 'số liệu của', 'The figure for Japan rose slightly.', 'a', ['the figures for']],
+    ['in contrast', 'ngược lại (so sánh hai đối tượng)', 'In contrast, the figure for Italy fell.', 'a', ['by contrast']],
+    ['halve', 'giảm còn một nửa', 'The number of smokers halved between 1990 and 2010.', 'd', ['halved']],
+    ['a gradual decline', 'sự giảm dần (danh từ)', 'There was a gradual decline in coal use.', 'd'],
+    ['a dramatic increase', 'sự tăng đột biến (danh từ)', 'There was a dramatic increase in online sales.', 'd', ['a dramatic rise']],
+    ['a downward trend', 'xu hướng giảm', 'Coal use showed a clear downward trend.', 'd', ['a clear downward trend']],
+    ['similarly', 'tương tự như vậy', 'Similarly, the figure for France rose steadily.', 'd'],
+    ['a fluctuation', 'sự dao động (danh từ)', 'After a brief fluctuation, prices stabilized.', 'l'],
+    ['the former', 'cái trước (trong hai cái vừa nêu)', 'The former doubled, while the latter fell.', 'l'],
+    ['the latter', 'cái sau (trong hai cái vừa nêu)', 'Coal and gas both rose, but the latter grew faster.', 'l'],
   ],
   sta: [
     ['the highest', 'cao nhất', 'Mexico records the highest figure.', 'a'],
@@ -25586,6 +25600,19 @@ const T1_WORDS = {
     ['the cycle begins again', 'chu trình lặp lại', 'The adult lays eggs, and the cycle begins again.', 'l'],
     ['is dispatched', 'được gửi đi', 'Finally, the product is packaged and dispatched.', 'l'],
     ['a negligible proportion', 'một tỉ lệ không đáng kể', 'Nuclear power made up a negligible proportion of the total.', 'l'],
+    ['slightly higher than', 'cao hơn một chút so với', 'The figure for men was slightly higher than that for women.', 'a'],
+    ['the same as', 'bằng, giống với', 'The figure for Spain was the same as that for Italy.', 'a'],
+    ['was replaced by', 'bị thay thế bởi', 'The car park was replaced by a park.', 'a'],
+    ['was added', 'được thêm vào', 'A footbridge was added across the river.', 'a'],
+    ['is transported to', 'được vận chuyển tới', 'The milk is transported to a factory.', 'a'],
+    ['in the final stage', 'ở bước cuối cùng', 'In the final stage, the bottles are sealed.', 'a'],
+    ['significantly lower than', 'thấp hơn đáng kể so với', 'Rent in Madrid was significantly lower than in London.', 'd'],
+    ['almost identical', 'gần như giống hệt', 'The two figures were almost identical.', 'd'],
+    ['just over a quarter', 'nhỉnh hơn 1/4 một chút', 'Gas made up just over a quarter of the total, at 27%.', 'd'],
+    ['roughly a third', 'khoảng 1/3', 'Roughly a third of students cycled, at 32%.', 'd', ['about a third', 'around a third', 'approximately a third']],
+    ['was widened', 'được nới rộng (đường)', 'The main road was widened.', 'd'],
+    ['is filtered', 'được lọc', 'The water is filtered to remove impurities.', 'd'],
+    ['is poured into', 'được đổ vào', 'The mixture is poured into moulds.', 'd'],
   ],
 };
 function t1Words(block) {
@@ -25593,18 +25620,36 @@ function t1Words(block) {
 }
 
 /* ── Gõ nghĩa ─────────────────────────────────────────────────────────────
-   Vietnamese meanings fall; type the English to shoot them. Only one way
-   round, meaning to English, as Task 1 needs the phrases on demand. The
-   lowest bubble whose answer starts with what is typed is the target; a
-   full match shoots it. A bubble that lands costs a life and shows the
-   answer. Every eight hits the rain speeds up. */
-const T1_TYPE_CFG = { a: { speed: 22, spawn: 3.6, hint: true }, d: { speed: 27, spawn: 3.1, hint: false }, l: { speed: 32, spawn: 2.7, hint: false } };
+   Vietnamese meanings fall; type the English to shoot them. One way round
+   only, meaning to English, as Task 1 needs the phrases on demand. The game
+   runs in waves: each wave lists its bank of English phrases beside the
+   arena, so the student knows what can fall, and drops only from that
+   bank. The lowest bubble whose answer starts with what is typed is the
+   target; a full match shoots it. A wrong try opens more of that bubble's
+   answer: first the first letters, then one more word each time. A bubble
+   that lands costs a life. Each wave is faster than the one before. */
+const T1_TYPE_CFG = { a: { speed: 22, spawn: 3.4, bank: 6 }, d: { speed: 26, spawn: 3, bank: 8 }, l: { speed: 30, spawn: 2.6, bank: 10 } };
 function t1TypeNorm(s) { return String(s).toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+// Level 1 shows each word's first letter; each level after opens one more
+// whole word, never the last one. A one-word answer opens letters instead.
+function t1TypeMask(en, lv) {
+  if (lv <= 0) return '';
+  const words = en.split(' '), part = (w, n) => w.slice(0, n) + w.slice(n).replace(/[a-z]/gi, '_');
+  if (words.length === 1) return part(en, Math.min(en.length - 1, 1 + (lv - 1) * Math.ceil(en.length / 4)));
+  // Words of one letter show anyway, so they don't use up a step.
+  let left = lv - 1;
+  return words.map((w, i) => {
+    if (i === words.length - 1 || w.length < 2) return part(w, 1);
+    if (left > 0) { left--; return w; }
+    return part(w, 1);
+  }).join(' ');
+}
 function t1TypeStart() {
   t1Leave();
   const cfg = T1_TYPE_CFG[_t1Lv];
-  const g = _t1 = { game: 'type', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, kills: 0, wave: 1,
-    deck: t1Shuffle(t1Words()), di: 0, drops: [], spawnIn: 0.5, spawnEvery: cfg.spawn, speed: cfg.speed, paused: false, over: false, last: 0, id: 0 };
+  const g = _t1 = { game: 'type', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, kills: 0, wave: 0,
+    deck: t1Shuffle(t1Words()), di: 0, bank: [], queue: [], drops: [], spawnIn: 0, spawnEvery: cfg.spawn, speed: cfg.speed,
+    between: 0, paused: false, over: false, last: 0, id: 0, lockId: 0, off: false };
   g.keyPick = () => {};
   g.pick = g.keyPick;
   g.next = () => {};
@@ -25612,7 +25657,7 @@ function t1TypeStart() {
   g.vis = () => { if (document.hidden && !g.paused) t1TypePause(); };
   document.addEventListener('visibilitychange', g.vis);
   t1Root().innerHTML = `
-    <div class="lv-wrap lv-wrap--narrow t1-play t1-type">
+    <div class="lv-wrap t1-play t1-type">
       <div class="t1-top">
         <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
         <span class="t1-stat" id="ty-lives">❤️❤️❤️</span>
@@ -25621,20 +25666,54 @@ function t1TypeStart() {
         <span class="t1-stat" id="ty-combo"></span>
         <button class="t1-pause" onclick="t1TypePause()" aria-label="Tạm dừng">⏸</button>
       </div>
-      <div class="t1-arena t1-type-arena" id="ty-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="ty-msg"></div></div>
-      <div class="t1-type-bar"><input id="ty-in" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ cụm tiếng Anh…" aria-label="Gõ cụm tiếng Anh" oninput="t1TypeInput()" onkeydown="if(event.key==='Escape'){this.value='';t1TypeInput()}"></div>
-      <div class="t1-hint">Nhìn nghĩa tiếng Việt, gõ cụm tiếng Anh. Gõ đúng hết cụm là bắn. Esc để xoá.</div>
+      <div class="t1-type-wrap">
+        <aside class="t1-type-bank" id="ty-bank" aria-label="Các cụm trong đợt này"></aside>
+        <div class="t1-type-main">
+          <div class="t1-arena t1-type-arena" id="ty-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="ty-msg"></div></div>
+          <div class="t1-type-bar"><input id="ty-in" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ cụm tiếng Anh…" aria-label="Gõ cụm tiếng Anh" oninput="t1TypeInput()" onkeydown="t1TypeKey(event)"></div>
+        </div>
+      </div>
+      <div class="t1-hint">Nhìn nghĩa tiếng Việt, gõ cụm tiếng Anh trong bảng. Gõ sai thì bong bóng mở thêm gợi ý. Esc để xoá.</div>
     </div>`;
   tsSfx('equip');
+  t1TypeWave();
   setTimeout(() => document.getElementById('ty-in')?.focus(), 50);
   g.raf = requestAnimationFrame(t1TypeTick);
 }
+// A new wave: the next phrases from the shuffled deck become the bank.
+function t1TypeWave() {
+  const g = _t1;
+  g.wave++;
+  if (g.wave > 1) { g.speed *= 1.1; g.spawnEvery = Math.max(1.6, g.spawnEvery * 0.92); }
+  const n = Math.min(g.cfg.bank, g.deck.length);
+  if (g.di + n > g.deck.length) { g.deck = t1Shuffle(t1Words()); g.di = 0; }
+  g.bank = g.deck.slice(g.di, g.di + n).map(w => ({ w, st: '' }));
+  g.di += n;
+  g.queue = t1Shuffle(g.bank);
+  g.spawnIn = 1.4;
+  t1TypeBank();
+  t1TypeHud();
+  t1TypeMsg(`Đợt ${g.wave} · ${n} cụm${g.wave > 1 ? ' · nhanh hơn!' : ''}`, 1400);
+}
+function t1TypeBank() {
+  const g = _t1, el = document.getElementById('ty-bank');
+  if (!el) return;
+  const done = g.bank.filter(b => b.st).length;
+  el.innerHTML = `<div class="t1-tb-h">📋 Đợt ${g.wave} <small>${done}/${g.bank.length}</small></div>` +
+    g.bank.slice().sort((a, b) => a.w.en.localeCompare(b.w.en)).map(b => `<span class="t1-tb${b.st ? ' ' + b.st : ''}">${b.st === 'ok' ? '✓ ' : b.st === 'no' ? '✗ ' : ''}${escapeHtml(b.w.en)}</span>`).join('');
+}
+function t1TypeMsg(text, ms) {
+  const m = document.getElementById('ty-msg');
+  if (!m) return;
+  m.textContent = text;
+  m.classList.remove('hidden');
+  clearTimeout(m._t);
+  m._t = setTimeout(() => { if (!_t1?.paused) m.classList.add('hidden'); }, ms);
+}
 function t1TypeSpawn() {
   const g = _t1, arena = document.getElementById('ty-arena');
-  if (!arena) return;
-  if (g.di >= g.deck.length) { g.deck = t1Shuffle(t1Words()); g.di = 0; }
-  const w = g.deck[g.di++];
-  if (g.drops.some(d => d.w.en === w.en)) return;
+  if (!arena || !g.queue.length) return;
+  const b = g.queue.shift(), w = b.w;
   const el = document.createElement('div');
   el.className = 't1-tdrop';
   el.innerHTML = `<span class="t1-tdrop-vi">${escapeHtml(w.vi)}</span><span class="t1-tdrop-hint"></span>`;
@@ -25644,7 +25723,7 @@ function t1TypeSpawn() {
   for (let t = 0; t < 8; t++) { x = 10 + Math.random() * Math.max(0, W - dw - 20); if (!g.drops.some(d => d.y < 110 && Math.abs(d.x - x) < dw * 0.8)) break; }
   el.style.left = x + 'px';
   el.style.maxWidth = dw + 'px';
-  g.drops.push({ id: ++g.id, w, el, x, y: -50, answers: [w.en, ...w.alt].map(t1TypeNorm) });
+  g.drops.push({ id: ++g.id, b, w, el, x, y: -50, hint: 0, answers: [w.en, ...w.alt].map(t1TypeNorm) });
 }
 function t1TypeTick(ts) {
   const g = _t1;
@@ -25656,22 +25735,61 @@ function t1TypeTick(ts) {
     const arena = document.getElementById('ty-arena');
     if (!arena) { g.stop(); return; }
     const floor = arena.clientHeight - 60;
-    g.spawnIn -= dt;
-    if (g.spawnIn <= 0 && g.drops.length < 4) { t1TypeSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.85, 1.15); }
+    if (g.between > 0) {
+      g.between -= dt;
+      if (g.between <= 0) t1TypeWave();
+    } else {
+      g.spawnIn -= dt;
+      if (g.spawnIn <= 0 && g.queue.length && g.drops.length < 4) { t1TypeSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.85, 1.15); }
+      if (!g.queue.length && !g.drops.length) t1TypeClear();
+    }
     for (const d of g.drops.slice()) {
       d.y += g.speed * dt;
       d.el.style.transform = `translateY(${d.y}px)`;
-      // Help as it gets low: first letter at Học việc, the letter count at every level.
-      if (!d.hinted && d.y > floor * 0.55) {
-        d.hinted = true;
-        const en = d.w.en;
-        d.el.querySelector('.t1-tdrop-hint').textContent = (g.cfg.hint ? en[0] : '') + en.slice(g.cfg.hint ? 1 : 0).replace(/[a-z]/gi, '_');
-      }
+      // Getting low: the first letters show by themselves.
+      if (!d.hint && d.y > floor * 0.55) t1TypeHint(d);
       if (d.y >= floor) t1TypeLand(d);
       if (g.over) return;
     }
   }
   g.raf = requestAnimationFrame(t1TypeTick);
+}
+function t1TypeClear() {
+  const g = _t1, missed = g.bank.filter(b => b.st === 'no').length;
+  g.between = 1.8;
+  g.score += missed ? 10 * g.wave : 25 * g.wave;
+  tsSfx('level');
+  t1TypeHud();
+  t1TypeMsg(missed ? `Xong đợt ${g.wave}!` : `Xong đợt ${g.wave}, không sót cụm nào! +${25 * g.wave}`, 1600);
+}
+function t1TypeHint(d) {
+  d.hint++;
+  d.el.querySelector('.t1-tdrop-hint').textContent = t1TypeMask(d.w.en, d.hint);
+}
+function t1TypeKey(e) {
+  const inp = e.target;
+  if (e.key === 'Escape') { inp.value = ''; t1TypeInput(); }
+  else if (e.key === 'Enter' && t1TypeNorm(inp.value)) {
+    // Enter on a phrase that shoots nothing counts as a wrong try.
+    t1TypeWrong();
+    inp.value = '';
+    t1TypeInput();
+  }
+}
+// One wrong try: the bubble being typed at (or the lowest) opens one more step.
+function t1TypeWrong() {
+  const g = _t1;
+  if (!g || g.game !== 'type' || g.off) return;
+  g.off = true;
+  const d = g.drops.find(x => x.id === g.lockId) || g.drops.slice().sort((a, b) => b.y - a.y)[0];
+  const inp = document.getElementById('ty-in');
+  if (inp) t1Shake(inp);
+  if (!d) return;
+  g.combo = 0;
+  t1TypeHint(d);
+  t1Shake(d.el);
+  tsSfx('wrong');
+  t1TypeHud();
 }
 function t1TypeInput() {
   const g = _t1, inp = document.getElementById('ty-in');
@@ -25679,40 +25797,39 @@ function t1TypeInput() {
   const v = t1TypeNorm(inp.value);
   const lowest = arr => arr.sort((a, b) => b.y - a.y)[0];
   g.drops.forEach(d => d.el.classList.remove('lock'));
-  if (!v) return;
+  if (!v) { g.off = false; g.lockId = 0; return; }
   const hit = lowest(g.drops.filter(d => d.answers.includes(v)));
   if (hit) {
     g.drops = g.drops.filter(x => x !== hit);
+    hit.b.st = 'ok';
     hit.el.classList.add('hit');
     hit.el.innerHTML = `<span class="t1-tdrop-en">${escapeHtml(hit.w.en)}</span>`;
     setTimeout(() => hit.el.remove(), 500);
     inp.value = '';
+    g.off = false; g.lockId = 0;
     g.kills++; g.right++; g.combo++;
-    g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (hit.hinted ? 0 : 5);
+    g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (hit.hint ? 0 : 5);
     g.coins += T1_LEVELS[_t1Lv].coin * 0.6 * walMult();
     tsSfx('kill');
-    if (g.kills % 8 === 0) {
-      g.wave++; g.speed *= 1.1; g.spawnEvery = Math.max(1.6, g.spawnEvery * 0.92);
-      tsSfx('level');
-      const m = document.getElementById('ty-msg');
-      if (m) { m.textContent = `Đợt ${g.wave} · nhanh hơn!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1200); }
-    }
+    t1TypeBank();
     t1TypeHud();
     return;
   }
   const lock = lowest(g.drops.filter(d => d.answers.some(a => a.startsWith(v))));
-  if (lock) lock.el.classList.add('lock');
-  else { inp.classList.remove('t1-shake'); void inp.offsetWidth; inp.classList.add('t1-shake'); }
+  if (lock) { lock.el.classList.add('lock'); g.lockId = lock.id; g.off = false; }
+  else t1TypeWrong();
 }
 function t1TypeLand(d) {
   const g = _t1;
   g.drops = g.drops.filter(x => x !== d);
+  d.b.st = 'no';
   g.lives--; g.combo = 0;
   tsSfx('wrong');
   g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(d.w.en)}</b> · ${escapeHtml(d.w.vi)}<br><i>${escapeHtml(d.w.ex)}</i></div>`);
   d.el.classList.add('landed');
   d.el.innerHTML = `<span class="t1-tdrop-vi">${escapeHtml(d.w.vi)}</span><span class="t1-tdrop-en">${escapeHtml(d.w.en)}</span>`;
   setTimeout(() => d.el.remove(), 1400);
+  t1TypeBank();
   t1TypeHud();
   if (g.lives <= 0) {
     g.stop();
