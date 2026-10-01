@@ -23567,7 +23567,7 @@ const T1_BLOCKS = {
     crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Ước lượng tỉ lệ', 'just over a quarter, nearly half, twice as many'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
     lv: { a: 'phân số tròn, 4 cột, 3 thay đổi', d: 'gấp mấy lần, 5 cột, di dời, mở rộng', l: 'just over / under, 6 cột sát nhau, having been' },
     fc: 'Phân số và tỉ lệ, xếp hạng, động từ bản đồ, bị động và từ nối quy trình.',
-    games: ['flash', 'rank', 'map', 'process'], warm: ['compare'] },
+    games: ['map', 'mapwrite', 'process', 'rank', 'flash'], warm: ['compare'] },
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
@@ -23577,6 +23577,7 @@ const T1_GAMES = {
   build:   { icon: '🧩', name: 'Ghép câu số liệu',       desc: 'Ghép từng cụm thành câu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
   flash:   { icon: '⚡', name: 'Ước lượng chớp nhoáng',  desc: 'Biểu đồ hiện vài giây rồi tắt. Chọn nhanh: just over a quarter, nearly half, twice as many…', start: 't1FlashStart()' },
   rank:    { icon: '🏁', name: 'Xếp hạng tốc độ',        desc: 'Các cột hiện thoáng qua rồi ẩn. Chạm theo thứ tự từ cao xuống thấp, rồi chọn cụm xếp hạng.', start: 't1RankStart()' },
+  mapwrite: { icon: '✍️', name: 'Bản đồ → Bài viết',   desc: 'Tìm thay đổi trên một bản đồ rồi viết thành bài hoàn chỉnh: mở bài, overview, hai đoạn thân bài. Có bài mẫu từ chính bản đồ đó.', start: "t1MapStart('essay')" },
   map:     { icon: '🗺️', name: 'Bản đồ tìm điểm khác',   desc: 'Hai bản đồ trước và sau. Tìm chỗ thay đổi, rồi chọn câu đúng: demolished, converted into…', start: 't1MapStart()' },
   process: { icon: '⚙️', name: 'Dây chuyền quy trình',   desc: 'Các bước bị xáo trộn. Xếp lại đúng thứ tự trước khi hết giờ, rồi chọn câu bị động và từ nối.', start: 't1ProcStart()' },
   compare: { icon: '📊', name: 'Cao hơn, thấp hơn',      desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
@@ -25523,8 +25524,8 @@ function t1MapDir(a, b) {
   const dx = b.x - a.x, dy = b.y - a.y;
   return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'east' : 'west') : (dy > 0 ? 'south' : 'north');
 }
-function t1MapRound() {
-  const cfg = T1_MAP_CFG[_t1Lv], N = T1_MAP_COLS * T1_MAP_ROWS;
+function t1MapRound(nWant) {
+  const cfg = T1_MAP_CFG[_t1Lv], N = T1_MAP_COLS * T1_MAP_ROWS, need = nWant || cfg.n;
   for (let tries = 0; tries < 50; tries++) {
     const before = Array(N).fill(null);
     const types = t1Shuffle(Object.keys(T1_MAP_T)).slice(0, 9);
@@ -25534,37 +25535,37 @@ function t1MapRound() {
     const xy = i => ({ x: i % T1_MAP_COLS, y: Math.floor(i / T1_MAP_COLS) });
     const empty = () => t1Shuffle([...Array(N).keys()].filter(i => !before[i] && !after[i] && !used.has(i)));
     const filled = () => t1Shuffle([...Array(N).keys()].filter(i => before[i] && after[i] === before[i] && !used.has(i)));
-    const kinds = t1Shuffle([...cfg.kinds, ...cfg.kinds]).slice(0, cfg.n);
+    const kinds = t1Shuffle([...cfg.kinds, ...cfg.kinds]).slice(0, need);
     for (const k of kinds) {
       if (k === 'demolish') {
         const i = filled()[0]; if (i == null) continue;
         after[i] = null; used.add(i);
-        changes.push({ k, cells: [i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} demolished.` });
+        changes.push({ k, cells: [i], at: i, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} demolished.` });
       } else if (k === 'build') {
         const i = empty()[0]; if (i == null) continue;
         const t = t1Pick(Object.keys(T1_MAP_T).filter(x => !before.includes(x) && !after.includes(x))); if (!t) continue;
         after[i] = t; used.add(i);
-        changes.push({ k, cells: [i], t, s: `${t1MapCap(T1_MAP_T[t][2])} ${t1MapWas(t)} built.` });
+        changes.push({ k, cells: [i], at: i, t, s: `${t1MapCap(T1_MAP_T[t][2])} ${t1MapWas(t)} built.` });
       } else if (k === 'convert') {
-        const pair = t1Shuffle(T1_MAP_CONVERT).find(([a, b]) => { const i = before.indexOf(a); return i >= 0 && after[i] === a && !used.has(i) && !before.includes(b); });
+        const pair = t1Shuffle(T1_MAP_CONVERT).find(([a, b]) => { const i = before.indexOf(a); return i >= 0 && after[i] === a && !used.has(i) && !before.includes(b) && !after.includes(b); });
         if (!pair) continue;
         const i = before.indexOf(pair[0]);
         after[i] = pair[1]; used.add(i);
-        changes.push({ k, cells: [i], t: pair[0], s: `${t1MapCap(T1_MAP_T[pair[0]][1])} ${t1MapWas(pair[0])} converted into ${T1_MAP_T[pair[1]][2]}.`, to: pair[1] });
+        changes.push({ k, cells: [i], at: i, t: pair[0], s: `${t1MapCap(T1_MAP_T[pair[0]][1])} ${t1MapWas(pair[0])} converted into ${T1_MAP_T[pair[1]][2]}.`, to: pair[1] });
       } else if (k === 'extend') {
         const i = filled().find(j => { const p = xy(j); return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const x = p.x + dx, y = p.y + dy, n = y * T1_MAP_COLS + x; return x >= 0 && y >= 0 && x < T1_MAP_COLS && y < T1_MAP_ROWS && !before[n] && !after[n] && !used.has(n); }); });
         if (i == null) continue;
         const p = xy(i), n = t1Shuffle([[1, 0], [-1, 0], [0, 1], [0, -1]]).map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).filter(q => q.x >= 0 && q.y >= 0 && q.x < T1_MAP_COLS && q.y < T1_MAP_ROWS).map(q => q.y * T1_MAP_COLS + q.x).find(m => !before[m] && !after[m] && !used.has(m));
         after[n] = before[i]; used.add(i); used.add(n);
-        changes.push({ k, cells: [n, i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} extended.` });
+        changes.push({ k, cells: [n, i], at: i, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} extended.` });
       } else if (k === 'move') {
         const i = filled()[0], j = empty().find(m => { const a = xy(i), b = xy(m); return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) >= 3; });
         if (i == null || j == null) continue;
         after[j] = before[i]; after[i] = null; used.add(i); used.add(j);
-        changes.push({ k, cells: [j, i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} relocated to the ${t1MapDir(xy(i), xy(j))}.` });
+        changes.push({ k, cells: [j, i], at: i, dest: j, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} relocated to the ${t1MapDir(xy(i), xy(j))}.` });
       }
     }
-    if (changes.length < cfg.n) continue;
+    if (changes.length < need) continue;
     changes.forEach(c => { c.opts = t1Shuffle([c.s, ...t1MapWrong(c)]); });
     return { before, after, changes };
   }
@@ -25587,25 +25588,25 @@ function t1MapGrid(cells, id, tap, g) {
     return `<button class="t1-map-cell${t ? '' : ' empty'}${found ? ' found' : ''}" ${tap ? `onclick="t1MapTap(${i})"` : 'tabindex="-1"'} aria-label="${t ? escapeHtml(T1_MAP_T[t][1]) : 'trống'}">${t ? T1_MAP_T[t][0] : ''}</button>`;
   }).join('')}</div>`;
 }
-function t1MapStart() {
+function t1MapStart(mode) {
   t1Leave();
-  const g = _t1 = { game: 'map', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0 };
+  const g = _t1 = { game: 'map', essay: mode === 'essay', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0 };
   g.stop = () => { clearInterval(g.timer); };
   g.keyPick = i => { if (g.ask) t1MapPick(i); };
   g.pick = g.keyPick;
-  g.next = () => { if (g.roundDone) t1MapNextMap(); };
+  g.next = () => { if (g.roundDone) { if (g.essay) t1MapEssay(g.q); else t1MapNextMap(); } };
   t1Bind();
   tsSfx('equip');
   t1MapNew();
 }
 function t1MapNew() {
   const g = _t1;
-  g.q = t1MapRound();
+  g.q = t1MapRound(g.essay ? 5 : 0);
   g.found = [];
   g.ask = null;
   g.roundDone = false;
   g.answered = false;
-  g.left = T1_MAP_CFG[_t1Lv].time;
+  g.left = T1_MAP_CFG[_t1Lv].time * (g.essay ? 1.5 : 1);
   t1MapRender();
   clearInterval(g.timer);
   g.last = performance.now();
@@ -25623,7 +25624,7 @@ function t1MapRender() {
   const g = _t1;
   t1Root().innerHTML = `
     <div class="lv-wrap t1-play t1-mapgame">
-      ${t1ArcTop(g, `<span class="t1-stat">Bản đồ <strong>${g.n + 1}</strong>/4</span><span class="t1-stat">⏱️ <strong id="mp-time">${Math.ceil(g.left)}</strong></span><span class="t1-stat">🔎 <strong id="mp-left">${g.q.changes.length - g.found.length}</strong> chỗ</span>`)}
+      ${t1ArcTop(g, `<span class="t1-stat">${g.essay ? '✍️ Tìm thay đổi rồi viết bài' : `Bản đồ <strong>${g.n + 1}</strong>/4`}</span><span class="t1-stat">⏱️ <strong id="mp-time">${Math.ceil(g.left)}</strong></span><span class="t1-stat">🔎 <strong id="mp-left">${g.q.changes.length - g.found.length}</strong> chỗ</span>`)}
       <div class="t1-maps">
         <div><div class="t1-map-h">Trước <small>N ↑</small></div>${t1MapGrid(g.q.before, 'mp-before', false)}</div>
         <div><div class="t1-map-h">Sau · chạm vào chỗ thay đổi</div>${t1MapGrid(g.q.after, 'mp-after', true, g)}</div>
@@ -25693,7 +25694,8 @@ function t1MapRoundEnd(msg) {
   const missed = g.q.changes.filter(c => !g.found.includes(c));
   missed.forEach(c => document.querySelectorAll('#mp-after .t1-map-cell').forEach((b, k) => { if (c.cells.includes(k)) b.classList.add('missed'); }));
   document.getElementById('mp-ask').innerHTML = `<div class="t1-fb ${missed.length ? 'no' : 'ok'}"><strong>${escapeHtml(msg)}</strong>${g.q.changes.map(c => `<span>${g.found.includes(c) ? '✓' : '✗'} ${escapeHtml(c.s)}</span>`).join('')}</div>
-    <button class="vb-start-btn t1-next" onclick="t1MapNextMap()">${g.n + 1 >= 4 ? 'Xem kết quả' : 'Bản đồ tiếp'} → <small>Enter</small></button>`;
+    ${g.essay ? `<button class="vb-start-btn t1-next" onclick="t1MapEssay(_t1.q)">✍️ Viết thành bài →</button>` : `<button class="vb-start-btn t1-next" onclick="t1MapNextMap()">${g.n + 1 >= 4 ? 'Xem kết quả' : 'Bản đồ tiếp'} → <small>Enter</small></button>
+    <button class="vb-secondary-btn" onclick="t1MapEssay(_t1.q)">✍️ Viết bài từ bản đồ này</button>`}`;
   tsSfx(missed.length ? 'equip' : 'level');
 }
 function t1MapNextMap() {
@@ -25705,6 +25707,7 @@ function t1MapNextMap() {
 }
 function t1MapEnd(g) {
   if (_t1 !== g) return;
+  if (g.essay) { t1MapRoundEnd('Hết mạng, nhưng vẫn viết bài được.'); return; }
   g.stop();
   t1Finish(g, 'map', 'map', { big: `${g.right} câu tả đúng · ${g.n} bản đồ xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🗺️', good: g.lives > 0 });
 }
@@ -25923,5 +25926,247 @@ function t1ProcEnd(g) {
   if (_t1 !== g) return;
   g.stop();
   t1Finish(g, 'process', 'process_diagram', { big: `${g.right} lượt đúng · ${g.n} quy trình xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '⚙️', good: g.lives > 0 });
+}
+/* ── Bản đồ → Bài viết ────────────────────────────────────────────────────
+   One map from the game becomes a whole Task 1 answer in four steps:
+   1 pick the paraphrased introduction, 2 pick the two true main features
+   for the overview, 3 sort the change sentences into the two body
+   paragraphs by area, 4 write the whole answer, check it, and compare it
+   with the model built from the same map. */
+const T1_TOWNS = ['Riverton', 'Ashford', 'Millbrook', 'Westbury', 'Hillside', 'Lakeview', 'Oakham', 'Brookfield'];
+const T1_MAP_CAT = { house: 'res', flats: 'res', shop: 'com', mall: 'com', cafe: 'com', hotel: 'com', factory: 'ind', farm: 'ind', park: 'green', lake: 'green', school: 'pub', hospital: 'pub', church: 'pub', station: 'pub', stadium: 'pub', carpark: 'car' };
+let _t1me = null;
+function t1MapXY(i) { return { x: i % T1_MAP_COLS, y: Math.floor(i / T1_MAP_COLS) }; }
+function t1MapWhere(i) {
+  const { x, y } = t1MapXY(i), ns = y <= 1 ? 'north' : 'south', ew = x <= 1 ? 'west' : x >= 4 ? 'east' : '';
+  return ew ? `${ns}-${ew}` : ns;
+}
+// A building next to cell i on the after map that did not change, for "next to the …".
+function t1MapNear(q, i) {
+  const { x, y } = t1MapXY(i);
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const nx = x + dx, ny = y + dy, n = ny * T1_MAP_COLS + nx;
+    if (nx < 0 || ny < 0 || nx >= T1_MAP_COLS || ny >= T1_MAP_ROWS) continue;
+    const t = q.after[n];
+    if (t && q.before[n] === t && !q.changes.some(c => c.cells.includes(n))) return T1_MAP_T[t][1];
+  }
+  return '';
+}
+// The change as a body sentence. The area the paragraph is about is not
+// repeated inside it ("Turning to the south, … in the south").
+function t1MapLine(c, region, q, again) {
+  const T = T1_MAP_T[c.t], was = t1MapWas(c.t), at = t1MapWhere(c.at);
+  const loc = at === region ? '' : ` in the ${at}`;
+  const near = q ? t1MapNear(q, c.dest != null ? c.dest : c.at) : '';
+  const open = ['farm', 'park', 'lake'].includes(c.t);
+  if (c.k === 'demolish') return open ? `${t1Cap(T[1])}${loc} ${was} cleared.` : again ? `${t1Cap(T[1])}${loc} ${was} knocked down.` : `${t1Cap(T[1])}${loc} ${was} demolished, leaving the site empty.`;
+  if (c.k === 'build') return `${t1Cap(T[2])} ${was} ${again ? 'constructed' : 'built'}${loc}${near ? `, next to ${near}` : ''}.`;
+  if (c.k === 'convert') return again ? `${t1Cap(T[1])}${loc} made way for ${T1_MAP_T[c.to][2]}.` : `${t1Cap(T[1])}${loc} ${was} converted into ${T1_MAP_T[c.to][2]}.`;
+  if (c.k === 'extend') return `${t1Cap(T[1])}${loc} ${was} extended to the ${t1MapDir(t1MapXY(c.at), t1MapXY(c.cells[0]))}, almost doubling in size.`;
+  return `${t1Cap(T[1])} ${was} relocated from the ${at} to the ${t1MapWhere(c.dest)}${near ? `, next to ${near}` : ''}.`;
+}
+// Two body paragraphs by area: north and south if both have changes,
+// otherwise west and east, otherwise first half and second half.
+function t1MapSplit(changes) {
+  const by = (f, a, b, ra, rb) => { const g1 = changes.filter(c => f(c)), g2 = changes.filter(c => !f(c)); return g1.length && g2.length ? { g1, g2, a, b, ra, rb } : null; };
+  return by(c => t1MapXY(c.at).y <= 1, 'phía bắc (north)', 'phía nam (south)', 'north', 'south')
+    || by(c => t1MapXY(c.at).x <= 2, 'phía tây (west)', 'phía đông (east)', 'west', 'east')
+    || { g1: changes.slice(0, Math.ceil(changes.length / 2)), g2: changes.slice(Math.ceil(changes.length / 2)), a: 'nhóm thay đổi thứ nhất', b: 'nhóm còn lại', ra: '', rb: '' };
+}
+function t1MapFacts(q) {
+  const cnt = cells => { const o = { res: 0, com: 0, ind: 0, green: 0, pub: 0, car: 0 }; cells.forEach(t => { if (t) o[T1_MAP_CAT[t]]++; }); return o; };
+  const b = cnt(q.before), a = cnt(q.after), ks = q.changes.map(c => c.k);
+  const kept = q.before.filter((t, i) => t && q.after[i] === t && !q.changes.some(c => c.cells.includes(i))).length;
+  const facts = [
+    [a.res > b.res, 'the town became noticeably more residential'],
+    [a.ind < b.ind, 'much of the industrial and farming land disappeared'],
+    [a.com > b.com, 'more shops and services were introduced'],
+    [a.green < b.green, 'some green space was lost'],
+    [a.green > b.green, 'more green space was created'],
+    [ks.includes('move') || ks.includes('extend'), 'several existing buildings were extended or relocated'],
+    [kept > 0, 'a number of features remained unchanged'],
+    [a.ind > b.ind, 'the town became more industrial'],
+    [a.res < b.res, 'the amount of housing fell'],
+    [false, 'the town remained almost entirely unchanged'],
+    [false, 'all of the original buildings were demolished'],
+  ];
+  const yes = facts.filter(f => f[0]).map(f => f[1]), no = facts.filter(f => !f[0]).map(f => f[1]);
+  // The generic "unchanged" fact goes last, so the specific ones lead the overview.
+  yes.sort((x, y) => (x.includes('unchanged') ? 1 : 0) - (y.includes('unchanged') ? 1 : 0));
+  return { yes: yes.slice(0, 2), no: t1Shuffle(no).slice(0, 2) };
+}
+function t1MapEssay(q) {
+  t1Leave();
+  const town = t1Pick(T1_TOWNS), y1 = t1Pick([1985, 1990, 1995, 2000]), y2 = Math.min(2020, y1 + t1Pick([15, 20, 25]));
+  const prompt = `The maps below show the changes to the town of ${town} between ${y1} and ${y2}.`;
+  const intro = [
+    { t: `The two maps illustrate how the town of ${town} changed between ${y1} and ${y2} in terms of its buildings and land use.`, ok: true, why: 'Đổi show → illustrate, changes to → how … changed, bỏ "below". Giữ đủ tên thị trấn và hai mốc năm.' },
+    { t: prompt, why: 'Chép nguyên đề, còn chữ "below". Giám khảo không tính những từ chép từ đề.' },
+    { t: `The two maps illustrate how the town of ${town} will change after ${y2}.`, why: 'Sai thông tin: bản đồ tả quá khứ từ ' + y1 + ' đến ' + y2 + ', không phải tương lai.' },
+  ];
+  const facts = t1MapFacts(q), split = t1MapSplit(q.changes);
+  _t1me = { q, town, y1, y2, prompt, intro: t1Shuffle(intro), facts, opts: t1Shuffle([...facts.yes, ...facts.no]), split,
+    lines: t1Shuffle(q.changes.map(c => ({ c, s: t1MapLine(c, '', q), g: split.g1.includes(c) ? 1 : 2, pick: 0 }))), step: 1, picked: [], score: 0, coins: 0 };
+  t1MeRender();
+}
+function t1MeModel() {
+  const m = _t1me, q = m.q, sp = m.split;
+  // Buildings in an area that stayed as they were, for the closing sentence of its paragraph.
+  const kept = region => q.before.map((t, i) => ({ t, i })).filter(({ t, i }) => t && q.after[i] === t && !q.changes.some(c => c.cells.includes(i))
+    && (region === 'north' ? t1MapXY(i).y <= 1 : region === 'south' ? t1MapXY(i).y > 1 : region === 'west' ? t1MapXY(i).x <= 2 : region === 'east' ? t1MapXY(i).x > 2 : false)).map(({ t }) => T1_MAP_T[t][1]);
+  const para = (arr, region, open) => {
+    const joins = ['', 'In addition, ', 'Meanwhile, ', 'Furthermore, '];
+    const ss = arr.map((c, i) => { const l = t1MapLine(c, region, q, arr.slice(0, i).some(x => x.k === c.k)); return i === 0 ? l : joins[Math.min(i, 3)] + l.charAt(0).toLowerCase() + l.slice(1); });
+    ss[0] = open + ss[0].charAt(0).toLowerCase() + ss[0].slice(1);
+    const sum = t1MeAreaSum(arr);
+    if (sum) ss.push(`As a result, this part of the town ${sum}.`);
+    const k = [...new Set(kept(region))].slice(0, 2);
+    if (k.length) ss.push(`${t1Cap(k.join(' and '))}, however, remained unchanged.`);
+    return ss.join(' ');
+  };
+  const o1 = sp.ra ? `In the ${sp.ra} of the town, ` : 'In the first part of the period, ';
+  const o2 = sp.rb ? `Turning to the ${sp.rb}, ` : 'At the same time, ';
+  return [
+    m.intro.find(x => x.ok).t,
+    `Overall, the town underwent considerable development over the period. ${t1Cap(m.facts.yes[0])}, while ${m.facts.yes[1] || 'a few features remained unchanged'}. ${t1MeBiggest(q)}`,
+    para(sp.g1, sp.ra, o1),
+    para(sp.g2, sp.rb, o2),
+  ];
+}
+// The change an overview can name as the most noticeable one.
+function t1MeBiggest(q) {
+  const order = ['move', 'convert', 'build', 'extend', 'demolish'];
+  const c = q.changes.slice().sort((a, b) => order.indexOf(a.k) - order.indexOf(b.k))[0], T = T1_MAP_T[c.t];
+  const what = { move: `the relocation of ${T[1]}`, convert: `the conversion of ${T[1]} into ${c.to ? T1_MAP_T[c.to][2] : ''}`, build: `the construction of ${T[2]}`, extend: `the extension of ${T[1]}`, demolish: `the removal of ${T[1]}` }[c.k];
+  return `The most noticeable change was ${what}.`;
+}
+// What a paragraph's changes did to its area, from the before and after types.
+function t1MeAreaSum(arr) {
+  const d = { res: 0, com: 0, ind: 0, green: 0 };
+  arr.forEach(c => {
+    const from = c.k === 'build' ? null : c.t, to = c.k === 'demolish' ? null : c.k === 'convert' ? c.to : c.k === 'build' ? c.t : null;
+    if (from && d[T1_MAP_CAT[from]] !== undefined) d[T1_MAP_CAT[from]]--;
+    if (to && d[T1_MAP_CAT[to]] !== undefined) d[T1_MAP_CAT[to]]++;
+  });
+  if (d.res > 0) return 'became more residential';
+  if (d.com > 0) return 'became more commercial';
+  if (d.green > 0) return 'became greener';
+  if (d.ind < 0) return 'became less industrial';
+  if (d.green < 0) return 'lost some of its green space';
+  return '';
+}
+function t1MeMaps() {
+  const q = _t1me.q;
+  return `<details class="t1-me-maps"><summary>🗺️ Xem lại hai bản đồ</summary><div class="t1-maps">
+    <div><div class="t1-map-h">${_t1me.y1} <small>N ↑</small></div>${t1MapGrid(q.before, 'me-before', false)}</div>
+    <div><div class="t1-map-h">${_t1me.y2}</div>${t1MapGrid(q.after, 'me-after', false)}</div></div></details>`;
+}
+function t1MeRender() {
+  const m = _t1me, steps = ['Mở bài', 'Overview', 'Thân bài', 'Tự viết'];
+  let body = '';
+  if (m.step === 1) {
+    body = `<p class="t1-stem">Câu mở bài nào paraphrase đề tốt nhất?</p>
+      <div class="t1-opts t1-opts--long">${m.intro.map((x, i) => `<button class="t1-opt${m.ans != null ? (x.ok ? ' ok' : i === m.ans ? ' no' : ' dim') : ''}" ${m.ans != null ? 'disabled' : ''} onclick="t1MeIntro(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(x.t)}</span></button>`).join('')}</div>
+      ${m.ans != null ? `<div class="t1-fb ${m.intro[m.ans].ok ? 'ok' : 'no'}"><strong>${m.intro[m.ans].ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>${escapeHtml(m.intro.find(x => x.ok).why)}</span>${m.intro[m.ans].ok ? '' : `<span>Câu em chọn: ${escapeHtml(m.intro[m.ans].why)}</span>`}</div>
+        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang Overview →</button>` : ''}`;
+  } else if (m.step === 2) {
+    const done = m.picked.length === 2;
+    body = `<p class="t1-stem">Overview tả bức tranh chung, không có chi tiết. Chọn <b>2</b> ý đúng với hai bản đồ.</p>
+      <div class="t1-opts t1-opts--long">${m.opts.map((o, i) => {
+        const on = m.picked.includes(i), ok = m.facts.yes.includes(o);
+        return `<button class="t1-opt${done ? (ok ? ' ok' : on ? ' no' : ' dim') : on ? ' on' : ''}" ${done ? 'disabled' : ''} onclick="t1MeFact(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`;
+      }).join('')}</div>
+      ${done ? `<div class="t1-fb ok"><strong>Overview ghép từ hai ý đúng:</strong><span class="t1-me-model">${escapeHtml(t1MeModel()[1])}</span><span>Mở bằng Overall, nêu xu hướng chung rồi nối hai ý bằng while. Không có chi tiết từng công trình.</span></div>
+        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang thân bài →</button>` : ''}`;
+  } else if (m.step === 3) {
+    const done = m.lines.every(l => l.pick);
+    body = `<p class="t1-stem">Xếp mỗi câu vào đoạn thân bài đúng. <b>Đoạn 1</b>: ${escapeHtml(m.split.a)} · <b>Đoạn 2</b>: ${escapeHtml(m.split.b)}.</p>
+      <div class="t1-me-lines">${m.lines.map((l, i) => `<div class="t1-me-line${l.pick ? (l.pick === l.g ? ' ok' : ' no') : ''}"><span>${escapeHtml(l.s)}</span>
+        <span class="t1-me-btns">${l.pick ? (l.pick === l.g ? `✓ Đoạn ${l.g}` : `✗ Phải là đoạn ${l.g}`) : `<button class="vb-chip" onclick="t1MeSort(${i},1)">Đoạn 1</button><button class="vb-chip" onclick="t1MeSort(${i},2)">Đoạn 2</button>`}</span></div>`).join('')}</div>
+      ${done ? `<div class="t1-fb ok"><strong>Hai đoạn thân bài:</strong><span class="t1-me-model">${escapeHtml(t1MeModel()[2])}</span><span class="t1-me-model">${escapeHtml(t1MeModel()[3])}</span><span>Mỗi đoạn một khu vực. Nối câu bằng In addition, Meanwhile; mở đoạn 2 bằng Turning to the …</span></div>
+        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang tự viết cả bài →</button>` : ''}`;
+  } else {
+    body = `<p class="t1-stem">Viết cả bài: 4 đoạn, cách nhau một dòng trống, ít nhất 150 từ. Dùng lại những gì vừa chọn, nhưng viết bằng câu của em.</p>
+      <div class="row t1-me-start"><button class="vb-chip" onclick="t1MeFill(true)">Bắt đầu từ bản ghép</button><button class="vb-chip" onclick="t1MeFill(false)">Viết từ đầu</button></div>
+      <textarea id="me-ta" class="rd-rw-ta t1-me-ta" rows="14" spellcheck="true" oninput="t1MeCount()" placeholder="The two maps illustrate…">${escapeHtml(m.draft || '')}</textarea>
+      <div class="rd-rw-count" id="me-count"></div>
+      <div id="me-out"></div>
+      <div class="vb-results-btns"><button class="vb-start-btn" onclick="t1MeCheck()">🔍 Kiểm tra</button><button class="vb-secondary-btn" onclick="t1MapStart('essay')">🗺️ Bản đồ khác</button></div>`;
+  }
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-me">
+      <div class="t1-top"><button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button><span class="t1-stat">✍️ Bản đồ → Bài viết</span></div>
+      <div class="t1-me-steps">${steps.map((s, i) => `<span class="${i + 1 < m.step ? 'done' : i + 1 === m.step ? 'now' : ''}">${i + 1 < m.step ? '✓' : i + 1} ${s}</span>`).join('<i>›</i>')}</div>
+      <div class="t1-me-prompt">📜 ${escapeHtml(m.prompt)} <small>Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.</small></div>
+      ${t1MeMaps()}
+      ${body}
+    </div>`;
+  if (m.step === 4) t1MeCount();
+}
+function t1MeIntro(i) {
+  const m = _t1me;
+  if (m.ans != null) return;
+  m.ans = i;
+  if (m.intro[i].ok) { m.score++; tsSfx('coin'); } else tsSfx('wrong');
+  t1MeRender();
+}
+function t1MeFact(i) {
+  const m = _t1me;
+  if (m.picked.length >= 2) return;
+  if (m.picked.includes(i)) m.picked = m.picked.filter(x => x !== i); else m.picked.push(i);
+  if (m.picked.length === 2) { const ok = m.picked.filter(x => m.facts.yes.includes(m.opts[x])).length; m.score += ok; tsSfx(ok === 2 ? 'coin' : 'wrong'); } else tsSfx('key');
+  t1MeRender();
+}
+function t1MeSort(i, p) {
+  const m = _t1me, l = m.lines[i];
+  if (l.pick) return;
+  l.pick = p;
+  if (p === l.g) { m.score++; tsSfx('coin'); } else tsSfx('wrong');
+  t1MeRender();
+}
+function t1MeNext() { _t1me.step++; tsSfx('level'); t1MeRender(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function t1MeFill(fromModel) {
+  const ta = document.getElementById('me-ta');
+  if (!ta) return;
+  if (ta.value.trim() && ta.value.trim() !== t1MeModel().join('\n\n') && !confirm('Thay chữ đang có trong ô?')) return;
+  ta.value = fromModel ? t1MeModel().join('\n\n') : '';
+  _t1me.draft = ta.value;
+  t1MeCount();
+  ta.focus();
+}
+function t1MeCount() {
+  const ta = document.getElementById('me-ta'), el = document.getElementById('me-count');
+  if (!ta || !el) return;
+  _t1me.draft = ta.value;
+  el.textContent = `${(ta.value.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length} từ · Task 1 cần ít nhất 150 từ`;
+}
+function t1MeCheck() {
+  const m = _t1me, text = (document.getElementById('me-ta').value || '').trim(), out = document.getElementById('me-out');
+  const words = (text.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length;
+  const paras = text.split(/\n\s*\n/).filter(p => p.trim()).length;
+  const passive = (text.match(/\b(was|were|has been|have been)\s+(\w+ly\s+)?(demolished|built|constructed|converted|extended|relocated|moved|replaced|added|removed|expanded|enlarged|turned)\b/gi) || []).length;
+  const dirs = (text.match(/\b(north|south|east|west)(-?(east|west))?\b/gi) || []).length;
+  const copied = typeof raidRwCopied === 'function' ? raidRwCopied(text, m.prompt) : '';
+  const copyN = copied ? copied.split(' ').length : 0;
+  const rows = [
+    [words >= 150, `Độ dài: ${words} từ`, words >= 150 ? 'Đủ 150 từ.' : 'Chưa đủ 150 từ: thêm chi tiết về vị trí, hoặc so sánh trước và sau.'],
+    [paras >= 4, `Số đoạn: ${paras}`, paras >= 4 ? 'Đủ 4 đoạn: mở bài, overview, hai thân bài.' : 'Tách thành 4 đoạn, cách nhau một dòng trống.'],
+    [/\boverall\b/i.test(text), 'Có overview', /\boverall\b/i.test(text) ? 'Có câu Overall tả bức tranh chung.' : 'Thiếu overview. Thêm một đoạn mở bằng Overall, …'],
+    [passive >= Math.min(4, m.q.changes.length), `Câu bị động: ${passive}`, passive >= Math.min(4, m.q.changes.length) ? 'Dùng bị động để tả thay đổi.' : 'Tả thay đổi bằng bị động: was demolished, was converted into, was extended…'],
+    [dirs >= 3, `Chỉ vị trí: ${dirs} lần`, dirs >= 3 ? 'Có nói thay đổi ở đâu.' : 'Nói rõ vị trí: in the north-west, to the south of…'],
+    [copyN < 8, 'Không chép đề', copyN >= 8 ? `Đoạn ${copyN} từ chép nguyên văn đề: “${copied}”.` : 'Mở bài đã diễn đạt lại đề.'],
+  ];
+  const ok = rows.filter(r => r[0]).length;
+  out.innerHTML = `<div class="rd-rw-res"><div class="rd-rw-score">${ok === rows.length ? '🌟' : ok >= 4 ? '👍' : '💪'} Đạt ${ok}/${rows.length} tiêu chí</div>
+      <ul>${rows.map(([p, n, w]) => `<li class="${p ? 'ok' : 'no'}"><b>${p ? '✓' : '✗'} ${escapeHtml(n)}</b> ${escapeHtml(w)}</li>`).join('')}</ul></div>
+    <div class="rd-rw-model"><div class="rd-rw-model-h">Bài mẫu từ chính bản đồ này</div>${t1MeModel().map(p => `<p>${escapeHtml(p)}</p>`).join('')}</div>`;
+  if (ok === rows.length && !m.paid) {
+    m.paid = true;
+    const xu = Math.round(15 * T1_LEVELS[_t1Lv].coin);
+    walEarn(xu, true);
+    showToast(`✍️ Viết xong bài bản đồ: +${xu} 🪙`);
+  }
+  tsSfx(ok === rows.length ? 'level' : 'key');
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 // TASK1 END
