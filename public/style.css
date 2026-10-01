@@ -8945,17 +8945,10 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 /* Task 1 static games */
 .t1-shake { animation: t1Shake .35s; }
 @keyframes t1Shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-.t1-flash-stage { position: relative; }
-.t1-flash-cover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 800; color: var(--forest); background: repeating-linear-gradient(45deg, #EEF4F1, #EEF4F1 14px, #E2ECE7 14px, #E2ECE7 28px); border-radius: 16px; }
 .t1-flash-bar { height: 6px; border-radius: 99px; background: #E2ECE7; overflow: hidden; margin: 0.5rem 0; }
 .t1-flash-bar i { display: block; height: 100%; background: #E5533D; transform-origin: left; }
 .t1-pie-wrap { text-align: center; }
 .t1-chart svg.t1-pie { width: min(220px, 60vw); height: auto; display: block; margin: 0.4rem auto; }
-.t1-bars--hidden .t1-bar-fill { width: 0 !important; }
-.t1-bars--hidden .t1-bar-track { background: repeating-linear-gradient(90deg, #EEF4F1, #EEF4F1 8px, #E2ECE7 8px, #E2ECE7 16px); }
-.t1-rank-picked { display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 1.6rem; margin-bottom: 0.4rem; }
-.t1-rank-picked span { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem 0.2rem 0.25rem; border-radius: 99px; background: #E6F4EA; color: #14532D; font-weight: 700; font-size: 0.9rem; }
-.t1-rank-picked b { display: inline-flex; width: 1.4rem; height: 1.4rem; border-radius: 50%; align-items: center; justify-content: center; background: var(--forest); color: #fff; font-size: 0.75rem; }
 .t1-opts--long .t1-opt span { text-align: left; line-height: 1.4; }
 .t1-maps { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin: 0.6rem 0; }
 .t1-map-h { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; color: var(--gray-800); }
@@ -9064,8 +9057,40 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-arena-msg.t1-surv-tip { inset: 8px 8px auto 8px; padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; background: rgba(255, 253, 246, .92); color: #8A1C0C; }
 .t1-surv-hero.fire { animation: t1Recoil .15s; }
 @keyframes t1Recoil { 50% { transform: scale(0.88); } }
-.t1-flash-peek { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0.3rem 0; }
 .t1-flash-peek.hidden { display: none; }
 .t1-flash-peek small { color: var(--gray-600); }
 .t1-proc-q { margin: 0 0 0.6rem; padding: 0.55rem 0.8rem; border-radius: 12px; background: #FFF6D6; border: 2px solid #EED58A; color: #4A3A00; line-height: 1.45; }
 .t1-proc-qbtn { margin-bottom: 0.6rem; }
+
+/* Task 1 · Chia đoạn thân bài */
+.t1-gtable { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.t1-gtable th, .t1-gtable td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #E2ECE7; text-align: right; }
+.t1-gtable th:first-child { text-align: left; font-weight: 600; }
+.t1-gtable thead th { color: var(--forest); font-weight: 800; border-bottom: 2px solid #C9D6D0; }
+.t1-gp-rows { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.6rem; }
+.t1-gp-row { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; padding: 0.4rem 0.5rem 0.4rem 0.8rem; border-radius: 12px; background: #fff; border: 2px solid #E2ECE7; }
+.t1-gp-row.ok { border-color: #12A150; background: #F0FAF3; }
+.t1-gp-row.no { border-color: #E5533D; background: #FDF1EE; }
+.t1-gp-name { flex: 1 1 10rem; font-weight: 700; }
+.t1-gp-name small { font-weight: 500; color: var(--moss); margin-left: 0.3rem; }
+.t1-gp-b { border: 2px solid #C9D6D0; background: #F7FAF8; color: var(--forest); border-radius: 10px; padding: 0.4rem 0.8rem; font-weight: 700; cursor: pointer; min-height: 2.4rem; }
+.t1-gp-b.on { background: var(--forest); border-color: var(--forest); color: #fff; }
+.t1-gp-b:disabled { cursor: default; }
+.t1-gp-row em { font-style: normal; font-weight: 800; color: #B5301B; }
+.t1-gp-rows .t1-next:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Task 1 · Gõ nghĩa */
+.t1-tdrop { position: absolute; top: 0; padding: 0.45rem 0.7rem; background: #fff; border-radius: 12px; border: 2px solid #13294F; box-shadow: 0 6px 14px -8px rgba(19, 41, 79, 0.6); will-change: transform; transition: opacity .4s, scale .4s, border-color .15s; display: flex; flex-direction: column; gap: 0.15rem; text-align: center; }
+.t1-tdrop-vi { font-weight: 700; color: #13294F; line-height: 1.3; }
+.t1-tdrop-hint { font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.12em; color: var(--moss); font-size: 0.85rem; }
+.t1-tdrop-hint:empty { display: none; }
+.t1-tdrop-en { font-weight: 800; color: #12A150; }
+.t1-tdrop.lock { border-color: #3E6FD8; box-shadow: 0 0 0 3px rgba(62, 111, 216, 0.25); }
+.t1-tdrop.hit { opacity: 0; scale: 1.3; border-color: #12A150; }
+.t1-tdrop.landed { border-color: #E5533D; background: #FDF1EE; }
+.t1-tdrop.landed .t1-tdrop-en { color: #B5301B; }
+.t1-type-bar { margin-top: 0.6rem; }
+.t1-type-bar input { width: 100%; box-sizing: border-box; font-size: 1.15rem; padding: 0.75rem 1rem; border-radius: 12px; border: 2px solid #13294F; background: #fff; outline: none; }
+.t1-type-bar input:focus { box-shadow: 0 0 0 3px rgba(62, 111, 216, 0.3); }
+.t1-mini-pv { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+.t1-mini-pv b { font-size: 0.85rem; color: #13294F; }
