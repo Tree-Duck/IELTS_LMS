@@ -8993,3 +8993,23 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-mini-map { display: flex; align-items: center; justify-content: center; gap: 0.3rem; font-size: 1.6rem; line-height: 1; padding: 0.3rem 0.2rem; }
 .t1-mini-map i { font-style: normal; font-size: 0.9rem; opacity: 0.6; }
 .t1-drop .t1-mini--pie { width: 56px; height: 56px; }
+
+/* Bản đồ → Bài viết */
+.t1-me-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; font-size: 0.85rem; margin: 0.3rem 0 0.6rem; }
+.t1-me-steps span { padding: 0.2rem 0.6rem; border-radius: 999px; border: 2px solid var(--line); opacity: 0.6; font-weight: 700; }
+.t1-me-steps span.done { opacity: 1; background: var(--forest); border-color: var(--forest); color: #fff; }
+.t1-me-steps span.now { opacity: 1; border-color: #F5C542; background: #FFF8E1; }
+.t1-me-steps i { font-style: normal; opacity: 0.5; }
+.t1-me-prompt { padding: 0.6rem 0.8rem; border-radius: 12px; background: #FFFDF6; border: 2px solid #E8DDBE; font-weight: 600; line-height: 1.5; }
+.t1-me-prompt small { display: block; font-weight: 400; color: var(--gray-600); margin-top: 0.2rem; }
+.t1-me-maps { margin: 0.6rem 0; }
+.t1-me-maps summary { cursor: pointer; font-weight: 700; color: var(--forest); }
+.t1-opt.on { border-color: var(--forest); background: #E6F4EA; }
+.t1-me-lines { display: flex; flex-direction: column; gap: 0.45rem; }
+.t1-me-line { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.55rem 0.75rem; border-radius: 12px; border: 2px solid var(--line); background: var(--surface, #fff); line-height: 1.45; }
+.t1-me-line.ok { border-color: #1F8A4C; background: #F2FAF4; }
+.t1-me-line.no { border-color: #E5533D; background: #FFF4F2; }
+.t1-me-btns { display: flex; gap: 0.35rem; font-weight: 700; font-size: 0.85rem; }
+.t1-me-model { display: block; font-style: italic; margin-top: 0.3rem; }
+.t1-me-start { margin-bottom: 0.4rem; gap: 0.4rem; display: flex; flex-wrap: wrap; }
+.t1-me-ta { min-height: 280px; }
