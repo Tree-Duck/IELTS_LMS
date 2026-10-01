@@ -23377,21 +23377,44 @@ function renderBcFinal() {
    Levels mirror Hầm ngục chữ: a = Học việc, d = Dũng sĩ, l = Huyền thoại.
    ═══════════════════════════════════════════════════════════════════════════ */
 const T1_LEVELS = {
-  a: { id: 'a', icon: '🌱', name: 'Học việc',    band: '4.0–5.0', coin: 1,   blurb: 'rise, fall, peak và cao nhất, thấp nhất' },
-  d: { id: 'd', icon: '⚔️', name: 'Dũng sĩ',     band: '5.5–6.5', coin: 1.5, blurb: 'Động từ theo tốc độ, giới từ, đơn vị, gấp mấy lần' },
-  l: { id: 'l', icon: '👑', name: 'Huyền thoại', band: '7.0+',    coin: 2,   blurb: 'crept up, rocketed, tăng tốc, giảm tốc, cụm nâng cấp' },
+  a: { id: 'a', icon: '🌱', name: 'Học việc',    band: '4.0–5.0', coin: 1 },
+  d: { id: 'd', icon: '⚔️', name: 'Dũng sĩ',     band: '5.5–6.5', coin: 1.5 },
+  l: { id: 'l', icon: '👑', name: 'Huyền thoại', band: '7.0+',    coin: 2 },
 };
-const T1_GAMES = [
-  { id: 'slope',   icon: '📐', name: 'Đọc dốc',            desc: 'Nhìn độ dốc của đường, chọn động từ đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
-  { id: 'compare', icon: '📊', name: 'Cao hơn, thấp hơn',  desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
-  { id: 'hunt',    icon: '🎯', name: 'Săn feature',        desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn trên biểu đồ, rồi chọn câu tả nó.', start: 't1HuntStart()' },
-  { id: 'build',   icon: '🧩', name: 'Ghép câu số liệu',   desc: 'Ghép từng cụm thành câu tả số liệu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
-];
+// Two blocks, each with its own criteria and games. "games" are the real
+// games; "warm" are the quick quiz rounds kept as warm-ups.
+const T1_BLOCKS = {
+  dyn: { icon: '📈', name: 'Biểu đồ động', en: 'Dynamic',
+    sub: 'Đề có nhiều mốc thời gian: line graph, bar chart theo năm. Tả xu hướng lên, xuống, đi ngang và các điểm đặc biệt.',
+    crit: [['Hướng và tốc độ', 'rise, surge, creep up, plummet, level off'], ['12 feature', 'đỉnh, đáy, điểm vượt, bình ổn, tăng tốc…'], ['Giới từ và đơn vị', 'to hay by, percent hay percentage points'], ['Câu nâng cấp', 'having peaked, representing a …% increase']],
+    lv: { a: 'rise, fall, peak, ổn định', d: 'surge, plummet, level off, giới từ', l: 'crept up, rocketed, tăng tốc, giảm tốc' },
+    games: ['rain', 'snake'], warm: ['slope', 'hunt', 'build'] },
+  sta: { icon: '📊', name: 'Biểu đồ tĩnh', en: 'Static',
+    sub: 'Đề chỉ có một mốc: pie chart, bar chart, table, bản đồ, quy trình. So sánh, xếp hạng, ước lượng tỉ lệ, tả thay đổi trên bản đồ và các bước quy trình.',
+    crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Ước lượng tỉ lệ', 'just over a quarter, nearly half, twice as many'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
+    lv: { a: 'phân số tròn, 4 cột, 3 thay đổi', d: 'gấp mấy lần, 5 cột, di dời, mở rộng', l: 'just over / under, 6 cột sát nhau, having been' },
+    games: ['flash', 'rank', 'map', 'process'], warm: ['compare'] },
+};
+const T1_GAMES = {
+  rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
+  snake:   { icon: '🐍', name: 'Rắn săn mồi',            desc: 'Đề là một biểu đồ. Điều khiển rắn ăn đúng mồi có cụm mô tả nó. Ăn sai mất mạng, đâm tường là thua.', start: 't1SnakeStart()' },
+  slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
+  hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
+  build:   { icon: '🧩', name: 'Ghép câu số liệu',       desc: 'Ghép từng cụm thành câu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
+  flash:   { icon: '⚡', name: 'Ước lượng chớp nhoáng',  desc: 'Biểu đồ hiện vài giây rồi tắt. Chọn nhanh: just over a quarter, nearly half, twice as many…', start: 't1FlashStart()' },
+  rank:    { icon: '🏁', name: 'Xếp hạng tốc độ',        desc: 'Các cột hiện thoáng qua rồi ẩn. Chạm theo thứ tự từ cao xuống thấp, rồi chọn cụm xếp hạng.', start: 't1RankStart()' },
+  map:     { icon: '🗺️', name: 'Bản đồ tìm điểm khác',   desc: 'Hai bản đồ trước và sau. Tìm chỗ thay đổi, rồi chọn câu đúng: demolished, converted into…', start: 't1MapStart()' },
+  process: { icon: '⚙️', name: 'Dây chuyền quy trình',   desc: 'Các bước bị xáo trộn. Xếp lại đúng thứ tự trước khi hết giờ, rồi chọn câu bị động và từ nối.', start: 't1ProcStart()' },
+  compare: { icon: '📊', name: 'Cao hơn, thấp hơn',      desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
+};
 const T1_COLORS = ['#0E4D3C', '#E5533D', '#3E6FD8', '#B8860B'];
+const T1_WRITE_LABEL = { line_graph: 'Line graph', bar_chart: 'Bar chart', pie_chart: 'Pie chart', table: 'Bảng', map: 'Bản đồ', process_diagram: 'Quy trình' };
 
 let _t1 = null;               // the game in play
 let _t1Lv = (() => { try { return localStorage.getItem('t1Lv') || 'a'; } catch (e) { return 'a'; } })();
 if (!T1_LEVELS[_t1Lv]) _t1Lv = 'a';
+let _t1Block = (() => { try { return localStorage.getItem('t1Block') || 'dyn'; } catch (e) { return 'dyn'; } })();
+if (!T1_BLOCKS[_t1Block]) _t1Block = 'dyn';
 
 function t1Rand(a, b) { return a + Math.random() * (b - a); }
 function t1Pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -23401,8 +23424,15 @@ function t1GetBest(game) { try { return +localStorage.getItem(t1BestKey(game)) |
 function t1SetBest(game, v) { try { localStorage.setItem(t1BestKey(game), String(v)); } catch (e) {} }
 
 function showTask1Games() { t1Leave(); t1Hub(); }
+// The games hub opens one block or the other.
+function t1Open(block) {
+  _t1Block = block;
+  try { localStorage.setItem('t1Block', block); } catch (e) {}
+  showView('task1-games');
+}
 function t1Root() { return document.getElementById('task1-games-root'); }
 function t1Leave() {
+  if (_t1 && _t1.stop) _t1.stop();
   if (_t1 && _t1.coins && !_t1.banked) { _t1.banked = true; walEarn(_t1.coins, true); }
   _t1 = null;
   document.removeEventListener('keydown', t1Key);
@@ -23413,37 +23443,46 @@ function t1SetLevel(id) {
   tsSfx('equip');
   t1Hub();
 }
+function t1GameCard(id, warm) {
+  const g = T1_GAMES[id];
+  return `<button class="lv-mode t1-mode${warm ? ' t1-mode--warm' : ''}" onclick="${g.start}">
+    <span class="lv-mode-icon">${g.icon}</span>
+    <span class="lv-mode-name">${g.name}</span>
+    <span class="lv-mode-desc">${escapeHtml(g.desc)}</span>
+    <span class="lv-mode-best">🏆 ${t1GetBest(id)}</span>
+  </button>`;
+}
 
 function t1Hub() {
   const root = t1Root();
   if (!root) return;
   t1Leave();
-  const lv = T1_LEVELS[_t1Lv];
+  const b = T1_BLOCKS[_t1Block], other = _t1Block === 'dyn' ? 'sta' : 'dyn', lv = T1_LEVELS[_t1Lv];
   root.innerHTML = `
-    <div class="lv-wrap">
-      <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
-      <div class="lv-head">
-        <div class="vb-logo">📈 Task 1 · Đọc biểu đồ</div>
-        <div class="vb-tagline">Học từ và cụm để tả biểu đồ: lên là gì, xuống là gì, cao hơn thấp hơn ra sao. Chọn cấp theo band rồi chọn trò.</div>
+    <div class="lv-wrap t1-hub t1-hub--${_t1Block}">
+      <div class="t1-hub-nav">
+        <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
+        <button class="t1-swap" onclick="t1Open('${other}')">${T1_BLOCKS[other].icon} Sang ${T1_BLOCKS[other].name} →</button>
       </div>
+      <div class="lv-head">
+        <div class="vb-logo">${b.icon} Task 1 · ${b.name} <small>${b.en}</small></div>
+        <div class="vb-tagline">${escapeHtml(b.sub)}</div>
+      </div>
+      <div class="t1-crit">${b.crit.map(([k, v], i) => `<div class="t1-crit-item"><b>${i + 1}</b><span><strong>${escapeHtml(k)}</strong>${escapeHtml(v)}</span></div>`).join('')}</div>
       <div class="rd-lvcards t1-lvcards">${Object.values(T1_LEVELS).map(l => `
         <button class="rd-lvcard rd-lvcard--${l.id}${l.id === _t1Lv ? ' last' : ''}" onclick="t1SetLevel('${l.id}')" aria-pressed="${l.id === _t1Lv}">
           <span class="rd-lvcard-icon">${l.icon}</span>
           <span class="rd-lvcard-name">${l.name}</span>
           <span class="rd-lvcard-band">${l.band}</span>
-          <ul><li>${escapeHtml(l.blurb)}</li></ul>
+          <ul><li>${escapeHtml(b.lv[l.id])}</li></ul>
         </button>`).join('')}
       </div>
       <div class="wal-bar" id="wal-bar"></div>
       <div class="wal-shop hidden" id="wal-shop"></div>
-      <div class="lv-modes t1-modes">${T1_GAMES.map(g => `
-        <button class="lv-mode t1-mode" onclick="${g.start}">
-          <span class="lv-mode-icon">${g.icon}</span>
-          <span class="lv-mode-name">${g.name}</span>
-          <span class="lv-mode-desc">${escapeHtml(g.desc)}</span>
-          <span class="lv-mode-best">🏆 ${t1GetBest(g.id)}</span>
-        </button>`).join('')}
-      </div>
+      <h3 class="t1-sec">🎮 Trò chơi</h3>
+      <div class="lv-modes t1-modes">${b.games.map(id => t1GameCard(id)).join('')}</div>
+      <h3 class="t1-sec">🔥 Khởi động nhanh <small>12 câu trắc nghiệm</small></h3>
+      <div class="lv-modes t1-modes t1-modes--warm">${b.warm.map(id => t1GameCard(id, true)).join('')}</div>
       <div class="t1-lvnote">Đang chơi cấp <strong>${lv.icon} ${lv.name}</strong>. Mỗi câu đúng được ${lv.coin} xu.</div>
     </div>`;
   walBar();
@@ -23517,7 +23556,7 @@ function t1Key(e) {
 function t1Bind() { document.removeEventListener('keydown', t1Key); document.addEventListener('keydown', t1Key); }
 function t1Head(g) {
   return `<div class="t1-top">
-    <button class="btn-back-plain" onclick="t1Hub()">← Task 1</button>
+    <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
     <span class="t1-stat">Câu <strong>${Math.min(g.i + 1, T1_ROUNDS)}</strong>/${T1_ROUNDS}</span>
     <span class="t1-stat">⭐ <strong>${g.score}</strong></span>
     <span class="t1-stat">${g.combo >= 2 ? `🔥 x${g.combo}` : '&nbsp;'}</span>
@@ -23548,26 +23587,29 @@ function t1Options(opts, chosen, correct) {
     return `<button class="${cls}" ${chosen != null ? 'disabled' : ''} onclick="_t1.pick(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`;
   }).join('');
 }
-function t1Finish(g, game, writeType) {
+// opts.big replaces the "x/12 câu đúng" line for the arcade games.
+function t1Finish(g, game, writeType, opts) {
+  opts = opts || {};
   const best = t1GetBest(game);
   const isBest = g.score > best;
   if (isBest) t1SetBest(game, g.score);
   if (g.coins && !g.banked) { g.banked = true; walEarn(g.coins, true); }
-  tsSfx(g.right >= T1_ROUNDS * 0.75 ? 'level' : 'equip');
-  const meta = T1_GAMES.find(x => x.id === game);
+  const good = opts.good != null ? opts.good : g.right >= T1_ROUNDS * 0.75;
+  tsSfx(good ? 'level' : 'equip');
+  const meta = T1_GAMES[game];
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow">
-      <button class="btn-back-plain" onclick="t1Hub()">← Task 1</button>
+      <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
       <div class="t1-result">
-        <div class="t1-result-icon">${g.right >= 10 ? '🏆' : g.right >= 7 ? '👏' : '💪'}</div>
+        <div class="t1-result-icon">${opts.icon || (g.right >= 10 ? '🏆' : g.right >= 7 ? '👏' : '💪')}</div>
         <div class="t1-result-title">${meta.icon} ${meta.name} · ${T1_LEVELS[_t1Lv].name}</div>
-        <div class="t1-result-big">${g.right}/${T1_ROUNDS} câu đúng</div>
+        <div class="t1-result-big">${opts.big || `${g.right}/${T1_ROUNDS} câu đúng`}</div>
         <div class="t1-result-row"><span>⭐ ${g.score} điểm${isBest ? ' · kỷ lục mới!' : ` · kỷ lục ${best}`}</span><span>🪙 +${Math.round(g.coins)} xu</span></div>
       </div>
       ${g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>'}
       <div class="t1-result-btns">
         <button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>
-        <button class="vb-secondary-btn" onclick="t1GoWrite('${writeType}')">✍️ Áp dụng: viết một đề ${writeType === 'line_graph' ? 'Line graph' : 'Bar chart'}</button>
+        <button class="vb-secondary-btn" onclick="t1GoWrite('${writeType}')">✍️ Áp dụng: viết một đề ${T1_WRITE_LABEL[writeType] || 'Task 1'}</button>
       </div>
     </div>`;
   _t1 = null;
@@ -23583,7 +23625,7 @@ function t1GoWrite(type) {
   }, 700);
 }
 
-/* ── Game 1 · Đọc dốc ─────────────────────────────────────────────────────
+/* ── Khởi động · Mô tả pattern ─────────────────────────────────────────────────────
    One line, one shape. The student picks the verb that matches both the
    direction and the speed (master sheet 10.1: "nhìn độ dốc trước, rồi mới
    chọn động từ"). Each shape class has an answer per level; distractors are
@@ -24343,4 +24385,424 @@ function t1BuildNext() {
   tsSfx('key');
   t1BuildRender(true);
 }
+/* ── Dynamic · Mưa pattern ────────────────────────────────────────────────
+   Small line charts fall into the arena. The phrase buttons (keys 1–6)
+   shoot the lowest falling chart that matches; a chart that lands costs a
+   life. Every ten hits the rain speeds up and the phrase set changes, so
+   the student has to read shapes faster, not memorise four buttons. */
+const T1_RAIN_SET = {
+  a: ['up_steady', 'up_sharp', 'down_steady', 'down_sharp', 'flat', 'fluct', 'peak', 'vshape'],
+};
+const T1_RAIN_CFG = { a: { n: 4, spawn: 2.6, speed: 34 }, d: { n: 5, spawn: 2.2, speed: 40 }, l: { n: 6, spawn: 1.9, speed: 46 } };
+function t1RainClasses() { return T1_RAIN_SET[_t1Lv] || Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
+// A chart small enough to fall: fixed 0..1 scale so "slightly" and "sharply" keep their size.
+function t1MiniSvg(ys, w, h, color) {
+  w = w || 100; h = h || 56;
+  const p = 5, n = ys.length;
+  const d = ys.map((v, i) => (i ? 'L' : 'M') + (p + i * (w - 2 * p) / (n - 1)).toFixed(1) + ' ' + (h - p - Math.max(0, Math.min(1, v)) * (h - 2 * p)).toFixed(1)).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" class="t1-mini" aria-hidden="true"><path d="M${p} ${p}V${h - p}H${w - p}" class="t1-mini-axis"/><path d="${d}" class="t1-mini-line" stroke="${color || '#0E4D3C'}"/></svg>`;
+}
+function t1RainStart() {
+  t1Leave();
+  const cfg = T1_RAIN_CFG[_t1Lv];
+  const g = _t1 = { game: 'rain', score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 3, wave: 1, kills: 0,
+    drops: [], spawnIn: 0.6, spawnEvery: cfg.spawn, speed: cfg.speed, paused: false, over: false, last: 0, id: 0 };
+  g.set = t1RainNewSet();
+  g.keyPick = i => t1RainShoot(i);
+  g.pick = g.keyPick;
+  g.next = () => {};
+  g.stop = () => { g.over = true; cancelAnimationFrame(g.raf); document.removeEventListener('visibilitychange', g.vis); };
+  g.vis = () => { if (document.hidden && !g.paused) t1RainPause(); };
+  document.addEventListener('visibilitychange', g.vis);
+  t1Bind();
+  tsSfx('equip');
+  t1RainRender();
+  g.raf = requestAnimationFrame(t1RainTick);
+}
+function t1RainNewSet() {
+  const n = T1_RAIN_CFG[_t1Lv].n, seen = new Set(), out = [];
+  for (const k of t1Shuffle(t1RainClasses())) {
+    const ph = T1_SLOPE[k][_t1Lv];
+    if (seen.has(ph)) continue;
+    seen.add(ph); out.push(k);
+    if (out.length === n) break;
+  }
+  return out;
+}
+function t1RainRender() {
+  const g = _t1;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-rain">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat" id="rn-lives">${'❤️'.repeat(g.lives)}${'🖤'.repeat(3 - g.lives)}</span>
+        <span class="t1-stat">Đợt <strong id="rn-wave">${g.wave}</strong></span>
+        <span class="t1-stat">⭐ <strong id="rn-score">${g.score}</strong></span>
+        <span class="t1-stat" id="rn-combo">${g.combo >= 2 ? '🔥 x' + g.combo : ''}</span>
+        <button class="t1-pause" onclick="t1RainPause()" aria-label="Tạm dừng">⏸</button>
+      </div>
+      <div class="t1-arena" id="rn-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="rn-msg"></div></div>
+      <div class="t1-shoot" id="rn-btns">${t1RainBtns()}</div>
+      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ biểu đồ thấp nhất khớp với cụm đó.</div>
+    </div>`;
+}
+function t1RainBtns() {
+  return _t1.set.map((k, i) => `<button class="t1-shot" onclick="t1RainShoot(${i})"><kbd>${i + 1}</kbd>${escapeHtml(T1_SLOPE[k][_t1Lv])}</button>`).join('');
+}
+function t1RainSpawn() {
+  const g = _t1, arena = document.getElementById('rn-arena');
+  if (!arena) return;
+  const k = t1Pick(g.set);
+  const el = document.createElement('div');
+  el.className = 't1-drop';
+  const ys = T1_SLOPE[k].f();
+  el.innerHTML = t1MiniSvg(ys);
+  const w = arena.clientWidth, dw = 112;
+  // Keep new drops away from the lanes of drops still near the top.
+  let x = 0;
+  for (let t = 0; t < 8; t++) {
+    x = Math.random() * Math.max(10, w - dw);
+    if (!g.drops.some(d => d.y < 120 && Math.abs(d.x - x) < dw)) break;
+  }
+  el.style.left = x + 'px';
+  arena.appendChild(el);
+  g.drops.push({ id: ++g.id, k, ys, el, x, y: -70 });
+}
+function t1RainTick(ts) {
+  const g = _t1;
+  if (!g || g.game !== 'rain' || g.over) return;
+  if (!g.last) g.last = ts;
+  const dt = Math.min(0.05, (ts - g.last) / 1000);
+  g.last = ts;
+  if (!g.paused) {
+    const arena = document.getElementById('rn-arena');
+    if (!arena) { g.stop(); return; }
+    const floor = arena.clientHeight - 66;
+    g.spawnIn -= dt;
+    if (g.spawnIn <= 0 && g.drops.length < 6) { t1RainSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.8, 1.2); }
+    for (const d of g.drops.slice()) {
+      d.y += g.speed * dt;
+      d.el.style.transform = `translateY(${d.y}px)`;
+      if (d.y >= floor) t1RainLand(d);
+      if (g.over) return;
+    }
+  }
+  g.raf = requestAnimationFrame(t1RainTick);
+}
+function t1RainRemove(d, cls) {
+  const g = _t1;
+  g.drops = g.drops.filter(x => x !== d);
+  d.el.classList.add(cls);
+  setTimeout(() => d.el.remove(), 450);
+}
+function t1RainLand(d) {
+  const g = _t1;
+  g.lives--;
+  g.combo = 0;
+  tsSfx('wrong');
+  if (!g.missed[d.k]) { g.missed[d.k] = 1; g.misses.push(`<div class="t1-miss-row">${t1MiniSvg(d.ys, 120, 66)}<span><strong>${escapeHtml(T1_SLOPE[d.k][_t1Lv])}</strong><br>${escapeHtml(T1_SLOPE[d.k].vi)}</span></div>`); }
+  d.el.innerHTML += `<span class="t1-drop-tag">${escapeHtml(T1_SLOPE[d.k][_t1Lv])}</span>`;
+  t1RainRemove(d, 'landed');
+  t1RainHud();
+  if (g.lives <= 0) t1RainOver();
+}
+function t1RainShoot(i) {
+  const g = _t1;
+  if (!g || g.game !== 'rain' || g.paused || g.over || i < 0 || i >= g.set.length) return;
+  const k = g.set[i], ph = T1_SLOPE[k][_t1Lv];
+  const hit = g.drops.filter(d => T1_SLOPE[d.k][_t1Lv] === ph).sort((a, b) => b.y - a.y)[0];
+  const btn = document.querySelectorAll('#rn-btns .t1-shot')[i];
+  if (!hit) {
+    g.combo = 0;
+    tsSfx('miss');
+    if (btn) { btn.classList.remove('no'); void btn.offsetWidth; btn.classList.add('no'); }
+    t1RainHud();
+    return;
+  }
+  g.kills++; g.right++; g.combo++;
+  g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (g.wave - 1) * 2;
+  g.coins += T1_LEVELS[_t1Lv].coin * 0.5 * walMult();
+  tsSfx('kill');
+  if (btn) { btn.classList.remove('ok'); void btn.offsetWidth; btn.classList.add('ok'); }
+  t1RainRemove(hit, 'hit');
+  if (g.kills % 10 === 0) t1RainWave();
+  t1RainHud();
+}
+function t1RainWave() {
+  const g = _t1;
+  g.wave++;
+  g.speed *= 1.12;
+  g.spawnEvery = Math.max(0.8, g.spawnEvery * 0.9);
+  // Drops already falling keep their phrase available until they are gone.
+  const live = [...new Set(g.drops.map(d => d.k))];
+  const fresh = t1RainNewSet().filter(k => !live.some(l => T1_SLOPE[l][_t1Lv] === T1_SLOPE[k][_t1Lv]));
+  g.set = [...live, ...fresh].slice(0, Math.max(T1_RAIN_CFG[_t1Lv].n, live.length));
+  document.getElementById('rn-btns').innerHTML = t1RainBtns();
+  tsSfx('level');
+  const m = document.getElementById('rn-msg');
+  if (m) { m.textContent = `Đợt ${g.wave} · nhanh hơn, cụm mới!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1400); }
+}
+function t1RainHud() {
+  const g = _t1, $ = id => document.getElementById(id);
+  if (!$('rn-score')) return;
+  $('rn-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
+  $('rn-wave').textContent = g.wave;
+  $('rn-score').textContent = g.score;
+  $('rn-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
+}
+function t1RainPause() {
+  const g = _t1;
+  if (!g || g.game !== 'rain' || g.over) return;
+  g.paused = !g.paused;
+  g.last = 0;
+  const m = document.getElementById('rn-msg');
+  if (m) { m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1RainPause()">▶ Chơi tiếp</button>' : ''; m.classList.toggle('hidden', !g.paused); }
+}
+function t1RainOver() {
+  const g = _t1;
+  g.stop();
+  setTimeout(() => {
+    if (_t1 !== g) return;
+    t1Finish(g, 'rain', 'line_graph', { big: `${g.kills} biểu đồ bắn hạ · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: g.kills >= 20 });
+  }, 700);
+}
+
+/* ── Dynamic · Rắn săn mồi ────────────────────────────────────────────────
+   The question is a chart above the field; each food carries a phrase.
+   Eat the phrase that describes the chart to grow and get the next chart;
+   eat a wrong one and lose a life (and two segments). Walls and your own
+   tail end the run. The snake waits for the first arrow, so the student
+   can read the chart before moving. */
+const T1_SNAKE_CFG = { a: { foods: 3, tick: 175 }, d: { foods: 3, tick: 155 }, l: { foods: 4, tick: 135 } };
+const T1_SNAKE_COLS = 18, T1_SNAKE_ROWS = 12;
+const T1_FOOD_COLORS = ['#E5533D', '#3E6FD8', '#B8860B', '#8E44AD'];
+function t1SnakeStart() {
+  t1Leave();
+  const cfg = T1_SNAKE_CFG[_t1Lv];
+  const mid = Math.floor(T1_SNAKE_ROWS / 2);
+  const g = _t1 = { game: 'snake', score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 3, eaten: 0,
+    body: [{ x: 5, y: mid }, { x: 4, y: mid }, { x: 3, y: mid }], dir: null, queue: [], grow: 0, tick: cfg.tick,
+    paused: false, over: false, started: false, flash: null };
+  g.keyPick = () => {}; g.pick = () => {}; g.next = () => {};
+  g.keys = e => t1SnakeKey(e);
+  g.vis = () => { if (document.hidden && g.started && !g.paused) t1SnakePause(); };
+  g.stop = () => { g.over = true; clearTimeout(g.timer); document.removeEventListener('keydown', g.keys); document.removeEventListener('visibilitychange', g.vis); };
+  document.addEventListener('keydown', g.keys);
+  document.addEventListener('visibilitychange', g.vis);
+  t1SnakeQuestion();
+  tsSfx('equip');
+  t1SnakeRender();
+}
+function t1SnakeQuestion() {
+  const g = _t1, n = T1_SNAKE_CFG[_t1Lv].foods;
+  const keys = Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv] && k !== (g.q && g.q.k));
+  const k = t1Pick(keys), c = T1_SLOPE[k], answer = c[_t1Lv];
+  const same = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
+  const other = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam !== c.fam));
+  const wrong = [...new Set([...same.slice(0, 2), ...other].map(x => T1_SLOPE[x][_t1Lv]))].filter(p => p !== answer).slice(0, n - 1);
+  g.q = { k, ys: c.f(), answer };
+  const phrases = t1Shuffle([answer, ...wrong]);
+  g.foods = [];
+  phrases.forEach((p, i) => { const cell = t1SnakeFreeCell(); if (cell) g.foods.push({ ...cell, p, ok: p === answer, color: T1_FOOD_COLORS[i % 4] }); });
+}
+// A free cell away from the head and from other foods, with room for its label.
+function t1SnakeFreeCell() {
+  const g = _t1, head = g.body[0];
+  for (let t = 0; t < 400; t++) {
+    const x = 1 + Math.floor(Math.random() * (T1_SNAKE_COLS - 2)), y = 1 + Math.floor(Math.random() * (T1_SNAKE_ROWS - 2));
+    if (g.body.some(s => s.x === x && s.y === y)) continue;
+    if (Math.abs(head.x - x) + Math.abs(head.y - y) < 4) continue;
+    if (g.foods.some(f => Math.abs(f.y - y) < 2 && Math.abs(f.x - x) < 6)) continue;
+    return { x, y };
+  }
+  return null;
+}
+function t1SnakeRender() {
+  const g = _t1;
+  t1Root().innerHTML = `
+    <div class="lv-wrap t1-play t1-snake">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat" id="sn-lives"></span>
+        <span class="t1-stat">🍎 <strong id="sn-eaten">0</strong></span>
+        <span class="t1-stat">⭐ <strong id="sn-score">0</strong></span>
+        <span class="t1-stat" id="sn-combo"></span>
+        <button class="t1-pause" onclick="t1SnakePause()" aria-label="Tạm dừng">⏸</button>
+      </div>
+      <div class="t1-snake-q">
+        <div class="t1-snake-chart" id="sn-chart"></div>
+        <div class="t1-snake-ask">Ăn mồi có cụm <strong>mô tả đúng đường này</strong>.<span id="sn-note"></span></div>
+      </div>
+      <div class="t1-snake-field"><canvas id="sn-canvas"></canvas><div class="t1-arena-msg" id="sn-msg">Bấm phím mũi tên (hoặc vuốt) để bắt đầu</div></div>
+      <div class="t1-dpad" aria-label="Điều khiển">
+        <button onclick="t1SnakeTurn(0,-1)" aria-label="Lên">▲</button>
+        <button onclick="t1SnakeTurn(-1,0)" aria-label="Trái">◀</button>
+        <button onclick="t1SnakeTurn(1,0)" aria-label="Phải">▶</button>
+        <button onclick="t1SnakeTurn(0,1)" aria-label="Xuống">▼</button>
+      </div>
+    </div>`;
+  const cv = document.getElementById('sn-canvas');
+  const wrap = cv.parentElement;
+  const cell = Math.max(16, Math.min(36, Math.floor(wrap.clientWidth / T1_SNAKE_COLS)));
+  const dpr = window.devicePixelRatio || 1;
+  g.cell = cell;
+  cv.width = T1_SNAKE_COLS * cell * dpr; cv.height = T1_SNAKE_ROWS * cell * dpr;
+  cv.style.width = T1_SNAKE_COLS * cell + 'px'; cv.style.height = T1_SNAKE_ROWS * cell + 'px';
+  g.ctx = cv.getContext('2d');
+  g.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.font = getComputedStyle(document.body).fontFamily;
+  // Swipe on the field.
+  let sx = 0, sy = 0;
+  cv.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+  cv.addEventListener('touchend', e => {
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+    if (Math.abs(dx) > Math.abs(dy)) t1SnakeTurn(Math.sign(dx), 0); else t1SnakeTurn(0, Math.sign(dy));
+  }, { passive: true });
+  t1SnakeChart();
+  t1SnakeHud();
+  t1SnakeDraw();
+}
+function t1SnakeChart() {
+  const el = document.getElementById('sn-chart');
+  if (el) el.innerHTML = t1MiniSvg(_t1.q.ys, 180, 96);
+}
+function t1SnakeHud(note) {
+  const g = _t1, $ = id => document.getElementById(id);
+  if (!$('sn-score')) return;
+  $('sn-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
+  $('sn-eaten').textContent = g.eaten;
+  $('sn-score').textContent = g.score;
+  $('sn-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
+  if (note !== undefined) $('sn-note').innerHTML = note;
+}
+function t1SnakeKey(e) {
+  const g = _t1;
+  if (!g || g.game !== 'snake' || !t1Root() || t1Root().offsetParent === null) return;
+  const m = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] }[e.key];
+  if (m) { e.preventDefault(); t1SnakeTurn(m[0], m[1]); }
+  else if (e.key === ' ' || e.key === 'p') { e.preventDefault(); t1SnakePause(); }
+}
+function t1SnakeTurn(dx, dy) {
+  const g = _t1;
+  if (!g || g.game !== 'snake' || g.over) return;
+  if (g.paused) t1SnakePause();
+  const last = g.queue.length ? g.queue[g.queue.length - 1] : g.dir;
+  if (last && (last.x === -dx && last.y === -dy || last.x === dx && last.y === dy)) return;
+  if (g.queue.length < 3) g.queue.push({ x: dx, y: dy });
+  if (!g.started) {
+    g.started = true;
+    document.getElementById('sn-msg').classList.add('hidden');
+    t1SnakeStep();
+  }
+}
+function t1SnakePause() {
+  const g = _t1;
+  if (!g || g.game !== 'snake' || g.over || !g.started) return;
+  g.paused = !g.paused;
+  const m = document.getElementById('sn-msg');
+  if (g.paused) { clearTimeout(g.timer); m.innerHTML = '⏸ Tạm dừng · bấm mũi tên hoặc phím cách để chơi tiếp'; m.classList.remove('hidden'); }
+  else { m.classList.add('hidden'); t1SnakeStep(); }
+}
+function t1SnakeStep() {
+  const g = _t1;
+  if (!g || g.game !== 'snake' || g.over || g.paused) return;
+  if (g.queue.length) g.dir = g.queue.shift();
+  const head = g.body[0], nx = head.x + g.dir.x, ny = head.y + g.dir.y;
+  if (nx < 0 || ny < 0 || nx >= T1_SNAKE_COLS || ny >= T1_SNAKE_ROWS || g.body.slice(0, -1).some(s => s.x === nx && s.y === ny)) {
+    tsSfx('boss');
+    g.crash = { x: nx, y: ny };
+    t1SnakeDraw();
+    return t1SnakeOver(nx < 0 || ny < 0 || nx >= T1_SNAKE_COLS || ny >= T1_SNAKE_ROWS ? 'Đâm vào tường!' : 'Cắn phải đuôi!');
+  }
+  g.body.unshift({ x: nx, y: ny });
+  const food = g.foods.find(f => f.x === nx && f.y === ny);
+  if (food) t1SnakeEat(food);
+  if (g.grow > 0) g.grow--; else g.body.pop();
+  t1SnakeDraw();
+  if (!g.over) g.timer = setTimeout(t1SnakeStep, g.tick);
+}
+function t1SnakeEat(food) {
+  const g = _t1, c = T1_SLOPE[g.q.k];
+  if (food.ok) {
+    g.eaten++; g.right++; g.combo++;
+    g.score += 10 + Math.min(g.combo - 1, 8) * 2;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+    g.grow += 2;
+    g.tick = Math.max(80, g.tick - 4);
+    tsSfx('coin');
+    t1SnakeHud(`<span class="t1-snake-ok">✓ ${escapeHtml(g.q.answer)}</span>`);
+  } else {
+    g.lives--; g.combo = 0;
+    for (let i = 0; i < 2 && g.body.length > 3; i++) g.body.pop();
+    tsSfx('wrong');
+    if (!g.missed[g.q.k]) { g.missed[g.q.k] = 1; g.misses.push(`<div class="t1-miss-row">${t1MiniSvg(g.q.ys, 120, 66)}<span>Bạn ăn <s>${escapeHtml(food.p)}</s> → đúng là <strong>${escapeHtml(g.q.answer)}</strong><br>${escapeHtml(c.vi)}</span></div>`); }
+    t1SnakeHud(`<span class="t1-snake-no">✗ Đó là <s>${escapeHtml(food.p)}</s>. Đúng: ${escapeHtml(g.q.answer)}</span>`);
+    if (g.lives <= 0) { t1SnakeDraw(); return t1SnakeOver('Hết mạng!'); }
+  }
+  t1SnakeQuestion();
+  t1SnakeChart();
+  t1SnakeHud();
+}
+function t1SnakeDraw() {
+  const g = _t1, ctx = g.ctx, c = g.cell;
+  if (!ctx) return;
+  const W = T1_SNAKE_COLS * c, H = T1_SNAKE_ROWS * c;
+  ctx.clearRect(0, 0, W, H);
+  for (let y = 0; y < T1_SNAKE_ROWS; y++) for (let x = 0; x < T1_SNAKE_COLS; x++) {
+    ctx.fillStyle = (x + y) % 2 ? '#EEF5EF' : '#F6FAF6';
+    ctx.fillRect(x * c, y * c, c, c);
+  }
+  // Foods first, labels last so the snake never hides a phrase.
+  g.foods.forEach(f => {
+    ctx.fillStyle = f.color;
+    ctx.beginPath(); ctx.arc(f.x * c + c / 2, f.y * c + c / 2, c * 0.36, 0, Math.PI * 2); ctx.fill();
+  });
+  g.body.forEach((s, i) => {
+    ctx.fillStyle = i === 0 ? '#08301F' : i % 2 ? '#1F7A4D' : '#228B57';
+    const r = i === 0 ? 7 : 5, p = 1.5;
+    ctx.beginPath(); ctx.roundRect(s.x * c + p, s.y * c + p, c - 2 * p, c - 2 * p, r); ctx.fill();
+  });
+  const h = g.body[0], d = g.dir || { x: 1, y: 0 };
+  ctx.fillStyle = '#fff';
+  [[-1, 1], [1, 1]].forEach(([a]) => {
+    const ex = h.x * c + c / 2 + d.x * c * 0.18 + (d.y ? a * c * 0.18 : 0), ey = h.y * c + c / 2 + d.y * c * 0.18 + (d.x ? a * c * 0.18 : 0);
+    ctx.beginPath(); ctx.arc(ex, ey, c * 0.09, 0, Math.PI * 2); ctx.fill();
+  });
+  const fs = Math.max(11, Math.min(14, c * 0.42));
+  ctx.font = `700 ${fs}px ${g.font}`;
+  ctx.textBaseline = 'middle';
+  g.foods.forEach(f => {
+    const tw = ctx.measureText(f.p).width + 12, th = fs + 9;
+    let lx = f.x * c + c / 2 - tw / 2;
+    lx = Math.max(2, Math.min(W - tw - 2, lx));
+    const ly = f.y > 0 ? f.y * c - th - 2 : (f.y + 1) * c + 2;
+    ctx.fillStyle = 'rgba(255,255,255,0.94)';
+    ctx.strokeStyle = f.color; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(lx, ly, tw, th, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillText(f.p, lx + 6, ly + th / 2 + 1);
+  });
+  if (g.crash) {
+    ctx.strokeStyle = '#E5533D'; ctx.lineWidth = 4;
+    ctx.strokeRect(Math.max(0, Math.min(W - c, g.crash.x * c)) + 2, Math.max(0, Math.min(H - c, g.crash.y * c)) + 2, c - 4, c - 4);
+  }
+}
+function t1SnakeOver(why) {
+  const g = _t1;
+  g.stop();
+  const m = document.getElementById('sn-msg');
+  if (m) { m.textContent = why; m.classList.remove('hidden'); }
+  setTimeout(() => {
+    if (_t1 !== g) return;
+    t1Finish(g, 'snake', 'line_graph', { big: `${g.eaten} mồi đúng · rắn dài ${g.body.length}`, icon: g.eaten >= 20 ? '🏆' : g.eaten >= 10 ? '👏' : '🐍', good: g.eaten >= 12 });
+  }, 1100);
+}
+
+// Static games land one by one; until then their cards say so.
+function t1Soon(name) { showToast(name + ': đang làm, sắp có!'); }
+if (typeof t1FlashStart === 'undefined') window.t1FlashStart = () => t1Soon('Ước lượng chớp nhoáng');
+if (typeof t1RankStart === 'undefined') window.t1RankStart = () => t1Soon('Xếp hạng tốc độ');
+if (typeof t1MapStart === 'undefined') window.t1MapStart = () => t1Soon('Bản đồ tìm điểm khác');
+if (typeof t1ProcStart === 'undefined') window.t1ProcStart = () => t1Soon('Dây chuyền quy trình');
 // TASK1 END
