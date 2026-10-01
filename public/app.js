@@ -23728,9 +23728,6 @@ function t1SlopeNext() {
   t1SlopeRender(true);
 }
 
-// Games still being built answer with a toast instead of failing.
-function t1Soon(name) { showToast(name + ' đang được làm, sắp có nhé!'); }
-if (typeof t1BuildStart === 'undefined') window.t1BuildStart = () => t1Soon('Ghép câu số liệu');
 /* ── Game 2 · Cao hơn, thấp hơn ───────────────────────────────────────────
    Bars from a fixed dataset, a sentence with one gap, four phrases. Each
    question type checks its own condition on the numbers (the two closest
@@ -24170,5 +24167,180 @@ function t1HuntNext() {
   g.q = t1HuntRound(g.q.feat);
   tsSfx('key');
   t1HuntRender(true);
+}
+/* ── Game 4 · Ghép câu số liệu ────────────────────────────────────────────
+   The sentence is built one chunk at a time. Each step offers the right
+   chunk and the traps the master sheet warns about: to or by, number or
+   amount or proportion, percent or percentage points (dynamic sheet 2.2,
+   2.3), peaked at not peaked to, having peaked not having peak. A wrong
+   pick explains the trap and lets the student try again; a round counts
+   as right only when every chunk went in first time. */
+const T1_BUILD_TOPICS = [
+  { title: 'Households with internet access', pct: true, names: ['Kenya', 'Mexico', 'Japan'], unit: '%', max: 100,
+    subj: n => `the proportion of households with internet access in ${n}`,
+    trap: n => `the number of households with internet access in ${n}`,
+    why: 'Số liệu là %, nên dùng the proportion of, không dùng the number of.' },
+  { title: 'Visitors to national parks', pct: false, count: true, names: ['Banff', 'Jasper', 'Yoho'], unit: 'million visitors', max: 5, fmt: v => t1Num(v) + ' million',
+    subj: n => `the number of visitors to ${n}`, trap: n => `the amount of visitors to ${n}`,
+    why: 'visitors đếm được → the number of. the amount of chỉ đi với danh từ không đếm được.' },
+  { title: 'Spending on fuel', pct: false, count: false, names: ['Fuel spending'], unit: 'billion dollars', max: 50, fmt: v => '$' + t1Num(v) + ' billion',
+    subj: () => 'the amount of money spent on fuel', trap: () => 'the number of money spent on fuel',
+    why: 'money không đếm được → the amount of.' },
+  { title: 'Plastic waste recycled', pct: false, count: false, names: ['Plastic recycled'], unit: 'million tons', max: 20, fmt: v => t1Num(v) + ' million tons',
+    subj: () => 'the amount of plastic waste recycled', trap: () => 'the number of plastic waste recycled',
+    why: 'waste không đếm được → the amount of.' },
+  { title: 'Cyclists in the city', pct: false, count: true, names: ['Cyclists'], unit: 'thousand', max: 50, fmt: v => t1Num(v) + ' thousand',
+    subj: () => 'the number of cyclists in the city', trap: () => 'the amount of cyclists in the city',
+    why: 'cyclists đếm được → the number of.' },
+];
+const T1_BUILD_BY_LV = { a: ['change', 'peak', 'change'], d: ['by', 'peakat', 'low', 'by'], l: ['having', 'representing', 'accel'] };
+// A slot is { ok, wrong: [..], why } ; a fixed chunk is { ok } with no wrong.
+function t1BuildRound(prev) {
+  let tpl = t1Pick(T1_BUILD_BY_LV[_t1Lv]);
+  if (tpl === prev) tpl = t1Pick(T1_BUILD_BY_LV[_t1Lv]);
+  const tp = t1Pick(tpl === 'representing' ? T1_BUILD_TOPICS.filter(t => !t.pct) : T1_BUILD_TOPICS);
+  const name = t1Pick(tp.names);
+  const start = t1Pick([2000, 2004, 2006]), xs = Array.from({ length: T1_HUNT_N }, (_, i) => start + i * 2), n = T1_HUNT_N - 1;
+  const up = Math.random() < .6;
+  let lines;
+  if (tpl === 'peak' || tpl === 'peakat' || tpl === 'having') lines = T1_HUNT_GEN.peak().lines;
+  else if (tpl === 'low') lines = T1_HUNT_GEN.trough().lines;
+  else if (tpl === 'accel') lines = T1_HUNT_GEN.accel().lines;
+  else if (tpl === 'representing') lines = [t1Mono(t1Rand(.3, .45), t1Rand(.55, .85))];
+  else lines = [up ? t1Mono(t1Rand(.15, .3), t1Rand(.6, .8)) : t1Mono(t1Rand(.65, .85), t1Rand(.2, .35))];
+  const dp = tp.pct ? 0 : 1, f10 = Math.pow(10, dp);
+  const ys = lines[0].map(v => Math.round(v * tp.max * f10) / f10);
+  const fv = v => tp.pct ? v + '%' : tp.fmt(v);
+  const S = t1Cap(tp.subj(name)), s = tp.subj(name), T = t1Cap(tp.trap(name));
+  const subjSlot = { ok: S, wrong: [T], why: tp.why };
+  const pk = ys.indexOf(Math.max(...ys)), lo = ys.indexOf(Math.min(...ys));
+  let slots;
+  switch (tpl) {
+    case 'change': {
+      const r = ys[n] > ys[0];
+      slots = [{ ok: S }, { ok: r ? 'rose' : 'fell', wrong: [r ? 'fell' : 'rose', 'remained stable'], why: 'Nhìn hướng của đường: đi lên là rose, đi xuống là fell.' },
+        { ok: `from ${fv(ys[0])}`, wrong: [`at ${fv(ys[0])}`, `by ${fv(ys[0])}`], why: 'Có cả điểm đầu và điểm cuối → from … to ….' },
+        { ok: `to ${fv(ys[n])}`, wrong: [`by ${fv(ys[n])}`, `at ${fv(ys[n])}`], why: 'to + giá trị cuối; by + lượng chênh lệch. Ở đây là giá trị cuối.' },
+        { ok: `between ${xs[0]} and ${xs[n]}.`, wrong: [`between ${xs[0]} to ${xs[n]}.`, `from ${xs[0]} and ${xs[n]}.`], why: 'between … and … hoặc from … to …, không trộn hai cặp.' }];
+      break;
+    }
+    case 'peak':
+      slots = [{ ok: S }, { ok: 'reached a peak of', wrong: ['reached a low of', 'reached a peak at'], why: 'Điểm cao nhất rồi quay xuống là đỉnh: reached a peak of + giá trị.' },
+        { ok: fv(ys[pk]) }, { ok: `in ${xs[pk]}.`, wrong: [`on ${xs[pk]}.`, `at ${xs[pk]}.`], why: 'Năm đi với in: in 2010.' }];
+      break;
+    case 'by': {
+      const r = ys[n] > ys[0], d = Math.round(Math.abs(ys[n] - ys[0]) * f10) / f10;
+      slots = [subjSlot, { ok: r ? 'increased' : 'decreased', wrong: [r ? 'decreased' : 'increased', r ? 'increased to' : 'decreased to'], why: 'Câu nói lượng thay đổi: increased/decreased + by + lượng, không dùng to.',
+          whyMap: { [r ? 'decreased' : 'increased']: `Nhìn hướng trước: đường đi ${r ? 'lên → increased' : 'xuống → decreased'}.` } },
+        tp.pct ? { ok: `by ${d} percentage points`, wrong: [`by ${d}%`, `to ${d} percentage points`], why: `Từ ${ys[0]}% lên ${ys[n]}% là chênh ${d} điểm phần trăm (percentage points), không phải ${d}%.` }
+               : { ok: `by ${fv(d)}`, wrong: [`to ${fv(d)}`, `at ${fv(d)}`], why: `${fv(d)} là lượng chênh lệch (${t1Num(ys[n])} − ${t1Num(ys[0])}), nên dùng by.` },
+        { ok: `between ${xs[0]} and ${xs[n]}.`, wrong: [`between ${xs[0]} to ${xs[n]}.`], why: 'between … and ….' }];
+      break;
+    }
+    case 'peakat':
+      slots = [subjSlot, { ok: 'peaked at', wrong: ['peaked to', 'peaked on'], why: 'peak đi với at: peaked at + giá trị.' },
+        { ok: fv(ys[pk]) }, { ok: `in ${xs[pk]}`, wrong: [`on ${xs[pk]}`], why: 'Năm đi với in.' },
+        { ok: `before declining to ${fv(ys[n])}.`, wrong: [`before decline to ${fv(ys[n])}.`, `before declining by ${fv(ys[n])}.`], why: 'before + V-ing; to + giá trị cuối.' }];
+      break;
+    case 'low':
+      slots = [subjSlot, { ok: 'fell to a low of', wrong: ['fell at a low of', 'fell to a peak of'], why: 'Đáy: fell to a low of + giá trị (sheet 3.3).' },
+        { ok: fv(ys[lo]) }, { ok: `in ${xs[lo]},`, wrong: [`on ${xs[lo]},`], why: 'Năm đi với in.' },
+        { ok: `after which it recovered to ${fv(ys[n])}.`, wrong: [`after which it recovered by ${fv(ys[n])}.`, `after that it recovering to ${fv(ys[n])}.`], why: 'recovered to + giá trị cuối; after which + mệnh đề đầy đủ.' }];
+      break;
+    case 'having':
+      slots = [{ ok: `Having peaked at ${fv(ys[pk])} in ${xs[pk]},`, wrong: [`Having peak at ${fv(ys[pk])} in ${xs[pk]},`, `Having peaked to ${fv(ys[pk])} in ${xs[pk]},`], why: 'having + phân từ quá khứ (peaked); peak đi với at.' },
+        { ok: s }, { ok: `fell back to ${fv(ys[n])}`, wrong: [`fell back at ${fv(ys[n])}`, `fell back by ${fv(ys[n])}`], why: 'fell back to + giá trị cuối.' },
+        { ok: `by ${xs[n]}.`, wrong: [`on ${xs[n]}.`], why: 'by + năm = tính đến năm đó.' }];
+      break;
+    case 'representing': {
+      const p = Math.round((ys[n] - ys[0]) / ys[0] * 100);
+      slots = [{ ok: `By ${xs[n]},`, wrong: [`Until ${xs[n]},`], why: 'By + năm = tính đến năm đó, dùng cho mốc chốt.' }, { ok: s },
+        { ok: `stood at ${fv(ys[n])},`, wrong: [`stood ${fv(ys[n])},`, `stood on ${fv(ys[n])},`], why: 'stood at + giá trị tại một mốc.' },
+        { ok: `representing a ${p}% increase.`, wrong: [`representing ${p}% increase.`, `represented a ${p}% increase.`], why: `Từ ${t1Num(ys[0])} lên ${t1Num(ys[n])} là tăng ${p}%. Cụm rút gọn: , representing a …% increase.` }];
+      break;
+    }
+    case 'accel': {
+      const c = ys.findIndex((v, i) => i > 0 && i < n && (ys[i + 1] - v) > 3 * (v - ys[i - 1]) && (v - ys[i - 1]) >= 0);
+      const k = c > 0 ? c : 3;
+      slots = [{ ok: `After rising only slightly to ${fv(ys[k])} by ${xs[k]},`, wrong: [`After rise only slightly to ${fv(ys[k])} by ${xs[k]},`, `After rising only slight to ${fv(ys[k])} by ${xs[k]},`], why: 'After + V-ing; trạng từ slightly bổ nghĩa cho rising.' },
+        { ok: s }, { ok: 'climbed far more steeply', wrong: ['climbed far more steep', 'continued to rise but less steeply'], why: 'Đường dốc hơn sau mốc này → tăng tốc: climbed far more steeply (trạng từ).' },
+        { ok: `to ${fv(ys[n])} in ${xs[n]}.`, wrong: [`by ${fv(ys[n])} in ${xs[n]}.`], why: 'to + giá trị cuối.' }];
+      break;
+    }
+  }
+  return { tpl, tp, name, xs, ys, slots, step: 0, chart: { xs, series: [{ name: tp.pct ? name : tp.names[0], ys }], yMax: tp.max, yStep: tp.max <= 5 ? 1 : tp.max / 5, unit: tp.unit, title: tp.title } };
+}
+function t1BuildStart() {
+  t1Leave();
+  _t1 = { game: 'build', i: 0, score: 0, combo: 0, right: 0, coins: 0, misses: [], answered: false };
+  _t1.pick = t1BuildPick;
+  _t1.keyPick = t1BuildPick;
+  _t1.next = t1BuildNext;
+  t1BuildNew();
+  t1Bind();
+  tsSfx('equip');
+  t1BuildRender(true);
+}
+function t1BuildNew(prev) {
+  const g = _t1;
+  g.q = t1BuildRound(prev);
+  g.clean = true;
+  g.note = null;
+  t1BuildSkipFixed();
+}
+// Fixed chunks (subject, value) drop in by themselves.
+function t1BuildSkipFixed() {
+  const q = _t1.q;
+  while (q.step < q.slots.length && !q.slots[q.step].wrong) q.step++;
+  if (q.step < q.slots.length) q.opts = t1Shuffle([q.slots[q.step].ok, ...q.slots[q.step].wrong]);
+}
+function t1BuildRender(animate) {
+  const g = _t1, q = g.q, done = q.step >= q.slots.length;
+  const built = q.slots.slice(0, q.step).map(sl => `<span class="t1-chunk${sl.wrong ? '' : ' fixed'}">${escapeHtml(sl.ok)}</span>`).join(' ');
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play">
+      ${t1Head(g)}
+      ${t1LineChart({ ...q.chart, animate })}
+      <div class="t1-sentence">${built}${done ? '' : ' <span class="t1-blank">______</span>'}</div>
+      ${done ? `<div class="t1-fb ${g.clean ? 'ok' : 'no'}"><strong>${g.clean ? 'Hoàn hảo! Không dính bẫy nào.' : 'Xong câu, nhưng có chỗ chọn sai.'}</strong></div>
+          <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.i + 1 >= T1_ROUNDS ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>`
+        : `<div class="t1-opts t1-opts--1">${q.opts.map((o, i) => `<button class="t1-opt" onclick="_t1.pick(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`).join('')}</div>
+           ${g.note ? `<div class="t1-fb no"><strong>Bẫy rồi!</strong><span>${escapeHtml(g.note)}</span></div>` : '<div class="t1-hint">Chọn cụm tiếp theo của câu. Bấm 1–3 hoặc chạm.</div>'}`}
+    </div>`;
+}
+function t1BuildPick(i) {
+  const g = _t1, q = g.q;
+  if (!g || q.step >= q.slots.length || i < 0 || i >= q.opts.length) return;
+  const sl = q.slots[q.step];
+  if (q.opts[i] !== sl.ok) {
+    const why = (sl.whyMap && sl.whyMap[q.opts[i]]) || sl.why;
+    if (g.clean) g.misses.push(`<div class="t1-review-line">Bẫy: <s>${escapeHtml(q.opts[i])}</s> → <strong>${escapeHtml(sl.ok)}</strong>. ${escapeHtml(why)}</div>`);
+    g.clean = false;
+    g.note = why;
+    tsSfx('wrong');
+    t1BuildRender(false);
+    const b = t1Root().querySelectorAll('.t1-opt')[i];
+    if (b) b.classList.add('no');
+    return;
+  }
+  g.note = null;
+  q.step++;
+  tsSfx('key');
+  t1BuildSkipFixed();
+  if (q.step >= q.slots.length) {
+    g.answered = true;
+    t1Score(g, g.clean);
+  }
+  t1BuildRender(false);
+}
+function t1BuildNext() {
+  const g = _t1;
+  if (!g || !g.answered) return;
+  g.i++;
+  if (g.i >= T1_ROUNDS) { t1Finish(g, 'build', 'line_graph'); return; }
+  g.answered = false;
+  t1BuildNew(g.q.tpl);
+  tsSfx('key');
+  t1BuildRender(true);
 }
 // TASK1 END

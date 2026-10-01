@@ -8818,6 +8818,9 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-task { text-align: center; font-size: 1.15rem; }
 .t1-task strong { color: #1D2F7A; }
 .t1-opts--1 { grid-template-columns: 1fr; }
+.t1-sentence { margin: 1.1rem 0 0.9rem; font-size: 1.12rem; line-height: 1.9; font-weight: 600; min-height: 2.2em; }
+.t1-chunk { display: inline; padding: 0.15rem 0.35rem; border-radius: 6px; background: #E6F6EC; color: #0B5A2E; box-decoration-break: clone; -webkit-box-decoration-break: clone; animation: t1fade .3s both; }
+.t1-chunk.fixed { background: #EEF2FA; color: #1D2F7A; }
 .t1-hint { margin-top: 0.8rem; font-size: 0.85rem; color: var(--moss); text-align: center; }
 
 .t1-result { text-align: center; padding: 1.2rem 0 0.5rem; }
