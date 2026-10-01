@@ -23730,8 +23730,227 @@ function t1SlopeNext() {
 
 // Games still being built answer with a toast instead of failing.
 function t1Soon(name) { showToast(name + ' đang được làm, sắp có nhé!'); }
-if (typeof t1CmpStart === 'undefined') window.t1CmpStart = () => t1Soon('Cao hơn, thấp hơn');
 if (typeof t1HuntStart === 'undefined') window.t1HuntStart = () => t1Soon('Săn feature');
 if (typeof t1BuildStart === 'undefined') window.t1BuildStart = () => t1Soon('Ghép câu số liệu');
 function t1HuntTap() {}
+/* ── Game 2 · Cao hơn, thấp hơn ───────────────────────────────────────────
+   Bars from a fixed dataset, a sentence with one gap, four phrases. Each
+   question type checks its own condition on the numbers (the two closest
+   bars for "negligible", a top bar 1.4x the next for "by far"…), so the
+   right phrase is always true of the chart. Types follow the static master
+   sheet: highest, lowest, multiples, negligible gap, broadly similar,
+   combined share, range, remainder, plus the number/amount trap (2.2). */
+const T1_DATA = [
+  { id: 'coffee', title: 'Coffee consumption per person, 2020', unit: 'kilograms per person', pct: false,
+    noun: 'coffee', count: false, verb: 'consumes', val: v => t1Num(v) + ' kilograms',
+    big: 'the largest consumer', rows: [['Finland', 12], ['Sweden', 9.9], ['Switzerland', 9.5], ['Canada', 6.2], ['Brazil', 5.8], ['USA', 4.7], ['Japan', 3.3]] },
+  { id: 'hours', title: 'Average working hours per year, 2019', unit: 'hours per year', pct: false,
+    noun: 'hours', count: true, verb: 'work', people: { Mexico: 'Mexicans', USA: 'Americans', Japan: 'Japanese workers', UK: 'British workers', Germany: 'Germans' }, val: v => t1Num(v) + ' hours',
+    rows: [['Mexico', 2128], ['USA', 1791], ['Japan', 1607], ['UK', 1538], ['Germany', 1341]] },
+  { id: 'china', title: 'Sources of energy in China, 2015', unit: '%', pct: true, whole: 'Chinese supply', big: 'the largest source',
+    noun: 'energy', count: false, val: v => t1Num(v) + '%',
+    rows: [['Coal', 62], ['Hydropower', 17], ['Gas', 9], ['Renewables', 9], ['Nuclear power', 3]] },
+  { id: 'france', title: 'Sources of energy in France, 2015', unit: '%', pct: true, whole: 'French supply', big: 'the largest source',
+    noun: 'energy', count: false, val: v => t1Num(v) + '%',
+    rows: [['Nuclear power', 71], ['Hydropower', 13], ['Renewables', 6], ['Gas', 6], ['Coal', 4]] },
+  { id: 'sport', title: 'Favourite sports of 500 students surveyed', unit: 'students', pct: false, total: 500, big: 'the most popular choice',
+    noun: 'students', count: true, val: v => t1Num(v) + ' students',
+    rows: [['Football', 190], ['Basketball', 130], ['Swimming', 70], ['Tennis', 60], ['Badminton', 50]] },
+  { id: 'housing', title: 'Monthly spending on housing per household, 2021', unit: 'US dollars', pct: false,
+    noun: 'money', count: false, val: v => '$' + t1Num(v),
+    rows: [['USA', 1450], ['UK', 1210], ['France', 980], ['Germany', 965], ['Spain', 760]] },
+];
+const T1_COMMON = ['Coal', 'Hydropower', 'Gas', 'Renewables', 'Nuclear power', 'Football', 'Basketball', 'Swimming', 'Tennis', 'Badminton'];
+// Name as it sits inside a sentence: "the USA", "coal", "football".
+function t1Nm(n) { return n === 'USA' || n === 'UK' ? 'the ' + n : T1_COMMON.includes(n) ? n.toLowerCase() : n; }
+function t1Cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+const T1_FRACTIONS = [[1 / 4, 'a quarter'], [1 / 3, 'a third'], [1 / 2, 'half']];
+// "in Germany" for places, "for coal" for categories (static sheet 3.7).
+function t1For(n) { return (T1_COMMON.includes(n) ? 'for ' : 'in ') + t1Nm(n); }
+function t1Sorted(d) { return d.rows.map(([name, v]) => ({ name, v })).sort((a, b) => b.v - a.v); }
+function t1Times(r) {
+  if (Math.abs(r - 2) < 0.06) return 'twice';
+  if (Math.abs(r - 3) < 0.08) return 'three times';
+  return 'roughly ' + r.toFixed(1) + ' times';
+}
+// Each type returns null when the dataset cannot carry it, or
+// { stem (with ____), answer, wrong: [3], hl: [names], vi }.
+const T1_CMP_TYPES = {
+  highest(d) {
+    const s = t1Sorted(d), top = s[0];
+    if (d.pct) return { stem: `${t1Cap(t1Nm(top.name))} accounted for the ____ share, at ${d.val(top.v)}.`, answer: 'largest', wrong: ['smallest', 'larger', 'most large'], hl: [top.name], vi: 'Cột dài nhất → the largest share / the highest figure. So sánh nhất có "the" và đuôi -est.' };
+    return { stem: `The figure for ${t1Nm(top.name)} is the ____, at ${d.val(top.v)}.`, answer: 'highest', wrong: ['lowest', 'higher', 'most high'], hl: [top.name], vi: 'Cột dài nhất → the highest. Không viết "most high".' };
+  },
+  lowest(d) {
+    const s = t1Sorted(d), low = s[s.length - 1];
+    if (d.pct) return { stem: `${t1Cap(t1Nm(low.name))} represented the ____ proportion, at just ${d.val(low.v)}.`, answer: 'smallest', wrong: ['largest', 'smaller', 'most small'], hl: [low.name], vi: 'Cột ngắn nhất → the smallest proportion. Với tỉ lệ dùng small, large; với con số dùng low, high.' };
+    return { stem: `${t1Cap(t1Nm(low.name))} has the ____ figure, at ${d.val(low.v)}.`, answer: 'lowest', wrong: ['highest', 'lower', 'least high'], hl: [low.name], vi: 'Cột ngắn nhất → the lowest figure.' };
+  },
+  pair(d) {
+    const s = t1Shuffle(t1Sorted(d)), [a, b] = s;
+    if (Math.abs(a.v - b.v) / Math.max(a.v, b.v) < 0.1) return null;
+    const hi = a.v > b.v;
+    return { stem: `The figure for ${t1Nm(a.name)} is ____ than that for ${t1Nm(b.name)}.`, answer: hi ? 'higher' : 'lower', wrong: hi ? ['lower', 'the highest', 'more high'] : ['higher', 'the lowest', 'more low'], hl: [a.name, b.name], vi: 'So sánh hai đối tượng → dạng so sánh hơn + than: higher than, lower than.' };
+  },
+  multiple(d) {
+    if (d.pct) return null;
+    const s = t1Sorted(d);
+    const pairs = [];
+    for (const a of s) for (const b of s) { const r = a.v / b.v; if (r >= 1.4 && r <= 3.9) pairs.push([a, b, r]); }
+    if (!pairs.length) return null;
+    const [a, b, r] = t1Pick(pairs);
+    const t = t1Times(r), q = d.count ? 'many' : 'much', q2 = d.count ? 'much' : 'many';
+    const subj = d.people ? (d.people[a.name] || t1Nm(a.name)) : t1Nm(a.name), obj = d.people ? (d.people[b.name] || t1Nm(b.name)) : t1Nm(b.name);
+    const stem = d.id === 'housing' ? `Households in ${t1Nm(a.name)} spend ____ money on housing as those in ${t1Nm(b.name)}.`
+      : d.id === 'sport' ? `${t1Cap(t1Nm(a.name))} attracted ____ students as ${t1Nm(b.name)}.`
+      : `${t1Cap(subj)} ${d.verb} ____ ${d.noun} as ${obj}.`;
+    const other = r < 2.5 ? (r + 1).toFixed(1) : (r - 1).toFixed(1);
+    const answer = `${t} as ${q}`;
+    return { stem, answer, wrong: [`${t} as ${q2}`, `roughly ${other} times as ${q}`, `${t} more ${q}`], hl: [a.name, b.name],
+      vi: `${t1Num(a.v)} chia ${t1Num(b.v)} ≈ ${r.toFixed(2)}. ${d.noun} là danh từ ${d.count ? 'đếm được → as many as' : 'không đếm được → as much as'}.` };
+  },
+  negligible(d) {
+    const s = t1Sorted(d);
+    let best = null;
+    for (let i = 0; i < s.length - 1; i++) { const gap = s[i].v - s[i + 1].v; if (!best || gap < best[2]) best = [s[i], s[i + 1], gap]; }
+    const [a, b, gap] = best;
+    if (gap / s[0].v > 0.05) return null;
+    return { stem: `The difference between ${t1Nm(a.name)} and ${t1Nm(b.name)} is ____, at ${d.val(a.v)} and ${d.val(b.v)}.`, answer: 'negligible', wrong: ['considerable', 'significant', 'dramatic'], hl: [a.name, b.name], vi: 'Hai cột gần như bằng nhau → negligible (không đáng kể). considerable, significant là chênh lệch lớn.' };
+  },
+  combined(d) {
+    if (!d.pct && !d.total) return null;
+    const s = t1Sorted(d), sum = s[0].v + s[1].v;
+    const tail = d.pct ? `${sum}% of ${d.whole}` : `${sum} of the ${d.total} students`;
+    return { stem: `${t1Cap(t1Nm(s[0].name))} and ${t1Nm(s[1].name)} together accounted for a ____ total of ${tail}.`, answer: 'combined', wrong: ['remaining', 'whole', 'separate'], hl: [s[0].name, s[1].name], vi: `Cộng hai cột đầu: ${t1Num(s[0].v)} + ${t1Num(s[1].v)} = ${t1Num(sum)} → a combined total of.` };
+  },
+  numamount(d) {
+    if (d.pct) return null;
+    const s = t1Sorted(d), top = s[0];
+    const stem = d.id === 'housing' ? `The ____ of money spent on housing is highest in ${t1Nm(top.name)}.`
+      : d.id === 'sport' ? `The ____ of students choosing ${t1Nm(top.name)} is the highest.`
+      : d.id === 'hours' ? `The ____ of hours worked is highest in ${t1Nm(top.name)}.`
+      : `The ____ of ${d.noun} consumed is highest in ${t1Nm(top.name)}.`;
+    return { stem, answer: d.count ? 'number' : 'amount', wrong: d.count ? ['amount', 'proportion', 'figure of'] : ['number', 'proportion', 'figure of'], hl: [top.name],
+      vi: d.count ? `${d.noun} đếm được → the number of.` : `${d.noun} không đếm được → the amount of.` };
+  },
+  accounted(d) {
+    if (!d.pct) return null;
+    const r = t1Pick(t1Sorted(d));
+    return { stem: `${t1Cap(t1Nm(r.name))} ____ ${r.v}% of ${d.whole}.`, answer: 'accounted for', wrong: ['accounted', 'accounted to', 'made of'], hl: [r.name], vi: 'Nói tỉ lệ: accounted for / made up / represented + số %. Không bỏ "for".' };
+  },
+  byfar(d) {
+    const s = t1Sorted(d);
+    if (s[0].v < s[1].v * 1.4) return null;
+    return { stem: `${t1Cap(t1Nm(s[0].name))} is ____ ${d.big || 'the largest'}, at ${d.val(s[0].v)}, well ahead of ${t1Nm(s[1].name)}.`, answer: 'by far', wrong: ['so far', 'far from', 'by much'], hl: [s[0].name, s[1].name], vi: 'Cột đầu bỏ xa cột thứ hai → by far the largest. Nhấn mạnh so sánh nhất bằng "by far".' };
+  },
+  range(d) {
+    const s = t1Sorted(d), hi = s[0], lo = s[s.length - 1];
+    return { stem: `The figures range ____ ${d.val(lo.v)} ${t1For(lo.name)} to ${d.val(hi.v)} ${t1For(hi.name)}.`, answer: 'from', wrong: ['between', 'at', 'within'], hl: [lo.name, hi.name], vi: 'range from … to … : trải dài từ thấp nhất đến cao nhất. "between" phải đi với "and".' };
+  },
+  remainder(d) {
+    if (!d.pct && !d.total) return null;
+    const s = t1Sorted(d), total = d.pct ? 100 : d.total, rest = total - s[0].v - s[1].v;
+    const tail = d.pct ? `${rest}% was divided among the other sources` : `${rest} students were spread across the other sports`;
+    return { stem: `After ${t1Nm(s[0].name)} and ${t1Nm(s[1].name)}, the ____ ${tail}.`, answer: 'remaining', wrong: ['remain', 'rest of', 'combined'], hl: s.slice(2).map(x => x.name), vi: `Phần còn lại: ${total} − ${t1Num(s[0].v)} − ${t1Num(s[1].v)} = ${t1Num(rest)} → the remaining ${t1Num(rest)}.` };
+  },
+  respectively(d) {
+    const s = t1Shuffle(t1Sorted(d)), [a, b] = s;
+    return { stem: `${t1Cap(t1Nm(a.name))} and ${t1Nm(b.name)} stand at ${d.val(a.v)} and ${d.val(b.v)} ____.`, answer: 'respectively', wrong: ['relatively', 'separately', 'accordingly'], hl: [a.name, b.name], vi: 'respectively = theo thứ tự đã nêu: số thứ nhất của đối tượng thứ nhất, số thứ hai của đối tượng thứ hai.' };
+  },
+  similar(d) {
+    const s = t1Sorted(d);
+    for (let i = 0; i + 2 < s.length; i++) {
+      const a = s[i], c = s[i + 2];
+      const spread = a.v - c.v, range = s[0].v - s[s.length - 1].v;
+      if (spread > 0 && spread / a.v <= 0.3 && spread / range <= 0.25) {
+        return { stem: `${t1Cap(t1Nm(a.name))}, ${t1Nm(s[i + 1].name)} and ${t1Nm(c.name)} record broadly ____ figures.`, answer: 'similar', wrong: ['same', 'equal', 'alike'], hl: [a.name, s[i + 1].name, c.name], vi: 'Ba cột gần nhau nhưng không bằng hẳn → broadly similar. "same" phải có "the" và nghĩa là y hệt.' };
+      }
+    }
+    return null;
+  },
+  fraction(d) {
+    const s = t1Sorted(d), hi = s[0];
+    for (const lo of s.slice().reverse()) {
+      const r = lo.v / hi.v;
+      const f = T1_FRACTIONS.find(([x]) => r >= x && r <= x * 1.12);
+      if (f) {
+        const others = T1_FRACTIONS.filter(x => x !== f).map(x => x[1]);
+        return { stem: `The figure for ${t1Nm(lo.name)} is little more than ____ of that for ${t1Nm(hi.name)}.`, answer: f[1], wrong: [...others, 'a tenth'], hl: [lo.name, hi.name], vi: `${t1Num(lo.v)} ÷ ${t1Num(hi.v)} ≈ ${r.toFixed(2)}, nhỉnh hơn 1/${f[1] === 'a quarter' ? 4 : f[1] === 'a third' ? 3 : 2} một chút → little more than ${f[1]}.` };
+      }
+    }
+    return null;
+  },
+};
+const T1_CMP_BY_LV = {
+  a: ['highest', 'lowest', 'pair', 'highest', 'lowest', 'pair'],
+  d: ['multiple', 'negligible', 'combined', 'numamount', 'accounted', 'highest', 'multiple'],
+  l: ['byfar', 'range', 'remainder', 'respectively', 'similar', 'fraction', 'multiple', 'negligible'],
+};
+function t1CmpRound(prevType) {
+  for (let tries = 0; tries < 80; tries++) {
+    const type = t1Pick(T1_CMP_BY_LV[_t1Lv]);
+    if (type === prevType && tries < 40) continue;
+    const d = t1Pick(T1_DATA);
+    const q = T1_CMP_TYPES[type](d);
+    if (!q) continue;
+    const opts = t1Shuffle([q.answer, ...q.wrong.slice(0, 3)]);
+    return { ...q, type, d, opts, correct: opts.indexOf(q.answer) };
+  }
+  return null;
+}
+function t1CmpChart(q) {
+  return t1BarChart({ title: q.d.title, unit: q.d.unit, rows: q.d.rows.map(([name, v]) => ({ name, v, hl: q.hl.includes(name) })),
+    max: q.d.pct ? 100 : undefined, fmt: v => q.d.id === 'housing' ? '$' + t1Num(v) : t1Num(v) });
+}
+function t1CmpStart() {
+  t1Leave();
+  _t1 = { game: 'compare', i: 0, score: 0, combo: 0, right: 0, coins: 0, misses: [], answered: false };
+  _t1.pick = t1CmpPick;
+  _t1.keyPick = t1CmpPick;
+  _t1.next = t1CmpNext;
+  _t1.q = t1CmpRound();
+  t1Bind();
+  tsSfx('equip');
+  t1CmpRender();
+}
+function t1CmpStem(q, filled) {
+  return escapeHtml(q.stem).replace('____', `<span class="t1-blank">${filled ? escapeHtml(q.answer) : '______'}</span>`);
+}
+function t1CmpRender() {
+  const g = _t1, q = g.q;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play">
+      ${t1Head(g)}
+      ${t1CmpChart(q)}
+      <p class="t1-stem">${t1CmpStem(q, g.answered)}</p>
+      <div class="t1-opts">${t1Options(q.opts, g.answered ? g.chosen : null, q.correct)}</div>
+      ${g.answered ? `<div class="t1-fb ${g.chosen === q.correct ? 'ok' : 'no'}">
+          <strong>${g.chosen === q.correct ? 'Đúng!' : `Chưa đúng. Đáp án: ${escapeHtml(q.answer)}`}</strong>
+          <span>${escapeHtml(q.vi)}</span>
+        </div>
+        <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.i + 1 >= T1_ROUNDS ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>` :
+        '<div class="t1-hint">Các cột tô cam là đối tượng trong câu. Bấm 1–4 hoặc chạm vào đáp án.</div>'}
+    </div>`;
+}
+function t1CmpPick(i) {
+  const g = _t1;
+  if (!g || g.answered || i < 0 || i >= g.q.opts.length) return;
+  g.answered = true;
+  g.chosen = i;
+  const ok = i === g.q.correct;
+  t1Score(g, ok);
+  if (!ok) g.misses.push(`${t1CmpChart(g.q)}<div class="t1-review-line">${t1CmpStem(g.q, true)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s>. ${escapeHtml(g.q.vi)}</div>`);
+  t1CmpRender();
+}
+function t1CmpNext() {
+  const g = _t1;
+  if (!g || !g.answered) return;
+  g.i++;
+  if (g.i >= T1_ROUNDS) { t1Finish(g, 'compare', 'bar_chart'); return; }
+  g.answered = false;
+  g.chosen = null;
+  g.q = t1CmpRound(g.q.type);
+  tsSfx('key');
+  t1CmpRender();
+}
 // TASK1 END
