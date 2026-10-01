@@ -252,7 +252,9 @@ function authenticate(req, res, next) {
       return res.status(401).json({ error: 'Session ended after a password change. Please sign in again.' });
     }
     const liveRole = adminRole(dbUser.email) === 'admin' ? 'admin' : (dbUser.role || 'student');
-    req.user = { ...decoded, role: liveRole, name: dbUser.name };
+    // ADMIN_EMAIL accounts play the games with unlimited coins and items.
+    const unlimited = getAdminEmails().includes(String(dbUser.email || '').toLowerCase());
+    req.user = { ...decoded, role: liveRole, name: dbUser.name, unlimited };
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -4015,6 +4017,23 @@ const walletOut = w => ({
   day_left: w.day === walletDay() ? Math.max(0, WALLET_DAY_MAX - (w.day_earned || 0)) : WALLET_DAY_MAX,
 });
 
+// Admin accounts (ADMIN_EMAIL on Railway) test and demo the games with no
+// limits: the wallet is topped up before and after every change, every look
+// is owned, and the daily caps never bite. earned and week_earned are left
+// alone, so the rankings are not touched.
+const ADMIN_COINS = 999999;
+function walletUnlimited(w, room) {
+  if (!w.inv) w.inv = {};
+  if (!w.owned) w.owned = {};
+  w.coins = Math.max(w.coins || 0, ADMIN_COINS);
+  // One below the cap while a change runs, so buying in the shop still works.
+  Object.keys(SHOP_PRICES).forEach(k => { w.inv[k] = WALLET_INV_MAX - (room ? 1 : 0); });
+  Object.keys(COSMETIC_PRICES).forEach(k => { w.owned[k] = true; });
+  w.day_earned = 0;
+  w.chest_n = 0;
+  w.merch_n = 0;
+}
+
 // Runs fn against the student's wallet. A string back from fn is a refusal:
 // nothing is saved and the student sees why.
 function walletRoute(fn) {
@@ -4026,7 +4045,9 @@ function walletRoute(fn) {
         if (!w.inv) w.inv = {};
         if (!w.owned) w.owned = {};
         if (!w.equip) w.equip = {};
+        if (req.user.unlimited) walletUnlimited(w, true);
         refusal = fn(w, req.body || {}, extra);
+        if (req.user.unlimited && !refusal) walletUnlimited(w);
         return !refusal;
       });
       if (refusal) return res.status(400).json({ error: refusal, ...walletOut(w) });
@@ -4039,6 +4060,7 @@ function walletRoute(fn) {
 
 app.get('/api/game/wallet', authenticate, (req, res) => {
   try {
+    if (req.user.unlimited) return res.json(walletOut(db.updateWallet(req.user.id, w => { walletUnlimited(w); return true; })));
     res.json(walletOut(db.getWallet(req.user.id) || {}));
   } catch (err) {
     res.status(500).json({ error: 'Failed to load coins' });
@@ -4533,7 +4555,7 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
       return Math.max(...SHOOT_MODES.map(m => s[`${m}_${diff}`] || 0));
     };
     const ranked = db.getAllUsers()
-      .filter(u => u.role === 'student' && (!inScope || inScope.has(u.id)))
+      .filter(u => u.role === 'student' && !getAdminEmails().includes(String(u.email || '').toLowerCase()) && (!inScope || inScope.has(u.id)))
       .map(u => ({ id: u.id, name: u.name || 'Học viên', value: value(u.id) }))
       .filter(r => r.value > 0)
       .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
