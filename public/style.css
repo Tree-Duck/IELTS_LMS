@@ -8941,3 +8941,44 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .rd-rw-model small { display: block; color: var(--gray-600, #5b6470); font-size: 0.82rem; }
 .rd-rw-btns { margin-top: 0.9rem; }
 @media (max-width: 600px) { .rd-rw-modes button { flex: 1 1 auto; font-size: 0.85rem; padding: 0.4rem 0.6rem; } }
+
+/* Task 1 static games */
+.t1-shake { animation: t1Shake .35s; }
+@keyframes t1Shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.t1-flash-stage { position: relative; }
+.t1-flash-cover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 800; color: var(--forest); background: repeating-linear-gradient(45deg, #EEF4F1, #EEF4F1 14px, #E2ECE7 14px, #E2ECE7 28px); border-radius: 16px; }
+.t1-flash-bar { height: 6px; border-radius: 99px; background: #E2ECE7; overflow: hidden; margin: 0.5rem 0; }
+.t1-flash-bar i { display: block; height: 100%; background: #E5533D; transform-origin: left; }
+.t1-pie-wrap { text-align: center; }
+.t1-chart svg.t1-pie { width: min(220px, 60vw); height: auto; display: block; margin: 0.4rem auto; }
+.t1-bars--hidden .t1-bar-fill { width: 0 !important; }
+.t1-bars--hidden .t1-bar-track { background: repeating-linear-gradient(90deg, #EEF4F1, #EEF4F1 8px, #E2ECE7 8px, #E2ECE7 16px); }
+.t1-rank-picked { display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 1.6rem; margin-bottom: 0.4rem; }
+.t1-rank-picked span { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem 0.2rem 0.25rem; border-radius: 99px; background: #E6F4EA; color: #14532D; font-weight: 700; font-size: 0.9rem; }
+.t1-rank-picked b { display: inline-flex; width: 1.4rem; height: 1.4rem; border-radius: 50%; align-items: center; justify-content: center; background: var(--forest); color: #fff; font-size: 0.75rem; }
+.t1-opts--long .t1-opt span { text-align: left; line-height: 1.4; }
+.t1-maps { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin: 0.6rem 0; }
+.t1-map-h { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; color: var(--gray-800); }
+.t1-map-h small { float: right; font-weight: 800; color: var(--forest); }
+.t1-map { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; padding: 6px; border-radius: 14px; background: #DDEBD9; border: 2px solid #B9D3B2; }
+.t1-map-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: clamp(1.1rem, 3.2vw, 1.8rem); border: 0; border-radius: 8px; background: #F4F9F1; cursor: default; padding: 0; }
+.t1-map-cell.empty { background: #EAF2E6; }
+#mp-after .t1-map-cell { cursor: pointer; }
+#mp-after .t1-map-cell:hover { box-shadow: inset 0 0 0 2px var(--forest); }
+.t1-map-cell.found { box-shadow: inset 0 0 0 3px #1F8A4C !important; background: #E6F4EA; }
+.t1-map-cell.missed { box-shadow: inset 0 0 0 3px #E5533D !important; background: #FFF1EE; }
+.t1-map-ask { margin-top: 0.4rem; }
+.t1-proc-title { font-weight: 800; font-size: 1.15rem; margin: 0.4rem 0; color: var(--gray-800); }
+.t1-belt { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; padding: 0.6rem; border-radius: 14px; background: repeating-linear-gradient(90deg, #EAEFEC, #EAEFEC 10px, #DFE6E2 10px, #DFE6E2 20px); }
+.t1-belt i { font-style: normal; opacity: 0.5; }
+.t1-belt-slot { min-width: 3rem; min-height: 3rem; padding: 0.25rem 0.4rem; border-radius: 10px; border: 2px dashed #A9B9B1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.6); font-size: 0.7rem; text-align: center; }
+.t1-belt-slot b { color: #7E918A; font-size: 0.95rem; }
+.t1-belt-slot.on { border: 2px solid #1F8A4C; background: #fff; animation: jCard .3s; }
+.t1-belt-slot span { font-size: 1.3rem; }
+.t1-proc-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
+.t1-proc-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; padding: 0.7rem 0.5rem; border-radius: 14px; border: 2px solid var(--line); background: var(--surface, #fff); font: inherit; font-weight: 700; font-size: 0.9rem; color: var(--gray-800); cursor: pointer; }
+.t1-proc-card span { font-size: 1.8rem; }
+.t1-proc-card kbd { position: absolute; top: 4px; left: 6px; font-size: 0.7rem; opacity: 0.55; }
+.t1-proc-card:hover { border-color: var(--forest); }
+.t1-stat.late { color: #E5533D; }
+@media (max-width: 640px) { .t1-maps { grid-template-columns: 1fr; } }

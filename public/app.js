@@ -24971,10 +24971,732 @@ function t1SnakeOver(why) {
   }, 1100);
 }
 
-// Static games land one by one; until then their cards say so.
-function t1Soon(name) { showToast(name + ': đang làm, sắp có!'); }
-if (typeof t1FlashStart === 'undefined') window.t1FlashStart = () => t1Soon('Ước lượng chớp nhoáng');
-if (typeof t1RankStart === 'undefined') window.t1RankStart = () => t1Soon('Xếp hạng tốc độ');
-if (typeof t1MapStart === 'undefined') window.t1MapStart = () => t1Soon('Bản đồ tìm điểm khác');
-if (typeof t1ProcStart === 'undefined') window.t1ProcStart = () => t1Soon('Dây chuyền quy trình');
+/* ── Static games: shared arcade frame ─────────────────────────────────────
+   Lives, score and combo on one bar; a round counter when the game has a
+   fixed number of rounds. */
+function t1ArcTop(g, extra) {
+  return `<div class="t1-top">
+    <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+    <span class="t1-stat" id="ar-lives">${'❤️'.repeat(Math.max(0, g.lives))}${'🖤'.repeat(3 - Math.max(0, g.lives))}</span>
+    ${extra || ''}
+    <span class="t1-stat">⭐ <strong id="ar-score">${g.score}</strong></span>
+    <span class="t1-stat" id="ar-combo">${g.combo >= 2 ? '🔥 x' + g.combo : ''}</span>
+  </div>`;
+}
+function t1ArcHud() {
+  const g = _t1, $ = id => document.getElementById(id);
+  if (!g || !$('ar-score')) return;
+  $('ar-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
+  $('ar-score').textContent = g.score;
+  $('ar-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
+}
+function t1Hit(g, bonus) {
+  g.combo++; g.right++;
+  g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (bonus || 0);
+  g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+  tsSfx('coin');
+}
+function t1Miss(g) { g.combo = 0; g.lives--; tsSfx('wrong'); }
+function t1Shake(el) { if (!el) return; el.classList.remove('t1-shake'); void el.offsetWidth; el.classList.add('t1-shake'); }
+
+/* ── Static · Ước lượng chớp nhoáng ───────────────────────────────────────
+   A pie slice (or two bars) shows for a moment and is covered. Pick the
+   phrase that fits what you saw. Each right answer shortens the next flash;
+   three wrong answers end the run. Phrase ranges never overlap inside one
+   level, so exactly one option is true of the number. */
+const T1_FLASH_PIE = {
+  a: [['about a tenth', 9, 11], ['about a fifth', 19, 21], ['a quarter', 24, 26], ['a third', 32, 34], ['half', 49, 51], ['two thirds', 66, 68], ['three quarters', 74, 76]],
+  d: [['a small minority', 5, 9], ['just under a quarter', 21, 23], ['just over a quarter', 27, 29], ['roughly a third', 32, 34], ['nearly half', 45, 48], ['just over half', 52, 55], ['around two thirds', 65, 68], ['the vast majority', 85, 92]],
+};
+T1_FLASH_PIE.l = T1_FLASH_PIE.d;
+const T1_FLASH_RATIO = {
+  d: [['twice as many', 2], ['three times as many', 3], ['half as many', 0.5], ['roughly the same number of', 1]],
+  l: [['twice as many', 2], ['three times as many', 3], ['four times as many', 4], ['half as many', 0.5], ['one and a half times as many', 1.5], ['roughly the same number of', 1]],
+};
+const T1_FLASH_CFG = { a: { show: 2.5, ratio: 0 }, d: { show: 1.8, ratio: 0.3 }, l: { show: 1.2, ratio: 0.5 } };
+const T1_FLASH_CTX = [
+  { title: 'Household spending', of: 'household spending', cats: ['Housing', 'Food', 'Transport', 'Leisure', 'Clothing'] },
+  { title: 'Sources of electricity', of: 'electricity generation', cats: ['Coal', 'Gas', 'Nuclear power', 'Wind', 'Solar'] },
+  { title: 'How students travel to school', of: 'journeys to school', cats: ['Bus', 'Car', 'Bicycle', 'Walking', 'Train'] },
+  { title: 'Use of free time', of: 'free time', cats: ['Social media', 'Sport', 'Reading', 'Gaming', 'Music'] },
+];
+const T1_FLASH_PAIRS = [
+  { noun: 'students', a: 'football', b: 'tennis', unit: 'students', title: 'Students joining each club' },
+  { noun: 'visitors', a: 'the museum', b: 'the gallery', unit: 'visitors', title: 'Visitors in one week' },
+  { noun: 'cars', a: 'Japan', b: 'Italy', unit: 'thousand cars', title: 'Cars exported, 2020' },
+  { noun: 'books', a: 'novels', b: 'poetry', unit: 'books', title: 'Library loans in May' },
+];
+function t1PieSvg(slices, size) {
+  size = size || 220;
+  const r = size / 2 - 6, c = size / 2;
+  let a0 = -Math.PI / 2 + Math.random() * Math.PI * 2, g = '';
+  slices.forEach(s => {
+    const a1 = a0 + s.v / 100 * Math.PI * 2, big = a1 - a0 > Math.PI ? 1 : 0;
+    const p = t => `${(c + r * Math.cos(t)).toFixed(1)} ${(c + r * Math.sin(t)).toFixed(1)}`;
+    g += `<path d="M${c} ${c}L${p(a0)}A${r} ${r} 0 ${big} 1 ${p(a1)}Z" fill="${s.color}" stroke="#fff" stroke-width="2"/>`;
+    a0 = a1;
+  });
+  return `<svg viewBox="0 0 ${size} ${size}" class="t1-pie" aria-hidden="true">${g}</svg>`;
+}
+function t1FlashRound() {
+  const g = _t1, cfg = T1_FLASH_CFG[_t1Lv];
+  if (Math.random() < cfg.ratio) {
+    const set = T1_FLASH_RATIO[_t1Lv], pick = t1Pick(set), P = t1Pick(T1_FLASH_PAIRS);
+    const b = Math.round(t1Rand(30, 60)), a = Math.round(b * pick[1] * t1Rand(0.97, 1.03));
+    const opts = t1Shuffle([pick[0], ...t1Shuffle(set.filter(x => x !== pick).map(x => x[0])).slice(0, 3)]);
+    return { kind: 'ratio', P, a, b, answer: pick[0], opts,
+      chart: t1BarChart({ title: P.title, unit: P.unit, rows: [{ name: t1Cap(P.a), v: a, hl: true }, { name: t1Cap(P.b), v: b }], fmt: () => '' }),
+      line: `${t1Cap(P.a)} had ${pick[0]} ${P.noun} as ${P.b} (${a} and ${b}).`,
+      vi: 'So hai cột: dài gấp đôi → twice as many … as; bằng nửa → half as many … as; gần bằng → roughly the same number of … as.' };
+  }
+  const set = T1_FLASH_PIE[_t1Lv], pick = t1Pick(set), C = t1Pick(T1_FLASH_CTX);
+  const v = Math.round(t1Rand(pick[1], pick[2]));
+  const others = t1Shuffle(C.cats.slice(1)).slice(0, 3);
+  let rest = 100 - v;
+  const parts = others.map((name, i) => { const x = i === others.length - 1 ? rest : Math.max(2, Math.round(rest * t1Rand(0.25, 0.5))); rest -= x; return { name, v: x }; });
+  const slices = [{ name: C.cats[0], v, color: T1_COLORS[1] }, ...parts.map((p, i) => ({ ...p, color: ['#9FB7AE', '#C9D6D0', '#7E9C90'][i] }))];
+  const opts = t1Shuffle([pick[0], ...t1Shuffle(set.filter(x => x !== pick && (v < x[1] - 1 || v > x[2] + 1)).map(x => x[0])).slice(0, 3)]);
+  return { kind: 'pie', C, v, answer: pick[0], opts,
+    chart: `<div class="t1-chart t1-pie-wrap"><div class="t1-chart-title">${escapeHtml(C.title)}</div>${t1PieSvg(slices)}<div class="t1-legend">${slices.map(s => `<span><i style="background:${s.color}"></i>${escapeHtml(s.name)}</span>`).join('')}</div></div>`,
+    line: `${t1Cap(C.cats[0].toLowerCase())} accounted for ${pick[0]} of ${C.of} (${v}%).`,
+    vi: 'Nhìn lát cam so với cả hình tròn: 1/4 là một góc vuông, 1/2 là nửa hình, "just over" là nhỉnh hơn một chút, "nearly" là gần tới.' };
+}
+function t1FlashStart() {
+  t1Leave();
+  const g = _t1 = { game: 'flash', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, show: T1_FLASH_CFG[_t1Lv].show, answered: false, timers: [] };
+  g.stop = () => { g.timers.forEach(clearTimeout); };
+  g.keyPick = i => t1FlashPick(i);
+  g.pick = g.keyPick;
+  g.next = t1FlashNext;
+  t1Bind();
+  tsSfx('equip');
+  t1FlashNew();
+}
+function t1FlashNew() {
+  const g = _t1;
+  g.q = t1FlashRound();
+  g.answered = false;
+  g.hidden = false;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-flash">
+      ${t1ArcTop(g, `<span class="t1-stat">Câu <strong>${g.n + 1}</strong></span><span class="t1-stat">⚡ ${g.show.toFixed(1)} giây</span>`)}
+      <div class="t1-flash-stage" id="fl-stage">${g.q.chart}<div class="t1-flash-cover hidden" id="fl-cover">?</div><div class="t1-flash-bar"><i id="fl-bar"></i></div></div>
+      <p class="t1-stem" id="fl-stem">Nhìn kỹ! ${g.q.kind === 'pie' ? `Lát cam <b>${escapeHtml(g.q.C.cats[0])}</b> chiếm bao nhiêu?` : `<b>${escapeHtml(t1Cap(g.q.P.a))}</b> so với <b>${escapeHtml(g.q.P.b)}</b>?`}</p>
+      <div class="t1-opts hidden" id="fl-opts"></div>
+      <div id="fl-fb"></div>
+    </div>`;
+  const bar = document.getElementById('fl-bar');
+  bar.style.transition = `transform ${g.show}s linear`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+  g.timers.push(setTimeout(() => {
+    if (_t1 !== g) return;
+    g.hidden = true;
+    g.t0 = performance.now();
+    document.getElementById('fl-cover').classList.remove('hidden');
+    const o = document.getElementById('fl-opts');
+    o.innerHTML = t1Options(g.q.opts, null, -1);
+    o.classList.remove('hidden');
+    document.getElementById('fl-stem').innerHTML = g.q.kind === 'pie'
+      ? `${escapeHtml(t1Cap(g.q.C.cats[0].toLowerCase()))} accounted for <span class="t1-blank">______</span> of ${escapeHtml(g.q.C.of)}.`
+      : `${escapeHtml(t1Cap(g.q.P.a))} had <span class="t1-blank">______</span> ${escapeHtml(g.q.P.noun)} as ${escapeHtml(g.q.P.b)}.`;
+    tsSfx('key');
+  }, g.show * 1000));
+}
+function t1FlashPick(i) {
+  const g = _t1;
+  if (!g || g.game !== 'flash' || !g.hidden || g.answered || i < 0 || i >= g.q.opts.length) return;
+  g.answered = true;
+  const ok = g.q.opts[i] === g.q.answer, secs = (performance.now() - g.t0) / 1000;
+  if (ok) { t1Hit(g, Math.max(0, Math.round(6 - secs))); g.show = Math.max(0.6, g.show * 0.95); }
+  else {
+    t1Miss(g);
+    g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.line)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s>.</div>`);
+  }
+  document.getElementById('fl-cover').classList.add('hidden');
+  document.getElementById('fl-opts').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.answer));
+  document.getElementById('fl-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? `Đúng! ${secs < 3 ? '⚡ Nhanh!' : ''}` : 'Chưa đúng.'}</strong><span>${escapeHtml(g.q.line)}</span><span>${escapeHtml(g.q.vi)}</span></div>
+    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>`;
+  t1ArcHud();
+}
+function t1FlashNext() {
+  const g = _t1;
+  if (!g || !g.answered) return;
+  g.n++;
+  if (g.lives <= 0 || g.n >= 20) { g.stop(); t1Finish(g, 'flash', 'pie_chart', { big: `${g.right}/${g.n} câu đúng · chớp còn ${g.show.toFixed(1)} giây`, icon: g.right >= 16 ? '🏆' : g.right >= 10 ? '👏' : '⚡', good: g.right >= 14 }); return; }
+  t1FlashNew();
+}
+
+/* ── Static · Xếp hạng tốc độ ─────────────────────────────────────────────
+   The bars show for a moment, then their lengths are hidden. Tap the names
+   from highest to lowest; a wrong tap costs a life and flashes the bars back.
+   Then pick the ranking sentence that matches. Eight rounds. */
+const T1_RANK_CFG = { a: { n: 4, show: 3.2, gap: 0.15 }, d: { n: 5, show: 2.6, gap: 0.08 }, l: { n: 6, show: 2.1, gap: 0.035 } };
+const T1_RANK_CTX = [
+  { title: 'Tourists visiting each country, 2019', unit: 'million visitors', names: ['France', 'Spain', 'USA', 'China', 'Italy', 'Turkey', 'Mexico', 'Thailand'], base: [20, 90], what: 'the number of tourists' },
+  { title: 'Rice production, 2020', unit: 'million tonnes', names: ['China', 'India', 'Indonesia', 'Vietnam', 'Thailand', 'Bangladesh', 'Myanmar'], base: [20, 210], what: 'rice production' },
+  { title: 'Internet users per 100 people', unit: 'users per 100 people', names: ['Japan', 'Germany', 'UK', 'Brazil', 'Canada', 'Australia', 'Korea'], base: [55, 96], what: 'internet use' },
+  { title: 'Average monthly rent in city centres', unit: 'US dollars', names: ['London', 'Paris', 'Tokyo', 'Sydney', 'Berlin', 'Madrid', 'Seoul'], base: [900, 2600], what: 'rent' },
+];
+function t1RankRound() {
+  const cfg = T1_RANK_CFG[_t1Lv], C = t1Pick(T1_RANK_CTX);
+  const names = t1Shuffle(C.names).slice(0, cfg.n);
+  // Values spaced by at least the level's gap, so the order is readable but tight at Huyền thoại.
+  let v = t1Rand(C.base[1] * 0.75, C.base[1]);
+  const vals = [];
+  for (let i = 0; i < cfg.n; i++) { vals.push(Math.round(v * 10) / 10); v *= 1 - cfg.gap - Math.random() * cfg.gap * 1.5; }
+  const rows = t1Shuffle(names.map((name, i) => ({ name, v: vals[i] })));
+  const order = rows.slice().sort((a, b) => b.v - a.v).map(r => r.name);
+  const N = n => t1Nm(n);
+  const s = o => `${t1Cap(N(o[0]))} ranked first for ${C.what}, followed by ${N(o[1])} and ${N(o[2])}, while ${N(o[o.length - 1])} had the lowest figure.`;
+  const right = s(order);
+  const n = order.length;
+  const wrongs = [s([order[1], order[0], ...order.slice(2)]), s([order[0], order[2], order[1], ...order.slice(3)]), s([...order.slice(0, n - 2), order[n - 1], order[n - 2]])];
+  const opts = t1Shuffle([right, ...[...new Set(wrongs)].filter(x => x !== right).slice(0, 2)]);
+  return { C, rows, order, opts, right };
+}
+function t1RankChart(q, hide) {
+  return t1BarChart({ title: q.C.title, unit: q.C.unit, rows: q.rows.map(r => ({ name: r.name, v: r.v, hl: false })), fmt: hide ? () => '' : t1Num }).replace('t1-bars', 't1-bars' + (hide ? ' t1-bars--hidden' : ''));
+}
+function t1RankStart() {
+  t1Leave();
+  const g = _t1 = { game: 'rank', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, timers: [], answered: false };
+  g.stop = () => { g.timers.forEach(clearTimeout); };
+  g.keyPick = i => { if (g.phase === 'tap') t1RankTap(i); else if (g.phase === 'sent') t1RankSent(i); };
+  g.pick = g.keyPick;
+  g.next = t1RankNext;
+  t1Bind();
+  tsSfx('equip');
+  t1RankNew();
+}
+function t1RankNew() {
+  const g = _t1, cfg = T1_RANK_CFG[_t1Lv];
+  g.q = t1RankRound();
+  g.got = [];
+  g.phase = 'look';
+  g.answered = false;
+  g.btns = t1Shuffle(g.q.order);
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-rank">
+      ${t1ArcTop(g, `<span class="t1-stat">Vòng <strong>${g.n + 1}</strong>/8</span>`)}
+      <div id="rk-chart">${t1RankChart(g.q, false)}</div>
+      <div class="t1-flash-bar"><i id="rk-bar"></i></div>
+      <p class="t1-stem" id="rk-stem">Nhớ thứ tự các cột!</p>
+      <div class="t1-rank-picked" id="rk-picked"></div>
+      <div class="t1-opts t1-rank-btns hidden" id="rk-btns"></div>
+      <div id="rk-fb"></div>
+    </div>`;
+  const bar = document.getElementById('rk-bar');
+  bar.style.transition = `transform ${cfg.show}s linear`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+  g.timers.push(setTimeout(() => {
+    if (_t1 !== g) return;
+    g.phase = 'tap';
+    g.t0 = performance.now();
+    document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, true);
+    document.getElementById('rk-stem').textContent = 'Chạm tên theo thứ tự từ cao nhất xuống thấp nhất.';
+    t1RankBtns();
+    tsSfx('key');
+  }, cfg.show * 1000));
+}
+function t1RankBtns() {
+  const g = _t1, el = document.getElementById('rk-btns');
+  el.classList.remove('hidden');
+  el.innerHTML = g.btns.map((n, i) => `<button class="t1-opt${g.got.includes(n) ? ' dim' : ''}" ${g.got.includes(n) ? 'disabled' : ''} onclick="_t1.pick(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(n)}</span></button>`).join('');
+  document.getElementById('rk-picked').innerHTML = g.got.map((n, i) => `<span><b>${i + 1}</b>${escapeHtml(n)}</span>`).join('');
+}
+function t1RankTap(i) {
+  const g = _t1;
+  if (!g || g.phase !== 'tap' || i < 0 || i >= g.btns.length) return;
+  const name = g.btns[i];
+  if (g.got.includes(name)) return;
+  if (name === g.q.order[g.got.length]) {
+    g.got.push(name);
+    tsSfx('key');
+    if (g.got.length === g.q.order.length) {
+      const secs = (performance.now() - g.t0) / 1000;
+      t1Hit(g, Math.max(0, Math.round(10 - secs)));
+      t1RankToSent();
+      return;
+    }
+    t1RankBtns();
+  } else {
+    t1Miss(g);
+    if (!g.missedRound) { g.missedRound = true; g.misses.push(`${t1RankChart(g.q, false)}<div class="t1-review-line">Thứ tự đúng: ${g.q.order.map(escapeHtml).join(' › ')}</div>`); }
+    t1Shake(document.querySelectorAll('#rk-btns .t1-opt')[i]);
+    t1ArcHud();
+    if (g.lives <= 0) { g.phase = 'over'; document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false); g.timers.push(setTimeout(() => t1RankEnd(g), 1200)); return; }
+    // Show the bars again for a moment as a hint.
+    document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false);
+    g.timers.push(setTimeout(() => { if (_t1 === g && g.phase === 'tap') document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, true); }, 700));
+  }
+  t1ArcHud();
+}
+function t1RankToSent() {
+  const g = _t1;
+  g.phase = 'sent';
+  g.missedRound = false;
+  document.getElementById('rk-chart').innerHTML = t1RankChart(g.q, false);
+  document.getElementById('rk-picked').innerHTML = '';
+  document.getElementById('rk-stem').textContent = 'Đúng thứ tự! Giờ chọn câu xếp hạng đúng:';
+  const el = document.getElementById('rk-btns');
+  el.classList.add('t1-opts--long');
+  el.innerHTML = t1Options(g.q.opts, null, -1);
+  t1ArcHud();
+}
+function t1RankSent(i) {
+  const g = _t1;
+  if (!g || g.phase !== 'sent' || g.answered || i < 0 || i >= g.q.opts.length) return;
+  g.answered = true;
+  const ok = g.q.opts[i] === g.q.right;
+  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`${t1RankChart(g.q, false)}<div class="t1-review-line">${escapeHtml(g.q.right)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s></div>`); }
+  document.getElementById('rk-btns').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.right));
+  document.getElementById('rk-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>ranked first → followed by A and B (hạng 2, 3) → while X had the lowest figure (thấp nhất).</span></div>
+    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 || g.n + 1 >= 8 ? 'Xem kết quả' : 'Vòng tiếp'} → <small>Enter</small></button>`;
+  t1ArcHud();
+}
+function t1RankNext() {
+  const g = _t1;
+  if (!g || !g.answered) return;
+  g.n++;
+  if (g.lives <= 0 || g.n >= 8) { t1RankEnd(g); return; }
+  t1RankNew();
+}
+function t1RankEnd(g) {
+  if (_t1 !== g) return;
+  g.stop();
+  t1Finish(g, 'rank', 'bar_chart', { big: `${g.right} lượt đúng · ${g.n} vòng xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🏁', good: g.lives > 0 });
+}
+
+/* ── Static · Bản đồ tìm điểm khác ────────────────────────────────────────
+   Two maps of the same town, before and after. Tap each change on the
+   after map, then pick the sentence that describes it (static sheet 6.x:
+   demolished, built, converted into, extended, relocated). Wrong taps cost
+   time. Four maps per game. */
+const T1_MAP_COLS = 6, T1_MAP_ROWS = 4;
+const T1_MAP_T = {
+  house:    ['🏠', 'the houses', 'new houses', true],
+  school:   ['🏫', 'the school', 'a new school'],
+  factory:  ['🏭', 'the factory', 'a factory'],
+  park:     ['🌳', 'the park', 'a park'],
+  carpark:  ['🅿️', 'the car park', 'a car park'],
+  shop:     ['🏪', 'the shop', 'a shop'],
+  hospital: ['🏥', 'the hospital', 'a hospital'],
+  church:   ['⛪', 'the church', 'a church'],
+  farm:     ['🌾', 'the farmland', 'farmland'],
+  flats:    ['🏢', 'the apartments', 'apartments', true],
+  mall:     ['🏬', 'the shopping centre', 'a shopping centre'],
+  station:  ['🚉', 'the train station', 'a train station'],
+  hotel:    ['🏨', 'the hotel', 'a hotel'],
+  cafe:     ['☕', 'the café', 'a café'],
+  stadium:  ['🏟️', 'the stadium', 'a stadium'],
+};
+const T1_MAP_CONVERT = [['factory', 'flats'], ['farm', 'house'], ['carpark', 'park'], ['shop', 'cafe'], ['hotel', 'flats'], ['church', 'cafe'], ['station', 'mall']];
+const T1_MAP_CFG = { a: { n: 3, time: 75, kinds: ['demolish', 'build', 'convert'] }, d: { n: 4, time: 60, kinds: ['demolish', 'build', 'convert', 'extend', 'move'] }, l: { n: 5, time: 50, kinds: ['demolish', 'build', 'convert', 'extend', 'move'] } };
+function t1MapCap(s) { return t1Cap(s); }
+function t1MapWas(t) { return T1_MAP_T[t][3] ? 'were' : 'was'; }
+function t1MapDir(a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'east' : 'west') : (dy > 0 ? 'south' : 'north');
+}
+function t1MapRound() {
+  const cfg = T1_MAP_CFG[_t1Lv], N = T1_MAP_COLS * T1_MAP_ROWS;
+  for (let tries = 0; tries < 50; tries++) {
+    const before = Array(N).fill(null);
+    const types = t1Shuffle(Object.keys(T1_MAP_T)).slice(0, 9);
+    const cells = t1Shuffle([...Array(N).keys()]);
+    types.forEach((t, i) => { before[cells[i]] = t; });
+    const after = before.slice(), changes = [], used = new Set();
+    const xy = i => ({ x: i % T1_MAP_COLS, y: Math.floor(i / T1_MAP_COLS) });
+    const empty = () => t1Shuffle([...Array(N).keys()].filter(i => !before[i] && !after[i] && !used.has(i)));
+    const filled = () => t1Shuffle([...Array(N).keys()].filter(i => before[i] && after[i] === before[i] && !used.has(i)));
+    const kinds = t1Shuffle([...cfg.kinds, ...cfg.kinds]).slice(0, cfg.n);
+    for (const k of kinds) {
+      if (k === 'demolish') {
+        const i = filled()[0]; if (i == null) continue;
+        after[i] = null; used.add(i);
+        changes.push({ k, cells: [i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} demolished.` });
+      } else if (k === 'build') {
+        const i = empty()[0]; if (i == null) continue;
+        const t = t1Pick(Object.keys(T1_MAP_T).filter(x => !before.includes(x) && !after.includes(x))); if (!t) continue;
+        after[i] = t; used.add(i);
+        changes.push({ k, cells: [i], t, s: `${t1MapCap(T1_MAP_T[t][2])} ${t1MapWas(t)} built.` });
+      } else if (k === 'convert') {
+        const pair = t1Shuffle(T1_MAP_CONVERT).find(([a, b]) => { const i = before.indexOf(a); return i >= 0 && after[i] === a && !used.has(i) && !before.includes(b); });
+        if (!pair) continue;
+        const i = before.indexOf(pair[0]);
+        after[i] = pair[1]; used.add(i);
+        changes.push({ k, cells: [i], t: pair[0], s: `${t1MapCap(T1_MAP_T[pair[0]][1])} ${t1MapWas(pair[0])} converted into ${T1_MAP_T[pair[1]][2]}.`, to: pair[1] });
+      } else if (k === 'extend') {
+        const i = filled().find(j => { const p = xy(j); return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const x = p.x + dx, y = p.y + dy, n = y * T1_MAP_COLS + x; return x >= 0 && y >= 0 && x < T1_MAP_COLS && y < T1_MAP_ROWS && !before[n] && !after[n] && !used.has(n); }); });
+        if (i == null) continue;
+        const p = xy(i), n = t1Shuffle([[1, 0], [-1, 0], [0, 1], [0, -1]]).map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).filter(q => q.x >= 0 && q.y >= 0 && q.x < T1_MAP_COLS && q.y < T1_MAP_ROWS).map(q => q.y * T1_MAP_COLS + q.x).find(m => !before[m] && !after[m] && !used.has(m));
+        after[n] = before[i]; used.add(i); used.add(n);
+        changes.push({ k, cells: [n, i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} extended.` });
+      } else if (k === 'move') {
+        const i = filled()[0], j = empty().find(m => { const a = xy(i), b = xy(m); return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) >= 3; });
+        if (i == null || j == null) continue;
+        after[j] = before[i]; after[i] = null; used.add(i); used.add(j);
+        changes.push({ k, cells: [j, i], t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} relocated to the ${t1MapDir(xy(i), xy(j))}.` });
+      }
+    }
+    if (changes.length < cfg.n) continue;
+    changes.forEach(c => { c.opts = t1Shuffle([c.s, ...t1MapWrong(c)]); });
+    return { before, after, changes };
+  }
+  return null;
+}
+// Wrong sentences: the same subject with the other verbs.
+function t1MapWrong(c) {
+  const T = T1_MAP_T[c.t], subj = c.k === 'build' ? t1MapCap(T[2]) : t1MapCap(T[1]), was = t1MapWas(c.t);
+  const conv = (T1_MAP_CONVERT.find(p => p[0] === c.t) || [null, c.t === 'flats' ? 'hotel' : 'flats'])[1];
+  const pool = [
+    `${subj} ${was} demolished.`, `${subj} ${was} extended.`, `${subj} ${was} converted into ${T1_MAP_T[conv][2]}.`,
+    `${subj} ${was} relocated to the ${t1Pick(['north', 'south', 'east', 'west'])}.`, `${subj} remained unchanged.`,
+    c.k === 'build' ? `${subj} ${was} demolished.` : `${subj} ${was} built.`,
+  ].filter(s => s.split(' ').slice(-2).join(' ') !== c.s.split(' ').slice(-2).join(' ') && !(c.k === 'move' && /relocated/.test(s)));
+  return t1Shuffle([...new Set(pool)]).slice(0, 3);
+}
+function t1MapGrid(cells, id, tap, g) {
+  return `<div class="t1-map" id="${id}">${cells.map((t, i) => {
+    const found = g && g.found.some(c => c.cells.includes(i));
+    return `<button class="t1-map-cell${t ? '' : ' empty'}${found ? ' found' : ''}" ${tap ? `onclick="t1MapTap(${i})"` : 'tabindex="-1"'} aria-label="${t ? escapeHtml(T1_MAP_T[t][1]) : 'trống'}">${t ? T1_MAP_T[t][0] : ''}</button>`;
+  }).join('')}</div>`;
+}
+function t1MapStart() {
+  t1Leave();
+  const g = _t1 = { game: 'map', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0 };
+  g.stop = () => { clearInterval(g.timer); };
+  g.keyPick = i => { if (g.ask) t1MapPick(i); };
+  g.pick = g.keyPick;
+  g.next = () => { if (g.roundDone) t1MapNextMap(); };
+  t1Bind();
+  tsSfx('equip');
+  t1MapNew();
+}
+function t1MapNew() {
+  const g = _t1;
+  g.q = t1MapRound();
+  g.found = [];
+  g.ask = null;
+  g.roundDone = false;
+  g.answered = false;
+  g.left = T1_MAP_CFG[_t1Lv].time;
+  t1MapRender();
+  clearInterval(g.timer);
+  g.last = performance.now();
+  g.timer = setInterval(() => {
+    if (_t1 !== g) { clearInterval(g.timer); return; }
+    const now = performance.now();
+    if (!g.ask && !document.hidden) g.left -= (now - g.last) / 1000;
+    g.last = now;
+    const el = document.getElementById('mp-time');
+    if (el) el.textContent = Math.max(0, Math.ceil(g.left));
+    if (g.left <= 0) t1MapTimeUp();
+  }, 200);
+}
+function t1MapRender() {
+  const g = _t1;
+  t1Root().innerHTML = `
+    <div class="lv-wrap t1-play t1-mapgame">
+      ${t1ArcTop(g, `<span class="t1-stat">Bản đồ <strong>${g.n + 1}</strong>/4</span><span class="t1-stat">⏱️ <strong id="mp-time">${Math.ceil(g.left)}</strong></span><span class="t1-stat">🔎 <strong id="mp-left">${g.q.changes.length - g.found.length}</strong> chỗ</span>`)}
+      <div class="t1-maps">
+        <div><div class="t1-map-h">Trước <small>N ↑</small></div>${t1MapGrid(g.q.before, 'mp-before', false)}</div>
+        <div><div class="t1-map-h">Sau · chạm vào chỗ thay đổi</div>${t1MapGrid(g.q.after, 'mp-after', true, g)}</div>
+      </div>
+      <div id="mp-ask"></div>
+      <div class="t1-hint">Chạm ô trống cũng tính nếu ở đó có công trình bị phá. Chạm sai trừ 4 giây.</div>
+    </div>`;
+}
+function t1MapTap(i) {
+  const g = _t1;
+  if (!g || g.game !== 'map' || g.ask || g.roundDone) return;
+  const c = g.q.changes.find(x => !g.found.includes(x) && x.cells.includes(i));
+  if (!c) {
+    if (g.found.some(x => x.cells.includes(i))) return;
+    g.left -= 4; g.combo = 0;
+    tsSfx('miss');
+    t1Shake(document.querySelectorAll('#mp-after .t1-map-cell')[i]);
+    t1ArcHud();
+    return;
+  }
+  g.found.push(c);
+  g.ask = c;
+  g.answered = false;
+  tsSfx('key');
+  document.querySelectorAll('#mp-after .t1-map-cell').forEach((b, k) => { if (c.cells.includes(k)) b.classList.add('found'); });
+  document.getElementById('mp-left').textContent = g.q.changes.length - g.found.length;
+  document.getElementById('mp-ask').innerHTML = `<div class="t1-map-ask"><p class="t1-stem">Câu nào tả đúng thay đổi này?</p><div class="t1-opts t1-opts--long">${t1Options(c.opts, null, -1)}</div><div id="mp-fb"></div></div>`;
+  document.getElementById('mp-ask').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function t1MapPick(i) {
+  const g = _t1, c = g && g.ask;
+  if (!c || g.answered || i < 0 || i >= c.opts.length) return;
+  g.answered = true;
+  const ok = c.opts[i] === c.s;
+  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`<div class="t1-review-line">${escapeHtml(c.s)}<br>Bạn chọn <s>${escapeHtml(c.opts[i])}</s></div>`); }
+  document.querySelector('#mp-ask .t1-opts').innerHTML = t1Options(c.opts, i, c.opts.indexOf(c.s));
+  const why = { demolish: 'Có ở bản đồ trước, mất ở bản đồ sau → was demolished.', build: 'Ô trống thành công trình mới → was built / was constructed.', convert: 'Cùng chỗ, đổi công năng → was converted into …', extend: 'Cùng công trình, chiếm thêm ô bên cạnh → was extended.', move: 'Mất ở chỗ cũ, xuất hiện chỗ khác → was relocated to the north / south / east / west.' }[c.k];
+  document.getElementById('mp-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>${escapeHtml(why)}</span></div>`;
+  t1ArcHud();
+  setTimeout(() => {
+    if (_t1 !== g) return;
+    g.ask = null;
+    if (g.lives <= 0) { t1MapEnd(g); return; }
+    if (g.found.length === g.q.changes.length) {
+      const bonus = Math.max(0, Math.round(g.left / 3));
+      g.score += bonus;
+      t1MapRoundEnd(`Tìm đủ ${g.q.changes.length} chỗ! +${bonus} điểm thời gian`);
+      return;
+    }
+    document.getElementById('mp-ask').innerHTML = '';
+  }, ok ? 900 : 2200);
+}
+function t1MapTimeUp() {
+  const g = _t1;
+  if (g.roundDone || g.ask) return;
+  t1Miss(g);
+  g.q.changes.filter(c => !g.found.includes(c)).forEach(c => g.misses.push(`<div class="t1-review-line">Bỏ sót: ${escapeHtml(c.s)}</div>`));
+  t1ArcHud();
+  if (g.lives <= 0) { t1MapEnd(g); return; }
+  t1MapRoundEnd('Hết giờ! Mất một mạng.');
+}
+function t1MapRoundEnd(msg) {
+  const g = _t1;
+  g.roundDone = true;
+  g.answered = true;
+  clearInterval(g.timer);
+  const missed = g.q.changes.filter(c => !g.found.includes(c));
+  missed.forEach(c => document.querySelectorAll('#mp-after .t1-map-cell').forEach((b, k) => { if (c.cells.includes(k)) b.classList.add('missed'); }));
+  document.getElementById('mp-ask').innerHTML = `<div class="t1-fb ${missed.length ? 'no' : 'ok'}"><strong>${escapeHtml(msg)}</strong>${g.q.changes.map(c => `<span>${g.found.includes(c) ? '✓' : '✗'} ${escapeHtml(c.s)}</span>`).join('')}</div>
+    <button class="vb-start-btn t1-next" onclick="t1MapNextMap()">${g.n + 1 >= 4 ? 'Xem kết quả' : 'Bản đồ tiếp'} → <small>Enter</small></button>`;
+  tsSfx(missed.length ? 'equip' : 'level');
+}
+function t1MapNextMap() {
+  const g = _t1;
+  if (!g || !g.roundDone) return;
+  g.n++;
+  if (g.n >= 4) { t1MapEnd(g); return; }
+  t1MapNew();
+}
+function t1MapEnd(g) {
+  if (_t1 !== g) return;
+  g.stop();
+  t1Finish(g, 'map', 'map', { big: `${g.right} câu tả đúng · ${g.n} bản đồ xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🗺️', good: g.lives > 0 });
+}
+
+/* ── Static · Dây chuyền quy trình ────────────────────────────────────────
+   The steps of a process come shuffled. Put them in order before the clock
+   runs out; then fill the passive verb (and, from Dũng sĩ, the sequencer)
+   in a few of the step sentences. Three processes per game. */
+const T1_PROCS = [
+  { name: 'Brick manufacturing', icon: '🧱', steps: [
+    ['⛏️', 'Digging clay', 'To begin with, clay {is dug} from the ground by a large digger.', 'dig', 'dug'],
+    ['🧺', 'Sieving and mixing', 'Next, the clay {is placed} on a metal grid and mixed with sand and water.', 'place', 'placed'],
+    ['🔲', 'Moulding', 'After that, the mixture {is shaped} into bricks in a mould or by a wire cutter.', 'shape', 'shaped'],
+    ['💨', 'Drying', 'The bricks {are then left} to dry in a drying oven for 24 to 48 hours.', 'leave', 'left'],
+    ['🔥', 'Firing', 'Once they have dried, the bricks {are heated} in a kiln at a very high temperature.', 'heat', 'heated'],
+    ['❄️', 'Cooling', 'Following this, they {are cooled} in a cooling chamber for two to three days.', 'cool', 'cooled'],
+    ['📦', 'Packaging', 'Finally, the bricks {are packaged} and delivered to customers.', 'package', 'packaged'],
+  ] },
+  { name: 'Tea production', icon: '🍵', steps: [
+    ['🌱', 'Picking leaves', 'First, the tea leaves {are picked} by hand on plantations.', 'pick', 'picked'],
+    ['☀️', 'Withering', 'Next, the leaves {are spread} out to wither in warm air for several hours.', 'spread', 'spread'],
+    ['🌀', 'Rolling', 'After that, they {are rolled} by machines to release their natural oils.', 'roll', 'rolled'],
+    ['🫖', 'Fermenting', 'The leaves {are then left} to ferment, which turns them dark brown.', 'leave', 'left'],
+    ['🔥', 'Drying', 'Once they have fermented, the leaves {are dried} in hot ovens.', 'dry', 'dried'],
+    ['⚖️', 'Sorting', 'Following this, the dried leaves {are sorted} by size and quality.', 'sort', 'sorted'],
+    ['📦', 'Packing', 'Finally, the tea {is packed} into boxes and sent to shops.', 'pack', 'packed'],
+  ] },
+  { name: 'Recycling plastic bottles', icon: '♻️', steps: [
+    ['🗑️', 'Collecting', 'To begin with, used bottles {are collected} from recycling bins.', 'collect', 'collected'],
+    ['🚚', 'Transporting', 'They {are then taken} to a recycling plant by truck.', 'take', 'taken'],
+    ['🔍', 'Sorting', 'At the plant, the bottles {are sorted} by colour and type of plastic.', 'sort', 'sorted'],
+    ['💧', 'Washing', 'Next, they {are washed} to remove labels and dirt.', 'wash', 'washed'],
+    ['✂️', 'Shredding', 'After that, the clean bottles {are crushed} into small flakes.', 'crush', 'crushed'],
+    ['🫕', 'Melting', 'These flakes {are melted} down and formed into small pellets.', 'melt', 'melted'],
+    ['🧥', 'New products', 'Finally, the pellets {are used} to make new products such as clothing.', 'use', 'used'],
+  ] },
+  { name: 'Cement production', icon: '🏗️', steps: [
+    ['⛰️', 'Crushing raw materials', 'First, limestone and clay {are crushed} into a fine powder.', 'crush', 'crushed'],
+    ['🌀', 'Mixing', 'Next, the powder {is passed} through a mixer.', 'pass', 'passed'],
+    ['🔥', 'Heating', 'The mixture {is then heated} in a rotating heater.', 'heat', 'heated'],
+    ['⚙️', 'Grinding', 'After that, it {is ground} in a grinder to produce cement.', 'grind', 'ground'],
+    ['🛍️', 'Bagging', 'Finally, the cement {is packed} into bags for sale.', 'pack', 'packed'],
+  ] },
+  { name: 'Rainwater for drinking', icon: '🌧️', steps: [
+    ['🏠', 'Collecting from roofs', 'First, rainwater {is collected} from the roofs of houses.', 'collect', 'collected'],
+    ['🚰', 'Carrying in pipes', 'It {is then carried} through pipes to a storage tank.', 'carry', 'carried'],
+    ['🧹', 'Filtering', 'Next, the water {is filtered} to remove leaves and dirt.', 'filter', 'filtered'],
+    ['🧪', 'Adding chemicals', 'After that, chemicals {are added} to kill bacteria.', 'add', 'added'],
+    ['🛢️', 'Storing', 'The clean water {is stored} in a tank under the house.', 'store', 'stored'],
+    ['🚿', 'Using at home', 'Finally, it {is pumped} to the kitchen and bathroom for daily use.', 'pump', 'pumped'],
+  ] },
+  { name: 'Making chocolate', icon: '🍫', steps: [
+    ['🌳', 'Harvesting pods', 'To begin with, ripe cocoa pods {are harvested} from the trees.', 'harvest', 'harvested'],
+    ['🫘', 'Fermenting beans', 'Next, the beans {are removed} from the pods and left to ferment.', 'remove', 'removed'],
+    ['☀️', 'Drying', 'After that, the beans {are dried} in the sun for about a week.', 'dry', 'dried'],
+    ['🚢', 'Shipping', 'The dried beans {are then transported} to a chocolate factory by ship.', 'transport', 'transported'],
+    ['🔥', 'Roasting', 'Once they have arrived, the beans {are roasted} at a high temperature.', 'roast', 'roasted'],
+    ['⚙️', 'Crushing', 'Following this, they {are crushed} into a thick liquid.', 'crush', 'crushed'],
+    ['🍫', 'Moulding', 'Finally, sugar and milk {are added} and the mixture is poured into moulds.', 'add', 'added'],
+  ] },
+];
+const T1_PROC_CFG = { a: { time: 45, verbs: 3, conns: 0 }, d: { time: 40, verbs: 2, conns: 2 }, l: { time: 32, verbs: 2, conns: 3 } };
+const T1_PROC_CONN = /^(To begin with|First|Next|After that|Following this|Finally|Once [^,]+),/;
+function t1Ing(v) { return /ie$/.test(v) ? v.slice(0, -2) + 'ying' : /[^e]e$/.test(v) ? v.slice(0, -1) + 'ing' : v === 'dig' ? 'digging' : v + 'ing'; }
+function t1Third(v) { return /(s|sh|ch|x)$/.test(v) ? v + 'es' : /[^aeiou]y$/.test(v) ? v.slice(0, -1) + 'ies' : v + 's'; }
+// The passive in braces, plus three forms students mix it up with.
+function t1ProcVerb(step) {
+  const [, , t, base, pp] = step;
+  const m = t.match(/\{(is|are)( then)? [^}]+\}/), aux = m[1], then = m[2] || '';
+  const right = `${aux}${then} ${pp}`;
+  const wrong = [`${aux}${then} ${t1Ing(base)}`, `${then.trim() ? 'then ' : ''}${aux === 'is' ? t1Third(base) : base}`, `${then.trim() ? 'then ' : ''}${pp === base ? t1Ing(base).replace(/ing$/, 'ed') : pp}`];
+  if (wrong[2] === right) wrong[2] = `${aux}${then} ${base}`;
+  return { stem: t.replace(/\{[^}]+\}/, '____'), answer: right, opts: t1Shuffle([right, ...[...new Set(wrong)].filter(w => w !== right).slice(0, 3)]),
+    vi: 'Quy trình dùng bị động: is/are + V3. Chủ ngữ là vật, không tự làm hành động.' };
+}
+function t1ProcConn(step, i, n) {
+  const t = step[2].replace(/[{}]/g, ''), m = t.match(T1_PROC_CONN);
+  if (!m) return null;
+  const c = m[1];
+  let pool;
+  if (/^Once/.test(c)) pool = [c.replace('Once', 'Although'), c.replace('Once', 'Unless'), c.replace(/^Once (they|it) have /, 'Before $1 have ')];
+  else if (i === 0) pool = ['Finally', 'After that', 'However', 'In conclusion'];
+  else if (i === n - 1) pool = ['To begin with', 'Firstly', 'However', 'For example'];
+  else pool = ['Finally', 'To begin with', 'In conclusion', 'However', 'For instance'];
+  return { stem: t.replace(c, '____'), answer: c, opts: t1Shuffle([c, ...t1Shuffle(pool.filter(x => x !== c)).slice(0, 3)]),
+    vi: /^Once/.test(c) ? 'Once + hiện tại hoàn thành = ngay sau khi xong bước trước.' : i === 0 ? 'Bước đầu: To begin with / First.' : i === n - 1 ? 'Bước cuối: Finally / In the final stage.' : 'Bước giữa: Next / After that / Following this.' };
+}
+function t1ProcStart() {
+  t1Leave();
+  const g = _t1 = { game: 'process', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0, list: t1Shuffle(T1_PROCS).slice(0, 3) };
+  g.stop = () => { clearInterval(g.timer); };
+  g.keyPick = i => { if (g.phase === 'order') t1ProcTap(i); else if (g.phase === 'gram') t1ProcPick(i); };
+  g.pick = g.keyPick;
+  g.next = t1ProcNext;
+  t1Bind();
+  tsSfx('equip');
+  t1ProcNew();
+}
+function t1ProcNew() {
+  const g = _t1, P = g.list[g.n], cfg = T1_PROC_CFG[_t1Lv];
+  g.P = P;
+  g.phase = 'order';
+  g.got = 0;
+  g.cards = t1Shuffle(P.steps.map((s, i) => i));
+  g.answered = false;
+  g.left = cfg.time;
+  // The grammar questions for this process, picked now so they do not repeat.
+  const idx = t1Shuffle(P.steps.map((s, i) => i));
+  const connAt = idx.filter(i => t1ProcConn(P.steps[i], i, P.steps.length)).slice(0, cfg.conns);
+  const verbAt = idx.filter(i => !connAt.includes(i)).slice(0, cfg.verbs);
+  g.qs = t1Shuffle([...verbAt.map(i => t1ProcVerb(P.steps[i])), ...connAt.map(i => t1ProcConn(P.steps[i], i, P.steps.length))]);
+  g.qi = 0;
+  t1ProcRender();
+  clearInterval(g.timer);
+  g.last = performance.now();
+  g.timer = setInterval(() => {
+    if (_t1 !== g || g.phase !== 'order') return;
+    const now = performance.now();
+    if (!document.hidden) g.left -= (now - g.last) / 1000;
+    g.last = now;
+    const el = document.getElementById('pr-time');
+    if (el) { el.textContent = Math.max(0, Math.ceil(g.left)); el.parentNode.classList.toggle('late', g.left <= 8); }
+    if (g.left <= 0) t1ProcTimeUp();
+  }, 200);
+}
+function t1ProcRender() {
+  const g = _t1, P = g.P;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-proc">
+      ${t1ArcTop(g, `<span class="t1-stat">Quy trình <strong>${g.n + 1}</strong>/3</span><span class="t1-stat">⏱️ <strong id="pr-time">${Math.ceil(g.left)}</strong></span>`)}
+      <div class="t1-proc-title">${P.icon} ${escapeHtml(P.name)}</div>
+      <div class="t1-belt" id="pr-belt">${P.steps.map((s, i) => `<div class="t1-belt-slot${i < g.got ? ' on' : ''}">${i < g.got ? `<span>${s[0]}</span><small>${escapeHtml(s[1])}</small>` : `<b>${i + 1}</b>`}</div>`).join('<i>›</i>')}</div>
+      <div id="pr-body"></div>
+    </div>`;
+  t1ProcBody();
+}
+function t1ProcBody() {
+  const g = _t1, P = g.P, body = document.getElementById('pr-body');
+  if (g.phase === 'order') {
+    body.innerHTML = `<p class="t1-stem">Chạm các bước theo đúng thứ tự, bước ${g.got + 1} trước.</p>
+      <div class="t1-proc-cards">${g.cards.map((si, k) => si < g.got ? '' : `<button class="t1-proc-card" onclick="_t1.pick(${k})"><kbd>${k + 1}</kbd><span>${P.steps[si][0]}</span>${escapeHtml(P.steps[si][1])}</button>`).join('')}</div>`;
+  } else if (g.phase === 'gram') {
+    const q = g.qs[g.qi];
+    body.innerHTML = `<p class="t1-stem">Câu ${g.qi + 1}/${g.qs.length} · ${escapeHtml(q.stem).replace('____', '<span class="t1-blank">______</span>')}</p>
+      <div class="t1-opts">${t1Options(q.opts, null, -1)}</div><div id="pr-fb"></div>`;
+  }
+}
+function t1ProcTap(k) {
+  const g = _t1;
+  if (!g || g.phase !== 'order' || k < 0 || k >= g.cards.length) return;
+  const si = g.cards[k];
+  if (si < g.got) return;
+  const btn = document.querySelectorAll('#pr-body .t1-proc-card')[g.cards.filter((x, j) => j < k && x >= g.got).length];
+  if (si === g.got) {
+    g.got++;
+    tsSfx('key');
+    if (g.got === g.P.steps.length) {
+      t1Hit(g, Math.max(0, Math.round(g.left / 2)));
+      t1ProcToGram();
+      return;
+    }
+    t1ProcRender();
+  } else {
+    g.left -= 3; g.combo = 0;
+    tsSfx('miss');
+    t1Shake(btn);
+    t1ArcHud();
+  }
+}
+function t1ProcToGram() {
+  const g = _t1;
+  g.phase = g.qs.length ? 'gram' : 'done';
+  t1ProcRender();
+  if (g.phase === 'done') t1ProcDone();
+}
+function t1ProcTimeUp() {
+  const g = _t1;
+  if (g.phase !== 'order') return;
+  t1Miss(g);
+  g.misses.push(`<div class="t1-review-line">${g.P.icon} ${escapeHtml(g.P.name)}: ${g.P.steps.map(s => s[0] + ' ' + escapeHtml(s[1])).join(' › ')}</div>`);
+  g.got = g.P.steps.length;
+  t1ArcHud();
+  if (g.lives <= 0) { t1ProcEnd(g); return; }
+  showToast('Hết giờ! Đây là thứ tự đúng.');
+  t1ProcToGram();
+}
+function t1ProcPick(i) {
+  const g = _t1, q = g && g.qs[g.qi];
+  if (!q || g.answered || i < 0 || i >= q.opts.length) return;
+  g.answered = true;
+  const ok = q.opts[i] === q.answer;
+  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`<div class="t1-review-line">${escapeHtml(q.stem.replace('____', q.answer))}<br>Bạn chọn <s>${escapeHtml(q.opts[i])}</s>. ${escapeHtml(q.vi)}</div>`); }
+  document.querySelector('#pr-body .t1-opts').innerHTML = t1Options(q.opts, i, q.opts.indexOf(q.answer));
+  const last = g.qi + 1 >= g.qs.length;
+  document.getElementById('pr-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : `Chưa đúng. Đáp án: ${escapeHtml(q.answer)}`}</strong><span>${escapeHtml(q.vi)}</span></div>
+    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 ? 'Xem kết quả' : last ? (g.n + 1 >= 3 ? 'Xem kết quả' : 'Quy trình tiếp') : 'Câu tiếp'} → <small>Enter</small></button>`;
+  t1ArcHud();
+}
+function t1ProcNext() {
+  const g = _t1;
+  if (!g || g.phase !== 'gram' || !g.answered) return;
+  if (g.lives <= 0) { t1ProcEnd(g); return; }
+  g.answered = false;
+  g.qi++;
+  if (g.qi < g.qs.length) { t1ProcBody(); return; }
+  t1ProcDone();
+}
+function t1ProcDone() {
+  const g = _t1;
+  g.n++;
+  if (g.n >= 3) { t1ProcEnd(g); return; }
+  tsSfx('level');
+  t1ProcNew();
+}
+function t1ProcEnd(g) {
+  if (_t1 !== g) return;
+  g.stop();
+  t1Finish(g, 'process', 'process_diagram', { big: `${g.right} lượt đúng · ${g.n} quy trình xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '⚙️', good: g.lives > 0 });
+}
 // TASK1 END
