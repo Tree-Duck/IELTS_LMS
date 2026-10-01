@@ -9064,3 +9064,8 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-arena-msg.t1-surv-tip { inset: 8px 8px auto 8px; padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; background: rgba(255, 253, 246, .92); color: #8A1C0C; }
 .t1-surv-hero.fire { animation: t1Recoil .15s; }
 @keyframes t1Recoil { 50% { transform: scale(0.88); } }
+.t1-flash-peek { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0.3rem 0; }
+.t1-flash-peek.hidden { display: none; }
+.t1-flash-peek small { color: var(--gray-600); }
+.t1-proc-q { margin: 0 0 0.6rem; padding: 0.55rem 0.8rem; border-radius: 12px; background: #FFF6D6; border: 2px solid #EED58A; color: #4A3A00; line-height: 1.45; }
+.t1-proc-qbtn { margin-bottom: 0.6rem; }
