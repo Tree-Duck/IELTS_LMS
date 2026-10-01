@@ -3994,8 +3994,10 @@ const COSMETIC_PRICES = {
   frame_gold: 150, frame_fire: 300, frame_rainbow: 600,
   hero_mage: 60, hero_archer: 60, hero_ninja: 150, hero_dragon: 300, hero_gold: 600,
   pet_cat: 80, pet_dog: 80, pet_turtle: 150, pet_owl: 150, pet_fairy: 300, pet_dragon: 600,
+  // Task 1 Sinh tồn heroes; the first hero is free.
+  t1hero_female: 100, t1hero_knight: 200, t1hero_archer: 300,
 };
-const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame', 'hero', 'pet'];
+const COSMETIC_SLOTS = ['ship', 'drop', 'tower', 'title', 'frame', 'hero', 'pet', 't1hero'];
 const BOOST_MS = 10 * 60 * 1000;
 const WALLET_EARN_MAX = 500;
 const WALLET_DAY_MAX = 2000;
@@ -4304,7 +4306,7 @@ app.post('/api/game/chest', authenticate, walletRoute((w, b, extra) => {
   const r = Math.random();
   let loot;
   if (r < 0.04) {
-    const looks = Object.keys(COSMETIC_PRICES).filter(id => COSMETIC_PRICES[id] <= 150 && !w.owned[id]);
+    const looks = Object.keys(COSMETIC_PRICES).filter(id => COSMETIC_PRICES[id] <= 150 && !w.owned[id] && !id.startsWith('t1hero_'));
     if (looks.length) {
       const id = looks[Math.floor(Math.random() * looks.length)];
       w.owned[id] = true;
