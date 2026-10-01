@@ -23561,16 +23561,17 @@ const T1_BLOCKS = {
     crit: [['Hướng và tốc độ', 'rise, surge, creep up, plummet, level off'], ['12 feature', 'đỉnh, đáy, điểm vượt, bình ổn, tăng tốc…'], ['Giới từ và đơn vị', 'to hay by, percent hay percentage points'], ['Câu nâng cấp', 'having peaked, representing a …% increase']],
     lv: { a: 'rise, fall, peak, ổn định', d: 'surge, plummet, level off, giới từ', l: 'crept up, rocketed, tăng tốc, giảm tốc' },
     fc: 'Hình dạng đường và cụm tả xu hướng, giới từ to / by, đỉnh, đáy, vượt.',
-    games: ['rain', 'snake'], warm: ['slope', 'hunt', 'build'] },
+    games: ['survive', 'rain'], warm: ['slope', 'hunt', 'build'] },
   sta: { icon: '📊', name: 'Biểu đồ tĩnh', en: 'Static',
     sub: 'Đề chỉ có một mốc: pie chart, bar chart, table, bản đồ, quy trình. So sánh, xếp hạng, ước lượng tỉ lệ, tả thay đổi trên bản đồ và các bước quy trình.',
     crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Ước lượng tỉ lệ', 'just over a quarter, nearly half, twice as many'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
     lv: { a: 'phân số tròn, 4 cột, 3 thay đổi', d: 'gấp mấy lần, 5 cột, di dời, mở rộng', l: 'just over / under, 6 cột sát nhau, having been' },
     fc: 'Phân số và tỉ lệ, xếp hạng, động từ bản đồ, bị động và từ nối quy trình.',
-    games: ['map', 'mapwrite', 'process', 'rank', 'flash'], warm: ['compare'] },
+    games: ['map', 'mapwrite', 'survive', 'process', 'rank', 'flash'], warm: ['compare'] },
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
+  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Quái tràn tới từ mọi phía, mỗi con mang một cụm câu. Bắn đúng thứ tự để ghép câu mở bài, overview, thân bài; cụm sai ngữ pháp thì bắn hạ.', start: 't1SurvStart()' },
   snake:   { icon: '🐍', name: 'Rắn săn mồi',            desc: 'Đề là một biểu đồ. Điều khiển rắn ăn đúng mồi có cụm mô tả nó. Ăn sai mất mạng, đâm tường là thua.', start: 't1SnakeStart()' },
   slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
   hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
@@ -26349,5 +26350,270 @@ function t1SampleOpen(id, show) {
           <div class="vb-results-btns"><button class="vb-start-btn" onclick="t1SampleOpen('${id}', true)">👀 Xem bài mẫu</button></div>`}
     </div>`;
   window.scrollTo({ top: 0 });
+}
+/* ── Sinh tồn ghép câu ────────────────────────────────────────────────────
+   Top-down survival. The hero stands in the middle; monsters walk in from
+   every side, each carrying a chunk of a Task 1 sentence (introduction,
+   overview or body). Shoot the real chunks in sentence order to build the
+   sentence; shoot the wrong chunks (bad grammar, wrong word) whenever you
+   see them. A real chunk shot out of turn bounces off and the monster
+   charges. Anything that reaches the hero costs a heart; a real chunk that
+   gets through walks back in later. A finished sentence sends out a wave
+   that clears the screen. Tap a monster, or press its number. */
+const T1_SURV = {
+  dyn: [
+    { part: 'Mở bài', c: ['The line graph', 'illustrates', 'the proportion of households', 'with internet access', 'in three countries', 'between 2000 and 2020.'], bad: ['shows below', 'illustrate', 'from 2000 to 2020 years', 'In conclusion,'],
+      vi: 'Biểu đồ đường minh hoạ tỉ lệ hộ gia đình có internet ở ba nước từ 2000 đến 2020.' },
+    { part: 'Overview', c: ['Overall,', 'internet access', 'rose considerably', 'in all three countries,', 'while', 'Vietnam saw', 'the most dramatic growth.'], bad: ['Overall the', 'rised', 'more dramatic', 'In summary of'],
+      vi: 'Nhìn chung, tỉ lệ dùng internet tăng đáng kể ở cả ba nước, trong khi Việt Nam tăng mạnh nhất.' },
+    { part: 'Overview', c: ['Overall,', 'coffee consumption', 'increased dramatically,', 'whereas', 'tea consumption', 'declined steadily.'], bad: ['increased dramatic', 'Firstly,', 'declining steady', 'In the other hand'],
+      vi: 'Nhìn chung, lượng cà phê tăng mạnh, trong khi lượng trà giảm đều.' },
+    { part: 'Mở bài', c: ['The bar chart', 'compares', 'the number of international students', 'in Australia, Canada and Japan', 'in four separate years.'], bad: ['compare', 'the amount of students', 'on four years'],
+      vi: 'Biểu đồ cột so sánh số sinh viên quốc tế ở Úc, Canada và Nhật trong bốn năm.' },
+    { part: 'Thân bài', c: ['In 2000,', 'a quarter of British households', 'were connected,', 'compared with', 'just 5%', 'in Brazil.'], bad: ['was connected', 'compare with', 'in the Brazil'],
+      vi: 'Năm 2000, một phần tư hộ ở Anh có internet, so với chỉ 5% ở Brazil.' },
+    { part: 'Thân bài', c: ["Vietnam's figure", 'surged', 'to 55%', 'in 2015,', 'before overtaking', 'Brazil.'], bad: ['by 55%', 'overtake', 'surge'],
+      vi: 'Con số của Việt Nam tăng vọt lên 55% năm 2015, trước khi vượt Brazil.' },
+  ],
+  sta: [
+    { part: 'Mở bài', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], bad: ['illustrates', 'that take place', 'below', 'In conclusion,'],
+      vi: 'Hai bản đồ minh hoạ những thay đổi diễn ra ở thị trấn Riverton từ 2000 đến 2020.' },
+    { part: 'Overview', c: ['Overall,', 'the town', 'became more residential,', 'while', 'most of the farmland', 'disappeared.'], bad: ['become', 'was disappeared', 'Firstly,'],
+      vi: 'Nhìn chung, thị trấn có nhiều nhà ở hơn, trong khi phần lớn đất nông nghiệp biến mất.' },
+    { part: 'Thân bài', c: ['The factory', 'in the north-west', 'was demolished', 'and replaced', 'by apartments.'], bad: ['demolished', 'were demolished', 'replaced with by'],
+      vi: 'Nhà máy ở phía tây bắc bị phá bỏ và thay bằng căn hộ.' },
+    { part: 'Overview', c: ['Overall,', 'there are', 'seven stages', 'in the process,', 'beginning with', 'the digging of clay.'], bad: ['there is', 'begin with', 'In conclusion,'],
+      vi: 'Nhìn chung, quy trình có bảy giai đoạn, bắt đầu bằng việc đào đất sét.' },
+    { part: 'Thân bài', c: ['Once', 'the clay', 'has been shaped,', 'it is dried', 'in an oven.'], bad: ['has shaped', 'it dries', 'Although'],
+      vi: 'Khi đất sét đã được tạo hình, nó được sấy trong lò.' },
+    { part: 'Overview', c: ['Overall,', 'housing', 'replaced food', 'as the largest expense', 'over the twenty years.'], bad: ['the most large', 'replace', 'In 2000,'],
+      vi: 'Nhìn chung, nhà ở thay thế thực phẩm thành khoản chi lớn nhất trong hai mươi năm.' },
+  ],
+};
+const T1_SURV_CFG = { a: { bad: 1, speed: 26, spawn: 2.4, max: 5 }, d: { bad: 2, speed: 32, spawn: 2.0, max: 6 }, l: { bad: 3, speed: 38, spawn: 1.7, max: 7 } };
+const T1_SURV_MOBS = ['👾', '👻', '🦇', '🐺', '🧟', '🐍', '🕷️', '👹'];
+function t1SurvStart() {
+  t1Leave();
+  const cfg = T1_SURV_CFG[_t1Lv];
+  const g = _t1 = { game: 'survive', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 5, list: t1Shuffle(T1_SURV[_t1Block]), si: 0,
+    mobs: [], id: 0, spawnIn: 0.4, paused: false, over: false, last: 0, done: 0 };
+  g.keyPick = i => { const m = g.mobs.find(x => x.n === i + 1 && !x.dead); if (m) t1SurvShoot(m.id); };
+  g.pick = g.keyPick;
+  g.next = () => {};
+  g.stop = () => { g.over = true; cancelAnimationFrame(g.raf); document.removeEventListener('visibilitychange', g.vis); };
+  g.vis = () => { if (document.hidden && !g.paused) t1SurvPause(); };
+  document.addEventListener('visibilitychange', g.vis);
+  t1Bind();
+  t1SurvSentence();
+  t1SurvRender();
+  tsSfx('boss');
+  g.raf = requestAnimationFrame(t1SurvTick);
+}
+function t1SurvSentence() {
+  const g = _t1, S = g.list[g.si];
+  g.S = S;
+  g.got = 0;
+  g.bad = t1Shuffle(S.bad).slice(0, g.cfg.bad);
+}
+function t1SurvRender() {
+  const g = _t1;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play t1-surv">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat" id="sv-lives">${'❤️'.repeat(g.lives)}</span>
+        <span class="t1-stat">Câu <strong id="sv-n">${g.si + 1}</strong>/${g.list.length}</span>
+        <span class="t1-stat">⭐ <strong id="sv-score">${g.score}</strong></span>
+        <span class="t1-stat" id="sv-combo"></span>
+        <button class="t1-pause" onclick="t1SurvPause()" aria-label="Tạm dừng">⏸</button>
+      </div>
+      <div class="t1-surv-goal"><span class="t1-step-tag" id="sv-part">${g.S.part}</span><div class="t1-surv-slots" id="sv-slots"></div></div>
+      <div class="t1-surv-arena" id="sv-arena"><div class="t1-surv-hero" id="sv-hero">🧙</div><div class="t1-arena-msg hidden" id="sv-msg"></div></div>
+      <div class="t1-hint">Bắn cụm <b>đúng thứ tự</b> để ghép câu. Cụm sai ngữ pháp thì bắn lúc nào cũng được. Chạm vào quái hoặc bấm số trên đầu nó.</div>
+    </div>`;
+  t1SurvSlots();
+}
+function t1SurvSlots() {
+  const g = _t1, el = document.getElementById('sv-slots');
+  if (!el) return;
+  el.innerHTML = g.S.c.map((c, i) => `<span class="${i < g.got ? 'on' : i === g.got ? 'now' : ''}">${i < g.got ? escapeHtml(c) : i === g.got ? '❓' : '···'}</span>`).join('');
+  const p = document.getElementById('sv-part'); if (p) p.textContent = g.S.part;
+  const n = document.getElementById('sv-n'); if (n) n.textContent = g.si + 1;
+}
+// What to send in next: the chunk the sentence needs, if it is not already
+// walking in, then a mix of other real chunks and wrong ones.
+function t1SurvPickChunk() {
+  const g = _t1, live = g.mobs.filter(m => !m.dead);
+  const need = g.S.c[g.got];
+  if (!live.some(m => m.text === need)) return { text: need, real: true };
+  const pool = [...g.S.c.slice(g.got + 1).map(t => ({ text: t, real: true })), ...g.bad.map(t => ({ text: t, real: false }))].filter(x => !live.some(m => m.text === x.text));
+  return pool.length ? t1Pick(pool) : null;
+}
+function t1SurvSpawn() {
+  const g = _t1, arena = document.getElementById('sv-arena');
+  if (!arena || g.mobs.filter(m => !m.dead).length >= g.cfg.max) return;
+  const ch = t1SurvPickChunk();
+  if (!ch) return;
+  const W = arena.clientWidth, H = arena.clientHeight, a = Math.random() * Math.PI * 2, R = Math.hypot(W, H) / 2 + 10;
+  const used = new Set(g.mobs.filter(m => !m.dead).map(m => m.n));
+  let n = 1; while (used.has(n)) n++;
+  const m = { id: ++g.id, n, text: ch.text, real: ch.real, x: W / 2 + Math.cos(a) * R, y: H / 2 + Math.sin(a) * R, sp: g.cfg.speed * t1Rand(0.85, 1.15), dead: false };
+  m.el = document.createElement('button');
+  m.el.className = 't1-mob';
+  m.el.innerHTML = `<b>${n}</b><span class="t1-mob-face">${t1Pick(T1_SURV_MOBS)}</span><span class="t1-mob-tag">${escapeHtml(m.text)}</span>`;
+  m.el.onclick = () => t1SurvShoot(m.id);
+  arena.appendChild(m.el);
+  g.mobs.push(m);
+  t1SurvPlace(m);
+}
+function t1SurvPlace(m) { m.el.style.transform = `translate(${m.x.toFixed(1)}px, ${m.y.toFixed(1)}px) translate(-50%, -50%)`; }
+function t1SurvTick(ts) {
+  const g = _t1;
+  if (!g || g.game !== 'survive' || g.over) return;
+  if (!g.last) g.last = ts;
+  const dt = Math.min(0.05, (ts - g.last) / 1000);
+  g.last = ts;
+  if (!g.paused) {
+    const arena = document.getElementById('sv-arena');
+    if (!arena) { g.stop(); return; }
+    const cx = arena.clientWidth / 2, cy = arena.clientHeight / 2;
+    g.spawnIn -= dt;
+    if (g.spawnIn <= 0) { t1SurvSpawn(); g.spawnIn = g.cfg.spawn * t1Rand(0.7, 1.2); }
+    for (const m of g.mobs) {
+      if (m.dead) continue;
+      const dx = cx - m.x, dy = cy - m.y, d = Math.hypot(dx, dy);
+      if (d < 34) { t1SurvBite(m); if (g.over) return; continue; }
+      const sp = m.sp * (m.rage ? 2.2 : 1);
+      m.x += dx / d * sp * dt; m.y += dy / d * sp * dt;
+      t1SurvPlace(m);
+    }
+  }
+  g.raf = requestAnimationFrame(t1SurvTick);
+}
+function t1SurvKill(m, cls) {
+  const g = _t1;
+  m.dead = true;
+  m.el.classList.add(cls);
+  m.el.disabled = true;
+  setTimeout(() => m.el.remove(), 420);
+  g.mobs = g.mobs.filter(x => !x.dead);
+}
+function t1SurvBullet(m, ok) {
+  const arena = document.getElementById('sv-arena');
+  if (!arena) return;
+  const b = document.createElement('i');
+  b.className = 't1-bullet' + (ok ? '' : ' no');
+  b.style.transform = `translate(${arena.clientWidth / 2}px, ${arena.clientHeight / 2}px)`;
+  arena.appendChild(b);
+  requestAnimationFrame(() => { b.style.transform = `translate(${m.x}px, ${m.y}px)`; });
+  setTimeout(() => b.remove(), 260);
+  const h = document.getElementById('sv-hero');
+  if (h) { h.classList.remove('fire'); void h.offsetWidth; h.classList.add('fire'); }
+}
+function t1SurvShoot(id) {
+  const g = _t1;
+  if (!g || g.game !== 'survive' || g.paused || g.over) return;
+  const m = g.mobs.find(x => x.id === id && !x.dead);
+  if (!m) return;
+  if (!m.real) {
+    // A wrong chunk: always a good shot.
+    t1SurvBullet(m, true);
+    g.combo++; g.score += 8 + Math.min(g.combo, 8);
+    tsSfx('kill');
+    t1SurvKill(m, 'hit');
+  } else if (m.text === g.S.c[g.got]) {
+    t1SurvBullet(m, true);
+    g.got++; g.combo++; g.right++;
+    g.score += 12 + Math.min(g.combo, 8) * 2;
+    g.coins += T1_LEVELS[_t1Lv].coin * 0.4 * walMult();
+    tsSfx('coin');
+    t1SurvKill(m, 'hit');
+    t1SurvSlots();
+    if (g.got === g.S.c.length) t1SurvDone();
+  } else {
+    // A real chunk, but not its turn yet: it bounces and charges.
+    t1SurvBullet(m, false);
+    g.combo = 0;
+    m.rage = true;
+    m.el.classList.add('rage');
+    tsSfx('miss');
+    t1SurvMsg(`Chưa tới lượt “${m.text}”. Câu cần cụm khác trước.`);
+    if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(g.S.part)}:</b> ${escapeHtml(g.S.c.join(' '))}<br><i>${escapeHtml(g.S.vi)}</i></div>`); }
+  }
+  t1SurvHud();
+}
+function t1SurvBite(m) {
+  const g = _t1;
+  g.lives--; g.combo = 0;
+  tsSfx('wrong');
+  t1SurvKill(m, 'bite');
+  const a = document.getElementById('sv-arena');
+  if (a) { a.classList.remove('hurt'); void a.offsetWidth; a.classList.add('hurt'); }
+  if (!m.real) t1SurvMsg(`“${m.text}” là cụm sai, lẽ ra phải bắn nó.`);
+  t1SurvHud();
+  if (g.lives <= 0) t1SurvOver();
+}
+function t1SurvDone() {
+  const g = _t1;
+  g.done++;
+  g.score += 30;
+  // The finished sentence clears the screen.
+  g.mobs.slice().forEach(m => { if (!m.dead) t1SurvKill(m, 'hit'); });
+  const a = document.getElementById('sv-arena');
+  if (a) { const w = document.createElement('div'); w.className = 't1-wave'; a.appendChild(w); setTimeout(() => w.remove(), 700); }
+  tsSfx('level');
+  g.paused = true;
+  const msg = document.getElementById('sv-msg');
+  const last = g.si + 1 >= g.list.length;
+  if (msg) {
+    msg.className = 't1-arena-msg';
+    msg.innerHTML = `<div class="t1-surv-done"><b>✓ ${escapeHtml(g.S.part)}</b><p>${escapeHtml(g.S.c.join(' '))}</p><small>${escapeHtml(g.S.vi)}</small><button class="vb-start-btn" onclick="t1SurvNext()">${last ? 'Xem kết quả' : 'Câu tiếp →'}</button></div>`;
+    msg.classList.remove('hidden');
+  }
+  g.answered = true;
+  g.next = t1SurvNext;
+}
+function t1SurvNext() {
+  const g = _t1;
+  if (!g || g.game !== 'survive' || !g.answered) return;
+  g.answered = false;
+  g.next = () => {};
+  g.si++;
+  if (g.si >= g.list.length) { t1SurvOver(true); return; }
+  t1SurvSentence();
+  t1SurvSlots();
+  document.getElementById('sv-msg').classList.add('hidden');
+  g.paused = false; g.last = 0; g.spawnIn = 0.3;
+}
+function t1SurvMsg(t) {
+  const el = document.getElementById('sv-msg');
+  if (!el || !_t1 || _t1.paused) return;
+  el.textContent = t;
+  el.className = 't1-arena-msg t1-surv-tip';
+  clearTimeout(_t1.msgT);
+  _t1.msgT = setTimeout(() => { if (_t1 && !_t1.paused) el.classList.add('hidden'); }, 1600);
+}
+function t1SurvHud() {
+  const g = _t1, $ = id => document.getElementById(id);
+  if (!$('sv-score')) return;
+  $('sv-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(Math.max(0, 5 - g.lives));
+  $('sv-score').textContent = g.score;
+  $('sv-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
+}
+function t1SurvPause() {
+  const g = _t1;
+  if (!g || g.game !== 'survive' || g.over || g.answered) return;
+  g.paused = !g.paused;
+  g.last = 0;
+  const m = document.getElementById('sv-msg');
+  if (m) { m.className = 't1-arena-msg' + (g.paused ? '' : ' hidden'); m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1SurvPause()">▶ Chơi tiếp</button>' : ''; }
+}
+function t1SurvOver(won) {
+  const g = _t1;
+  g.stop();
+  setTimeout(() => {
+    if (_t1 !== g) return;
+    t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `${g.done}/${g.list.length} câu ghép xong`, icon: won ? '🏆' : g.done >= 3 ? '👏' : '🛡️', good: !!won });
+  }, won ? 200 : 900);
 }
 // TASK1 END
