@@ -23672,6 +23672,11 @@ function t1Hub() {
       </div>
       <h3 class="t1-sec" id="t1-games">🎮 Bước 3 · Trò chơi</h3>
       <div class="lv-modes t1-modes">${b.games.map(id => t1GameCard(id)).join('')}</div>
+      <h3 class="t1-sec">📖 Bài mẫu <small>${T1_SAMPLES.filter(x => x.block === _t1Block).length} đề, mỗi đề một bài</small></h3>
+      <div class="lv-modes t1-modes"><button class="lv-mode t1-mode t1-mode--step" onclick="t1SampleList()">
+        <span class="lv-mode-icon">📖</span><span class="lv-mode-name">Đề và bài mẫu</span>
+        <span class="lv-mode-desc">${escapeHtml([...new Set(T1_SAMPLES.filter(x => x.block === _t1Block).map(x => x.type))].join(', '))}. Tự viết trước, rồi so với bài mẫu 4 đoạn.</span>
+      </button></div>
       <h3 class="t1-sec">🔥 Khởi động nhanh <small>12 câu trắc nghiệm</small></h3>
       <div class="lv-modes t1-modes t1-modes--warm">${b.warm.map(id => t1GameCard(id, true)).join('')}</div>
       <div class="t1-lvnote">Đang chơi cấp <strong>${lv.icon} ${lv.name}</strong>. Mỗi câu đúng được ${lv.coin} xu.</div>
@@ -26168,5 +26173,181 @@ function t1MeCheck() {
   }
   tsSfx(ok === rows.length ? 'level' : 'key');
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+/* ── Bài mẫu: model answers, two or three per chart type ─────────────────
+   Each prompt carries its own chart (drawn from the numbers the answer
+   uses), the question, and a four-paragraph answer: introduction,
+   overview, two body paragraphs. The student can write first and then
+   open the model. Written in the structure DOL, ZIM and IELTSCITY use. */
+function t1GroupBars(o) {
+  const W = 600, H = 300, L = 52, R = 14, T = 26, B = 40, pw = W - L - R, ph = H - T - B;
+  const n = o.xs.length, k = o.series.length, gw = pw / n, bw = Math.min(26, (gw - 16) / k);
+  const Y = v => T + ph - v / o.yMax * ph;
+  let g = '';
+  for (let v = 0; v <= o.yMax + 1e-9; v += o.yStep) g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="t1-grid"/><text x="${L - 8}" y="${Y(v) + 4}" class="t1-ytick">${t1Num(v)}</text>`;
+  o.xs.forEach((x, i) => {
+    const x0 = L + i * gw + (gw - bw * k) / 2;
+    o.series.forEach((s, si) => { g += `<rect x="${(x0 + si * bw).toFixed(1)}" y="${Y(s.ys[i]).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${(ph - (Y(s.ys[i]) - T)).toFixed(1)}" fill="${T1_COLORS[si]}" rx="2"/>`; });
+    g += `<text x="${L + i * gw + gw / 2}" y="${H - B + 22}" class="t1-xtick">${x}</text>`;
+  });
+  g += `<text x="${L - 44}" y="${T - 12}" class="t1-unit">${escapeHtml(o.unit)}</text><line x1="${L}" x2="${L}" y1="${T}" y2="${T + ph}" class="t1-axis"/><line x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}" class="t1-axis"/>`;
+  return `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(o.title)}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(o.title)}">${g}</svg><div class="t1-legend">${o.series.map((s, si) => `<span><i style="background:${T1_COLORS[si]}"></i>${escapeHtml(s.name)}</span>`).join('')}</div></div>`;
+}
+function t1LibMap(title, rows) {
+  const cells = rows.join(' ').split(/\s+/);
+  return `<div><div class="t1-map-h">${escapeHtml(title)} <small>N ↑</small></div><div class="t1-map">${cells.map(c => `<span class="t1-map-cell${c === '·' ? ' empty' : ''}">${c === '·' ? '' : c}</span>`).join('')}</div></div>`;
+}
+function t1LibMaps(a, b, key) {
+  return `<div class="t1-maps">${t1LibMap(a[0], a[1])}${t1LibMap(b[0], b[1])}</div><div class="t1-map-key">${key.map(([i, n]) => `<span>${i} ${escapeHtml(n)}</span>`).join('')}</div>`;
+}
+function t1LibProc(name) {
+  const P = T1_PROCS.find(p => p.name === name);
+  return `<div class="t1-chart"><div class="t1-chart-title">${P.icon} ${escapeHtml(P.name)}</div><div class="t1-belt t1-belt--lib">${P.steps.map((s, i) => `<div class="t1-belt-slot on"><b>${i + 1}</b><span>${s[0]}</span><small>${escapeHtml(s[1])}</small></div>`).join('<i>›</i>')}</div></div>`;
+}
+function t1LibPie(title, rows) {
+  const cols = ['#0E4D3C', '#E5533D', '#3E6FD8', '#B8860B', '#7E9C90', '#C9A3D9'];
+  const slices = rows.map(([n, v], i) => ({ name: n, v, color: cols[i] }));
+  return `<div class="t1-chart t1-pie-wrap"><div class="t1-chart-title">${escapeHtml(title)}</div>${t1PieSvg(slices)}<div class="t1-legend">${slices.map(s => `<span><i style="background:${s.color}"></i>${escapeHtml(s.name)} ${s.v}%</span>`).join('')}</div></div>`;
+}
+const T1_SAMPLES = [
+  { id: 'line-internet', block: 'dyn', type: 'Line graph', icon: '📈',
+    prompt: 'The graph below shows the percentage of households with internet access in the UK, Brazil and Vietnam between 2000 and 2020.',
+    chart: () => t1LineChart({ xs: [2000, 2005, 2010, 2015, 2020], yMax: 100, yStep: 20, unit: '%', legend: true, title: 'Households with internet access (%)',
+      series: [{ name: 'UK', ys: [25, 50, 70, 88, 95] }, { name: 'Brazil', ys: [5, 18, 40, 58, 75] }, { name: 'Vietnam', ys: [1, 4, 9, 55, 80] }] }),
+    essay: [
+      'The line graph illustrates the proportion of households with internet access in the UK, Brazil and Vietnam over a twenty-year period from 2000.',
+      'Overall, internet access rose considerably in all three countries. The UK had the highest figure throughout the period, while Vietnam experienced the most dramatic growth.',
+      'In 2000, a quarter of British households were connected, compared with just 5% in Brazil and only 1% in Vietnam. The UK figure climbed steadily to 70% in 2010, at which point the gap between the UK and Vietnam was at its widest, at over 60 percentage points. British access then continued to rise, albeit more slowly, to reach 95% in 2020.',
+      'Brazil saw more gradual growth, with its figure increasing to 40% in 2010 and 75% by the end of the period. Vietnam, by contrast, remained below 10% until 2010, but then surged to 55% in 2015, before overtaking Brazil and finishing the period at 80%.',
+    ] },
+  { id: 'line-drinks', block: 'dyn', type: 'Line graph', icon: '📈',
+    prompt: 'The graph below shows the average number of cups of tea, coffee and soft drinks consumed per person each week in Vietnam from 1990 to 2020.',
+    chart: () => t1LineChart({ xs: [1990, 1995, 2000, 2005, 2010, 2015, 2020], yMax: 16, yStep: 4, unit: 'cups / week', legend: true, title: 'Average weekly drinks per person, Vietnam',
+      series: [{ name: 'Tea', ys: [14, 13, 12, 10, 9, 8, 7] }, { name: 'Coffee', ys: [3, 4, 6, 8, 11, 13, 14] }, { name: 'Soft drinks', ys: [1, 2, 4, 6, 6, 6, 5] }] }),
+    essay: [
+      'The line graph compares the average number of cups of tea, coffee and soft drinks that people in Vietnam drank each week over a thirty-year period starting in 1990.',
+      'Overall, coffee consumption rose dramatically while tea consumption declined steadily, with coffee overtaking tea as the most popular drink by the end of the period. Soft drinks remained the least consumed of the three throughout.',
+      'In 1990, the average Vietnamese person drank 14 cups of tea a week, almost five times the figure for coffee, at 3 cups. Over the following three decades, tea consumption fell gradually, dropping to 10 cups in 2005 and reaching a low of 7 cups in 2020, exactly half of its original level.',
+      'Coffee, by contrast, saw continuous growth. Its figure doubled to 6 cups by 2000 and climbed steeply thereafter, overtaking tea between 2005 and 2010 before finishing the period at 14 cups. Soft drink consumption rose from just 1 cup to 6 cups between 1990 and 2005, after which it levelled off and then dipped slightly to 5 cups in 2020.',
+    ] },
+  { id: 'bar-students', block: 'dyn', type: 'Bar chart (theo năm)', icon: '📊',
+    prompt: 'The chart below shows the number of international students in Australia, Canada and Japan in 2004, 2008, 2012 and 2016.',
+    chart: () => t1GroupBars({ title: 'International students (thousands)', unit: 'thousands', xs: [2004, 2008, 2012, 2016], yMax: 350, yStep: 50,
+      series: [{ name: 'Australia', ys: [150, 230, 250, 310] }, { name: 'Canada', ys: [70, 90, 130, 250] }, { name: 'Japan', ys: [110, 120, 140, 170] }] }),
+    essay: [
+      'The bar chart illustrates how many international students were studying in Australia, Canada and Japan in four separate years between 2004 and 2016.',
+      'Overall, all three countries attracted more international students over the period, with Australia hosting the largest number throughout. Canada, however, recorded the most rapid growth, particularly in the final four years.',
+      'In 2004, Australia had around 150,000 international students, compared with 110,000 in Japan and only 70,000 in Canada. Australia\'s figure rose sharply to 230,000 in 2008, increased only slightly over the next four years and then climbed again to reach a peak of 310,000 in 2016.',
+      'Japan saw slow but steady growth, with its student numbers rising from 110,000 to 170,000 over the twelve years. Canada\'s figure grew moderately to 130,000 by 2012, before almost doubling to 250,000 in 2016. As a result, Canada overtook Japan to become the second most popular destination of the three.',
+    ] },
+  { id: 'pie-budget', block: 'sta', type: 'Pie chart', icon: '🥧',
+    prompt: 'The pie charts below show how a typical urban household spent its monthly income in 2000 and 2020.',
+    chart: () => `<div class="t1-pies">${t1LibPie('2000', [['Food', 35], ['Housing', 25], ['Transport', 10], ['Education', 10], ['Leisure', 5], ['Other', 15]])}${t1LibPie('2020', [['Food', 22], ['Housing', 35], ['Transport', 12], ['Education', 15], ['Leisure', 10], ['Other', 6]])}</div>`,
+    essay: [
+      'The pie charts compare the proportions of monthly income that a typical urban household spent on six categories in 2000 and 2020.',
+      'Overall, housing replaced food as the largest expense over the twenty years, and spending on education and leisure grew, while the share spent on food and other items fell considerably.',
+      'In 2000, food accounted for just over a third of household spending, at 35%, followed by housing at a quarter. Twenty years later, this pattern had reversed: housing made up 35% of the budget, while the figure for food had dropped to 22%. Housing therefore saw the largest increase of any category, at ten percentage points.',
+      'The proportions spent on education and leisure both rose by 5 percentage points, to 15% and 10% respectively. Transport increased only marginally, from 10% to 12%. By contrast, the share of income spent on other items fell sharply from 15% to just 6%, making it the smallest category in 2020.',
+    ] },
+  { id: 'table-screen', block: 'sta', type: 'Table', icon: '🧮',
+    prompt: 'The table below shows the average number of hours per day that people in four age groups spent looking at screens in Vietnam, Japan and the USA.',
+    chart: () => `<div class="t1-chart"><div class="t1-chart-title">Average daily screen time (hours)</div><table class="t1-table"><thead><tr><th>Age</th><th>Vietnam</th><th>Japan</th><th>USA</th></tr></thead><tbody>${[['10–15', 4.5, 3.2, 5.0], ['16–24', 6.8, 5.6, 7.4], ['25–44', 5.1, 4.3, 6.2], ['45+', 2.9, 3.0, 4.8]].map(r => `<tr><th>${r[0]}</th>${r.slice(1).map(v => `<td>${v.toFixed(1)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`,
+    essay: [
+      'The table shows the average number of hours that people in four age groups spent looking at screens each day in Vietnam, Japan and the USA.',
+      'Overall, people aged 16 to 24 had the highest screen time in all three countries, while those aged 45 and over generally had the lowest. Americans spent more time on screens than people in the other two nations in every age group.',
+      'Young adults aged 16 to 24 in the USA spent 7.4 hours a day on screens, the highest figure in the table, followed by their Vietnamese and Japanese counterparts at 6.8 and 5.6 hours respectively. For children aged 10 to 15, the figures were lower, ranging from 3.2 hours in Japan to 5 hours in the USA.',
+      'Screen time fell with age after 24. Among 25 to 44-year-olds, Americans averaged 6.2 hours, compared with 5.1 hours in Vietnam and 4.3 hours in Japan. The oldest group spent the least time on screens, at around 3 hours in both Vietnam and Japan, although the figure for older Americans remained relatively high, at 4.8 hours.',
+    ] },
+  { id: 'map-riverton', block: 'sta', type: 'Map', icon: '🗺️',
+    prompt: 'The maps below show the town of Riverton in 2000 and at present.',
+    chart: () => t1LibMaps(['2000', ['🏭 · 🏫 · 🌾 🌾', '🌊 🌳 · ⛪ 🏥 ·', '· · 🅿️ · · ·', '🏠 · 🚉 · · 🏪']], ['Now', ['🏢 · 🏫 🏫 🏠 🏠', '🌊 🌳 · ⛪ · ·', '🏥 · 🌳 · · ·', '🏠 · 🚉 🏬 · 🏪']],
+      [['🏭', 'factory'], ['🏢', 'apartments'], ['🏫', 'school'], ['🌾', 'farmland'], ['🏠', 'houses'], ['🌊', 'lake'], ['🌳', 'park'], ['⛪', 'church'], ['🏥', 'hospital'], ['🅿️', 'car park'], ['🚉', 'train station'], ['🏬', 'shopping centre'], ['🏪', 'shop']]),
+    essay: [
+      'The two maps illustrate the changes that have taken place in the town of Riverton between 2000 and the present day.',
+      'Overall, the town has become considerably more residential and better provided with services, with most of its industrial and farming land being replaced. The central park and the church, however, have remained unchanged.',
+      'In the north, the factory beside the lake has been demolished and replaced by apartments, and the farmland in the north-east has made way for new houses. The school has also been extended to the east to accommodate more pupils, while the hospital has been relocated from the north-east to the west of the town.',
+      'Turning to the south, the car park in the centre has been converted into a park, providing more green space. In addition, a shopping centre has been built next to the train station. The houses in the south-west and the shop in the south-east, however, are still in their original positions.',
+    ] },
+  { id: 'map-seaview', block: 'sta', type: 'Map', icon: '🗺️',
+    prompt: 'The maps below show the coastal village of Seaview in 1980 and 2020.',
+    chart: () => t1LibMaps(['1980', ['🌲 🌲 🌲 🌲 · ·', '🌾 🌾 🏠 🏠 · ·', '🌾 🌾 🏠 ⛪ · ·', '🏖️ 🏖️ 🏖️ 🏖️ 🏖️ 🏖️']], ['2020', ['🌲 🌲 🅿️ 🌲 · ·', '🏨 🏨 🏠 🏠 🏪 ·', '🏘️ 🏘️ 🏠 ⛪ ☕ ·', '🏖️ 🏖️ 🏖️ 🏖️ 🛥️ 🏖️']],
+      [['🌲', 'forest'], ['🌾', 'farmland'], ['🏠', 'houses'], ['⛪', 'church'], ['🏖️', 'beach'], ['🅿️', 'car park'], ['🏨', 'hotel'], ['🏘️', 'housing estate'], ['🏪', 'shop'], ['☕', 'café'], ['🛥️', 'pier']]),
+    essay: [
+      'The maps compare the coastal village of Seaview in 1980 and 2020.',
+      'Overall, the village was transformed from a quiet farming community into a tourist destination, as its farmland and part of the forest gave way to accommodation and visitor facilities. The beach and the original houses, however, remained largely unchanged.',
+      'In 1980, the west of the village was mainly farmland, with a forest stretching across the north. By 2020, the farmland had been replaced by a large hotel in the north-west and a housing estate to the south of it. A small area of the forest was also cleared to make way for a car park.',
+      'In the east, which had previously been empty, a shop and a café were built beside the existing houses and the church. Meanwhile, a pier was constructed towards the eastern end of the beach, giving visitors access to the sea. The church and the houses in the centre of the village were kept in their original positions.',
+    ] },
+  { id: 'map-school', block: 'sta', type: 'Map', icon: '🗺️',
+    prompt: 'The plans below show Westbrook School in 2005 and now.',
+    chart: () => t1LibMaps(['2005', ['🌳 🌳 🏠 🏠 · ·', '🏫 🏫 · · ⚽ ⚽', '🏫 🏫 · · ⚽ ⚽', '🅿️ · · 🌳 🌳 🌳']], ['Now', ['🌳 🌳 🏫 🏫 · ·', '🏫 🏫 📚 · 🏟️ ⚽', '🏫 🏫 🍽️ · 🏟️ ⚽', '🅿️ 🅿️ 🅿️ 🌳 🌳 🌳']],
+      [['🏫', 'school building / classrooms'], ['🏠', 'staff houses'], ['⚽', 'playing field'], ['🏟️', 'sports hall'], ['📚', 'library'], ['🍽️', 'cafeteria'], ['🅿️', 'car park'], ['🌳', 'trees']]),
+    essay: [
+      'The two plans illustrate how Westbrook School has been developed since 2005.',
+      'Overall, the school has expanded considerably, with several new facilities added in the previously empty centre of the site. Most of the playing field and all of the trees, however, have been preserved.',
+      'The most significant changes have taken place in the centre and north of the school. The two staff houses in the north have been converted into classrooms, providing extra space for lessons, and a new library has been built directly to the east of the main building, with a cafeteria constructed just south of it.',
+      'On the eastern side, half of the playing field has made way for a sports hall, although the remaining part is still used for sport. Meanwhile, the car park in the south-west has been extended eastwards, roughly tripling in size. The main building and the trees in the north-west and south-east have remained unchanged.',
+    ] },
+  { id: 'proc-bricks', block: 'sta', type: 'Process', icon: '⚙️',
+    prompt: 'The diagram below shows the process by which bricks are manufactured for the building industry.',
+    chart: () => t1LibProc('Brick manufacturing'),
+    essay: [
+      'The diagram illustrates the process by which bricks are produced for the building industry.',
+      'Overall, there are seven main stages in the process, beginning with the digging of clay and ending with the delivery of the finished bricks to customers, and the whole process takes several days.',
+      'To begin with, clay is dug from the ground by a large digger. It is then placed on a metal grid, which breaks it into smaller pieces, before being mixed with sand and water. Next, the mixture is shaped into bricks, either in a mould or by a wire cutter.',
+      'Once they have been shaped, the bricks are dried in an oven for 24 to 48 hours and then heated in a kiln at a very high temperature, which makes them hard and strong. Following this, they are left to cool in a cooling chamber for two to three days. Finally, the bricks are packaged and delivered to their destinations.',
+    ] },
+  { id: 'proc-tea', block: 'sta', type: 'Process', icon: '⚙️',
+    prompt: 'The diagram below shows how tea is produced.',
+    chart: () => t1LibProc('Tea production'),
+    essay: [
+      'The diagram illustrates the stages involved in producing tea, from picking the leaves to packing the final product.',
+      'Overall, the process consists of seven steps, beginning on the plantation and ending when the packed tea is sent to shops, and it combines manual work in the field with machine processing in the factory.',
+      'First, tea leaves are picked by hand on plantations. They are then spread out in warm air for several hours so that they wither and become soft. After that, the leaves are rolled by machines, which breaks them and releases their natural oils. These oils give the tea much of its flavour.',
+      'Next, the rolled leaves are left to ferment, during which time they turn dark brown. Once they have fermented, they are dried in hot ovens to stop the fermentation. Following this, the dried leaves are sorted according to their size and quality. Finally, the tea is packed into boxes and distributed to shops.',
+    ] },
+  { id: 'proc-recycle', block: 'sta', type: 'Process', icon: '⚙️',
+    prompt: 'The diagram below shows how plastic bottles are recycled.',
+    chart: () => t1LibProc('Recycling plastic bottles'),
+    essay: [
+      'The diagram shows how plastic bottles are recycled to make new products.',
+      'Overall, there are seven stages in the process, starting with the collection of used bottles and ending with the manufacture of new items such as clothing, and most of these steps take place at a recycling plant.',
+      'To begin with, used plastic bottles are collected from recycling bins and then transported by truck to a recycling plant. At the plant, the bottles are sorted according to their colour and the type of plastic they are made from, before being washed to remove labels and dirt.',
+      'After that, the clean bottles are crushed into small flakes. These flakes are melted down and formed into small pellets, which are easy to transport and store. Finally, the pellets are used as a raw material to produce new products, for example clothing and new bottles, so that waste is turned into useful goods.',
+    ] },
+];
+const T1_PARA = ['Mở bài', 'Overview', 'Thân bài 1', 'Thân bài 2'];
+function t1SampleList() {
+  t1Leave();
+  const list = T1_SAMPLES.filter(x => x.block === _t1Block), types = [...new Set(list.map(x => x.type))];
+  t1Root().innerHTML = `
+    <div class="lv-wrap t1-lib">
+      <div class="t1-hub-nav"><button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button></div>
+      <div class="lv-head"><div class="vb-logo">📖 Bài mẫu · ${T1_BLOCKS[_t1Block].name}</div>
+        <div class="vb-tagline">Mỗi đề một bài mẫu 4 đoạn: mở bài, overview, hai thân bài. Nên tự viết trước rồi mới mở bài mẫu.</div></div>
+      ${types.map(t => `<h3 class="t1-sec">${list.find(x => x.type === t).icon} ${escapeHtml(t)} <small>${list.filter(x => x.type === t).length} đề</small></h3>
+        <div class="t1-lib-grid">${list.filter(x => x.type === t).map(x => `<button class="t1-lib-card" onclick="t1SampleOpen('${x.id}')">${escapeHtml(x.prompt)}</button>`).join('')}</div>`).join('')}
+    </div>`;
+}
+function t1SampleOpen(id, show) {
+  const x = T1_SAMPLES.find(s => s.id === id);
+  if (!x) return;
+  const key = 't1Lib_' + id + '_' + walWho();
+  let mine = ''; try { mine = localStorage.getItem(key) || ''; } catch (e) {}
+  const words = x.essay.join(' ').split(/\s+/).length;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-lib">
+      <div class="t1-hub-nav"><button class="btn-back-plain" onclick="t1SampleList()">← Bài mẫu</button><span class="t1-step-tag">${x.icon} ${escapeHtml(x.type)}</span></div>
+      <div class="t1-me-prompt">📜 ${escapeHtml(x.prompt)} <small>Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.</small></div>
+      ${x.chart()}
+      ${show ? `<div class="t1-lib-essay">${x.essay.map((p, i) => `<div class="t1-lib-para"><span class="t1-lib-tag">${T1_PARA[i]}</span><p>${escapeHtml(p)}</p></div>`).join('')}<div class="t1-lib-count">${words} từ</div></div>
+          ${mine ? `<details class="t1-lib-mine"><summary>Bài em viết</summary><p>${escapeHtml(mine).replace(/\n/g, '<br>')}</p></details>` : ''}
+          <div class="vb-results-btns"><button class="vb-secondary-btn" onclick="t1SampleOpen('${id}')">✍️ Viết lại</button><button class="vb-secondary-btn" onclick="t1SampleList()">📖 Đề khác</button></div>`
+        : `<p class="t1-stem">Tự viết trước, khoảng 20 phút. Bài được lưu trên máy này.</p>
+          <textarea class="rd-rw-ta t1-me-ta" id="lib-ta" rows="12" placeholder="The ${escapeHtml(x.type.toLowerCase().split(' ')[0])} illustrates…" oninput="try{localStorage.setItem('${key}',this.value)}catch(e){}; document.getElementById('lib-n').textContent=(this.value.match(/[A-Za-z][A-Za-z'’-]*/g)||[]).length+' từ'">${escapeHtml(mine)}</textarea>
+          <div class="rd-rw-count" id="lib-n">${(mine.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length} từ</div>
+          <div class="vb-results-btns"><button class="vb-start-btn" onclick="t1SampleOpen('${id}', true)">👀 Xem bài mẫu</button></div>`}
+    </div>`;
+  window.scrollTo({ top: 0 });
 }
 // TASK1 END
