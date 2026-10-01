@@ -23560,11 +23560,13 @@ const T1_BLOCKS = {
     sub: 'Đề có nhiều mốc thời gian: line graph, bar chart theo năm. Tả xu hướng lên, xuống, đi ngang và các điểm đặc biệt.',
     crit: [['Hướng và tốc độ', 'rise, surge, creep up, plummet, level off'], ['12 feature', 'đỉnh, đáy, điểm vượt, bình ổn, tăng tốc…'], ['Giới từ và đơn vị', 'to hay by, percent hay percentage points'], ['Câu nâng cấp', 'having peaked, representing a …% increase']],
     lv: { a: 'rise, fall, peak, ổn định', d: 'surge, plummet, level off, giới từ', l: 'crept up, rocketed, tăng tốc, giảm tốc' },
+    fc: 'Hình dạng đường và cụm tả xu hướng, giới từ to / by, đỉnh, đáy, vượt.',
     games: ['rain', 'snake'], warm: ['slope', 'hunt', 'build'] },
   sta: { icon: '📊', name: 'Biểu đồ tĩnh', en: 'Static',
     sub: 'Đề chỉ có một mốc: pie chart, bar chart, table, bản đồ, quy trình. So sánh, xếp hạng, ước lượng tỉ lệ, tả thay đổi trên bản đồ và các bước quy trình.',
     crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Ước lượng tỉ lệ', 'just over a quarter, nearly half, twice as many'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
     lv: { a: 'phân số tròn, 4 cột, 3 thay đổi', d: 'gấp mấy lần, 5 cột, di dời, mở rộng', l: 'just over / under, 6 cột sát nhau, having been' },
+    fc: 'Phân số và tỉ lệ, xếp hạng, động từ bản đồ, bị động và từ nối quy trình.',
     games: ['flash', 'rank', 'map', 'process'], warm: ['compare'] },
 };
 const T1_GAMES = {
@@ -23604,6 +23606,7 @@ function t1Open(block) {
 }
 function t1Root() { return document.getElementById('task1-games-root'); }
 function t1Leave() {
+  t1FcStop();
   if (_t1 && _t1.stop) _t1.stop();
   if (_t1 && _t1.coins && !_t1.banked) { _t1.banked = true; walEarn(_t1.coins, true); }
   _t1 = null;
@@ -23615,6 +23618,7 @@ function t1SetLevel(id) {
   tsSfx('equip');
   t1Hub();
 }
+function t1DeckKnown() { const k = t1Known(); return t1Deck().filter(c => k.has(c.en)).length + '/' + t1Deck().length; }
 function t1GameCard(id, warm) {
   const g = T1_GAMES[id];
   return `<button class="lv-mode t1-mode${warm ? ' t1-mode--warm' : ''}" onclick="${g.start}">
@@ -23651,7 +23655,21 @@ function t1Hub() {
       </div>
       <div class="wal-bar" id="wal-bar"></div>
       <div class="wal-shop hidden" id="wal-shop"></div>
-      <h3 class="t1-sec">🎮 Trò chơi</h3>
+      <h3 class="t1-sec">📚 Ôn từ vựng trước <small>làm trước khi chơi</small></h3>
+      <div class="lv-modes t1-modes t1-modes--steps">
+        <button class="lv-mode t1-mode t1-mode--step" onclick="t1FcStart()">
+          <span class="lv-mode-icon">🃏</span>
+          <span class="lv-mode-name">Bước 1 · Flashcard</span>
+          <span class="lv-mode-desc">${escapeHtml(b.fc)} Lật thẻ, đánh dấu nhớ hay chưa.</span>
+          <span class="lv-mode-best">✓ ${t1DeckKnown()} thẻ đã nhớ</span>
+        </button>
+        <button class="lv-mode t1-mode t1-mode--step" onclick="t1RainStart('review')">
+          <span class="lv-mode-icon">🌧️</span>
+          <span class="lv-mode-name">Bước 2 · Ôn lại bằng Mưa pattern</span>
+          <span class="lv-mode-desc">Hình rơi xuống, bắn bằng đúng cụm vừa học. Mỗi đợt 6 hình, hết đợt thì đổi cụm ở các nút số.</span>
+        </button>
+      </div>
+      <h3 class="t1-sec" id="t1-games">🎮 Bước 3 · Trò chơi</h3>
       <div class="lv-modes t1-modes">${b.games.map(id => t1GameCard(id)).join('')}</div>
       <h3 class="t1-sec">🔥 Khởi động nhanh <small>12 câu trắc nghiệm</small></h3>
       <div class="lv-modes t1-modes t1-modes--warm">${b.warm.map(id => t1GameCard(id, true)).join('')}</div>
@@ -23762,8 +23780,8 @@ function t1Options(opts, chosen, correct) {
 // opts.big replaces the "x/12 câu đúng" line for the arcade games.
 function t1Finish(g, game, writeType, opts) {
   opts = opts || {};
-  const best = t1GetBest(game);
-  const isBest = g.score > best;
+  const best = opts.review ? 0 : t1GetBest(game);
+  const isBest = !opts.review && g.score > best;
   if (isBest) t1SetBest(game, g.score);
   if (g.coins && !g.banked) { g.banked = true; walEarn(g.coins, true); }
   const good = opts.good != null ? opts.good : g.right >= T1_ROUNDS * 0.75;
@@ -23776,11 +23794,12 @@ function t1Finish(g, game, writeType, opts) {
         <div class="t1-result-icon">${opts.icon || (g.right >= 10 ? '🏆' : g.right >= 7 ? '👏' : '💪')}</div>
         <div class="t1-result-title">${meta.icon} ${meta.name} · ${T1_LEVELS[_t1Lv].name}</div>
         <div class="t1-result-big">${opts.big || `${g.right}/${T1_ROUNDS} câu đúng`}</div>
-        <div class="t1-result-row"><span>⭐ ${g.score} điểm${isBest ? ' · kỷ lục mới!' : ` · kỷ lục ${best}`}</span><span>🪙 +${Math.round(g.coins)} xu</span></div>
+        <div class="t1-result-row"><span>⭐ ${g.score} điểm${opts.review ? '' : isBest ? ' · kỷ lục mới!' : ` · kỷ lục ${best}`}</span><span>🪙 +${Math.round(g.coins)} xu</span></div>
       </div>
       ${g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>'}
       <div class="t1-result-btns">
-        <button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>
+        ${opts.review ? `<button class="vb-start-btn" onclick="t1Hub(); setTimeout(() => document.getElementById('t1-games')?.scrollIntoView({ behavior: 'smooth' }), 50)">🎮 Bước 3 · Vào trò chơi →</button>
+        <button class="vb-secondary-btn" onclick="t1RainStart('review')">↺ Ôn lại lần nữa</button>` : `<button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>`}
         <button class="vb-secondary-btn" onclick="t1GoWrite('${writeType}')">✍️ Áp dụng: viết một đề ${T1_WRITE_LABEL[writeType] || 'Task 1'}</button>
       </div>
     </div>`;
@@ -24557,15 +24576,208 @@ function t1BuildNext() {
   tsSfx('key');
   t1BuildRender(true);
 }
-/* ── Dynamic · Mưa pattern ────────────────────────────────────────────────
-   Small line charts fall into the arena. The phrase buttons (keys 1–6)
-   shoot the lowest falling chart that matches; a chart that lands costs a
-   life. Every ten hits the rain speeds up and the phrase set changes, so
-   the student has to read shapes faster, not memorise four buttons. */
+/* ── Review sources: what can fall in Mưa pattern ─────────────────────────
+   A source lists keys, and for each key the phrase on its button, a small
+   picture to fall, the Vietnamese note and an example sentence. Dynamic
+   uses the line shapes; Static uses pie slices, bar highlights and map
+   changes. The same source feeds the flashcards, so the rain right after
+   them only drops what was just studied. */
+function t1MiniPie(v, size) {
+  size = size || 56;
+  const r = size / 2 - 4, c = size / 2, a0 = -Math.PI / 2, a1 = a0 + v / 100 * Math.PI * 2, big = v > 50 ? 1 : 0;
+  const p = t => `${(c + r * Math.cos(t)).toFixed(1)} ${(c + r * Math.sin(t)).toFixed(1)}`;
+  return `<svg viewBox="0 0 ${size} ${size}" class="t1-mini t1-mini--pie" aria-hidden="true"><circle cx="${c}" cy="${c}" r="${r}" fill="#DCE7E1"/>${v >= 99.5 ? `<circle cx="${c}" cy="${c}" r="${r}" fill="#E5533D"/>` : `<path d="M${c} ${c}L${p(a0)}A${r} ${r} 0 ${big} 1 ${p(a1)}Z" fill="#E5533D"/>`}</svg>`;
+}
+function t1MiniBars(vals, hi) {
+  const w = 100, h = 56, bw = 14, gap = (w - 10 - bw * vals.length) / (vals.length - 1), max = Math.max(...vals);
+  return `<svg viewBox="0 0 ${w} ${h}" class="t1-mini" aria-hidden="true"><path d="M5 5V${h - 5}H${w - 5}" class="t1-mini-axis"/>${vals.map((v, i) => `<rect x="${5 + i * (bw + gap)}" y="${(h - 5 - v / max * (h - 12)).toFixed(1)}" width="${bw}" height="${(v / max * (h - 12)).toFixed(1)}" rx="2" fill="${i === hi ? '#E5533D' : '#9FB7AE'}"/>`).join('')}</svg>`;
+}
+function t1MiniMap(a, b) { return `<div class="t1-mini-map"><span>${a}</span><i>→</i><span>${b}</span></div>`; }
+const T1_STA_REVIEW = {
+  quarter:   { lv: 'a', p: 'a quarter', vi: '1/4, một góc vuông của hình tròn', v: [24, 26], ex: 'Transport accounted for a quarter of household spending.' },
+  third:     { lv: 'a', p: 'a third', vi: '1/3', v: [32, 34], ex: 'Coal made up a third of electricity generation.' },
+  half:      { lv: 'a', p: 'half', vi: '1/2, đúng nửa hình', v: [49, 51], ex: 'Half of the students walked to school.' },
+  threeq:    { lv: 'a', p: 'three quarters', vi: '3/4', v: [74, 76], ex: 'Three quarters of the land was used for farming.' },
+  nearhalf:  { lv: 'd', p: 'nearly half', vi: 'gần một nửa, hơi thiếu 50%', v: [45, 48], ex: 'Nearly half of all visitors came from Asia.' },
+  majority:  { lv: 'd', p: 'the vast majority', vi: 'đại đa số, khoảng 85–95%', v: [86, 93], ex: 'The vast majority of households owned a phone.' },
+  minority:  { lv: 'd', p: 'a small minority', vi: 'một phần nhỏ, dưới 10%', v: [5, 9], ex: 'Only a small minority of workers cycled to work.' },
+  overq:     { lv: 'l', p: 'just over a quarter', vi: 'nhỉnh hơn 1/4 một chút, 27–29%', v: [27, 29], ex: 'Gas accounted for just over a quarter of the total.' },
+  highest:   { lv: 'a', p: 'the highest figure', vi: 'cột cao nhất', bars: 0, ex: 'Finland had the highest figure, at 12 kilograms per person.' },
+  lowest:    { lv: 'a', p: 'the lowest figure', vi: 'cột thấp nhất', bars: 3, ex: 'Japan recorded the lowest figure of all.' },
+  second:    { lv: 'd', p: 'ranked second', vi: 'đứng thứ hai', bars: 1, ex: 'Sweden ranked second, with 9.9 kilograms.' },
+  demolish:  { lv: 'a', p: 'was demolished', vi: 'bị phá bỏ: có ở bản đồ trước, mất ở bản đồ sau', map: ['🏭', '✖️'], ex: 'The factory was demolished.' },
+  build:     { lv: 'a', p: 'was built', vi: 'được xây mới trên chỗ trống', map: ['⬜', '🏥'], ex: 'A new hospital was built near the river.' },
+  convert:   { lv: 'a', p: 'was converted into', vi: 'được chuyển đổi công năng, cùng chỗ', map: ['🏭', '🏢'], ex: 'The factory was converted into apartments.' },
+  extend:    { lv: 'd', p: 'was extended', vi: 'được mở rộng, chiếm thêm chỗ bên cạnh', map: ['🏫', '🏫🏫'], ex: 'The school was extended to the east.' },
+  relocate:  { lv: 'd', p: 'was relocated', vi: 'được dời đi chỗ khác', map: ['🏥⬜', '⬜🏥'], ex: 'The hospital was relocated to the west.' },
+  replace:   { lv: 'l', p: 'made way for', vi: 'nhường chỗ cho, bị thay bằng', map: ['🌾', '🏘️'], ex: 'The farmland made way for a housing estate.' },
+};
+function t1LvOk(lv) { return lv === 'a' || (lv === 'd' && _t1Lv !== 'a') || (lv === 'l' && _t1Lv === 'l'); }
+function t1Source(block) {
+  if (block === 'dyn') {
+    const keys = t1RainClasses();
+    return {
+      keys,
+      phrase: k => T1_SLOPE[k][_t1Lv],
+      draw: k => t1MiniSvg(T1_SLOPE[k].f()),
+      vi: k => T1_SLOPE[k].vi,
+      ex: k => `Internet access ${T1_SLOPE[k][_t1Lv]} between 2000 and 2020.`,
+    };
+  }
+  const keys = Object.keys(T1_STA_REVIEW).filter(k => t1LvOk(T1_STA_REVIEW[k].lv));
+  return {
+    keys,
+    phrase: k => T1_STA_REVIEW[k].p,
+    draw: k => {
+      const r = T1_STA_REVIEW[k];
+      if (r.v) return t1MiniPie(Math.round(t1Rand(r.v[0], r.v[1])));
+      if (r.bars !== undefined) {
+        const vals = t1Shuffle([90, 70, 52, 34]).sort((a, b) => b - a);
+        const order = t1Shuffle([0, 1, 2, 3]);
+        const out = []; order.forEach((pos, rank) => { out[pos] = vals[rank]; });
+        return t1MiniBars(out, order[r.bars]);
+      }
+      return t1MiniMap(r.map[0], r.map[1]);
+    },
+    vi: k => T1_STA_REVIEW[k].vi,
+    ex: k => T1_STA_REVIEW[k].ex,
+  };
+}
+
+/* ── Flashcards for a block ───────────────────────────────────────────────
+   The picture cards come from the block's review source; the rest are
+   words with no picture (prepositions, sentence frames). Cards marked as
+   remembered are kept per block in the browser. */
+const T1_FC_EXTRA = {
+  dyn: [
+    { lv: 'a', en: 'rise to 50%', vi: 'tăng ĐẾN mức 50%', ex: 'The figure rose to 50% in 2010.', use: 'to + mức đạt được' },
+    { lv: 'a', en: 'rise by 10%', vi: 'tăng THÊM 10%', ex: 'Sales rose by 10% over the decade.', use: 'by + lượng thay đổi' },
+    { lv: 'a', en: 'reach a peak of', vi: 'đạt đỉnh ở mức', ex: 'Unemployment reached a peak of 12% in 2009.' },
+    { lv: 'a', en: 'over the period', vi: 'trong suốt giai đoạn', ex: 'Car ownership doubled over the period.' },
+    { lv: 'a', en: 'stand at', vi: 'ở mức (điểm bắt đầu)', ex: 'In 2000, the figure stood at 20%.' },
+    { lv: 'd', en: 'a sharp rise in', vi: 'sự tăng mạnh của (danh từ)', ex: 'There was a sharp rise in tourism after 2015.', use: 'Danh từ hoá: There was + a + adj + noun + in' },
+    { lv: 'd', en: 'overtake', vi: 'vượt qua (đường khác)', ex: 'Vietnam overtook Brazil in 2016.' },
+    { lv: 'd', en: 'hit a low of', vi: 'chạm đáy ở mức', ex: 'Exports hit a low of 3 million tonnes in 2008.' },
+    { lv: 'd', en: 'by the end of the period', vi: 'đến cuối giai đoạn', ex: 'By the end of the period, the figure had doubled.' },
+    { lv: 'l', en: 'percentage points', vi: 'điểm phần trăm (hiệu hai tỉ lệ)', ex: 'The rate fell by 5 percentage points, from 20% to 15%.', use: '20% → 15% là giảm 5 percentage points, không phải 5%' },
+    { lv: 'l', en: 'representing a twofold increase', vi: 'tương đương tăng gấp đôi', ex: 'Sales reached 40 million, representing a twofold increase.' },
+  ],
+  sta: [
+    { lv: 'a', en: 'account for', vi: 'chiếm (bao nhiêu phần)', ex: 'Coal accounted for 62% of the total.' },
+    { lv: 'a', en: 'twice as many … as', vi: 'nhiều gấp đôi (danh từ đếm được)', ex: 'Football attracted twice as many students as tennis.' },
+    { lv: 'a', en: 'To begin with', vi: 'Đầu tiên (mở bước 1 của quy trình)', ex: 'To begin with, clay is dug from the ground.' },
+    { lv: 'a', en: 'Finally', vi: 'Cuối cùng (bước cuối)', ex: 'Finally, the bricks are packaged.' },
+    { lv: 'a', en: 'is heated', vi: 'được làm nóng (bị động: is/are + V3)', ex: 'The mixture is heated in a kiln.', use: 'Quy trình luôn dùng bị động hiện tại' },
+    { lv: 'd', en: 'Following this', vi: 'Sau bước này', ex: 'Following this, the bricks are cooled.' },
+    { lv: 'd', en: 'roughly the same as', vi: 'gần bằng', ex: 'The figure for Spain was roughly the same as that for Italy.' },
+    { lv: 'd', en: 'respectively', vi: 'lần lượt (theo thứ tự vừa nêu)', ex: 'Gas and wind made up 20% and 10% respectively.' },
+    { lv: 'd', en: 'to the north of', vi: 'ở phía bắc của', ex: 'A car park was built to the north of the station.' },
+    { lv: 'l', en: 'Once … has been …', vi: 'Một khi … đã được … (nối hai bước)', ex: 'Once the clay has been shaped, it is dried.' },
+    { lv: 'l', en: 'a negligible proportion', vi: 'một tỉ lệ không đáng kể', ex: 'Nuclear power made up a negligible proportion of the total.' },
+  ],
+};
+let _t1fc = null;
+function t1KnownKey() { return 't1Known_' + _t1Block + '_' + walWho(); }
+function t1Known() { try { return new Set(JSON.parse(localStorage.getItem(t1KnownKey()) || '[]')); } catch (e) { return new Set(); } }
+function t1SaveKnown(s) { try { localStorage.setItem(t1KnownKey(), JSON.stringify([...s])); } catch (e) {} }
+function t1Deck() {
+  const src = t1Source(_t1Block);
+  const seen = new Set();
+  const pics = src.keys.filter(k => { const p = src.phrase(k); if (seen.has(p)) return false; seen.add(p); return true; })
+    .map(k => ({ en: src.phrase(k), vi: src.vi(k), ex: src.ex(k), pic: src.draw(k), key: k }));
+  const words = T1_FC_EXTRA[_t1Block].filter(c => t1LvOk(c.lv)).map(c => ({ ...c }));
+  return [...pics, ...words];
+}
+function t1FcStart(list) {
+  t1Leave();
+  const deck = list || t1Deck();
+  _t1fc = { deck: t1Shuffle(deck), i: 0, got: [], miss: [], flipped: false, retry: !!list };
+  document.addEventListener('keydown', t1FcKey);
+  tsSfx('equip');
+  t1FcRender();
+}
+function t1FcStop() { document.removeEventListener('keydown', t1FcKey); }
+function t1FcKey(e) {
+  if (!_t1fc || _t1fc.done || !t1Root() || t1Root().offsetParent === null) return;
+  if (e.key === ' ') { e.preventDefault(); t1FcFlip(); }
+  else if (e.key === 'ArrowLeft') t1FcMark(false);
+  else if (e.key === 'ArrowRight') t1FcMark(true);
+}
+function t1FcRender() {
+  const f = _t1fc, c = f.deck[f.i], b = T1_BLOCKS[_t1Block];
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-fc">
+      <div class="lv-fc-top"><button class="btn-back-plain" onclick="t1FcStop(); t1Hub()">← ${b.name}</button><span class="t1-step-tag">Bước 1 · Ôn từ vựng · ${T1_LEVELS[_t1Lv].icon} ${T1_LEVELS[_t1Lv].name}</span></div>
+      <div class="lv-progress"><div class="lv-progress-bar" style="width:${Math.round(f.i / f.deck.length * 100)}%"></div></div>
+      <div class="lv-count">${f.i + 1} / ${f.deck.length}</div>
+      <div class="lv-card${f.flipped ? ' flipped' : ''}" onclick="t1FcFlip()">
+        <div class="lv-card-inner">
+          <div class="lv-face lv-face--front">
+            <div class="lv-card-tag">${b.icon} ${b.name}</div>
+            ${c.pic ? `<div class="t1-fc-pic">${c.pic}</div>` : ''}
+            <div class="lv-card-main">${escapeHtml(c.en)}</div>
+            <div class="lv-card-hint">Bấm để lật</div>
+          </div>
+          <div class="lv-face lv-face--back">
+            <div class="lv-card-tag">${escapeHtml(c.en)}</div>
+            <div class="lv-card-main lv-card-main--vi">${escapeHtml(c.vi)}</div>
+            ${c.use ? `<div class="lv-card-use">${escapeHtml(c.use)}</div>` : ''}
+            ${c.ex ? `<div class="lv-card-ex">${escapeHtml(c.ex)}</div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="lv-fc-btns">
+        <button class="lv-btn lv-btn--miss" onclick="t1FcMark(false)">✗ Chưa nhớ</button>
+        <button class="lv-btn lv-btn--say" onclick="tsSpeak(${escapeHtml(JSON.stringify(c.ex || c.en))})" title="Nghe" aria-label="Nghe">🔊</button>
+        <button class="lv-btn lv-btn--got" onclick="t1FcMark(true)">✓ Nhớ rồi</button>
+      </div>
+      <div class="vb-hint-text">Phím cách để lật thẻ. Mũi tên trái là chưa nhớ, mũi tên phải là nhớ rồi.</div>
+    </div>`;
+}
+function t1FcFlip() {
+  if (!_t1fc) return;
+  _t1fc.flipped = !_t1fc.flipped;
+  document.querySelector('#task1-games-root .lv-card')?.classList.toggle('flipped', _t1fc.flipped);
+}
+function t1FcMark(ok) {
+  const f = _t1fc;
+  if (!f || f.done) return;
+  const c = f.deck[f.i], known = t1Known();
+  if (ok) { known.add(c.en); f.got.push(c); tsSfx('coin'); } else { known.delete(c.en); f.miss.push(c); tsSfx('key'); }
+  t1SaveKnown(known);
+  f.i++;
+  f.flipped = false;
+  if (f.i < f.deck.length) { t1FcRender(); return; }
+  f.done = true;
+  t1FcStop();
+  t1Root().innerHTML = `
+    <div class="vb-wrap"><div class="vb-results">
+      <div class="vb-results-score">${f.got.length}/${f.deck.length}</div>
+      <div class="vb-results-score-lbl">thẻ đã nhớ trong lượt này</div>
+      <div class="vb-missed"><div class="vb-missed-title">📒 Chưa nhớ</div>
+        ${f.miss.length ? f.miss.map(c => `<div class="vb-missed-item"><strong>${escapeHtml(c.en)}</strong> · ${escapeHtml(c.vi)}</div>`).join('') : '<div class="vb-missed-empty">Nhớ hết cả lượt 🎉</div>'}
+      </div>
+      <div class="vb-results-btns">
+        <button class="vb-start-btn" onclick="t1RainStart('review')">🌧️ Bước 2 · Ôn lại bằng Mưa pattern →</button>
+        ${f.miss.length ? `<button class="vb-secondary-btn" onclick="t1FcStart(_t1fc.miss.slice())">↺ Ôn lại ${f.miss.length} thẻ chưa nhớ</button>` : ''}
+        <button class="vb-secondary-btn" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+      </div>
+    </div></div>`;
+  tsSfx('level');
+}
+
+/* ── Mưa pattern ──────────────────────────────────────────────────────────
+   Small pictures fall into the arena. The phrase buttons (keys 1–6) shoot
+   the lowest falling picture that matches; one that lands costs a life.
+   Game mode: every ten hits the rain speeds up and the buttons change.
+   Review mode (after the flashcards): waves of six hits, the buttons change
+   after each wave, and the run ends once every studied phrase has had its
+   turn on a button. */
 const T1_RAIN_SET = {
   a: ['up_steady', 'up_sharp', 'down_steady', 'down_sharp', 'flat', 'fluct', 'peak', 'vshape'],
 };
 const T1_RAIN_CFG = { a: { n: 4, spawn: 2.6, speed: 34 }, d: { n: 5, spawn: 2.2, speed: 40 }, l: { n: 6, spawn: 1.9, speed: 46 } };
+const T1_RAIN_REVIEW_WAVE = 6;
 function t1RainClasses() { return T1_RAIN_SET[_t1Lv] || Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
 // A chart small enough to fall: fixed 0..1 scale so "slightly" and "sharply" keep their size.
 function t1MiniSvg(ys, w, h, color) {
@@ -24574,11 +24786,12 @@ function t1MiniSvg(ys, w, h, color) {
   const d = ys.map((v, i) => (i ? 'L' : 'M') + (p + i * (w - 2 * p) / (n - 1)).toFixed(1) + ' ' + (h - p - Math.max(0, Math.min(1, v)) * (h - 2 * p)).toFixed(1)).join(' ');
   return `<svg viewBox="0 0 ${w} ${h}" class="t1-mini" aria-hidden="true"><path d="M${p} ${p}V${h - p}H${w - p}" class="t1-mini-axis"/><path d="${d}" class="t1-mini-line" stroke="${color || '#0E4D3C'}"/></svg>`;
 }
-function t1RainStart() {
+function t1RainStart(mode) {
   t1Leave();
-  const cfg = T1_RAIN_CFG[_t1Lv];
-  const g = _t1 = { game: 'rain', score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 3, wave: 1, kills: 0,
-    drops: [], spawnIn: 0.6, spawnEvery: cfg.spawn, speed: cfg.speed, paused: false, over: false, last: 0, id: 0 };
+  const cfg = T1_RAIN_CFG[_t1Lv], review = mode === 'review';
+  const src = t1Source(review ? _t1Block : 'dyn');
+  const g = _t1 = { game: 'rain', review, src, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 3, wave: 1, kills: 0,
+    drops: [], spawnIn: 0.6, spawnEvery: cfg.spawn * (review ? 1.15 : 1), speed: cfg.speed * (review ? 0.85 : 1), paused: false, over: false, last: 0, id: 0, covered: new Set() };
   g.set = t1RainNewSet();
   g.keyPick = i => t1RainShoot(i);
   g.pick = g.keyPick;
@@ -24591,20 +24804,25 @@ function t1RainStart() {
   t1RainRender();
   g.raf = requestAnimationFrame(t1RainTick);
 }
-function t1RainNewSet() {
-  const n = T1_RAIN_CFG[_t1Lv].n, seen = new Set(), out = [];
-  for (const k of t1Shuffle(t1RainClasses())) {
-    const ph = T1_SLOPE[k][_t1Lv];
+// A new button set: phrases not yet on a button first, no two buttons alike.
+function t1RainNewSet(keep) {
+  const g = _t1, n = Math.min(T1_RAIN_CFG[_t1Lv].n, new Set(g.src.keys.map(g.src.phrase)).size), seen = new Set((keep || []).map(g.src.phrase)), out = (keep || []).slice();
+  const fresh = t1Shuffle(g.src.keys.filter(k => !g.covered.has(g.src.phrase(k))));
+  for (const k of [...fresh, ...t1Shuffle(g.src.keys)]) {
+    if (out.length >= n) break;
+    const ph = g.src.phrase(k);
     if (seen.has(ph)) continue;
     seen.add(ph); out.push(k);
-    if (out.length === n) break;
   }
+  out.forEach(k => g.covered.add(g.src.phrase(k)));
   return out;
 }
 function t1RainRender() {
   const g = _t1;
+  const total = new Set(g.src.keys.map(g.src.phrase)).size;
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow t1-play t1-rain">
+      ${g.review ? `<div class="t1-step-tag">Bước 2 · Ôn lại nhanh · bắn ${T1_RAIN_REVIEW_WAVE} hình mỗi đợt, hết đợt thì đổi cụm · <span id="rn-cover">${g.covered.size}/${total}</span> cụm</div>` : ''}
       <div class="t1-top">
         <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
         <span class="t1-stat" id="rn-lives">${'❤️'.repeat(g.lives)}${'🖤'.repeat(3 - g.lives)}</span>
@@ -24615,11 +24833,12 @@ function t1RainRender() {
       </div>
       <div class="t1-arena" id="rn-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="rn-msg"></div></div>
       <div class="t1-shoot" id="rn-btns">${t1RainBtns()}</div>
-      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ biểu đồ thấp nhất khớp với cụm đó.</div>
+      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ hình thấp nhất khớp với cụm đó.</div>
     </div>`;
 }
 function t1RainBtns() {
-  return _t1.set.map((k, i) => `<button class="t1-shot" onclick="t1RainShoot(${i})"><kbd>${i + 1}</kbd>${escapeHtml(T1_SLOPE[k][_t1Lv])}</button>`).join('');
+  const g = _t1;
+  return g.set.map((k, i) => `<button class="t1-shot" onclick="t1RainShoot(${i})"><kbd>${i + 1}</kbd>${escapeHtml(g.src.phrase(k))}</button>`).join('');
 }
 function t1RainSpawn() {
   const g = _t1, arena = document.getElementById('rn-arena');
@@ -24627,8 +24846,8 @@ function t1RainSpawn() {
   const k = t1Pick(g.set);
   const el = document.createElement('div');
   el.className = 't1-drop';
-  const ys = T1_SLOPE[k].f();
-  el.innerHTML = t1MiniSvg(ys);
+  const pic = g.src.draw(k);
+  el.innerHTML = pic;
   const w = arena.clientWidth, dw = 112;
   // Keep new drops away from the lanes of drops still near the top.
   let x = 0;
@@ -24638,7 +24857,7 @@ function t1RainSpawn() {
   }
   el.style.left = x + 'px';
   arena.appendChild(el);
-  g.drops.push({ id: ++g.id, k, ys, el, x, y: -70 });
+  g.drops.push({ id: ++g.id, k, pic, el, x, y: -70 });
 }
 function t1RainTick(ts) {
   const g = _t1;
@@ -24668,12 +24887,12 @@ function t1RainRemove(d, cls) {
   setTimeout(() => d.el.remove(), 450);
 }
 function t1RainLand(d) {
-  const g = _t1;
+  const g = _t1, ph = g.src.phrase(d.k);
   g.lives--;
   g.combo = 0;
   tsSfx('wrong');
-  if (!g.missed[d.k]) { g.missed[d.k] = 1; g.misses.push(`<div class="t1-miss-row">${t1MiniSvg(d.ys, 120, 66)}<span><strong>${escapeHtml(T1_SLOPE[d.k][_t1Lv])}</strong><br>${escapeHtml(T1_SLOPE[d.k].vi)}</span></div>`); }
-  d.el.innerHTML += `<span class="t1-drop-tag">${escapeHtml(T1_SLOPE[d.k][_t1Lv])}</span>`;
+  if (!g.missed[ph]) { g.missed[ph] = 1; g.misses.push(`<div class="t1-miss-row">${d.pic}<span><strong>${escapeHtml(ph)}</strong><br>${escapeHtml(g.src.vi(d.k))}</span></div>`); }
+  d.el.innerHTML += `<span class="t1-drop-tag">${escapeHtml(ph)}</span>`;
   t1RainRemove(d, 'landed');
   t1RainHud();
   if (g.lives <= 0) t1RainOver();
@@ -24681,8 +24900,8 @@ function t1RainLand(d) {
 function t1RainShoot(i) {
   const g = _t1;
   if (!g || g.game !== 'rain' || g.paused || g.over || i < 0 || i >= g.set.length) return;
-  const k = g.set[i], ph = T1_SLOPE[k][_t1Lv];
-  const hit = g.drops.filter(d => T1_SLOPE[d.k][_t1Lv] === ph).sort((a, b) => b.y - a.y)[0];
+  const ph = g.src.phrase(g.set[i]);
+  const hit = g.drops.filter(d => g.src.phrase(d.k) === ph).sort((a, b) => b.y - a.y)[0];
   const btn = document.querySelectorAll('#rn-btns .t1-shot')[i];
   if (!hit) {
     g.combo = 0;
@@ -24697,22 +24916,24 @@ function t1RainShoot(i) {
   tsSfx('kill');
   if (btn) { btn.classList.remove('ok'); void btn.offsetWidth; btn.classList.add('ok'); }
   t1RainRemove(hit, 'hit');
-  if (g.kills % 10 === 0) t1RainWave();
+  if (g.kills % (g.review ? T1_RAIN_REVIEW_WAVE : 10) === 0) t1RainWave();
   t1RainHud();
 }
 function t1RainWave() {
   const g = _t1;
+  const total = new Set(g.src.keys.map(g.src.phrase)).size;
+  if (g.review && g.covered.size >= total) { t1RainOver(true); return; }
   g.wave++;
-  g.speed *= 1.12;
-  g.spawnEvery = Math.max(0.8, g.spawnEvery * 0.9);
-  // Drops already falling keep their phrase available until they are gone.
-  const live = [...new Set(g.drops.map(d => d.k))];
-  const fresh = t1RainNewSet().filter(k => !live.some(l => T1_SLOPE[l][_t1Lv] === T1_SLOPE[k][_t1Lv]));
-  g.set = [...live, ...fresh].slice(0, Math.max(T1_RAIN_CFG[_t1Lv].n, live.length));
+  if (!g.review) { g.speed *= 1.12; g.spawnEvery = Math.max(0.8, g.spawnEvery * 0.9); }
+  // Drops already falling keep their phrase on a button until they are gone.
+  const live = [...new Set(g.drops.map(d => d.k))].filter((k, i, a) => a.findIndex(x => g.src.phrase(x) === g.src.phrase(k)) === i);
+  g.set = t1RainNewSet(live);
   document.getElementById('rn-btns').innerHTML = t1RainBtns();
+  const cov = document.getElementById('rn-cover');
+  if (cov) cov.textContent = `${g.covered.size}/${total}`;
   tsSfx('level');
   const m = document.getElementById('rn-msg');
-  if (m) { m.textContent = `Đợt ${g.wave} · nhanh hơn, cụm mới!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1400); }
+  if (m) { m.textContent = g.review ? `Đợt ${g.wave} · cụm mới!` : `Đợt ${g.wave} · nhanh hơn, cụm mới!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1400); }
 }
 function t1RainHud() {
   const g = _t1, $ = id => document.getElementById(id);
@@ -24730,13 +24951,17 @@ function t1RainPause() {
   const m = document.getElementById('rn-msg');
   if (m) { m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1RainPause()">▶ Chơi tiếp</button>' : ''; m.classList.toggle('hidden', !g.paused); }
 }
-function t1RainOver() {
+function t1RainOver(cleared) {
   const g = _t1;
   g.stop();
   setTimeout(() => {
     if (_t1 !== g) return;
+    if (g.review) {
+      t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Ôn xong ${g.covered.size} cụm · ${g.kills} hình bắn hạ` : `${g.kills} hình bắn hạ · hết mạng ở đợt ${g.wave}`, icon: cleared ? '✅' : '💪', good: !!cleared, review: true });
+      return;
+    }
     t1Finish(g, 'rain', 'line_graph', { big: `${g.kills} biểu đồ bắn hạ · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: g.kills >= 20 });
-  }, 700);
+  }, cleared ? 300 : 700);
 }
 
 /* ── Dynamic · Rắn săn mồi ────────────────────────────────────────────────
