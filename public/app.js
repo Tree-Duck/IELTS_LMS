@@ -1488,6 +1488,7 @@ function showView(name) {
   else if (name === 'dictation') loadDictation();
   else if (name === 'vocab-blitz') showVocabBlitz();
   else if (name === 'lesson-vocab') showLessonVocab();
+  else if (name === 'task1-games') showTask1Games();
   else if (name === 'band-climber') showBandClimber();
   else if (name === 'settings') loadSettings();
   else if (name === 'model-essays') loadModelEssays();
@@ -23366,4 +23367,371 @@ function renderBcFinal() {
   }
   tick();
 })();
+// TASK1 BEGIN
+/* ═══════════════════════════════════════════════════════════════════════════
+   TASK 1 · ĐỌC BIỂU ĐỒ — four games over chart language, all charts drawn
+   here from numbers (no uploaded images), so every answer is exact.
+   Wording follows the teacher's Task 1 master sheets: the dynamic sheet's
+   verb table (10.1), degree words (10.3) and twelve features (3.1–3.12),
+   and the static sheet's comparison features (3.1–3.8).
+   Levels mirror Hầm ngục chữ: a = Học việc, d = Dũng sĩ, l = Huyền thoại.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const T1_LEVELS = {
+  a: { id: 'a', icon: '🌱', name: 'Học việc',    band: '4.0–5.0', coin: 1,   blurb: 'rise, fall, peak và cao nhất, thấp nhất' },
+  d: { id: 'd', icon: '⚔️', name: 'Dũng sĩ',     band: '5.5–6.5', coin: 1.5, blurb: 'Động từ theo tốc độ, giới từ, đơn vị, gấp mấy lần' },
+  l: { id: 'l', icon: '👑', name: 'Huyền thoại', band: '7.0+',    coin: 2,   blurb: 'crept up, rocketed, tăng tốc, giảm tốc, cụm nâng cấp' },
+};
+const T1_GAMES = [
+  { id: 'slope',   icon: '📐', name: 'Đọc dốc',            desc: 'Nhìn độ dốc của đường, chọn động từ đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
+  { id: 'compare', icon: '📊', name: 'Cao hơn, thấp hơn',  desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
+  { id: 'hunt',    icon: '🎯', name: 'Săn feature',        desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn trên biểu đồ, rồi chọn câu tả nó.', start: 't1HuntStart()' },
+  { id: 'build',   icon: '🧩', name: 'Ghép câu số liệu',   desc: 'Ghép từng cụm thành câu tả số liệu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
+];
+const T1_COLORS = ['#0E4D3C', '#E5533D', '#3E6FD8', '#B8860B'];
 
+let _t1 = null;               // the game in play
+let _t1Lv = (() => { try { return localStorage.getItem('t1Lv') || 'a'; } catch (e) { return 'a'; } })();
+if (!T1_LEVELS[_t1Lv]) _t1Lv = 'a';
+
+function t1Rand(a, b) { return a + Math.random() * (b - a); }
+function t1Pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function t1Shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function t1BestKey(game) { return 't1Best_' + game + '_' + _t1Lv; }
+function t1GetBest(game) { try { return +localStorage.getItem(t1BestKey(game)) || 0; } catch (e) { return 0; } }
+function t1SetBest(game, v) { try { localStorage.setItem(t1BestKey(game), String(v)); } catch (e) {} }
+
+function showTask1Games() { t1Leave(); t1Hub(); }
+function t1Root() { return document.getElementById('task1-games-root'); }
+function t1Leave() {
+  if (_t1 && _t1.coins && !_t1.banked) { _t1.banked = true; walEarn(_t1.coins, true); }
+  _t1 = null;
+  document.removeEventListener('keydown', t1Key);
+}
+function t1SetLevel(id) {
+  _t1Lv = id;
+  try { localStorage.setItem('t1Lv', id); } catch (e) {}
+  tsSfx('equip');
+  t1Hub();
+}
+
+function t1Hub() {
+  const root = t1Root();
+  if (!root) return;
+  t1Leave();
+  const lv = T1_LEVELS[_t1Lv];
+  root.innerHTML = `
+    <div class="lv-wrap">
+      <button class="btn-back-plain" onclick="showView('games')">← Trò chơi</button>
+      <div class="lv-head">
+        <div class="vb-logo">📈 Task 1 · Đọc biểu đồ</div>
+        <div class="vb-tagline">Học từ và cụm để tả biểu đồ: lên là gì, xuống là gì, cao hơn thấp hơn ra sao. Chọn cấp theo band rồi chọn trò.</div>
+      </div>
+      <div class="rd-lvcards t1-lvcards">${Object.values(T1_LEVELS).map(l => `
+        <button class="rd-lvcard rd-lvcard--${l.id}${l.id === _t1Lv ? ' last' : ''}" onclick="t1SetLevel('${l.id}')" aria-pressed="${l.id === _t1Lv}">
+          <span class="rd-lvcard-icon">${l.icon}</span>
+          <span class="rd-lvcard-name">${l.name}</span>
+          <span class="rd-lvcard-band">${l.band}</span>
+          <ul><li>${escapeHtml(l.blurb)}</li></ul>
+        </button>`).join('')}
+      </div>
+      <div class="wal-bar" id="wal-bar"></div>
+      <div class="wal-shop hidden" id="wal-shop"></div>
+      <div class="lv-modes t1-modes">${T1_GAMES.map(g => `
+        <button class="lv-mode t1-mode" onclick="${g.start}">
+          <span class="lv-mode-icon">${g.icon}</span>
+          <span class="lv-mode-name">${g.name}</span>
+          <span class="lv-mode-desc">${escapeHtml(g.desc)}</span>
+          <span class="lv-mode-best">🏆 ${t1GetBest(g.id)}</span>
+        </button>`).join('')}
+      </div>
+      <div class="t1-lvnote">Đang chơi cấp <strong>${lv.icon} ${lv.name}</strong>. Mỗi câu đúng được ${lv.coin} xu.</div>
+    </div>`;
+  walBar();
+  walLoad().then(walBar);
+}
+
+/* ── Chart drawing ──────────────────────────────────────────────────────────
+   o = { xs: [labels], series: [{ name, ys }], yMax, yStep, unit, fmt,
+         pick: true to add tap targets, hl: [{ s, from, to }] to shade a span,
+         animate: true to draw the lines in, w, h }                          */
+function t1Num(v) {
+  const r = Math.round(v * 10) / 10;
+  return (Number.isInteger(r) ? String(r) : r.toFixed(1)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+function t1LineChart(o) {
+  const W = o.w || 600, H = o.h || 320, L = 52, R = 18, T = 30, B = 40;
+  const pw = W - L - R, ph = H - T - B, n = o.xs.length;
+  const X = i => L + (n === 1 ? pw / 2 : i * pw / (n - 1));
+  const Y = v => T + ph - (v / o.yMax) * ph;
+  const fmt = o.fmt || t1Num;
+  let g = '';
+  for (let v = 0; v <= o.yMax + 1e-9; v += o.yStep) {
+    g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="t1-grid"/>` +
+         `<text x="${L - 8}" y="${Y(v) + 4}" class="t1-ytick">${fmt(v)}</text>`;
+  }
+  o.xs.forEach((x, i) => { g += `<text x="${X(i)}" y="${H - B + 22}" class="t1-xtick">${x}</text>`; });
+  (o.hl || []).forEach(h => {
+    const x0 = X(h.from) - (h.from === h.to ? 14 : 8), x1 = X(h.to) + (h.from === h.to ? 14 : 8);
+    g += `<rect x="${x0}" y="${T}" width="${x1 - x0}" height="${ph}" class="t1-hl"/>`;
+  });
+  o.series.forEach((s, si) => {
+    const c = s.color || T1_COLORS[si % T1_COLORS.length];
+    const d = s.ys.map((v, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' ');
+    g += `<path d="${d}" pathLength="1" class="t1-line${o.animate ? ' t1-draw' : ''}" stroke="${c}"/>`;
+    s.ys.forEach((v, i) => { g += `<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${c}" class="t1-dot${o.animate ? ' t1-dot-in' : ''}"/>`; });
+  });
+  if (o.pick) {
+    o.series.forEach((s, si) => s.ys.forEach((v, i) => {
+      g += `<circle cx="${X(i)}" cy="${Y(v)}" r="16" class="t1-pt" data-s="${si}" data-i="${i}" onclick="t1HuntTap(${si},${i})"/>`;
+    }));
+  }
+  if (o.unit) g += `<text x="${L - 44}" y="${T - 14}" class="t1-unit">${escapeHtml(o.unit)}</text>`;
+  g += `<line x1="${L}" x2="${L}" y1="${T}" y2="${T + ph}" class="t1-axis"/><line x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}" class="t1-axis"/>`;
+  const legend = o.series.length > 1 || o.legend ? `<div class="t1-legend">${o.series.map((s, si) =>
+    `<span><i style="background:${s.color || T1_COLORS[si % T1_COLORS.length]}"></i>${escapeHtml(s.name)}</span>`).join('')}</div>` : '';
+  return `<div class="t1-chart">${o.title ? `<div class="t1-chart-title">${escapeHtml(o.title)}</div>` : ''}<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(o.title || 'Biểu đồ đường')}">${g}</svg>${legend}</div>`;
+}
+// Horizontal bars: o = { title, unit, rows: [{ name, v }], max, fmt }
+function t1BarChart(o) {
+  const max = o.max || Math.max(...o.rows.map(r => r.v)) * 1.08;
+  const fmt = o.fmt || t1Num;
+  return `<div class="t1-chart t1-bars">${o.title ? `<div class="t1-chart-title">${escapeHtml(o.title)}</div>` : ''}
+    ${o.rows.map((r, i) => `<div class="t1-bar-row${r.hl ? ' hl' : ''}">
+      <span class="t1-bar-name">${escapeHtml(r.name)}</span>
+      <span class="t1-bar-track"><span class="t1-bar-fill" style="width:${(r.v / max * 100).toFixed(1)}%;background:${r.hl ? T1_COLORS[1] : T1_COLORS[0]};animation-delay:${i * 60}ms"></span></span>
+      <span class="t1-bar-v">${fmt(r.v)}${o.unit === '%' ? '%' : ''}</span>
+    </div>`).join('')}
+    ${o.unit && o.unit !== '%' ? `<div class="t1-bar-unit">Đơn vị: ${escapeHtml(o.unit)}</div>` : ''}
+  </div>`;
+}
+
+/* ── Shared round frame: 12 questions, 4 options, keys 1–4 and Enter ─────── */
+const T1_ROUNDS = 12;
+function t1Key(e) {
+  if (!_t1 || !t1Root() || t1Root().offsetParent === null) return;
+  if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+  if (_t1.answered && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); _t1.next(); return; }
+  const k = parseInt(e.key, 10);
+  if (!_t1.answered && k >= 1 && k <= 9 && _t1.keyPick) _t1.keyPick(k - 1);
+}
+function t1Bind() { document.removeEventListener('keydown', t1Key); document.addEventListener('keydown', t1Key); }
+function t1Head(g) {
+  return `<div class="t1-top">
+    <button class="btn-back-plain" onclick="t1Hub()">← Task 1</button>
+    <span class="t1-stat">Câu <strong>${Math.min(g.i + 1, T1_ROUNDS)}</strong>/${T1_ROUNDS}</span>
+    <span class="t1-stat">⭐ <strong>${g.score}</strong></span>
+    <span class="t1-stat">${g.combo >= 2 ? `🔥 x${g.combo}` : '&nbsp;'}</span>
+    <span class="t1-stat">🪙 <strong>${Math.round(g.coins)}</strong></span>
+  </div>
+  <div class="lv-progress"><div class="lv-progress-bar" style="width:${(g.i / T1_ROUNDS) * 100}%"></div></div>`;
+}
+// Scores one answer: 10 points plus 2 per combo step, coins by level.
+function t1Score(g, ok) {
+  if (ok) {
+    g.combo++; g.right++;
+    g.score += 10 + Math.min(g.combo - 1, 5) * 2;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+    tsSfx('coin');
+  } else {
+    g.combo = 0;
+    tsSfx('wrong');
+  }
+}
+function t1Options(opts, chosen, correct) {
+  return opts.map((o, i) => {
+    let cls = 't1-opt';
+    if (chosen != null) {
+      if (i === correct) cls += ' ok';
+      else if (i === chosen) cls += ' no';
+      else cls += ' dim';
+    }
+    return `<button class="${cls}" ${chosen != null ? 'disabled' : ''} onclick="_t1.pick(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`;
+  }).join('');
+}
+function t1Finish(g, game, writeType) {
+  const best = t1GetBest(game);
+  const isBest = g.score > best;
+  if (isBest) t1SetBest(game, g.score);
+  if (g.coins && !g.banked) { g.banked = true; walEarn(g.coins, true); }
+  tsSfx(g.right >= T1_ROUNDS * 0.75 ? 'level' : 'equip');
+  const meta = T1_GAMES.find(x => x.id === game);
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow">
+      <button class="btn-back-plain" onclick="t1Hub()">← Task 1</button>
+      <div class="t1-result">
+        <div class="t1-result-icon">${g.right >= 10 ? '🏆' : g.right >= 7 ? '👏' : '💪'}</div>
+        <div class="t1-result-title">${meta.icon} ${meta.name} · ${T1_LEVELS[_t1Lv].name}</div>
+        <div class="t1-result-big">${g.right}/${T1_ROUNDS} câu đúng</div>
+        <div class="t1-result-row"><span>⭐ ${g.score} điểm${isBest ? ' · kỷ lục mới!' : ` · kỷ lục ${best}`}</span><span>🪙 +${Math.round(g.coins)} xu</span></div>
+      </div>
+      ${g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>'}
+      <div class="t1-result-btns">
+        <button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>
+        <button class="vb-secondary-btn" onclick="t1GoWrite('${writeType}')">✍️ Áp dụng: viết một đề ${writeType === 'line_graph' ? 'Line graph' : 'Bar chart'}</button>
+      </div>
+    </div>`;
+  _t1 = null;
+}
+// Into writing practice, filtered to the chart type the game just drilled.
+function t1GoWrite(type) {
+  showView('writing-practice');
+  setTimeout(() => {
+    const b = document.querySelector('.wp-filter-btn[data-filter="task1"]');
+    if (typeof filterWritingQuestions === 'function') filterWritingQuestions('task1', b);
+    const chip = [...document.querySelectorAll('.wp-type-chip')].find(c => (c.getAttribute('onclick') || '').includes("'" + type + "'"));
+    if (chip) chip.click();
+  }, 700);
+}
+
+/* ── Game 1 · Đọc dốc ─────────────────────────────────────────────────────
+   One line, one shape. The student picks the verb that matches both the
+   direction and the speed (master sheet 10.1: "nhìn độ dốc trước, rồi mới
+   chọn động từ"). Each shape class has an answer per level; distractors are
+   drawn mostly from the same family, so the choice is about speed, not
+   just up versus down. Shapes are 7 values on 0..1, jittered every round. */
+const T1_SLOPE_N = 7;
+function t1Lin(start, delta, noise) {
+  return Array.from({ length: T1_SLOPE_N }, (_, i) => start + delta * i / (T1_SLOPE_N - 1) + t1Rand(-noise, noise));
+}
+const T1_SLOPE = {
+  up_slight:   { fam: 'up',   f: () => t1Lin(t1Rand(.3, .5), t1Rand(.08, .12), .006),
+                 a: 'rose slightly', d: 'rose marginally', l: 'crept up',
+                 vi: 'Tăng rất ít: đường gần như nằm ngang, chỉ nhích lên.' },
+  up_steady:   { fam: 'up',   f: () => t1Lin(t1Rand(.15, .3), t1Rand(.35, .45), .008),
+                 a: 'rose steadily', d: 'climbed steadily', l: 'rose at a consistent rate',
+                 vi: 'Tăng đều: đường thẳng nghiêng, mỗi mốc tăng gần bằng nhau.' },
+  up_sharp:    { fam: 'up',   f: () => t1Lin(t1Rand(.05, .15), t1Rand(.68, .8), .01),
+                 a: 'rose sharply', d: 'surged', l: 'rocketed',
+                 vi: 'Tăng mạnh: đường dốc đứng, tăng rất nhiều. surge = tăng vọt, rocket = tăng cực nhanh.' },
+  down_slight: { fam: 'down', f: () => t1Lin(t1Rand(.5, .7), -t1Rand(.08, .12), .006),
+                 a: 'fell slightly', d: 'dropped slightly', l: 'declined marginally',
+                 vi: 'Giảm rất ít: đường gần như nằm ngang, chỉ nhích xuống.' },
+  down_steady: { fam: 'down', f: () => t1Lin(t1Rand(.7, .85), -t1Rand(.35, .45), .008),
+                 a: 'fell steadily', d: 'declined gradually', l: 'fell at a consistent rate',
+                 vi: 'Giảm đều: đường thẳng nghiêng xuống, mỗi mốc giảm gần bằng nhau.' },
+  down_sharp:  { fam: 'down', f: () => t1Lin(t1Rand(.85, .95), -t1Rand(.68, .8), .01),
+                 a: 'fell sharply', d: 'plummeted', l: 'plunged',
+                 vi: 'Giảm mạnh: đường lao dốc. plummet, plunge = giảm rất mạnh.' },
+  flat:        { fam: 'flat', f: () => t1Lin(t1Rand(.35, .65), 0, .005),
+                 a: 'remained stable', d: 'remained stable', l: 'held steady',
+                 vi: 'Đi ngang: đường phẳng suốt cả giai đoạn, không lên không xuống.' },
+  fluct:       { fam: 'flat', f: () => { const b = t1Rand(.4, .6), amp = t1Rand(.07, .1); return Array.from({ length: T1_SLOPE_N }, (_, i) => b + (i % 2 ? amp : -amp) * t1Rand(.7, 1)); },
+                 a: 'fluctuated', d: 'fluctuated considerably', l: 'oscillated with no clear direction',
+                 vi: 'Dao động: lên xuống nhiều lần quanh một mức, không có hướng rõ ràng.' },
+  peak:        { fam: 'turn', f: () => { const s = t1Rand(.15, .3), top = t1Rand(.7, .85), e = t1Rand(.35, .5); return [s, s + (top - s) * .35, s + (top - s) * .7, top, top - (top - e) * .4, top - (top - e) * .75, e]; },
+                 a: 'rose, then fell', d: 'reached a peak before falling', l: 'climbed, after which the trend reversed',
+                 vi: 'Đỉnh và đảo chiều: đi lên rồi quay xuống đúng một lần, hình chữ V ngược.' },
+  vshape:      { fam: 'turn', f: () => { const s = t1Rand(.7, .85), low = t1Rand(.12, .25), e = t1Rand(.55, .7); return [s, s - (s - low) * .4, s - (s - low) * .75, low, low + (e - low) * .4, low + (e - low) * .75, e]; },
+                 a: 'fell, then rose', d: 'fell before rebounding', l: 'bottomed out before recovering',
+                 vi: 'Đáy và bật lại: đi xuống rồi quay lên, hình chữ V. rebound, recover = bật lại sau cú giảm.' },
+  rise_flat:   { fam: 'up',   f: () => { const s = t1Rand(.1, .25), top = t1Rand(.6, .75); return [s, s + (top - s) * .4, s + (top - s) * .8, top, top + t1Rand(-.008, .008), top + t1Rand(-.008, .008), top + t1Rand(-.008, .008)]; },
+                 d: 'rose before leveling off', l: 'climbed before leveling off',
+                 vi: 'Tăng rồi bình ổn: lên một đoạn rồi đi ngang. level off = chững lại, đi ngang.' },
+  dip:         { fam: 'turn', f: () => { const b = t1Rand(.5, .65); return [b, b + .01, b - .005, b - t1Rand(.12, .16), b + .005, b + .01, b + .015]; },
+                 d: 'dipped briefly', l: 'dipped temporarily before recovering',
+                 vi: 'Giảm nhẹ tạm thời: hụt xuống một mốc rồi trở lại như cũ. dip = giảm nhẹ, ngắn.' },
+  accel:       { fam: 'up',   f: () => { const s = t1Rand(.08, .15); return [s, s + .03, s + .06, s + .1, s + .3, s + .5, s + .7]; },
+                 l: 'rose slightly, then climbed substantially',
+                 vi: 'Tăng tốc: lúc đầu tăng chậm rồi đột ngột dốc hơn. Phải tả đủ hai giai đoạn.' },
+  decel:       { fam: 'up',   f: () => { const s = t1Rand(.08, .15); return [s, s + .3, s + .52, s + .62, s + .66, s + .69, s + .71]; },
+                 l: 'rocketed, then continued to rise but less steeply',
+                 vi: 'Giảm tốc: lúc đầu tăng rất nhanh rồi thoải dần nhưng vẫn tăng. Không phải bình ổn.' },
+  vol_flat:    { fam: 'flat', f: () => { const b = t1Rand(.4, .55); return [b, b + .12, b - .08, b + .1, b + .02, b + .02 + t1Rand(-.006, .006), b + .02 + t1Rand(-.006, .006)]; },
+                 l: 'fluctuated before stabilizing',
+                 vi: 'Dao động rồi ổn định: nhấp nhô vài mốc rồi đi ngang. stabilize = ổn định lại sau biến động.' },
+};
+// Subjects for the stem. A unit with a scale turns 0..1 into real figures.
+const T1_SUBJECTS = [
+  { s: 'internet access in Kenya',         unit: '%',              max: 100 },
+  { s: 'car ownership in Mexico',          unit: '%',              max: 100 },
+  { s: 'the share of renewable energy',    unit: '%',              max: 100 },
+  { s: 'coal use in Germany',              unit: '%',              max: 100 },
+  { s: 'the proportion of cyclists',       unit: '%',              max: 100 },
+  { s: 'visitor numbers at Banff',         unit: 'million visitors', max: 5 },
+  { s: 'sales of tea',                     unit: 'million cups',   max: 10 },
+  { s: 'the number of students abroad',    unit: 'thousand',       max: 50 },
+  { s: 'average house prices',             unit: 'thousand $',     max: 500 },
+  { s: 'the volume of plastic waste',      unit: 'million tons',   max: 20 },
+];
+function t1SlopeClasses() { return Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
+function t1SlopeRound() {
+  const keys = t1SlopeClasses();
+  const k = t1Pick(keys);
+  const c = T1_SLOPE[k];
+  const answer = c[_t1Lv];
+  const same = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
+  const other = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam !== c.fam));
+  const wrong = [...same.slice(0, 2), ...other].slice(0, 3).map(x => T1_SLOPE[x][_t1Lv]);
+  const opts = t1Shuffle([answer, ...wrong]);
+  const sub = t1Pick(T1_SUBJECTS);
+  const start = t1Pick([1990, 1995, 2000, 2002, 2005]);
+  const step = t1Pick([2, 3]);
+  const xs = Array.from({ length: T1_SLOPE_N }, (_, i) => start + i * step);
+  const ys = c.f().map(v => Math.max(.01, Math.min(.99, v)) * sub.max);
+  return { k, answer, opts, correct: opts.indexOf(answer), sub, xs, ys };
+}
+function t1SlopeStart() {
+  t1Leave();
+  _t1 = { game: 'slope', i: 0, score: 0, combo: 0, right: 0, coins: 0, misses: [], answered: false };
+  _t1.pick = t1SlopePick;
+  _t1.keyPick = t1SlopePick;
+  _t1.next = t1SlopeNext;
+  _t1.q = t1SlopeRound();
+  t1Bind();
+  tsSfx('equip');
+  t1SlopeRender(true);
+}
+function t1SlopeChart(q, animate, w, h) {
+  const step = q.sub.max <= 10 ? (q.sub.max <= 5 ? 1 : 2) : q.sub.max / 5;
+  return t1LineChart({ xs: q.xs, series: [{ name: q.sub.s, ys: q.ys }], yMax: q.sub.max, yStep: step, unit: q.sub.unit, animate, w, h });
+}
+function t1SlopeRender(animate) {
+  const g = _t1, q = g.q, c = T1_SLOPE[q.k];
+  const stem = `Between ${q.xs[0]} and ${q.xs[q.xs.length - 1]}, ${q.sub.s} <span class="t1-blank">${g.answered ? escapeHtml(q.answer) : '______'}</span>.`;
+  t1Root().innerHTML = `
+    <div class="lv-wrap lv-wrap--narrow t1-play">
+      ${t1Head(g)}
+      ${t1SlopeChart(q, animate)}
+      <p class="t1-stem">${stem}</p>
+      <div class="t1-opts">${t1Options(q.opts, g.answered ? g.chosen : null, q.correct)}</div>
+      ${g.answered ? `<div class="t1-fb ${g.chosen === q.correct ? 'ok' : 'no'}">
+          <strong>${g.chosen === q.correct ? 'Đúng!' : `Chưa đúng. Đáp án: ${escapeHtml(q.answer)}`}</strong>
+          <span>${escapeHtml(c.vi)}</span>
+        </div>
+        <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.i + 1 >= T1_ROUNDS ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>` :
+        '<div class="t1-hint">Nhìn độ dốc trước: dốc đứng, thoai thoải hay đi ngang? Bấm 1–4 hoặc chạm vào đáp án.</div>'}
+    </div>`;
+}
+function t1SlopePick(i) {
+  const g = _t1;
+  if (!g || g.answered || i < 0 || i >= g.q.opts.length) return;
+  g.answered = true;
+  g.chosen = i;
+  const ok = i === g.q.correct;
+  t1Score(g, ok);
+  if (!ok) {
+    g.misses.push(`${t1SlopeChart(g.q, false, 600, 220)}<div class="t1-review-line">Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s> → đúng là <strong>${escapeHtml(g.q.answer)}</strong>. ${escapeHtml(T1_SLOPE[g.q.k].vi)}</div>`);
+  }
+  t1SlopeRender(false);
+}
+function t1SlopeNext() {
+  const g = _t1;
+  if (!g || !g.answered) return;
+  g.i++;
+  if (g.i >= T1_ROUNDS) { t1Finish(g, 'slope', 'line_graph'); return; }
+  g.answered = false;
+  g.chosen = null;
+  let q;
+  do { q = t1SlopeRound(); } while (q.k === g.q.k && t1SlopeClasses().length > 2);
+  g.q = q;
+  tsSfx('key');
+  t1SlopeRender(true);
+}
+
+// Games still being built answer with a toast instead of failing.
+function t1Soon(name) { showToast(name + ' đang được làm, sắp có nhé!'); }
+if (typeof t1CmpStart === 'undefined') window.t1CmpStart = () => t1Soon('Cao hơn, thấp hơn');
+if (typeof t1HuntStart === 'undefined') window.t1HuntStart = () => t1Soon('Săn feature');
+if (typeof t1BuildStart === 'undefined') window.t1BuildStart = () => t1Soon('Ghép câu số liệu');
+function t1HuntTap() {}
+// TASK1 END
