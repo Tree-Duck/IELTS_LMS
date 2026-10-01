@@ -25245,7 +25245,7 @@ const T1_FLASH_RATIO = {
   d: [['twice as many', 2], ['three times as many', 3], ['half as many', 0.5], ['roughly the same number of', 1]],
   l: [['twice as many', 2], ['three times as many', 3], ['four times as many', 4], ['half as many', 0.5], ['one and a half times as many', 1.5], ['roughly the same number of', 1]],
 };
-const T1_FLASH_CFG = { a: { show: 2.5, ratio: 0 }, d: { show: 1.8, ratio: 0.3 }, l: { show: 1.2, ratio: 0.5 } };
+const T1_FLASH_CFG = { a: { show: 4, ratio: 0 }, d: { show: 2.8, ratio: 0.3 }, l: { show: 1.8, ratio: 0.5 } };
 const T1_FLASH_CTX = [
   { title: 'Household spending', of: 'household spending', cats: ['Housing', 'Food', 'Transport', 'Leisure', 'Clothing'] },
   { title: 'Sources of electricity', of: 'electricity generation', cats: ['Coal', 'Gas', 'Nuclear power', 'Wind', 'Solar'] },
@@ -25308,6 +25308,7 @@ function t1FlashNew() {
   const g = _t1;
   g.q = t1FlashRound();
   g.answered = false;
+  g.peeked = false;
   g.hidden = false;
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow t1-play t1-flash">
@@ -25315,6 +25316,7 @@ function t1FlashNew() {
       <div class="t1-flash-stage" id="fl-stage">${g.q.chart}<div class="t1-flash-cover hidden" id="fl-cover">?</div><div class="t1-flash-bar"><i id="fl-bar"></i></div></div>
       <p class="t1-stem" id="fl-stem">Nhìn kỹ! ${g.q.kind === 'pie' ? `Lát cam <b>${escapeHtml(g.q.C.cats[0])}</b> chiếm bao nhiêu?` : `<b>${escapeHtml(t1Cap(g.q.P.a))}</b> so với <b>${escapeHtml(g.q.P.b)}</b>?`}</p>
       <div class="t1-opts hidden" id="fl-opts"></div>
+      <div class="t1-flash-peek hidden" id="fl-peek"><button class="vb-chip" onclick="t1FlashPeek()">👀 Xem lại 1 lần</button><small>xem lại thì không có điểm thưởng tốc độ</small></div>
       <div id="fl-fb"></div>
     </div>`;
   const bar = document.getElementById('fl-bar');
@@ -25325,6 +25327,7 @@ function t1FlashNew() {
     g.hidden = true;
     g.t0 = performance.now();
     document.getElementById('fl-cover').classList.remove('hidden');
+    document.getElementById('fl-peek').classList.remove('hidden');
     const o = document.getElementById('fl-opts');
     o.innerHTML = t1Options(g.q.opts, null, -1);
     o.classList.remove('hidden');
@@ -25334,17 +25337,29 @@ function t1FlashNew() {
     tsSfx('key');
   }, g.show * 1000));
 }
+// One more look at the chart, once per question, at the cost of the speed bonus.
+function t1FlashPeek() {
+  const g = _t1;
+  if (!g || g.game !== 'flash' || !g.hidden || g.answered || g.peeked) return;
+  g.peeked = true;
+  const cover = document.getElementById('fl-cover'), btn = document.getElementById('fl-peek');
+  cover.classList.add('hidden');
+  btn.classList.add('hidden');
+  tsSfx('key');
+  g.timers.push(setTimeout(() => { if (_t1 === g && !g.answered) cover.classList.remove('hidden'); }, Math.max(1200, g.show * 600)));
+}
 function t1FlashPick(i) {
   const g = _t1;
   if (!g || g.game !== 'flash' || !g.hidden || g.answered || i < 0 || i >= g.q.opts.length) return;
   g.answered = true;
   const ok = g.q.opts[i] === g.q.answer, secs = (performance.now() - g.t0) / 1000;
-  if (ok) { t1Hit(g, Math.max(0, Math.round(6 - secs))); g.show = Math.max(0.6, g.show * 0.95); }
+  if (ok) { t1Hit(g, g.peeked ? 0 : Math.max(0, Math.round(6 - secs))); g.show = Math.max(1, g.show * 0.95); }
   else {
     t1Miss(g);
     g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.line)}<br>Bạn chọn <s>${escapeHtml(g.q.opts[i])}</s>.</div>`);
   }
   document.getElementById('fl-cover').classList.add('hidden');
+  document.getElementById('fl-peek').classList.add('hidden');
   document.getElementById('fl-opts').innerHTML = t1Options(g.q.opts, i, g.q.opts.indexOf(g.q.answer));
   document.getElementById('fl-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? `Đúng! ${secs < 3 ? '⚡ Nhanh!' : ''}` : 'Chưa đúng.'}</strong><span>${escapeHtml(g.q.line)}</span><span>${escapeHtml(g.q.vi)}</span></div>
     <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 ? 'Xem kết quả' : 'Câu tiếp'} → <small>Enter</small></button>`;
@@ -25775,6 +25790,16 @@ const T1_PROCS = [
     ['🍫', 'Moulding', 'Finally, sugar and milk {are added} and the mixture is poured into moulds.', 'add', 'added'],
   ] },
 ];
+// Guiding questions, one per step, shown while ordering: always at Học việc,
+// behind a button above that.
+const T1_PROC_Q = {
+  'Brick manufacturing': ['Where does the raw material come from at the very start?', 'Once the clay is out of the ground, what is it combined with?', 'How does the wet mixture get the shape of a brick?', 'Before the bricks can take great heat, what must happen to the water in them?', 'Which step makes the dry bricks hard, using very high temperatures?', 'After the kiln, the bricks are too hot to touch. What comes next?', 'What is the last thing that happens before the bricks reach customers?'],
+  'Tea production': ['What has to be collected from the plants before anything else?', 'Fresh leaves are stiff. What softens them in warm air?', 'Which machine step breaks the leaves and releases their oils?', 'Which stage turns the green leaves dark brown?', 'How is the fermentation stopped, using heat?', 'Before packing, how are the leaves separated by size and quality?', 'What is the final step before the tea goes to shops?'],
+  'Recycling plastic bottles': ['Where do the used bottles start their journey?', 'How do the bottles get from the bins to the plant?', 'At the plant, how are the bottles divided by colour and type of plastic?', 'What removes the labels and dirt?', 'How are the clean bottles made into small pieces?', 'What turns the flakes into small pellets?', 'What are the pellets finally used for?'],
+  'Cement production': ['What happens first to the limestone and clay?', 'Where does the powder go to be combined?', 'What gives the mixture very high heat?', 'After heating, what turns it into fine cement?', 'How is the cement prepared for sale?'],
+  'Rainwater for drinking': ['Where does the water come from at first?', 'How does the water travel to the tank?', 'What removes leaves and dirt from the water?', 'What is added to kill bacteria?', 'Where is the clean water kept?', 'How does the water finally reach the kitchen and bathroom?'],
+  'Making chocolate': ['What is taken from the cocoa trees first?', 'What happens to the beans after they come out of the pods?', 'How are the beans dried?', 'How do the dried beans reach the factory?', 'What does the factory do to the beans with high heat?', 'What turns the roasted beans into a thick liquid?', 'What is added before the mixture goes into moulds?'],
+};
 const T1_PROC_CFG = { a: { time: 45, verbs: 3, conns: 0 }, d: { time: 40, verbs: 2, conns: 2 }, l: { time: 32, verbs: 2, conns: 3 } };
 const T1_PROC_CONN = /^(To begin with|First|Next|After that|Following this|Finally|Once [^,]+),/;
 function t1Ing(v) { return /ie$/.test(v) ? v.slice(0, -2) + 'ying' : /[^e]e$/.test(v) ? v.slice(0, -1) + 'ing' : v === 'dig' ? 'digging' : v + 'ing'; }
@@ -25853,7 +25878,9 @@ function t1ProcRender() {
 function t1ProcBody() {
   const g = _t1, P = g.P, body = document.getElementById('pr-body');
   if (g.phase === 'order') {
+    const qs = T1_PROC_Q[P.name] || [], showQ = _t1Lv === 'a' || g.showQ;
     body.innerHTML = `<p class="t1-stem">Chạm các bước theo đúng thứ tự, bước ${g.got + 1} trước.</p>
+      ${qs[g.got] ? (showQ ? `<div class="t1-proc-q">💡 <b>Step ${g.got + 1}:</b> <i>${escapeHtml(qs[g.got])}</i></div>` : `<button class="vb-chip t1-proc-qbtn" onclick="_t1.showQ = true; t1ProcBody()">💡 Câu hỏi gợi ý bằng tiếng Anh</button>`) : ''}
       <div class="t1-proc-cards">${g.cards.map((si, k) => si < g.got ? '' : `<button class="t1-proc-card" onclick="_t1.pick(${k})"><kbd>${k + 1}</kbd><span>${P.steps[si][0]}</span>${escapeHtml(P.steps[si][1])}</button>`).join('')}</div>`;
   } else if (g.phase === 'gram') {
     const q = g.qs[g.qi];
