@@ -9131,3 +9131,23 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-up kbd { position: absolute; top: 6px; left: 8px; font-size: 0.75rem; opacity: .6; }
 .t1h-up-i { font-size: 2rem; }
 .t1h-up small { color: var(--moss); line-height: 1.35; }
+.t1h-hero { position: relative; border-color: color-mix(in srgb, var(--hc, #E2ECE7) 35%, #E2ECE7); }
+.t1h-hero.on { border-color: var(--hc, var(--forest)); box-shadow: 0 6px 18px -10px var(--hc, rgba(14, 77, 60, .6)); }
+.t1h-role { align-self: stretch; padding: 0.2rem 0.5rem; border-radius: 99px; background: var(--hc, var(--forest)); color: #fff; font-weight: 800; font-size: 0.8rem; }
+.t1h-name { font-size: 1.25rem; font-weight: 900; letter-spacing: 0.08em; color: var(--hc, #13294F); }
+.t1h-kit { list-style: none; margin: 0.2rem 0 0.4rem; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; text-align: left; font-size: 0.82rem; line-height: 1.35; }
+.t1h-kit li { display: flex; gap: 0.4rem; align-items: flex-start; }
+.t1h-kit kbd { flex: none; min-width: 1.5em; text-align: center; border-radius: 5px; background: var(--hc, #13294F); color: #fff; font: 800 0.75rem/1.6 ui-monospace, Consolas, monospace; }
+.t1h-kit i { color: var(--moss); font-style: normal; }
+.t1h-skills { position: absolute; right: 12px; bottom: 12px; z-index: 4; display: flex; gap: 10px; }
+.t1h-sk { position: relative; width: 62px; height: 62px; border-radius: 50%; border: 3px solid var(--hc); cursor: pointer; padding: 0; touch-action: none; user-select: none; -webkit-user-select: none;
+  background: conic-gradient(rgba(19, 41, 79, .72) calc(var(--cd, 0) * 360deg), rgba(255, 255, 255, .92) 0); box-shadow: 0 4px 12px rgba(0, 0, 0, .25); }
+.t1h-sk span { font-size: 1.6rem; line-height: 1; opacity: .5; }
+.t1h-sk.ready span { opacity: 1; }
+.t1h-sk.ready { animation: t1hReady 1.6s ease-in-out infinite; }
+@keyframes t1hReady { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--hc) 35%, transparent), 0 4px 12px rgba(0, 0, 0, .25); } }
+.t1h-sk kbd { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); padding: 0 6px; border-radius: 6px; background: var(--hc); color: #fff; font: 800 0.7rem/1.5 ui-monospace, Consolas, monospace; }
+.t1-surv-slots span.gold { background: #FFF3CF; color: #7A5600; border-color: #E5A52D; }
+@media (prefers-reduced-motion: reduce) { .t1h-sk.ready, .t1h-hero.on .t1h-face, .t1h-hero:hover .t1h-face { animation: none; } }
+.t1h-hero .vb-start-btn { background: var(--hc, var(--coral)); border-color: var(--hc); }
+.t1h-stage .t1-arena-msg.t1-surv-tip { top: 46px; }
