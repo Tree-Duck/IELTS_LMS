@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SSP IELTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0E1311;
+  --muted: #4A524E;
+  --soft: #6B7470;
+  --line: #DCE3DF;
+  --bg: #FFFFFF;
+  --bg-2: #F5F8F6;
+  --green: #0C7A3D;
+  --green-hi: #12A150;
+  --green-bg: #E6F6EC;
+  --green-ink: #0B6B36;
+  --sun: #FFD84D;
+  --coral: #E5533D;
+  --night: #0F1A16;
+  --r: 14px;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--sun); color: var(--ink); }
+:focus-visible { outline: 3px solid var(--green-hi); outline-offset: 3px; border-radius: 6px; }
+a { color: inherit; }
+.in { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 22px; border-radius: 12px; border: 0; cursor: pointer;
+  font: 700 16px 'Be Vietnam Pro', sans-serif; text-decoration: none;
+  transition: transform .3s var(--ease), background-color .2s, box-shadow .3s;
+}
+.btn-main { background: var(--green); color: #fff; box-shadow: 0 8px 20px -10px rgba(15,138,69,.8); }
+.btn-main:hover { background: var(--green-ink); transform: translateY(-2px); }
+.btn-soft { background: var(--bg-2); color: var(--ink); }
+.btn-soft:hover { background: #E8EEEA; }
+.btn-lg { min-height: 56px; padding: 0 28px; font-size: 17px; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.92); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .in { display: flex; align-items: center; gap: 28px; height: 72px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -.01em; text-decoration: none; }
+.logo svg { width: 32px; height: 32px; }
+.links { display: flex; gap: 26px; font-size: 15px; font-weight: 500; color: var(--muted); }
+.links a { text-decoration: none; }
+.links a:hover { color: var(--ink); }
+.nav .act { margin-left: auto; display: flex; gap: 10px; }
+
+/* hero */
+.hero { text-align: center; padding: clamp(48px, 8vh, 88px) 0 0; position: relative; }
+.hero h1 { font-weight: 800; font-size: clamp(42px, 6.2vw, 84px); line-height: 1.05; letter-spacing: -.035em; max-width: 15ch; margin: 0 auto; text-wrap: balance; }
+.mark { position: relative; white-space: nowrap; color: var(--green); }
+.mark svg { position: absolute; left: -3%; bottom: -.1em; width: 106%; height: .3em; z-index: -1; }
+.mark path { stroke-dasharray: 600; animation: swash 1s .3s var(--ease) both; }
+@keyframes swash { from { stroke-dashoffset: 600; } }
+.hero .lead { margin: 24px auto 0; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.6; color: var(--muted); max-width: 52ch; }
+.hero .cta { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero .note { margin-top: 14px; font-size: 14px; color: var(--soft); }
+
+/* product window */
+.stage { margin: 56px auto 0; max-width: 1000px; position: relative; }
+.device { background: var(--night); border-radius: 20px 20px 0 0; padding: 12px 12px 0; box-shadow: 0 40px 80px -30px rgba(14,19,17,.45); }
+.dots { display: flex; gap: 6px; padding: 2px 6px 10px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: #2C3A34; }
+.win { background: var(--bg-2); border-radius: 10px 10px 0 0; display: grid; grid-template-columns: 220px 1fr; text-align: left; min-height: 360px; }
+.side { padding: 20px 14px; border-right: 1px solid var(--line); }
+.side .me { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; font-size: 14px; font-weight: 700; }
+.side .me i { width: 30px; height: 30px; border-radius: 50%; background: var(--sun); display: grid; place-items: center; font-style: normal; font-size: 13px; }
+.side a { display: block; padding: 10px 12px; border-radius: 9px; font-size: 14px; color: var(--muted); text-decoration: none; }
+.side a.on { background: var(--green-bg); color: var(--green-ink); font-weight: 700; }
+.panel { padding: 24px 28px 28px; }
+.crumb { font-size: 13px; color: var(--soft); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.crumb b { color: var(--green-ink); background: var(--green-bg); padding: 3px 9px; border-radius: 999px; font-weight: 600; }
+.steps-bar { margin-top: 14px; display: flex; gap: 6px; }
+.steps-bar span { flex: 1; height: 6px; border-radius: 3px; background: var(--line); transition: background-color .4s; }
+.steps-bar span.done { background: var(--green-hi); }
+.sent { margin-top: 20px; font-size: clamp(19px, 2vw, 24px); font-weight: 700; line-height: 1.55; letter-spacing: -.01em; }
+.gap { display: inline-block; min-width: 150px; border-bottom: 3px solid var(--green-hi); color: var(--green-ink); text-align: center; transition: background-color .3s; }
+.gap.filled { background: var(--green-bg); border-radius: 6px 6px 0 0; padding: 0 8px; }
+.hint { margin-top: 8px; font-size: 15px; color: var(--soft); }
+.chips { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { padding: 10px 16px; border-radius: 11px; background: #fff; border: 1.5px solid var(--line); font: 600 15px 'Be Vietnam Pro', sans-serif; color: var(--ink); cursor: pointer; transition: transform .25s var(--ease), border-color .2s, background-color .2s; }
+.chip:hover { border-color: var(--green-hi); transform: translateY(-2px); }
+.chip.ok { border-color: var(--green-hi); background: var(--green-bg); color: var(--green-ink); }
+.chip.no { border-color: var(--coral); color: var(--coral); animation: shake .4s; }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.fb { margin-top: 16px; min-height: 24px; font-size: 15px; font-weight: 600; }
+.fb.ok { color: var(--green-ink); }
+.fb.no { color: var(--coral); }
+.try { position: absolute; right: 28px; top: -18px; z-index: 2; background: var(--sun); color: var(--ink); font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 10px; transform: rotate(4deg); box-shadow: 0 10px 20px -10px rgba(0,0,0,.35); }
+
+/* sections */
+.sec { padding: clamp(72px, 11vh, 120px) 0 0; }
+.sec h2 { font-weight: 800; font-size: clamp(32px, 4vw, 52px); line-height: 1.1; letter-spacing: -.03em; max-width: 20ch; text-wrap: balance; }
+.sec .sub { margin-top: 14px; font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 56ch; }
+
+/* lessons strip */
+.lessons { margin-top: 36px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; counter-reset: l; }
+.lesson { background: var(--bg-2); border-radius: var(--r); padding: 16px 14px 18px; min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; transition: background-color .25s, transform .3s var(--ease); }
+.lesson:hover { background: var(--green-bg); transform: translateY(-3px); }
+.lesson .n { font-weight: 800; font-size: 28px; letter-spacing: -.02em; color: var(--green); font-variant-numeric: tabular-nums; }
+.lesson .t { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.lessons-note { margin-top: 16px; font-size: 15px; color: var(--soft); }
+
+/* skills: zig-zag rows with real UI fragments */
+.skill { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 80px); align-items: center; padding-top: clamp(56px, 8vh, 88px); }
+.skill:nth-of-type(even) .copy { order: 2; }
+.skill h3 { font-weight: 800; font-size: clamp(26px, 2.8vw, 36px); letter-spacing: -.025em; line-height: 1.15; }
+.skill p { margin-top: 12px; font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 44ch; }
+.skill .pill { display: inline-flex; margin-top: 18px; gap: 8px; flex-wrap: wrap; }
+.skill .pill span { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: var(--bg-2); color: var(--muted); }
+.frag { background: var(--bg-2); border-radius: 20px; padding: clamp(20px, 3vw, 32px); }
+.frag .card { background: #fff; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(14,19,17,.06), 0 12px 28px -18px rgba(14,19,17,.25); }
+.frag .lbl { font-size: 13px; color: var(--soft); font-weight: 500; }
+.band { display: flex; align-items: baseline; gap: 12px; margin-top: 4px; }
+.band b { font-size: 52px; font-weight: 800; letter-spacing: -.03em; color: var(--green); }
+.band span { font-size: 14px; color: var(--soft); }
+.crit { margin-top: 14px; display: grid; gap: 10px; }
+.crit div { display: grid; grid-template-columns: 1fr 120px 34px; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
+.crit i { height: 8px; border-radius: 4px; background: var(--line); position: relative; overflow: hidden; }
+.crit i::after { content: ''; position: absolute; inset: 0; width: var(--w); background: var(--green-hi); border-radius: 4px; }
+.crit em { font-style: normal; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.comment { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: #FFF6D6; font-size: 14px; line-height: 1.5; }
+.timer { display: flex; justify-content: space-between; align-items: center; }
+.timer b { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.grid-q { margin-top: 16px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+.grid-q span { aspect-ratio: 1; border-radius: 7px; background: var(--bg-2); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--soft); font-variant-numeric: tabular-nums; }
+.grid-q span.a { background: var(--green-bg); color: var(--green-ink); }
+.grid-q span.x { background: #FDE6E2; color: var(--coral); }
+.cue { font-size: 18px; font-weight: 700; line-height: 1.4; }
+.cue ul { margin-top: 10px; padding-left: 20px; font-size: 15px; font-weight: 500; color: var(--muted); line-height: 1.7; }
+.wave { margin-top: 16px; display: flex; align-items: center; gap: 3px; height: 40px; }
+.wave i { flex: 1; border-radius: 2px; background: var(--green-hi); opacity: .8; }
+.games { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.games .g { border-radius: 12px; padding: 16px; font-weight: 700; font-size: 16px; min-height: 92px; display: flex; flex-direction: column; justify-content: space-between; }
+.games .g small { font-weight: 500; font-size: 13px; opacity: .8; }
+.g1 { background: #FFF1C2; } .g2 { background: #DFF3FF; } .g3 { background: #FDE6E2; } .g4 { background: var(--night); color: #fff; }
+
+/* how it works */
+.how { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; position: relative; }
+.how .s { padding: 0 8px 0 0; }
+.how .s b { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 18px; font-weight: 800; }
+.how h3 { margin-top: 16px; font-size: 21px; font-weight: 700; letter-spacing: -.015em; }
+.how p { margin-top: 6px; font-size: 16px; line-height: 1.6; color: var(--muted); }
+
+/* final band */
+.final { margin: clamp(80px, 12vh, 130px) auto 0; background: var(--green); color: #fff; border-radius: 28px; padding: clamp(40px, 6vw, 72px) clamp(24px, 5vw, 64px); display: grid; grid-template-columns: 1.4fr auto; gap: 28px; align-items: center; }
+.final h2 { font-weight: 800; font-size: clamp(30px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -.03em; }
+.final p { margin-top: 10px; font-size: 17px; color: #EEF9F2; }
+.final .btn { background: #fff; color: var(--green-ink); }
+.final .btn:hover { background: var(--sun); color: var(--ink); }
+
+footer { margin-top: 64px; border-top: 1px solid var(--line); }
+footer .in { display: flex; align-items: center; gap: 16px; padding-top: 28px; padding-bottom: 36px; font-size: 14px; color: var(--soft); flex-wrap: wrap; }
+footer .logo { font-size: 16px; color: var(--ink); }
+footer .logo svg { width: 26px; height: 26px; }
+footer .r { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+@media (max-width: 980px) {
+  .lessons { grid-template-columns: repeat(4, 1fr); }
+  .try { right: 8px; top: -18px; }
+}
+@media (max-width: 760px) {
+  .links { display: none; }
+  .win { grid-template-columns: 1fr; }
+  .side { display: none; }
+  .skill { grid-template-columns: 1fr; }
+  .skill:nth-of-type(even) .copy { order: 0; }
+  .how { grid-template-columns: 1fr; gap: 28px; }
+  .final { grid-template-columns: 1fr; }
+  .lessons { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .nav .act .btn-soft { display: none; }
+  .hero .cta .btn { width: 100%; }
+  .panel { padding: 20px 18px 22px; }
+  .gap { min-width: 110px; }
+  .crit div { grid-template-columns: 1fr 80px 30px; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="in">
+    <a class="logo" href="/" aria-label="SSP IELTS">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#0C7A3D"/><path d="M9 23c0-8 5-13 14-14 0 9-5 14-13 14M9 23l8-8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      SSP IELTS
+    </a>
+    <nav class="links" aria-label="Mục">
+      <a href="#lessons">Giáo trình</a><a href="#skills">Kỹ năng</a><a href="#how">Cách học</a>
+    </nav>
+    <div class="act">
+      <a class="btn btn-soft" href="/">Đăng nhập</a>
+      <a class="btn btn-main" href="/">Đăng ký</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="in">
+      <h1>Lên band <span class="mark">nhanh hơn<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C80 6 180 4 296 12" stroke="#FFD84D" stroke-width="14" fill="none" stroke-linecap="round"/></svg></span> mà không học vẹt.</h1>
+      <p class="lead">Bài học ngắn, luyện mỗi ngày, chấm sát tiêu chí thật. Giữ streak, theo dõi tiến bộ, và biết chính xác mình yếu ở đâu.</p>
+      <div class="cta">
+        <a class="btn btn-main btn-lg" href="/">Học thử miễn phí</a>
+        <a class="btn btn-soft btn-lg" href="/">Tôi đã có tài khoản</a>
+      </div>
+      <p class="note">Đăng ký bằng email hoặc Google.</p>
+
+      <div class="stage">
+        <span class="try" aria-hidden="true">Bấm thử đi ↓</span>
+        <div class="device">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="win">
+            <aside class="side" aria-hidden="true">
+              <div class="me"><i>HV</i>Học viên</div>
+              <a class="on">Hầm ngục chữ</a><a>Từ vựng · Buổi 1</a><a>Writing Task 2</a><a>Reading</a><a>Listening</a><a>Speaking</a>
+            </aside>
+            <div class="panel">
+              <div class="crumb"><b>Buổi 1</b> Tuổi tác, thế hệ và gia đình · Đoạn 1</div>
+              <div class="steps-bar" id="bar"><span class="done"></span><span></span><span></span><span></span><span></span><span></span></div>
+              <p class="sent" id="sent">Making family support <span class="gap" id="gap">&nbsp;</span> does not create any extra care.</p>
+              <p class="hint">Gợi ý: “nghĩa vụ pháp lý”</p>
+              <div class="chips" id="chips">
+                <button class="chip" type="button">a moral reason</button>
+                <button class="chip" type="button" data-ok>a legal duty</button>
+                <button class="chip" type="button">a family tie</button>
+                <button class="chip" type="button">an extra care</button>
+              </div>
+              <p class="fb" id="fb" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="lessons">
+    <div class="in">
+      <h2>14 buổi, đúng giáo trình trên lớp</h2>
+      <p class="sub">Từ vựng, bài viết mẫu và trò chơi đều lấy từ chính các buổi học của lớp. Mỗi buổi có 3 đề viết để chọn.</p>
+      <div class="lessons" id="lesson-grid"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="skills">
+    <div class="in">
+      <h2>Mọi kỹ năng, một nền tảng</h2>
+
+      <div class="skill">
+        <div class="copy">
+          <h3>Writing AI</h3>
+          <p>Nộp essay Task 1 &amp; 2, nhận band điểm và nhận xét chi tiết trong vài giây.</p>
+          <div class="pill"><span>Task 1</span><span>Task 2</span><span>Chấm theo 4 tiêu chí</span></div>
+        </div>
+        <div class="frag" aria-hidden="true">
+          <div class="card">
+            <div class="lbl">Bài mẫu · Writing Task 2</div>
+            <div class="band"><b>6.5</b><span>Overall band (ví dụ minh họa)</span></div>
+            <div class="crit">
+              <div>Task Response<i style="--w:72%"></i><em>7.0</em></div>
+              <div>Coherence &amp; Cohesion<i style="--w:64%"></i><em>6.5</em></div>
+              <div>Lexical Resource<i style="--w:64%"></i><em>6.5</em></div>
+              <div>Grammar<i style="--w:56%"></i><em>6.0</em></div>
+            </div>
+            <div class="comment">Câu chủ đề đoạn 2 chưa trả lời thẳng câu hỏi. Thử mở đầu bằng ý chính, rồi mới đưa ví dụ.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skill">
+        <div class="copy">
+          <h3>Reading &amp; Listening</h3>
+          <p>Đề thi mô phỏng có tính giờ, chấm tự động và quy đổi band.</p>
+          <div class="pill"><span>Tính giờ như thi thật</span><span>Quy đổi band</span></div>
+        </div>
+        <div class="frag" aria-hidden="true">
+          <div class="card">
+            <div class="timer"><span class="lbl">Reading · Passage 2</span><b>38:12</b></div>
+            <div class="grid-q" id="qgrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skill">
+        <div class="copy">
+          <h3>Speaking</h3>
+          <p>Bộ đề Part 1·2·3 kèm bài nói mẫu band 7–9 để học theo.</p>
+          <div class="pill"><span>Part 1</span><span>Part 2</span><span>Part 3</span></div>
+        </div>
+        <div class="frag" aria-hidden="true">
+          <div class="card">
+            <div class="lbl">Part 2 · Cue card</div>
+            <div class="cue" style="margin-top:6px">Describe an older person in your family you admire.
+              <ul><li>who this person is</li><li>what you do together</li><li>and explain why you admire them</li></ul>
+            </div>
+            <div class="wave" id="wave"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skill">
+        <div class="copy">
+          <h3>Từ vựng &amp; Trò chơi</h3>
+          <p>Flashcard, collocation theo chủ đề và 4 trò chơi luyện từ. Chơi để nhận xu, đổi đồ trong cửa hàng và leo bảng xếp hạng lớp.</p>
+          <div class="pill"><span>Xu &amp; cửa hàng</span><span>Bảng xếp hạng lớp</span></div>
+        </div>
+        <div class="frag" aria-hidden="true">
+          <div class="games">
+            <div class="g g1">Flashcard<small>Lật thẻ, nhớ nghĩa</small></div>
+            <div class="g g2">Bắn Chữ<small>Bắn đúng từ, nhanh tay</small></div>
+            <div class="g g3">Xây tháp<small>Ghép câu, tháp lên cao</small></div>
+            <div class="g g4">Hầm ngục chữ<small>Ghép cả bài band 7</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="in">
+      <h2>Bắt đầu trong 3 bước</h2>
+      <div class="how">
+        <div class="s"><b>1</b><h3>Tạo tài khoản</h3><p>Đăng ký miễn phí chỉ với email.</p></div>
+        <div class="s"><b>2</b><h3>Luyện tập</h3><p>Chọn kỹ năng và bắt đầu làm bài ngay.</p></div>
+        <div class="s"><b>3</b><h3>Theo dõi tiến bộ</h3><p>Xem band điểm và điểm cần cải thiện theo thời gian.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="in">
+    <section class="final">
+      <div>
+        <h2>Học mà vui, tiến bộ thật.</h2>
+        <p>Bắt đầu từ Buổi 1 ngay hôm nay.</p>
+      </div>
+      <a class="btn btn-lg" href="/">Tạo tài khoản miễn phí</a>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="in">
+    <a class="logo" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#0C7A3D"/><path d="M9 23c0-8 5-13 14-14 0 9-5 14-13 14M9 23l8-8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>SSP IELTS</a>
+    <span class="r">tintinlab.com</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var nav = document.getElementById('nav');
+  addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+
+  // hero: real Buổi 1 blank from Hầm ngục chữ
+  var gap = document.getElementById('gap'), fb = document.getElementById('fb'), bar = document.getElementById('bar');
+  document.querySelectorAll('#chips .chip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      if (c.hasAttribute('data-ok')) {
+        document.querySelectorAll('#chips .chip').forEach(function (x) { x.disabled = true; x.classList.remove('no'); });
+        c.classList.add('ok');
+        gap.textContent = c.textContent; gap.classList.add('filled');
+        bar.children[1].classList.add('done');
+        fb.className = 'fb ok';
+        fb.textContent = 'Đúng! Câu A xong. Còn 5 câu nữa là hoàn thành đoạn band 7.';
+      } else {
+        c.classList.remove('no'); void c.offsetWidth; c.classList.add('no');
+        fb.className = 'fb no';
+        fb.textContent = 'Chưa đúng. Gợi ý là “nghĩa vụ pháp lý”.';
+      }
+    });
+  });
+
+  var L = ['Tuổi tác, thế hệ và gia đình', 'Văn hóa và toàn cầu hóa', 'Giáo dục', 'Kinh tế, tiền và tiêu dùng',
+    'Truyền thông và mạng xã hội', 'Chính phủ và dịch vụ công', 'Công việc và sự nghiệp', 'Môi trường và năng lượng',
+    'Khoa học, công nghệ và AI', 'Giao thông, đô thị và nhà ở', 'Sức khỏe, thực phẩm và lối sống',
+    'Nghệ thuật, thể thao và giải trí', 'Tội phạm và pháp luật', 'Xã hội, bình đẳng và đạo đức'];
+  var g = document.getElementById('lesson-grid');
+  L.forEach(function (t, i) {
+    var d = document.createElement('div');
+    d.className = 'lesson';
+    d.innerHTML = '<span class="n">' + String(i + 1).padStart(2, '0') + '</span><span class="t"></span>';
+    d.querySelector('.t').textContent = t;
+    g.appendChild(d);
+  });
+
+  // reading answer grid (illustrative)
+  var q = document.getElementById('qgrid'), marks = 'aaaxaaaaxaaaa';
+  for (var i = 0; i < 40; i++) {
+    var s = document.createElement('span');
+    s.textContent = i + 1;
+    if (i < marks.length) s.className = marks[i];
+    q.appendChild(s);
+  }
+  // speaking waveform
+  var w = document.getElementById('wave');
+  for (var j = 0; j < 48; j++) {
+    var b = document.createElement('i');
+    b.style.height = (18 + Math.abs(Math.sin(j * .7) * Math.cos(j * .23)) * 82) + '%';
+    w.appendChild(b);
+  }
+})();
+</script>
+</body>
+</html>
