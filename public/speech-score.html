@@ -112,13 +112,44 @@ input[type=text]{flex:1;min-width:0;font:15px var(--ui);color:var(--ink);backgro
 /* IPA only: plain words, transcription in front */
 .ipaonly .w,.ipaonly .w.ct,.ipaonly .w.fn,.ipaonly .w.nuc{color:var(--ink);text-transform:none;font-weight:400;letter-spacing:0;text-decoration:none}
 .ipaonly .w .s1,.ipaonly .w.nuc .s1,.ipaonly .w.ct .s1{color:inherit;font-weight:inherit;text-decoration:none}
-.ipaonly .w .ipa{opacity:1;color:var(--str);font-size:14px}
-.script-card.ipaonly .w .wt{text-decoration:none!important}
-.ipaonly .script{line-height:2.6;word-spacing:.25em}
+.w .ipa .sl{font-style:normal}
+.script-card.ipaonly .w .wt{display:none}
+.ipaonly .w .ipa{opacity:1;color:var(--ink);font:400 1em/1.25 var(--ipa);margin:0;padding:0}
+.ipaonly .w .ipa .sl{display:none}
+.script-card.ipaonly:not(.noipa) .script{line-height:1.9;word-spacing:.12em}
 .ipaonly .w .sep,.ipaonly .w .dots,.ipaonly .w .wk,.ipaonly .w .guess,.ipaonly .lk,.ipaonly .tone,.ipaonly .pz,.ipaonly .pzl,.ipaonly .slow,.ipaonly .w.edited::after{display:none}
 .ipaonly .sp-link::before{content:" "}
 .ipaonly .el,.ipaonly .fl{color:inherit;text-decoration:none;font-weight:inherit}
 .ipaonly .legend{display:none}
+/* IPA drills */
+.drill-card{display:flex;flex-direction:column;gap:12px}
+.present .drill-card{display:none}
+.drill-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.drill-head h2{margin:0}
+.dr-top{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.dr-q{font:600 26px var(--read);margin:6px 0 2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dr-ipa{font:500 28px var(--ipa);color:var(--str)}
+.dr-sent{font-size:21px;line-height:1.6;font-weight:400}
+.dr-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+.dr-opt{font:500 19px var(--ipa);color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:12px 10px;cursor:pointer}
+.dr-opt:hover:not(:disabled){border-color:var(--ink)}
+.dr-opt.ok{border-color:var(--link);background:var(--link-soft)}
+.dr-opt.no{border-color:var(--el);opacity:.8}
+.dr-opt:disabled{cursor:default}
+.dr-say{font-size:18px;background:none;border:1.5px solid var(--line);border-radius:999px;padding:2px 9px;cursor:pointer;vertical-align:middle;color:var(--ink)}
+textarea.dr-ta{min-height:0;margin-bottom:8px}
+.dr-fb{display:flex;flex-direction:column;gap:8px;align-items:flex-start;margin-top:4px}
+.dr-fb:empty{display:none}
+.dr-res{font-size:15px;line-height:1.55}
+.dr-res.ok{color:var(--link)}
+.dr-res.no{color:var(--el)}
+.dr-res b{color:var(--ink)}
+.dr-ans{margin-top:6px;font:17px/1.6 var(--read);color:var(--ink)}
+.dr-w-ok{color:var(--link)}
+.dr-w-hom{color:#C68A00;text-decoration:underline dotted;text-underline-offset:4px}
+.dr-w-no{color:var(--el);text-decoration:underline wavy;text-underline-offset:4px}
+.dr-big{font:700 34px var(--read)}
+.dr-end{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .w .dots{position:absolute;left:0;right:0;bottom:100%;text-align:center;font-size:12px;line-height:1;color:var(--muted);letter-spacing:.15em;text-transform:none;margin-bottom:2px;white-space:nowrap}
 .w .dots .dP{color:var(--nuc)}
 .nodots .w .dots{display:none}
@@ -205,6 +236,15 @@ $("app").innerHTML=
    '<div class="script" id="out" aria-live="polite"></div>'+
   '</section>'+
  '</div>'+
+ '<section class="card drill-card" id="drillCard">'+
+  '<div class="drill-head"><h2>Luyện phiên âm</h2><div class="chips" id="drillModes">'+
+   '<button class="chip" data-m="i2w" aria-pressed="true">IPA → chữ</button>'+
+   '<button class="chip" data-m="w2i" aria-pressed="false">Chữ → IPA</button>'+
+   '<button class="chip" data-m="s2w" aria-pressed="false">Câu IPA → chữ</button>'+
+   '<button class="chip" id="drNew">↻ Lượt mới</button></div></div>'+
+  '<p class="hint" style="margin:0">Từ và câu lấy từ đoạn văn đang xem. Phiên âm theo giọng chọn ở mục Hiện gì.</p>'+
+  '<div id="drillBox"></div>'+
+ '</section>'+
 '</div>';
 
 // ---------------- dictionary ----------------
@@ -661,7 +701,7 @@ function renderWord(w, edits){
   }
   var ip=wordIpa(w);
   if(w.guess && w.role!=="fn") extra+='<span class="guess" title="Từ này không có trong từ điển, trọng âm do máy đoán">?</span>';
-  if(ip) return '<span class="'+cls+'" data-i="'+w.i+'">'+extra+'<span class="wt">'+inner+'</span><span class="ipa">/'+ip+'/</span></span>';
+  if(ip) return '<span class="'+cls+'" data-i="'+w.i+'">'+extra+'<span class="wt">'+inner+'</span><span class="ipa"><i class="sl">/</i>'+ip+'<i class="sl">/</i></span></span>';
   return '<span class="'+cls+'" data-i="'+w.i+'">'+extra+inner+'</span>';
 }
 // Weak function words show their weak form; everything else comes from the dictionary.
@@ -719,6 +759,167 @@ function renderAll(paras, edits){
   return h || '<p class="empty">Dán một đoạn văn tiếng Anh vào ô bên trái để xem bản đánh dấu.</p>';
 }
 
+
+// ---------------- IPA drills ----------------
+// Three rounds of ten, built from the passage on screen: read the IPA and type
+// the word, pick the right IPA for a word, read a whole sentence in IPA and
+// type it. The accent follows the UK/US choice. Homophones count as right.
+var DRILL_MODES=[["i2w","IPA → chữ"],["w2i","Chữ → IPA"],["s2w","Câu IPA → chữ"]];
+var DRILL_FALLBACK="government environment important education technology information population pollution traffic children parents society opinion advantage disadvantage example problem solution increase decrease percentage majority community country develop economy experience knowledge university teacher student science health water language culture tradition business industry employee company";
+var DRILL_SWAP=[["iː","ɪ"],["ɪ","iː"],["æ","e"],["e","æ"],["ʌ","ɑː"],["ɑː","ʌ"],["ʊ","uː"],["uː","ʊ"],["ɔː","oʊ"],["əʊ","ɔː"],["oʊ","ɔː"],["θ","t"],["ð","d"],["ʃ","s"],["ŋ","n"],["eɪ","e"],["aɪ","eɪ"],["z","s"],["ɜː","ɑː"],["ɝː","ɑːr"],["ə","æ"],["dʒ","ʒ"],["tʃ","ʃ"],["v","w"]];
+var drill={mode:"i2w",items:[],at:0,score:0,done:false,answered:false};
+function drillWords(){
+  var seen={}, out=[];
+  function add(lw){
+    if(seen[lw] || lw.length<3 || FW[lw] || /[^a-z']/.test(lw)) return;
+    var L=lookup(lw); if(!L || L.src!=="dict") return;
+    seen[lw]=1; out.push({lw:lw, ph:L.ph});
+  }
+  (lastParas||[]).forEach(function(ss){ ss.forEach(function(s){ s.forEach(function(t){ if(t.t==="w" && !t.num) add(t.lw); }); }); });
+  if(out.length<12) DRILL_FALLBACK.split(" ").forEach(add);
+  return out;
+}
+function drillSentences(){
+  var out=[];
+  (lastParas||[]).forEach(function(ss){ ss.forEach(function(s){
+    var ws=s.filter(function(t){return t.t==="w";});
+    if(ws.length<3 || ws.length>18) return;
+    if(ws.some(function(w){ return !wordIpa(w); })) return;
+    out.push(ws);
+  }); });
+  return out;
+}
+function drillShuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+// Wrong options that look close: one confusable sound swapped, the stress moved, or another word.
+function drillDistract(ip, pool){
+  var out={}, list=[];
+  function put(x){ if(x && x!==ip && !out[x]){ out[x]=1; list.push(x); } }
+  // swap whole sounds, so the ɪ of aɪ or the ʊ of əʊ is never touched on its own
+  var toks=ip.match(/aɪə|aʊə|tʃ|dʒ|aɪ|eɪ|ɔɪ|aʊ|əʊ|oʊ|ɪə|eə|ʊə|iː|uː|ɑː|ɔː|ɜː|ɝː|t̬|./g)||[];
+  drillShuffle(DRILL_SWAP).forEach(function(p){
+    if(list.length>=2) return;
+    var at=toks.indexOf(p[0]); if(at<0) return;
+    var t=toks.slice(); t[at]=p[1]; put(t.join(""));
+  });
+  var bare=ip.replace(/[ˈˌ]/g,"");
+  if(ip.indexOf("ˈ")>=0 && list.length<3){
+    var vs=[], re=/[aeiouæɑɒɔəɛɜɝɚɪʊʌ]/g, m;
+    while((m=re.exec(bare))) if(!vs.length || m.index>vs[vs.length-1]+2) vs.push(m.index);
+    var cur=ip.indexOf("ˈ"), sv=vs.filter(function(v){ return v>=cur; })[0], alt=drillShuffle(vs.filter(function(v){ return v!==sv; }))[0];
+    if(alt!=null){
+      // the mark goes before the consonant that starts the syllable, keeping tʃ and dʒ whole
+      var c=bare[alt-1];
+      if(alt>1 && c && !/[aeiouæɑɒɔəɛɜɝɚɪʊʌː]/.test(c)) alt -= (/[ʃʒ]/.test(c) && /[td]/.test(bare[alt-2]||"")) ? 2 : 1;
+      put(bare.slice(0,alt)+"ˈ"+bare.slice(alt));
+    }
+  }
+  // another word of about the same length, so the odd one out is not obvious
+  drillShuffle(pool).sort(function(x,y){ return Math.abs(x.ph.length-ip.length)-Math.abs(y.ph.length-ip.length); }).forEach(function(w){ if(list.length<3) put(ipaOf(w.lw,w.ph,state.accent)); });
+  return list.slice(0,3);
+}
+function drillStart(mode){
+  if(mode) drill.mode=mode;
+  drill.at=0; drill.score=0; drill.done=false; drill.answered=false;
+  if(drill.mode==="s2w"){
+    drill.items=drillShuffle(drillSentences()).slice(0,6).map(function(ws){ return {ws:ws}; });
+  } else {
+    var pool=drillWords();
+    drill.items=drillShuffle(pool).slice(0,10).map(function(w){
+      var ip=ipaOf(w.lw,w.ph,state.accent), it={lw:w.lw, ip:ip};
+      if(drill.mode==="w2i") it.opts=drillShuffle([ip].concat(drillDistract(ip, pool.filter(function(x){return x.lw!==w.lw;}))));
+      return it;
+    });
+  }
+  drillRender();
+}
+function drillSay(text){
+  try{
+    var u=new SpeechSynthesisUtterance(text); u.lang=state.accent==="uk"?"en-GB":"en-US"; u.rate=.9;
+    var v=speechSynthesis.getVoices().filter(function(x){ return x.lang && x.lang.replace("_","-").indexOf(u.lang)===0; })[0]; if(v) u.voice=v;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+function drillSentIpa(ws){ return ws.map(wordIpa).join(" "); }
+function drillSentText(ws){ return ws.map(function(w){return w.x;}).join(" "); }
+function drillRender(){
+  var box=$("drillBox"); if(!box) return;
+  document.querySelectorAll("#drillModes .chip").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-m")===drill.mode?"true":"false"); });
+  var acc=state.accent==="uk"?"Anh Anh":"Anh Mỹ";
+  if(!drill.items.length){ box.innerHTML='<p class="empty">Đoạn văn chưa có câu nào đủ để luyện. Dán thêm vài câu tiếng Anh vào ô bên trái.</p>'; return; }
+  if(drill.done){
+    var n=drill.items.length;
+    box.innerHTML='<div class="dr-end"><div class="dr-big">'+(drill.score===n?"🌟":drill.score>=n*.7?"👍":"💪")+' '+drill.score+'/'+n+'</div><p class="hint">Phiên âm theo giọng '+acc+'. Đổi giọng ở mục Hiện gì rồi làm lại để so.</p><div class="row"><button class="btn" id="drAgain">Làm lượt mới</button></div></div>';
+    $("drAgain").onclick=function(){ drillStart(); };
+    return;
+  }
+  var it=drill.items[drill.at], h='<div class="dr-top"><span>Câu '+(drill.at+1)+'/'+drill.items.length+'</span><span>Đúng '+drill.score+'</span><span>Giọng '+acc+'</span></div>';
+  if(drill.mode==="i2w"){
+    h+='<div class="dr-q dr-ipa">/'+esc(it.ip)+'/</div><p class="hint">Từ này viết thế nào?</p>'+
+       '<div class="row"><input type="text" id="drIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Gõ từ tiếng Anh"><button class="btn" id="drGo">Kiểm tra</button></div>';
+  } else if(drill.mode==="w2i"){
+    h+='<div class="dr-q">'+esc(it.lw)+' <button class="dr-say" id="drSay" aria-label="Nghe">🔊</button></div><p class="hint">Chọn phiên âm đúng.</p>'+
+       '<div class="dr-opts">'+it.opts.map(function(o,i){ return '<button class="dr-opt" data-o="'+i+'">/'+esc(o)+'/</button>'; }).join("")+'</div>';
+  } else {
+    h+='<div class="dr-q dr-ipa dr-sent">/'+esc(drillSentIpa(it.ws))+'/</div><p class="hint">Đọc câu phiên âm, gõ lại bằng chữ.</p>'+
+       '<textarea id="drIn" class="dr-ta" rows="3" spellcheck="false" placeholder="Gõ cả câu"></textarea><div class="row"><button class="btn" id="drGo">Kiểm tra</button></div>';
+  }
+  h+='<div class="dr-fb" id="drFb" aria-live="polite"></div>';
+  box.innerHTML=h;
+  drill.answered=false;
+  if($("drGo")) $("drGo").onclick=drillCheck;
+  if($("drIn")){ $("drIn").addEventListener("keydown",function(e){ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); if(drill.answered) drillNext(); else drillCheck(); } }); }
+  if($("drSay")) $("drSay").onclick=function(){ drillSay(it.lw); };
+  box.querySelectorAll(".dr-opt").forEach(function(b){ b.onclick=function(){ drillPick(+b.getAttribute("data-o")); }; });
+}
+function drillSameSound(typed, lw){
+  typed=typed.toLowerCase().replace(/[^a-z']/g,"");
+  if(typed===lw) return true;
+  var A=lookup(typed), B=lookup(lw);
+  return !!(A && B && ipaOf(typed,A.ph,state.accent).replace(/[ˈˌ]/g,"")===ipaOf(lw,B.ph,state.accent).replace(/[ˈˌ]/g,""));
+}
+function drillFeedback(ok, html){
+  if(ok) drill.score++;
+  drill.answered=true;
+  var last=drill.at===drill.items.length-1;
+  $("drFb").innerHTML='<div class="dr-res '+(ok?"ok":"no")+'">'+(ok?"✓ Đúng. ":"✗ Chưa đúng. ")+html+'</div><button class="btn ghost" id="drNext">'+(last?"Xem kết quả":"Câu tiếp →")+'</button>';
+  $("drNext").onclick=drillNext;
+  if(drill.mode!=="w2i") $("drNext").focus();
+}
+function drillCheck(){
+  if(drill.answered) return;
+  var it=drill.items[drill.at], v=$("drIn").value.trim();
+  if(!v){ $("drIn").focus(); return; }
+  if(drill.mode==="i2w"){
+    var ok=drillSameSound(v,it.lw), vv=v.toLowerCase().replace(/[^a-z']/g,"");
+    drillFeedback(ok, (ok && vv!==it.lw ? 'Đọc giống hệt, từ trong bài viết là ' : '')+'<b>'+esc(it.lw)+'</b> /'+esc(it.ip)+'/ <button class="dr-say" id="drSay3" aria-label="Nghe">🔊</button>');
+    $("drSay3").onclick=function(){ drillSay(it.lw); };
+    $("drIn").disabled=true;
+    return;
+  }
+  // a sentence: word by word, punctuation and capitals ignored
+  var want=it.ws, got=v.split(/\s+/).map(function(x){ return x.toLowerCase().replace(/[^a-z']/g,""); }).filter(Boolean);
+  var right=0, hom=0, marked=want.map(function(w,i){
+    var g=got[i]||"", ok=g && drillSameSound(g,w.lw); if(ok) right++;
+    var same=ok && g!==w.lw; if(same) hom++;
+    return '<span class="'+(same?"dr-w-hom":ok?"dr-w-ok":"dr-w-no")+'"'+(same?' title="Em gõ '+esc(g)+': đọc giống, nhưng câu này viết là '+esc(w.lw)+'"':'')+'>'+esc(w.x)+'</span>';
+  }).join(" ");
+  var all=right===want.length && got.length===want.length;
+  drillFeedback(all, 'Đúng '+right+'/'+want.length+' từ.'+(hom?' Từ vàng: em gõ từ đọc giống hệt nhưng viết khác, xem lại chính tả.':'')+'<div class="dr-ans">'+marked+' <button class="dr-say" id="drSay2" aria-label="Nghe">🔊</button></div>');
+  $("drSay2").onclick=function(){ drillSay(drillSentText(want)); };
+  $("drIn").disabled=true;
+}
+function drillPick(i){
+  if(drill.answered) return;
+  var it=drill.items[drill.at], ok=it.opts[i]===it.ip;
+  $("drillBox").querySelectorAll(".dr-opt").forEach(function(b,k){ b.disabled=true; if(it.opts[k]===it.ip) b.classList.add("ok"); else if(k===i) b.classList.add("no"); });
+  drillFeedback(ok, ok?'':'Đáp án: /'+esc(it.ip)+'/');
+  drillSay(it.lw);
+}
+function drillNext(){
+  if(drill.at<drill.items.length-1){ drill.at++; drillRender(); if($("drIn")) $("drIn").focus(); }
+  else { drill.done=true; drillRender(); }
+}
+
 // ---------------- state ----------------
 function lsGet(k,d){ try{ var v=localStorage.getItem("ss_"+k); return v==null?d:JSON.parse(v);}catch(e){return d;} }
 function lsSet(k,v){ try{ localStorage.setItem("ss_"+k,JSON.stringify(v)); }catch(e){} }
@@ -758,7 +959,8 @@ $("src").addEventListener("input",function(){ state.text=this.value; state.curre
 $("bSample").addEventListener("click",function(){ state.text=SAMPLE; state.edits={}; state.wordsAt={}; state.current=null; $("src").value=SAMPLE; render(); });
 $("bClear").addEventListener("click",function(){ state.text=""; state.edits={}; state.wordsAt={}; state.current=null; $("src").value=""; render(); $("src").focus(); });
 $("layers").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; var k=b.getAttribute("data-l"); state.layers[k]=state.layers[k]?0:1; if(k==="ipaonly" && state.layers.ipaonly) state.layers.ipa=1; if(k==="ipa" && !state.layers.ipa) state.layers.ipaonly=0; lsSet("layers",state.layers); applyLayers(); });
-$("accent").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; state.accent=b.getAttribute("data-a"); lsSet("accent",state.accent); if(!state.layers.ipa && !state.layers.ipaonly){ state.layers.ipa=1; lsSet("layers",state.layers); } applyLayers(); render(); });
+$("accent").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; state.accent=b.getAttribute("data-a"); lsSet("accent",state.accent); if(!state.layers.ipa && !state.layers.ipaonly){ state.layers.ipa=1; lsSet("layers",state.layers); } applyLayers(); render(); drillStart(); });
+$("drillModes").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; if(b.id==="drNew") drillStart(); else drillStart(b.getAttribute("data-m")); });
 $("tPresent").addEventListener("click",function(){ var on=this.getAttribute("aria-pressed")!=="true"; this.setAttribute("aria-pressed",on); $("wrap").classList.toggle("present",on); });
 $("tBig").addEventListener("click",function(){ var on=this.getAttribute("aria-pressed")!=="true"; this.setAttribute("aria-pressed",on); $("wrap").classList.toggle("big",on); });
 $("tEdit").addEventListener("click",function(){ editing=!editing; this.setAttribute("aria-pressed",editing); document.body.classList.toggle("editing",editing); $("out").parentNode.classList.toggle("editing",editing); $("editNote").hidden=!editing; closePop(); render(); });
@@ -900,6 +1102,7 @@ if(window.claude && typeof window.claude.use==="function"){
 if(!(window.claude && typeof window.claude.use==="function") && !LIB.length){ $("libCard").hidden=true; }
 applyLayers();
 render();
+drillStart();
 })();
 </script>
 </body>
