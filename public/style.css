@@ -9013,3 +9013,22 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-me-model { display: block; font-style: italic; margin-top: 0.3rem; }
 .t1-me-start { margin-bottom: 0.4rem; gap: 0.4rem; display: flex; flex-wrap: wrap; }
 .t1-me-ta { min-height: 280px; }
+
+/* Task 1 sample answers */
+.t1-lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.6rem; }
+.t1-lib-card { text-align: left; font: inherit; font-size: 0.92rem; line-height: 1.45; padding: 0.8rem 0.9rem; border-radius: 14px; border: 2px solid var(--line); background: var(--surface, #fff); color: var(--gray-800); cursor: pointer; }
+.t1-lib-card:hover { border-color: var(--forest); }
+.t1-lib-essay { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.t1-lib-para { padding: 0.6rem 0.8rem; border-radius: 12px; background: #FFFDF6; border: 2px solid #E8DDBE; }
+.t1-lib-para p { margin: 0.25rem 0 0; line-height: 1.6; }
+.t1-lib-tag { font-size: 0.75rem; font-weight: 800; color: #6B4E00; text-transform: uppercase; letter-spacing: 0.05em; }
+.t1-lib-count { text-align: right; font-size: 0.82rem; color: var(--gray-600); }
+.t1-lib-mine { margin-top: 0.6rem; }
+.t1-lib-mine summary { cursor: pointer; font-weight: 700; color: var(--forest); }
+.t1-pies { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.t1-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.t1-table th, .t1-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #DCE7E1; text-align: center; }
+.t1-table thead th { background: #EEF4F1; }
+.t1-map-key { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; font-size: 0.82rem; margin-top: 0.3rem; color: var(--gray-600); }
+.t1-belt--lib .t1-belt-slot { min-width: 4.2rem; }
+@media (max-width: 640px) { .t1-pies { grid-template-columns: 1fr; } }
