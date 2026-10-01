@@ -8813,6 +8813,11 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-fb.no { background: #FDE9E5; color: #8A2414; }
 .t1-next { margin-top: 0.9rem; width: 100%; }
 .t1-next small { opacity: 0.7; font-weight: 500; margin-left: 0.4rem; }
+.t1-dot.tap-ok { r: 8; stroke: #12A150; stroke-width: 4; }
+.t1-dot.tap-no { r: 8; stroke: #E5533D; stroke-width: 4; }
+.t1-task { text-align: center; font-size: 1.15rem; }
+.t1-task strong { color: #1D2F7A; }
+.t1-opts--1 { grid-template-columns: 1fr; }
 .t1-hint { margin-top: 0.8rem; font-size: 0.85rem; color: var(--moss); text-align: center; }
 
 .t1-result { text-align: center; padding: 1.2rem 0 0.5rem; }
