@@ -9234,7 +9234,10 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-trash { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: var(--moss); }
 .t1h-trash .t1h-chip { border-color: #E2C9C3; background: #FBF2F0; color: #8A4B3E; text-decoration: line-through; }
 .t1h-why { margin: 0.3rem 0 0; padding-left: 1.1rem; line-height: 1.45; }
-.t1h-role { display: inline-block; padding: 0.05rem 0.4rem; border-radius: 6px; border-bottom: 3px solid var(--rc); background: color-mix(in srgb, var(--rc) 10%, #fff); font-weight: 700; margin: 0.1rem 0; }
+.t1h-rc { display: inline-block; padding: 0.05rem 0.4rem; border-radius: 6px; border-bottom: 3px solid var(--rc); background: color-mix(in srgb, var(--rc) 12%, #fff); color: #13294F; font-weight: 700; margin: 0.1rem 0; }
+.t1h-rkey { display: flex; flex-wrap: wrap; gap: 0.25rem 0.8rem; margin-top: 0.35rem; font-size: 0.78rem; color: #4C5F57; }
+.t1h-rkey i { font-style: normal; display: inline-flex; align-items: center; gap: 0.3rem; }
+.t1h-rkey i::before { content: ''; width: 0.75rem; height: 0.75rem; border-radius: 3px; background: var(--rc); }
 .t1h-showvi { align-self: flex-start; }
 /* Level-up question */
 .t1h-qhead { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 800; color: var(--moss); text-transform: uppercase; letter-spacing: 0.04em; }
