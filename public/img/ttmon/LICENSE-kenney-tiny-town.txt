@@ -1,0 +1,7 @@
+Tiny Town (1.1) by Kenney (www.kenney.nl)
+https://kenney.nl/assets/tiny-town
+
+License: Creative Commons Zero, CC0
+http://creativecommons.org/publicdomain/zero/1.0/
+
+town.png is the packed 16x16 tilemap from the pack.

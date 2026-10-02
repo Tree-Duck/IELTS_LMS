@@ -1511,6 +1511,24 @@ const db = {
     return { wallets: data.game_wallets || {}, towers: data.game_towers || {}, scores: data.game_scores || {}, raids: data.game_raids || {} };
   },
 
+  // Game feedback and TinTinMon sentences, newest last, capped at 3000.
+  addGameFeedback(f) {
+    const data = load();
+    if (!data.game_feedback) data.game_feedback = [];
+    data.game_feedback.push({ ...f, at: new Date().toISOString() });
+    if (data.game_feedback.length > 3000) data.game_feedback.splice(0, data.game_feedback.length - 3000);
+    save(data);
+  },
+  countGameFeedbackToday(userId) {
+    const day = new Date().toISOString().slice(0, 10);
+    return ((load().game_feedback) || []).filter(f => f.user_id === userId && f.at.slice(0, 10) === day).length;
+  },
+  listGameFeedback(limit) {
+    const data = load(), names = {};
+    (data.users || []).forEach(u => { names[u.id] = u.name; });
+    return ((data.game_feedback) || []).slice(-limit).reverse().map(f => ({ name: names[f.user_id] || '', game: f.game, kind: f.kind, text: f.text, at: f.at }));
+  },
+
   // Hầm ngục chữ: best stars per lesson dungeon. A lesson's stars never go down.
   getRaid(userId) {
     const data = load();
