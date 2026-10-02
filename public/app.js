@@ -28468,15 +28468,6 @@ function t1hNear(a, b) {
 }
 function t1hBare(en) { return String(en).replace(/[.,;:]+$/, '').trim(); }
 function t1hReEsc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-// The gap hint: Học việc sees each word's first letter and length, Dũng sĩ
-// only first letters, Huyền thoại nothing. A second try opens one more word.
-function t1hHint(en, extra) {
-  const words = t1hBare(en).split(' ');
-  if (words.length === 1 && extra) { const w = words[0], n = Math.ceil(w.length / 2); return w.slice(0, n) + w.slice(n).replace(/[a-z0-9]/gi, '_'); }
-  if (_t1Lv === 'l' && !extra) return '';
-  const part = w => w.length < 2 ? w : _t1Lv === 'a' ? w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_') : w[0] + '…';
-  return words.map((w, i) => i < extra ? w : part(w)).join(' ');
-}
 // A Task 1 sentence holding the phrase: a model essay of this block (the
 // current chart first), else the run's own sentence, else the card example.
 function t1hClozeSrc(it) {
@@ -28549,39 +28540,145 @@ function t1hQuizPick(i) {
   document.getElementById('h-qfb').scrollIntoView({ block: 'nearest' });
   g.answered = true; g.next = t1hCloze; g.keyPick = () => {};
 }
-// Step 2: the phrase is a gap in a model sentence; the student types it.
+// Step 2 gaps. More words to fill as the level rises: Học việc one long gap,
+// Dũng sĩ two gaps, Huyền thoại three gaps and then half the sentence. Inside
+// a level the scaffolding comes off as the phrase's mastery (0–4) rises:
+// longer gaps and fewer letters shown. Every gap carries its meaning.
+function t1hTier(m) {
+  if (_t1Lv === 'a') return m < 2 ? 'full' : m < 4 ? 'first' : 'one';
+  if (_t1Lv === 'd') return m < 2 ? 'first' : m < 4 ? 'one' : 'none';
+  return 'none';
+}
+// The letters shown for a gap: full = first letters and length, first = first
+// letters, one = the first letter only. A second try opens one more word.
+function t1hHint(text, tier, extra) {
+  const words = text.split(' '), blank = w => w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_');
+  if (extra && words.length === 1) { const w = words[0], n = Math.ceil(w.length / 2); return w.slice(0, n) + w.slice(n).replace(/[a-z0-9]/gi, '_'); }
+  if (extra && tier !== 'full') tier = 'first';
+  return words.map((w, i) => {
+    if (i < extra) return w;
+    if (w.length < 2 || tier === 'full') return w.length < 2 ? w : blank(w);
+    if (tier === 'first' || (tier === 'one' && i === 0)) return w[0] + '…';
+    return '…';
+  }).join(' ').replace(/^(… ?)+$/, '');
+}
+// Phrases with a meaning, for the gaps around the main one: this block's
+// sentence chunks, its flashcards and the Gõ nghĩa words.
+function t1hPhraseBook() {
+  const g = _t1;
+  if (g.book) return g.book;
+  const book = new Map(), add = (en, vi) => { const b = t1hBare(en); if (b.length >= 4 && vi && !book.has(b.toLowerCase())) book.set(b.toLowerCase(), { en: b, vi: String(vi).split(':')[0].trim() }); };
+  T1_SURV[_t1Block].forEach(S => S.c.forEach((c, i) => add(c, S.cv[i])));
+  t1FcDeckList(_t1Block).forEach(d => d.cards.forEach(c => add(c.en, c.vi)));
+  (T1_WORDS[_t1Block] || []).forEach(w => add(w[0], w[1]));
+  return (g.book = book);
+}
+// The known phrases in a sentence, longest first, none overlapping the main gap or each other.
+function t1hSpans(s, main) {
+  const found = [main];
+  [...t1hPhraseBook().values()].sort((a, b) => b.en.length - a.en.length).forEach(p => {
+    const re = new RegExp('(^|[^A-Za-z])(' + t1hReEsc(p.en) + ')(?=[^A-Za-z]|$)', 'ig');
+    let m;
+    while ((m = re.exec(s))) {
+      const at = m.index + m[1].length, len = m[2].length;
+      if (!found.some(f => at < f.at + f.len && f.at < at + len)) found.push({ at, len, vi: p.vi });
+    }
+  });
+  return found.sort((a, b) => a.at - b.at);
+}
+const T1H_LITTLE = /^(of|the|a|an|to|and|or|in|on|at|by|from|between|with|for|than|that|its|their|was|were|is|are|be|\d+)$/i;
+function t1hGapPlan(q) {
+  const cz = q.cz, s = cz.s, m = q.m, main = { at: cz.at, len: cz.len, vi: q.it.vi, main: true };
+  const spans = t1hSpans(s, main), by = (a, b) => a.at - b.at;
+  const touch = (a, b) => /^[\s,]*$/.test(s.slice(Math.min(a.at + a.len, b.at + b.len), Math.max(a.at, b.at)));
+  const join = (a, b) => { const x = a.at < b.at ? a : b, y = x === a ? b : a; return { at: x.at, len: y.at + y.len - x.at, vi: x.vi + ' + ' + y.vi, main: true }; };
+  // Merge up to n known phrases touching the gap; with none, take n words
+  // after it (or before it, at the end of a clause).
+  const grow = (gap, n) => {
+    let k = 0;
+    for (; k < n; k++) { const nb = spans.find(x => !x.main && !x.used && touch(gap, x)); if (!nb) break; nb.used = true; gap = join(gap, nb); }
+    if (!k) {
+      const after = s.slice(gap.at + gap.len).match(new RegExp(`^((?:\\s+[A-Za-z0-9%'’-]+){1,${n}})`));
+      const before = s.slice(0, gap.at).match(new RegExp(`((?:[A-Za-z0-9%'’-]+\\s+){1,${n}})$`));
+      if (after) gap = { ...gap, len: gap.len + after[1].length, vi: gap.vi + ' (+ từ đi kèm)' };
+      else if (before) gap = { ...gap, at: gap.at - before[1].length, len: gap.len + before[1].length, vi: '(từ đi kèm +) ' + gap.vi };
+    }
+    return gap;
+  };
+  const others = () => spans.filter(x => !x.main && !x.used).sort((a, b) => b.len - a.len);
+  if (_t1Lv === 'a') return [grow({ ...main }, m >= 2 ? 2 : 1)];
+  if (_t1Lv === 'd') {
+    const g0 = m >= 2 ? grow(main, 1) : main, o = others()[0];
+    return o ? [g0, o].sort(by) : [grow(g0, 1)];
+  }
+  if (m >= 3) {
+    // Half the sentence's words, starting at the phrase (earlier when the phrase sits near the end).
+    const toks = [...s.matchAll(/[A-Za-z0-9%'’-]+/g)].map(x => ({ at: x.index, to: x.index + x[0].length }));
+    const wi = toks.findIndex(x => x.to > main.at), wj = toks.findIndex(x => x.to >= main.at + main.len);
+    const n = Math.max(wj - wi + 1, Math.ceil(toks.length / 2)), w0 = Math.max(0, Math.min(wi, toks.length - n));
+    let at = toks[w0].at, w1 = Math.min(toks.length, w0 + n) - 1, to = toks[w1].to;
+    // Never cut a known phrase in two, and never stop on a little word like "of" or "and".
+    spans.forEach(x => { if (x.at < at && x.at + x.len > at) at = x.at; });
+    for (let k = 0; k < 6; k++) {
+      const cut = spans.find(x => x.at < to && x.at + x.len > to);
+      if (cut) to = cut.at + cut.len;
+      w1 = toks.findIndex(x => x.to >= to);
+      if (cut || !T1H_LITTLE.test(s.slice(toks[w1].at, toks[w1].to)) || w1 === toks.length - 1) { if (!cut) break; continue; }
+      to = toks[w1 + 1].to;
+    }
+    return [{ at, len: to - at, vi: spans.filter(x => x.at >= at && x.at + x.len <= to).map(x => x.vi).join(' + '), main: true }];
+  }
+  return [main, ...others().slice(0, 2)].sort(by);
+}
+// Step 2: the phrase (and more, by level) are gaps in a model sentence.
 function t1hCloze() {
   const g = _t1, q = g.q;
   if (!q || q.step !== 1) return;
   q.step = 2; q.tries = 0;
   g.answered = false; g.next = () => {}; g.keyPick = () => {};
-  const it = q.it, cz = q.cz, hint = t1hHint(it.en, 0);
-  const gap = `<input id="h-qin" class="t1h-gap" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" style="width:${Math.max(7, t1hBare(it.en).length + 2)}ch" aria-label="Gõ cụm còn thiếu">`;
+  const it = q.it, cz = q.cz, tier = t1hTier(q.m);
+  q.gaps = cz ? t1hGapPlan(q).map(x => ({ ...x, ans: cz.s.slice(x.at, x.at + x.len) })) : [{ ans: t1hBare(it.en), vi: it.vi, main: true }];
+  const box = (x, i) => `<input class="t1h-gap" data-i="${i}" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" style="width:${Math.min(40, Math.max(7, x.ans.length + 2))}ch" aria-label="Ô ${i + 1}: ${escapeHtml(x.vi)}">`;
+  let body = '';
+  if (cz) { let pos = 0; q.gaps.forEach((x, i) => { body += escapeHtml(cz.s.slice(pos, x.at)) + `<span class="t1h-gapw"><sup class="t1h-gapn">${i + 1}</sup>${box(x, i)}</span>`; pos = x.at + x.len; }); body += escapeHtml(cz.s.slice(pos)); }
+  const n = q.gaps.length;
   t1hModal(`<div class="t1h-lv">✍️ Điền vào câu</div>
-    ${t1hQHead(cz && !cz.own ? 'Bước 2 · Câu trong bài mẫu Task 1' : 'Bước 2 · Gõ cụm vào câu', q.m)}
-    ${cz ? `<p class="t1h-cloze t1h-cloze--big">${escapeHtml(cz.s.slice(0, cz.at))}${gap}${escapeHtml(cz.s.slice(cz.at + cz.len))}</p>` : `<p class="t1h-q">Gõ cụm tiếng Anh:</p>${gap}`}
-    <p class="t1h-vi">🇻🇳 Cụm cần điền: <b>${escapeHtml(it.vi)}</b></p>
-    <div class="t1h-mask" id="h-qhint">${hint ? escapeHtml(hint) : '<small>Huyền thoại: không có gợi ý</small>'}</div>
+    ${t1hQHead(`Bước 2 · ${n > 1 ? n + ' ô trong ' : ''}${cz && !cz.own ? 'câu bài mẫu Task 1' : 'câu Task 1'}`, q.m)}
+    ${cz ? `<p class="t1h-cloze t1h-cloze--big">${body}</p>` : `<p class="t1h-q">Gõ cụm tiếng Anh:</p>${box(q.gaps[0], 0)}`}
+    <ol class="t1h-gaplist">${q.gaps.map((x, i) => { const h = t1hHint(x.ans, tier, 0); return `<li><span>🇻🇳 ${escapeHtml(x.vi)}</span><code id="h-hint${i}">${h ? escapeHtml(h) : ''}</code></li>`; }).join('')}</ol>
+    ${tier === 'none' ? '<p class="t1h-q t1h-c"><small>Không có gợi ý chữ ở mức này. Sai lần đầu sẽ mở chữ cái đầu.</small></p>' : ''}
     <div id="h-qfb"></div>
     <div class="t1h-row" id="h-qbtn"><button class="vb-start-btn" onclick="t1hClozeCheck()">Kiểm tra → <small>Enter</small></button></div>`, t1hQSide(q));
-  const inp = document.getElementById('h-qin');
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t1hClozeCheck(); } });
-  setTimeout(() => inp.focus(), 60);
+  const inputs = [...document.querySelectorAll('.t1h-gap')];
+  // Enter moves to the next empty gap, and checks once all are filled.
+  inputs.forEach(inp => inp.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const empty = inputs.find(x => !x.disabled && !x.value.trim());
+    if (empty) empty.focus(); else t1hClozeCheck();
+  }));
+  setTimeout(() => inputs[0] && inputs[0].focus(), 60);
 }
 function t1hClozeCheck() {
-  const g = _t1, q = g.q, inp = document.getElementById('h-qin');
-  if (!q || q.step !== 2 || q.done || !inp || !inp.value.trim()) return;
+  const g = _t1, q = g.q, inputs = [...document.querySelectorAll('.t1h-gap')];
+  if (!q || q.step !== 2 || q.done || !inputs.length) return;
+  const empty = inputs.find(x => !x.disabled && !x.value.trim());
+  if (empty) { empty.focus(); return; }
   q.tries++;
-  if (t1TypeNorm(inp.value) === t1TypeNorm(t1hBare(q.it.en))) { inp.classList.add('ok'); inp.disabled = true; t1hQuizEnd(true); return; }
+  const ok = inputs.map((inp, i) => t1TypeNorm(inp.value) === t1TypeNorm(q.gaps[i].ans));
+  inputs.forEach((inp, i) => { if (ok[i]) { inp.classList.add('ok'); inp.disabled = true; } });
+  if (ok.every(Boolean)) { t1hQuizEnd(true); return; }
   tsSfx('wrong');
   if (q.tries === 1) {
-    // One more try, with one more word open.
-    document.getElementById('h-qhint').textContent = t1hHint(q.it.en, 1);
-    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb no"><strong>Chưa đúng, thử lại lần nữa.</strong><span>Gợi ý đã mở thêm. Em gõ: <s>${escapeHtml(inp.value.trim())}</s></span></div>`;
-    inp.select();
+    // One more try: the wrong gaps open one more word each.
+    const tier = t1hTier(q.m);
+    q.gaps.forEach((x, i) => { if (!ok[i]) document.getElementById('h-hint' + i).textContent = t1hHint(x.ans, tier, 1); });
+    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb no"><strong>${ok.filter(Boolean).length}/${ok.length} ô đúng. Thử lại các ô còn trống.</strong><span>Gợi ý của ô sai đã mở thêm một từ.</span></div>`;
+    const bad = inputs.find(x => !x.disabled);
+    if (bad) bad.select();
     return;
   }
-  inp.classList.add('no'); inp.disabled = true;
+  inputs.forEach((inp, i) => { if (!ok[i]) { inp.classList.add('no'); inp.disabled = true; } });
   t1hQuizEnd(false);
 }
 function t1hQuizEnd(ok2) {
@@ -28599,9 +28696,12 @@ function t1hQuizEnd(ok2) {
     t1hNoteWeak(it.en, it.vi, q.cz ? q.cz.s : it.kind === 'chunk' ? it.S.c.join(' ') : it.ex);
     g.due.push({ key: it.key, at: g.level + 2 + (Math.random() < 0.5 ? 1 : 0) });
   }
-  // The whole sentence with the phrase in bold, and its meaning when it is the run's own.
-  const cz = q.cz, sent = cz ? `${escapeHtml(cz.s.slice(0, cz.at))}<b>${escapeHtml(cz.s.slice(cz.at, cz.at + cz.len))}</b>${escapeHtml(cz.s.slice(cz.at + cz.len))}` : `<b>${escapeHtml(t1hBare(it.en))}</b>`;
-  const head = full ? `✓ Đúng cả hai bước! Độ thuộc ${Math.min(4, q.m + 1)}/4` : ok2 ? 'Bước 2 đúng, bước 1 sai: giữ nguyên độ thuộc' : q.ok1 ? `Bước 1 đúng, bước 2 sai. Đáp án: ${escapeHtml(t1hBare(it.en))}` : `Chưa đúng. Đáp án: ${escapeHtml(t1hBare(it.en))}`;
+  // The whole sentence with every gap in bold, and its meaning when it is the run's own.
+  const cz = q.cz, gaps = q.gaps || [];
+  let sent = `<b>${escapeHtml(t1hBare(it.en))}</b>`;
+  if (cz) { let pos = 0; sent = ''; gaps.forEach(x => { sent += escapeHtml(cz.s.slice(pos, x.at)) + `<b>${escapeHtml(x.ans)}</b>`; pos = x.at + x.len; }); sent += escapeHtml(cz.s.slice(pos)); }
+  const ans = gaps.length > 1 ? 'xem các cụm in đậm trong câu dưới' : escapeHtml(gaps[0] ? gaps[0].ans : t1hBare(it.en));
+  const head = full ? `✓ Đúng cả hai bước! Độ thuộc ${Math.min(4, q.m + 1)}/4` : ok2 ? 'Bước 2 đúng, bước 1 sai: giữ nguyên độ thuộc' : q.ok1 ? `Bước 1 đúng, bước 2 sai. Đáp án: ${ans}` : `Chưa đúng. Đáp án: ${ans}`;
   document.getElementById('h-qfb').innerHTML = `<div class="t1-fb ${full ? 'ok' : 'no'}"><strong>${head}</strong><span class="t1h-ex">${sent}</span>${cz && cz.own && it.kind === 'chunk' ? `<span><i>${escapeHtml(it.S.vi)}</i></span>` : ''}${full ? '' : '<span>Cụm này sẽ quay lại sau 2–3 cấp. Lần này chỉ được nâng cấp nhỏ.</span>'}</div>`;
   document.getElementById('h-qbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hCards(${full ? 3 : 2}, ${!full})">${full ? 'Chọn chiêu →' : 'Chọn nâng cấp nhỏ →'} <small>Enter</small></button>`;
   document.getElementById('h-qfb').scrollIntoView({ block: 'nearest' });

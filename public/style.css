@@ -9300,6 +9300,14 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-cloze--big { font-size: 1.15rem; line-height: 2.1; }
 .t1h-gap { display: inline-block; max-width: 100%; margin: 0 0.25rem; padding: 0.1rem 0.4rem; border: 0; border-bottom: 3px solid #5B3FD9; border-radius: 6px 6px 0 0; background: #F5F2FF; font-family: inherit; font-weight: 700; font-size: 1.05rem; line-height: 1.5; color: #2B1E6B; text-align: center; }
 .t1h-gap:focus { outline: 3px solid #CFC4FF; }
+.t1h-gapw { display: inline-flex; align-items: baseline; max-width: 100%; }
+.t1h-gapn { margin-left: 0.15rem; font-weight: 800; font-size: 0.75rem; color: #5B3FD9; }
+.t1h-gaplist { display: grid; gap: 0.35rem; margin: 0; padding-left: 1.6rem; }
+.t1h-gaplist li { line-height: 1.4; }
+.t1h-gaplist li::marker { font-weight: 800; color: #5B3FD9; }
+.t1h-gaplist span { color: var(--moss); font-style: italic; }
+.t1h-gaplist code { display: block; font: 800 1.05rem/1.4 ui-monospace, Consolas, monospace; letter-spacing: 0.06em; color: #5B3FD9; }
+.t1h-gaplist code:empty { display: none; }
 .t1h-gap.ok { border-color: #12A150; background: #E8F7EE; color: #14532D; }
 .t1h-gap.no { border-color: #E5533D; background: #FFF0EC; color: #9A2A16; text-decoration: line-through; }
 .t1h-mask small { font-family: inherit; font-weight: 600; font-size: 0.85rem; line-height: 1.4; color: var(--moss); letter-spacing: 0; }
