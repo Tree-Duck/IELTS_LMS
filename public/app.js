@@ -28311,6 +28311,10 @@ function t1hOrderRender(fb) {
   g.keyPick = i => { if (o.pool[i] !== undefined) t1hOrderPut(o.pool[i]); };
   g.answered = full; g.next = t1hOrderCheck;
 }
+// What the colours under a sentence mean: one entry per job in it.
+function t1hRoleKey(S) {
+  return `<span class="t1h-rkey">${[...new Set(S.r)].map(k => `<i style="--rc:${T1H_ROLES[k].color}">${escapeHtml(T1H_ROLES[k].name)}</i>`).join('')}</span>`;
+}
 function t1hOrdSide() {
   const sample = T1_SAMPLES.find(x => x.id === _t1.S.img);
   return sample ? `<div class="t1h-side-h">📊 ${escapeHtml(sample.type)}</div>${sample.chart()}` : '';
@@ -28368,7 +28372,7 @@ function t1hOrderCheck() {
   if (o.tries < 2) { t1hOrderRender(`<div class="t1-fb no"><strong>Chưa đúng, sửa lại nhé.</strong><ul class="t1h-why">${why.join('')}</ul></div>`); return; }
   // Second miss: show the sentence and move on without the bonus.
   o.done = true;
-  t1hOrderRender(`<div class="t1-fb no"><strong>Câu đúng là:</strong><span>${S.c.map((c, i) => `<span class="t1h-role" style="--rc:${T1H_ROLES[S.r[i]].color}">${escapeHtml(c)}</span>`).join(' ')}</span><ul class="t1h-why">${why.join('')}</ul></div>`);
+  t1hOrderRender(`<div class="t1-fb no"><strong>Câu đúng là:</strong><span>${S.c.map((c, i) => `<span class="t1h-rc" style="--rc:${T1H_ROLES[S.r[i]].color}" title="${T1H_ROLES[S.r[i]].name}">${escapeHtml(c)}</span>`).join(' ')}</span>${t1hRoleKey(S)}<ul class="t1h-why">${why.join('')}</ul></div>`);
   document.getElementById('h-ordbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hOrderDone()">Chơi tiếp → <small>Enter</small></button>`;
   g.answered = true; g.next = t1hOrderDone; g.keyPick = () => {};
 }
@@ -28381,7 +28385,7 @@ function t1hOrderWin() {
   g.exp += first ? 5 : 2;
   g.p.hp = Math.min(g.p.maxHp, g.p.hp + 20);
   tsSfx('level');
-  t1hOrderRender(`<div class="t1-fb ok"><strong>${first ? 'Chính xác ngay lần đầu! +60 ⭐' : 'Đúng rồi! +30 ⭐'} · +20 ❤️</strong><span>${g.S.c.map((c, i) => `<span class="t1h-role" style="--rc:${T1H_ROLES[g.S.r[i]].color}">${escapeHtml(c)}</span>`).join(' ')}</span></div>`);
+  t1hOrderRender(`<div class="t1-fb ok"><strong>${first ? 'Chính xác ngay lần đầu! +60 ⭐' : 'Đúng rồi! +30 ⭐'} · +20 ❤️</strong><span>${g.S.c.map((c, i) => `<span class="t1h-rc" style="--rc:${T1H_ROLES[g.S.r[i]].color}" title="${T1H_ROLES[g.S.r[i]].name}">${escapeHtml(c)}</span>`).join(' ')}</span>${t1hRoleKey(g.S)}</div>`);
   document.getElementById('h-ordbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hOrderDone()">Chơi tiếp → <small>Enter</small></button>`;
   g.answered = true; g.next = t1hOrderDone; g.keyPick = () => {};
 }
