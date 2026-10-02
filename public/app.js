@@ -1484,7 +1484,8 @@ function showView(name) {
   else if (name === 'translation-exercise') { /* loaded via startTranslationBuoc */ }
   else if (name === 'paragraph-list') loadParagraphList();
   else if (name === 'paragraph-exercise') { /* loaded via openParagraphExercise */ }
-  else if (name === 'games') { /* static hub, no loader */ }
+  else if (name === 'games') gfbRender();
+  else if (name === 'ttmon') ttmShow();
   else if (name === 'dictation') loadDictation();
   else if (name === 'vocab-blitz') showVocabBlitz();
   else if (name === 'lesson-vocab') showLessonVocab();
@@ -27923,3 +27924,1206 @@ function t1hDraw() {
   }
 }
 // TASK1 END
+
+// TTMON BEGIN
+/* ── TinTinMon (thử nghiệm) ────────────────────────────────────────────────
+   A Task 2 creature game in the spirit of the old monster-catching RPGs,
+   built on Hầm ngục lesson 1. Two families, kept apart everywhere:
+   Ý-Mon are the ideas of the model paragraph (steps A–E), typed by the field
+   of the essay they belong to; Từ-Mon are its marked phrases, typed by what
+   they do in a sentence. Tall green grass hides Từ-Mon, flowery grass hides
+   Ý-Mon. Answers are the attacks: there is no luck in a catch. The gym is the
+   prompt itself: send the Ý-Mon in the order a paragraph needs, write each
+   sentence, then write one sentence of your own with two weak phrases.
+   Map tiles: Kenney Tiny Town (CC0). People: 0x72 DungeonTileset II (CC0).
+   Creatures are drawn in code below and pixelated at load. */
+const TTM_TS = 48;
+const TTM_TYPES = {
+  gov:     { name: 'Chính phủ', color: '#5B6CD9', fam: 'y' },
+  family:  { name: 'Gia đình', color: '#E07A5F', fam: 'y' },
+  econ:    { name: 'Kinh tế', color: '#C9940E', fam: 'y' },
+  society: { name: 'Xã hội', color: '#2E9C88', fam: 'y' },
+  culture: { name: 'Văn hoá', color: '#B565C9', fam: 'y' },
+  colloc:  { name: 'Kết hợp từ', color: '#2F80ED', fam: 't' },
+  linker:  { name: 'Từ nối', color: '#27AE60', fam: 't' },
+  hedge:   { name: 'Rào đón', color: '#9B51E0', fam: 't' },
+  verb:    { name: 'Động từ', color: '#EB5757', fam: 't' },
+  band:    { name: 'Nâng band', color: '#E67E22', fam: 't' },
+};
+const TTM_FAM = {
+  y: { name: 'Ý-Mon', tag: 'Ý tưởng', desc: 'Một ý của đoạn văn. Hệ là lĩnh vực của ý đó.' },
+  t: { name: 'Từ-Mon', tag: 'Cụm từ', desc: 'Một cụm từ dùng trong câu. Hệ là việc nó làm trong câu.' },
+};
+// Steps of lesson 1, paragraph 1, and what each does in the paragraph.
+const TTM_ROLE = {
+  A: 'câu chủ đề: nêu luận điểm',
+  B: 'giải thích: gánh nặng rơi vào ai',
+  C: 'hệ quả cụ thể với người đó',
+  D: 'đối chiếu: nhóm khác thì sao',
+  E: 'câu kết: quay lại luận điểm',
+};
+const TTM_GYM_STEPS = ['A', 'B', 'C', 'D', 'E'];
+const TTM_MONS = {
+  // Starters: the partner every student begins with.
+  muop:  { name: 'Mướp Mực', fam: 't', type: 'colloc', starter: true, moves: ['play a crucial role', 'have a direct impact on'], desc: 'Mèo mực, quẹt đuôi là ra một cụm kết hợp từ.' },
+  cun:   { name: 'Cún Câu', fam: 't', type: 'linker', starter: true, moves: ['However,', 'As a result,'], desc: 'Cún nối câu, đeo khăn mắt xích.' },
+  rua:   { name: 'Rùa Rào', fam: 't', type: 'hedge', starter: true, moves: ['tend to', 'to some extent'], desc: 'Rùa mai rào, nói gì cũng chừa đường lui.' },
+  // Từ-Mon of lesson 1.
+  phaply: { name: 'Pháp Lý', fam: 't', type: 'colloc', p: 'legal duty', vi: 'nghĩa vụ pháp lý', step: 'A', bad: ['law duty', 'legally duty'], desc: 'Cuộn giấy luật, tay cầm búa toà.' },
+  thucte: { name: 'Thực Tế', fam: 't', type: 'linker', p: 'In practice', vi: 'trên thực tế', step: 'B', bad: ['In practise of', 'On practice'], desc: 'Cây cầu nhỏ nối lý thuyết với đời thật.' },
+  dondon: { name: 'Dồn Dồn', fam: 't', type: 'verb', p: 'settles on', vi: 'dồn lên, rơi vào', step: 'B', bad: ['settles in', 'is settle on'], desc: 'Ba cục bột chồng lên nhau, nặng trĩu.' },
+  dolen:  { name: 'Đổ Lên', fam: 't', type: 'verb', p: 'lands instead on', vi: 'thay vào đó lại đổ lên', step: 'D+', bad: ['lands instead to', 'land instead on'], desc: 'Chim sà xuống đúng chỗ không ai muốn.' },
+  khoma:  { name: 'Khó Mà', fam: 't', type: 'hedge', p: 'unlikely to', vi: 'khó có thể', step: 'E', bad: ['unlikely for', 'unlike to'], desc: 'Nhím ngại ngùng, chẳng bao giờ nói chắc.' },
+  vande:  { name: 'Vấn Đề', fam: 't', type: 'band', evo: true, desc: 'Hòn đá lớn dần theo band.',
+    stages: [
+      { name: 'Vấn Đề', p: 'a big problem', vi: 'một vấn đề lớn', art: 'vande1' },
+      { name: 'Vấn Nạn', p: 'a serious issue', vi: 'một vấn đề nghiêm trọng', art: 'vande2' },
+      { name: 'Cấp Bách', p: 'a pressing concern', vi: 'một mối lo cấp bách', art: 'vande3' },
+    ],
+    ctx: 'Caring for elderly parents can become ____ for working adults.',
+    bad: ['a very big problem', 'a problem serious', 'a bigger issue'] },
+  // Ý-Mon of lesson 1, one per paragraph step (D carries D+).
+  luatsuong: { name: 'Luật Suông', fam: 'y', type: 'gov', steps: ['A'], gist: 'Luật không tạo thêm chăm sóc, chỉ quyết định ai phải chăm.', desc: 'Phiến đá luật, ngực rỗng một trái tim.' },
+  congan:    { name: 'Con Gần', fam: 'y', type: 'family', steps: ['B'], gist: 'Gánh nặng dồn lên người con sống gần nhất.', desc: 'Ngôi nhà có túi, địu theo đứa con ở gần.' },
+  haoluong:  { name: 'Hao Lương', fam: 'y', type: 'econ', steps: ['C'], gist: 'Họ phải làm bán thời gian, thu nhập giảm đúng lúc cần để dành.', desc: 'Đồng xu nứt, tay cầm đồng hồ ca làm.' },
+  batcong:   { name: 'Bất Công', fam: 'y', type: 'society', steps: ['D', 'D+'], gist: 'Nhà khá giả thuê người giúp, nhà nghèo gánh hết chi phí.', desc: 'Cái cân lệch hẳn về một bên.' },
+  khocai:    { name: 'Khó Cải', fam: 'y', type: 'gov', steps: ['E'], gist: 'Kết luận: luật như vậy khó cải thiện việc chăm sóc người già.', desc: 'Cú quan toà, đội mũ tốt nghiệp.' },
+  lacde:     { name: 'Lạc Đề', fam: 'y', type: 'culture', off: true, gist: 'Toàn cầu hoá làm mai một lễ hội truyền thống.',
+    t: 'Globalisation is gradually {erasing|xoá dần} {traditional festivals|lễ hội truyền thống}.', vi: 'Toàn cầu hoá đang dần xoá đi các lễ hội truyền thống.', desc: 'Cáo lạc đường, mắt xoáy, đuôi la bàn. Hay, nhưng không hợp đề này.' },
+};
+const TTM_TU = ['phaply', 'thucte', 'dondon', 'dolen', 'khoma', 'vande'];
+const TTM_Y = ['luatsuong', 'congan', 'haoluong', 'batcong', 'khocai', 'lacde'];
+const TTM_LOOKS = ['knight_m', 'knight_f', 'elf_m', 'elf_f', 'wizzard_m', 'wizzard_f', 'dwarf_m', 'dwarf_f'];
+const TTM_LV = { a: 'Học việc · chọn đáp án', d: 'Dũng sĩ · điền chữ thiếu', l: 'Huyền thoại · gõ cả cụm' };
+
+/* ── Creature art ── each draws in a 40×40 box; ttmSprite pixelates it,
+   snaps every pixel to the creature's own colours and adds an outline. */
+const TTM_K = '#1B1B24', TTM_W = '#FFFFFF', TTM_PINK = '#F29CB0';
+const TTM_ART = {
+  muop(D) {
+    const A = '#8EA6C8', INK = '#2C3E73';
+    D.l(29, 31, 35, 22, 4, A); D.l(35, 22, 33, 13, 4, A); D.c(33, 11, 3.6, INK);
+    D.e(20, 30, 10, 7, A); D.e(20, 32, 6, 4.5, '#F4F1EA');
+    D.p([[11, 13], [12, 3], [18, 9]], A); D.p([[29, 13], [28, 3], [22, 9]], A);
+    D.p([[13, 10], [13.5, 6], [16, 9]], TTM_PINK); D.p([[27, 10], [26.5, 6], [24, 9]], TTM_PINK);
+    D.c(20, 17, 10, A);
+    D.eyes(20, 16.5, 4.3, 2.6);
+    D.p([[18.8, 20], [21.2, 20], [20, 21.6]], TTM_PINK);
+    D.l(20, 21.6, 18.3, 22.8, 0.8, TTM_K); D.l(20, 21.6, 21.7, 22.8, 0.8, TTM_K);
+    D.c(13.5, 21, 1.5, TTM_PINK); D.c(26.5, 21, 1.5, TTM_PINK);
+    D.l(7, 19.5, 12.5, 20.3, 0.7, INK); D.l(33, 19.5, 27.5, 20.3, 0.7, INK);
+    D.e(15, 36, 3, 2, INK); D.e(25, 36, 3, 2, INK);
+  },
+  cun(D) {
+    const A = '#D9A066', B = '#B9824A', BR = '#8A5A2B';
+    D.e(20, 30, 9, 7, A); D.e(14, 36, 3, 2.2, B); D.e(26, 36, 3, 2.2, B);
+    D.r(12, 22.5, 16, 3.6, '#27AE60'); [16, 20, 24].forEach(x => D.c(x, 24.3, 0.9, '#BFF0CF'));
+    D.c(20, 15, 9.5, A);
+    D.e(10.5, 16, 3.4, 7, BR, -0.3); D.e(29.5, 16, 3.4, 7, BR, 0.3);
+    D.e(20, 19.2, 5, 3.6, '#F3D9B1'); D.e(20, 17.6, 2, 1.4, TTM_K);
+    D.eyes(20, 13, 4.5, 2.4);
+    D.e(20, 22.6, 1.6, 1.8, TTM_PINK);
+  },
+  rua(D) {
+    const G = '#7FBF6A';
+    D.e(10, 33, 3.6, 3, G); D.e(30, 33, 3.6, 3, G); D.e(13, 37, 3, 2, G); D.e(27, 37, 3, 2, G);
+    D.c(20, 13, 6.6, G);
+    D.eyes(20, 12.6, 2.8, 1.9);
+    D.r(14.4, 10, 4.2, 1.7, G); D.r(21.4, 10, 4.2, 1.7, G);
+    D.l(18.3, 16.2, 21.7, 16.2, 0.8, TTM_K);
+    D.e(20, 31, 13.5, 6, '#5E3F86'); D.e(20, 27, 12.5, 9.5, '#7E5BA6');
+    D.c(20, 26, 3.5, '#A586D1'); D.c(13.5, 27.5, 2.6, '#A586D1'); D.c(26.5, 27.5, 2.6, '#A586D1'); D.c(16.5, 21, 2.2, '#A586D1'); D.c(23.5, 21, 2.2, '#A586D1');
+  },
+  phaply(D) {
+    const P = '#F1E3C2', R = '#D8C49A';
+    D.l(10, 23, 5, 18, 1.6, '#8A5A2B'); D.r(2, 14.5, 6.5, 4.2, '#6B4423');
+    D.r(11, 9, 18, 24, P); D.e(20, 9, 10, 3, R); D.e(20, 33, 10, 3, R);
+    D.r(14, 24, 12, 1, '#B8A276'); D.r(14, 27, 9, 1, '#B8A276');
+    D.eyes(20, 16, 4, 2.3);
+    D.l(18.4, 20.6, 21.6, 20.6, 0.9, TTM_K);
+    D.p([[24, 31], [24.6, 37], [26.4, 33.6]], '#2F80ED'); D.p([[28, 31], [27.4, 37], [25.6, 33.6]], '#2F80ED'); D.c(26, 29.5, 3, '#2F80ED');
+    D.e(15, 36.6, 2.5, 1.5, R); D.e(25, 36.6, 2.5, 1.5, R);
+  },
+  thucte(D) {
+    const G = '#3FA34D', DG = '#2E7D3A', WD = '#8D6E4A';
+    D.r(6, 14, 28, 10, G); D.r(6, 22, 6, 13, G); D.r(28, 22, 6, 13, G); D.cut(20, 31, 8, 8);
+    D.r(6, 18, 28, 1, DG);
+    D.r(5, 12, 30, 3, WD); [7, 14, 24.4, 31.4].forEach(x => D.r(x, 8, 1.6, 4, WD)); D.r(7, 8, 26, 1.4, WD);
+    D.eyes(20, 19.6, 4.5, 2.2);
+    D.l(18.4, 22.8, 21.6, 22.8, 0.8, TTM_K);
+    D.r(6, 34, 6, 2, DG); D.r(28, 34, 6, 2, DG);
+  },
+  dondon(D) {
+    D.e(20, 31, 13, 7, '#D9583B'); D.e(20, 19.5, 9, 7, '#E8774F'); D.e(20, 11, 5, 3.6, '#F29A6B');
+    D.eyes(20, 19.5, 3.8, 2);
+    D.r(14.5, 16.6, 4, 1.6, '#E8774F'); D.r(21.5, 16.6, 4, 1.6, '#E8774F');
+    D.l(17.6, 24, 22.4, 24, 0.9, TTM_K);
+    D.l(5, 11, 5, 19, 1.1, '#9E3A26'); D.p([[3.4, 18.5], [6.6, 18.5], [5, 22]], '#9E3A26');
+    D.l(35, 11, 35, 19, 1.1, '#9E3A26'); D.p([[33.4, 18.5], [36.6, 18.5], [35, 22]], '#9E3A26');
+  },
+  dolen(D) {
+    D.p([[18, 18], [3, 24], [8, 29], [18, 24]], '#C0392B'); D.p([[22, 18], [37, 24], [32, 29], [22, 24]], '#C0392B');
+    D.l(17, 29, 15, 35, 1.2, '#F1C40F'); D.l(23, 29, 25, 35, 1.2, '#F1C40F'); D.l(12.5, 35.4, 17, 35.4, 1.2, '#F1C40F'); D.l(23, 35.4, 27.5, 35.4, 1.2, '#F1C40F');
+    D.e(20, 21, 8, 9, '#E67E22'); D.e(20, 24.5, 5, 5.5, '#F6C38B');
+    D.p([[19, 12.6], [20, 6.5], [21, 12.6]], '#C0392B');
+    D.eyes(20, 17, 3.5, 2.1);
+    D.p([[18.4, 20], [21.6, 20], [20, 23.2]], '#F1C40F');
+    D.e(8, 37.4, 3.2, 1.2, '#D5CFC4'); D.e(32, 37.4, 3.2, 1.2, '#D5CFC4');
+  },
+  khoma(D) {
+    for (let i = -5; i <= 5; i++) {
+      const a = -Math.PI / 2 + i * 0.3, b = 0.15;
+      D.p([[20 + Math.cos(a - b) * 9, 25 + Math.sin(a - b) * 9], [20 + Math.cos(a) * 17, 25 + Math.sin(a) * 17], [20 + Math.cos(a + b) * 9, 25 + Math.sin(a + b) * 9]], '#6C3FA0');
+    }
+    D.e(20, 26, 12, 9, '#9B6BD3'); D.e(20, 28.4, 8, 6, '#F3D9E8');
+    D.eyes(20, 27, 3.4, 1.9);
+    D.c(14.5, 30.4, 1.4, TTM_PINK); D.c(25.5, 30.4, 1.4, TTM_PINK);
+    D.c(20, 31.6, 0.9, TTM_K);
+    D.e(30, 19, 1.3, 2, '#7FC8F8');
+    D.e(15, 35.4, 2.6, 1.6, '#6C3FA0'); D.e(25, 35.4, 2.6, 1.6, '#6C3FA0');
+  },
+  vande1(D) {
+    D.p([[10, 35], [8, 24], [14, 16], [25, 15], [32, 22], [32, 35]], '#B08968'); D.p([[23, 35], [32, 22], [32, 35]], '#8C6A4F');
+    D.l(19, 16, 21, 21.6, 1, '#5A4535'); D.l(21, 21.6, 18.4, 26, 1, '#5A4535');
+    D.eyes(20, 25.6, 4, 2.2);
+    D.l(17, 31, 23, 31, 0.9, TTM_K);
+  },
+  vande2(D) {
+    D.p([[11, 14], [8, 4.5], [15.5, 11]], '#E0D6C2'); D.p([[29, 14], [32, 4.5], [24.5, 11]], '#E0D6C2');
+    D.p([[7, 36], [5, 22], [12, 12], [28, 11], [35, 20], [35, 36]], '#A0522D'); D.p([[25, 36], [35, 20], [35, 36]], '#7F3F22');
+    D.l(21, 12, 23, 18, 1, '#4A2615'); D.l(23, 18, 20, 23, 1, '#4A2615');
+    D.eyes(20, 23, 5, 2.5);
+    D.l(12.6, 18.4, 18, 20.4, 1.2, TTM_K); D.l(27.4, 18.4, 22, 20.4, 1.2, TTM_K);
+    D.l(15, 30, 25, 30, 1, TTM_K);
+  },
+  vande3(D) {
+    D.p([[6, 36], [4, 20], [9, 25], [10, 13], [14, 22], [20, 9], [26, 22], [30, 13], [31, 25], [36, 20], [34, 36]], '#F39C12');
+    D.p([[10, 36], [9, 27], [14, 29], [20, 17], [26, 29], [31, 27], [30, 36]], '#F7DC6F');
+    D.e(20, 29.5, 11, 8, '#7B3F27');
+    D.p([[17, 3.5], [23, 3.5], [25.4, 9], [14.6, 9]], '#F1C40F'); D.c(20, 10, 1.4, '#B7950B'); D.r(19.3, 1.4, 1.4, 2.2, '#B7950B');
+    D.eyes(20, 28, 4.5, 2.3);
+    D.l(13.6, 24.6, 18, 26, 1.2, TTM_K); D.l(26.4, 24.6, 22, 26, 1.2, TTM_K);
+    D.e(20, 33.4, 2.5, 1.5, TTM_K);
+  },
+  luatsuong(D) {
+    const S = '#9AACC4', L = '#6E7F96';
+    D.e(8, 24, 3, 6, '#7D8FA6'); D.e(32, 24, 3, 6, '#7D8FA6');
+    D.e(20, 12, 11, 6, S); D.r(9, 12, 22, 22, S);
+    D.r(12, 20.5, 16, 1, L); D.r(12, 23, 16, 1, L);
+    D.c(18.2, 28.6, 2, '#4A5A70'); D.c(21.8, 28.6, 2, '#4A5A70'); D.p([[16.2, 29.2], [23.8, 29.2], [20, 33.6]], '#4A5A70');
+    D.eyes(20, 14, 4.5, 2.3);
+    D.l(18, 17.8, 22, 17.8, 0.9, TTM_K);
+    D.r(11, 34, 6, 3, L); D.r(23, 34, 6, 3, L);
+  },
+  congan(D) {
+    const A = '#E07A5F', R = '#B5482F';
+    D.e(9, 26, 2.2, 4, A); D.e(31, 26, 2.2, 4, A);
+    D.e(20, 27, 10, 9.5, A);
+    D.r(25, 5, 3, 6, '#7A2E20');
+    D.r(11, 13, 18, 10, A); D.p([[8, 14], [20, 3], [32, 14]], R);
+    D.eyes(20, 17, 4.2, 2.2);
+    D.l(18.4, 21, 21.6, 21, 0.9, TTM_K);
+    D.e(20, 30.6, 6, 4.6, '#F2B5A0'); D.c(20, 27.6, 3, '#F4D3B8'); D.c(19, 27.4, 0.6, TTM_K); D.c(21, 27.4, 0.6, TTM_K);
+    D.e(13, 36.4, 4, 2, R); D.e(27, 36.4, 4, 2, R);
+  },
+  haoluong(D) {
+    D.l(9, 28, 12, 25, 1.3, '#B7950B'); D.c(6, 30, 4, '#D9D9D9'); D.c(6, 30, 3, TTM_W); D.l(6, 30, 6, 28, 0.8, TTM_K); D.l(6, 30, 7.6, 30, 0.8, TTM_K);
+    D.e(20, 22, 13, 13, '#D4A017'); D.e(20, 22, 10, 10, '#F1C40F');
+    D.l(24, 9.4, 21, 17, 1.2, '#8C6A00'); D.l(21, 17, 24, 22, 1.2, '#8C6A00'); D.l(24, 22, 20.6, 30, 1.2, '#8C6A00');
+    D.eyes(20, 20, 4.2, 2.3);
+    D.l(17, 27, 23, 26.2, 0.9, TTM_K);
+    D.e(31, 14.6, 1.6, 2.4, '#7FC8F8');
+    D.e(15, 36, 3, 1.6, '#B7950B'); D.e(25, 36, 3, 1.6, '#B7950B');
+  },
+  batcong(D) {
+    const T = '#3FA796', DT = '#2E8B7A';
+    D.r(18.5, 10, 3, 23, DT); D.e(20, 34.4, 9, 3, DT);
+    D.l(6, 10, 34, 16, 2, T);
+    D.l(6, 10, 3.6, 16.4, 0.8, DT); D.l(6, 10, 8.4, 16.4, 0.8, DT); D.e(6, 17, 4.5, 1.8, '#E5B53D');
+    D.l(34, 16, 31.4, 25, 0.8, DT); D.l(34, 16, 36.6, 25, 0.8, DT); D.c(34, 22.6, 3, '#8D6E4A'); D.e(34, 26, 5, 2.2, '#E5B53D');
+    D.c(20, 22, 6.6, T);
+    D.eyes(20, 21, 2.8, 1.8);
+    D.l(18.4, 25.2, 21.6, 24.4, 0.8, TTM_K);
+    D.c(20, 8.6, 2, '#E5B53D');
+  },
+  khocai(D) {
+    const B = '#5B6CD9', DB = '#3F4FB8';
+    D.p([[10, 15], [11, 6.5], [15.5, 12]], DB); D.p([[30, 15], [29, 6.5], [24.5, 12]], DB);
+    D.e(9.6, 26, 2.8, 7, DB); D.e(30.4, 26, 2.8, 7, DB);
+    D.e(20, 24, 11, 12, B); D.e(20, 28.4, 7, 7, '#C9D1F5');
+    D.l(18, 27, 20, 29, 0.7, '#9AA6E8'); D.l(22, 27, 20, 29, 0.7, '#9AA6E8');
+    D.eyes(20, 19, 4.6, 3.2);
+    D.p([[18.8, 22.4], [21.2, 22.4], [20, 25.4]], '#F2B233');
+    D.p([[12, 9.4], [20, 5], [28, 9.4], [20, 13.4]], '#2A2A3A'); D.l(27, 9.6, 29, 14.6, 0.8, '#F2B233');
+    D.l(17, 35.6, 17, 38, 1, '#F2B233'); D.l(23, 35.6, 23, 38, 1, '#F2B233');
+  },
+  lacde(D) {
+    const F = '#B565C9', C = '#F4EAF7';
+    D.e(31, 27, 6, 9, F, 0.5); D.e(34.4, 19.6, 3.5, 4, C, 0.5);
+    D.c(33, 30, 3, '#F1E3C2'); D.l(33, 27.8, 33, 32.2, 0.9, '#C0392B');
+    D.e(19, 29.6, 9, 7, F); D.e(19, 31.6, 4.5, 4, C);
+    D.p([[10, 14], [9, 3.4], [16, 10]], F); D.p([[28, 14], [29, 3.4], [22, 10]], F);
+    D.p([[11.4, 11.6], [10.8, 6.4], [14.4, 10]], TTM_PINK); D.p([[26.6, 11.6], [27.2, 6.4], [23.6, 10]], TTM_PINK);
+    D.e(19, 17, 9, 7, F); D.p([[13, 19], [25, 19], [19, 25]], C); D.c(19, 24, 1.2, TTM_K);
+    D.c(15, 16, 2.6, TTM_W); D.c(23, 16, 2.6, TTM_W); D.c(16.2, 16.6, 1.2, TTM_K); D.c(21.8, 15.4, 1.2, TTM_K);
+    D.e(14, 36, 2.5, 1.6, '#8E44AD'); D.e(23, 36, 2.5, 1.6, '#8E44AD');
+  },
+};
+const TTM_ART_CACHE = {};
+// Draws a creature once into a 40×40 canvas: shapes, then every pixel either
+// cleared or snapped to the nearest of its own colours, then an outline.
+function ttmSprite(art, sil) {
+  const key = art + (sil ? '_sil' : '');
+  if (TTM_ART_CACHE[key]) return TTM_ART_CACHE[key];
+  const N = 40, c = document.createElement('canvas');
+  c.width = c.height = N;
+  const x = c.getContext('2d'), pal = new Set([TTM_K, TTM_W]);
+  const fill = col => { pal.add(col); x.fillStyle = col; x.strokeStyle = col; };
+  const D = {
+    e(cx, cy, rx, ry, col, rot) { fill(col); x.beginPath(); x.ellipse(cx, cy, rx, ry, rot || 0, 0, Math.PI * 2); x.fill(); },
+    c(cx, cy, r, col) { D.e(cx, cy, r, r, col); },
+    r(px, py, w, h, col) { fill(col); x.fillRect(px, py, w, h); },
+    p(pts, col) { fill(col); x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); x.fill(); },
+    l(x1, y1, x2, y2, w, col) { fill(col); x.lineWidth = w * 2; x.lineCap = 'round'; x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); },
+    cut(cx, cy, rx, ry) { x.save(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); x.fill(); x.restore(); },
+    eyes(cx, cy, gap, r) {
+      [cx - gap, cx + gap].forEach(ex => {
+        D.c(ex, cy, r, TTM_W); D.c(ex + 0.2, cy + 0.3, r * 0.6, TTM_K); D.c(ex - r * 0.3, cy - r * 0.35, Math.max(0.6, r * 0.26), TTM_W);
+      });
+    },
+  };
+  (TTM_ART[art] || TTM_ART.vande1)(D);
+  const img = x.getImageData(0, 0, N, N), d = img.data;
+  const cols = [...pal].map(h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+  const on = new Uint8Array(N * N);
+  for (let i = 0; i < N * N; i++) {
+    const o = i * 4;
+    if (d[o + 3] < 110) { d[o + 3] = 0; continue; }
+    // Anti-aliased edges were blended against nothing: undo the alpha first.
+    const a = d[o + 3] / 255, r = d[o] / a, g = d[o + 1] / a, b = d[o + 2] / a;
+    let best = cols[0], bd = 1e9;
+    for (const q of cols) { const dd = (q[0] - r) ** 2 + (q[1] - g) ** 2 + (q[2] - b) ** 2; if (dd < bd) { bd = dd; best = q; } }
+    if (sil) best = [42, 30, 46];
+    d[o] = best[0]; d[o + 1] = best[1]; d[o + 2] = best[2]; d[o + 3] = 255; on[i] = 1;
+  }
+  for (let y = 0; y < N; y++) for (let x0 = 0; x0 < N; x0++) {
+    const i = y * N + x0;
+    if (on[i]) continue;
+    if ((x0 > 0 && on[i - 1]) || (x0 < N - 1 && on[i + 1]) || (y > 0 && on[i - N]) || (y < N - 1 && on[i + N])) {
+      const o = i * 4; d[o] = 42; d[o + 1] = 30; d[o + 2] = 46; d[o + 3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+  return (TTM_ART_CACHE[key] = c);
+}
+function ttmArt(id, g) {
+  const M = TTM_MONS[id];
+  if (M && M.evo) return M.stages[ttmStage(id, g)].art;
+  return id;
+}
+function ttmStage(id, g) { return Math.min(2, ((g || _ttm || {}).caught?.[id]?.stage) || 0); }
+function ttmName(id, g) { const M = TTM_MONS[id]; return M.evo ? M.stages[ttmStage(id, g)].name : M.name; }
+function ttmPhrase(id, g) { const M = TTM_MONS[id]; return M.evo ? M.stages[ttmStage(id, g)].p : M.p; }
+function ttmVi(id, g) { const M = TTM_MONS[id]; return M.evo ? M.stages[ttmStage(id, g)].vi : M.vi; }
+// Paints a creature into every <canvas data-ttm="id"> under root.
+function ttmPaintAll(root) {
+  (root || document).querySelectorAll('canvas[data-ttm]').forEach(cv => {
+    const x = cv.getContext('2d');
+    x.imageSmoothingEnabled = false;
+    x.clearRect(0, 0, cv.width, cv.height);
+    x.drawImage(ttmSprite(cv.dataset.ttm, cv.dataset.sil === '1'), 0, 0, cv.width, cv.height);
+  });
+}
+function ttmChip(type) { const T = TTM_TYPES[type]; return `<span class="ttm-chip" style="--tc:${T.color}">${T.name}</span>`; }
+function ttmFamTag(id) {
+  const M = TTM_MONS[id];
+  if (M.starter) return '<span class="ttm-fam ttm-fam-s">Bạn đồng hành</span>';
+  return `<span class="ttm-fam ttm-fam-${M.fam}">${TTM_FAM[M.fam].name}</span>`;
+}
+
+/* ── Lesson text ── */
+function ttmLesson() { return RAID_LESSONS[0]; }
+function ttmStepS(step) { return ttmLesson().paras[0].s.find(s => s.step === step); }
+function ttmPlainT(t) { return raidPlain(t); }
+// The sentences an Ý-Mon stands for, as raw {ans|hint} text and Vietnamese.
+function ttmYText(id) {
+  const M = TTM_MONS[id];
+  if (M.off) return { t: M.t, vi: M.vi };
+  const ss = M.steps.map(ttmStepS);
+  return { t: ss.map(s => s.t).join(' '), vi: ss.map(s => s.vi).join(' ') };
+}
+// A Từ-Mon's sentence from the lesson with its phrase blanked.
+function ttmCtx(id) {
+  const M = TTM_MONS[id];
+  if (M.evo) return M.ctx;
+  const s = ttmStepS(M.step);
+  return s.t.replace(/\{([^|{}]+)\|[^{}]+\}/g, (all, a) => raidNorm(a) === raidNorm(M.p) ? '____' : a);
+}
+function ttmMask(ans) { return ans.split(' ').map(w => w.replace(/^([^A-Za-z]*[A-Za-z])(.*)$/, (a, f, r) => f + r.replace(/[A-Za-z]/g, '_'))).join(' '); }
+
+/* ── State & save ── */
+let _ttm = null;
+function ttmKey() { return 'ttm_v1_' + ((currentUser && currentUser.id) || 'guest'); }
+function ttmLoad() { try { return JSON.parse(localStorage.getItem(ttmKey()) || 'null'); } catch (e) { return null; } }
+function ttmSave() {
+  const g = _ttm;
+  if (!g || !g.started) return;
+  try {
+    localStorage.setItem(ttmKey(), JSON.stringify({ look: g.look, lv: g.lv, team: g.team, caught: g.caught, mast: g.mast, fled: g.fled, x: g.p.x, y: g.p.y, badge: g.badge, trainerWon: g.trainerWon }));
+  } catch (e) {}
+}
+function ttmRoot() { return document.getElementById('ttmon-root'); }
+
+/* ── Map: 28×24 tiles. Buildings and people are laid on top. ── */
+const TTM_MAP = [
+  'YTTTTYTTTTYTTTTYTTTTYTTTTYTT',
+  'TYTTTTYTTTTYTTTTYTTTTYTTTTYT',
+  'TT......*...gggg...*......TY',
+  'TT.,.......,gggg.,........TT',
+  'TT..B.......gggg.......B..TT',
+  'YT...........==.........,.TT',
+  'TY.""""""",..==..;;;;;;;..YT',
+  'TT.""""""".Y.==..;;;;;;;..TY',
+  'TT."""""""...==..;;;;;;;.,TT',
+  'TT.""""""",..==..;;;;;;;..TT',
+  'YT."""""""...==..;;;;;;;..TT',
+  'TY.""""""".Y.==..;;;;;;;..YT',
+  'TT.,.r.......==.,....r....TY',
+  'TT###########==###########TT',
+  'TT..*.....,.s==...*.....*,TT',
+  'YT..hhh......==....ppp....TT',
+  'TY..hhh......==....ppp....YT',
+  'TT..hhh......==....ppp....TY',
+  'TT.======================.TT',
+  'TT.*.........==.......,...TT',
+  'YT..r....w...==..oo....*..TT',
+  'TY.*..,......==*.......r..YT',
+  'TTYTTTTYTTTTYTTTTYTTTTYTTTTY',
+  'TTTYTTTTYTTTTYTTTTYTTTTYTTTT',
+];
+const TTM_TILE = { '.': 0, ',': 1, '*': 2, '"': 0, ';': 0, '=': 25, r: 0, T: 0, Y: 0, B: 0, '#': 0, s: 0, w: 0, o: 0, g: 0, h: 0, p: 0 };
+const TTM_PROP = { T: 16, Y: 28, B: 5, '#': 81, s: 83, w: 104, o: 130, r: 29 };
+const TTM_SOLID = new Set(['T', 'Y', 'B', '#', 's', 'w', 'o']);
+const TTM_BUILD = [
+  { id: 'gym', x: 12, y: 2, t: [[99, 100, 100, 101], [126, 111, 112, 126], [126, 113, 114, 126]], doors: [[13, 4], [14, 4]] },
+  { id: 'home', x: 4, y: 15, t: [[52, 53, 54], [64, 67, 66], [84, 86, 84]], doors: [[5, 17]] },
+  { id: 'heal', x: 19, y: 15, t: [[48, 49, 50], [60, 63, 62], [76, 89, 79]], doors: [[20, 17]] },
+];
+const TTM_NPC = [
+  { id: 'guide', x: 11, y: 19, look: 'elf_f', name: 'Cô Hướng Dẫn' },
+  { id: 'trainer', x: 15, y: 9, look: 'dwarf_m', name: 'Thợ Săn Từ', face: -1 },
+  { id: 'guard', x: 15, y: 5, look: 'knight_f', name: 'Lính gác', face: -1 },
+];
+function ttmTileAt(x, y) { return (TTM_MAP[y] || '')[x] || 'T'; }
+function ttmBuildAt(x, y) { return TTM_BUILD.find(b => x >= b.x && x < b.x + b.t[0].length && y >= b.y && y < b.y + b.t.length); }
+function ttmNpcAt(x, y) { return TTM_NPC.find(n => n.x === x && n.y === y); }
+function ttmSolid(x, y) { return TTM_SOLID.has(ttmTileAt(x, y)) || !!ttmBuildAt(x, y) || !!ttmNpcAt(x, y); }
+
+/* ── Entry ── */
+function ttmShow() {
+  ttmStop();
+  t1dLoad();
+  if (!TTM_IMG.img) { TTM_IMG.img = new Image(); TTM_IMG.img.onload = () => { TTM_IMG.ready = true; }; TTM_IMG.img.src = '/img/ttmon/town.png'; }
+  ttmStartScreen();
+}
+const TTM_IMG = { img: null, ready: false };
+function ttmStop() {
+  if (_ttm) { cancelAnimationFrame(_ttm.raf); document.removeEventListener('keydown', _ttm.kd); document.removeEventListener('keyup', _ttm.ku); }
+  _ttm = null;
+}
+function ttmStartScreen() {
+  const save = ttmLoad(), r = ttmRoot();
+  const pick = ttmStartScreen.pick || (ttmStartScreen.pick = { lv: 'a', look: 'knight_m', starter: 'muop' });
+  r.innerHTML = `<div class="lv-wrap ttm">
+    <button class="vb-back" onclick="ttmStop(); showView('games')">← Trò chơi</button>
+    <div class="ttm-title"><h2>TinTinMon <span class="ttm-beta">🧪 thử nghiệm</span></h2>
+      <p>Bắt <b>Ý-Mon</b> (ý của đoạn văn) và <b>Từ-Mon</b> (cụm từ) của Buổi 1, rồi dựng cả đoạn văn để thắng Nhà thi đấu.</p></div>
+    ${save ? `<div class="ttm-row"><button class="vb-start-btn" onclick="ttmBegin(true)">▶ Chơi tiếp</button><button class="ttm-ghost" onclick="if (confirm('Xoá tiến độ TinTinMon và chơi lại từ đầu?')) { try { localStorage.removeItem(ttmKey()); } catch (e) {} ttmStartScreen(); }">Chơi lại từ đầu</button></div>` : ''}
+    <h3 class="ttm-h">1 · Cấp độ</h3>
+    <div class="ttm-opts">${Object.entries(TTM_LV).map(([k, t]) => `<button class="ttm-opt ${pick.lv === k ? 'on' : ''}" onclick="ttmStartScreen.pick.lv='${k}'; ttmStartScreen()">${t}</button>`).join('')}</div>
+    <h3 class="ttm-h">2 · Nhân vật</h3>
+    <div class="ttm-looks">${TTM_LOOKS.map(l => `<button class="ttm-look ${pick.look === l ? 'on' : ''}" onclick="ttmStartScreen.pick.look='${l}'; ttmStartScreen()" aria-label="${l}"><canvas width="48" height="72" data-look="${l}"></canvas></button>`).join('')}</div>
+    <h3 class="ttm-h">3 · Bạn đồng hành</h3>
+    <div class="ttm-starters">${['muop', 'cun', 'rua'].map(id => { const M = TTM_MONS[id]; return `<button class="ttm-starter ${pick.starter === id ? 'on' : ''}" onclick="ttmStartScreen.pick.starter='${id}'; ttmStartScreen()">
+      <canvas width="96" height="96" data-ttm="${id}"></canvas><b>${M.name}</b>${ttmChip(M.type)}<small>${M.desc}</small><small class="ttm-moves">Chiêu: ${M.moves.map(escapeHtml).join(' · ')}</small></button>`; }).join('')}</div>
+    <div class="ttm-row"><button class="vb-start-btn" onclick="ttmBegin(false)">${save ? 'Bắt đầu lại với lựa chọn này' : '▶ Bắt đầu'}</button></div>
+    <details class="ttm-how"><summary>Cách chơi</summary><ul>
+      <li>Đi: <kbd>WASD</kbd> / mũi tên, nói chuyện: <kbd>Space</kbd> hoặc <kbd>Enter</kbd>. Điện thoại: nút bấm trên màn hình.</li>
+      <li>🌿 Cỏ xanh: <b>Từ-Mon</b> (cụm từ). 🌼 Cỏ hoa: <b>Ý-Mon</b> (ý của đoạn văn).</li>
+      <li>Trả lời đúng là đánh trúng. Hết máu thì thú tự vào bóng. Không có may rủi.</li>
+      <li>Sai 2 lần thì thú bỏ chạy, lát gặp lại. Sổ Thú có nút <b>Luyện</b> để lên độ thuộc.</li>
+      <li>Nhà thi đấu: đưa Ý-Mon ra đúng thứ tự một đoạn văn. Ý-Mon lạc đề sẽ không có tác dụng.</li>
+    </ul></details>
+  </div>`;
+  ttmPaintAll(r);
+  ttmPaintLooks(r);
+}
+function ttmPaintLooks(root) {
+  const go = () => root.querySelectorAll('canvas[data-look]').forEach(cv => {
+    const x = cv.getContext('2d');
+    x.clearRect(0, 0, cv.width, cv.height);
+    t1dDraw(x, `${cv.dataset.look}_idle_anim_f0`, 24, 66, 2, false, null, true);
+  });
+  if (T1D.ready) go(); else setTimeout(() => ttmPaintLooks(root), 200);
+}
+function ttmBegin(resume) {
+  const s = resume ? ttmLoad() : null, pick = ttmStartScreen.pick;
+  const g = _ttm = {
+    started: true, lv: s ? s.lv : pick.lv, look: s ? s.look : pick.look,
+    team: s ? s.team : [{ id: pick.starter, hp: 20 }],
+    caught: s ? s.caught : { [pick.starter]: { stage: 0 } },
+    mast: s ? s.mast || {} : {}, fled: s ? s.fled || {} : {}, badge: s ? !!s.badge : false, trainerWon: s ? !!s.trainerWon : false,
+    p: { x: s ? s.x : 13, y: s ? s.y : 19, fx: 0, fy: 0, face: 1, dir: 'u', moving: false, t: 0, anim: 0 },
+    keys: {}, safe: 4, mode: 'walk', last: 0, raf: 0, time: 0, talkQ: null,
+  };
+  if (ttmSolid(g.p.x, g.p.y)) { g.p.x = 13; g.p.y = 19; }
+  g.p.fx = g.p.x; g.p.fy = g.p.y;
+  ttmSave();
+  ttmWorld();
+  if (!s) ttmTalk([`Chào em! Đây là Thị trấn Buổi 1. Đề hôm nay hỏi: người già có nên được con cái chu cấp <b>theo luật</b> không?`, 'Nói chuyện với cô ở giữa thị trấn để biết thêm nhé. Đi bằng WASD hoặc mũi tên.']);
+}
+function ttmWorld() {
+  const g = _ttm, r = ttmRoot();
+  r.innerHTML = `<div class="lv-wrap ttm ttm-play">
+    <div class="ttm-hud">
+      <button class="vb-back" onclick="ttmSave(); ttmStop(); showView('games')">← Thoát</button>
+      <button class="ttm-hbtn" onclick="ttmDex()">📖 Sổ Thú <b id="ttm-dexn"></b></button>
+      <button class="ttm-hbtn" onclick="ttmTeamView()">🎒 Đội</button>
+      <span class="ttm-lvtag">${TTM_LV[g.lv].split(' · ')[0]}</span>
+      ${g.badge ? '<span class="ttm-badge" title="Huy hiệu Buổi 1">🏅</span>' : ''}
+    </div>
+    <div class="ttm-stage" id="ttm-stage">
+      <canvas id="ttm-cv"></canvas>
+      <div class="ttm-talk hidden" id="ttm-talk" onclick="ttmTalkNext()"></div>
+      <div class="ttm-over hidden" id="ttm-over"></div>
+      <div class="ttm-pad" aria-hidden="true">
+        <button data-d="u">▲</button><button data-d="l">◀</button><button data-d="r">▶</button><button data-d="d">▼</button>
+      </div>
+      <button class="ttm-abtn" aria-label="Nói chuyện" onclick="ttmAct()">A</button>
+    </div>
+    <p class="ttm-hint">🌿 Cỏ xanh: Từ-Mon · 🌼 Cỏ hoa: Ý-Mon · Nhà thi đấu ở phía bắc · <kbd>Space</kbd> nói chuyện</p>
+  </div>`;
+  ttmDexCount();
+  const cv = document.getElementById('ttm-cv');
+  g.ctx = cv.getContext('2d');
+  g.rs = () => {
+    const W = Math.min(cv.parentElement.clientWidth, 960), H = Math.round(Math.min(560, Math.max(330, window.innerHeight * 0.6)));
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
+    g.W = W; g.H = H; g.dpr = dpr;
+  };
+  g.rs();
+  window.addEventListener('resize', g.rs);
+  const map = { ArrowUp: 'u', ArrowDown: 'd', ArrowLeft: 'l', ArrowRight: 'r', w: 'u', s: 'd', a: 'l', d: 'r', W: 'u', S: 'd', A: 'l', D: 'r' };
+  g.kd = e => {
+    if (!document.getElementById('ttm-cv') || document.getElementById('view-ttmon')?.classList.contains('hidden')) return;
+    if (/input|textarea|select/i.test(e.target.tagName)) return;
+    if (map[e.key]) { g.keys[map[e.key]] = 1; e.preventDefault(); }
+    else if (e.key === ' ' || e.key === 'Enter' || e.key === 'e') { e.preventDefault(); if (g.mode === 'walk' || g.mode === 'talk') ttmAct(); }
+  };
+  g.ku = e => { if (map[e.key]) g.keys[map[e.key]] = 0; };
+  document.addEventListener('keydown', g.kd);
+  document.addEventListener('keyup', g.ku);
+  document.querySelectorAll('.ttm-pad button').forEach(b => {
+    const d = b.dataset.d;
+    b.addEventListener('pointerdown', e => { e.preventDefault(); g.keys = { [d]: 1 }; });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => { g.keys[d] = 0; }));
+  });
+  g.raf = requestAnimationFrame(ttmTick);
+}
+// Battles and menus take over the stage, which grows to fit them.
+function ttmOverlay(open) {
+  const st = document.getElementById('ttm-stage'), el = document.getElementById('ttm-over');
+  if (st) st.classList.toggle('open', open);
+  if (el) el.classList.toggle('hidden', !open);
+}
+function ttmDexCount() {
+  const g = _ttm, el = document.getElementById('ttm-dexn');
+  if (el) el.textContent = `${[...TTM_TU, ...TTM_Y].filter(id => g.caught[id]).length}/${TTM_TU.length + TTM_Y.length}`;
+}
+
+/* ── Walking ── */
+function ttmTick(ts) {
+  const g = _ttm;
+  const view = document.getElementById('view-ttmon');
+  if (!g || !document.getElementById('ttm-cv') || (view && view.classList.contains('hidden'))) { if (g) { window.removeEventListener('resize', g.rs); ttmSave(); ttmStop(); } return; }
+  const dt = g.last ? Math.max(0, Math.min(0.05, (ts - g.last) / 1000)) : 0;
+  g.last = ts; g.time += dt;
+  if (g.mode === 'walk') ttmStep(dt);
+  ttmDraw();
+  g.raf = requestAnimationFrame(ttmTick);
+}
+function ttmStep(dt) {
+  const g = _ttm, p = g.p;
+  if (p.moving) {
+    p.t += dt / 0.17;
+    p.anim += dt;
+    if (p.t >= 1) {
+      p.x = p.tx; p.y = p.ty; p.fx = p.x; p.fy = p.y; p.moving = false;
+      ttmArrive();
+    } else { p.fx = p.x + (p.tx - p.x) * p.t; p.fy = p.y + (p.ty - p.y) * p.t; }
+    return;
+  }
+  const d = ['u', 'd', 'l', 'r'].find(k => g.keys[k]);
+  if (!d) return;
+  p.dir = d;
+  if (d === 'l') p.face = -1; if (d === 'r') p.face = 1;
+  const [dx, dy] = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] }[d];
+  const nx = p.x + dx, ny = p.y + dy;
+  const b = ttmBuildAt(nx, ny);
+  if (b && b.doors.some(([x, y]) => x === nx && y === ny) && d === 'u') { g.keys = {}; ttmDoor(b); return; }
+  if (ttmSolid(nx, ny)) return;
+  p.tx = nx; p.ty = ny; p.t = 0; p.moving = true;
+}
+function ttmArrive() {
+  const g = _ttm, p = g.p, t = ttmTileAt(p.x, p.y);
+  if (g.safe > 0) g.safe--;
+  // The trainer spots anyone walking up the path past them.
+  if (!g.trainerWon && !g.trainerSeen && p.y === 9 && (p.x === 13 || p.x === 14)) {
+    g.trainerSeen = true; g.keys = {};
+    g.bang = { npc: 'trainer', t: g.time };
+    ttmTalk(['Thợ Săn Từ: Này! Em đi qua đây thì phải đấu với anh. Anh có ba Từ-Mon, xem em biết chúng không!'], () => ttmBattle({ kind: 'trainer' }));
+    return;
+  }
+  if ((t === '"' || t === ';') && g.safe <= 0 && Math.random() < 0.13) {
+    g.keys = {};
+    g.safe = 4;
+    ttmBattle({ kind: 'wild', foe: ttmWildPick(t === ';' ? TTM_Y : TTM_TU) });
+  }
+}
+function ttmWildPick(pool) {
+  const g = _ttm, w = pool.map(id => (TTM_MONS[id].off ? 1.4 : g.fled[id] ? 4 : g.caught[id] ? 1 : 3) * (TTM_MONS[id].evo ? 0.6 : 1));
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < pool.length; i++) { r -= w[i]; if (r <= 0) return pool[i]; }
+  return pool[0];
+}
+function ttmFront() {
+  const p = _ttm.p, [dx, dy] = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] }[p.dir];
+  return [p.x + dx, p.y + dy];
+}
+function ttmAct() {
+  const g = _ttm;
+  if (!g) return;
+  if (g.mode === 'talk') { ttmTalkNext(); return; }
+  if (g.mode !== 'walk' || g.p.moving) return;
+  const [fx, fy] = ttmFront(), n = ttmNpcAt(fx, fy), t = ttmTileAt(fx, fy), b = ttmBuildAt(fx, fy);
+  if (n) { n.face = g.p.x < n.x ? -1 : 1; ttmNpcTalk(n); return; }
+  if (t === 's') { ttmTalk(['📋 ↑ Tuyến đường 1 · Nhà thi đấu Buổi 1<br>← Nhà em · Nhà Hồi Sức →']); return; }
+  if (b && b.doors.some(([x, y]) => x === fx && y === fy)) ttmDoor(b);
+}
+function ttmYOk(g) { return TTM_GYM_STEPS.every(st => TTM_Y.some(id => g.caught[id] && !TTM_MONS[id].off && TTM_MONS[id].steps.includes(st))); }
+function ttmNpcTalk(n) {
+  const g = _ttm;
+  if (n.id === 'guide') {
+    const nY = TTM_Y.filter(id => g.caught[id] && !TTM_MONS[id].off).length;
+    ttmTalk([
+      'Cô Hướng Dẫn: 🌿 Cỏ <b>xanh</b> có <b>Từ-Mon</b>: cụm từ hay trong bài mẫu. 🌼 Cỏ <b>hoa</b> có <b>Ý-Mon</b>: từng ý của đoạn văn.',
+      'Muốn vào Nhà thi đấu, em cần đủ <b>5 Ý-Mon đúng đề</b>. Coi chừng Ý-Mon <b>lạc đề</b>: bắt thì được, nhưng đánh trùm không có tác dụng đâu.',
+      `Em đang có ${nY}/5 Ý-Mon đúng đề. Thú mệt thì vào Nhà Hồi Sức (mái xám) để hồi máu.`,
+    ]);
+  } else if (n.id === 'trainer') {
+    if (g.trainerWon) ttmTalk(['Thợ Săn Từ: Em giỏi thật! Muốn đấu lại thì cứ nói.'], () => ttmBattle({ kind: 'trainer' }));
+    else ttmTalk(['Thợ Săn Từ: Đấu nào!'], () => ttmBattle({ kind: 'trainer' }));
+  } else if (n.id === 'guard') {
+    ttmTalk([ttmYOk(g) ? 'Lính gác: Em đã đủ 5 ý của đoạn văn. Mời vào Nhà thi đấu!' : `Lính gác: Nhà thi đấu cần đủ 5 Ý-Mon đúng đề. Em còn thiếu ${5 - TTM_GYM_STEPS.filter(st => TTM_Y.some(id => g.caught[id] && !TTM_MONS[id].off && TTM_MONS[id].steps.includes(st))).length} con. Tìm ở 🌼 cỏ hoa nhé.`]);
+  }
+}
+function ttmDoor(b) {
+  const g = _ttm;
+  if (b.id === 'heal') {
+    g.team.forEach(m => { m.hp = 20; });
+    tsSfx('heal');
+    ttmSave();
+    ttmTalk(['Nhà Hồi Sức: Đội của em đã hồi phục hoàn toàn! ✨']);
+  } else if (b.id === 'home') {
+    ttmSave();
+    ttmTalk(['Nhà của em. Tiến độ đã được lưu. 💾']);
+  } else if (b.id === 'gym') {
+    if (!ttmYOk(g)) { ttmNpcTalk(TTM_NPC.find(n => n.id === 'guard')); return; }
+    const L = ttmLesson().paras[0];
+    ttmTalk([
+      'Trưởng phái Lập Luận: Muốn có huy hiệu, em phải dựng được <b>cả một đoạn văn</b> trả lời đề này.',
+      `<i>${escapeHtml(L.prompt)}</i>`,
+      'Mỗi lượt, đưa ra Ý-Mon <b>tiếp theo</b> mà đoạn văn cần, rồi viết câu của nó. Bắt đầu!',
+    ], () => ttmBattle({ kind: 'gym' }));
+  }
+}
+
+/* ── Talk box ── */
+function ttmTalk(lines, then) {
+  const g = _ttm;
+  g.mode = 'talk'; g.talkQ = lines.slice(); g.talkThen = then || null; g.keys = {};
+  ttmTalkNext();
+}
+function ttmTalkNext() {
+  const g = _ttm, el = document.getElementById('ttm-talk');
+  if (!g || !el) return;
+  if (!g.talkQ || !g.talkQ.length) {
+    el.classList.add('hidden');
+    g.mode = 'walk'; g.bang = null;
+    const t = g.talkThen; g.talkThen = null;
+    if (t) t();
+    return;
+  }
+  el.innerHTML = `<div>${g.talkQ.shift()}</div><span class="ttm-more">▼</span>`;
+  el.classList.remove('hidden');
+  tsSfx('key');
+}
+
+/* ── Drawing the world ── */
+const TTM_GRASS = {};
+function ttmGrassTile(kind) {
+  if (TTM_GRASS[kind]) return TTM_GRASS[kind];
+  const c = document.createElement('canvas');
+  c.width = c.height = 16;
+  const x = c.getContext('2d');
+  const blade = kind === 'y' ? ['#2F7D4F', '#3E9C5F'] : ['#4CA63D', '#6CC24A'];
+  for (let i = 0; i < 9; i++) {
+    const bx = (i * 5 + (i % 3) * 3) % 15, by = 6 + (i * 7) % 9;
+    x.fillStyle = blade[i % 2]; x.fillRect(bx, by, 1, 5); x.fillRect(bx + 1, by + 1, 1, 4);
+    x.fillStyle = '#2B5E2B'; x.fillRect(bx, by + 4, 2, 1);
+  }
+  if (kind === 'y') { x.fillStyle = '#F4D35E'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 2, 2)); x.fillStyle = '#FFF6C7'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 1, 1)); }
+  return (TTM_GRASS[kind] = c);
+}
+function ttmTile(c, i, dx, dy) {
+  if (!TTM_IMG.ready) return;
+  c.drawImage(TTM_IMG.img, (i % 12) * 16, Math.floor(i / 12) * 16, 16, 16, dx, dy, TTM_TS, TTM_TS);
+}
+function ttmDraw() {
+  const g = _ttm, c = g.ctx, W = g.W, H = g.H, S = TTM_TS, p = g.p;
+  if (!c) return;
+  c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
+  c.imageSmoothingEnabled = false;
+  const MW = TTM_MAP[0].length * S, MH = TTM_MAP.length * S;
+  const camX = Math.max(0, Math.min(MW - W, p.fx * S + S / 2 - W / 2)), camY = Math.max(0, Math.min(MH - H, p.fy * S + S / 2 - H / 2));
+  c.fillStyle = '#5E9E4B'; c.fillRect(0, 0, W, H);
+  c.save();
+  c.translate(-Math.round(camX), -Math.round(camY));
+  const x0 = Math.max(0, Math.floor(camX / S)), x1 = Math.min(TTM_MAP[0].length - 1, Math.ceil((camX + W) / S));
+  const y0 = Math.max(0, Math.floor(camY / S)), y1 = Math.min(TTM_MAP.length - 1, Math.ceil((camY + H) / S));
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const t = ttmTileAt(x, y);
+    ttmTile(c, TTM_TILE[t] ?? 0, x * S, y * S);
+    if (TTM_PROP[t] != null) ttmTile(c, TTM_PROP[t], x * S, y * S);
+    if (t === '"' || t === ';') c.drawImage(ttmGrassTile(t === ';' ? 'y' : 't'), x * S, y * S, S, S);
+  }
+  TTM_BUILD.forEach(b => b.t.forEach((row, j) => row.forEach((ti, i) => ttmTile(c, ti, (b.x + i) * S, (b.y + j) * S))));
+  // People, back to front.
+  const ents = TTM_NPC.map(n => ({ y: n.y, draw: () => ttmPerson(c, n.look, n.x, n.y, n.face || 1, false, n) }));
+  ents.push({ y: p.fy, draw: () => ttmPerson(c, g.look, p.fx, p.fy, p.face, p.moving, null) });
+  ents.sort((a, b) => a.y - b.y).forEach(e => e.draw());
+  // Tall grass hides the lower legs.
+  const pt = ttmTileAt(Math.round(p.fx), Math.round(p.fy));
+  if ((pt === '"' || pt === ';') && !p.moving) {
+    c.drawImage(ttmGrassTile(pt === ';' ? 'y' : 't'), 0, 9, 16, 7, Math.round(p.fx) * S, Math.round(p.fy) * S + S * 9 / 16, S, S * 7 / 16);
+  }
+  if (g.bang) {
+    const n = TTM_NPC.find(q => q.id === g.bang.npc);
+    c.fillStyle = '#fff'; c.strokeStyle = '#1B1B24'; c.lineWidth = 2;
+    t1hRR(c, n.x * S + S / 2 - 11, n.y * S - S + 2, 22, 26, 6); c.fill(); c.stroke();
+    c.fillStyle = '#E5533D'; c.font = '900 20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('!', n.x * S + S / 2, n.y * S - S + 15);
+  }
+  c.restore();
+}
+function ttmPerson(c, look, tx, ty, face, moving, npc) {
+  const S = TTM_TS, g = _ttm;
+  const f = moving ? `run_anim_f${Math.floor(g.p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 5 + (npc ? npc.x : 0)) % 4}`;
+  t1dDraw(c, `${look}_${f}`, tx * S + S / 2, ty * S + S - 3, 2.1, face < 0);
+}
+
+/* ── Questions ── one per attack. Level decides the form: choose, fill the
+   missing letters, or type the whole phrase. */
+function ttmOptions(right, wrongs) { return t1Shuffle([right, ...t1Shuffle([...new Set(wrongs.filter(w => w && raidNorm(w) !== raidNorm(right)))]).slice(0, 3)]); }
+function ttmQTu(id, lv) {
+  const g = _ttm, M = TTM_MONS[id], p = ttmPhrase(id, g), ctx = escapeHtml(ttmCtx(id).replace('____', '\u0000')).replace('\u0000', '<span class="ttm-gap">____</span>');
+  const others = TTM_TU.filter(o => o !== id).map(o => ttmPhrase(o, g));
+  const q = { id, ask: `<div class="ttm-q-ctx">${M.evo ? ctx.replace('____', '') : ctx}</div><div class="ttm-q-vi">💬 ${escapeHtml(ttmVi(id, g))}</div>`, ans: [p] };
+  if (lv === 'a') { q.kind = 'choose'; q.opts = ttmOptions(p, [...(M.bad || []), ...others]); }
+  else { q.kind = 'fill'; q.masks = [lv === 'd' ? ttmMask(p) : '']; q.hints = [ttmVi(id, g)]; }
+  return q;
+}
+// The second blow on a Từ-Mon: what does it mean?
+function ttmQMean(id) {
+  const g = _ttm, right = ttmVi(id, g);
+  const wrong = [...TTM_TU.filter(o => o !== id).map(o => ttmVi(o, g)), 'tăng mạnh', 'tuy nhiên'];
+  return { id, kind: 'choose', ask: `<div class="ttm-q-ctx">“<b>${escapeHtml(ttmPhrase(id, g))}</b>” nghĩa là gì?</div>`, opts: ttmOptions(right, wrong), ans: [right] };
+}
+function ttmQY(id, lv) {
+  const { t, vi } = ttmYText(id), parts = raidParse(t), plain = ttmPlainT(t);
+  const q = { id };
+  if (lv === 'a') {
+    const others = TTM_Y.filter(o => o !== id).map(o => ttmPlainT(ttmYText(o).t));
+    q.kind = 'choose'; q.long = true;
+    q.ask = `<div class="ttm-q-vi">💬 ${escapeHtml(vi)}</div><div class="ttm-q-ctx">Câu tiếng Anh nào nói đúng ý này?</div>`;
+    q.opts = t1Shuffle([plain, ...t1Shuffle(others).slice(0, 2)]); q.ans = [plain];
+    return q;
+  }
+  q.kind = 'fill'; q.ans = []; q.masks = []; q.hints = [];
+  let html = '';
+  parts.forEach(pt => {
+    if (typeof pt === 'string') { html += escapeHtml(pt); return; }
+    if (pt.extra && lv !== 'l') { html += escapeHtml(pt.ans); return; }
+    html += `<span class="ttm-gap">#${q.ans.length + 1}</span>`;
+    q.ans.push(pt.ans); q.masks.push(lv === 'd' ? ttmMask(pt.ans) : ''); q.hints.push(pt.hint);
+  });
+  q.ask = `<div class="ttm-q-ctx">${html}</div><div class="ttm-q-vi">💬 ${escapeHtml(vi)}</div>`;
+  return q;
+}
+// The second blow on an Ý-Mon: which field of the essay is it?
+function ttmQField(id) {
+  const M = TTM_MONS[id], right = M.off ? 'Lạc đề' : TTM_TYPES[M.type].name;
+  return { id, kind: 'choose', ask: `<div class="ttm-q-vi">💡 ${escapeHtml(M.gist)}</div><div class="ttm-q-ctx">Với đề này, ý trên thuộc lĩnh vực nào?</div>`,
+    opts: t1Shuffle(['Chính phủ', 'Gia đình', 'Kinh tế', 'Xã hội', 'Lạc đề']), ans: [right] };
+}
+function ttmQEvo(id, lv) {
+  const g = _ttm, M = TTM_MONS[id], s = ttmStage(id, g), next = M.stages[s + 1];
+  const ctx = escapeHtml(M.ctx).replace('____', `<s>${escapeHtml(M.stages[s].p)}</s> → <span class="ttm-gap">____</span>`);
+  const q = { id, evo: true, ask: `<div class="ttm-q-ctx">Nâng band: ${ctx}</div><div class="ttm-q-vi">💬 ${escapeHtml(next.vi)}</div>`, ans: [next.p] };
+  if (lv === 'a') { q.kind = 'choose'; q.opts = ttmOptions(next.p, [...M.bad, ...M.stages.map(x => x.p)]); }
+  else { q.kind = 'fill'; q.masks = [lv === 'd' ? ttmMask(next.p) : '']; q.hints = [next.vi]; }
+  return q;
+}
+
+/* ── Battles ── */
+function ttmActive() { return _ttm.team.find(m => m.hp > 0); }
+function ttmBattle(o) {
+  const g = _ttm;
+  g.mode = 'battle'; g.keys = {};
+  const B = g.B = { kind: o.kind, wrong: 0, busy: false, para: [] };
+  if (o.kind === 'wild') { B.foes = [o.foe]; B.hp = 2; B.max = 2; }
+  else if (o.kind === 'trainer') { B.foes = t1Shuffle(TTM_TU.filter(id => !TTM_MONS[id].evo)).sort((a, b) => (g.mast[a] || 0) - (g.mast[b] || 0)).slice(0, 3); B.hp = 1; B.max = 1; }
+  else { B.si = 0; B.hp = TTM_GYM_STEPS.length; B.max = B.hp; B.chosen = null; }
+  B.fi = 0;
+  if (!ttmActive()) { ttmBlackout(); return; }
+  const st = document.getElementById('ttm-stage');
+  st.classList.remove('flash'); void st.offsetWidth; st.classList.add('flash');
+  tsSfx(o.kind === 'gym' ? 'boss' : 'callout');
+  setTimeout(() => { ttmBattleView(); ttmBattleOpen(); }, 650);
+}
+function ttmFoeId() { const B = _ttm.B; return B.kind === 'gym' ? null : B.foes[B.fi]; }
+function ttmBattleView() {
+  const g = _ttm, B = g.B, el = document.getElementById('ttm-over'), me = ttmActive();
+  const foe = ttmFoeId();
+  const foeBox = B.kind === 'gym'
+    ? `<div class="ttm-hp"><b>Trưởng phái Lập Luận</b><span class="ttm-fam ttm-fam-y">Nhà thi đấu</span><div class="ttm-steps">${TTM_GYM_STEPS.map((s, i) => `<i class="${i < B.si ? 'done' : i === B.si ? 'now' : ''}">${s}</i>`).join('')}</div></div><canvas class="ttm-leader" width="72" height="108" id="ttm-leader"></canvas>`
+    : `<div class="ttm-hp"><b>${ttmName(foe, g)}</b>${ttmFamTag(foe)}${ttmChip(TTM_MONS[foe].type)}<div class="ttm-bar"><i style="width:${B.hp / B.max * 100}%"></i></div>${B.kind === 'trainer' ? `<small>Thợ Săn Từ · ${B.fi + 1}/${B.foes.length}</small>` : g.caught[foe] ? '<small>✓ Đã có trong Sổ Thú</small>' : ''}</div><canvas class="ttm-spr" id="ttm-foe" width="120" height="120" data-ttm="${ttmArt(foe, g)}"></canvas>`;
+  el.innerHTML = `<div class="ttm-bt ttm-bt-${B.kind}">
+    <div class="ttm-bt-foe">${foeBox}</div>
+    <div class="ttm-bt-me"><canvas class="ttm-spr ttm-back" id="ttm-me" width="120" height="120" data-ttm="${ttmArt(me.id, g)}"></canvas>
+      <div class="ttm-hp"><b>${ttmName(me.id, g)}</b>${ttmChip(TTM_MONS[me.id].type)}<div class="ttm-bar me"><i style="width:${me.hp / 20 * 100}%"></i></div><small>${Math.max(0, Math.round(me.hp))}/20</small></div></div>
+    ${B.kind === 'gym' ? `<div class="ttm-para" id="ttm-para">${B.para.length ? B.para.map(s => `<span>${escapeHtml(s)}</span>`).join(' ') : '<em>Đoạn văn của em sẽ hiện ở đây…</em>'}</div>` : ''}
+    <div class="ttm-box" id="ttm-box"></div>
+  </div>`;
+  ttmOverlay(true);
+  ttmPaintAll(el);
+  const L = document.getElementById('ttm-leader');
+  if (L) { const x = L.getContext('2d'); const draw = () => { x.clearRect(0, 0, 72, 108); t1dDraw(x, 'wizzard_m_idle_anim_f0', 36, 104, 3.4, true, null, true); }; if (T1D.ready) draw(); else setTimeout(draw, 300); }
+}
+async function ttmSay(html, ms) {
+  const box = document.getElementById('ttm-box');
+  if (!box) return;
+  box.innerHTML = `<div class="ttm-say">${html}</div>`;
+  await new Promise(r => {
+    const t = setTimeout(done, ms || 1500);
+    function done() { clearTimeout(t); box.removeEventListener('click', done); r(); }
+    box.addEventListener('click', done);
+  });
+}
+async function ttmBattleOpen() {
+  const g = _ttm, B = g.B, me = ttmActive();
+  if (B.kind === 'wild') await ttmSay(`Một <b>${ttmName(B.foes[0], g)}</b> hoang xuất hiện! <span class="ttm-small">(${TTM_FAM[TTM_MONS[B.foes[0]].fam].name})</span>`);
+  else if (B.kind === 'trainer') await ttmSay(`Thợ Săn Từ tung ra <b>${ttmName(B.foes[0], g)}</b>!`);
+  await ttmSay(`Tiến lên, <b>${ttmName(me.id, g)}</b>!`, 900);
+  ttmNextQ();
+}
+function ttmNextQ() {
+  const g = _ttm, B = g.B;
+  if (B.kind === 'gym') { ttmGymPick(); return; }
+  const id = B.foes[B.fi], M = TTM_MONS[id];
+  let q;
+  if (B.kind === 'trainer') q = ttmQTu(id, g.lv);
+  else if (M.fam === 't') q = B.hp === B.max ? ttmQTu(id, g.lv) : ttmQMean(id);
+  else q = B.hp === B.max ? ttmQY(id, g.lv) : ttmQField(id);
+  ttmAsk(q);
+}
+function ttmAsk(q) {
+  const g = _ttm, B = g.B, box = document.getElementById('ttm-box');
+  B.q = q;
+  const menu = B.kind === 'wild' ? `<div class="ttm-menu"><button onclick="ttmTeamView(true)">🎒 Đổi thú</button><button onclick="ttmRun()">🏃 Chạy</button></div>` : B.kind === 'trainer' ? '<div class="ttm-menu"><button onclick="ttmTeamView(true)">🎒 Đổi thú</button></div>' : '';
+  if (q.kind === 'choose') {
+    box.innerHTML = `${q.ask}<div class="ttm-opts-q ${q.long ? 'long' : ''}">${q.opts.map((o, i) => `<button onclick="ttmAnswer(${i})"><kbd>${i + 1}</kbd> ${escapeHtml(o)}</button>`).join('')}</div>${menu}`;
+  } else {
+    box.innerHTML = `${q.ask}<div class="ttm-fills">${q.ans.map((a, i) => `<label>${q.ans.length > 1 ? `<b>#${i + 1}</b>` : ''}<input id="ttm-in${i}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${escapeHtml(q.masks[i] || q.hints[i] || '')}" aria-label="Ô trống ${i + 1}: ${escapeHtml(q.hints[i] || '')}"><small>${escapeHtml(q.hints[i] || '')}</small></label>`).join('')}</div>
+      <div class="ttm-row"><button class="vb-start-btn" onclick="ttmAnswer()">⚔️ Ra chiêu <small>Enter</small></button></div>${menu}`;
+    const ins = box.querySelectorAll('input');
+    ins.forEach((inp, i) => inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (i < ins.length - 1 && !ins[i + 1].value) ins[i + 1].focus(); else ttmAnswer(); } }));
+    setTimeout(() => ins[0] && ins[0].focus(), 50);
+  }
+  box.onkeydown = null;
+  if (q.kind === 'choose') {
+    document.removeEventListener('keydown', B.numKey);
+    B.numKey = e => { const n = parseInt(e.key, 10); if (n >= 1 && n <= q.opts.length && _ttm && _ttm.B === B && B.q === q) ttmAnswer(n - 1); };
+    document.addEventListener('keydown', B.numKey);
+  }
+}
+async function ttmAnswer(i) {
+  const g = _ttm, B = g && g.B;
+  if (!B || B.busy || !B.q) return;
+  if (B.kind === 'train') { ttmTrainAnswer(i); return; }
+  const q = B.q;
+  let ok, near = false;
+  if (q.kind === 'choose') ok = raidNorm(q.opts[i]) === raidNorm(q.ans[0]);
+  else {
+    const got = q.ans.map((a, k) => (document.getElementById('ttm-in' + k) || {}).value || '');
+    if (got.some(v => !v.trim())) { document.getElementById('ttm-in' + got.findIndex(v => !v.trim()))?.focus(); return; }
+    ok = got.every((v, k) => raidNorm(v) === raidNorm(q.ans[k]) || (g.lv !== 'a' && raidNear(v, q.ans[k]) && (near = true)));
+  }
+  B.busy = true;
+  document.removeEventListener('keydown', B.numKey);
+  if (B.kind === 'gym') { await ttmGymAnswer(ok, near); B.busy = false; return; }
+  const me = ttmActive(), id = B.foes[B.fi];
+  if (ok) {
+    g.mast[id] = Math.min(4, (g.mast[id] || 0) + 1);
+    walEarn(1);
+    tsSfx('kill');
+    const mv = TTM_MONS[me.id].moves ? t1Pick(TTM_MONS[me.id].moves) : (ttmPhrase(me.id, g) || ttmName(me.id, g));
+    ttmHit('me');
+    await ttmSay(`<b>${ttmName(me.id, g)}</b> dùng “${escapeHtml(mv)}”! Trúng rồi!${near ? ' <span class="ttm-small">(gần đúng, chú ý chính tả: <b>' + escapeHtml(q.ans.join(' / ')) + '</b>)</span>' : ''}`, 1300);
+    B.hp--;
+    ttmBattleView();
+    if (B.hp > 0) { B.busy = false; ttmNextQ(); return; }
+    if (B.kind === 'wild') { await ttmCatch(id); return; }
+    // Trainer: next creature, or the win.
+    if (B.fi < B.foes.length - 1) {
+      B.fi++; B.hp = B.max;
+      ttmBattleView();
+      await ttmSay(`Thợ Săn Từ tung ra <b>${ttmName(B.foes[B.fi], g)}</b>!`, 1100);
+      B.busy = false; ttmNextQ(); return;
+    }
+    const first = !g.trainerWon;
+    g.trainerWon = true;
+    walEarn(first ? 15 : 5);
+    tsSfx('level');
+    await ttmSay(`Em đã thắng Thợ Săn Từ! +${first ? 15 : 5} 🪙`, 1800);
+    ttmEndBattle();
+    return;
+  }
+  // Wrong: the answer is shown, the foe strikes back, and guessing costs time.
+  g.mast[id] = Math.max(0, (g.mast[id] || 0) - 1);
+  B.wrong++;
+  tsSfx('wrong');
+  ttmShowAnswer(q);
+  await new Promise(r => setTimeout(r, 1600));
+  ttmHit('foe');
+  me.hp -= 7;
+  await ttmSay(`<b>${ttmName(id, g)}</b> phản đòn! ${ttmName(me.id, g)} mất 7 máu.`, 1200);
+  ttmBattleView();
+  if (me.hp <= 0) {
+    await ttmSay(`${ttmName(me.id, g)} kiệt sức rồi!`, 1100);
+    if (!ttmActive()) { ttmBlackout(); return; }
+    await ttmSay(`Tiến lên, <b>${ttmName(ttmActive().id, g)}</b>!`, 900);
+    ttmBattleView();
+  }
+  if (B.kind === 'wild' && B.wrong >= 2) {
+    g.fled[id] = 1;
+    await ttmSay(`<b>${ttmName(id, g)}</b> bỏ chạy mất! Lát nữa sẽ gặp lại trong cỏ.`, 1600);
+    ttmEndBattle();
+    return;
+  }
+  B.busy = false;
+  ttmNextQ();
+}
+function ttmShowAnswer(q) {
+  const box = document.getElementById('ttm-box');
+  if (!box) return;
+  box.insertAdjacentHTML('beforeend', `<div class="ttm-answer">❌ Đáp án: <b>${q.ans.map(escapeHtml).join(' · ')}</b></div>`);
+  box.querySelectorAll('button, input').forEach(b => { b.disabled = true; });
+}
+function ttmHit(who) {
+  const a = document.getElementById(who === 'me' ? 'ttm-me' : 'ttm-foe'), b = document.getElementById(who === 'me' ? 'ttm-foe' : 'ttm-me');
+  if (a) { a.classList.remove('lunge'); void a.offsetWidth; a.classList.add('lunge'); }
+  if (b) { b.classList.remove('hurt'); void b.offsetWidth; b.classList.add('hurt'); }
+}
+async function ttmCatch(id) {
+  const g = _ttm, M = TTM_MONS[id], had = !!g.caught[id];
+  const foe = document.getElementById('ttm-foe');
+  if (foe) foe.classList.add('caught');
+  tsSfx('ring');
+  await ttmSay('Ném TinTin Ball… 🔴', 1100);
+  delete g.fled[id];
+  if (!had) {
+    g.caught[id] = { stage: 0 };
+    g.team.push({ id, hp: 20 });
+    walEarn(5);
+    tsSfx('level');
+    const what = M.fam === 'y' ? escapeHtml(ttmPlainT(ttmYText(id).t)) : `<b>${escapeHtml(ttmPhrase(id, g))}</b> · ${escapeHtml(ttmVi(id, g))}`;
+    await ttmSay(`🎉 Bắt được <b>${ttmName(id, g)}</b>! Đã vào Sổ Thú. +5 🪙<div class="ttm-caughtcard">${ttmFamTag(id)}${ttmChip(M.type)}<div>${what}</div>${M.off ? '<div class="ttm-warn">⚠️ Ý này lạc đề với đề hôm nay.</div>' : ''}</div>`, 4200);
+  } else {
+    await ttmSay(`<b>${ttmName(id, g)}</b> đã có trong Sổ Thú rồi. Độ thuộc tăng lên ${g.mast[id] || 0}/4.`, 1600);
+  }
+  ttmEndBattle();
+}
+function ttmEndBattle() {
+  const g = _ttm;
+  if (g.B) document.removeEventListener('keydown', g.B.numKey);
+  g.B = null;
+  ttmOverlay(false);
+  g.mode = 'walk'; g.safe = 4; g.keys = {};
+  ttmDexCount();
+  ttmSave();
+}
+async function ttmRun() {
+  const g = _ttm;
+  if (!g.B || g.B.busy) return;
+  g.B.busy = true;
+  await ttmSay('Em đã chạy thoát.', 900);
+  ttmEndBattle();
+}
+async function ttmBlackout() {
+  const g = _ttm;
+  if (document.getElementById('ttm-box')) await ttmSay('Cả đội đã kiệt sức… Em chạy về Nhà Hồi Sức.', 1800);
+  g.team.forEach(m => { m.hp = 20; });
+  g.p.x = 20; g.p.y = 18; g.p.fx = 20; g.p.fy = 18; g.p.dir = 'u';
+  ttmEndBattle();
+  ttmTalk(['Nhà Hồi Sức: Đội của em đã hồi phục. Ôn lại Sổ Thú rồi thử lại nhé!']);
+}
+
+/* ── Gym: build the paragraph ── */
+function ttmGymPick() {
+  const g = _ttm, B = g.B, box = document.getElementById('ttm-box');
+  const mine = TTM_Y.filter(id => g.caught[id]);
+  B.q = null;
+  box.innerHTML = `<div class="ttm-q-ctx">Câu <b>${B.si + 1}/5</b>: đoạn văn cần ý nào tiếp theo?</div>
+    <div class="ttm-ycards">${mine.map(id => { const M = TTM_MONS[id], used = !M.off && TTM_GYM_STEPS.indexOf(M.steps[0]) < B.si; return `<button class="ttm-ycard" ${used ? 'disabled' : ''} onclick="ttmGymSend('${id}')">
+      <canvas width="56" height="56" data-ttm="${id}"></canvas><span><b>${M.name}</b>${ttmChip(M.type)}<small>${escapeHtml(M.gist)}</small></span></button>`; }).join('')}</div>`;
+  ttmPaintAll(box);
+}
+async function ttmGymSend(id) {
+  const g = _ttm, B = g.B, M = TTM_MONS[id], need = TTM_GYM_STEPS[B.si];
+  if (!B || B.busy) return;
+  B.busy = true;
+  const me = g.team.find(m => m.id === id);
+  if (M.off) {
+    tsSfx('miss');
+    await ttmSay(`<b>${M.name}</b> ra sân… Không có tác dụng! <b>Lạc đề</b>: đề hỏi về chăm sóc người già, không phải văn hoá.`, 2600);
+    await ttmGymHurt(me);
+  } else if (M.steps[0] !== need) {
+    tsSfx('miss');
+    await ttmSay(`Chưa tới lượt <b>${M.name}</b>. Câu ${B.si + 1} cần <b>${TTM_ROLE[need]}</b>.`, 2600);
+    await ttmGymHurt(me);
+  } else {
+    B.chosen = id;
+    if (me) { const i = g.team.indexOf(me); g.team.splice(i, 1); g.team.unshift(me); if (me.hp <= 0) me.hp = 8; }
+    ttmBattleView();
+    await ttmSay(`<b>${M.name}</b> ra sân! Viết câu của nó.`, 900);
+    B.busy = false;
+    ttmAsk(ttmQY(id, g.lv));
+    return;
+  }
+  B.busy = false;
+  if (g.B) ttmGymPick();
+}
+async function ttmGymHurt(mon) {
+  const g = _ttm, m = mon || ttmActive();
+  if (!m) return;
+  m.hp -= 6;
+  tsSfx('wrong');
+  ttmBattleView();
+  if (!g.team.some(x => TTM_MONS[x.id].fam === 'y' && x.hp > 0)) { ttmBlackout(); }
+}
+async function ttmGymAnswer(ok, near) {
+  const g = _ttm, B = g.B, id = B.chosen, M = TTM_MONS[id];
+  if (ok) {
+    tsSfx('kill');
+    g.mast[id] = Math.min(4, (g.mast[id] || 0) + 1);
+    walEarn(2);
+    B.para.push(ttmPlainT(ttmYText(id).t));
+    B.si++; B.hp--;
+    ttmHit('me');
+    ttmBattleView();
+    await ttmSay(`Siêu hiệu quả! Câu ${B.si}/5 đã vào đoạn văn.${near ? ' <span class="ttm-small">(gần đúng, chú ý chính tả)</span>' : ''}`, 1500);
+    if (B.si >= TTM_GYM_STEPS.length) { await ttmGymWin(); return; }
+    ttmGymPick();
+    return;
+  }
+  g.mast[id] = Math.max(0, (g.mast[id] || 0) - 1);
+  ttmShowAnswer(B.q);
+  await new Promise(r => setTimeout(r, 2200));
+  const me = g.team.find(m => m.id === id);
+  await ttmSay(`Trưởng phái Lập Luận phản bác! ${M.name} mất 6 máu. Thử viết lại câu này.`, 1500);
+  await ttmGymHurt(me);
+  if (!g.B) return;
+  if (me && me.hp <= 0) { await ttmSay(`${M.name} kiệt sức. Chọn lại Ý-Mon cho câu ${B.si + 1}.`, 1400); ttmGymPick(); return; }
+  ttmAsk(ttmQY(id, g.lv));
+}
+async function ttmGymWin() {
+  const g = _ttm, B = g.B, first = !g.badge;
+  g.badge = true;
+  tsSfx('level');
+  walEarn(first ? 30 : 10);
+  ttmSave();
+  // One sentence of the student's own with the two weakest phrases they own.
+  const own = TTM_TU.filter(id => g.caught[id]);
+  const pool = (own.length >= 2 ? own : TTM_TU.filter(id => !TTM_MONS[id].evo)).slice().sort((a, b) => (g.mast[a] || 0) - (g.mast[b] || 0));
+  const two = pool.slice(0, 2).map(id => ttmPhrase(id, g));
+  B.two = two;
+  const box = document.getElementById('ttm-box');
+  box.innerHTML = `<div class="ttm-win">🏅 <b>Thắng Nhà thi đấu Buổi 1!</b> ${first ? '+30' : '+10'} 🪙</div>
+    <div class="ttm-q-ctx">Bước cuối: viết <b>một câu của riêng em</b> (từ 8 chữ) có dùng cả hai cụm: ${two.map(t => `<b class="ttm-must">${escapeHtml(t)}</b>`).join(' và ')}</div>
+    <textarea id="ttm-own" rows="3" placeholder="Viết câu của em…" spellcheck="false"></textarea>
+    <div id="ttm-ownfb"></div>
+    <div class="ttm-row"><button class="vb-start-btn" onclick="ttmOwnSend()">Gửi câu</button></div>`;
+  B.busy = false;
+  setTimeout(() => document.getElementById('ttm-own')?.focus(), 50);
+}
+async function ttmOwnSend() {
+  const g = _ttm, B = g.B, ta = document.getElementById('ttm-own'), fb = document.getElementById('ttm-ownfb');
+  if (!B || !ta || B.busy) return;
+  const text = ta.value.trim(), low = ' ' + raidNorm(text) + ' ';
+  const missing = B.two.filter(t => !low.includes(' ' + raidNorm(t) + ' '));
+  const words = text.split(/\s+/).filter(Boolean).length;
+  if (missing.length) { fb.innerHTML = `<div class="ttm-answer">Câu chưa có: <b>${missing.map(escapeHtml).join(', ')}</b></div>`; return; }
+  if (words < 8) { fb.innerHTML = '<div class="ttm-answer">Câu hơi ngắn, viết ít nhất 8 chữ nhé.</div>'; return; }
+  B.busy = true;
+  try { await api('/api/game/feedback', { method: 'POST', body: JSON.stringify({ game: 'ttmon', kind: 'sentence', text }) }); } catch (e) {}
+  walEarn(5);
+  tsSfx('coin');
+  document.getElementById('ttm-box').innerHTML = `<div class="ttm-win">✅ Đã gửi câu cho giáo viên. +5 🪙</div>
+    <div class="ttm-q-ctx">Đoạn văn em vừa dựng:</div><div class="ttm-para done">${B.para.map(escapeHtml).join(' ')}</div>
+    <div class="ttm-row"><button class="vb-start-btn" onclick="ttmEndBattle(); ttmWorld()">Về thị trấn</button></div>`;
+}
+
+/* ── Team and Sổ Thú ── */
+function ttmTeamView(inBattle) {
+  const g = _ttm, el = inBattle ? document.getElementById('ttm-box') : document.getElementById('ttm-over');
+  if (!el || (inBattle && g.B && g.B.busy)) return;
+  if (!inBattle) { g.mode = 'menu'; ttmOverlay(true); }
+  el.innerHTML = `<div class="ttm-panel">
+    <div class="ttm-panel-h"><b>🎒 Đội của em</b><button class="ttm-x" onclick="${inBattle ? 'ttmNextQ()' : 'ttmMenuClose()'}">✕</button></div>
+    <p class="ttm-small">Chạm một con để cho nó ra sân trước.</p>
+    <div class="ttm-team">${g.team.map((m, i) => `<button class="ttm-mon ${i === 0 ? 'lead' : ''}" ${m.hp <= 0 ? 'disabled' : ''} onclick="ttmLead(${i}, ${!!inBattle})">
+      <canvas width="56" height="56" data-ttm="${ttmArt(m.id, g)}"></canvas><span><b>${ttmName(m.id, g)}</b>${ttmFamTag(m.id)}<div class="ttm-bar me"><i style="width:${Math.max(0, m.hp) / 20 * 100}%"></i></div><small>${Math.max(0, Math.round(m.hp))}/20</small></span></button>`).join('')}</div>
+  </div>`;
+  ttmPaintAll(el);
+}
+function ttmLead(i, inBattle) {
+  const g = _ttm, m = g.team.splice(i, 1)[0];
+  g.team.unshift(m);
+  tsSfx('equip');
+  if (inBattle) { ttmBattleView(); ttmNextQ(); } else ttmTeamView(false);
+}
+function ttmMenuClose() {
+  const g = _ttm;
+  ttmOverlay(false);
+  g.mode = 'walk';
+  ttmDexCount();
+  ttmSave();
+}
+function ttmDex(tab) {
+  const g = _ttm, el = document.getElementById('ttm-over');
+  tab = tab || ttmDex.tab || 'y';
+  ttmDex.tab = tab;
+  g.mode = 'menu';
+  const list = tab === 'y' ? TTM_Y : TTM_TU;
+  el.innerHTML = `<div class="ttm-panel">
+    <div class="ttm-panel-h"><b>📖 Sổ Thú</b><button class="ttm-x" onclick="ttmMenuClose()">✕</button></div>
+    <div class="ttm-tabs"><button class="${tab === 'y' ? 'on' : ''}" onclick="ttmDex('y')">💡 Ý-Mon · ý tưởng</button><button class="${tab === 't' ? 'on' : ''}" onclick="ttmDex('t')">🔤 Từ-Mon · cụm từ</button></div>
+    <p class="ttm-small">${TTM_FAM[tab].desc}</p>
+    <div class="ttm-dex">${list.map(id => {
+      const M = TTM_MONS[id], has = g.caught[id], m = g.mast[id] || 0;
+      if (!has) return `<div class="ttm-dexcard ttm-dex-${M.fam} locked"><canvas width="64" height="64" data-ttm="${ttmArt(id, g)}" data-sil="1"></canvas><b>???</b><small>Tìm ở ${M.fam === 'y' ? '🌼 cỏ hoa' : '🌿 cỏ xanh'}</small></div>`;
+      const body = M.fam === 'y'
+        ? `<small>${escapeHtml(M.gist)}</small><small class="ttm-en">${escapeHtml(ttmPlainT(ttmYText(id).t))}</small>`
+        : `<small class="ttm-en"><b>${escapeHtml(ttmPhrase(id, g))}</b></small><small>${escapeHtml(ttmVi(id, g))}</small>`;
+      const canEvo = M.evo && ttmStage(id, g) < 2;
+      return `<div class="ttm-dexcard ttm-dex-${M.fam}"><canvas width="64" height="64" data-ttm="${ttmArt(id, g)}"></canvas><b>${ttmName(id, g)}</b>${ttmChip(M.type)}${M.off ? '<span class="ttm-warn">Lạc đề</span>' : ''}${body}
+        <span class="ttm-stars" title="Độ thuộc">${'★'.repeat(m)}${'☆'.repeat(4 - m)}</span>
+        <button class="ttm-train" onclick="ttmTrain('${id}')">${canEvo ? '✨ Tiến hoá' : '🎯 Luyện'}</button></div>`;
+    }).join('')}</div>
+  </div>`;
+  ttmOverlay(true);
+  ttmPaintAll(el);
+}
+// One question from the Sổ Thú: right raises the mastery; for Vấn Đề it is the
+// band upgrade, and a right answer evolves it.
+function ttmTrain(id) {
+  const g = _ttm, M = TTM_MONS[id], el = document.getElementById('ttm-over');
+  const q = M.evo && ttmStage(id, g) < 2 ? ttmQEvo(id, g.lv) : M.fam === 'y' ? ttmQY(id, g.lv) : ttmQTu(id, g.lv);
+  g.B = { kind: 'train', busy: false, q };
+  el.innerHTML = `<div class="ttm-panel"><div class="ttm-panel-h"><b>${M.evo && q.evo ? '✨ Tiến hoá' : '🎯 Luyện'}: ${ttmName(id, g)}</b><button class="ttm-x" onclick="_ttm.B=null; ttmDex()">✕</button></div>
+    <div class="ttm-train-row"><canvas width="96" height="96" data-ttm="${ttmArt(id, g)}" id="ttm-trainspr"></canvas><div class="ttm-box" id="ttm-box"></div></div></div>`;
+  ttmPaintAll(el);
+  ttmAsk(q);
+}
+async function ttmTrainAnswer(i) {
+  const g = _ttm, B = g.B;
+  if (!B || B.busy) return;
+  const q = B.q, id = q.id, M = TTM_MONS[id];
+  let ok;
+  if (q.kind === 'choose') ok = raidNorm(q.opts[i]) === raidNorm(q.ans[0]);
+  else ok = q.ans.every((a, k) => { const v = (document.getElementById('ttm-in' + k) || {}).value || ''; return raidNorm(v) === raidNorm(a) || (g.lv !== 'a' && raidNear(v, a)); });
+  B.busy = true;
+  document.removeEventListener('keydown', B.numKey);
+  if (ok) {
+    g.mast[id] = Math.min(4, (g.mast[id] || 0) + 1);
+    walEarn(1);
+    if (q.evo) {
+      g.caught[id].stage = ttmStage(id, g) + 1;
+      tsSfx('level');
+      const sp = document.getElementById('ttm-trainspr');
+      if (sp) { sp.classList.add('evolve'); setTimeout(() => { sp.dataset.ttm = ttmArt(id, g); ttmPaintAll(sp.parentElement); }, 700); }
+      await ttmSay(`✨ ${M.stages[g.caught[id].stage - 1].name} tiến hoá thành <b>${ttmName(id, g)}</b>! Cụm mới: <b>${escapeHtml(ttmPhrase(id, g))}</b>`, 2600);
+    } else { tsSfx('coin'); await ttmSay(`Đúng rồi! Độ thuộc ${g.mast[id]}/4.`, 1100); }
+  } else {
+    g.mast[id] = Math.max(0, (g.mast[id] || 0) - 1);
+    tsSfx('wrong');
+    ttmShowAnswer(q);
+    await new Promise(r => setTimeout(r, 2200));
+  }
+  g.B = null;
+  ttmSave();
+  ttmDex();
+}
+/* ── Góp ý trò chơi ── on the games hub: students write, teachers read. */
+const GFB_GAMES = { ttmon: 'TinTinMon', survive: 'Sinh tồn ghép câu', rain: 'Mưa pattern', raid: 'Hầm ngục chữ', shoot: 'Bắn Chữ', tower: 'Xây tháp', t1: 'Game Task 1 khác', other: 'Khác' };
+function gfbStaff() { return !!(currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')); }
+async function gfbRender() {
+  const el = document.getElementById('games-feedback');
+  if (!el) return;
+  el.innerHTML = `<h3>💬 Góp ý trò chơi</h3>
+    <p>Trò nào hay, trò nào khó, chỗ nào bị lỗi, em muốn thêm gì… Viết ở đây, giáo viên sẽ đọc hết.</p>
+    <div class="gfb-form">
+      <label class="sr-only" for="gfb-game">Trò chơi</label>
+      <select id="gfb-game">${Object.entries(GFB_GAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+      <label class="sr-only" for="gfb-text">Góp ý</label>
+      <textarea id="gfb-text" maxlength="1000" placeholder="Ví dụ: TinTinMon câu hỏi Ý-Mon hơi dài, em muốn có thêm…"></textarea>
+      <button class="vb-start-btn" onclick="gfbSend()">Gửi góp ý</button>
+      <div id="gfb-msg" class="gfb-msg" role="status"></div>
+    </div>
+    ${gfbStaff() ? '<div class="gfb-list" id="gfb-list"><em>Đang tải góp ý của học sinh…</em></div>' : ''}`;
+  if (gfbStaff()) gfbList();
+}
+async function gfbSend() {
+  const ta = document.getElementById('gfb-text'), msg = document.getElementById('gfb-msg'), text = (ta.value || '').trim();
+  if (text.length < 3) { msg.textContent = 'Em viết thêm một chút nhé.'; ta.focus(); return; }
+  try {
+    await api('/api/game/feedback', { method: 'POST', body: JSON.stringify({ game: document.getElementById('gfb-game').value, kind: 'feedback', text }) });
+    ta.value = '';
+    msg.textContent = '✅ Đã gửi. Cảm ơn em!';
+    if (gfbStaff()) gfbList();
+  } catch (e) { msg.textContent = 'Chưa gửi được: ' + (e.message || 'lỗi mạng') + '. Thử lại sau nhé.'; }
+}
+async function gfbList() {
+  const el = document.getElementById('gfb-list');
+  if (!el) return;
+  try {
+    const r = await api('/api/game/feedback');
+    const items = r.items || [];
+    el.innerHTML = `<h3>📥 Góp ý và câu viết của học sinh (${items.length})</h3>` + (items.length ? items.map(f => `<div class="gfb-item ${f.kind === 'sentence' ? 'sentence' : ''}">
+      <header><b>${escapeHtml(f.name || 'Học sinh')}</b><span>${escapeHtml(GFB_GAMES[f.game] || f.game)}</span><span>${f.kind === 'sentence' ? '✍️ câu tự viết' : '💬 góp ý'}</span><span>${new Date(f.at).toLocaleString('vi-VN')}</span></header>
+      <div>${escapeHtml(f.text)}</div></div>`).join('') : '<em>Chưa có góp ý nào.</em>');
+  } catch (e) { el.innerHTML = '<em>Không tải được góp ý.</em>'; }
+}
+// TTMON END

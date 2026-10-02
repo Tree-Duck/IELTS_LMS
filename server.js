@@ -4360,6 +4360,32 @@ app.post('/api/game/score', authenticate, (req, res) => {
   }
 });
 
+// Game feedback from the games hub, and the sentence a student writes at the
+// end of a TinTinMon gym. Students post; teachers and admins read.
+const FEEDBACK_GAMES = ['ttmon', 'survive', 'rain', 'raid', 'shoot', 'tower', 't1', 'other'];
+const FEEDBACK_KINDS = ['feedback', 'sentence'];
+const FEEDBACK_DAY_MAX = 30;
+app.post('/api/game/feedback', authenticate, (req, res) => {
+  try {
+    const { game, kind } = req.body || {};
+    const text = String((req.body && req.body.text) || '').trim().slice(0, 1000);
+    if (!FEEDBACK_GAMES.includes(game) || !FEEDBACK_KINDS.includes(kind)) return res.status(400).json({ error: 'Unknown game' });
+    if (text.length < 3) return res.status(400).json({ error: 'Góp ý quá ngắn' });
+    if (db.countGameFeedbackToday(req.user.id) >= FEEDBACK_DAY_MAX) return res.status(429).json({ error: 'Hôm nay em đã gửi nhiều rồi, mai gửi tiếp nhé' });
+    db.addGameFeedback({ user_id: req.user.id, game, kind, text });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save feedback' });
+  }
+});
+app.get('/api/game/feedback', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    res.json({ items: db.listGameFeedback(200) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load feedback' });
+  }
+});
+
 // Hầm ngục chữ: stars per lesson dungeon and level, 0 to 3. The key is the
 // lesson number for Dũng sĩ, plus "a" for Học việc or "l" for Huyền thoại.
 app.get('/api/game/raid', authenticate, (req, res) => {
