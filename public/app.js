@@ -28261,9 +28261,10 @@ function t1hHurt(dmg, fx, fy) {
   if (st) { st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); }
   if (p.hp <= 0) { p.hp = 0; t1hOver(false); }
 }
-function t1hModal(html) {
+// The step cards cover the screen; with a chart, it sits large on the left.
+function t1hModal(html, side) {
   const el = document.getElementById('h-modal');
-  el.innerHTML = `<div class="t1h-card">${html}</div>`;
+  el.innerHTML = side ? `<div class="t1h-card t1h-card--split"><div class="t1h-side-chart">${side}</div><div class="t1h-main">${html}</div></div>` : `<div class="t1h-card">${html}</div>`;
   el.classList.remove('hidden');
   return el;
 }
@@ -28306,9 +28307,13 @@ function t1hOrderRender(fb) {
     <div class="t1h-pool">${o.pool.map(chip).join('') || '<span class="t1h-bag-tip">Đã đặt hết cụm.</span>'}</div>
     ${o.trash.length ? `<div class="t1h-trash"><span>🗑 Đã bỏ:</span>${o.trash.map(bi => `<button class="t1h-chip" onclick="t1hOrderRestore(${bi})" title="Lấy lại">${escapeHtml(g.bag[bi].text)}</button>`).join('')}</div>` : ''}
     <div id="h-ordfb">${fb || ''}</div>
-    <div class="t1h-row" id="h-ordbtn"><button class="vb-start-btn" onclick="t1hOrderCheck()"${full ? '' : ' disabled'}>Kiểm tra → <small>Enter</small></button></div>`);
+    <div class="t1h-row" id="h-ordbtn"><button class="vb-start-btn" onclick="t1hOrderCheck()"${full ? '' : ' disabled'}>Kiểm tra → <small>Enter</small></button></div>`, t1hOrdSide());
   g.keyPick = i => { if (o.pool[i] !== undefined) t1hOrderPut(o.pool[i]); };
   g.answered = full; g.next = t1hOrderCheck;
+}
+function t1hOrdSide() {
+  const sample = T1_SAMPLES.find(x => x.id === _t1.S.img);
+  return sample ? `<div class="t1h-side-h">📊 ${escapeHtml(sample.type)}</div>${sample.chart()}` : '';
 }
 function t1hOrderPut(bi) {
   const o = _t1.ord, i = o.slots.indexOf(null);
@@ -28448,8 +28453,36 @@ function t1hPickItem(items) {
   for (const it of items) { r -= wt(it); if (r <= 0) return it; }
   return items[0];
 }
-const T1H_QLABEL = ['Chọn nghĩa', 'Chọn cụm tiếng Anh', 'Điền chữ còn thiếu', 'Cụm nào khớp biểu đồ?', 'Gõ cả cụm'];
-function t1hMask(en) { return en.split(' ').map(w => w.length < 2 ? w : w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_')).join(' '); }
+// A level up is two steps on one phrase: pick (by mastery: the meaning, the
+// English, or the one the chart supports), then type it into a gap in a
+// sentence from a Task 1 model essay, with its meaning and a hint by level.
+const T1H_QLABEL = { vi: 'Bước 1 · Chọn nghĩa', en: 'Bước 1 · Chọn cụm tiếng Anh', chart: 'Bước 1 · Cụm nào khớp biểu đồ?' };
+// Too close to the answer to be a fair wrong option: shares half its words.
+function t1hNear(a, b) {
+  const A = new Set(String(a).toLowerCase().split(/\s+/)), B = String(b).toLowerCase().split(/\s+/).filter(w => w.length > 1);
+  return B.length > 0 && B.filter(w => A.has(w)).length / Math.min(A.size, B.length) >= 0.5;
+}
+function t1hBare(en) { return String(en).replace(/[.,;:]+$/, '').trim(); }
+function t1hReEsc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+// The gap hint: Học việc sees each word's first letter and length, Dũng sĩ
+// only first letters, Huyền thoại nothing. A second try opens one more word.
+function t1hHint(en, extra) {
+  const words = t1hBare(en).split(' ');
+  if (words.length === 1 && extra) { const w = words[0], n = Math.ceil(w.length / 2); return w.slice(0, n) + w.slice(n).replace(/[a-z0-9]/gi, '_'); }
+  if (_t1Lv === 'l' && !extra) return '';
+  const part = w => w.length < 2 ? w : _t1Lv === 'a' ? w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_') : w[0] + '…';
+  return words.map((w, i) => i < extra ? w : part(w)).join(' ');
+}
+// A Task 1 sentence holding the phrase: a model essay of this block (the
+// current chart first), else the run's own sentence, else the card example.
+function t1hClozeSrc(it) {
+  const g = _t1, bare = t1hBare(it.en), re = new RegExp('(^|[^A-Za-z])(' + t1hReEsc(bare) + ')(?=[^A-Za-z]|$)', 'i');
+  const cur = (g.S || g.lastS).img, find = s => { const m = s.match(re); return m ? { at: m.index + m[1].length, len: m[2].length } : null; };
+  const samples = T1_SAMPLES.filter(s => s.block === _t1Block && s.essay).sort((a, b) => (b.id === cur) - (a.id === cur));
+  for (const s of samples) for (const para of s.essay) for (const sent of para.split(/(?<=[.!?])\s+/)) { const f = find(sent); if (f) return { s: sent, sample: s, ...f }; }
+  const own = it.kind === 'chunk' ? it.S.c.join(' ') : it.ex || '', f = find(own);
+  return f ? { s: own, sample: it.kind === 'chunk' ? T1_SAMPLES.find(x => x.id === it.S.img) : null, own: true, ...f } : null;
+}
 function t1hLevelUp() {
   const g = _t1;
   const items = t1hItems();
@@ -28463,82 +28496,112 @@ function t1hLevelUp() {
   if (!items.length) { t1hCards(3, false); return; }
   const it = t1hPickItem(items), m = t1hM(it.key).m;
   g.lastQ = it.key; g.asked++;
-  let type = ['vi', 'en', 'fill', 'chart', 'type'][m];
-  const blankRe = it.ex ? new RegExp(it.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
+  let type = ['vi', 'en', 'chart', 'en', 'chart'][m];
+  const blankRe = it.ex ? new RegExp(t1hReEsc(it.en), 'i') : null;
   if (type === 'chart' && it.kind === 'card' && !(blankRe && blankRe.test(it.ex))) type = 'en';
   const others = items.filter(x => x.key !== it.key);
-  const q = g.q = { it, type, m };
-  const sample = it.kind === 'chunk' ? T1_SAMPLES.find(s => s.id === it.S.img) : null;
-  let body = '';
-  if (type === 'vi' || type === 'en' || type === 'chart') {
-    let right, wrong;
-    if (type === 'vi') { right = it.vi; wrong = t1Shuffle([...new Set(others.map(x => x.vi))].filter(v => v && v !== right)).slice(0, 3); }
-    else {
-      right = it.en;
-      const traps = it.kind !== 'chunk' ? [] : type === 'chart' ? [...it.S.fake, ...it.S.bad] : it.S.fake;
-      const pool = [...t1Shuffle(traps).slice(0, type === 'chart' ? 3 : 1), ...t1Shuffle(others.map(x => x.en))];
-      wrong = [...new Set(pool)].filter(x => x !== right).slice(0, 3);
-    }
-    q.opts = t1Shuffle([right, ...wrong]); q.right = right;
-    let prompt;
-    if (type === 'vi') prompt = `<p class="t1h-q">Cụm này nghĩa là gì?</p><div class="t1h-big">${escapeHtml(it.en)}</div>`;
-    else if (type === 'en') prompt = `<p class="t1h-q">Chọn cụm tiếng Anh có nghĩa:</p><div class="t1h-big t1h-big--vi">${escapeHtml(it.vi)}</div>${it.pic ? `<div class="t1-fc-pic">${it.pic}</div>` : sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}`;
-    else prompt = it.kind === 'chunk'
-      ? `<p class="t1h-q">Nhìn biểu đồ: cụm nào điền vào chỗ trống mà <b>đúng cả thông tin lẫn ngữ pháp</b>?</p>${sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}<p class="t1h-cloze">${it.S.c.map((c, j) => j === it.i ? '<b>______</b>' : escapeHtml(c)).join(' ')}</p>`
-      : `<p class="t1h-q">Cụm nào điền vào chỗ trống?</p><p class="t1h-cloze">${escapeHtml(it.ex).replace(new RegExp(escapeHtml(it.en).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '<b>______</b>')}</p><p class="t1h-vi">${escapeHtml(it.vi)}</p>`;
-    body = `${prompt}<div class="t1h-opts">${q.opts.map((o, i) => `<button class="t1h-opt" onclick="t1hQuizPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(o)}</button>`).join('')}</div>`;
-    g.keyPick = i => t1hQuizPick(i);
-  } else {
-    body = `<p class="t1h-q">${type === 'fill' ? 'Điền chữ còn thiếu:' : 'Gõ cụm tiếng Anh có nghĩa:'}</p><div class="t1h-big t1h-big--vi">${escapeHtml(it.vi)}</div>
-      ${type === 'fill' ? `<div class="t1h-mask">${escapeHtml(t1hMask(it.en))}</div>` : sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}
-      <input id="h-qin" class="t1h-in" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Gõ tiếng Anh…" aria-label="Gõ cụm tiếng Anh">
-      <div class="t1h-row"><button class="vb-start-btn" onclick="t1hQuizType()">Kiểm tra → <small>Enter</small></button></div>`;
-    g.keyPick = () => {};
+  const q = g.q = { it, type, m, step: 1, ok1: false, tries: 0, cz: t1hClozeSrc(it) };
+  q.sample = (q.cz && q.cz.sample) || T1_SAMPLES.find(s => s.id === (it.kind === 'chunk' ? it.S.img : (g.S || g.lastS).img));
+  let right, wrong;
+  if (type === 'vi') { right = it.vi; wrong = t1Shuffle([...new Set(others.map(x => x.vi))].filter(v => v && v !== right && !t1hNear(v, right))).slice(0, 3); }
+  else {
+    right = it.en;
+    const traps = it.kind !== 'chunk' ? [] : type === 'chart' ? [...it.S.fake, ...it.S.bad] : it.S.fake;
+    const pool = [...t1Shuffle(traps).slice(0, type === 'chart' ? 3 : 1), ...t1Shuffle(others.map(x => x.en).filter(x => !t1hNear(x, right) && !t1hNear(others.find(o => o.en === x).vi, it.vi)))];
+    wrong = [...new Set(pool)].filter(x => x !== right).slice(0, 3);
   }
+  q.opts = t1Shuffle([right, ...wrong]); q.right = right;
+  let prompt;
+  if (type === 'vi') prompt = `<p class="t1h-q">Cụm này nghĩa là gì?</p><div class="t1h-big">${escapeHtml(it.en)}</div>`;
+  else if (type === 'en') prompt = `<p class="t1h-q">Chọn cụm tiếng Anh có nghĩa:</p><div class="t1h-big t1h-big--vi">${escapeHtml(it.vi)}</div>${it.pic ? `<div class="t1-fc-pic">${it.pic}</div>` : ''}`;
+  else prompt = it.kind === 'chunk'
+    ? `<p class="t1h-q">Nhìn biểu đồ: cụm nào điền vào chỗ trống mà <b>đúng cả thông tin lẫn ngữ pháp</b>?</p><p class="t1h-cloze">${it.S.c.map((c, j) => j === it.i ? '<b>______</b>' : escapeHtml(c)).join(' ')}</p>`
+    : `<p class="t1h-q">Cụm nào điền vào chỗ trống?</p><p class="t1h-cloze">${escapeHtml(it.ex).replace(new RegExp(t1hReEsc(escapeHtml(it.en)), 'i'), '<b>______</b>')}</p><p class="t1h-vi">${escapeHtml(it.vi)}</p>`;
   t1hModal(`<div class="t1h-lv">⬆️ Lên cấp ${g.level + 1}!</div>
-    <div class="t1h-qhead"><span>${T1H_QLABEL[['vi', 'en', 'fill', 'chart', 'type'].indexOf(type)]}</span><span class="t1h-mast" title="Độ thuộc cụm này">${[0, 1, 2, 3].map(k => `<i class="${k < m ? 'on' : ''}"></i>`).join('')}</span></div>
-    ${body}<div id="h-qfb"></div>`);
-  const inp = document.getElementById('h-qin');
-  if (inp) { inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t1hQuizType(); } }); setTimeout(() => inp.focus(), 60); }
+    ${t1hQHead(T1H_QLABEL[type], m)}
+    ${prompt}<div class="t1h-opts">${q.opts.map((o, i) => `<button class="t1h-opt" onclick="t1hQuizPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(o)}</button>`).join('')}</div>
+    <div id="h-qfb"></div>`, t1hQSide(q));
+  g.keyPick = i => t1hQuizPick(i);
+}
+function t1hQHead(label, m) {
+  return `<div class="t1h-qhead"><span>${label}</span><span class="t1h-mast" title="Độ thuộc cụm này">${[0, 1, 2, 3].map(k => `<i class="${k < m ? 'on' : ''}"></i>`).join('')}</span></div>`;
+}
+// The big chart beside the question: the essay's chart, or the card's picture.
+function t1hQSide(q) {
+  if (q.sample) return `<div class="t1h-side-h">📊 ${escapeHtml(q.sample.type)}</div>${q.sample.chart()}`;
+  return q.it.pic ? `<div class="t1-fc-pic">${q.it.pic}</div>` : '';
 }
 function t1hQuizPick(i) {
   const g = _t1, q = g.q;
-  if (!q || q.done || !q.opts[i]) return;
-  document.querySelectorAll('.t1h-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', q.opts[j] === q.right); b.classList.toggle('no', j === i && q.opts[j] !== q.right); });
-  t1hQuizEnd(q.opts[i] === q.right, q.opts[i]);
+  if (!q || q.step !== 1 || q.picked || !q.opts[i]) return;
+  q.picked = q.opts[i];
+  q.ok1 = q.picked === q.right;
+  document.querySelectorAll('.t1h-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', q.opts[j] === q.right); b.classList.toggle('no', j === i && !q.ok1); });
+  const it = q.it, trap = it.kind === 'chunk' && !q.ok1 && it.S.t[q.picked];
+  const why = trap ? (it.S.bad.includes(q.picked) ? trap[1] : T1H_FAKE_WHY) : '';
+  tsSfx(q.ok1 ? 'coin' : 'wrong');
+  document.getElementById('h-qfb').innerHTML = `<div class="t1-fb ${q.ok1 ? 'ok' : 'no'}"><strong>${q.ok1 ? '✓ Đúng!' : 'Chưa đúng. Đáp án: ' + escapeHtml(q.right)}</strong><span>${escapeHtml(it.en)} · ${escapeHtml(it.vi)}</span>${why ? `<span>“${escapeHtml(q.picked)}”: ${escapeHtml(why)}</span>` : ''}</div>
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1hCloze()">Bước 2 · Điền vào câu → <small>Enter</small></button></div>`;
+  document.getElementById('h-qfb').scrollIntoView({ block: 'nearest' });
+  g.answered = true; g.next = t1hCloze; g.keyPick = () => {};
 }
-function t1hQuizType() {
+// Step 2: the phrase is a gap in a model sentence; the student types it.
+function t1hCloze() {
+  const g = _t1, q = g.q;
+  if (!q || q.step !== 1) return;
+  q.step = 2; q.tries = 0;
+  g.answered = false; g.next = () => {}; g.keyPick = () => {};
+  const it = q.it, cz = q.cz, hint = t1hHint(it.en, 0);
+  const gap = `<input id="h-qin" class="t1h-gap" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" style="width:${Math.max(7, t1hBare(it.en).length + 2)}ch" aria-label="Gõ cụm còn thiếu">`;
+  t1hModal(`<div class="t1h-lv">✍️ Điền vào câu</div>
+    ${t1hQHead(cz && !cz.own ? 'Bước 2 · Câu trong bài mẫu Task 1' : 'Bước 2 · Gõ cụm vào câu', q.m)}
+    ${cz ? `<p class="t1h-cloze t1h-cloze--big">${escapeHtml(cz.s.slice(0, cz.at))}${gap}${escapeHtml(cz.s.slice(cz.at + cz.len))}</p>` : `<p class="t1h-q">Gõ cụm tiếng Anh:</p>${gap}`}
+    <p class="t1h-vi">🇻🇳 Cụm cần điền: <b>${escapeHtml(it.vi)}</b></p>
+    <div class="t1h-mask" id="h-qhint">${hint ? escapeHtml(hint) : '<small>Huyền thoại: không có gợi ý</small>'}</div>
+    <div id="h-qfb"></div>
+    <div class="t1h-row" id="h-qbtn"><button class="vb-start-btn" onclick="t1hClozeCheck()">Kiểm tra → <small>Enter</small></button></div>`, t1hQSide(q));
+  const inp = document.getElementById('h-qin');
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t1hClozeCheck(); } });
+  setTimeout(() => inp.focus(), 60);
+}
+function t1hClozeCheck() {
   const g = _t1, q = g.q, inp = document.getElementById('h-qin');
-  if (!q || q.done || !inp || !inp.value.trim()) return;
-  inp.disabled = true;
-  t1hQuizEnd(t1TypeNorm(inp.value) === t1TypeNorm(q.it.en), inp.value.trim());
+  if (!q || q.step !== 2 || q.done || !inp || !inp.value.trim()) return;
+  q.tries++;
+  if (t1TypeNorm(inp.value) === t1TypeNorm(t1hBare(q.it.en))) { inp.classList.add('ok'); inp.disabled = true; t1hQuizEnd(true); return; }
+  tsSfx('wrong');
+  if (q.tries === 1) {
+    // One more try, with one more word open.
+    document.getElementById('h-qhint').textContent = t1hHint(q.it.en, 1);
+    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb no"><strong>Chưa đúng, thử lại lần nữa.</strong><span>Gợi ý đã mở thêm. Em gõ: <s>${escapeHtml(inp.value.trim())}</s></span></div>`;
+    inp.select();
+    return;
+  }
+  inp.classList.add('no'); inp.disabled = true;
+  t1hQuizEnd(false);
 }
-function t1hQuizEnd(ok, chosen) {
-  const g = _t1, q = g.q, it = q.it;
+function t1hQuizEnd(ok2) {
+  const g = _t1, q = g.q, it = q.it, full = q.ok1 && ok2;
   q.done = true;
   g.exp = Math.max(0, g.exp - g.need);
-  let fb;
-  if (ok) {
+  t1hMastSet(it.key, full ? q.m + 1 : q.ok1 || ok2 ? q.m : q.m - 1, !full);
+  if (full) {
     g.quizRight++; g.right++;
     g.score += 20 + q.m * 5;
     g.coins += T1_LEVELS[_t1Lv].coin * walMult() * 0.6;
-    t1hMastSet(it.key, q.m + 1, false);
     tsSfx('coin');
-    fb = `<div class="t1-fb ok"><strong>✓ Đúng! Độ thuộc ${Math.min(4, q.m + 1)}/4</strong><span>${escapeHtml(it.en)} · ${escapeHtml(it.vi)}</span></div>`;
   } else {
-    t1hMastSet(it.key, q.m - 1, true);
-    t1hNoteWeak(it.en, it.vi, it.kind === 'chunk' ? it.S.c.join(' ') : it.ex);
+    g.score += ok2 ? 8 : 0;
+    t1hNoteWeak(it.en, it.vi, q.cz ? q.cz.s : it.kind === 'chunk' ? it.S.c.join(' ') : it.ex);
     g.due.push({ key: it.key, at: g.level + 2 + (Math.random() < 0.5 ? 1 : 0) });
-    tsSfx('wrong');
-    // Explain: the trap's reason if a trap was picked, then the right phrase in its sentence.
-    const trap = it.kind === 'chunk' && it.S.t[chosen];
-    const why = trap ? (it.S.bad.includes(chosen) ? trap[1] : T1H_FAKE_WHY) : '';
-    const ex = escapeHtml(it.ex || '');
-    fb = `<div class="t1-fb no"><strong>Chưa đúng. Đáp án: ${escapeHtml(it.en)}</strong><span>${escapeHtml(it.vi)}</span>${why ? `<span>“${escapeHtml(chosen)}”: ${escapeHtml(why)}</span>` : ''}<span class="t1h-ex">${it.kind === 'chunk' ? escapeHtml(it.S.c.join(' ')) + '<br><i>' + escapeHtml(it.S.vi) + '</i>' : ex}</span><span>Cụm này sẽ quay lại sau 2–3 cấp. Lần này chỉ được nâng cấp nhỏ.</span></div>`;
   }
-  document.getElementById('h-qfb').innerHTML = fb + `<div class="t1h-row"><button class="vb-start-btn" onclick="t1hCards(${ok ? 3 : 2}, ${!ok})">${ok ? 'Chọn chiêu →' : 'Chọn nâng cấp nhỏ →'} <small>Enter</small></button></div>`;
+  // The whole sentence with the phrase in bold, and its meaning when it is the run's own.
+  const cz = q.cz, sent = cz ? `${escapeHtml(cz.s.slice(0, cz.at))}<b>${escapeHtml(cz.s.slice(cz.at, cz.at + cz.len))}</b>${escapeHtml(cz.s.slice(cz.at + cz.len))}` : `<b>${escapeHtml(t1hBare(it.en))}</b>`;
+  const head = full ? `✓ Đúng cả hai bước! Độ thuộc ${Math.min(4, q.m + 1)}/4` : ok2 ? 'Bước 2 đúng, bước 1 sai: giữ nguyên độ thuộc' : q.ok1 ? `Bước 1 đúng, bước 2 sai. Đáp án: ${escapeHtml(t1hBare(it.en))}` : `Chưa đúng. Đáp án: ${escapeHtml(t1hBare(it.en))}`;
+  document.getElementById('h-qfb').innerHTML = `<div class="t1-fb ${full ? 'ok' : 'no'}"><strong>${head}</strong><span class="t1h-ex">${sent}</span>${cz && cz.own && it.kind === 'chunk' ? `<span><i>${escapeHtml(it.S.vi)}</i></span>` : ''}${full ? '' : '<span>Cụm này sẽ quay lại sau 2–3 cấp. Lần này chỉ được nâng cấp nhỏ.</span>'}</div>`;
+  document.getElementById('h-qbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hCards(${full ? 3 : 2}, ${!full})">${full ? 'Chọn chiêu →' : 'Chọn nâng cấp nhỏ →'} <small>Enter</small></button>`;
   document.getElementById('h-qfb').scrollIntoView({ block: 'nearest' });
-  g.answered = true; g.next = () => t1hCards(ok ? 3 : 2, !ok); g.keyPick = () => {};
+  g.answered = true; g.next = () => t1hCards(full ? 3 : 2, !full); g.keyPick = () => {};
 }
 
 /* ── Upgrade cards ── */
@@ -28758,10 +28821,9 @@ function t1hFinal(won) {
   const el = t1hModal(`<div class="t1h-lv">${won ? '🏆 Hạ cả 3 Trùm!' : '🛡️ Hết máu rồi'}</div>
     <p class="t1h-q">Trước khi xem kết quả: viết <b>1 câu tiếng Anh của riêng em</b> về biểu đồ này, dùng cả hai cụm em còn yếu:</p>
     <div class="t1h-pair">${pair.map(it => `<span><b>${escapeHtml(it.en.replace(/[.,;:]+$/, ''))}</b><i>${escapeHtml(it.vi)}</i></span>`).join('')}</div>
-    ${sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}
     <textarea id="h-own" rows="3" spellcheck="false" autocomplete="off" placeholder="Viết câu của em…" aria-label="Câu của em"></textarea>
     <div id="h-ownfb"></div>
-    <div class="t1h-row"><button class="vb-start-btn" onclick="t1hFinalCheck()">Gửi câu cho thầy cô →</button></div>`);
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1hFinalCheck()">Gửi câu cho thầy cô →</button></div>`, sample ? `<div class="t1h-side-h">📊 ${escapeHtml(sample.type)}</div>${sample.chart()}` : '');
   el.querySelector('textarea').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); t1hFinalCheck(); } });
   setTimeout(() => document.getElementById('h-own')?.focus(), 60);
 }
