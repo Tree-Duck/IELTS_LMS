@@ -23578,7 +23578,7 @@ const T1_BLOCKS = {
     crit: [['Xếp hạng', 'the highest, ranked second, followed by'], ['Chia đoạn thân bài', 'nhóm lớn và nhóm nhỏ, bên nào cao hơn ở mục nào'], ['Bản đồ', 'demolished, converted into, extended, relocated'], ['Quy trình', 'câu bị động và từ nối: once, following this, finally']],
     lv: { a: 'nhóm cách xa, 3 thay đổi, bị động', d: 'gấp mấy lần, di dời, mở rộng', l: 'nhóm sát nhau, just over / under, having been' },
     fc: 'Phân số và tỉ lệ, xếp hạng, động từ bản đồ, bị động và từ nối quy trình.',
-    games: ['map', 'mapwrite', 'group', 'survive', 'process'], warm: ['compare'] },
+    games: ['map', 'group', 'survive', 'process'], warm: ['compare'] },
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
@@ -23589,8 +23589,7 @@ const T1_GAMES = {
   build:   { icon: '🧩', name: 'Ghép câu số liệu',       desc: 'Ghép từng cụm thành câu. Cẩn thận bẫy to hay by, number hay amount.', start: 't1BuildStart()' },
   group:   { icon: '🧩', name: 'Chia đoạn thân bài',     desc: 'Biểu đồ có đủ số liệu. Chia các mục thành 2 đoạn thân bài: nhóm lớn và nhóm nhỏ, hoặc bên nào cao hơn ở mục nào. Rồi chọn câu mở đoạn.', start: 't1GroupStart()' },
   type:    { icon: '⌨️', name: 'Gõ nghĩa',               desc: 'Nghĩa tiếng Việt rơi xuống. Gõ đúng cụm tiếng Anh để bắn trước khi chạm đất. 3 mạng, nhanh dần.', start: 't1TypeStart()' },
-  mapwrite: { icon: '✍️', name: 'Bản đồ → Bài viết',   desc: 'Tìm thay đổi trên một bản đồ rồi viết thành bài hoàn chỉnh: mở bài, overview, hai đoạn thân bài. Có bài mẫu từ chính bản đồ đó.', start: "t1MapStart('essay')" },
-  map:     { icon: '🗺️', name: 'Bản đồ tìm điểm khác',   desc: 'Hai bản đồ trước và sau. Tìm chỗ thay đổi, rồi chọn câu đúng: demolished, converted into…', start: 't1MapStart()' },
+  map:     { icon: '🗺️', name: 'Bản đồ: tìm thay đổi & viết bài', desc: 'Kéo thanh năm để thấy thị trấn đổi khác. Chạm chỗ thay đổi, ghép câu chủ ngữ + động từ + vị trí, chia đoạn, chọn overview, rồi xem bài em vừa ghép cạnh bài mẫu. 5 thị trấn.', start: 't1MapStart()' },
   process: { icon: '⚙️', name: 'Dây chuyền quy trình',   desc: 'Các bước bị xáo trộn. Xếp lại đúng thứ tự trước khi hết giờ, rồi chọn câu bị động và từ nối.', start: 't1ProcStart()' },
   compare: { icon: '📊', name: 'Cao hơn, thấp hơn',      desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
 };
@@ -26242,223 +26241,605 @@ function t1TypePause() {
   if (!g.paused) document.getElementById('ty-in')?.focus();
 }
 
-/* ── Static · Bản đồ tìm điểm khác ────────────────────────────────────────
-   Two maps of the same town, before and after. Tap each change on the
-   after map, then pick the sentence that describes it (static sheet 6.x:
-   demolished, built, converted into, extended, relocated). Wrong taps cost
-   time. Four maps per game. */
-const T1_MAP_COLS = 6, T1_MAP_ROWS = 4;
-const T1_MAP_T = {
-  house:    ['🏠', 'the houses', 'new houses', true],
-  school:   ['🏫', 'the school', 'a new school'],
-  factory:  ['🏭', 'the factory', 'a factory'],
-  park:     ['🌳', 'the park', 'a park'],
-  carpark:  ['🅿️', 'the car park', 'a car park'],
-  shop:     ['🏪', 'the shop', 'a shop'],
-  hospital: ['🏥', 'the hospital', 'a hospital'],
-  church:   ['⛪', 'the church', 'a church'],
-  farm:     ['🌾', 'the farmland', 'farmland'],
-  flats:    ['🏢', 'the apartments', 'apartments', true],
-  mall:     ['🏬', 'the shopping centre', 'a shopping centre'],
-  station:  ['🚉', 'the train station', 'a train station'],
-  hotel:    ['🏨', 'the hotel', 'a hotel'],
-  cafe:     ['☕', 'the café', 'a café'],
-  stadium:  ['🏟️', 'the stadium', 'a stadium'],
-};
-const T1_MAP_CONVERT = [['factory', 'flats'], ['farm', 'house'], ['carpark', 'park'], ['shop', 'cafe'], ['hotel', 'flats'], ['church', 'cafe'], ['station', 'mall']];
-const T1_MAP_CFG = { a: { n: 3, time: 75, kinds: ['demolish', 'build', 'convert'] }, d: { n: 4, time: 60, kinds: ['demolish', 'build', 'convert', 'extend', 'move'] }, l: { n: 5, time: 50, kinds: ['demolish', 'build', 'convert', 'extend', 'move'] } };
-function t1MapCap(s) { return t1Cap(s); }
-function t1MapWas(t) { return T1_MAP_T[t][3] ? 'were' : 'was'; }
-function t1MapDir(a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y;
-  return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'east' : 'west') : (dy > 0 ? 'south' : 'north');
+/* ── Static · Bản đồ: tìm thay đổi, ghép câu, viết bài ───────────────────
+   Five towns drawn like the maps in the exam: a river or lake, roads, green
+   areas and labelled buildings, with a compass. One map at a time with a
+   time slider between the two years; the student taps each place that
+   changed and builds the sentence about it from three parts (subject,
+   verb, location). From Dũng sĩ the parts carry traps (a/the, be + V3,
+   north-east or north-west, next to or opposite); Huyền thoại adds the
+   tense trap and one sentence about a feature that did not change. Then
+   the sentences are split into the two body paragraphs, an overview is
+   chosen, and the student's sentences become a whole answer to set beside
+   the model.
+   Map features, on a 600 x 400 board:
+     water  { d } a path, or { x, y, w, h } an ellipse (a lake)
+     river  { y, h } a band across the board
+     road   { pts, kind: track | road | dual }
+     bridge { x, y, w, h, wood }
+     area   { kind: forest | farm | park | field | trees | beach | sea }
+     bld    a building; houses a cluster of small houses; car a car park.
+   Every feature can carry a label. */
+const T1M_TOWNS = [
+  { id: 'riverton', name: 'Riverton', sample: 'map-riverton', years: ['2000', '2020'], tense: 'past', compass: [566, 350],
+    both: [
+      { t: 'water', x: 15, y: 132, w: 95, h: 85, label: 'Lake' },
+      { t: 'road', pts: [[0, 245], [600, 245]], kind: 'road', label: 'Main Road', lx: 470, ly: 240 },
+      { t: 'road', pts: [[0, 392], [600, 392]], kind: 'rail', label: 'Railway', lx: 520, ly: 386 },
+      { t: 'bld', x: 300, y: 140, w: 62, h: 50, label: 'Church' },
+      { t: 'area', kind: 'farm', x: 522, y: 135, w: 66, h: 92, label: 'Farmland' },
+      { t: 'area', kind: 'park', x: 20, y: 262, w: 115, h: 58, label: 'Park' },
+      { t: 'houses', x: 14, y: 330, w: 130, h: 48, label: 'Houses' },
+      { t: 'bld', x: 160, y: 335, w: 90, h: 42, label: 'Train station' },
+      { t: 'bld', x: 505, y: 280, w: 75, h: 45, label: 'Shop' },
+    ],
+    before: [
+      { t: 'bld', x: 14, y: 18, w: 100, h: 80, label: 'Factory' },
+      { t: 'bld', x: 220, y: 22, w: 85, h: 60, label: 'School' },
+      { t: 'area', kind: 'farm', x: 425, y: 15, w: 160, h: 100, label: 'Farmland' },
+      { t: 'bld', x: 410, y: 140, w: 85, h: 55, label: 'Hospital' },
+      { t: 'car', x: 290, y: 262, w: 80, h: 55 },
+    ],
+    after: [
+      { t: 'bld', x: 14, y: 18, w: 100, h: 80, label: 'Apartments' },
+      { t: 'bld', x: 220, y: 22, w: 175, h: 60, label: 'School' },
+      { t: 'houses', x: 425, y: 15, w: 160, h: 100, label: 'Houses' },
+      { t: 'bld', x: 125, y: 150, w: 82, h: 50, label: 'Hospital' },
+      { t: 'area', kind: 'park', x: 290, y: 262, w: 80, h: 55, label: 'Park' },
+      { t: 'bld', x: 262, y: 335, w: 105, h: 42, label: 'Shopping centre' },
+    ],
+    changes: [
+      { subj: 'The factory', k: 'replace', obj: 'apartments', loc: 'in the north-west, beside the lake', locX: ['in the north-east, beside the lake', 'in the north-west, opposite the church'], box: [[14, 18, 100, 80]], para: 0 },
+      { subj: 'The farmland', k: 'way', obj: 'new houses', loc: 'in the north-east', locX: ['in the north-west', 'in the south-east'], box: [[425, 15, 160, 100]], para: 0 },
+      { subj: 'The school', k: 'extend', loc: 'to the east', locX: ['to the west', 'to the south'], box: [[220, 22, 175, 60]], para: 0 },
+      { subj: 'The hospital', k: 'move', loc: 'from the east of the town to the west, next to the lake', locX: ['from the west of the town to the east, next to the lake', 'from the east of the town to the west, opposite the lake'], box: [[410, 140, 85, 55], [125, 150, 82, 50]], para: 0 },
+      { subj: 'The car park', k: 'convert', obj: 'a park', loc: 'in the centre, just south of the main road', locX: ['in the centre, just north of the main road', 'in the north-east, just south of the main road'], box: [[290, 262, 80, 55]], para: 1 },
+      { subj: 'A shopping centre', k: 'build', loc: 'next to the train station', locX: ['opposite the church', 'next to the shop'], box: [[262, 335, 105, 42]], para: 1 },
+    ],
+    same: [
+      { subj: 'The church', loc: 'in the centre of the town', locX: ['in the north of the town', 'next to the lake'], box: [[300, 140, 62, 50]] },
+      { subj: 'The train station', loc: 'in the south of the town', locX: ['in the north of the town', 'next to the church'], box: [[160, 335, 90, 42]] },
+      { subj: 'The shop', loc: 'in the south-east', locX: ['in the south-west', 'in the north-east'], box: [[505, 280, 75, 45]] },
+      { subj: 'The houses', pl: true, loc: 'in the south-west', locX: ['in the south-east', 'in the north-west'], box: [[14, 330, 130, 48]] },
+    ],
+    paras: ['Phía bắc đường Main Road', 'Phía nam đường Main Road'],
+    ov: ['Overall, Riverton became more residential and gained more services, while most of its farmland and its factory disappeared.',
+      ['Overall, Riverton became more industrial, with a new factory and more farmland in the north.', 'Sai thông tin: nhà máy bị phá, đất nông nghiệp giảm.'],
+      ['Overall, the factory in the north-west was demolished and replaced by apartments.', 'Đây là một chi tiết, không phải bức tranh chung. Overview tả xu hướng chung của cả thị trấn.']] },
+
+  { id: 'seaview', name: 'Seaview', sample: 'map-seaview', years: ['1980', '2020'], tense: 'past',
+    both: [
+      { t: 'area', kind: 'sea', x: 0, y: 360, w: 600, h: 40, label: 'Sea' },
+      { t: 'area', kind: 'beach', x: 0, y: 318, w: 600, h: 42, label: 'Beach' },
+      { t: 'road', pts: [[0, 300], [600, 300]], kind: 'road', label: 'Coast Road', lx: 520, ly: 295 },
+      { t: 'houses', x: 215, y: 115, w: 110, h: 70, label: 'Houses' },
+      { t: 'bld', x: 240, y: 205, w: 60, h: 48, label: 'Church' },
+      { t: 'area', kind: 'forest', x: 12, y: 12, w: 238, h: 85, label: 'Forest' },
+      { t: 'area', kind: 'forest', x: 322, y: 12, w: 110, h: 85, label: 'Forest' },
+    ],
+    before: [
+      { t: 'area', kind: 'forest', x: 250, y: 12, w: 72, h: 85 },
+      { t: 'area', kind: 'farm', x: 12, y: 110, w: 175, h: 180, label: 'Farmland' },
+    ],
+    after: [
+      { t: 'car', x: 255, y: 18, w: 62, h: 72 },
+      { t: 'bld', x: 15, y: 112, w: 170, h: 80, label: 'Hotel' },
+      { t: 'houses', x: 15, y: 205, w: 170, h: 82, label: 'Housing estate' },
+      { t: 'bld', x: 360, y: 118, w: 75, h: 50, label: 'Shop' },
+      { t: 'bld', x: 360, y: 190, w: 75, h: 48, label: 'Café' },
+      { t: 'bld', x: 470, y: 318, w: 22, h: 82, label: 'Pier', vertical: true },
+    ],
+    changes: [
+      { subj: 'Part of the forest', k: 'clear', obj: 'a car park', loc: 'in the north', locX: ['in the south', 'in the north-east, next to the shop'], box: [[250, 12, 72, 85]], para: 0 },
+      { subj: 'The farmland', k: 'way', obj: 'a large hotel', loc: 'in the north-west', locX: ['in the north-east', 'in the south-west'], box: [[15, 110, 172, 85]], para: 0 },
+      { subj: 'A housing estate', k: 'build', loc: 'to the south of the hotel', locX: ['to the north of the hotel', 'opposite the hotel'], box: [[15, 200, 172, 90]], para: 0 },
+      { subj: 'A shop and a café', pl: true, k: 'build', loc: 'in the east, beside the houses', locX: ['in the west, beside the houses', 'in the east, opposite the beach'], box: [[360, 118, 75, 120]], para: 1 },
+      { subj: 'A pier', k: 'build', loc: 'towards the eastern end of the beach', locX: ['towards the western end of the beach', 'next to the church'], box: [[460, 318, 42, 82]], para: 1 },
+    ],
+    same: [
+      { subj: 'The church', loc: 'in the centre of the village', locX: ['in the east of the village', 'next to the beach'], box: [[240, 205, 60, 48]] },
+      { subj: 'The houses', pl: true, loc: 'in the centre of the village', locX: ['in the west of the village', 'beside the hotel'], box: [[215, 115, 110, 70]] },
+      { subj: 'The beach', loc: 'along the south of the village', locX: ['along the north of the village', 'next to the forest'], box: [[0, 318, 600, 42]] },
+    ],
+    paras: ['Phía tây và phía bắc', 'Phía đông và bờ biển'],
+    ov: ['Overall, Seaview changed from a quiet farming village into a tourist destination, while the beach and the original houses remained largely unchanged.',
+      ['Overall, Seaview became more agricultural, with new farmland in the east.', 'Sai thông tin: đất nông nghiệp biến mất, phía đông có cửa hàng và quán cà phê.'],
+      ['Overall, a pier was constructed towards the eastern end of the beach.', 'Đây là một chi tiết, không phải bức tranh chung. Overview tả xu hướng chung của cả làng.']] },
+
+  { id: 'westbrook', name: 'Westbrook School', sample: 'map-school', years: ['2005', 'Now'], tense: 'pp',
+    both: [
+      { t: 'road', pts: [[0, 392], [600, 392]], kind: 'road', label: 'School Road', lx: 520, ly: 386 },
+      { t: 'area', kind: 'trees', x: 12, y: 12, w: 150, h: 80, label: 'Trees' },
+      { t: 'bld', x: 12, y: 108, w: 150, h: 172, label: 'Main building' },
+      { t: 'area', kind: 'trees', x: 330, y: 300, w: 258, h: 78, label: 'Trees' },
+      { t: 'area', kind: 'field', x: 485, y: 108, w: 103, h: 172, label: 'Playing field' },
+    ],
+    before: [
+      { t: 'houses', x: 185, y: 15, w: 125, h: 72, label: 'Staff houses', n: 2 },
+      { t: 'area', kind: 'field', x: 380, y: 108, w: 105, h: 172 },
+      { t: 'car', x: 12, y: 300, w: 92, h: 78 },
+    ],
+    after: [
+      { t: 'bld', x: 185, y: 15, w: 125, h: 72, label: 'Classrooms' },
+      { t: 'bld', x: 185, y: 108, w: 95, h: 75, label: 'Library' },
+      { t: 'bld', x: 185, y: 200, w: 95, h: 72, label: 'Cafeteria' },
+      { t: 'bld', x: 380, y: 108, w: 100, h: 172, label: 'Sports hall' },
+      { t: 'car', x: 12, y: 300, w: 285, h: 78 },
+    ],
+    changes: [
+      { subj: 'The two staff houses', pl: true, k: 'convert', obj: 'classrooms', loc: 'in the north of the site', locX: ['in the south of the site', 'opposite the main building'], box: [[185, 15, 125, 72]], para: 0 },
+      { subj: 'A library', k: 'build', loc: 'directly to the east of the main building', locX: ['directly to the west of the main building', 'opposite the trees'], box: [[185, 108, 95, 75]], para: 0 },
+      { subj: 'A cafeteria', k: 'build', loc: 'just south of the library', locX: ['just north of the library', 'next to the sports hall'], box: [[185, 200, 95, 72]], para: 0 },
+      { subj: 'Half of the playing field', k: 'way', obj: 'a sports hall', loc: 'on the eastern side of the site', locX: ['on the western side of the site', 'in the south-west of the site'], box: [[380, 108, 105, 172]], para: 1 },
+      { subj: 'The car park', k: 'extend', loc: 'to the east', locX: ['to the north', 'to the west'], box: [[12, 300, 285, 78]], para: 1 },
+    ],
+    same: [
+      { subj: 'The main building', loc: 'in the west of the site', locX: ['in the east of the site', 'next to the sports hall'], box: [[12, 108, 150, 172]] },
+      { subj: 'The trees', pl: true, loc: 'in the north-west and the south-east', locX: ['in the north-east and the south-west', 'in the centre of the site'], box: [[12, 12, 150, 80], [330, 300, 258, 78]] },
+    ],
+    paras: ['Phía bắc và khu giữa trường', 'Phía đông và phía nam'],
+    ov: ['Overall, the school has expanded considerably, with several new facilities added in the previously empty centre of the site.',
+      ['Overall, the school has become smaller, as several buildings have been demolished.', 'Sai thông tin: trường không phá gì, chỉ xây thêm và mở rộng.'],
+      ['Overall, a library has been built directly to the east of the main building.', 'Đây là một chi tiết, không phải bức tranh chung. Overview tả xu hướng chung của cả trường.']] },
+
+  { id: 'greenfield', name: 'Greenfield', sample: 'map-greenfield', years: ['1985', '2025'], tense: 'past',
+    both: [
+      { t: 'river', y: 185, h: 42, label: 'River' },
+      { t: 'bld', x: 40, y: 275, w: 72, h: 55, label: 'Church' },
+    ],
+    before: [
+      { t: 'road', pts: [[300, 0], [300, 400]], kind: 'track', label: 'Dirt track', lx: 310, ly: 300, side: true },
+      { t: 'bridge', x: 288, y: 178, w: 24, h: 56, wood: true, label: 'Wooden bridge', lx: 318, ly: 250 },
+      { t: 'area', kind: 'forest', x: 165, y: 12, w: 270, h: 110, label: 'Forest' },
+      { t: 'area', kind: 'farm', x: 12, y: 12, w: 140, h: 160, label: 'Farmland' },
+      { t: 'bld', x: 440, y: 275, w: 105, h: 60, label: 'School' },
+    ],
+    after: [
+      { t: 'road', pts: [[300, 0], [300, 400]], kind: 'road', label: 'Main Road', lx: 312, ly: 300, side: true },
+      { t: 'bridge', x: 286, y: 178, w: 28, h: 56, label: 'Concrete bridge', lx: 318, ly: 250 },
+      { t: 'bld', x: 175, y: 22, w: 108, h: 80, label: 'Hotel' },
+      { t: 'car', x: 318, y: 22, w: 105, h: 80 },
+      { t: 'houses', x: 12, y: 12, w: 140, h: 160, label: 'Housing estate' },
+      { t: 'bld', x: 440, y: 275, w: 105, h: 60, label: 'Community centre' },
+      { t: 'bld', x: 470, y: 105, w: 112, h: 60, label: 'Supermarket' },
+    ],
+    changes: [
+      { subj: 'The forest', k: 'clear', obj: 'a hotel and a car park', loc: 'in the north', locX: ['in the south', 'in the north-west, beside the river'], box: [[165, 12, 270, 110]], para: 0 },
+      { subj: 'The farmland', k: 'convert', obj: 'a housing estate', loc: 'in the north-west', locX: ['in the north-east', 'in the south-west'], box: [[12, 12, 140, 160]], para: 0 },
+      { subj: 'A supermarket', k: 'build', loc: 'in the east, just north of the river', locX: ['in the west, just north of the river', 'in the east, just south of the river'], box: [[470, 105, 112, 60]], para: 0 },
+      { subj: 'The dirt track', k: 'upgrade', obj: 'a main road', loc: 'running from north to south', locX: ['running from east to west', 'along the river'], box: [[288, 0, 24, 178], [288, 234, 24, 166]], para: 1 },
+      { subj: 'The wooden bridge', k: 'swap', obj: 'a concrete bridge', loc: 'in the centre of the town', locX: ['in the south of the town', 'next to the church'], box: [[278, 175, 44, 62]], para: 1 },
+      { subj: 'The school', k: 'convert', obj: 'a community centre', loc: 'in the south-east', locX: ['in the south-west', 'in the north-east'], box: [[440, 275, 105, 60]], para: 1 },
+    ],
+    same: [
+      { subj: 'The church', loc: 'in the south-west', locX: ['in the south-east', 'in the north-west'], box: [[40, 275, 72, 55]] },
+      { subj: 'The river', loc: 'across the centre of the town', locX: ['across the north of the town', 'next to the school'], box: [[0, 185, 280, 42], [320, 185, 280, 42]] },
+    ],
+    paras: ['Phía bắc: rừng, đất nông nghiệp, siêu thị', 'Đường sá, cầu và phía nam'],
+    ov: ['Overall, Greenfield changed from a rural settlement into a more developed town, as its natural and farming land gave way to housing, tourism and shopping facilities.',
+      ['Overall, Greenfield became more rural, with more forest and farmland by 2025.', 'Sai thông tin: rừng và đất nông nghiệp đều mất.'],
+      ['Overall, the wooden bridge was replaced by a concrete bridge.', 'Đây là một chi tiết, không phải bức tranh chung. Overview tả xu hướng chung của cả thị trấn.']] },
+
+  { id: 'riverside', name: 'Riverside', sample: 'map-riverside', years: ['1980', '2020'], tense: 'past',
+    both: [
+      { t: 'river', y: 338, h: 40, label: 'River' },
+      { t: 'road', pts: [[300, 235], [300, 400]], kind: 'road', label: 'Bridge Street', lx: 310, ly: 300, side: true },
+      { t: 'bridge', x: 288, y: 330, w: 24, h: 56, label: 'Bridge', lx: 318, ly: 326 },
+      { t: 'bld', x: 268, y: 150, w: 64, h: 55, label: 'Church' },
+    ],
+    before: [
+      { t: 'road', pts: [[0, 232], [600, 232]], kind: 'track', label: 'Dirt road', lx: 470, ly: 226 },
+      { t: 'bld', x: 195, y: 20, w: 175, h: 90, label: 'Factory' },
+      { t: 'area', kind: 'farm', x: 12, y: 15, w: 150, h: 195, label: 'Farmland' },
+    ],
+    after: [
+      { t: 'road', pts: [[0, 232], [600, 232]], kind: 'dual', label: 'Dual carriageway', lx: 470, ly: 222 },
+      { t: 'bld', x: 195, y: 20, w: 175, h: 90, label: 'Shopping centre' },
+      { t: 'houses', x: 12, y: 15, w: 150, h: 195, label: 'Housing estate' },
+      { t: 'car', x: 470, y: 125, w: 112, h: 72 },
+      { t: 'area', kind: 'park', x: 420, y: 258, w: 165, h: 70, label: 'Park' },
+    ],
+    changes: [
+      { subj: 'The factory', k: 'replace', obj: 'a shopping centre', loc: 'in the north', locX: ['in the south', 'in the north, beside the river'], box: [[195, 20, 175, 90]], para: 0 },
+      { subj: 'The farmland', k: 'convert', obj: 'a large housing estate', loc: 'in the west', locX: ['in the east', 'in the south-west, beside the river'], box: [[12, 15, 150, 195]], para: 0 },
+      { subj: 'The dirt road', k: 'upgrade', obj: 'a dual carriageway', loc: 'running from east to west', locX: ['running from north to south', 'along the river'], box: [[0, 220, 270, 26], [330, 220, 270, 26]], para: 1 },
+      { subj: 'A car park', k: 'build', loc: 'in the east, just north of the road', locX: ['in the west, just north of the road', 'in the east, just south of the road'], box: [[470, 125, 112, 72]], para: 1 },
+      { subj: 'A park', k: 'build', loc: 'in the south-east, beside the river', locX: ['in the south-west, beside the river', 'in the north-east, opposite the factory'], box: [[420, 258, 165, 70]], para: 1 },
+    ],
+    same: [
+      { subj: 'The church', loc: 'in the centre of the town', locX: ['in the north of the town', 'beside the river'], box: [[268, 150, 64, 55]] },
+      { subj: 'The bridge', loc: 'in the south of the town', locX: ['in the north of the town', 'next to the car park'], box: [[288, 330, 24, 56]] },
+    ],
+    paras: ['Phía bắc và phía tây', 'Đường, phía đông và phía nam'],
+    ov: ['Overall, Riverside became much more residential and commercial, while its industry and farmland disappeared.',
+      ['Overall, Riverside became more industrial, with a new factory built in the east.', 'Sai thông tin: nhà máy bị phá, phía đông có bãi đỗ xe và công viên.'],
+      ['Overall, a new park was built in the south-east, beside the river.', 'Đây là một chi tiết, không phải bức tranh chung. Overview tả xu hướng chung của cả thị trấn.']] },
+];
+// Drawing. Each layer is drawn ground first (water, land, roads), then
+// buildings, so that a crossfade between two layers stays readable.
+const T1M_FILL = { forest: '#A9CFA0', farm: '#EBDDA4', park: '#C3E3B4', field: '#BFE3B0', trees: '#A9CFA0', beach: '#F2E2B0', sea: '#9CCBEA' };
+function t1mLabel(x, y, text, cls) {
+  const words = String(text).split(' '), lines = text.length > 11 && words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [text];
+  return `<text x="${x}" y="${y - (lines.length - 1) * 6.5 + 4}" class="t1m-lab ${cls || ''}">${lines.map((l, i) => `<tspan x="${x}" dy="${i ? 13 : 0}">${escapeHtml(l)}</tspan>`).join('')}</text>`;
 }
-function t1MapRound(nWant) {
-  const cfg = T1_MAP_CFG[_t1Lv], N = T1_MAP_COLS * T1_MAP_ROWS, need = nWant || cfg.n;
-  for (let tries = 0; tries < 50; tries++) {
-    const before = Array(N).fill(null);
-    const types = t1Shuffle(Object.keys(T1_MAP_T)).slice(0, 9);
-    const cells = t1Shuffle([...Array(N).keys()]);
-    types.forEach((t, i) => { before[cells[i]] = t; });
-    const after = before.slice(), changes = [], used = new Set();
-    const xy = i => ({ x: i % T1_MAP_COLS, y: Math.floor(i / T1_MAP_COLS) });
-    const empty = () => t1Shuffle([...Array(N).keys()].filter(i => !before[i] && !after[i] && !used.has(i)));
-    const filled = () => t1Shuffle([...Array(N).keys()].filter(i => before[i] && after[i] === before[i] && !used.has(i)));
-    const kinds = t1Shuffle([...cfg.kinds, ...cfg.kinds]).slice(0, need);
-    for (const k of kinds) {
-      if (k === 'demolish') {
-        const i = filled()[0]; if (i == null) continue;
-        after[i] = null; used.add(i);
-        changes.push({ k, cells: [i], at: i, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} demolished.` });
-      } else if (k === 'build') {
-        const i = empty()[0]; if (i == null) continue;
-        const t = t1Pick(Object.keys(T1_MAP_T).filter(x => !before.includes(x) && !after.includes(x))); if (!t) continue;
-        after[i] = t; used.add(i);
-        changes.push({ k, cells: [i], at: i, t, s: `${t1MapCap(T1_MAP_T[t][2])} ${t1MapWas(t)} built.` });
-      } else if (k === 'convert') {
-        const pair = t1Shuffle(T1_MAP_CONVERT).find(([a, b]) => { const i = before.indexOf(a); return i >= 0 && after[i] === a && !used.has(i) && !before.includes(b) && !after.includes(b); });
-        if (!pair) continue;
-        const i = before.indexOf(pair[0]);
-        after[i] = pair[1]; used.add(i);
-        changes.push({ k, cells: [i], at: i, t: pair[0], s: `${t1MapCap(T1_MAP_T[pair[0]][1])} ${t1MapWas(pair[0])} converted into ${T1_MAP_T[pair[1]][2]}.`, to: pair[1] });
-      } else if (k === 'extend') {
-        const i = filled().find(j => { const p = xy(j); return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const x = p.x + dx, y = p.y + dy, n = y * T1_MAP_COLS + x; return x >= 0 && y >= 0 && x < T1_MAP_COLS && y < T1_MAP_ROWS && !before[n] && !after[n] && !used.has(n); }); });
-        if (i == null) continue;
-        const p = xy(i), n = t1Shuffle([[1, 0], [-1, 0], [0, 1], [0, -1]]).map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy })).filter(q => q.x >= 0 && q.y >= 0 && q.x < T1_MAP_COLS && q.y < T1_MAP_ROWS).map(q => q.y * T1_MAP_COLS + q.x).find(m => !before[m] && !after[m] && !used.has(m));
-        after[n] = before[i]; used.add(i); used.add(n);
-        changes.push({ k, cells: [n, i], at: i, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} extended.` });
-      } else if (k === 'move') {
-        const i = filled()[0], j = empty().find(m => { const a = xy(i), b = xy(m); return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) >= 3; });
-        if (i == null || j == null) continue;
-        after[j] = before[i]; after[i] = null; used.add(i); used.add(j);
-        changes.push({ k, cells: [j, i], at: i, dest: j, t: before[i], s: `${t1MapCap(T1_MAP_T[before[i]][1])} ${t1MapWas(before[i])} relocated to the ${t1MapDir(xy(i), xy(j))}.` });
-      }
-    }
-    if (changes.length < need) continue;
-    changes.forEach(c => { c.opts = t1Shuffle([c.s, ...t1MapWrong(c)]); });
-    return { before, after, changes };
+function t1mFeature(f) {
+  const cx = f.x + f.w / 2, cy = f.y + f.h / 2;
+  if (f.t === 'water') return `<ellipse cx="${cx}" cy="${cy}" rx="${f.w / 2}" ry="${f.h / 2}" class="t1m-water"/>${t1mLabel(cx, cy, f.label, 'water')}`;
+  if (f.t === 'river') return `<path d="M0 ${f.y + 4} C150 ${f.y - 6} 450 ${f.y + 10} 600 ${f.y} L600 ${f.y + f.h} C450 ${f.y + f.h + 8} 150 ${f.y + f.h - 8} 0 ${f.y + f.h + 2}Z" class="t1m-water"/>${t1mLabel(80, f.y + f.h / 2, f.label, 'water')}`;
+  if (f.t === 'road') {
+    const d = f.pts.map((p, i) => (i ? 'L' : 'M') + p.join(' ')).join('');
+    const body = f.kind === 'track' ? `<path d="${d}" class="t1m-track"/>`
+      : f.kind === 'rail' ? `<path d="${d}" class="t1m-rail"/><path d="${d}" class="t1m-rail-ties"/>`
+      : f.kind === 'dual' ? `<path d="${d}" class="t1m-road t1m-road--dual"/><path d="${d}" class="t1m-road-mid"/>`
+      : `<path d="${d}" class="t1m-road"/>`;
+    return body + (f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab"${f.side ? ' text-anchor="start"' : ''}>${escapeHtml(f.label)}</text>` : '');
   }
-  return null;
+  if (f.t === 'bridge') return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="3" class="t1m-bridge${f.wood ? ' wood' : ''}"/>${f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab" text-anchor="start">${escapeHtml(f.label)}</text>` : ''}`;
+  if (f.t === 'area') {
+    let g = `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="${f.kind === 'sea' || f.kind === 'beach' ? 0 : 10}" fill="${T1M_FILL[f.kind]}" class="t1m-area"/>`;
+    if (f.kind === 'farm') for (let x = f.x + 12; x < f.x + f.w - 4; x += 14) g += `<line x1="${x}" y1="${f.y + 6}" x2="${x}" y2="${f.y + f.h - 6}" class="t1m-furrow"/>`;
+    if (f.kind === 'forest' || f.kind === 'trees' || f.kind === 'park') {
+      const step = f.kind === 'park' ? 34 : 22;
+      for (let y = f.y + 14; y < f.y + f.h - 8; y += step) for (let x = f.x + 14 + ((y / step) % 2) * step / 2; x < f.x + f.w - 8; x += step) g += `<circle cx="${x.toFixed(1)}" cy="${y}" r="${f.kind === 'park' ? 6 : 8}" class="t1m-tree"/>`;
+    }
+    if (f.kind === 'field') g += `<rect x="${f.x + 8}" y="${f.y + 8}" width="${f.w - 16}" height="${f.h - 16}" class="t1m-pitch"/>`;
+    return g + (f.label ? t1mLabel(cx, cy, f.label, f.kind === 'sea' ? 'water' : '') : '');
+  }
+  if (f.t === 'houses') {
+    const n = f.n || Math.max(4, Math.round(f.w * f.h / 900)), cols = Math.ceil(Math.sqrt(n * f.w / f.h)), rows = Math.ceil(n / cols);
+    const cw = f.w / cols, ch = f.h / rows, s = Math.min(cw, ch) * 0.58;
+    let g = `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="8" class="t1m-lot"/>`;
+    for (let i = 0; i < n; i++) { const c = i % cols, r = Math.floor(i / cols); g += `<rect x="${(f.x + c * cw + (cw - s) / 2).toFixed(1)}" y="${(f.y + r * ch + (ch - s) / 2).toFixed(1)}" width="${s.toFixed(1)}" height="${s.toFixed(1)}" class="t1m-house"/>`; }
+    return g + t1mLabel(cx, cy, f.label, 'pill');
+  }
+  if (f.t === 'car') return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="6" class="t1m-car"/><text x="${cx}" y="${cy - 2}" class="t1m-p">P</text>${t1mLabel(cx, cy + 16, 'Car park', 'small')}`;
+  return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4" class="t1m-bld"/>` + (f.vertical
+    ? `<text x="${cx}" y="${cy}" class="t1m-lab small" transform="rotate(-90 ${cx} ${cy})">${escapeHtml(f.label)}</text>`
+    : t1mLabel(cx, cy, f.label));
 }
-// Wrong sentences: the same subject with the other verbs.
-function t1MapWrong(c) {
-  const T = T1_MAP_T[c.t], subj = c.k === 'build' ? t1MapCap(T[2]) : t1MapCap(T[1]), was = t1MapWas(c.t);
-  const conv = (T1_MAP_CONVERT.find(p => p[0] === c.t) || [null, c.t === 'flats' ? 'hotel' : 'flats'])[1];
-  const pool = [
-    `${subj} ${was} demolished.`, `${subj} ${was} extended.`, `${subj} ${was} converted into ${T1_MAP_T[conv][2]}.`,
-    `${subj} ${was} relocated to the ${t1Pick(['north', 'south', 'east', 'west'])}.`, `${subj} remained unchanged.`,
-    c.k === 'build' ? `${subj} ${was} demolished.` : `${subj} ${was} built.`,
-  ].filter(s => s.split(' ').slice(-2).join(' ') !== c.s.split(' ').slice(-2).join(' ') && !(c.k === 'move' && /relocated/.test(s)));
-  return t1Shuffle([...new Set(pool)]).slice(0, 3);
+function t1mLayer(list) {
+  const order = { river: 0, water: 0, area: 1, road: 2, bridge: 3, car: 4, houses: 4, bld: 5 };
+  return [...list].sort((a, b) => order[a.t] - order[b.t]).map(t1mFeature).join('');
 }
-function t1MapGrid(cells, id, tap, g) {
-  return `<div class="t1-map" id="${id}">${cells.map((t, i) => {
-    const found = g && g.found.some(c => c.cells.includes(i));
-    return `<button class="t1-map-cell${t ? '' : ' empty'}${found ? ' found' : ''}" ${tap ? `onclick="t1MapTap(${i})"` : 'tabindex="-1"'} aria-label="${t ? escapeHtml(T1_MAP_T[t][1]) : 'trống'}">${t ? T1_MAP_T[t][0] : ''}</button>`;
-  }).join('')}</div>`;
+function t1mCompass(T) {
+  const [x, y] = T.compass || [570, 36];
+  return `<g class="t1m-compass" transform="translate(${x} ${y})"><circle r="20"/><path d="M0 -15 L6 4 L0 0 L-6 4Z"/><text y="-23">N</text></g>`;
 }
-function t1MapStart(mode) {
+// One year of a town, for Bài mẫu and the chart beside the Sinh tồn questions.
+function t1mOne(T, which) {
+  return `<svg viewBox="0 0 600 400" class="t1m-svg" role="img" aria-label="${escapeHtml(T.name + ' ' + T.years[which])}"><rect width="600" height="400" class="t1m-land"/>${t1mLayer([...T.both, ...(which ? T.after : T.before)])}${t1mCompass(T)}</svg>`;
+}
+function t1mPair(id) {
+  const T = T1M_TOWNS.find(t => t.id === id);
+  return `<div class="t1m-pair">${[0, 1].map(i => `<div><div class="t1m-year">${escapeHtml(T.name)} · ${T.years[i]}</div>${t1mOne(T, i)}</div>`).join('')}</div>`;
+}
+
+/* ── Sentences ── */
+const T1M_V = { replace: 'demolished and replaced by', clear: 'cleared to make way for', build: 'built', convert: 'converted into', extend: 'extended', move: 'relocated', upgrade: 'upgraded to', swap: 'replaced by', demolish: 'demolished' };
+const T1M_BASE = { replace: 'demolish and replaced by', clear: 'clear to make way for', build: 'build', convert: 'convert into', extend: 'extend', move: 'relocate', upgrade: 'upgrade to', swap: 'replace by' };
+const T1M_OBJ = { replace: 1, clear: 1, convert: 1, upgrade: 1, swap: 1, way: 1 };
+// Other kinds of change offered as wrong verbs; none of them could also describe the change.
+const T1M_ALT = { replace: ['extend', 'move', 'build'], clear: ['extend', 'move', 'build'], build: ['demolish', 'extend', 'move'], convert: ['extend', 'move', 'build'], extend: ['move', 'demolish', 'build'],
+  move: ['extend', 'demolish', 'build'], way: ['extend', 'move', 'build'], upgrade: ['demolish', 'move', 'build'], swap: ['extend', 'move', 'build'], same: ['demolish', 'extend', 'move'] };
+const T1M_WHY = {
+  replace: 'Công trình cũ biến mất, công trình mới mọc lên đúng chỗ đó → demolished and replaced by …',
+  clear: 'Cây bị phát quang để lấy đất xây cái mới → cleared to make way for …',
+  build: 'Chỗ trước đây trống, giờ có công trình → was built / were built.',
+  convert: 'Vẫn chỗ đó, chỉ đổi công năng → converted into …',
+  extend: 'Vẫn công trình đó nhưng to ra, chiếm thêm đất bên cạnh → extended.',
+  move: 'Biến mất ở chỗ cũ, xuất hiện ở chỗ khác → relocated.',
+  way: 'Đất cũ nhường chỗ cho công trình mới → made way for … (chủ động).',
+  upgrade: 'Đường cũ được nâng lên thành đường lớn hơn → upgraded to …',
+  swap: 'Cái cũ được thay bằng cái mới cùng chỗ → replaced by …',
+  same: 'Hai bản đồ giống nhau ở chỗ này → remained unchanged.',
+};
+function t1mAux(pl, tense) { return tense === 'pp' ? (pl ? 'have been' : 'has been') : (pl ? 'were' : 'was'); }
+function t1mVerb(k, obj, pl, tense) {
+  obj = obj || 'a car park';
+  if (k === 'way') return `${tense === 'pp' ? (pl ? 'have made' : 'has made') : 'made'} way for ${obj}`;
+  if (k === 'same') return `${tense === 'pp' ? (pl ? 'have remained' : 'has remained') : 'remained'} unchanged`;
+  return `${t1mAux(pl, tense)} ${T1M_V[k]}${T1M_OBJ[k] || k === 'convert' ? ' ' + obj : ''}`;
+}
+// The three parts of a sentence, each [right, ...traps] with a reason per trap, by level.
+function t1mParts(T, c) {
+  const lv = _t1Lv, tense = T.tense, other = tense === 'pp' ? 'past' : 'pp', n = lv === 'a' ? 2 : 3;
+  const all = [...T.changes, ...T.same].map(x => x.subj).filter(s => s !== c.subj);
+  // Subject: the place tapped, other places on the map, and from Dũng sĩ a/the.
+  const subj = [[c.subj]];
+  if (lv !== 'a' && !c.pl && /^(The|A) /.test(c.subj) && !/^(Part|Half) /.test(c.subj)) {
+    const isNew = c.subj.startsWith('A ');
+    subj.push([(isNew ? 'The ' : 'A ') + c.subj.slice(isNew ? 2 : 4), isNew ? 'Công trình mới, lần đầu nhắc đến → a/an.' : 'Công trình có sẵn trên bản đồ trước → the.']);
+  }
+  t1Shuffle(all).slice(0, n + 1 - subj.length).forEach(s => subj.push([s, `Chỗ em chạm là ${c.subj.toLowerCase().replace(/^(the|a) /, '')}, không phải ${s.toLowerCase().replace(/^(the|a|part of the|half of the) /, '')}.`]));
+  // Verb: another kind of change, then a broken passive, and at Huyền thoại the other tense.
+  const k = c.k || 'same', right = t1mVerb(k, c.obj, c.pl, tense), verb = [[right]];
+  if (lv === 'l') verb.push([t1mVerb(k, c.obj, c.pl, other), tense === 'pp' ? `Đề có "${T.years[1]}" (đến nay) → hiện tại hoàn thành: has been / have been.` : `Cả ${T.years[0]} và ${T.years[1]} đều đã qua → quá khứ đơn: was / were.`]);
+  if (lv !== 'a') {
+    if (c.pl && k !== 'same' && k !== 'way') verb.push([t1mVerb(k, c.obj, false, tense), 'Chủ ngữ số nhiều → were / have been.']);
+    else if (k === 'same') verb.push([`${t1mAux(c.pl, tense)} remained unchanged`, 'remain không có bị động: remained unchanged.']);
+    else if (k === 'way') verb.push([`${t1mAux(c.pl, tense)} made way for ${c.obj}`, 'make way for là chủ động: made way for, không có was.']);
+    else verb.push([`${t1mAux(c.pl, tense)} ${T1M_BASE[k]}${T1M_OBJ[k] ? ' ' + c.obj : ''}`, 'Bị động = be + V3 (quá khứ phân từ).']);
+  }
+  T1M_ALT[k].forEach(a => { if (verb.length < n + 1) verb.push([t1mVerb(a, c.obj, c.pl, tense), T1M_WHY[k]]); });
+  // Location: the authored traps; the compass ones explain the compass.
+  const compass = (a, b) => a.replace(/north|south|east|west/g, '') === b.replace(/north|south|east|west/g, '');
+  const loc = [[c.loc], ...c.locX.slice(0, n).map(x => [x, compass(x, c.loc) ? 'Nhìn la bàn: trên là north, dưới là south, phải là east, trái là west.' : 'Nhìn lại bản đồ: công trình này nằm cạnh cái gì, ở phía nào.'])];
+  return [subj, verb, loc].map(p => { const seen = new Set(); return p.filter(([t]) => !seen.has(t) && seen.add(t)); });
+}
+function t1mSentence(parts) { const s = parts.join(' '); return s[0].toUpperCase() + s.slice(1) + '.'; }
+
+/* ── The game ── */
+const T1M_CFG = { a: { n: 4, coin: 1 }, d: { n: 9, coin: 1 }, l: { n: 9, coin: 1, same: true } };
+function t1MapPickTown() {
+  const key = 't1MapRot_' + walWho(), ids = T1M_TOWNS.map(t => t.id);
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(key) || '[]').filter(id => ids.includes(id)); } catch (e) {}
+  let left = ids.filter(id => !seen.includes(id));
+  if (!left.length) { left = ids.filter(id => id !== seen[seen.length - 1]); seen = []; }
+  const id = t1Pick(left);
+  seen.push(id);
+  try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {}
+  return T1M_TOWNS.find(t => t.id === id);
+}
+function t1MapStart() {
   t1Leave();
-  const g = _t1 = { game: 'map', essay: mode === 'essay', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0 };
-  g.stop = () => { clearInterval(g.timer); };
-  g.keyPick = i => { if (g.ask) t1MapPick(i); };
+  const T = t1MapPickTown(), cfg = T1M_CFG[_t1Lv];
+  const changes = t1Shuffle(T.changes).slice(0, cfg.n).map(c => ({ ...c, done: false }));
+  const g = _t1 = { game: 'map', T, changes, found: [], sents: [], cur: null, phase: 'find', t: 0, score: 0, combo: 0, right: 0, coins: 0, misses: [], wrongTaps: 0, answered: false };
+  g.stop = () => {};
+  g.keyPick = () => {};
   g.pick = g.keyPick;
-  g.next = () => { if (g.roundDone) { if (g.essay) t1MapEssay(g.q); else t1MapNextMap(); } };
+  g.next = () => {};
   t1Bind();
   tsSfx('equip');
-  t1MapNew();
-}
-function t1MapNew() {
-  const g = _t1;
-  g.q = t1MapRound(g.essay ? 5 : 0);
-  g.found = [];
-  g.ask = null;
-  g.roundDone = false;
-  g.answered = false;
-  g.left = T1_MAP_CFG[_t1Lv].time * (g.essay ? 1.5 : 1);
   t1MapRender();
-  clearInterval(g.timer);
-  g.last = performance.now();
-  g.timer = setInterval(() => {
-    if (_t1 !== g) { clearInterval(g.timer); return; }
-    const now = performance.now();
-    if (!g.ask && !document.hidden) g.left -= (now - g.last) / 1000;
-    g.last = now;
-    const el = document.getElementById('mp-time');
-    if (el) el.textContent = Math.max(0, Math.ceil(g.left));
-    if (g.left <= 0) t1MapTimeUp();
-  }, 200);
 }
 function t1MapRender() {
-  const g = _t1;
+  const g = _t1, T = g.T;
   t1Root().innerHTML = `
-    <div class="lv-wrap t1-play t1-mapgame">
-      ${t1ArcTop(g, `<span class="t1-stat">${g.essay ? '✍️ Tìm thay đổi rồi viết bài' : `Bản đồ <strong>${g.n + 1}</strong>/4`}</span><span class="t1-stat">⏱️ <strong id="mp-time">${Math.ceil(g.left)}</strong></span><span class="t1-stat">🔎 <strong id="mp-left">${g.q.changes.length - g.found.length}</strong> chỗ</span>`)}
-      <div class="t1-maps">
-        <div><div class="t1-map-h">Trước <small>N ↑</small></div>${t1MapGrid(g.q.before, 'mp-before', false)}</div>
-        <div><div class="t1-map-h">Sau · chạm vào chỗ thay đổi</div>${t1MapGrid(g.q.after, 'mp-after', true, g)}</div>
+    <div class="lv-wrap t1-play t1m">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat">🗺️ <strong>${escapeHtml(T.name)}</strong></span>
+        <span class="t1-stat">🔎 <strong id="m-found">${g.found.length}</strong>/${g.changes.length}</span>
+        <span class="t1-stat">⭐ <strong id="m-score">${g.score}</strong></span>
       </div>
-      <div id="mp-ask"></div>
-      <div class="t1-hint">Chạm ô trống cũng tính nếu ở đó có công trình bị phá. Chạm sai trừ 4 giây.</div>
+      <div class="t1m-grid">
+        <div class="t1m-stage">
+          <div class="t1m-yearbig" id="m-year">${T.years[0]}</div>
+          <svg viewBox="0 0 600 400" class="t1m-svg t1m-play" id="m-svg" onclick="t1MapTap(event)">
+            <rect width="600" height="400" class="t1m-land"/>
+            <g>${t1mLayer(T.both)}</g>
+            <g id="m-before">${t1mLayer(T.before)}</g>
+            <g id="m-after" style="opacity:0">${t1mLayer(T.after)}</g>
+            <g id="m-marks"></g>
+            ${t1mCompass(T)}
+          </svg>
+          <div class="t1m-slider">
+            <button class="vb-secondary-btn" onclick="t1MapSlide(0, true)">◀ ${T.years[0]}</button>
+            <input type="range" min="0" max="100" value="0" id="m-range" aria-label="Kéo để đổi năm" oninput="t1MapSlide(this.value / 100)">
+            <button class="vb-secondary-btn" onclick="t1MapSlide(1, true)">${T.years[1]} ▶</button>
+          </div>
+        </div>
+        <div class="t1m-panel" id="m-panel"></div>
+      </div>
     </div>`;
+  t1MapSlide(g.t);
+  t1MapMarks();
+  t1MapPanel();
 }
-function t1MapTap(i) {
+// The slider crossfades the two years; the label shows whichever is nearer.
+function t1MapSlide(t, animate) {
   const g = _t1;
-  if (!g || g.game !== 'map' || g.ask || g.roundDone) return;
-  const c = g.q.changes.find(x => !g.found.includes(x) && x.cells.includes(i));
-  if (!c) {
-    if (g.found.some(x => x.cells.includes(i))) return;
-    g.left -= 4; g.combo = 0;
-    tsSfx('miss');
-    t1Shake(document.querySelectorAll('#mp-after .t1-map-cell')[i]);
-    t1ArcHud();
+  if (!g || g.game !== 'map') return;
+  if (animate) {
+    const from = g.t, t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / 450); t1MapSlide(from + (t - from) * k); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
     return;
   }
-  g.found.push(c);
-  g.ask = c;
-  g.answered = false;
-  tsSfx('key');
-  document.querySelectorAll('#mp-after .t1-map-cell').forEach((b, k) => { if (c.cells.includes(k)) b.classList.add('found'); });
-  document.getElementById('mp-left').textContent = g.q.changes.length - g.found.length;
-  document.getElementById('mp-ask').innerHTML = `<div class="t1-map-ask"><p class="t1-stem">Câu nào tả đúng thay đổi này?</p><div class="t1-opts t1-opts--long">${t1Options(c.opts, null, -1)}</div><div id="mp-fb"></div></div>`;
-  document.getElementById('mp-ask').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  g.t = t;
+  const b = document.getElementById('m-before'), a = document.getElementById('m-after'), r = document.getElementById('m-range'), y = document.getElementById('m-year');
+  if (!b) return;
+  b.style.opacity = 1 - t; a.style.opacity = t;
+  if (r && Math.abs(r.value - t * 100) > 0.5) r.value = Math.round(t * 100);
+  y.textContent = g.T.years[t < 0.5 ? 0 : 1];
 }
-function t1MapPick(i) {
-  const g = _t1, c = g && g.ask;
-  if (!c || g.answered || i < 0 || i >= c.opts.length) return;
-  g.answered = true;
-  const ok = c.opts[i] === c.s;
-  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`<div class="t1-review-line">${escapeHtml(c.s)}<br>Bạn chọn <s>${escapeHtml(c.opts[i])}</s></div>`); }
-  document.querySelector('#mp-ask .t1-opts').innerHTML = t1Options(c.opts, i, c.opts.indexOf(c.s));
-  const why = { demolish: 'Có ở bản đồ trước, mất ở bản đồ sau → was demolished.', build: 'Ô trống thành công trình mới → was built / was constructed.', convert: 'Cùng chỗ, đổi công năng → was converted into …', extend: 'Cùng công trình, chiếm thêm ô bên cạnh → was extended.', move: 'Mất ở chỗ cũ, xuất hiện chỗ khác → was relocated to the north / south / east / west.' }[c.k];
-  document.getElementById('mp-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>${escapeHtml(why)}</span></div>`;
-  t1ArcHud();
-  setTimeout(() => {
-    if (_t1 !== g) return;
-    g.ask = null;
-    if (g.lives <= 0) { t1MapEnd(g); return; }
-    if (g.found.length === g.q.changes.length) {
-      const bonus = Math.max(0, Math.round(g.left / 3));
-      g.score += bonus;
-      t1MapRoundEnd(`Tìm đủ ${g.q.changes.length} chỗ! +${bonus} điểm thời gian`);
+function t1MapMarks() {
+  const g = _t1, el = document.getElementById('m-marks');
+  if (!el) return;
+  const cur = g.cur ? (g.cur.box || []) : [];
+  el.innerHTML = cur.map(([x, y, w, h]) => `<rect x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="8" class="t1m-cur"/>`).join('')
+    + g.found.map((c, i) => { const [x, y] = c.box[0]; return `<g class="t1m-pin${c.done ? ' done' : ''}" transform="translate(${x + 12} ${y + 12})"><circle r="11"/><text y="4">${i + 1}</text></g>`; }).join('');
+}
+function t1MapXY(e) {
+  const r = document.getElementById('m-svg').getBoundingClientRect();
+  return [(e.clientX - r.left) / r.width * 600, (e.clientY - r.top) / r.height * 400];
+}
+function t1MapIn(c, x, y) { return c.box.some(([bx, by, bw, bh]) => x >= bx - 4 && x <= bx + bw + 4 && y >= by - 4 && y <= by + bh + 4); }
+function t1MapTap(e) {
+  const g = _t1;
+  if (!g || g.game !== 'map' || g.cur) return;
+  const [x, y] = t1MapXY(e);
+  if (g.phase === 'find') {
+    const c = g.changes.find(c => !g.found.includes(c) && t1MapIn(c, x, y));
+    if (!c) {
+      if (g.found.some(f => t1MapIn(f, x, y))) return;
+      g.wrongTaps++; g.score = Math.max(0, g.score - 2); g.combo = 0;
+      tsSfx('miss');
+      t1MapToast('Chỗ này không đổi. Kéo thanh năm qua lại để so.');
       return;
     }
-    document.getElementById('mp-ask').innerHTML = '';
-  }, ok ? 900 : 2200);
+    g.found.push(c);
+    tsSfx('key');
+    t1MapBuild(c, false);
+  } else if (g.phase === 'same') {
+    const s = g.T.same.find(s => t1MapIn(s, x, y));
+    if (!s) {
+      if (g.changes.some(c => t1MapIn(c, x, y))) { tsSfx('miss'); t1MapToast('Chỗ này có thay đổi. Tìm một thứ giữ nguyên.'); }
+      return;
+    }
+    tsSfx('key');
+    t1MapBuild({ ...s, k: 'same' }, true);
+  }
 }
-function t1MapTimeUp() {
-  const g = _t1;
-  if (g.roundDone || g.ask) return;
-  t1Miss(g);
-  g.q.changes.filter(c => !g.found.includes(c)).forEach(c => g.misses.push(`<div class="t1-review-line">Bỏ sót: ${escapeHtml(c.s)}</div>`));
-  t1ArcHud();
-  if (g.lives <= 0) { t1MapEnd(g); return; }
-  t1MapRoundEnd('Hết giờ! Mất một mạng.');
+function t1MapToast(t) {
+  const el = document.getElementById('m-tip');
+  if (el) { el.textContent = t; el.classList.remove('hidden'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('hidden'), 2200); }
 }
-function t1MapRoundEnd(msg) {
+// The panel: what to do now, or the sentence being built.
+function t1MapPanel() {
+  const g = _t1, el = document.getElementById('m-panel'), T = g.T;
+  if (!el || g.cur) return;
+  const done = g.sents.length ? `<ol class="t1m-sents">${g.sents.map(s => `<li>${escapeHtml(s.text)}</li>`).join('')}</ol>` : '';
+  if (g.phase === 'find') el.innerHTML = `<div class="t1m-task"><b>🔎 Tìm ${g.changes.length - g.found.length} chỗ thay đổi</b>
+      <p>Kéo thanh năm từ ${T.years[0]} sang ${T.years[1]}, rồi chạm vào chỗ đã đổi trên bản đồ.</p>
+      <button class="vb-secondary-btn" onclick="t1MapHint()">💡 Gợi ý (−5 ⭐)</button></div>
+    <div class="t1m-tip hidden" id="m-tip"></div>${done}`;
+  else if (g.phase === 'same') el.innerHTML = `<div class="t1m-task"><b>🧭 Câu cuối: một thứ KHÔNG đổi</b>
+      <p>Bài band 7 luôn nói cái gì giữ nguyên. Chạm vào một công trình giống hệt nhau ở cả hai năm.</p></div>
+    <div class="t1m-tip hidden" id="m-tip"></div>${done}`;
+}
+function t1MapHint() {
+  const g = _t1, c = g.changes.find(c => !g.found.includes(c));
+  if (!c) return;
+  g.score = Math.max(0, g.score - 5);
+  document.getElementById('m-score').textContent = g.score;
+  const el = document.getElementById('m-marks');
+  el.insertAdjacentHTML('beforeend', c.box.map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" class="t1m-hint"/>`).join(''));
+  setTimeout(() => t1MapMarks(), 1600);
+}
+function t1MapBuild(c, same) {
   const g = _t1;
-  g.roundDone = true;
+  g.cur = c;
+  c.same = same;
+  c.parts = t1mParts(g.T, c).map(p => ({ opts: t1Shuffle(p), pick: null }));
+  c.tries = 0;
+  t1MapMarks();
+  t1MapBuildRender();
+}
+function t1MapBuildRender(fb) {
+  const g = _t1, c = g.cur, el = document.getElementById('m-panel'), names = ['Chủ ngữ', 'Động từ', 'Vị trí'];
+  const pick = c.parts.map(p => p.pick == null ? null : p.opts[p.pick][0]);
+  el.innerHTML = `<div class="t1m-build">
+      <div class="t1m-task"><b>${c.same ? '🧭 Tả thứ giữ nguyên' : `✍️ Thay đổi số ${g.found.length}`}</b><p>Ghép câu từ 3 phần. ${_t1Lv === 'a' ? 'Mỗi phần chọn 1 mảnh.' : 'Có mảnh bẫy: a/the, be + V3, hướng, giới từ.'}</p></div>
+      ${c.parts.map((p, i) => `<div class="t1m-row"><span class="t1m-rowh">${i + 1} · ${names[i]}</span><div class="t1m-chips">${p.opts.map(([t], j) =>
+        `<button class="t1m-chip${p.pick === j ? ' on' : ''}${p.bad && p.pick === j ? ' no' : ''}${p.ok ? ' ok' : ''}" ${p.ok ? 'disabled' : ''} onclick="t1MapChip(${i}, ${j})">${escapeHtml(t)}</button>`).join('')}</div></div>`).join('')}
+      <div class="t1m-preview">${pick.every(Boolean) ? escapeHtml(t1mSentence(pick)) : pick.map((t, i) => t ? escapeHtml(t) : `<i>${names[i].toLowerCase()}</i>`).join(' ')}</div>
+      <div id="m-fb">${fb || ''}</div>
+      <div class="t1h-row"><button class="vb-start-btn" onclick="t1MapCheck()" ${pick.every(Boolean) ? '' : 'disabled'}>Kiểm tra →</button></div>
+    </div>`;
+}
+function t1MapChip(i, j) {
+  const p = _t1.cur.parts[i];
+  if (p.ok) return;
+  p.pick = j; p.bad = false;
+  tsSfx('tick');
+  t1MapBuildRender();
+}
+function t1MapCheck() {
+  const g = _t1, c = g.cur;
+  if (!c || c.parts.some(p => p.pick == null)) return;
+  c.tries++;
+  const why = [];
+  c.parts.forEach(p => {
+    const [t, w] = p.opts[p.pick];
+    if (!w) p.ok = true;
+    else { p.bad = true; why.push(`<li><b>${escapeHtml(t)}</b>: ${escapeHtml(w)}</li>`); }
+  });
+  if (!why.length) { t1MapSentDone(); return; }
+  tsSfx('wrong');
+  g.combo = 0;
+  if (c.tries >= 2) {
+    // Second miss: the right parts are shown and the sentence still counts, for no points.
+    c.parts.forEach(p => { p.pick = p.opts.findIndex(o => !o[1]); p.ok = true; p.bad = false; });
+    g.misses.push(`<div class="t1-review-line">${escapeHtml(t1mSentence(c.parts.map(p => p.opts[p.pick][0])))}</div>`);
+    t1MapBuildRender(`<div class="t1-fb no"><strong>Đáp án đúng đã hiện.</strong><ul>${why.join('')}</ul></div>`);
+    setTimeout(() => { if (_t1 === g && g.cur === c) t1MapSentDone(true); }, 2600);
+    return;
+  }
+  t1MapBuildRender(`<div class="t1-fb no"><strong>Còn ${why.length} phần chưa đúng. Sửa rồi kiểm tra lại.</strong><ul>${why.join('')}</ul></div>`);
+}
+function t1MapSentDone(shown) {
+  const g = _t1, c = g.cur, first = c.tries === 1 && !shown;
+  const text = t1mSentence(c.parts.map(p => p.opts[p.pick][0]));
+  g.sents.push({ text, para: c.same ? 1 : c.para, same: c.same, c });
+  if (!c.same) c.done = true;
+  if (!shown) {
+    g.right++; g.combo++;
+    g.score += first ? 30 : 15;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 1 : 0.5);
+    tsSfx('coin');
+  }
+  g.cur = null;
+  document.getElementById('m-score').textContent = g.score;
+  document.getElementById('m-found').textContent = g.found.length;
+  t1MapMarks();
+  if (c.same) { t1MapGroup(); return; }
+  if (g.found.length < g.changes.length) { t1MapPanel(); return; }
+  if (T1M_CFG[_t1Lv].same) { g.phase = 'same'; t1MapPanel(); return; }
+  t1MapGroup();
+}
+// Body paragraphs: each change sentence goes to the paragraph for its part of the map.
+function t1MapGroup() {
+  const g = _t1, T = g.T, el = document.getElementById('m-panel');
+  g.phase = 'group';
+  const list = g.sents.filter(s => !s.same);
+  list.forEach(s => { s.pick = null; });
+  const draw = fb => {
+    el.innerHTML = `<div class="t1m-task"><b>🧩 Chia vào 2 đoạn thân bài</b><p>Bài band 7 gom các thay đổi cùng khu vực vào một đoạn. Nhìn bản đồ và xếp từng câu.</p></div>
+      ${list.map((s, i) => `<div class="t1m-grp"><p>${escapeHtml(s.text)}</p><div class="t1m-chips">${T.paras.map((name, k) => `<button class="t1m-chip${s.pick === k ? ' on' : ''}${s.pick === k && s.bad ? ' no' : ''}" onclick="t1MapGroupPick(${i}, ${k})">Đoạn ${k + 1}: ${escapeHtml(name)}</button>`).join('')}</div></div>`).join('')}
+      <div id="m-fb">${fb || ''}</div>
+      <div class="t1h-row"><button class="vb-start-btn" onclick="t1MapGroupCheck()" ${list.every(s => s.pick != null) ? '' : 'disabled'}>Kiểm tra →</button></div>`;
+  };
+  g.groupDraw = draw;
+  g.groupList = list;
+  draw();
+}
+function t1MapGroupPick(i, k) { const g = _t1, s = g.groupList[i]; s.pick = k; s.bad = false; tsSfx('tick'); g.groupDraw(); }
+function t1MapGroupCheck() {
+  const g = _t1, list = g.groupList, bad = list.filter(s => s.pick !== s.para);
+  if (!bad.length) { g.score += 20; tsSfx('coin'); t1MapOverview(); return; }
+  tsSfx('wrong');
+  g.groupTries = (g.groupTries || 0) + 1;
+  bad.forEach(s => { s.bad = true; });
+  if (g.groupTries >= 2) { list.forEach(s => { s.pick = s.para; s.bad = false; }); g.groupDraw(`<div class="t1-fb no"><strong>Đã xếp lại đúng.</strong><span>Đoạn 1: ${escapeHtml(g.T.paras[0])}. Đoạn 2: ${escapeHtml(g.T.paras[1])}.</span></div>`); setTimeout(() => { if (_t1 === g) t1MapOverview(); }, 2400); return; }
+  g.groupDraw(`<div class="t1-fb no"><strong>${bad.length} câu chưa đúng đoạn.</strong><span>Nhìn lại thay đổi đó nằm ở khu vực nào trên bản đồ.</span></div>`);
+}
+function t1MapOverview() {
+  const g = _t1, T = g.T, el = document.getElementById('m-panel');
+  g.phase = 'overview';
+  const opts = t1Shuffle([[T.ov[0]], T.ov[1], T.ov[2]]);
+  g.ovOpts = opts;
+  el.innerHTML = `<div class="t1m-task"><b>👀 Chọn câu overview</b><p>Overview tả bức tranh chung của cả bản đồ, không đi vào một chi tiết.</p></div>
+    <div class="t1-opts t1-opts--long">${opts.map(([t], i) => `<button class="t1-opt" onclick="t1MapOvPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(t)}</button>`).join('')}</div><div id="m-fb"></div>`;
+  g.keyPick = i => t1MapOvPick(i);
+}
+function t1MapOvPick(i) {
+  const g = _t1, o = g.ovOpts[i];
+  if (!o || g.answered) return;
+  document.querySelectorAll('#m-panel .t1-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', !g.ovOpts[j][1]); b.classList.toggle('no', j === i && !!o[1]); });
   g.answered = true;
-  clearInterval(g.timer);
-  const missed = g.q.changes.filter(c => !g.found.includes(c));
-  missed.forEach(c => document.querySelectorAll('#mp-after .t1-map-cell').forEach((b, k) => { if (c.cells.includes(k)) b.classList.add('missed'); }));
-  document.getElementById('mp-ask').innerHTML = `<div class="t1-fb ${missed.length ? 'no' : 'ok'}"><strong>${escapeHtml(msg)}</strong>${g.q.changes.map(c => `<span>${g.found.includes(c) ? '✓' : '✗'} ${escapeHtml(c.s)}</span>`).join('')}</div>
-    ${g.essay ? `<button class="vb-start-btn t1-next" onclick="t1MapEssay(_t1.q)">✍️ Viết thành bài →</button>` : `<button class="vb-start-btn t1-next" onclick="t1MapNextMap()">${g.n + 1 >= 4 ? 'Xem kết quả' : 'Bản đồ tiếp'} → <small>Enter</small></button>
-    <button class="vb-secondary-btn" onclick="t1MapEssay(_t1.q)">✍️ Viết bài từ bản đồ này</button>`}`;
-  tsSfx(missed.length ? 'equip' : 'level');
+  if (!o[1]) { g.score += 20; g.right++; tsSfx('coin'); } else { tsSfx('wrong'); g.misses.push(`<div class="t1-review-line">Overview: ${escapeHtml(g.T.ov[0])}</div>`); }
+  document.getElementById('m-fb').innerHTML = `<div class="t1-fb ${o[1] ? 'no' : 'ok'}"><strong>${o[1] ? 'Chưa đúng.' : 'Đúng!'}</strong>${o[1] ? `<span>${escapeHtml(o[1])}</span>` : ''}</div>
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1MapEssay()">📝 Ghép thành bài → <small>Enter</small></button></div>`;
+  g.keyPick = () => {};
+  g.next = t1MapEssay;
 }
-function t1MapNextMap() {
+// The student's sentences as a whole answer, beside the model.
+function t1MapEssay() {
   const g = _t1;
-  if (!g || !g.roundDone) return;
-  g.n++;
-  if (g.n >= 4) { t1MapEnd(g); return; }
-  t1MapNew();
-}
-function t1MapEnd(g) {
-  if (_t1 !== g) return;
-  if (g.essay) { t1MapRoundEnd('Hết mạng, nhưng vẫn viết bài được.'); return; }
-  g.stop();
-  t1Finish(g, 'map', 'map', { big: `${g.right} câu tả đúng · ${g.n} bản đồ xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '🗺️', good: g.lives > 0 });
+  if (!g || g.game !== 'map' || g.phase === 'essay') return;
+  const T = g.T, sample = T1_SAMPLES.find(s => s.id === T.sample);
+  g.phase = 'essay';
+  const body = k => g.sents.filter(s => s.para === k && !s.same).map(s => s.text).concat(k === 1 ? g.sents.filter(s => s.same).map(s => s.text) : []).join(' ');
+  const mine = [sample.essay[0], T.ov[0], body(0), body(1)].filter(Boolean);
+  const words = mine.join(' ').split(/\s+/).length;
+  const html = `<div class="t1-review"><div class="t1-review-title">📝 Bài của em, ghép từ các câu em vừa làm (${words} từ)</div>
+      ${mine.map((p, i) => `<div class="t1-lib-para"><span class="t1-lib-tag">${T1_PARA[i]}</span><p>${escapeHtml(p)}</p></div>`).join('')}
+      <p class="t1m-note">${words < 150 ? 'Chưa đủ 150 từ: bài mẫu nối các ý bằng while, and, in addition và thêm chi tiết vị trí. So sánh bên dưới.' : 'Đủ độ dài. So với bài mẫu để học cách nối câu.'}</p></div>
+    <details class="t1-review" open><summary class="t1-review-title">📖 Bài mẫu</summary>${sample.essay.map((p, i) => `<div class="t1-lib-para"><span class="t1-lib-tag">${T1_PARA[i]}</span><p>${escapeHtml(p)}</p></div>`).join('')}</details>`;
+  t1Finish(g, 'map', 'map', { big: `${escapeHtml(T.name)} · ${g.right} câu đúng ngay`, icon: g.misses.length ? '👏' : '🏆', good: !g.misses.length, list: html });
 }
 
 /* ── Static · Dây chuyền quy trình ────────────────────────────────────────
@@ -26688,248 +27069,6 @@ function t1ProcEnd(g) {
   g.stop();
   t1Finish(g, 'process', 'process_diagram', { big: `${g.right} lượt đúng · ${g.n} quy trình xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '⚙️', good: g.lives > 0 });
 }
-/* ── Bản đồ → Bài viết ────────────────────────────────────────────────────
-   One map from the game becomes a whole Task 1 answer in four steps:
-   1 pick the paraphrased introduction, 2 pick the two true main features
-   for the overview, 3 sort the change sentences into the two body
-   paragraphs by area, 4 write the whole answer, check it, and compare it
-   with the model built from the same map. */
-const T1_TOWNS = ['Riverton', 'Ashford', 'Millbrook', 'Westbury', 'Hillside', 'Lakeview', 'Oakham', 'Brookfield'];
-const T1_MAP_CAT = { house: 'res', flats: 'res', shop: 'com', mall: 'com', cafe: 'com', hotel: 'com', factory: 'ind', farm: 'ind', park: 'green', lake: 'green', school: 'pub', hospital: 'pub', church: 'pub', station: 'pub', stadium: 'pub', carpark: 'car' };
-let _t1me = null;
-function t1MapXY(i) { return { x: i % T1_MAP_COLS, y: Math.floor(i / T1_MAP_COLS) }; }
-function t1MapWhere(i) {
-  const { x, y } = t1MapXY(i), ns = y <= 1 ? 'north' : 'south', ew = x <= 1 ? 'west' : x >= 4 ? 'east' : '';
-  return ew ? `${ns}-${ew}` : ns;
-}
-// A building next to cell i on the after map that did not change, for "next to the …".
-function t1MapNear(q, i) {
-  const { x, y } = t1MapXY(i);
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    const nx = x + dx, ny = y + dy, n = ny * T1_MAP_COLS + nx;
-    if (nx < 0 || ny < 0 || nx >= T1_MAP_COLS || ny >= T1_MAP_ROWS) continue;
-    const t = q.after[n];
-    if (t && q.before[n] === t && !q.changes.some(c => c.cells.includes(n))) return T1_MAP_T[t][1];
-  }
-  return '';
-}
-// The change as a body sentence. The area the paragraph is about is not
-// repeated inside it ("Turning to the south, … in the south").
-function t1MapLine(c, region, q, again) {
-  const T = T1_MAP_T[c.t], was = t1MapWas(c.t), at = t1MapWhere(c.at);
-  const loc = at === region ? '' : ` in the ${at}`;
-  const near = q ? t1MapNear(q, c.dest != null ? c.dest : c.at) : '';
-  const open = ['farm', 'park', 'lake'].includes(c.t);
-  if (c.k === 'demolish') return open ? `${t1Cap(T[1])}${loc} ${was} cleared.` : again ? `${t1Cap(T[1])}${loc} ${was} knocked down.` : `${t1Cap(T[1])}${loc} ${was} demolished, leaving the site empty.`;
-  if (c.k === 'build') return `${t1Cap(T[2])} ${was} ${again ? 'constructed' : 'built'}${loc}${near ? `, next to ${near}` : ''}.`;
-  if (c.k === 'convert') return again ? `${t1Cap(T[1])}${loc} made way for ${T1_MAP_T[c.to][2]}.` : `${t1Cap(T[1])}${loc} ${was} converted into ${T1_MAP_T[c.to][2]}.`;
-  if (c.k === 'extend') return `${t1Cap(T[1])}${loc} ${was} extended to the ${t1MapDir(t1MapXY(c.at), t1MapXY(c.cells[0]))}, almost doubling in size.`;
-  return `${t1Cap(T[1])} ${was} relocated from the ${at} to the ${t1MapWhere(c.dest)}${near ? `, next to ${near}` : ''}.`;
-}
-// Two body paragraphs by area: north and south if both have changes,
-// otherwise west and east, otherwise first half and second half.
-function t1MapSplit(changes) {
-  const by = (f, a, b, ra, rb) => { const g1 = changes.filter(c => f(c)), g2 = changes.filter(c => !f(c)); return g1.length && g2.length ? { g1, g2, a, b, ra, rb } : null; };
-  return by(c => t1MapXY(c.at).y <= 1, 'phía bắc (north)', 'phía nam (south)', 'north', 'south')
-    || by(c => t1MapXY(c.at).x <= 2, 'phía tây (west)', 'phía đông (east)', 'west', 'east')
-    || { g1: changes.slice(0, Math.ceil(changes.length / 2)), g2: changes.slice(Math.ceil(changes.length / 2)), a: 'nhóm thay đổi thứ nhất', b: 'nhóm còn lại', ra: '', rb: '' };
-}
-function t1MapFacts(q) {
-  const cnt = cells => { const o = { res: 0, com: 0, ind: 0, green: 0, pub: 0, car: 0 }; cells.forEach(t => { if (t) o[T1_MAP_CAT[t]]++; }); return o; };
-  const b = cnt(q.before), a = cnt(q.after), ks = q.changes.map(c => c.k);
-  const kept = q.before.filter((t, i) => t && q.after[i] === t && !q.changes.some(c => c.cells.includes(i))).length;
-  const facts = [
-    [a.res > b.res, 'the town became noticeably more residential'],
-    [a.ind < b.ind, 'much of the industrial and farming land disappeared'],
-    [a.com > b.com, 'more shops and services were introduced'],
-    [a.green < b.green, 'some green space was lost'],
-    [a.green > b.green, 'more green space was created'],
-    [ks.includes('move') || ks.includes('extend'), 'several existing buildings were extended or relocated'],
-    [kept > 0, 'a number of features remained unchanged'],
-    [a.ind > b.ind, 'the town became more industrial'],
-    [a.res < b.res, 'the amount of housing fell'],
-    [false, 'the town remained almost entirely unchanged'],
-    [false, 'all of the original buildings were demolished'],
-  ];
-  const yes = facts.filter(f => f[0]).map(f => f[1]), no = facts.filter(f => !f[0]).map(f => f[1]);
-  // The generic "unchanged" fact goes last, so the specific ones lead the overview.
-  yes.sort((x, y) => (x.includes('unchanged') ? 1 : 0) - (y.includes('unchanged') ? 1 : 0));
-  return { yes: yes.slice(0, 2), no: t1Shuffle(no).slice(0, 2) };
-}
-function t1MapEssay(q) {
-  t1Leave();
-  const town = t1Pick(T1_TOWNS), y1 = t1Pick([1985, 1990, 1995, 2000]), y2 = Math.min(2020, y1 + t1Pick([15, 20, 25]));
-  const prompt = `The maps below show the changes to the town of ${town} between ${y1} and ${y2}.`;
-  const intro = [
-    { t: `The two maps illustrate how the town of ${town} changed between ${y1} and ${y2} in terms of its buildings and land use.`, ok: true, why: 'Đổi show → illustrate, changes to → how … changed, bỏ "below". Giữ đủ tên thị trấn và hai mốc năm.' },
-    { t: prompt, why: 'Chép nguyên đề, còn chữ "below". Giám khảo không tính những từ chép từ đề.' },
-    { t: `The two maps illustrate how the town of ${town} will change after ${y2}.`, why: 'Sai thông tin: bản đồ tả quá khứ từ ' + y1 + ' đến ' + y2 + ', không phải tương lai.' },
-  ];
-  const facts = t1MapFacts(q), split = t1MapSplit(q.changes);
-  _t1me = { q, town, y1, y2, prompt, intro: t1Shuffle(intro), facts, opts: t1Shuffle([...facts.yes, ...facts.no]), split,
-    lines: t1Shuffle(q.changes.map(c => ({ c, s: t1MapLine(c, '', q), g: split.g1.includes(c) ? 1 : 2, pick: 0 }))), step: 1, picked: [], score: 0, coins: 0 };
-  t1MeRender();
-}
-function t1MeModel() {
-  const m = _t1me, q = m.q, sp = m.split;
-  // Buildings in an area that stayed as they were, for the closing sentence of its paragraph.
-  const kept = region => q.before.map((t, i) => ({ t, i })).filter(({ t, i }) => t && q.after[i] === t && !q.changes.some(c => c.cells.includes(i))
-    && (region === 'north' ? t1MapXY(i).y <= 1 : region === 'south' ? t1MapXY(i).y > 1 : region === 'west' ? t1MapXY(i).x <= 2 : region === 'east' ? t1MapXY(i).x > 2 : false)).map(({ t }) => T1_MAP_T[t][1]);
-  const para = (arr, region, open) => {
-    const joins = ['', 'In addition, ', 'Meanwhile, ', 'Furthermore, '];
-    const ss = arr.map((c, i) => { const l = t1MapLine(c, region, q, arr.slice(0, i).some(x => x.k === c.k)); return i === 0 ? l : joins[Math.min(i, 3)] + l.charAt(0).toLowerCase() + l.slice(1); });
-    ss[0] = open + ss[0].charAt(0).toLowerCase() + ss[0].slice(1);
-    const sum = t1MeAreaSum(arr);
-    if (sum) ss.push(`As a result, this part of the town ${sum}.`);
-    const k = [...new Set(kept(region))].slice(0, 2);
-    if (k.length) ss.push(`${t1Cap(k.join(' and '))}, however, remained unchanged.`);
-    return ss.join(' ');
-  };
-  const o1 = sp.ra ? `In the ${sp.ra} of the town, ` : 'In the first part of the period, ';
-  const o2 = sp.rb ? `Turning to the ${sp.rb}, ` : 'At the same time, ';
-  return [
-    m.intro.find(x => x.ok).t,
-    `Overall, the town underwent considerable development over the period. ${t1Cap(m.facts.yes[0])}, while ${m.facts.yes[1] || 'a few features remained unchanged'}. ${t1MeBiggest(q)}`,
-    para(sp.g1, sp.ra, o1),
-    para(sp.g2, sp.rb, o2),
-  ];
-}
-// The change an overview can name as the most noticeable one.
-function t1MeBiggest(q) {
-  const order = ['move', 'convert', 'build', 'extend', 'demolish'];
-  const c = q.changes.slice().sort((a, b) => order.indexOf(a.k) - order.indexOf(b.k))[0], T = T1_MAP_T[c.t];
-  const what = { move: `the relocation of ${T[1]}`, convert: `the conversion of ${T[1]} into ${c.to ? T1_MAP_T[c.to][2] : ''}`, build: `the construction of ${T[2]}`, extend: `the extension of ${T[1]}`, demolish: `the removal of ${T[1]}` }[c.k];
-  return `The most noticeable change was ${what}.`;
-}
-// What a paragraph's changes did to its area, from the before and after types.
-function t1MeAreaSum(arr) {
-  const d = { res: 0, com: 0, ind: 0, green: 0 };
-  arr.forEach(c => {
-    const from = c.k === 'build' ? null : c.t, to = c.k === 'demolish' ? null : c.k === 'convert' ? c.to : c.k === 'build' ? c.t : null;
-    if (from && d[T1_MAP_CAT[from]] !== undefined) d[T1_MAP_CAT[from]]--;
-    if (to && d[T1_MAP_CAT[to]] !== undefined) d[T1_MAP_CAT[to]]++;
-  });
-  if (d.res > 0) return 'became more residential';
-  if (d.com > 0) return 'became more commercial';
-  if (d.green > 0) return 'became greener';
-  if (d.ind < 0) return 'became less industrial';
-  if (d.green < 0) return 'lost some of its green space';
-  return '';
-}
-function t1MeMaps() {
-  const q = _t1me.q;
-  return `<details class="t1-me-maps"><summary>🗺️ Xem lại hai bản đồ</summary><div class="t1-maps">
-    <div><div class="t1-map-h">${_t1me.y1} <small>N ↑</small></div>${t1MapGrid(q.before, 'me-before', false)}</div>
-    <div><div class="t1-map-h">${_t1me.y2}</div>${t1MapGrid(q.after, 'me-after', false)}</div></div></details>`;
-}
-function t1MeRender() {
-  const m = _t1me, steps = ['Mở bài', 'Overview', 'Thân bài', 'Tự viết'];
-  let body = '';
-  if (m.step === 1) {
-    body = `<p class="t1-stem">Câu mở bài nào paraphrase đề tốt nhất?</p>
-      <div class="t1-opts t1-opts--long">${m.intro.map((x, i) => `<button class="t1-opt${m.ans != null ? (x.ok ? ' ok' : i === m.ans ? ' no' : ' dim') : ''}" ${m.ans != null ? 'disabled' : ''} onclick="t1MeIntro(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(x.t)}</span></button>`).join('')}</div>
-      ${m.ans != null ? `<div class="t1-fb ${m.intro[m.ans].ok ? 'ok' : 'no'}"><strong>${m.intro[m.ans].ok ? 'Đúng!' : 'Chưa đúng.'}</strong><span>${escapeHtml(m.intro.find(x => x.ok).why)}</span>${m.intro[m.ans].ok ? '' : `<span>Câu em chọn: ${escapeHtml(m.intro[m.ans].why)}</span>`}</div>
-        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang Overview →</button>` : ''}`;
-  } else if (m.step === 2) {
-    const done = m.picked.length === 2;
-    body = `<p class="t1-stem">Overview tả bức tranh chung, không có chi tiết. Chọn <b>2</b> ý đúng với hai bản đồ.</p>
-      <div class="t1-opts t1-opts--long">${m.opts.map((o, i) => {
-        const on = m.picked.includes(i), ok = m.facts.yes.includes(o);
-        return `<button class="t1-opt${done ? (ok ? ' ok' : on ? ' no' : ' dim') : on ? ' on' : ''}" ${done ? 'disabled' : ''} onclick="t1MeFact(${i})"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`;
-      }).join('')}</div>
-      ${done ? `<div class="t1-fb ok"><strong>Overview ghép từ hai ý đúng:</strong><span class="t1-me-model">${escapeHtml(t1MeModel()[1])}</span><span>Mở bằng Overall, nêu xu hướng chung rồi nối hai ý bằng while. Không có chi tiết từng công trình.</span></div>
-        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang thân bài →</button>` : ''}`;
-  } else if (m.step === 3) {
-    const done = m.lines.every(l => l.pick);
-    body = `<p class="t1-stem">Xếp mỗi câu vào đoạn thân bài đúng. <b>Đoạn 1</b>: ${escapeHtml(m.split.a)} · <b>Đoạn 2</b>: ${escapeHtml(m.split.b)}.</p>
-      <div class="t1-me-lines">${m.lines.map((l, i) => `<div class="t1-me-line${l.pick ? (l.pick === l.g ? ' ok' : ' no') : ''}"><span>${escapeHtml(l.s)}</span>
-        <span class="t1-me-btns">${l.pick ? (l.pick === l.g ? `✓ Đoạn ${l.g}` : `✗ Phải là đoạn ${l.g}`) : `<button class="vb-chip" onclick="t1MeSort(${i},1)">Đoạn 1</button><button class="vb-chip" onclick="t1MeSort(${i},2)">Đoạn 2</button>`}</span></div>`).join('')}</div>
-      ${done ? `<div class="t1-fb ok"><strong>Hai đoạn thân bài:</strong><span class="t1-me-model">${escapeHtml(t1MeModel()[2])}</span><span class="t1-me-model">${escapeHtml(t1MeModel()[3])}</span><span>Mỗi đoạn một khu vực. Nối câu bằng In addition, Meanwhile; mở đoạn 2 bằng Turning to the …</span></div>
-        <button class="vb-start-btn t1-next" onclick="t1MeNext()">Sang tự viết cả bài →</button>` : ''}`;
-  } else {
-    body = `<p class="t1-stem">Viết cả bài: 4 đoạn, cách nhau một dòng trống, ít nhất 150 từ. Dùng lại những gì vừa chọn, nhưng viết bằng câu của em.</p>
-      <div class="row t1-me-start"><button class="vb-chip" onclick="t1MeFill(true)">Bắt đầu từ bản ghép</button><button class="vb-chip" onclick="t1MeFill(false)">Viết từ đầu</button></div>
-      <textarea id="me-ta" class="rd-rw-ta t1-me-ta" rows="14" spellcheck="true" oninput="t1MeCount()" placeholder="The two maps illustrate…">${escapeHtml(m.draft || '')}</textarea>
-      <div class="rd-rw-count" id="me-count"></div>
-      <div id="me-out"></div>
-      <div class="vb-results-btns"><button class="vb-start-btn" onclick="t1MeCheck()">🔍 Kiểm tra</button><button class="vb-secondary-btn" onclick="t1MapStart('essay')">🗺️ Bản đồ khác</button></div>`;
-  }
-  t1Root().innerHTML = `
-    <div class="lv-wrap lv-wrap--narrow t1-play t1-me">
-      <div class="t1-top"><button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button><span class="t1-stat">✍️ Bản đồ → Bài viết</span></div>
-      <div class="t1-me-steps">${steps.map((s, i) => `<span class="${i + 1 < m.step ? 'done' : i + 1 === m.step ? 'now' : ''}">${i + 1 < m.step ? '✓' : i + 1} ${s}</span>`).join('<i>›</i>')}</div>
-      <div class="t1-me-prompt">📜 ${escapeHtml(m.prompt)} <small>Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.</small></div>
-      ${t1MeMaps()}
-      ${body}
-    </div>`;
-  if (m.step === 4) t1MeCount();
-}
-function t1MeIntro(i) {
-  const m = _t1me;
-  if (m.ans != null) return;
-  m.ans = i;
-  if (m.intro[i].ok) { m.score++; tsSfx('coin'); } else tsSfx('wrong');
-  t1MeRender();
-}
-function t1MeFact(i) {
-  const m = _t1me;
-  if (m.picked.length >= 2) return;
-  if (m.picked.includes(i)) m.picked = m.picked.filter(x => x !== i); else m.picked.push(i);
-  if (m.picked.length === 2) { const ok = m.picked.filter(x => m.facts.yes.includes(m.opts[x])).length; m.score += ok; tsSfx(ok === 2 ? 'coin' : 'wrong'); } else tsSfx('key');
-  t1MeRender();
-}
-function t1MeSort(i, p) {
-  const m = _t1me, l = m.lines[i];
-  if (l.pick) return;
-  l.pick = p;
-  if (p === l.g) { m.score++; tsSfx('coin'); } else tsSfx('wrong');
-  t1MeRender();
-}
-function t1MeNext() { _t1me.step++; tsSfx('level'); t1MeRender(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function t1MeFill(fromModel) {
-  const ta = document.getElementById('me-ta');
-  if (!ta) return;
-  if (ta.value.trim() && ta.value.trim() !== t1MeModel().join('\n\n') && !confirm('Thay chữ đang có trong ô?')) return;
-  ta.value = fromModel ? t1MeModel().join('\n\n') : '';
-  _t1me.draft = ta.value;
-  t1MeCount();
-  ta.focus();
-}
-function t1MeCount() {
-  const ta = document.getElementById('me-ta'), el = document.getElementById('me-count');
-  if (!ta || !el) return;
-  _t1me.draft = ta.value;
-  el.textContent = `${(ta.value.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length} từ · Task 1 cần ít nhất 150 từ`;
-}
-function t1MeCheck() {
-  const m = _t1me, text = (document.getElementById('me-ta').value || '').trim(), out = document.getElementById('me-out');
-  const words = (text.match(/[A-Za-z][A-Za-z'’-]*/g) || []).length;
-  const paras = text.split(/\n\s*\n/).filter(p => p.trim()).length;
-  const passive = (text.match(/\b(was|were|has been|have been)\s+(\w+ly\s+)?(demolished|built|constructed|converted|extended|relocated|moved|replaced|added|removed|expanded|enlarged|turned)\b/gi) || []).length;
-  const dirs = (text.match(/\b(north|south|east|west)(-?(east|west))?\b/gi) || []).length;
-  const copied = typeof raidRwCopied === 'function' ? raidRwCopied(text, m.prompt) : '';
-  const copyN = copied ? copied.split(' ').length : 0;
-  const rows = [
-    [words >= 150, `Độ dài: ${words} từ`, words >= 150 ? 'Đủ 150 từ.' : 'Chưa đủ 150 từ: thêm chi tiết về vị trí, hoặc so sánh trước và sau.'],
-    [paras >= 4, `Số đoạn: ${paras}`, paras >= 4 ? 'Đủ 4 đoạn: mở bài, overview, hai thân bài.' : 'Tách thành 4 đoạn, cách nhau một dòng trống.'],
-    [/\boverall\b/i.test(text), 'Có overview', /\boverall\b/i.test(text) ? 'Có câu Overall tả bức tranh chung.' : 'Thiếu overview. Thêm một đoạn mở bằng Overall, …'],
-    [passive >= Math.min(4, m.q.changes.length), `Câu bị động: ${passive}`, passive >= Math.min(4, m.q.changes.length) ? 'Dùng bị động để tả thay đổi.' : 'Tả thay đổi bằng bị động: was demolished, was converted into, was extended…'],
-    [dirs >= 3, `Chỉ vị trí: ${dirs} lần`, dirs >= 3 ? 'Có nói thay đổi ở đâu.' : 'Nói rõ vị trí: in the north-west, to the south of…'],
-    [copyN < 8, 'Không chép đề', copyN >= 8 ? `Đoạn ${copyN} từ chép nguyên văn đề: “${copied}”.` : 'Mở bài đã diễn đạt lại đề.'],
-  ];
-  const ok = rows.filter(r => r[0]).length;
-  out.innerHTML = `<div class="rd-rw-res"><div class="rd-rw-score">${ok === rows.length ? '🌟' : ok >= 4 ? '👍' : '💪'} Đạt ${ok}/${rows.length} tiêu chí</div>
-      <ul>${rows.map(([p, n, w]) => `<li class="${p ? 'ok' : 'no'}"><b>${p ? '✓' : '✗'} ${escapeHtml(n)}</b> ${escapeHtml(w)}</li>`).join('')}</ul></div>
-    <div class="rd-rw-model"><div class="rd-rw-model-h">Bài mẫu từ chính bản đồ này</div>${t1MeModel().map(p => `<p>${escapeHtml(p)}</p>`).join('')}</div>`;
-  if (ok === rows.length && !m.paid) {
-    m.paid = true;
-    const xu = Math.round(15 * T1_LEVELS[_t1Lv].coin);
-    walEarn(xu, true);
-    showToast(`✍️ Viết xong bài bản đồ: +${xu} 🪙`);
-  }
-  tsSfx(ok === rows.length ? 'level' : 'key');
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 /* ── Bài mẫu: model answers, two or three per chart type ─────────────────
    Each prompt carries its own chart (drawn from the numbers the answer
    uses), the question, and a four-paragraph answer: introduction,
@@ -26948,13 +27087,6 @@ function t1GroupBars(o) {
   });
   g += `<text x="${L - 44}" y="${T - 12}" class="t1-unit">${escapeHtml(o.unit)}</text><line x1="${L}" x2="${L}" y1="${T}" y2="${T + ph}" class="t1-axis"/><line x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}" class="t1-axis"/>`;
   return `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(o.title)}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(o.title)}">${g}</svg><div class="t1-legend">${o.series.map((s, si) => `<span><i style="background:${T1_COLORS[si]}"></i>${escapeHtml(s.name)}</span>`).join('')}</div></div>`;
-}
-function t1LibMap(title, rows) {
-  const cells = rows.join(' ').split(/\s+/);
-  return `<div><div class="t1-map-h">${escapeHtml(title)} <small>N ↑</small></div><div class="t1-map">${cells.map(c => `<span class="t1-map-cell${c === '·' ? ' empty' : ''}">${c === '·' ? '' : c}</span>`).join('')}</div></div>`;
-}
-function t1LibMaps(a, b, key) {
-  return `<div class="t1-maps">${t1LibMap(a[0], a[1])}${t1LibMap(b[0], b[1])}</div><div class="t1-map-key">${key.map(([i, n]) => `<span>${i} ${escapeHtml(n)}</span>`).join('')}</div>`;
 }
 function t1LibProc(name) {
   const P = T1_PROCS.find(p => p.name === name);
@@ -27040,19 +27172,17 @@ const T1_SAMPLES = [
       'Screen time fell with age after 24. Among 25 to 44-year-olds, Americans averaged 6.2 hours, compared with 5.1 hours in Vietnam and 4.3 hours in Japan. The oldest group spent the least time on screens, at around 3 hours in both Vietnam and Japan, although the figure for older Americans remained relatively high, at 4.8 hours.',
     ] },
   { id: 'map-riverton', block: 'sta', type: 'Map', icon: '🗺️',
-    prompt: 'The maps below show the town of Riverton in 2000 and at present.',
-    chart: () => t1LibMaps(['2000', ['🏭 · 🏫 · 🌾 🌾', '🌊 🌳 · ⛪ 🏥 ·', '· · 🅿️ · · ·', '🏠 · 🚉 · · 🏪']], ['Now', ['🏢 · 🏫 🏫 🏠 🏠', '🌊 🌳 · ⛪ · ·', '🏥 · 🌳 · · ·', '🏠 · 🚉 🏬 · 🏪']],
-      [['🏭', 'factory'], ['🏢', 'apartments'], ['🏫', 'school'], ['🌾', 'farmland'], ['🏠', 'houses'], ['🌊', 'lake'], ['🌳', 'park'], ['⛪', 'church'], ['🏥', 'hospital'], ['🅿️', 'car park'], ['🚉', 'train station'], ['🏬', 'shopping centre'], ['🏪', 'shop']]),
+    prompt: 'The maps below show the town of Riverton in 2000 and 2020.',
+    chart: () => t1mPair('riverton'),
     essay: [
-      'The two maps illustrate the changes that have taken place in the town of Riverton between 2000 and the present day.',
-      'Overall, the town has become considerably more residential and better provided with services, with most of its industrial and farming land being replaced. The central park and the church, however, have remained unchanged.',
-      'In the north, the factory beside the lake has been demolished and replaced by apartments, and the farmland in the north-east has made way for new houses. The school has also been extended to the east to accommodate more pupils, while the hospital has been relocated from the north-east to the west of the town.',
-      'Turning to the south, the car park in the centre has been converted into a park, providing more green space. In addition, a shopping centre has been built next to the train station. The houses in the south-west and the shop in the south-east, however, are still in their original positions.',
+      'The two maps illustrate the changes that took place in the town of Riverton between 2000 and 2020.',
+      'Overall, the town became more residential and better provided with services, while most of the farmland disappeared. The park and the church, however, remained unchanged.',
+      'North of the main road, the factory in the north-west was demolished and replaced by apartments, and the farmland in the north-east made way for new houses. The school was extended to the east to accommodate more pupils, while the hospital was relocated from the east of the town to the west, next to the lake.',
+      'To the south of the main road, the car park in the centre was converted into a park, providing more green space, and a shopping centre was built next to the train station. The houses in the south-west and the shop in the south-east, however, remained in their original positions, as did the train station.',
     ] },
   { id: 'map-seaview', block: 'sta', type: 'Map', icon: '🗺️',
     prompt: 'The maps below show the coastal village of Seaview in 1980 and 2020.',
-    chart: () => t1LibMaps(['1980', ['🌲 🌲 🌲 🌲 · ·', '🌾 🌾 🏠 🏠 · ·', '🌾 🌾 🏠 ⛪ · ·', '🏖️ 🏖️ 🏖️ 🏖️ 🏖️ 🏖️']], ['2020', ['🌲 🌲 🅿️ 🌲 · ·', '🏨 🏨 🏠 🏠 🏪 ·', '🏘️ 🏘️ 🏠 ⛪ ☕ ·', '🏖️ 🏖️ 🏖️ 🏖️ 🛥️ 🏖️']],
-      [['🌲', 'forest'], ['🌾', 'farmland'], ['🏠', 'houses'], ['⛪', 'church'], ['🏖️', 'beach'], ['🅿️', 'car park'], ['🏨', 'hotel'], ['🏘️', 'housing estate'], ['🏪', 'shop'], ['☕', 'café'], ['🛥️', 'pier']]),
+    chart: () => t1mPair('seaview'),
     essay: [
       'The maps compare the coastal village of Seaview in 1980 and 2020.',
       'Overall, the village was transformed from a quiet farming community into a tourist destination, as its farmland and part of the forest gave way to accommodation and visitor facilities. The beach and the original houses, however, remained largely unchanged.',
@@ -27061,13 +27191,30 @@ const T1_SAMPLES = [
     ] },
   { id: 'map-school', block: 'sta', type: 'Map', icon: '🗺️',
     prompt: 'The plans below show Westbrook School in 2005 and now.',
-    chart: () => t1LibMaps(['2005', ['🌳 🌳 🏠 🏠 · ·', '🏫 🏫 · · ⚽ ⚽', '🏫 🏫 · · ⚽ ⚽', '🅿️ · · 🌳 🌳 🌳']], ['Now', ['🌳 🌳 🏫 🏫 · ·', '🏫 🏫 📚 · 🏟️ ⚽', '🏫 🏫 🍽️ · 🏟️ ⚽', '🅿️ 🅿️ 🅿️ 🌳 🌳 🌳']],
-      [['🏫', 'school building / classrooms'], ['🏠', 'staff houses'], ['⚽', 'playing field'], ['🏟️', 'sports hall'], ['📚', 'library'], ['🍽️', 'cafeteria'], ['🅿️', 'car park'], ['🌳', 'trees']]),
+    chart: () => t1mPair('westbrook'),
     essay: [
       'The two plans illustrate how Westbrook School has been developed since 2005.',
       'Overall, the school has expanded considerably, with several new facilities added in the previously empty centre of the site. Most of the playing field and all of the trees, however, have been preserved.',
       'The most significant changes have taken place in the centre and north of the school. The two staff houses in the north have been converted into classrooms, providing extra space for lessons, and a new library has been built directly to the east of the main building, with a cafeteria constructed just south of it.',
       'On the eastern side, half of the playing field has made way for a sports hall, although the remaining part is still used for sport. Meanwhile, the car park in the south-west has been extended eastwards, roughly tripling in size. The main building and the trees in the north-west and south-east have remained unchanged.',
+    ] },
+  { id: 'map-greenfield', block: 'sta', type: 'Map', icon: '🗺️',
+    prompt: 'The maps below show the town of Greenfield in 1985 and in 2025.',
+    chart: () => t1mPair('greenfield'),
+    essay: [
+      'The two maps illustrate how the town of Greenfield changed between 1985 and 2025.',
+      'Overall, Greenfield was transformed from a largely rural settlement into a more developed town, with its forest and farmland giving way to housing, tourism and shopping facilities. The church and the river, however, remained unchanged.',
+      'In the north, the forest was cleared to make way for a hotel and a car park, while the farmland in the north-west was converted into a housing estate. In addition, a supermarket was built in the east, just north of the river, on land that had previously been empty.',
+      'In terms of infrastructure, the dirt track running from north to south was upgraded to a main road, and the wooden bridge across the river was replaced by a concrete one. In the south-east, the school was converted into a community centre, whereas the church in the south-west remained in its original position.',
+    ] },
+  { id: 'map-riverside', block: 'sta', type: 'Map', icon: '🗺️',
+    prompt: 'The maps below show the town of Riverside in 1980 and 2020.',
+    chart: () => t1mPair('riverside'),
+    essay: [
+      'The maps compare the town of Riverside in 1980 and 2020, showing how its layout changed over this forty-year period.',
+      'Overall, Riverside became considerably more residential and commercial, as its industrial and agricultural land was redeveloped. The church, the river and the bridge, however, remained unchanged.',
+      'In the north, the factory was demolished and replaced by a shopping centre, while the farmland in the west was converted into a large housing estate. The dirt road running from east to west through the middle of the town was also upgraded to a dual carriageway.',
+      'In the east, which had previously been empty, a car park was built just north of the road, and a park was created in the south-east, beside the river, providing new green space for residents. The church in the centre of the town and the bridge across the river in the south remained in their original positions.',
     ] },
   { id: 'proc-bricks', block: 'sta', type: 'Process', icon: '⚙️',
     prompt: 'The diagram below shows the process by which bricks are manufactured for the building industry.',
