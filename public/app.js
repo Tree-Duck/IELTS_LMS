@@ -23571,7 +23571,7 @@ const T1_BLOCKS = {
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
-  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng: SURGE, PLUMMET, PLATEAU, SOAR, mỗi người 2 chiêu. Nhặt ngọc chữ đúng thứ tự để ghép câu, hạ Trùm cuối mỗi phần và chọn đúng câu nối đoạn.', start: 't1SurvStart()' },
+  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng xuống hầm ngục: SURGE, PLUMMET, PLATEAU, SOAR, mỗi người 2 chiêu. Nhìn biểu đồ, nhặt ngọc chữ đúng thứ tự để ghép câu, né cụm sai thông tin, hạ Trùm cuối mỗi phần.', start: 't1SurvStart()' },
   snake:   { icon: '🐍', name: 'Rắn săn mồi',            desc: 'Đề là một biểu đồ. Điều khiển rắn ăn đúng mồi có cụm mô tả nó. Ăn sai mất mạng, đâm tường là thua.', start: 't1SnakeStart()' },
   slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
   hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
@@ -26736,53 +26736,52 @@ function t1SampleOpen(id, show) {
    rings of slow bullets, and the last one calls in help. It drops three
    gold gems: walk over the right linker for the next part (Overall, /
    In 2000, / By contrast,). Right first time opens an upgrade chest.
-   Sprites: Kenney Toon Characters, CC0. */
+   Sprites: 0x72's 16x16 DungeonTileset II (CC0), packed into
+   public/img/t1/dungeon.png. */
 const T1_SURV = {
   dyn: [
-    { part: 'Mở bài', img: 'line-internet', c: ['The line graph', 'illustrates', 'the proportion of households', 'with internet access', 'in three countries', 'between 2000 and 2020.'], bad: ['shows below', 'illustrate', 'from 2000 to 2020 years', 'In conclusion,'],
+    { part: 'Mở bài', img: 'line-internet', c: ['The line graph', 'illustrates', 'the proportion of households', 'with internet access', 'in three countries', 'between 2000 and 2020.'], bad: ['shows below', 'illustrate', 'from 2000 to 2020 years', 'In conclusion,'], fake: ['in four countries', 'between 1990 and 2010.', 'The bar chart'],
       vi: 'Biểu đồ đường minh hoạ tỉ lệ hộ gia đình có internet ở ba nước từ 2000 đến 2020.' },
-    { part: 'Overview', img: 'line-internet', c: ['Overall,', 'internet access', 'rose considerably', 'in all three countries,', 'while', 'Vietnam saw', 'the most dramatic growth.'], bad: ['Overall the', 'rised', 'more dramatic', 'In summary of'],
+    { part: 'Overview', img: 'line-internet', c: ['Overall,', 'internet access', 'rose considerably', 'in all three countries,', 'while', 'Vietnam saw', 'the most dramatic growth.'], bad: ['Overall the', 'rised', 'more dramatic', 'In summary of'], fake: ['fell considerably', 'Brazil saw', 'in two of the three countries,'],
       vi: 'Nhìn chung, tỉ lệ dùng internet tăng đáng kể ở cả ba nước, trong khi Việt Nam tăng mạnh nhất.' },
-    { part: 'Overview', img: 'line-drinks', c: ['Overall,', 'coffee consumption', 'increased dramatically,', 'whereas', 'tea consumption', 'declined steadily.'], bad: ['increased dramatic', 'Firstly,', 'declining steady', 'In the other hand'],
+    { part: 'Overview', img: 'line-drinks', c: ['Overall,', 'coffee consumption', 'increased dramatically,', 'whereas', 'tea consumption', 'declined steadily.'], bad: ['increased dramatic', 'Firstly,', 'declining steady', 'In the other hand'], fake: ['decreased dramatically,', 'rose steadily.', 'soft drink consumption'],
       vi: 'Nhìn chung, lượng cà phê tăng mạnh, trong khi lượng trà giảm đều.' },
-    { part: 'Mở bài', img: 'bar-students', c: ['The bar chart', 'compares', 'the number of international students', 'in Australia, Canada and Japan', 'in four separate years.'], bad: ['compare', 'the amount of students', 'on four years'],
+    { part: 'Mở bài', img: 'bar-students', c: ['The bar chart', 'compares', 'the number of international students', 'in Australia, Canada and Japan', 'in four separate years.'], bad: ['compare', 'the amount of students', 'on four years'], fake: ['in Australia, Canada and the UK', 'in three separate years.', 'The line graph'],
       vi: 'Biểu đồ cột so sánh số sinh viên quốc tế ở Úc, Canada và Nhật trong bốn năm.' },
-    { part: 'Thân bài', img: 'line-internet', c: ['In 2000,', 'a quarter of British households', 'were connected,', 'compared with', 'just 5%', 'in Brazil.'], bad: ['was connected', 'compare with', 'in the Brazil'],
+    { part: 'Thân bài', img: 'line-internet', c: ['In 2000,', 'a quarter of British households', 'were connected,', 'compared with', 'just 5%', 'in Brazil.'], bad: ['was connected', 'compare with', 'in the Brazil'], fake: ['half of British households', 'just 15%', 'in Vietnam.'],
       vi: 'Năm 2000, một phần tư hộ ở Anh có internet, so với chỉ 5% ở Brazil.' },
-    { part: 'Thân bài', img: 'line-internet', c: ["Vietnam's figure", 'surged', 'to 55%', 'in 2015,', 'before overtaking', 'Brazil.'], bad: ['by 55%', 'overtake', 'surge'],
+    { part: 'Thân bài', img: 'line-internet', c: ["Vietnam's figure", 'surged', 'to 55%', 'in 2015,', 'before overtaking', 'Brazil.'], bad: ['by 55%', 'overtake', 'surge'], fake: ['to 80%', 'in 2010,', 'the UK.'],
       vi: 'Con số của Việt Nam tăng vọt lên 55% năm 2015, trước khi vượt Brazil.' },
   ],
   sta: [
-    { part: 'Mở bài', img: 'map-riverton', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], bad: ['illustrates', 'that take place', 'below', 'In conclusion,'],
+    { part: 'Mở bài', img: 'map-riverton', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], bad: ['illustrates', 'that take place', 'below', 'In conclusion,'], fake: ['The three maps', 'in the city of Seaview', 'between 1990 and 2010.'],
       vi: 'Hai bản đồ minh hoạ những thay đổi diễn ra ở thị trấn Riverton từ 2000 đến 2020.' },
-    { part: 'Overview', img: 'map-riverton', c: ['Overall,', 'the town', 'became more residential,', 'while', 'most of the farmland', 'disappeared.'], bad: ['become', 'was disappeared', 'Firstly,'],
+    { part: 'Overview', img: 'map-riverton', c: ['Overall,', 'the town', 'became more residential,', 'while', 'most of the farmland', 'disappeared.'], bad: ['become', 'was disappeared', 'Firstly,'], fake: ['became more industrial,', 'most of the houses', 'the lake'],
       vi: 'Nhìn chung, thị trấn có nhiều nhà ở hơn, trong khi phần lớn đất nông nghiệp biến mất.' },
-    { part: 'Thân bài', img: 'map-riverton', c: ['The factory', 'in the north-west', 'was demolished', 'and replaced', 'by apartments.'], bad: ['demolished', 'were demolished', 'replaced with by'],
+    { part: 'Thân bài', img: 'map-riverton', c: ['The factory', 'in the north-west', 'was demolished', 'and replaced', 'by apartments.'], bad: ['demolished', 'were demolished', 'replaced with by'], fake: ['in the south-east', 'by a car park.', 'The hospital'],
       vi: 'Nhà máy ở phía tây bắc bị phá bỏ và thay bằng căn hộ.' },
-    { part: 'Overview', img: 'proc-bricks', c: ['Overall,', 'there are', 'seven stages', 'in the process,', 'beginning with', 'the digging of clay.'], bad: ['there is', 'begin with', 'In conclusion,'],
+    { part: 'Overview', img: 'proc-bricks', c: ['Overall,', 'there are', 'seven stages', 'in the process,', 'beginning with', 'the digging of clay.'], bad: ['there is', 'begin with', 'In conclusion,'], fake: ['five stages', 'the packaging of bricks.', 'ending with'],
       vi: 'Nhìn chung, quy trình có bảy giai đoạn, bắt đầu bằng việc đào đất sét.' },
-    { part: 'Thân bài', img: 'proc-bricks', c: ['Once', 'the clay', 'has been shaped,', 'it is dried', 'in an oven.'], bad: ['has shaped', 'it dries', 'Although'],
+    { part: 'Thân bài', img: 'proc-bricks', c: ['Once', 'the clay', 'has been shaped,', 'it is dried', 'in an oven.'], bad: ['has shaped', 'it dries', 'Although'], fake: ['it is packaged', 'in a kiln.', 'has been fired,'],
       vi: 'Khi đất sét đã được tạo hình, nó được sấy trong lò.' },
-    { part: 'Overview', img: 'pie-budget', c: ['Overall,', 'housing', 'replaced food', 'as the largest expense', 'over the twenty years.'], bad: ['the most large', 'replace', 'In 2000,'],
+    { part: 'Overview', img: 'pie-budget', c: ['Overall,', 'housing', 'replaced food', 'as the largest expense', 'over the twenty years.'], bad: ['the most large', 'replace', 'In 2000,'], fake: ['transport', 'as the smallest expense', 'over the ten years.'],
       vi: 'Nhìn chung, nhà ở thay thế thực phẩm thành khoản chi lớn nhất trong hai mươi năm.' },
   ],
 };
 const T1H_CFG = { a: { spawn: 1.3, esp: 50, dmg: 7, bad: 1 }, d: { spawn: 1.05, esp: 60, dmg: 9, bad: 2 }, l: { spawn: 0.85, esp: 70, dmg: 11, bad: 3 } };
-// Sheet frames, 96 x 128 each: 0 idle, 1-8 walk, 9 hurt, 10 attack, 11 cheer.
-const T1H_FW = 96, T1H_FH = 128;
-// The sprite ids stay as they were bought (female, knight, archer); only names and roles changed.
+// Hero ids stay as they were bought (female, knight, archer); the look is sprite + sex.
 const T1H_HEROES = [
-  { id: 'male', name: 'SURGE', role: 'Xạ thủ', icon: '🔫', color: '#E5533D', weapon: 'gun', hp: 100, speed: 175,
-    desc: 'Bắn dồn dập như đường biểu đồ tăng vọt.', passive: 'Bắn liên tục thì càng lúc càng nhanh, tới +50%.',
+  { id: 'male', name: 'SURGE', title: 'Gunner', sprite: 'dwarf', sex: 'm', role: 'Xạ thủ', icon: '🔫', color: '#E5533D', weapon: 'gun', hp: 100, speed: 175,
+    desc: 'Người lùn thợ súng, bắn dồn dập như đường biểu đồ tăng vọt.', passive: 'Bắn liên tục thì càng lúc càng nhanh, tới +50%.',
     skills: [{ id: 'rush', icon: '💢', name: 'Xả đạn', cd: 10, desc: 'Tốc độ bắn x3 trong 3 giây.' }, { id: 'grenade', icon: '💣', name: 'Lựu đạn', cd: 8, desc: 'Ném vào đám đông nhất, nổ to.' }] },
-  { id: 'female', name: 'PLUMMET', role: 'Pháp sư', icon: '☄️', color: '#8D5CFF', weapon: 'magic', hp: 90, speed: 170, item: 't1hero_female', price: 100,
-    desc: 'Gọi thiên thạch lao thẳng xuống như số liệu giảm mạnh.', passive: 'Quái chết thì nổ nhỏ, lan sang con bên cạnh.',
+  { id: 'female', name: 'PLUMMET', title: 'Archmage', sprite: 'wizzard', sex: 'f', role: 'Pháp sư', icon: '☄️', color: '#8D5CFF', weapon: 'magic', hp: 90, speed: 170, item: 't1hero_female', price: 100,
+    desc: 'Phù thuỷ gọi thiên thạch lao thẳng xuống như số liệu giảm mạnh.', passive: 'Quái chết thì nổ nhỏ, lan sang con bên cạnh.',
     skills: [{ id: 'meteor', icon: '☄️', name: 'Thiên thạch', cd: 9, desc: 'Rơi vào chỗ đông quái nhất.' }, { id: 'freeze', icon: '❄️', name: 'Băng giá', cd: 14, desc: 'Cả màn hình chậm lại 3 giây.' }] },
-  { id: 'knight', name: 'PLATEAU', role: 'Đỡ đòn', icon: '🛡️', color: '#2D7FD3', weapon: 'sword', hp: 140, speed: 160, item: 't1hero_knight', price: 200,
-    desc: 'Đứng vững như đường đi ngang, không gì xô ngã được.', passive: 'Nhận ít hơn 30% sát thương.',
+  { id: 'knight', name: 'PLATEAU', title: 'Sir', sprite: 'knight', sex: 'm', role: 'Đỡ đòn', icon: '🛡️', color: '#2D7FD3', weapon: 'sword', hp: 140, speed: 160, item: 't1hero_knight', price: 200,
+    desc: 'Hiệp sĩ giáp nặng, đứng vững như đường đi ngang, không gì xô ngã được.', passive: 'Nhận ít hơn 30% sát thương.',
     skills: [{ id: 'shield', icon: '🛡️', name: 'Khiên Bình Ổn', cd: 12, desc: 'Miễn sát thương 3 giây.' }, { id: 'stomp', icon: '💥', name: 'Dậm đất', cd: 8, desc: 'Choáng và đẩy lùi quái quanh người.' }] },
-  { id: 'archer', name: 'SOAR', role: 'Cung thủ', icon: '🏹', color: '#E5A52D', weapon: 'bow', hp: 95, speed: 195, item: 't1hero_archer', price: 300,
-    desc: 'Bay vút lên cao, tên bắn xa nhất đội.', passive: 'Tên xuyên thêm 1 con, chạy nhanh hơn.',
+  { id: 'archer', name: 'SOAR', title: 'Ranger', sprite: 'elf', sex: 'f', role: 'Cung thủ', icon: '🏹', color: '#E5A52D', weapon: 'bow', hp: 95, speed: 195, item: 't1hero_archer', price: 300,
+    desc: 'Tiên tộc cung thủ, bay vút lên cao, tên bắn xa nhất đội.', passive: 'Tên xuyên thêm 1 con, chạy nhanh hơn.',
     skills: [{ id: 'dash', icon: '💨', name: 'Lướt', cd: 5, desc: 'Phóng theo hướng đang chạy, không bị trúng đòn lúc lướt.' }, { id: 'rain', icon: '🌧️', name: 'Mưa tên', cd: 12, desc: 'Vùng mưa tên 3 giây chỗ đông quái nhất.' }] },
 ];
 const T1H_SKILL_KEYS = ['J', 'K'];
@@ -26797,6 +26796,7 @@ const T1H_BOSS_Q = {
     why: 'By contrast mở ý đối lập với đoạn trước. On the contrary dùng để bác bỏ ý vừa nói; "contrastly" không có trong tiếng Anh.' },
 };
 const T1H_BOSS = { a: 380, d: 500, l: 650 };
+const T1H_BOSS_LOOK = [['big_zombie', 'Zombie khổng lồ'], ['ogre', 'Ogre'], ['big_demon', 'Quỷ lớn']];
 const T1H_WEAPONS = {
   gun:   { dmg: 10, rate: 2.2, count: 1, pierce: 0, splash: 0, speed: 560, range: 430 },
   magic: { dmg: 11, rate: 1.4, count: 1, pierce: 0, splash: 70, speed: 380, range: 400 },
@@ -26817,22 +26817,43 @@ const T1H_UPS = [
   { id: 'cdr', icon: '⏱️', name: () => 'Hồi chiêu nhanh', desc: () => 'Hai chiêu J, K hồi nhanh hơn 20%.', ok: (w, g) => g.cdMul > 0.5, apply: (w, g) => { g.cdMul *= 0.8; } },
 ];
 const T1H_FOES = {
-  zombie: { sheet: 'zombie', hp: 22, sp: 1, r: 15, scale: 0.5, dmg: 1, pts: 5 },
-  robot:  { sheet: 'robot', hp: 14, sp: 1.45, r: 14, scale: 0.46, dmg: 0.8, pts: 6 },
-  brute:  { sheet: 'zombie', hp: 90, sp: 0.75, r: 24, scale: 0.8, dmg: 1.8, pts: 15, tint: true },
+  zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5 },
+  robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6 },
+  brute:  { look: ['orc_warrior', 'masked_orc', 'chort'], hp: 90, sp: 0.75, r: 22, scale: 3.3, dmg: 1.8, pts: 15 },
 };
 const T1H_KEYS = { KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
 const T1H_JOY = 46;
 
-// Sheets load once; each keeps white and red silhouettes for hit flashes and the brute tint.
-const T1H_SHEETS = {};
-function t1hSheet(key) {
-  if (!T1H_SHEETS[key]) {
-    const img = new Image(), s = T1H_SHEETS[key] = { img, ready: false };
-    img.onload = () => { s.flash = t1hSilhouette(img, '#fff'); s.red = t1hSilhouette(img, '#C0392B'); s.ice = t1hSilhouette(img, '#7FC8F8'); s.ready = true; };
-    img.src = `/img/t1/${key}.png`;
-  }
-  return T1H_SHEETS[key];
+// One atlas for every sprite: [x, y, w, h] by frame name, as in the tileset's frames folder.
+const T1D_RECTS = {"big_zombie_idle_anim_f0":[0,0,32,36],"big_zombie_idle_anim_f1":[33,0,32,36],"big_zombie_idle_anim_f2":[66,0,32,36],"big_zombie_idle_anim_f3":[99,0,32,36],"big_zombie_run_anim_f0":[132,0,32,36],"big_zombie_run_anim_f1":[165,0,32,36],"big_zombie_run_anim_f2":[198,0,32,36],"big_zombie_run_anim_f3":[231,0,32,36],"ogre_idle_anim_f0":[264,0,32,36],"ogre_idle_anim_f1":[297,0,32,36],"ogre_idle_anim_f2":[330,0,32,36],"ogre_idle_anim_f3":[363,0,32,36],"ogre_run_anim_f0":[396,0,32,36],"ogre_run_anim_f1":[429,0,32,36],"ogre_run_anim_f2":[462,0,32,36],"ogre_run_anim_f3":[0,37,32,36],"big_demon_idle_anim_f0":[33,37,32,36],"big_demon_idle_anim_f1":[66,37,32,36],"big_demon_idle_anim_f2":[99,37,32,36],"big_demon_idle_anim_f3":[132,37,32,36],"big_demon_run_anim_f0":[165,37,32,36],"big_demon_run_anim_f1":[198,37,32,36],"big_demon_run_anim_f2":[231,37,32,36],"big_demon_run_anim_f3":[264,37,32,36],"weapon_red_magic_staff":[297,37,8,30],"weapon_knight_sword":[306,37,10,29],"knight_m_idle_anim_f0":[317,37,16,28],"knight_m_idle_anim_f1":[334,37,16,28],"knight_m_idle_anim_f2":[351,37,16,28],"knight_m_idle_anim_f3":[368,37,16,28],"knight_m_run_anim_f0":[385,37,16,28],"knight_m_run_anim_f1":[402,37,16,28],"knight_m_run_anim_f2":[419,37,16,28],"knight_m_run_anim_f3":[436,37,16,28],"knight_m_hit_anim_f0":[453,37,16,28],"knight_f_idle_anim_f0":[470,37,16,28],"knight_f_idle_anim_f1":[487,37,16,28],"knight_f_idle_anim_f2":[0,74,16,28],"knight_f_idle_anim_f3":[17,74,16,28],"knight_f_run_anim_f0":[34,74,16,28],"knight_f_run_anim_f1":[51,74,16,28],"knight_f_run_anim_f2":[68,74,16,28],"knight_f_run_anim_f3":[85,74,16,28],"knight_f_hit_anim_f0":[102,74,16,28],"wizzard_m_idle_anim_f0":[119,74,16,28],"wizzard_m_idle_anim_f1":[136,74,16,28],"wizzard_m_idle_anim_f2":[153,74,16,28],"wizzard_m_idle_anim_f3":[170,74,16,28],"wizzard_m_run_anim_f0":[187,74,16,28],"wizzard_m_run_anim_f1":[204,74,16,28],"wizzard_m_run_anim_f2":[221,74,16,28],"wizzard_m_run_anim_f3":[238,74,16,28],"wizzard_m_hit_anim_f0":[255,74,16,28],"wizzard_f_idle_anim_f0":[272,74,16,28],"wizzard_f_idle_anim_f1":[289,74,16,28],"wizzard_f_idle_anim_f2":[306,74,16,28],"wizzard_f_idle_anim_f3":[323,74,16,28],"wizzard_f_run_anim_f0":[340,74,16,28],"wizzard_f_run_anim_f1":[357,74,16,28],"wizzard_f_run_anim_f2":[374,74,16,28],"wizzard_f_run_anim_f3":[391,74,16,28],"wizzard_f_hit_anim_f0":[408,74,16,28],"elf_m_idle_anim_f0":[425,74,16,28],"elf_m_idle_anim_f1":[442,74,16,28],"elf_m_idle_anim_f2":[459,74,16,28],"elf_m_idle_anim_f3":[476,74,16,28],"elf_m_run_anim_f0":[493,74,16,28],"elf_m_run_anim_f1":[0,103,16,28],"elf_m_run_anim_f2":[17,103,16,28],"elf_m_run_anim_f3":[34,103,16,28],"elf_m_hit_anim_f0":[51,103,16,28],"elf_f_idle_anim_f0":[68,103,16,28],"elf_f_idle_anim_f1":[85,103,16,28],"elf_f_idle_anim_f2":[102,103,16,28],"elf_f_idle_anim_f3":[119,103,16,28],"elf_f_run_anim_f0":[136,103,16,28],"elf_f_run_anim_f1":[153,103,16,28],"elf_f_run_anim_f2":[170,103,16,28],"elf_f_run_anim_f3":[187,103,16,28],"elf_f_hit_anim_f0":[204,103,16,28],"dwarf_m_idle_anim_f0":[221,103,16,28],"dwarf_m_idle_anim_f1":[238,103,16,28],"dwarf_m_idle_anim_f2":[255,103,16,28],"dwarf_m_idle_anim_f3":[272,103,16,28],"dwarf_m_run_anim_f0":[289,103,16,28],"dwarf_m_run_anim_f1":[306,103,16,28],"dwarf_m_run_anim_f2":[323,103,16,28],"dwarf_m_run_anim_f3":[340,103,16,28],"dwarf_m_hit_anim_f0":[357,103,16,28],"dwarf_f_idle_anim_f0":[374,103,16,28],"dwarf_f_idle_anim_f1":[391,103,16,28],"dwarf_f_idle_anim_f2":[408,103,16,28],"dwarf_f_idle_anim_f3":[425,103,16,28],"dwarf_f_run_anim_f0":[442,103,16,28],"dwarf_f_run_anim_f1":[459,103,16,28],"dwarf_f_run_anim_f2":[476,103,16,28],"dwarf_f_run_anim_f3":[493,103,16,28],"dwarf_f_hit_anim_f0":[0,132,16,28],"weapon_bow":[17,132,14,26],"orc_warrior_idle_anim_f0":[32,132,16,23],"orc_warrior_idle_anim_f1":[49,132,16,23],"orc_warrior_idle_anim_f2":[66,132,16,23],"orc_warrior_idle_anim_f3":[83,132,16,23],"orc_warrior_run_anim_f0":[100,132,16,23],"orc_warrior_run_anim_f1":[117,132,16,23],"orc_warrior_run_anim_f2":[134,132,16,23],"orc_warrior_run_anim_f3":[151,132,16,23],"masked_orc_idle_anim_f0":[168,132,16,23],"masked_orc_idle_anim_f1":[185,132,16,23],"masked_orc_idle_anim_f2":[202,132,16,23],"masked_orc_idle_anim_f3":[219,132,16,23],"masked_orc_run_anim_f0":[236,132,16,23],"masked_orc_run_anim_f1":[253,132,16,23],"masked_orc_run_anim_f2":[270,132,16,23],"masked_orc_run_anim_f3":[287,132,16,23],"chort_idle_anim_f0":[304,132,16,23],"chort_idle_anim_f1":[321,132,16,23],"chort_idle_anim_f2":[338,132,16,23],"chort_idle_anim_f3":[355,132,16,23],"chort_run_anim_f0":[372,132,16,23],"chort_run_anim_f1":[389,132,16,23],"chort_run_anim_f2":[406,132,16,23],"chort_run_anim_f3":[423,132,16,23],"weapon_arrow":[440,132,7,21],"tiny_zombie_idle_anim_f0":[448,132,16,16],"tiny_zombie_idle_anim_f1":[465,132,16,16],"tiny_zombie_idle_anim_f2":[482,132,16,16],"tiny_zombie_idle_anim_f3":[0,161,16,16],"tiny_zombie_run_anim_f0":[17,161,16,16],"tiny_zombie_run_anim_f1":[34,161,16,16],"tiny_zombie_run_anim_f2":[51,161,16,16],"tiny_zombie_run_anim_f3":[68,161,16,16],"skelet_idle_anim_f0":[85,161,16,16],"skelet_idle_anim_f1":[102,161,16,16],"skelet_idle_anim_f2":[119,161,16,16],"skelet_idle_anim_f3":[136,161,16,16],"skelet_run_anim_f0":[153,161,16,16],"skelet_run_anim_f1":[170,161,16,16],"skelet_run_anim_f2":[187,161,16,16],"skelet_run_anim_f3":[204,161,16,16],"goblin_idle_anim_f0":[221,161,16,16],"goblin_idle_anim_f1":[238,161,16,16],"goblin_idle_anim_f2":[255,161,16,16],"goblin_idle_anim_f3":[272,161,16,16],"goblin_run_anim_f0":[289,161,16,16],"goblin_run_anim_f1":[306,161,16,16],"goblin_run_anim_f2":[323,161,16,16],"goblin_run_anim_f3":[340,161,16,16],"imp_idle_anim_f0":[357,161,16,16],"imp_idle_anim_f1":[374,161,16,16],"imp_idle_anim_f2":[391,161,16,16],"imp_idle_anim_f3":[408,161,16,16],"imp_run_anim_f0":[425,161,16,16],"imp_run_anim_f1":[442,161,16,16],"imp_run_anim_f2":[459,161,16,16],"imp_run_anim_f3":[476,161,16,16],"floor_1":[493,161,16,16],"floor_2":[0,178,16,16],"floor_3":[17,178,16,16],"floor_4":[34,178,16,16],"floor_5":[51,178,16,16],"floor_6":[68,178,16,16],"floor_7":[85,178,16,16],"floor_8":[102,178,16,16],"skull":[119,178,16,16],"ui_heart_full":[136,178,13,12]};
+const T1D = { img: null, ready: false };
+// Loads the atlas once, with white, red and ice silhouettes for hit flashes and effects.
+function t1dLoad() {
+  if (T1D.img) return;
+  const img = T1D.img = new Image();
+  img.onload = () => { T1D.flash = t1hSilhouette(img, '#fff'); T1D.red = t1hSilhouette(img, '#C0392B'); T1D.ice = t1hSilhouette(img, '#7FC8F8'); T1D.ready = true; };
+  img.src = '/img/t1/dungeon.png';
+}
+// One frame with its feet at (x, y), crisp pixels, optional shadow and overlays.
+function t1dDraw(c, name, x, y, scale, flip, over, noShadow) {
+  const r = T1D_RECTS[name];
+  if (!r) return;
+  const w = r[2] * scale, h = r[3] * scale;
+  if (!noShadow) { c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x, y - 1, w * 0.4, 3 + scale * 1.2, 0, 0, Math.PI * 2); c.fill(); }
+  if (!T1D.ready) return;
+  c.save();
+  c.imageSmoothingEnabled = false;
+  c.translate(x, y);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
+  (over || []).forEach(([k, a]) => { if (a > 0) { c.globalAlpha = a; c.drawImage(T1D[k], r[0], r[1], r[2], r[3], -w / 2, -h, w, h); } });
+  c.restore();
+}
+function t1hSex(h) { try { return localStorage.getItem('t1Sex_' + h.id) || h.sex; } catch (e) { return h.sex; } }
+function t1hSetSex(id, sex) {
+  try { localStorage.setItem('t1Sex_' + id, sex); } catch (e) {}
+  tsSfx('key');
+  t1hPickScreen();
 }
 function t1hSilhouette(img, color) {
   const c = document.createElement('canvas');
@@ -26850,7 +26871,7 @@ function t1hChosen() { let id = 'male'; try { id = localStorage.getItem('t1Hero'
 /* Hero select: owned heroes play, the rest unlock with coins. */
 function t1SurvStart() {
   t1Leave();
-  ['male', 'female', 'knight', 'archer', 'zombie', 'robot'].forEach(t1hSheet);
+  t1dLoad();
   t1hPickScreen();
   walLoad().then(() => { if (!_t1 && t1Root()?.querySelector('.t1h-pick')) t1hPickScreen(); });
 }
@@ -26867,8 +26888,9 @@ function t1hPickScreen() {
         const own = t1hOwned(h);
         return `<div class="t1h-hero${h.id === sel.id ? ' on' : ''}${own ? '' : ' locked'}" style="--hc:${h.color}">
           <span class="t1h-role">${h.icon} ${h.role}</span>
-          <span class="t1h-face" style="background-image:url(/img/t1/${h.id}.png)"></span>
-          <b class="t1h-name">${h.name}</b>
+          <canvas class="t1h-face" width="72" height="96" data-look="${h.sprite}_${t1hSex(h)}" aria-hidden="true"></canvas>
+          <span class="t1h-sex" role="group" aria-label="Chọn nam hay nữ">${[['m', '♂ Nam'], ['f', '♀ Nữ']].map(([k, t]) => `<button class="${t1hSex(h) === k ? 'on' : ''}" aria-pressed="${t1hSex(h) === k}" onclick="t1hSetSex('${h.id}', '${k}')">${t}</button>`).join('')}</span>
+          <b class="t1h-name"><small>${h.title}</small>${h.name}</b>
           <small>${escapeHtml(h.desc)}</small>
           <span class="t1h-stats">❤️ ${h.hp} · 👟 ${h.speed}</span>
           <ul class="t1h-kit">
@@ -26882,11 +26904,27 @@ function t1hPickScreen() {
       <ul class="t1h-how">
         <li>🕹️ Đi bằng <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> hoặc phím mũi tên. Điện thoại: chạm chỗ nào cũng được rồi kéo.</li>
         <li>⚔️ Nhân vật tự đánh. Chiêu riêng: <kbd>J</kbd> <kbd>K</kbd>, điện thoại bấm 2 nút tròn góc phải.</li>
-        <li>💎 Quái chết rơi <b>ngọc chữ</b> tím: đi qua để nhặt <b>đúng thứ tự</b> ghép câu. Nhặt cụm sai hay chưa tới lượt thì mất máu.</li>
+        <li>💎 Quái chết rơi <b>ngọc chữ</b> tím: đi qua để nhặt <b>đúng thứ tự</b> ghép câu. Biểu đồ của câu hiện bên trái: cụm nào trái với biểu đồ, sai ngữ pháp, hay chưa tới lượt thì nhặt vào mất máu.</li>
         <li>⬆️ Ghép xong câu là lên cấp: gõ lại cả câu, đúng thì chọn nâng cấp (2 tia, 3 tia, nổ lan, kiếm xoay…).</li>
         <li>👹 Hết mỗi phần bài có <b>Trùm</b>. Hạ trùm rồi nhặt <b>ngọc vàng</b> đúng câu nối đoạn để mở rương.</li>
       </ul>
     </div>`;
+  t1hPickAnim();
+}
+// The hero faces on the select screen: idle, and running for the chosen one.
+function t1hPickAnim() {
+  clearInterval(t1hPickAnim.t);
+  let f = 0;
+  t1hPickAnim.t = setInterval(() => {
+    const cs = document.querySelectorAll('.t1h-face[data-look]');
+    if (!cs.length) { clearInterval(t1hPickAnim.t); return; }
+    f++;
+    cs.forEach(cv => {
+      const x = cv.getContext('2d'), run = cv.closest('.t1h-hero.on');
+      x.clearRect(0, 0, cv.width, cv.height);
+      t1dDraw(x, `${cv.dataset.look}_${run ? 'run' : 'idle'}_anim_f${f % 4}`, 36, 92, 3, false, null, true);
+    });
+  }, 140);
 }
 async function t1hBuy(id, btn) {
   const h = T1H_HEROES.find(x => x.id === id);
@@ -26907,10 +26945,10 @@ function t1hGo(id) {
   const h = T1H_HEROES.find(x => x.id === id && t1hOwned(x)) || T1H_HEROES[0];
   try { localStorage.setItem('t1Hero', h.id); } catch (e) {}
   t1Leave();
-  [h.id, 'zombie', 'robot'].forEach(t1hSheet);
+  t1dLoad();
   const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 };
   const list = t1Shuffle(T1_SURV[_t1Block]).sort((a, b) => order[a.part] - order[b.part]);
-  const g = _t1 = { game: 'survive', cfg, hero: h, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0, got: 0,
+  const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0, got: 0,
     p: { x: 0, y: 0, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
     w: { kind: h.weapon, ...T1H_WEAPONS[h.weapon], orbit: 0, chain: 0, cd: 0.6, chainCd: 2, orbitA: 0 },
     foes: [], shots: [], fx: [], gems: [], hearts: [], ups: [], taken: [], spawnIn: 1, time: 0, kills: 0, level: 1, needT: 3,
@@ -26945,7 +26983,7 @@ function t1hGo(id) {
     document.removeEventListener('visibilitychange', g.vis);
   };
   t1Root().innerHTML = `
-    <div class="lv-wrap t1-play t1h">
+    <div class="lv-wrap t1-play t1h" style="--hc:${h.color}">
       <div class="t1-top">
         <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
         <span class="t1-stat">Lv <strong id="h-lv">1</strong></span>
@@ -26955,17 +26993,22 @@ function t1hGo(id) {
         <button class="t1-pause" onclick="t1hPause()" aria-label="Tạm dừng">⏸</button>
       </div>
       <div class="t1-surv-goal"><span class="t1-step-tag" id="sv-part"></span><span class="t1h-ups-got" id="h-ups"></span><div class="t1-surv-slots" id="sv-slots"></div></div>
+      <p class="t1h-vi-m" id="h-vim"></p>
+      <div class="t1h-play">
+      <aside class="t1h-side t1h-graph" id="h-chart" onclick="t1hChartBig(true)" aria-label="Biểu đồ của câu đang ghép"></aside>
       <div class="t1h-stage" id="h-stage">
         <canvas id="h-cv" aria-label="Sân chơi Sinh tồn ghép câu"></canvas>
         <div class="t1h-skills">${h.skills.map((s, i) => `<button class="t1h-sk ready" id="h-sk${i}" style="--hc:${h.color}" onpointerdown="event.preventDefault(); t1hSkill(${i})" aria-label="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}" title="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}"><span>${s.icon}</span><kbd>${T1H_SKILL_KEYS[i]}</kbd></button>`).join('')}</div>
         <div class="t1-arena-msg hidden" id="h-msg"></div>
         <div class="t1h-modal hidden" id="h-modal"></div>
       </div>
-      <div class="t1-hint">${h.icon} <b style="color:${h.color}">${h.name}</b> · Đi: <kbd>WASD</kbd> / mũi tên · chiêu <kbd>J</kbd> <kbd>K</kbd> · điện thoại: chạm rồi kéo · <kbd>P</kbd> tạm dừng.</div>
+      <aside class="t1h-side t1h-info" id="h-info"></aside>
+      </div>
+      <div class="t1h-chartbig hidden" id="h-chartbig" onclick="t1hChartBig(false)"></div>
+      <div class="t1-hint">${h.icon} <b style="color:${h.color}">${h.title} ${h.name}</b> · Đi: <kbd>WASD</kbd> / mũi tên · chiêu <kbd>J</kbd> <kbd>K</kbd> · điện thoại: chạm rồi kéo · <kbd>P</kbd> tạm dừng.</div>
     </div>`;
   const cv = document.getElementById('h-cv');
   g.ctx = cv.getContext('2d');
-  g.pat = g.ctx.createPattern(t1hGround(), 'repeat');
   cv.addEventListener('pointerdown', e => {
     if (g.paused || g.over) return;
     const r = cv.getBoundingClientRect();
@@ -26996,29 +27039,72 @@ function t1hGo(id) {
 function t1hSize() {
   const g = _t1, cv = document.getElementById('h-cv');
   if (!g || !cv) return;
-  const W = cv.parentElement.clientWidth, H = Math.round(Math.min(560, Math.max(340, window.innerHeight * 0.62)));
+  // Shorter on narrow screens, where the chart strip and meaning sit above the arena.
+  const W = cv.parentElement.clientWidth, H = Math.round(Math.min(560, Math.max(320, window.innerHeight * (window.innerWidth < 1100 ? 0.44 : 0.62))));
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   cv.style.height = H + 'px';
   g.W = W; g.H = H; g.dpr = dpr;
 }
-function t1hGround() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 160;
-  const x = c.getContext('2d');
-  x.fillStyle = '#CFE6C2'; x.fillRect(0, 0, 160, 160);
-  x.fillStyle = '#C5DFB7'; x.fillRect(0, 0, 80, 80); x.fillRect(80, 80, 80, 80);
-  x.fillStyle = '#9CC98C';
-  for (let i = 0; i < 14; i++) { const px = (i * 53) % 160, py = (i * 97 + 11) % 160; x.fillRect(px, py, 3, 7); x.fillRect(px + 4, py + 2, 3, 5); }
-  return c;
+// A dungeon floor tile built from the atlas once it has loaded: mostly plain
+// stone, some cracked, the odd skull.
+function t1hGround(c) {
+  const t = document.createElement('canvas'), N = 8, S = 32;
+  t.width = t.height = N * S;
+  const x = t.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const r = Math.random(), f = r < 0.78 ? 1 : r < 0.86 ? 2 : r < 0.92 ? 3 : 4 + Math.floor(Math.random() * 5);
+    const R = T1D_RECTS['floor_' + f];
+    x.drawImage(T1D.img, R[0], R[1], R[2], R[3], i * S, j * S, S, S);
+  }
+  // Dimmed a little so sprites and chunk labels stand out from the stone.
+  x.fillStyle = 'rgba(18,12,26,.28)'; x.fillRect(0, 0, t.width, t.height);
+  for (let k = 0; k < 2; k++) { const R = T1D_RECTS.skull; x.drawImage(T1D.img, R[0], R[1], R[2], R[3], Math.floor(Math.random() * N) * S, Math.floor(Math.random() * N) * S, S, S); }
+  return c.createPattern(t, 'repeat');
 }
 function t1hSentence() {
   const g = _t1;
-  g.S = g.list[g.si];
+  g.S = g.lastS = g.list[g.si];
   g.got = 0;
   g.bad = t1Shuffle(g.S.bad).slice(0, g.cfg.bad);
+  g.fake = t1Shuffle(g.S.fake || []).slice(0, g.cfg.bad);
   g.gems = [];
   g.needT = 3;
+}
+// Beside the arena: the chart the sentence describes on the left, its
+// meaning and the essay's progress on the right. On a phone the chart is a
+// strip above the arena that opens full size.
+function t1hPanels() {
+  const g = _t1, L = document.getElementById('h-chart'), R = document.getElementById('h-info');
+  if (!L || !R) return;
+  const S = g.S || g.lastS, sample = S && T1_SAMPLES.find(x => x.id === S.img);
+  if (S !== g.panelS) {
+    g.panelS = S;
+    L.innerHTML = `<div class="t1h-side-h">📊 Biểu đồ của câu <span class="t1h-zoom">🔍 Chạm để phóng to</span></div>${sample ? sample.chart() : ''}<p class="t1h-side-tip">Cụm nào <b>trái với biểu đồ</b> là bẫy: đúng ngữ pháp nhưng sai thông tin.</p>`;
+  }
+  const parts = [...new Set(g.list.map(x => x.part))], cur = g.S ? parts.indexOf(g.S.part) : g.bosses - 1;
+  const vi = S ? escapeHtml(S.vi) : '';
+  document.getElementById('h-vim').innerHTML = g.S ? '🇻🇳 ' + vi : '';
+  R.innerHTML = `<div class="t1h-side-h">🇻🇳 Nghĩa câu</div><p class="t1h-side-vi">${g.S ? vi : '👹 Hạ Trùm để mở câu nối đoạn.'}</p>
+    <div class="t1h-side-h">🧱 Phần bài</div>
+    <ol class="t1h-parts">${parts.map((pt, i) => `<li class="${i < cur ? 'done' : i === cur ? 'now' : ''}"><span>${i < cur ? '✓' : i === cur ? (g.S ? '✍️' : '👹') : '·'}</span>${escapeHtml(pt)}</li>`).join('')}</ol>
+    <div class="t1h-side-h">⚠️ Ba loại bẫy</div>
+    <ul class="t1h-traps"><li>📊 Sai thông tin so với biểu đồ</li><li>❌ Sai ngữ pháp</li><li>⏳ Đúng nhưng chưa tới lượt</li></ul>`;
+}
+function t1hChartBig(open) {
+  const g = _t1, big = document.getElementById('h-chartbig');
+  if (!g || !big || g.over) return;
+  if (open && !window.matchMedia('(max-width: 1099px)').matches) return;
+  if (open) {
+    if (g.phase) return;
+    big.innerHTML = `<div class="t1h-card t1h-bigcard">${document.getElementById('h-chart').innerHTML}<button class="vb-start-btn">▶ Chơi tiếp</button></div>`;
+    big.classList.remove('hidden');
+    if (!g.paused) { g.paused = true; g.bigPaused = true; g.keys = {}; g.joy = null; }
+  } else {
+    big.classList.add('hidden');
+    if (g.bigPaused) { g.bigPaused = false; g.paused = false; g.last = 0; }
+  }
 }
 function t1hSlots() {
   const g = _t1, el = document.getElementById('sv-slots');
@@ -27027,10 +27113,12 @@ function t1hSlots() {
     const q = g.bossQ;
     document.getElementById('sv-part').textContent = '👹 Trùm ' + g.bosses + '/3';
     el.innerHTML = g.gold.length ? `<span class="now gold">Nhặt ngọc vàng là câu mở <b>${escapeHtml(q.next)}</b></span>` : `<span class="now">Hạ Trùm để nhận câu nối sang <b>${escapeHtml(q ? q.next : '')}</b></span>`;
+    t1hPanels();
     return;
   }
   el.innerHTML = g.S.c.map((c, i) => `<span class="${i < g.got ? 'on' : i === g.got ? 'now' : ''}">${i < g.got ? escapeHtml(c) : i === g.got ? '❓' : '···'}</span>`).join('');
   document.getElementById('sv-part').textContent = g.S.part;
+  t1hPanels();
 }
 function t1hHud() {
   const g = _t1, $ = id => document.getElementById(id);
@@ -27229,9 +27317,9 @@ function t1hSpawnFoe(diff) {
   const g = _t1, p = g.p, r = Math.random();
   const type = diff >= 2 && r < 0.12 ? 'brute' : diff >= 0.8 && r < 0.4 ? 'robot' : 'zombie';
   const T = T1H_FOES[type], a = Math.random() * Math.PI * 2, R = Math.hypot(g.W, g.H) / 2 + 40;
-  const hp = T.hp * (1 + diff * 0.35);
-  g.foes.push({ id: ++g.id, type, T, x: p.x + Math.cos(a) * R, y: p.y + Math.sin(a) * R, hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1),
-    r: T.r, dmg: g.cfg.dmg * T.dmg, anim: Math.random(), hit: 0, face: 1, h: T1H_FH * T.scale });
+  const hp = T.hp * (1 + diff * 0.35), look = t1Pick(T.look);
+  g.foes.push({ id: ++g.id, type, T, look, x: p.x + Math.cos(a) * R, y: p.y + Math.sin(a) * R, hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1),
+    r: T.r, dmg: g.cfg.dmg * T.dmg, anim: Math.random(), hit: 0, face: 1, h: T1D_RECTS[look + '_run_anim_f0'][3] * T.scale });
 }
 function t1hNearest(range) {
   const g = _t1;
@@ -27325,21 +27413,21 @@ function t1hKill(f, quiet) {
   t1hHud();
 }
 // What a gem should carry: the chunk the sentence needs if no gem has it,
-// otherwise later real chunks and wrong ones.
+// otherwise later real chunks, wrong ones, and ones the chart contradicts.
 function t1hPickChunk() {
   const g = _t1;
   if (!g.S) return null;
   const need = g.S.c[g.got];
   if (!g.gems.some(m => m.text === need)) return { text: need, real: true };
-  const pool = [...g.S.c.slice(g.got + 1).map(t => ({ text: t, real: true })), ...g.bad.map(t => ({ text: t, real: false }))].filter(x => !g.gems.some(m => m.text === x.text));
+  const pool = [...g.S.c.slice(g.got + 1).map(t => ({ text: t, real: true })), ...g.bad.map(t => ({ text: t, real: false })), ...g.fake.map(t => ({ text: t, real: false, fake: true }))].filter(x => !g.gems.some(m => m.text === x.text));
   return pool.length ? t1Pick(pool) : null;
 }
 function t1hDropGem(x, y, force) {
-  const g = _t1, cap = 3 + g.cfg.bad;
+  const g = _t1, cap = 4 + 2 * g.cfg.bad;
   if (!g.S) return;
   if (g.gems.length >= cap) { if (!force) return; g.gems.shift(); }
   const needOut = g.gems.some(m => m.text === g.S.c[g.got]);
-  if (!force && Math.random() > (needOut ? 0.3 : 0.6)) return;
+  if (!force && Math.random() > (needOut ? 0.5 : 0.85)) return;
   const ch = t1hPickChunk();
   if (ch) g.gems.push({ id: ++g.id, ...ch, x, y, life: 22, cd: 0, bob: Math.random() * 6 });
 }
@@ -27349,7 +27437,7 @@ function t1hGems(dt) {
   const need = g.S.c[g.got];
   // The needed chunk turns up near the hero if no kill has dropped it for a while.
   if (g.gems.some(m => m.text === need)) g.needT = 0;
-  else if ((g.needT += dt) > 5) { const a = Math.random() * Math.PI * 2, r = t1Rand(130, 220); t1hDropGem(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, true); g.needT = 0; }
+  else if ((g.needT += dt) > 4) { const a = Math.random() * Math.PI * 2, r = t1Rand(130, 220); t1hDropGem(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, true); g.needT = 0; }
   for (const m of g.gems) {
     m.life -= dt; m.cd = Math.max(0, m.cd - dt); m.bob += dt;
     if (m.life <= 0 || m.cd > 0 || Math.hypot(m.x - p.x, m.y - p.y) > 30) continue;
@@ -27367,6 +27455,7 @@ function t1hGems(dt) {
     }
     if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(g.S.part)}:</b> ${escapeHtml(g.S.c.join(' '))}<br><i>${escapeHtml(g.S.vi)}</i></div>`); }
     if (m.real) { m.cd = 1.6; t1hMsg(`Chưa tới lượt “${m.text}”. Câu cần cụm khác trước.`); t1hHurt(6, m.x, m.y); }
+    else if (m.fake) { m.life = 0; t1hMsg(`“${m.text}” sai thông tin so với biểu đồ. Nhìn lại biểu đồ bên cạnh!`, 2400); t1hHurt(10, m.x, m.y); }
     else { m.life = 0; t1hMsg(`“${m.text}” là cụm sai. Tránh nó ra!`); t1hHurt(10, m.x, m.y); }
     if (g.over) return;
   }
@@ -27509,12 +27598,13 @@ function t1hBossStart(part) {
   g.bossQ = { next: q.next, right: qq.right, bad: qq.bad, why: qq.why };
   const n = g.bosses, a = Math.random() * Math.PI * 2;
   const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.05);
-  const f = { id: ++g.id, boss: true, n, T: { sheet: 'zombie', scale: 1.25, pts: 100, tint: true }, x: p.x + Math.cos(a) * 360, y: p.y + Math.sin(a) * 360,
-    hp, maxHp: hp, r: 34, h: T1H_FH * 1.25, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
+  const [look, name] = T1H_BOSS_LOOK[(n - 1) % T1H_BOSS_LOOK.length];
+  const f = { id: ++g.id, boss: true, n, look, name, T: { scale: 3, pts: 100 }, x: p.x + Math.cos(a) * 360, y: p.y + Math.sin(a) * 360,
+    hp, maxHp: hp, r: 34, h: 36 * 3, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
   g.boss = f;
   g.foes.push(f);
   tsSfx('boss');
-  t1hMsg(`👹 Trùm ${n} xuất hiện! Né vạch đỏ và vòng đạn.`, 2600);
+  t1hMsg(`👹 Trùm ${n}: ${name} xuất hiện! Né vạch đỏ và vòng đạn.`, 2600);
 }
 // Chase, then alternately a telegraphed charge or a ring of slow bullets.
 function t1hBossAI(f, dt) {
@@ -27603,21 +27693,9 @@ function t1hRR(c, x, y, w, h, r) {
   c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
-function t1hSprite(c, key, frame, x, y, scale, flip, over) {
-  const s = T1H_SHEETS[key], w = T1H_FW * scale, h = T1H_FH * scale;
-  c.fillStyle = 'rgba(0,0,0,.18)';
-  c.beginPath(); c.ellipse(x, y - 2, w * 0.3, 5 * scale * 2, 0, 0, Math.PI * 2); c.fill();
-  if (!s || !s.ready) { c.fillStyle = '#13294F'; c.beginPath(); c.arc(x, y - h / 2, w / 3, 0, Math.PI * 2); c.fill(); return; }
-  c.save();
-  c.translate(x, y);
-  if (flip) c.scale(-1, 1);
-  c.drawImage(s.img, frame * T1H_FW, 0, T1H_FW, T1H_FH, -w / 2, -h, w, h);
-  (over || []).forEach(([k, a]) => { if (a > 0) { c.globalAlpha = a; c.drawImage(s[k], frame * T1H_FW, 0, T1H_FW, T1H_FH, -w / 2, -h, w, h); } });
-  c.restore();
-}
 function t1hDrawHero(c) {
-  const g = _t1, p = g.p, sc = 0.6;
-  const frame = p.won ? 11 : p.hurt > 0 || p.hp <= 0 ? 9 : p.atk > 0 ? 10 : p.moving ? 1 + Math.floor(p.anim * 12) % 8 : 0;
+  const g = _t1, p = g.p, sc = 2.7;
+  const frame = p.hurt > 0 || p.hp <= 0 ? 'hit_anim_f0' : p.moving && !p.won ? `run_anim_f${Math.floor(p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 6) % 4}`;
   // The hero's team colour glows underfoot, brighter while a skill runs.
   const glow = g.rushT > 0 || g.shieldT > 0 || p.dashT > 0;
   c.save();
@@ -27627,7 +27705,7 @@ function t1hDrawHero(c) {
   c.restore();
   c.save();
   if (p.inv > 0 && p.dashT <= 0 && Math.floor(p.inv * 20) % 2) c.globalAlpha = 0.45;
-  t1hSprite(c, g.hero.id, frame, p.x, p.y, sc, p.face < 0, p.hurt > 0 ? [['red', 0.35]] : null);
+  t1dDraw(c, `${g.look}_${frame}`, p.x, p.y, sc, p.face < 0, p.hurt > 0 ? [['red', 0.35]] : null);
   c.restore();
   if (g.shieldT > 0) {
     c.save();
@@ -27637,14 +27715,29 @@ function t1hDrawHero(c) {
     c.restore();
   }
   // The weapon in hand, pointing where the last attack went.
-  const hx = p.x + p.face * 14, hy = p.y - 34, k = g.w.kind;
+  const hx = p.x + p.face * 12, hy = p.y - 26, k = g.w.kind;
+  const ang = k === 'sword' && p.atk <= 0 ? (p.face > 0 ? -0.9 : -2.24) : (p.aim || 0);
   c.save();
   c.translate(hx, hy);
-  c.rotate(k === 'sword' && p.atk <= 0 ? (p.face > 0 ? -0.9 : -2.24) : p.aim);
-  if (k === 'gun') { c.fillStyle = '#2B2F36'; c.fillRect(0, -3, 18, 6); c.fillRect(2, 2, 5, 6); }
-  else if (k === 'sword') { c.fillStyle = '#D9E2EA'; c.fillRect(4, -2, 26, 4); c.fillStyle = '#8A6A2E'; c.fillRect(-2, -5, 6, 10); }
-  else if (k === 'bow') { c.strokeStyle = '#8A5A2B'; c.lineWidth = 3; c.beginPath(); c.arc(4, 0, 12, -1.3, 1.3); c.stroke(); c.strokeStyle = '#eee'; c.lineWidth = 1; c.beginPath(); c.moveTo(7, -11.5); c.lineTo(7, 11.5); c.stroke(); }
-  else { c.fillStyle = '#7A5230'; c.fillRect(-2, -2, 22, 4); c.fillStyle = '#A66BFF'; c.shadowColor = '#A66BFF'; c.shadowBlur = 10; c.beginPath(); c.arc(22, 0, 5, 0, Math.PI * 2); c.fill(); }
+  c.imageSmoothingEnabled = false;
+  if (k === 'gun') {
+    // A stubby pixel blunderbuss, drawn rather than taken from the tileset.
+    c.rotate(ang);
+    if (Math.cos(ang) < 0) c.scale(1, -1);
+    c.fillStyle = '#5B3A22'; c.fillRect(-6, -2, 9, 6); c.fillRect(-4, 3, 4, 6);
+    c.fillStyle = '#9AA6B2'; c.fillRect(2, -4, 18, 5);
+    c.fillStyle = '#5E6873'; c.fillRect(18, -5, 4, 7);
+  } else if (k === 'bow') {
+    c.rotate(ang);
+    const r = T1D_RECTS.weapon_bow, s2 = 2.2;
+    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 / 2, r[2] * s2, r[3] * s2);
+  } else {
+    // Sword and staff stand blade-up in the atlas, so turn them a quarter more.
+    c.rotate(ang + Math.PI / 2);
+    const r = T1D_RECTS[k === 'sword' ? 'weapon_knight_sword' : 'weapon_red_magic_staff'], s2 = 2;
+    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 * 0.8, r[2] * s2, r[3] * s2);
+    if (k === 'magic') { c.fillStyle = 'rgba(166,107,255,.5)'; c.shadowColor = '#A66BFF'; c.shadowBlur = 12; c.beginPath(); c.arc(0, -r[3] * s2 * 0.75, 5, 0, Math.PI * 2); c.fill(); }
+  }
   c.restore();
   // Health bar under the hero.
   const bw = 46, f = Math.max(0, p.hp / p.maxHp);
@@ -27652,7 +27745,7 @@ function t1hDrawHero(c) {
   c.fillStyle = f > 0.5 ? '#2DBE60' : f > 0.25 ? '#F2B233' : '#E5533D'; t1hRR(c, p.x - bw / 2 + 1, p.y + 7, (bw - 2) * f, 5, 2); c.fill();
 }
 function t1hDrawFoe(c, f) {
-  const g = _t1, frame = f.hit > 0.06 && !f.boss ? 9 : f.stun > 0 ? 0 : 1 + Math.floor(f.anim * (f.st === 'charge' ? 22 : 10)) % 8;
+  const g = _t1, frame = f.stun > 0 ? `idle_anim_f${Math.floor(f.anim * 6) % 4}` : `run_anim_f${Math.floor(f.anim * (f.st === 'charge' ? 16 : 8)) % 4}`;
   if (f.boss) {
     if (f.st === 'aim') {
       // The lane it is about to charge down.
@@ -27665,7 +27758,7 @@ function t1hDrawFoe(c, f) {
     c.save(); c.globalAlpha = 0.35; c.fillStyle = '#E5533D';
     c.beginPath(); c.ellipse(f.x, f.y, 44, 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
   }
-  t1hSprite(c, f.T.sheet, frame, f.x, f.y, f.T.scale, f.face < 0, [['red', f.boss ? 0.28 : f.T.tint ? 0.4 : 0], ['ice', g.freezeT > 0 ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
+  t1dDraw(c, `${f.look}_${frame}`, f.x, f.y, f.T.scale, f.face < 0, [['red', f.st === 'aim' ? 0.35 : 0], ['ice', g.freezeT > 0 ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
   if (f.stun > 0) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
   if (f.boss) { c.font = '22px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('👑', f.x, f.y - f.h + 4); return; }
   if (f.hp < f.maxHp) {
@@ -27702,9 +27795,9 @@ function t1hDrawShot(c, s) {
     c.shadowColor = '#A66BFF'; c.shadowBlur = 14; c.fillStyle = '#C9A6FF';
     c.beginPath(); c.arc(s.x, s.y, 6.5, 0, Math.PI * 2); c.fill();
   } else {
-    c.translate(s.x, s.y); c.rotate(Math.atan2(s.vy, s.vx));
-    c.strokeStyle = '#8A5A2B'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-14, 0); c.lineTo(4, 0); c.stroke();
-    c.fillStyle = '#E8EEF2'; c.beginPath(); c.moveTo(8, 0); c.lineTo(2, -4); c.lineTo(2, 4); c.closePath(); c.fill();
+    c.translate(s.x, s.y); c.rotate(Math.atan2(s.vy, s.vx) + Math.PI / 2);
+    const r = T1D_RECTS.weapon_arrow;
+    if (T1D.ready) { c.imageSmoothingEnabled = false; c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2], -r[3], r[2] * 2, r[3] * 2); }
   }
   c.restore();
 }
@@ -27754,12 +27847,13 @@ function t1hDraw() {
   if (!c || !W) return;
   c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
   const camX = p.x - W / 2, camY = p.y - H / 2 - 20;
-  const ox = -(((camX % 160) + 160) % 160), oy = -(((camY % 160) + 160) % 160);
-  c.save(); c.translate(ox, oy); c.fillStyle = g.pat; c.fillRect(0, 0, W + 160, H + 160); c.restore();
+  if (!g.pat && T1D.ready) g.pat = t1hGround(c);
+  const ox = -(((camX % 256) + 256) % 256), oy = -(((camY % 256) + 256) % 256);
+  c.save(); c.translate(ox, oy); c.fillStyle = g.pat || '#2A2333'; c.fillRect(0, 0, W + 256, H + 256); c.restore();
   c.save();
   c.translate(-camX, -camY);
   c.font = '20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; c.fillText('❤️', h.x, h.y - 8 + Math.sin(g.time * 4) * 2); });
+  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.2, false, null, true); });
   c.globalAlpha = 1;
   g.zones.forEach(z => {
     c.save();
@@ -27818,7 +27912,7 @@ function t1hDraw() {
     c.fillStyle = '#3A2020'; t1hRR(c, (W - bw) / 2, 22, bw, 10, 5); c.fill();
     c.fillStyle = '#E5533D'; t1hRR(c, (W - bw) / 2, 22, bw * f, 10, 5); c.fill();
     c.font = '800 11px system-ui, -apple-system, Segoe UI, sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillText(`👹 TRÙM ${b.n}/3`, W / 2, 19);
+    c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}`, W / 2, 19);
   }
   if (g.freezeT > 0) { c.fillStyle = `rgba(127,200,248,${Math.min(0.18, g.freezeT * 0.1)})`; c.fillRect(0, 0, W, H); }
   if (g.joy) {

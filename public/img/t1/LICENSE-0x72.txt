@@ -1,0 +1,9 @@
+16x16 DungeonTileset II by 0x72 (Robert Norenberg)
+https://0x72.itch.io/dungeontileset-ii
+
+License: CC0 1.0 Universal (public domain dedication).
+The author: "You can use this tileset for whatever you like (CC-0)."
+
+dungeon.png is an atlas of selected frames from the tileset's frames/ folder
+(heroes, monsters, weapons, floor tiles). Frame rectangles live in T1D_RECTS
+in public/app.js.
