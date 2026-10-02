@@ -23621,7 +23621,7 @@ function t1SetLevel(id) {
   tsSfx('equip');
   t1Hub();
 }
-function t1DeckKnown() { const k = t1Known(); return t1Deck().filter(c => k.has(c.en)).length + '/' + t1Deck().length; }
+function t1DeckKnown() { const k = t1Known(), all = t1AllCards(); return all.filter(c => k.has(c.en)).length + '/' + all.length; }
 function t1GameCard(id, warm) {
   const g = T1_GAMES[id];
   return `<button class="lv-mode t1-mode${warm ? ' t1-mode--warm' : ''}" onclick="${g.start}">
@@ -23658,10 +23658,10 @@ function t1Hub() {
       </div>
       <h3 class="t1-sec">📚 Ôn từ vựng trước <small>làm trước khi chơi</small></h3>
       <div class="lv-modes t1-modes t1-modes--steps">
-        <button class="lv-mode t1-mode t1-mode--step" onclick="t1FcStart()">
+        <button class="lv-mode t1-mode t1-mode--step" onclick="t1FcPick()">
           <span class="lv-mode-icon">🃏</span>
           <span class="lv-mode-name">Bước 1 · Flashcard</span>
-          <span class="lv-mode-desc">${escapeHtml(b.fc)} Lật thẻ, đánh dấu nhớ hay chưa.</span>
+          <span class="lv-mode-desc">${escapeHtml(b.fc)} ${t1FcDeckList().filter(d => d.cards.length).length} bộ thẻ, chọn bộ rồi lật thẻ.</span>
           <span class="lv-mode-best">✓ ${t1DeckKnown()} thẻ đã nhớ</span>
         </button>
         <button class="lv-mode t1-mode t1-mode--step" onclick="t1RainStart('review')">
@@ -23806,7 +23806,7 @@ function t1Finish(g, game, writeType, opts) {
         <div class="t1-result-big">${opts.big || `${g.right}/${T1_ROUNDS} câu đúng`}</div>
         <div class="t1-result-row"><span>⭐ ${g.score} điểm${opts.review ? '' : isBest ? ' · kỷ lục mới!' : ` · kỷ lục ${best}`}</span><span>🪙 +${Math.round(g.coins)} xu</span></div>
       </div>
-      ${g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>'}
+      ${opts.list || (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>')}
       <div class="t1-result-btns">
         ${opts.review ? `<button class="vb-start-btn" onclick="t1Hub(); setTimeout(() => document.getElementById('t1-games')?.scrollIntoView({ behavior: 'smooth' }), 50)">🎮 Bước 3 · Vào trò chơi →</button>
         <button class="vb-secondary-btn" onclick="t1RainStart('review')">↺ Ôn lại lần nữa</button>` : `<button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>`}
@@ -23835,6 +23835,15 @@ function t1GoWrite(type) {
 const T1_SLOPE_N = 7;
 function t1Lin(start, delta, noise) {
   return Array.from({ length: T1_SLOPE_N }, (_, i) => start + delta * i / (T1_SLOPE_N - 1) + t1Rand(-noise, noise));
+}
+// A straight path whose first and last values are exact, for the charts
+// that print their figures (doubled, halved, tripled).
+function t1Path(s, e, noise) {
+  return Array.from({ length: T1_SLOPE_N }, (_, i) => i === 0 ? s : i === T1_SLOPE_N - 1 ? e : s + (e - s) * i / (T1_SLOPE_N - 1) + t1Rand(-noise, noise));
+}
+// A line that zigzags around a straight path from s to e.
+function t1Zig(s, e, amp) {
+  return Array.from({ length: T1_SLOPE_N }, (_, i) => s + (e - s) * i / (T1_SLOPE_N - 1) + (i % 2 ? amp : -amp) * t1Rand(.7, 1));
 }
 const T1_SLOPE = {
   up_slight:   { fam: 'up',   f: () => t1Lin(t1Rand(.3, .5), t1Rand(.08, .12), .006),
@@ -23882,7 +23891,85 @@ const T1_SLOPE = {
   vol_flat:    { fam: 'flat', f: () => { const b = t1Rand(.4, .55); return [b, b + .12, b - .08, b + .1, b + .02, b + .02 + t1Rand(-.006, .006), b + .02 + t1Rand(-.006, .006)]; },
                  l: 'fluctuated before stabilizing',
                  vi: 'Dao động rồi ổn định: nhấp nhô vài mốc rồi đi ngang. stabilize = ổn định lại sau biến động.' },
+  // Multiples print their first and last figures (lab), so "doubled" is read
+  // off the numbers, never guessed from the shape.
+  double:      { fam: 'mult', lab: true, clash: ['up_steady', 'up_sharp'],
+                 f: () => { const s = t1Pick([.2, .25, .3, .35, .4]); return t1Path(s, 2 * s, .012); },
+                 a: 'doubled', d: 'increased twofold', l: 'rose to twice its original level',
+                 vi: 'Gấp đôi: số cuối bằng 2 lần số đầu (20 → 40). Đọc hai con số, đừng đoán theo độ dốc.' },
+  triple:      { fam: 'mult', lab: true, clash: ['up_steady', 'up_sharp'],
+                 f: () => { const s = t1Pick([.15, .2, .25, .3]); return t1Path(s, 3 * s, .012); },
+                 d: 'tripled', l: 'increased threefold',
+                 vi: 'Gấp ba: số cuối bằng 3 lần số đầu (20 → 60). threefold = gấp ba lần.' },
+  halve:       { fam: 'mult', lab: true, clash: ['down_steady', 'down_sharp'],
+                 f: () => { const s = t1Pick([.5, .6, .7, .8]); return t1Path(s, s / 2, .012); },
+                 a: 'halved', d: 'fell by half', l: 'dropped to half its initial level',
+                 vi: 'Giảm một nửa: số cuối bằng nửa số đầu (60 → 30). by half = đi mất một nửa.' },
+  flat_surge:  { fam: 'up', clash: ['accel', 'up_sharp'],
+                 f: () => { const b = t1Rand(.12, .22), e = t1Rand(.78, .9); return [b, b + t1Rand(-.01, .01), b + t1Rand(-.01, .01), b + t1Rand(-.01, .01), b + (e - b) * .35, b + (e - b) * .72, e]; },
+                 d: 'remained stable before surging', l: 'stagnated before soaring',
+                 vi: 'Đi ngang rồi tăng vọt: nửa đầu phẳng, nửa sau dốc đứng. stagnate = giậm chân tại chỗ.' },
+  flat_plunge: { fam: 'down', clash: ['down_sharp'],
+                 f: () => { const b = t1Rand(.75, .85), e = t1Rand(.08, .18); return [b, b + t1Rand(-.01, .01), b + t1Rand(-.01, .01), b + t1Rand(-.01, .01), b - (b - e) * .35, b - (b - e) * .72, e]; },
+                 d: 'remained stable before plummeting', l: 'held steady before plunging',
+                 vi: 'Đi ngang rồi lao dốc: nửa đầu phẳng, nửa sau rơi mạnh.' },
+  fall_flat:   { fam: 'down', clash: ['down_steady', 'decel_down'],
+                 f: () => { const s = t1Rand(.75, .88), low = t1Rand(.25, .4); return [s, s - (s - low) * .4, s - (s - low) * .8, low, low + t1Rand(-.008, .008), low + t1Rand(-.008, .008), low + t1Rand(-.008, .008)]; },
+                 d: 'fell before leveling off', l: 'declined before stabilizing',
+                 vi: 'Giảm rồi bình ổn: xuống một đoạn rồi đi ngang. Ngược với "rose before leveling off".' },
+  fluct_up:    { fam: 'up', clash: ['up_steady', 'fluct'],
+                 f: () => t1Zig(t1Rand(.15, .25), t1Rand(.7, .8), t1Rand(.07, .09)),
+                 d: 'fluctuated but rose overall', l: 'rose erratically',
+                 vi: 'Lên xuống liên tục nhưng xu hướng chung là tăng. erratically = thất thường.' },
+  fluct_down:  { fam: 'down', clash: ['down_steady', 'fluct'],
+                 f: () => t1Zig(t1Rand(.75, .85), t1Rand(.2, .3), t1Rand(.07, .09)),
+                 d: 'fluctuated but fell overall', l: 'declined erratically',
+                 vi: 'Lên xuống liên tục nhưng xu hướng chung là giảm.' },
+  peak_plunge: { fam: 'turn', clash: ['peak'],
+                 f: () => { const s = t1Rand(.22, .32), top = t1Rand(.78, .88), e = t1Rand(.05, .12); return [s, s + (top - s) * .25, s + (top - s) * .5, s + (top - s) * .75, top, e + (top - e) * .45, e]; },
+                 d: 'peaked, then fell sharply', l: 'peaked before collapsing',
+                 vi: 'Tăng dần lên đỉnh rồi sụp mạnh, xuống thấp hơn cả lúc đầu. collapse = sụp đổ.' },
+  rebound_high:{ fam: 'turn', clash: ['vshape'],
+                 f: () => { const s = t1Rand(.45, .55), low = t1Rand(.1, .18), e = t1Rand(.82, .9); return [s, s - (s - low) * .5, low, low + (e - low) * .3, low + (e - low) * .6, low + (e - low) * .85, e]; },
+                 d: 'fell, then rose above its starting level', l: 'fell before rebounding to a new high',
+                 vi: 'Giảm rồi bật lên, vượt cả mức ban đầu. Khác hình V thường: điểm cuối cao hơn điểm đầu.' },
+  rise_dip:    { fam: 'up', clash: ['dip', 'up_steady'],
+                 f: () => { const s = t1Rand(.12, .2); return [s, s + .13, s + .26, s + .12, s + .34, s + .48, s + .62]; },
+                 d: 'rose despite a brief dip', l: 'rose overall, despite a temporary setback',
+                 vi: 'Tăng chung nhưng có một lần hụt xuống ngắn ở giữa. setback = bước lùi tạm thời.' },
+  decel_down:  { fam: 'down', clash: ['down_sharp', 'fall_flat'],
+                 f: () => { const s = t1Rand(.85, .92); return [s, s - .3, s - .52, s - .62, s - .66, s - .69, s - .71]; },
+                 d: 'fell sharply, then more slowly', l: 'plunged, then continued to fall but more gradually',
+                 vi: 'Giảm mạnh lúc đầu rồi chậm dần nhưng vẫn giảm. Không phải bình ổn.' },
+  // Two lines, A (blue) and B (orange). Each phrase is a whole clause about both.
+  overtake:    { fam: 'two', two: true,
+                 f: () => { const b = t1Rand(.45, .5); return [t1Path(t1Rand(.12, .2), t1Rand(.75, .82), .01), t1Lin(b, t1Rand(-.03, .03), .01)]; },
+                 a: 'A overtook B', d: 'A surpassed B', l: 'A overtook B midway through the period',
+                 vi: 'Vượt mặt: A bắt đầu thấp hơn B, cắt qua B rồi cao hơn. overtake, surpass = vượt.' },
+  converge:    { fam: 'two', two: true,
+                 f: () => [t1Lin(t1Rand(.78, .85), -t1Rand(.22, .26), .008), t1Lin(t1Rand(.12, .18), t1Rand(.24, .28), .008)],
+                 a: 'the gap narrowed', d: 'the two figures converged', l: 'the gap between them narrowed considerably',
+                 vi: 'Hai đường xích lại gần nhau nhưng chưa cắt nhau. converge = hội tụ, khoảng cách thu hẹp.' },
+  diverge:     { fam: 'two', two: true, clash: ['parallel', 'opposite'],
+                 f: () => [t1Lin(t1Rand(.32, .38), t1Rand(.48, .52), .008), t1Lin(t1Rand(.26, .3), t1Rand(.1, .14), .008)],
+                 a: 'the gap widened', d: 'the two figures diverged', l: 'the gap between them widened considerably',
+                 vi: 'Hai đường tách xa nhau dần: cùng tăng nhưng A tăng nhanh hơn nhiều. diverge = phân kỳ, tách ra.' },
+  parallel:    { fam: 'two', two: true,
+                 f: () => { const d = t1Rand(.3, .36); return [t1Lin(t1Rand(.45, .5), d, .008), t1Lin(t1Rand(.12, .17), d, .008)]; },
+                 a: 'both rose in parallel', d: 'both rose at a similar rate', l: 'both followed a similar trajectory',
+                 vi: 'Hai đường tăng song song, khoảng cách gần như không đổi. trajectory = quỹ đạo, chiều hướng.' },
+  opposite:    { fam: 'two', two: true,
+                 f: () => [t1Lin(t1Rand(.55, .6), t1Rand(.3, .34), .008), t1Lin(t1Rand(.42, .47), -t1Rand(.3, .34), .008)],
+                 d: 'A rose while B fell', l: 'A and B moved in opposite directions',
+                 vi: 'Ngược chiều: A tăng còn B giảm. while = trong khi (so sánh hai xu hướng).' },
 };
+// Two shapes clash when one's phrase is also true of the other's chart
+// (a doubling line also "rose steadily"). Clashing shapes never share a
+// set of buttons or a question.
+function t1Clash(a, b) {
+  const ca = T1_SLOPE[a] && T1_SLOPE[a].clash, cb = T1_SLOPE[b] && T1_SLOPE[b].clash;
+  return !!((ca && ca.includes(b)) || (cb && cb.includes(a)));
+}
 // Subjects for the stem. A unit with a scale turns 0..1 into real figures.
 const T1_SUBJECTS = [
   { s: 'internet access in Kenya',         unit: '%',              max: 100 },
@@ -23896,14 +23983,14 @@ const T1_SUBJECTS = [
   { s: 'average house prices',             unit: 'thousand $',     max: 500 },
   { s: 'the volume of plastic waste',      unit: 'million tons',   max: 20 },
 ];
-function t1SlopeClasses() { return Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
+function t1SlopeClasses() { return Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv] && !T1_SLOPE[k].two); }
 function t1SlopeRound() {
   const keys = t1SlopeClasses();
   const k = t1Pick(keys);
   const c = T1_SLOPE[k];
   const answer = c[_t1Lv];
-  const same = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
-  const other = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam !== c.fam));
+  const same = t1Shuffle(keys.filter(x => x !== k && !t1Clash(x, k) && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
+  const other = t1Shuffle(keys.filter(x => x !== k && !t1Clash(x, k) && T1_SLOPE[x].fam !== c.fam));
   const wrong = [...same.slice(0, 2), ...other].slice(0, 3).map(x => T1_SLOPE[x][_t1Lv]);
   const opts = t1Shuffle([answer, ...wrong]);
   const sub = t1Pick(T1_SUBJECTS);
@@ -24629,9 +24716,11 @@ function t1Source(block) {
     return {
       keys,
       phrase: k => T1_SLOPE[k][_t1Lv],
-      draw: k => t1MiniSvg(T1_SLOPE[k].f()),
+      draw: k => t1MiniSvg(T1_SLOPE[k].f(), 0, 0, { lab: T1_SLOPE[k].lab }),
       vi: k => T1_SLOPE[k].vi,
-      ex: k => `Internet access ${T1_SLOPE[k][_t1Lv]} between 2000 and 2020.`,
+      ex: k => T1_SLOPE[k].two
+        ? `Between 2000 and 2020, ${T1_SLOPE[k][_t1Lv].replace(/\bA\b/g, 'online sales').replace(/\bB\b/g, 'in-store sales')}.`
+        : `Internet access ${T1_SLOPE[k][_t1Lv]} between 2000 and 2020.`,
     };
   }
   const keys = Object.keys(T1_STA_REVIEW).filter(k => t1LvOk(T1_STA_REVIEW[k].lv));
@@ -24686,21 +24775,250 @@ const T1_FC_EXTRA = {
     { lv: 'l', en: 'a negligible proportion', vi: 'một tỉ lệ không đáng kể', ex: 'Nuclear power made up a negligible proportion of the total.' },
   ],
 };
+/* ── Flashcard decks from the teacher's Task 1 worksheets ──────────────────
+   Dynamic Charts, Static Diagrams (maps), Process & Cycle, Static Charts
+   Mastery and the bilingual Vocabulary MASTER sheet. Each block keeps its
+   picture deck as "Cơ bản"; these decks sit beside it, each card at the
+   level it suits. Spellings follow the sheets (British); "use" notes the
+   American form where it differs. */
+const T1_FC_DECKS = {
+  dyn: [
+    { id: 'verb', icon: '📈', name: 'Động từ & danh từ xu hướng', cards: [
+      { lv: 'a', en: 'climb', vi: 'tăng dần, leo lên từ từ', ex: 'Unemployment climbed gradually during the recession.' },
+      { lv: 'a', en: 'fluctuate', vi: 'dao động, lên xuống thất thường', ex: 'Oil prices fluctuated considerably throughout the period.' },
+      { lv: 'a', en: 'a steady increase in', vi: 'sự tăng đều của', ex: 'A steady increase in exports was recorded over the period.' },
+      { lv: 'a', en: 'a slight drop in', vi: 'sự giảm nhẹ của', ex: 'There was a slight drop in attendance in the final year.' },
+      { lv: 'd', en: 'surge', vi: 'tăng vọt', ex: 'Car ownership surged from 20% to 65% between 1990 and 2010.' },
+      { lv: 'd', en: 'soar', vi: 'tăng vọt, bay cao', ex: 'The number of internet users soared throughout the decade.' },
+      { lv: 'd', en: 'plunge', vi: 'lao dốc, giảm rất mạnh', ex: 'Tourism figures plunged dramatically following the crisis.' },
+      { lv: 'd', en: 'dip', vi: 'giảm nhẹ trong thời gian ngắn', ex: 'Profits dipped briefly in 2008 before recovering strongly.', use: 'dip = giảm ít và tạm thời, sau đó thường tăng lại' },
+      { lv: 'd', en: 'plateau', vi: 'đi ngang, chững lại (sau khi tăng)', ex: 'Growth plateaued at around 40% for several years.' },
+      { lv: 'd', en: 'level off', vi: 'chững lại, ổn định', ex: 'The unemployment rate levelled off at approximately 6%.', use: 'Anh-Anh: levelled off · Anh-Mỹ: leveled off. Cả hai đều đúng.' },
+      { lv: 'd', en: 'recover', vi: 'phục hồi', ex: 'The economy began to recover in 2021 after two years of contraction.' },
+      { lv: 'd', en: 'a dramatic fall in', vi: 'sự sụt giảm mạnh của', ex: 'A dramatic fall in coal use was observed after 2010.' },
+      { lv: 'd', en: 'a brief dip in', vi: 'cú giảm ngắn của', ex: 'A brief dip in profits was followed by a strong recovery.' },
+      { lv: 'd', en: 'consistent growth', vi: 'tăng trưởng đều đặn', ex: 'The data shows consistent growth in the services sector.' },
+      { lv: 'd', en: 'a sustained decline', vi: 'đà giảm kéo dài', ex: 'Coal production went into a sustained decline after 2000.' },
+      { lv: 'd', en: 'considerable fluctuation', vi: 'sự dao động đáng kể', ex: 'Considerable fluctuation was seen across the decade.' },
+      { lv: 'l', en: 'creep up', vi: 'nhích lên rất chậm', ex: 'House prices crept up by around 2% each year.' },
+      { lv: 'l', en: 'rebound', vi: 'bật tăng trở lại', ex: 'After a sharp drop, tourist numbers rebounded to 2.8 million by 2018.' },
+      { lv: 'l', en: 'contract', vi: 'co lại, thu hẹp', ex: 'The manufacturing sector contracted by 3% in the final quarter of the year.' },
+      { lv: 'l', en: 'stabilise', vi: 'ổn định lại', ex: 'After initial volatility, the exchange rate stabilised at around 1.15 by mid-year.', use: 'Anh-Anh: stabilise · Anh-Mỹ: stabilize. Cả hai đều đúng.' },
+      { lv: 'l', en: 'a trough', vi: 'điểm đáy', ex: 'The figure reached a trough of just 10% in 1990.' },
+      { lv: 'l', en: 'an extended plateau', vi: 'giai đoạn đi ngang kéo dài', ex: 'Growth entered an extended plateau between 2005 and 2010.' },
+    ] },
+    { id: 'degree', icon: '📏', name: 'Mức độ: tính từ & trạng từ', cards: [
+      { lv: 'a', en: 'dramatically', vi: 'rất mạnh và đột ngột', ex: 'Sales fell dramatically, dropping by over 40% in a single year.', use: 'Tính từ: dramatic' },
+      { lv: 'a', en: 'sharply', vi: 'mạnh và nhanh', ex: 'The unemployment rate fell sharply from 12% to 6% in just two years.', use: 'Tính từ: sharp' },
+      { lv: 'a', en: 'significantly', vi: 'đáng kể', ex: 'Emissions decreased significantly after the new policy was introduced.', use: 'Tính từ: significant' },
+      { lv: 'a', en: 'gradually', vi: 'từ từ, dần dần', ex: 'Prices rose gradually throughout the decade.', use: 'Tính từ: gradual' },
+      { lv: 'a', en: 'steadily', vi: 'đều đặn', ex: 'The population grew steadily from 2000 onwards.', use: 'Tính từ: steady' },
+      { lv: 'a', en: 'slightly', vi: 'nhẹ, một chút', ex: 'There was a slight increase in average temperatures in 2015.', use: 'Tính từ: slight' },
+      { lv: 'd', en: 'considerably', vi: 'khá nhiều, đáng kể', ex: 'There was a considerable drop in international tourism figures.', use: 'Tính từ: considerable' },
+      { lv: 'd', en: 'substantially', vi: 'nhiều, đáng kể', ex: 'Output grew substantially, more than doubling over the period.', use: 'Tính từ: substantial' },
+      { lv: 'd', en: 'steeply', vi: 'dốc, rất nhanh (hay đi với giảm)', ex: 'The graph shows a steep decline in the years after 2008.', use: 'Tính từ: steep' },
+      { lv: 'd', en: 'consistently', vi: 'liên tục, đều', ex: 'The birth rate fell consistently from 1980 onwards.' },
+      { lv: 'l', en: 'marginally', vi: 'rất ít, không đáng kể', ex: 'Costs fell marginally in the final year shown.', use: 'Tính từ: marginal' },
+      { lv: 'l', en: 'with no clear directional trend', vi: 'không có xu hướng rõ rệt', ex: 'The figure fluctuated considerably, oscillating between 1.2 and 3.4 million with no clear directional trend.' },
+    ] },
+    { id: 'prep', icon: '🔢', name: 'Giới từ & con số', cards: [
+      { lv: 'a', en: 'rise from … to …', vi: 'tăng TỪ mức này LÊN mức kia', ex: 'Renewable energy rose from 5% to 28% over 20 years.' },
+      { lv: 'a', en: 'peak at', vi: 'đạt đỉnh ở mức', ex: 'Sales peaked at $4.2 million in 2008.', use: 'peak AT, không phải peak IN' },
+      { lv: 'a', en: 'throughout the period', vi: 'trong suốt giai đoạn', ex: 'Car ownership remained the dominant mode of transport throughout the period shown.' },
+      { lv: 'a', en: 'over the 20-year period', vi: 'trong giai đoạn 20 năm', ex: 'Over the 20-year period, the urban population more than doubled.' },
+      { lv: 'd', en: 'a rise of', vi: 'mức tăng (danh từ + of + lượng)', ex: 'There was a rise of approximately 30 percentage points.' },
+      { lv: 'd', en: 'fluctuate between … and …', vi: 'dao động trong khoảng', ex: 'Temperatures fluctuated between 15 and 22 degrees.' },
+      { lv: 'd', en: 'fall to a low of', vi: 'giảm xuống mức thấp nhất là', ex: 'Prices fell to a low of $12 per barrel in 2016.' },
+      { lv: 'd', en: 'hover around', vi: 'quanh quẩn ở mức', ex: 'Inflation hovered around 3% for three consecutive years.' },
+      { lv: 'd', en: 'more than double', vi: 'tăng hơn gấp đôi', ex: 'The number of electric vehicle registrations more than doubled between 2018 and 2022.' },
+      { lv: 'd', en: 'By 2020, … had …', vi: 'Tính đến năm 2020, … đã …', ex: 'By 2020, coal production had fallen to its lowest level.', use: 'By + năm → thì quá khứ hoàn thành (had + V3)' },
+      { lv: 'l', en: 'a thirteen-fold increase', vi: 'mức tăng gấp mười ba lần', ex: 'Renewable energy recorded a thirteen-fold increase, from 10 TWh to 130 TWh.' },
+    ] },
+    { id: 'frame', icon: '🧩', name: 'Mẫu câu: mở bài, overview, nối ý', cards: [
+      { lv: 'a', en: 'The line graph illustrates how … changed', vi: 'Biểu đồ đường minh hoạ … đã thay đổi thế nào', ex: 'The line graph illustrates how electricity generation from three sources changed between 1990 and 2020.' },
+      { lv: 'a', en: 'Overall, … showed a clear upward trend', vi: 'Nhìn chung, … có xu hướng tăng rõ rệt', ex: 'Overall, renewable energy showed a clear upward trend throughout the period.' },
+      { lv: 'a', en: 'In contrast,', vi: 'Ngược lại,', ex: 'In contrast, public transport usage fell consistently over the same period.' },
+      { lv: 'a', en: 'while', vi: 'trong khi đó (nối hai xu hướng trong một câu)', ex: 'Car ownership rose steadily, while cycling remained relatively unpopular.' },
+      { lv: 'd', en: 'followed a similar pattern', vi: 'theo xu hướng tương tự', ex: 'Germany and France followed a similar pattern, with both recording steady growth.' },
+      { lv: 'd', en: 'before declining', vi: 'trước khi giảm', ex: 'Sales climbed steadily to $3 billion before declining sharply in the final year.' },
+      { lv: 'd', en: 'After peaking in …,', vi: 'Sau khi đạt đỉnh vào năm …,', ex: 'After peaking in 2015, the number of new businesses fell for three consecutive years.' },
+      { lv: 'd', en: 'There was a dramatic decline in …', vi: 'Đã có sự sụt giảm mạnh của …', ex: 'There was a dramatic decline in coal production over the period.', use: 'Câu kiểu 2 (Unit-led): There was + a + tính từ + danh từ + in' },
+      { lv: 'l', en: 'The line graph tracks …', vi: 'Biểu đồ đường theo dõi (sự tăng / giảm của) …', ex: 'The line graph tracks the growth of online shopping over a ten-year period between 2010 and 2020.' },
+      { lv: 'l', en: 'Having surged …,', vi: 'Sau khi đã tăng vọt …,', ex: 'Having surged throughout the 1990s, coal consumption began a sustained decline after 2000.' },
+      { lv: 'l', en: 'draw level with', vi: 'bắt kịp, ngang bằng với', ex: 'By 2020, gas had drawn level with coal.' },
+      { lv: 'l', en: 'converge', vi: 'hội tụ, tiến lại gần nhau', ex: 'All three energy sources converged to strikingly similar levels by 2020.' },
+      { lv: 'l', en: 'representing a 45% increase', vi: 'tương đương mức tăng 45%', ex: 'By 2020, the figure stood at 8.4 million, representing a 45% increase from 2010.' },
+      { lv: 'l', en: 'By 2020, … had fallen to its lowest level', vi: 'Tính đến 2020, … đã giảm xuống mức thấp nhất', ex: 'By 2020, coal production had fallen to its lowest level at 120 TWh.', use: 'Câu kiểu 3 (Figure-led): mở câu bằng năm hoặc con số' },
+    ] },
+  ],
+  sta: [
+    { id: 'share', icon: '🥧', name: 'Tỉ lệ & so sánh', cards: [
+      { lv: 'a', en: 'make up', vi: 'chiếm, tạo thành', ex: 'Students made up over 60% of the population in that age group.' },
+      { lv: 'a', en: 'represent', vi: 'chiếm (bao nhiêu phần)', ex: 'Renewable energy represented only 8% of total production in the year shown.' },
+      { lv: 'a', en: 'proportion', vi: 'tỉ lệ, phần', ex: 'A significant proportion of respondents chose online shopping over in-store visits.' },
+      { lv: 'a', en: 'share', vi: 'phần, tỉ trọng', ex: 'The share of coal in the energy mix declined from 45% to 28% over the period.' },
+      { lv: 'a', en: 'dominant', vi: 'chiếm ưu thế, đứng đầu', ex: 'Oil remained the dominant fuel source, representing over 40% of total consumption.' },
+      { lv: 'a', en: 'the largest share of', vi: 'phần lớn nhất của', ex: 'Food accounted for the largest share of household spending, at 38%.' },
+      { lv: 'a', en: 'the smallest proportion', vi: 'tỉ lệ nhỏ nhất', ex: 'Entertainment represented the smallest proportion, making up just 5% of expenditure.' },
+      { lv: 'a', en: 'just over a third', vi: 'nhỉnh hơn một phần ba', ex: 'Just over a third of respondents (34%) selected online as their preferred channel.', use: 'just over / just under / nearly / roughly: luôn có từ ước lượng khi số không tròn' },
+      { lv: 'a', en: 'followed closely by', vi: 'theo sát ngay sau là', ex: 'Asia led with 42%, followed closely by Europe at 38%.' },
+      { lv: 'a', en: 'ranged from … to …', vi: 'dao động từ … đến …', ex: 'Working hours ranged from 1,408 (Germany) to 2,123 (Mexico) per year.' },
+      { lv: 'd', en: 'constitute', vi: 'cấu thành, chiếm', ex: 'Part-time workers constituted nearly a third of the total workforce.' },
+      { lv: 'd', en: 'a fraction of', vi: 'một phần nhỏ của', ex: 'Only a small fraction of the budget was allocated to research and development.' },
+      { lv: 'd', en: 'segment', vi: 'phân khúc, nhóm', ex: 'The 18–24 age segment accounted for the highest proportion of social media users.' },
+      { lv: 'd', en: 'exceed', vi: 'vượt quá', ex: 'Expenditure on leisure exceeded that on clothing by a considerable margin.' },
+      { lv: 'd', en: 'surpass', vi: 'vượt hơn', ex: 'Online sales surpassed physical store revenue for the first time in 2020.' },
+      { lv: 'd', en: 'comparable to', vi: 'tương đương với', ex: 'The proportion of female graduates was comparable to that of male graduates at 48%.' },
+      { lv: 'd', en: 'negligible', vi: 'không đáng kể, gần như bằng 0', ex: 'The difference between the two groups was negligible, at less than 1%.' },
+      { lv: 'd', en: 'approximately three times as much … as', vi: 'nhiều gấp khoảng ba lần', ex: 'The US spent approximately three times as much on defence as the UK.', use: 'Anh-Anh: defence · Anh-Mỹ: defense' },
+      { lv: 'd', en: 'more than three times as much … as', vi: 'nhiều hơn gấp ba lần', ex: 'Finland consumed more than three times as much coffee as Japan.' },
+      { lv: 'd', en: 'a combined total of', vi: 'tổng cộng, gộp lại', ex: 'Food and housing represented a combined total of 58% of all household costs.' },
+      { lv: 'd', en: 'the remaining 22%', vi: '22% còn lại', ex: 'The remaining 22% was distributed among smaller categories.' },
+      { lv: 'd', en: 'broadly similar to', vi: 'nhìn chung tương tự', ex: 'Spending patterns in France were broadly similar to those in Germany.' },
+      { lv: 'd', en: 'lag behind', vi: 'tụt lại phía sau', ex: 'China lagged considerably behind both, with a figure of just 52%.' },
+      { lv: 'l', en: 'comprise', vi: 'bao gồm, chiếm', ex: 'Asia comprised the largest segment, accounting for 42% of global output.' },
+      { lv: 'l', en: 'outstrip', vi: 'vượt xa', ex: 'Demand for electric vehicles outstripped supply throughout the year.' },
+      { lv: 'l', en: 'trail behind', vi: 'kém hơn, đứng sau', ex: 'Public transport trailed behind private car use, accounting for just 18%.' },
+      { lv: 'l', en: 'dwarf', vi: 'áp đảo, lấn át (về quy mô)', ex: 'The Asian market dwarfed all other regions, with a share of over 55%.' },
+      { lv: 'l', en: 'marginally more … than', vi: 'nhỉnh hơn một chút', ex: 'Japan spent marginally more on defence than Germany, at 2.1% versus 1.9% of GDP.' },
+      { lv: 'l', en: 'in stark contrast to', vi: 'trái ngược hoàn toàn với', ex: 'Coal dominated in China, in stark contrast to France, where it made up just 4%.' },
+    ] },
+    { id: 'map', icon: '🗺️', name: 'Bản đồ & vị trí', cards: [
+      { lv: 'a', en: 'adjacent to', vi: 'ngay cạnh, sát bên', ex: 'The library is adjacent to the main hall.' },
+      { lv: 'a', en: 'opposite', vi: 'đối diện', ex: 'A supermarket now stands opposite the original church.' },
+      { lv: 'a', en: 'between … and …', vi: 'nằm giữa … và …', ex: 'A playground was added between the school and the sports hall.' },
+      { lv: 'a', en: 'surrounded by', vi: 'được bao quanh bởi', ex: 'The new park is surrounded by residential housing.' },
+      { lv: 'a', en: 'in the centre of', vi: 'ở trung tâm của', ex: 'A fountain was placed in the centre of the redeveloped square.', use: 'Anh-Anh: centre · Anh-Mỹ: center' },
+      { lv: 'a', en: 'in the southern part of', vi: 'ở phần phía nam của', ex: 'A car park was built in the southern part of the site.' },
+      { lv: 'a', en: 'was constructed', vi: 'được xây dựng', ex: 'A sports centre was constructed to the east of the park.', use: 'Bản đồ thay đổi: luôn dùng bị động (was/were + V3)' },
+      { lv: 'a', en: 'was replaced by', vi: 'bị thay thế bởi', ex: 'The open farmland was replaced by a large shopping centre.' },
+      { lv: 'a', en: 'remain unchanged', vi: 'giữ nguyên, không thay đổi', ex: 'The church remained unchanged in the south of the town.' },
+      { lv: 'd', en: 'overlooking', vi: 'nhìn ra (sông, biển…)', ex: 'A new restaurant was built overlooking the river.' },
+      { lv: 'd', en: 'run parallel to', vi: 'chạy song song với', ex: 'A new road runs parallel to the existing railway line.' },
+      { lv: 'd', en: 'at the intersection of', vi: 'ở giao lộ của', ex: 'A roundabout was constructed at the intersection of the two main roads.' },
+      { lv: 'd', en: 'on the outskirts of', vi: 'ở vùng ven, ngoại ô', ex: 'New factories were built on the outskirts of the town.' },
+      { lv: 'd', en: 'was cleared', vi: 'bị phát quang, san phẳng', ex: 'The forest in the north was cleared to make room for a hotel.' },
+      { lv: 'd', en: 'was transformed into', vi: 'được biến thành', ex: 'The warehouse was transformed into a block of flats.' },
+      { lv: 'd', en: 'was introduced', vi: 'được bổ sung (cái mới xuất hiện)', ex: 'A new pedestrian bridge was introduced across the river.' },
+      { lv: 'd', en: 'was upgraded to', vi: 'được nâng cấp thành', ex: 'The dirt track was upgraded to a surfaced main road.' },
+      { lv: 'd', en: 'underwent considerable development', vi: 'đã trải qua sự phát triển đáng kể', ex: 'Overall, Greenfield underwent considerable development over the forty-year period.' },
+      { lv: 'd', en: 'is divided into', vi: 'được chia thành', ex: 'The facility is divided into two main zones.' },
+      { lv: 'd', en: 'occupy', vi: 'chiếm (diện tích)', ex: 'A large housing development now occupies the majority of the site.' },
+      { lv: 'l', en: 'in the vicinity of', vi: 'ở khu vực gần', ex: 'Several new houses were constructed in the vicinity of the school.' },
+      { lv: 'l', en: 'was repurposed as', vi: 'được đổi công năng thành', ex: 'The school in the south-east was repurposed as a community centre.' },
+      { lv: 'l', en: 'retaining their original positions', vi: 'vẫn giữ nguyên vị trí cũ', ex: 'The church and the river remained unchanged, retaining their original positions.' },
+      { lv: 'l', en: 'give way to', vi: 'nhường chỗ cho', ex: 'Industrial land gave way to residential and commercial facilities.' },
+      { lv: 'l', en: 'is laid out symmetrically', vi: 'được bố trí đối xứng', ex: 'Overall, the building is laid out symmetrically, with the main hall at the centre.' },
+    ] },
+    { id: 'proc', icon: '⚙️', name: 'Quy trình & chu trình', cards: [
+      { lv: 'a', en: 'The process begins with', vi: 'Quy trình bắt đầu bằng', ex: 'The process begins with the collection of raw materials.' },
+      { lv: 'a', en: 'In the first stage,', vi: 'Ở giai đoạn đầu tiên,', ex: 'In the first stage, water is drawn from the reservoir.' },
+      { lv: 'a', en: 'At this stage,', vi: 'Ở giai đoạn này,', ex: 'At this stage, impurities are removed through filtration.' },
+      { lv: 'a', en: '… and the cycle begins again', vi: '… và chu trình lặp lại', ex: 'The water evaporates once more, and the cycle begins again.', use: 'Chu trình không có điểm cuối: KHÔNG kết bằng Finally' },
+      { lv: 'a', en: 'is converted into', vi: 'được chuyển hoá thành', ex: 'The raw material is converted into a refined product through distillation.' },
+      { lv: 'a', en: 'is transported to', vi: 'được vận chuyển đến', ex: 'Once the grain has been dried, it is transported to the mill.' },
+      { lv: 'a', en: 'is combined with', vi: 'được trộn với', ex: 'The chemicals are combined with water in a controlled environment.' },
+      { lv: 'a', en: 'is harvested', vi: 'được thu hoạch', ex: 'In the first stage, timber is harvested from managed forests.' },
+      { lv: 'a', en: 'Overall, the process consists of seven stages', vi: 'Nhìn chung, quy trình gồm bảy giai đoạn', ex: 'Overall, the process consists of seven key stages, beginning with the harvesting of timber.' },
+      { lv: 'd', en: 'Subsequently,', vi: 'Sau đó,', ex: 'Subsequently, the mixture is heated to 200 degrees Celsius.' },
+      { lv: 'd', en: 'Meanwhile,', vi: 'Trong khi đó (cùng lúc),', ex: 'Meanwhile, the by-products are collected separately for recycling.' },
+      { lv: 'd', en: 'undergo', vi: 'trải qua (một công đoạn)', ex: 'After drying, the material undergoes a chemical treatment process.' },
+      { lv: 'd', en: 'This cyclical process continues indefinitely', vi: 'Chu trình này tiếp diễn không ngừng', ex: 'This cyclical process continues indefinitely as long as conditions allow.' },
+      { lv: 'd', en: 'is filtered out', vi: 'được lọc bỏ', ex: 'Impurities are filtered out during the second stage.' },
+      { lv: 'd', en: 'is extracted', vi: 'được chiết xuất, khai thác', ex: 'Juice is extracted from the crushed grapes.' },
+      { lv: 'd', en: 'before being + V3', vi: 'trước khi được …', ex: 'The harvested grain is dried before being transported.', use: 'Nối hai bước bị động trong một câu' },
+      { lv: 'd', en: 'is dispatched to', vi: 'được chuyển đi (tới nơi bán)', ex: 'The bottles are labelled, filled and dispatched to retailers.' },
+      { lv: 'd', en: 'hatch into', vi: 'nở thành', ex: 'Within three to five days, the eggs hatch into larvae.', use: 'Vòng đời: sinh vật tự làm nên dùng chủ động' },
+      { lv: 'd', en: 'emerge from', vi: 'chui ra khỏi', ex: 'After about ten days, the adult butterfly emerges from the chrysalis.' },
+      { lv: 'l', en: 'In the penultimate stage,', vi: 'Ở giai đoạn áp chót,', ex: 'In the penultimate stage, the product is inspected for quality.' },
+      { lv: 'l', en: 'The process culminates in', vi: 'Quy trình kết thúc bằng (sản phẩm cuối)', ex: 'The process culminates in the production of clean, drinkable water.' },
+      { lv: 'l', en: 'has no fixed starting point', vi: 'không có điểm bắt đầu cố định', ex: 'The cycle has no fixed starting point, but can be traced from the evaporation stage.' },
+      { lv: 'l', en: 'recommence', vi: 'bắt đầu lại', ex: 'The female lays eggs on milkweed leaves, and the entire cycle recommences.' },
+      { lv: 'l', en: 'is conveyed', vi: 'được dẫn, chuyển (qua ống, băng chuyền)', ex: 'The liquid is conveyed through a series of pipes to the storage tank.' },
+      { lv: 'l', en: 'is subjected to high temperatures', vi: 'chịu nhiệt độ cao', ex: 'The mixture is subjected to temperatures exceeding 300 degrees Celsius.' },
+      { lv: 'l', en: 'metamorphosis', vi: 'sự biến thái (đổi hình dạng hoàn toàn)', ex: 'The most striking aspect is the dramatic metamorphosis from larva to adult butterfly.' },
+    ] },
+    { id: 'frame', icon: '🧩', name: 'Mẫu câu: mở bài, overview', cards: [
+      { lv: 'a', en: 'illustrates', vi: 'minh hoạ (thay cho shows)', ex: 'The bar graph illustrates the annual per-capita coffee consumption across eight nations in 2020.' },
+      { lv: 'a', en: 'whereas', vi: 'trong khi (đối lập hai vế)', ex: 'Coal was the dominant source in China, whereas nuclear energy made up the greatest proportion of France\'s supply.' },
+      { lv: 'd', en: 'provides a breakdown of', vi: 'cho thấy sự phân chia của', ex: 'The pie chart provides a breakdown of household spending in 2020.' },
+      { lv: 'd', en: 'It is evident that', vi: 'Rõ ràng là', ex: 'It is evident that private transport dominated in all four cities surveyed.' },
+      { lv: 'd', en: 'The most striking feature is', vi: 'Điểm nổi bật nhất là', ex: 'The most striking feature is the near-equal split between the two groups.' },
+      { lv: 'd', en: 'stood out as', vi: 'nổi bật là', ex: 'Mexico stood out as the country with the highest working hours.' },
+      { lv: 'd', en: 'by a notable margin', vi: 'với cách biệt đáng kể', ex: 'Germany recorded the lowest figure by a notable margin.' },
+      { lv: 'l', en: 'presents a comparative overview of', vi: 'trình bày tổng quan so sánh về', ex: 'The table presents a comparative overview of working hours across five countries.' },
+      { lv: 'l', en: 'together constituted over half of', vi: 'cộng lại chiếm hơn một nửa', ex: 'Overall, food and housing together constituted over half of all spending.' },
+      { lv: 'l', en: 'there is a clear disparity between', vi: 'có sự chênh lệch rõ rệt giữa', ex: 'Overall, there is a clear disparity between reading, which dominated, and the remaining activities.' },
+      { lv: 'l', en: 'markedly different', vi: 'khác biệt rõ rệt', ex: 'The two countries show markedly different energy profiles.' },
+      { lv: 'l', en: 'The amount … was …', vi: 'Câu kiểu "đơn vị đứng đầu" (Unit-led)', ex: 'The amount Americans spent on books in 2013 was $300,000.', use: 'Xoay vòng: Subject-led → Unit-led → Figure-led, không lặp một kiểu chủ ngữ' },
+    ] },
+  ],
+};
+
 let _t1fc = null;
 function t1KnownKey() { return 't1Known_' + _t1Block + '_' + walWho(); }
 function t1Known() { try { return new Set(JSON.parse(localStorage.getItem(t1KnownKey()) || '[]')); } catch (e) { return new Set(); } }
 function t1SaveKnown(s) { try { localStorage.setItem(t1KnownKey(), JSON.stringify([...s])); } catch (e) {} }
-function t1Deck() {
-  const src = t1Source(_t1Block);
+function t1Deck(block) {
+  block = block || _t1Block;
+  const src = t1Source(block);
   const seen = new Set();
   const pics = src.keys.filter(k => { const p = src.phrase(k); if (seen.has(p)) return false; seen.add(p); return true; })
     .map(k => ({ en: src.phrase(k), vi: src.vi(k), ex: src.ex(k), pic: src.draw(k), key: k }));
-  const words = T1_FC_EXTRA[_t1Block].filter(c => t1LvOk(c.lv)).map(c => ({ ...c }));
+  const words = T1_FC_EXTRA[block].filter(c => t1LvOk(c.lv)).map(c => ({ ...c }));
   return [...pics, ...words];
+}
+// The decks of a block at the current level: "Cơ bản" (the picture deck the
+// games use) first, then the worksheet decks. A phrase in two decks keeps
+// its first card. Cards above the level are counted as locked.
+function t1FcDeckList(block) {
+  block = block || _t1Block;
+  const seen = new Set(), out = [];
+  const add = (d, cards, locked) => {
+    const mine = cards.filter(c => { const k = c.en.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+      .map(c => ({ ...c, deck: d.name, deckIcon: d.icon }));
+    out.push({ id: d.id, icon: d.icon, name: d.name, cards: mine, locked });
+  };
+  add({ id: 'base', icon: '🖼️', name: 'Cơ bản (có hình)' }, t1Deck(block), 0);
+  (T1_FC_DECKS[block] || []).forEach(d => add(d, d.cards.filter(c => t1LvOk(c.lv)), d.cards.filter(c => !t1LvOk(c.lv)).length));
+  return out;
+}
+// Every card of a block at the current level, for the games that quiz them.
+function t1AllCards(block) { return t1FcDeckList(block).flatMap(d => d.cards); }
+function t1FcPick() {
+  t1Leave();
+  t1FcStop();
+  const b = T1_BLOCKS[_t1Block], lv = T1_LEVELS[_t1Lv], known = t1Known(), decks = t1FcDeckList();
+  const all = decks.flatMap(d => d.cards), weak = all.filter(c => !known.has(c.en));
+  const locked = decks.reduce((n, d) => n + d.locked, 0);
+  t1Root().innerHTML = `
+    <div class="lv-wrap t1-fcpick">
+      <div class="lv-fc-top"><button class="btn-back-plain" onclick="t1Hub()">← ${b.name}</button><span class="t1-step-tag">Bước 1 · Chọn bộ thẻ · ${lv.icon} ${lv.name}</span></div>
+      <div class="t1-fcpick-mix">
+        <button class="vb-start-btn" onclick="t1FcOpen('weak')"${weak.length ? '' : ' disabled'}>🔁 Ôn ${weak.length} thẻ chưa nhớ</button>
+        <button class="vb-secondary-btn" onclick="t1FcOpen('all')">🎲 Trộn cả ${all.length} thẻ</button>
+      </div>
+      <div class="lv-modes t1-modes">${decks.filter(d => d.cards.length).map(d => {
+        const got = d.cards.filter(c => known.has(c.en)).length;
+        return `<button class="lv-mode t1-mode t1-deck" onclick="t1FcOpen('${d.id}')">
+          <span class="lv-mode-icon">${d.icon}</span>
+          <span class="lv-mode-name">${escapeHtml(d.name)}</span>
+          <span class="lv-mode-desc">${d.cards.length} thẻ${d.locked ? ` · 🔒 ${d.locked} thẻ ở cấp cao hơn` : ''}</span>
+          <span class="t1-deck-bar" aria-hidden="true"><i style="width:${Math.round(got / d.cards.length * 100)}%"></i></span>
+          <span class="lv-mode-best">✓ ${got}/${d.cards.length} đã nhớ</span>
+        </button>`;
+      }).join('')}</div>
+      ${locked ? `<div class="vb-hint-text">🔒 Còn ${locked} thẻ khó hơn. Chọn cấp cao hơn ở trang Task 1 để mở.</div>` : ''}
+    </div>`;
+}
+function t1FcOpen(id) {
+  const decks = t1FcDeckList(), known = t1Known(), all = decks.flatMap(d => d.cards);
+  const list = id === 'all' ? all : id === 'weak' ? all.filter(c => !known.has(c.en)) : (decks.find(d => d.id === id) || decks[0]).cards;
+  if (list.length) t1FcStart(list.slice());
 }
 function t1FcStart(list) {
   t1Leave();
-  const deck = list || t1Deck();
+  const deck = list || t1AllCards();
   _t1fc = { deck: t1Shuffle(deck), i: 0, got: [], miss: [], flipped: false, retry: !!list };
   document.addEventListener('keydown', t1FcKey);
   tsSfx('equip');
@@ -24717,13 +25035,13 @@ function t1FcRender() {
   const f = _t1fc, c = f.deck[f.i], b = T1_BLOCKS[_t1Block];
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow t1-fc">
-      <div class="lv-fc-top"><button class="btn-back-plain" onclick="t1FcStop(); t1Hub()">← ${b.name}</button><span class="t1-step-tag">Bước 1 · Ôn từ vựng · ${T1_LEVELS[_t1Lv].icon} ${T1_LEVELS[_t1Lv].name}</span></div>
+      <div class="lv-fc-top"><button class="btn-back-plain" onclick="t1FcPick()">← Bộ thẻ</button><span class="t1-step-tag">Bước 1 · Ôn từ vựng · ${T1_LEVELS[_t1Lv].icon} ${T1_LEVELS[_t1Lv].name}</span></div>
       <div class="lv-progress"><div class="lv-progress-bar" style="width:${Math.round(f.i / f.deck.length * 100)}%"></div></div>
       <div class="lv-count">${f.i + 1} / ${f.deck.length}</div>
       <div class="lv-card${f.flipped ? ' flipped' : ''}" onclick="t1FcFlip()">
         <div class="lv-card-inner">
           <div class="lv-face lv-face--front">
-            <div class="lv-card-tag">${b.icon} ${b.name}</div>
+            <div class="lv-card-tag">${c.deckIcon || b.icon} ${escapeHtml(c.deck || b.name)}</div>
             ${c.pic ? `<div class="t1-fc-pic">${c.pic}</div>` : ''}
             <div class="lv-card-main">${escapeHtml(c.en)}</div>
             <div class="lv-card-hint">Bấm để lật</div>
@@ -24770,6 +25088,7 @@ function t1FcMark(ok) {
       <div class="vb-results-btns">
         <button class="vb-start-btn" onclick="t1RainStart('review')">🌧️ Bước 2 · Ôn lại bằng Mưa pattern →</button>
         ${f.miss.length ? `<button class="vb-secondary-btn" onclick="t1FcStart(_t1fc.miss.slice())">↺ Ôn lại ${f.miss.length} thẻ chưa nhớ</button>` : ''}
+        <button class="vb-secondary-btn" onclick="t1FcPick()">🗂️ Chọn bộ thẻ khác</button>
         <button class="vb-secondary-btn" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
       </div>
     </div></div>`;
@@ -24784,24 +25103,51 @@ function t1FcMark(ok) {
    after each wave, and the run ends once every studied phrase has had its
    turn on a button. */
 const T1_RAIN_SET = {
-  a: ['up_steady', 'up_sharp', 'down_steady', 'down_sharp', 'flat', 'fluct', 'peak', 'vshape'],
+  a: ['up_steady', 'up_sharp', 'down_steady', 'down_sharp', 'flat', 'fluct', 'peak', 'vshape',
+      'double', 'halve', 'overtake', 'converge', 'diverge', 'parallel'],
 };
 const T1_RAIN_CFG = { a: { n: 4, spawn: 2.6, speed: 34 }, d: { n: 5, spawn: 2.2, speed: 40 }, l: { n: 6, spawn: 1.9, speed: 46 } };
 const T1_RAIN_REVIEW_WAVE = 6;
 function t1RainClasses() { return T1_RAIN_SET[_t1Lv] || Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
-// A chart small enough to fall: fixed 0..1 scale so "slightly" and "sharply" keep their size.
-function t1MiniSvg(ys, w, h, color) {
-  w = w || 100; h = h || 56;
-  const p = 5, n = ys.length;
-  const d = ys.map((v, i) => (i ? 'L' : 'M') + (p + i * (w - 2 * p) / (n - 1)).toFixed(1) + ' ' + (h - p - Math.max(0, Math.min(1, v)) * (h - 2 * p)).toFixed(1)).join(' ');
-  return `<svg viewBox="0 0 ${w} ${h}" class="t1-mini" aria-hidden="true"><path d="M${p} ${p}V${h - p}H${w - p}" class="t1-mini-axis"/><path d="${d}" class="t1-mini-line" stroke="${color || '#0E4D3C'}"/></svg>`;
+// A chart small enough to fall: fixed 0..1 scale so "slightly" and "sharply"
+// keep their size. ys is one line, or [A, B] for two lines. opts.lab prints
+// the first and last figures (0..100), for the shapes read off the numbers.
+const T1_MINI_AB = ['#2563EB', '#E5533D'];
+function t1MiniSvg(ys, w, h, opts) {
+  w = w || 120; h = h || 68; opts = opts || {};
+  const two = Array.isArray(ys[0]), lines = two ? ys : [ys], n = lines[0].length;
+  const pl = 6, pr = two ? 15 : 8, pt = opts.lab ? 15 : 6, pb = 6;
+  const X = i => pl + i * (w - pl - pr) / (n - 1), Y = v => h - pb - Math.max(0, Math.min(1, v)) * (h - pt - pb);
+  const f = v => v.toFixed(1);
+  const pts = lines.map(l => l.map((v, i) => [X(i), Y(v)]));
+  const path = p => p.map(([x, y], i) => (i ? 'L' : 'M') + f(x) + ' ' + f(y)).join(' ');
+  let out = [0.25, 0.5, 0.75].map(v => `<path d="M${pl} ${f(Y(v))}H${w - pr}" class="t1-mini-grid"/>`).join('');
+  out += `<path d="M${pl} ${pt - 3}V${h - pb}H${w - pr}" class="t1-mini-axis"/>`;
+  pts.forEach((p, j) => {
+    const c = two ? T1_MINI_AB[j] : '#0E7A5A', end = p[n - 1];
+    if (!two) out += `<path d="${path(p)}L${f(end[0])} ${h - pb}L${pl} ${h - pb}Z" fill="${c}" fill-opacity=".14"/>`;
+    out += `<path d="${path(p)}" class="t1-mini-line" stroke="${c}"/>`;
+    out += `<circle cx="${f(p[0][0])}" cy="${f(p[0][1])}" r="2.6" fill="#fff" stroke="${c}" stroke-width="1.8"/><circle cx="${f(end[0])}" cy="${f(end[1])}" r="3.2" fill="${c}"/>`;
+  });
+  if (two) {
+    // Letters at the line ends, pushed apart when the ends nearly meet.
+    let [ya, yb] = [pts[0][n - 1][1], pts[1][n - 1][1]];
+    if (Math.abs(ya - yb) < 10) { const m = (ya + yb) / 2, s = ya <= yb ? -1 : 1; ya = m + s * 5; yb = m - s * 5; }
+    [ya, yb].forEach((y, j) => { out += `<text x="${w - pr + 4}" y="${f(Math.max(9, Math.min(h - 2, y + 3.5)))}" class="t1-mini-ab" fill="${T1_MINI_AB[j]}">${'AB'[j]}</text>`; });
+  }
+  if (opts.lab) {
+    const l = lines[0], p = pts[0];
+    out += `<text x="${f(p[0][0] + 1)}" y="${f(p[0][1] - 5)}" class="t1-mini-val">${Math.round(l[0] * 100)}</text>`;
+    out += `<text x="${f(p[n - 1][0])}" y="${f(p[n - 1][1] - 5)}" class="t1-mini-val" text-anchor="end">${Math.round(l[n - 1] * 100)}</text>`;
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" class="t1-mini" aria-hidden="true">${out}</svg>`;
 }
 function t1RainStart(mode) {
   t1Leave();
   const cfg = T1_RAIN_CFG[_t1Lv], review = mode === 'review';
   const src = t1Source(review ? _t1Block : 'dyn');
   const g = _t1 = { game: 'rain', review, src, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, lives: 3, wave: 1, kills: 0,
-    drops: [], spawnIn: 0.6, spawnEvery: cfg.spawn * (review ? 1.15 : 1), speed: cfg.speed * (review ? 0.85 : 1), paused: false, over: false, last: 0, id: 0, covered: new Set() };
+    drops: [], spawnIn: 0.6, spawnEvery: cfg.spawn * (review ? 1.15 : 1), speed: cfg.speed * (review ? 0.85 : 1), paused: false, over: false, last: 0, id: 0, covered: new Set(), log: {} };
   g.set = t1RainNewSet();
   g.keyPick = i => t1RainShoot(i);
   g.pick = g.keyPick;
@@ -24821,7 +25167,7 @@ function t1RainNewSet(keep) {
   for (const k of [...fresh, ...t1Shuffle(g.src.keys)]) {
     if (out.length >= n) break;
     const ph = g.src.phrase(k);
-    if (seen.has(ph)) continue;
+    if (seen.has(ph) || out.some(x => t1Clash(x, k))) continue;
     seen.add(ph); out.push(k);
   }
   out.forEach(k => g.covered.add(g.src.phrase(k)));
@@ -24843,7 +25189,7 @@ function t1RainRender() {
       </div>
       <div class="t1-arena" id="rn-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="rn-msg"></div></div>
       <div class="t1-shoot" id="rn-btns">${t1RainBtns()}</div>
-      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ hình thấp nhất khớp với cụm đó.</div>
+      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ hình thấp nhất khớp với cụm đó. Bấm cụm không có hình nào khớp là mất 1 ❤️.</div>
     </div>`;
 }
 function t1RainBtns() {
@@ -24868,6 +25214,12 @@ function t1RainSpawn() {
   el.style.left = x + 'px';
   arena.appendChild(el);
   g.drops.push({ id: ++g.id, k, pic, el, x, y: -70 });
+  t1RainLog(k, pic);
+}
+// One entry per phrase for the answer list at the end.
+function t1RainLog(k, pic) {
+  const g = _t1, ph = g.src.phrase(k);
+  return g.log[ph] || (g.log[ph] = { k, ph, pic: pic || g.src.draw(k), hit: 0, land: 0, wrong: 0 });
 }
 function t1RainTick(ts) {
   const g = _t1;
@@ -24900,6 +25252,7 @@ function t1RainLand(d) {
   const g = _t1, ph = g.src.phrase(d.k);
   g.lives--;
   g.combo = 0;
+  t1RainLog(d.k, d.pic).land++;
   tsSfx('wrong');
   if (!g.missed[ph]) { g.missed[ph] = 1; g.misses.push(`<div class="t1-miss-row">${d.pic}<span><strong>${escapeHtml(ph)}</strong><br>${escapeHtml(g.src.vi(d.k))}</span></div>`); }
   d.el.innerHTML += `<span class="t1-drop-tag">${escapeHtml(ph)}</span>`;
@@ -24914,12 +25267,19 @@ function t1RainShoot(i) {
   const hit = g.drops.filter(d => g.src.phrase(d.k) === ph).sort((a, b) => b.y - a.y)[0];
   const btn = document.querySelectorAll('#rn-btns .t1-shot')[i];
   if (!hit) {
+    // Nothing on screen matches: a guess, and it costs a life.
     g.combo = 0;
-    tsSfx('miss');
+    g.lives--;
+    t1RainLog(g.set[i]).wrong++;
+    tsSfx('wrong');
     if (btn) { btn.classList.remove('no'); void btn.offsetWidth; btn.classList.add('no'); }
+    const m = document.getElementById('rn-msg');
+    if (m && g.lives > 0) { m.textContent = `Không có hình nào là "${ph}" · −1 ❤️`; m.classList.remove('hidden'); clearTimeout(g.msgT); g.msgT = setTimeout(() => m.classList.add('hidden'), 1300); }
     t1RainHud();
+    if (g.lives <= 0) t1RainOver();
     return;
   }
+  t1RainLog(hit.k, hit.pic).hit++;
   g.kills++; g.right++; g.combo++;
   g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (g.wave - 1) * 2;
   g.coins += T1_LEVELS[_t1Lv].coin * 0.5 * walMult();
@@ -24961,16 +25321,29 @@ function t1RainPause() {
   const m = document.getElementById('rn-msg');
   if (m) { m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1RainPause()">▶ Chơi tiếp</button>' : ''; m.classList.toggle('hidden', !g.paused); }
 }
+// Every phrase that fell or was pressed, with its picture and meaning. The
+// ones that cost a life come first, in red.
+function t1RainAnswers(g) {
+  const rows = Object.values(g.log), bad = r => r.land + r.wrong > 0;
+  if (!rows.length) return '';
+  rows.sort((a, b) => bad(b) - bad(a) || (b.land + b.wrong) - (a.land + a.wrong));
+  const nBad = rows.filter(bad).length;
+  return `<div class="t1-review t1-ans"><div class="t1-review-title">Đáp án cả lượt · ${rows.length} cụm${nBad ? ` · <span class="t1-ans-badn">${nBad} cụm cần ôn</span>` : ''}</div>
+    ${rows.map(r => `<div class="t1-ans-row${bad(r) ? ' bad' : ''}">${r.pic}<span><strong>${escapeHtml(r.ph)}</strong><br>${escapeHtml(g.src.vi(r.k))}
+      <small>${[r.hit && `✓ bắn trúng ${r.hit}`, r.land && `✗ để rơi ${r.land}`, r.wrong && `✗ bấm nhầm ${r.wrong}`].filter(Boolean).join(' · ') || 'đang rơi khi hết lượt'}</small></span></div>`).join('')}
+  </div>`;
+}
 function t1RainOver(cleared) {
   const g = _t1;
   g.stop();
   setTimeout(() => {
     if (_t1 !== g) return;
+    const list = t1RainAnswers(g);
     if (g.review) {
-      t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Ôn xong ${g.covered.size} cụm · ${g.kills} hình bắn hạ` : `${g.kills} hình bắn hạ · hết mạng ở đợt ${g.wave}`, icon: cleared ? '✅' : '💪', good: !!cleared, review: true });
+      t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Ôn xong ${g.covered.size} cụm · ${g.kills} hình bắn hạ` : `${g.kills} hình bắn hạ · hết mạng ở đợt ${g.wave}`, icon: cleared ? '✅' : '💪', good: !!cleared, review: true, list });
       return;
     }
-    t1Finish(g, 'rain', 'line_graph', { big: `${g.kills} biểu đồ bắn hạ · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: g.kills >= 20 });
+    t1Finish(g, 'rain', 'line_graph', { big: `${g.kills} biểu đồ bắn hạ · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: g.kills >= 20, list });
   }, cleared ? 300 : 700);
 }
 
@@ -25004,8 +25377,8 @@ function t1SnakeQuestion() {
   const g = _t1, n = T1_SNAKE_CFG[_t1Lv].foods;
   const keys = Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv] && k !== (g.q && g.q.k));
   const k = t1Pick(keys), c = T1_SLOPE[k], answer = c[_t1Lv];
-  const same = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
-  const other = t1Shuffle(keys.filter(x => x !== k && T1_SLOPE[x].fam !== c.fam));
+  const same = t1Shuffle(keys.filter(x => x !== k && !t1Clash(x, k) && T1_SLOPE[x].fam === c.fam && T1_SLOPE[x][_t1Lv] !== answer));
+  const other = t1Shuffle(keys.filter(x => x !== k && !t1Clash(x, k) && T1_SLOPE[x].fam !== c.fam));
   const wrong = [...new Set([...same.slice(0, 2), ...other].map(x => T1_SLOPE[x][_t1Lv]))].filter(p => p !== answer).slice(0, n - 1);
   g.q = { k, ys: c.f(), answer };
   const phrases = t1Shuffle([answer, ...wrong]);
@@ -25072,7 +25445,7 @@ function t1SnakeRender() {
 }
 function t1SnakeChart() {
   const el = document.getElementById('sn-chart');
-  if (el) el.innerHTML = t1MiniSvg(_t1.q.ys, 180, 96);
+  if (el) el.innerHTML = t1MiniSvg(_t1.q.ys, 180, 96, { lab: T1_SLOPE[_t1.q.k].lab });
 }
 function t1SnakeHud(note) {
   const g = _t1, $ = id => document.getElementById(id);
@@ -25143,7 +25516,7 @@ function t1SnakeEat(food) {
     g.lives--; g.combo = 0;
     for (let i = 0; i < 2 && g.body.length > 3; i++) g.body.pop();
     tsSfx('wrong');
-    if (!g.missed[g.q.k]) { g.missed[g.q.k] = 1; g.misses.push(`<div class="t1-miss-row">${t1MiniSvg(g.q.ys, 120, 66)}<span>Bạn ăn <s>${escapeHtml(food.p)}</s> → đúng là <strong>${escapeHtml(g.q.answer)}</strong><br>${escapeHtml(c.vi)}</span></div>`); }
+    if (!g.missed[g.q.k]) { g.missed[g.q.k] = 1; g.misses.push(`<div class="t1-miss-row">${t1MiniSvg(g.q.ys, 120, 66, { lab: c.lab })}<span>Bạn ăn <s>${escapeHtml(food.p)}</s> → đúng là <strong>${escapeHtml(g.q.answer)}</strong><br>${escapeHtml(c.vi)}</span></div>`); }
     t1SnakeHud(`<span class="t1-snake-no">✗ Đó là <s>${escapeHtml(food.p)}</s>. Đúng: ${escapeHtml(g.q.answer)}</span>`);
     if (g.lives <= 0) { t1SnakeDraw(); return t1SnakeOver('Hết mạng!'); }
   }

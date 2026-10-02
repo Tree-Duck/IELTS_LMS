@@ -9195,6 +9195,24 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
   .t1h-vi-m:empty { display: none; }
 }
 
+/* ─── TASK 1 · FLASHCARD DECKS + MƯA PATTERN v2 ─────────────────────────── */
+.t1-mini-grid { fill: none; stroke: #E4EBE7; stroke-width: 1; stroke-dasharray: 2 3; }
+.t1-mini-axis { stroke: #B9C6BF; }
+.t1-mini-line { stroke-width: 3; }
+.t1-mini-ab { font-size: 10px; font-weight: 800; font-family: inherit; }
+.t1-mini-val { font-size: 10px; font-weight: 800; font-family: inherit; fill: #13294F; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
+.t1-drop { width: 116px; padding: 5px 5px 3px; border-radius: 14px; background: linear-gradient(180deg, #fff 0%, #F2F8F5 100%); }
+.t1-ans-badn { color: #C0392B; }
+.t1-ans-row { display: flex; gap: 0.8rem; align-items: center; font-size: 0.9rem; line-height: 1.45; padding: 0.45rem 0.55rem; border-radius: 12px; border: 1px solid #DCE3DF; background: #fff; margin-top: 0.45rem; }
+.t1-ans-row .t1-mini, .t1-ans-row .t1-mini-pv, .t1-ans-row .t1-mini-map { width: 120px; flex: none; }
+.t1-ans-row small { display: block; color: #4C5F57; font-size: 0.78rem; }
+.t1-ans-row.bad { border-color: #F2B8AE; background: #FFF3F0; }
+.t1-ans-row.bad strong { color: #C0392B; }
+.t1-fcpick-mix { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.4rem 0 1rem; }
+.t1-fcpick-mix button[disabled] { opacity: 0.5; cursor: default; }
+.t1-deck-bar { display: block; height: 6px; border-radius: 999px; background: rgba(19, 41, 79, 0.12); overflow: hidden; margin-top: 0.3rem; }
+.t1-deck-bar i { display: block; height: 100%; background: #12A150; border-radius: inherit; }
+
 /* ─── TINTINMON (thử nghiệm) ─────────────────────────────────────────────── */
 .game-card--ttm { border-color: #F2B233; background: linear-gradient(160deg, #FFF8E1, #FFFFFF 60%); }
 .lv-wrap.ttm { max-width: 980px; }
