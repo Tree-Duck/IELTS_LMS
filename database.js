@@ -1511,6 +1511,27 @@ const db = {
     return { wallets: data.game_wallets || {}, towers: data.game_towers || {}, scores: data.game_scores || {}, raids: data.game_raids || {} };
   },
 
+  // Task 1 Sinh tồn mastery: { dyn: { phrase: { m, w, at } }, sta: {...} }.
+  // The oldest phrases go first once a block holds more than max.
+  getT1Mastery(userId) {
+    const data = load();
+    return (data.t1_mastery || {})[userId] || { dyn: {}, sta: {} };
+  },
+  updateT1Mastery(userId, block, items, max) {
+    const data = load();
+    if (!data.t1_mastery) data.t1_mastery = {};
+    const p = data.t1_mastery[userId] || { dyn: {}, sta: {} };
+    const cur = p[block] || {}, at = new Date().toISOString();
+    items.forEach((v, k) => { cur[k] = { m: v.m, w: v.w, at }; });
+    const keys = Object.keys(cur);
+    if (keys.length > max) keys.sort((a, b) => String(cur[a].at).localeCompare(String(cur[b].at))).slice(0, keys.length - max).forEach(k => { delete cur[k]; });
+    p[block] = cur;
+    p.updated_at = at;
+    data.t1_mastery[userId] = p;
+    save(data);
+    return p;
+  },
+
   // Game feedback and TinTinMon sentences, newest last, capped at 3000.
   addGameFeedback(f) {
     const data = load();

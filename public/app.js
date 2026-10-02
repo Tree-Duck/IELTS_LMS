@@ -15282,10 +15282,11 @@ async function loadClassVocab() {
         const tests = r.tests || [];
         const avg = tests.length ? Math.round(tests.reduce((s, t) => s + lvPct(t.right, t.total), 0) / tests.length) : null;
         const l = last(r);
+        const t1 = [...Object.values((r.t1 || {}).dyn || {}), ...Object.values((r.t1 || {}).sta || {})];
         return `<div class="cv-row" id="cv-row-${i}">
           <button class="cv-head" onclick="cvToggle(${i})">
             <span class="cv-name">${escapeHtml(r.name)}</span>
-            <span class="cv-meta">${tests.length} bài KT${avg !== null ? ` · TB ${avg}%` : ''} · ${l ? 'hoạt động ' + lvWhen(l) : 'chưa học'}</span>
+            <span class="cv-meta">${tests.length} bài KT${avg !== null ? ` · TB ${avg}%` : ''} · ${l ? 'hoạt động ' + lvWhen(l) : 'chưa học'}${t1.length ? ` · Task 1 thuộc ${t1.filter(v => v.m >= 3).length}/${t1.length} cụm` : ''}</span>
             <span class="cv-bars">${sets.map(s => { const c = lvSetCount(s.topics, known); return `<span class="cv-bar"><small>${s.icon} ${lvPct(c.k, c.n)}%</small>${lvBar(c.k, c.n, true)}</span>`; }).join('')}</span>
           </button>
           <div class="cv-detail hidden" id="cv-detail-${i}"></div>
@@ -15299,7 +15300,16 @@ function cvToggle(i) {
   const d = document.getElementById('cv-detail-' + i);
   if (!d) return;
   const open = d.classList.toggle('hidden') === false;
-  if (open && !d.innerHTML) { const r = _cvRows[i]; d.innerHTML = lvProgressHTML(new Set(r.known || []), r.tests || []); }
+  if (open && !d.innerHTML) { const r = _cvRows[i]; d.innerHTML = lvProgressHTML(new Set(r.known || []), r.tests || []) + cvT1HTML(r.t1); }
+}
+// Task 1 phrases from Sinh tồn: how many are known, and the weakest ones.
+function cvT1HTML(t1) {
+  const rows = [];
+  [['dyn', 'Biểu đồ động'], ['sta', 'Biểu đồ tĩnh']].forEach(([b, name]) => Object.entries((t1 || {})[b] || {}).forEach(([k, v]) => rows.push({ k, b: name, m: v.m || 0, w: v.w || 0 })));
+  if (!rows.length) return '';
+  const weak = rows.filter(r => r.m <= 2).sort((a, b) => a.m - b.m || b.w - a.w).slice(0, 15);
+  return `<div class="cv-t1"><div class="cv-t1-h">🛡️ Task 1 · Sinh tồn: ${rows.filter(r => r.m >= 3).length}/${rows.length} cụm đã thuộc (độ thuộc 3–4 trên 4)</div>
+    ${weak.length ? `<table class="cv-t1-t"><tr><th>Cụm còn yếu</th><th>Khối</th><th>Độ thuộc</th><th>Số lần sai</th></tr>${weak.map(r => `<tr><td>${escapeHtml(r.k)}</td><td>${r.b}</td><td>${r.m}/4</td><td>${r.w}</td></tr>`).join('')}</table>` : '<p>Không còn cụm yếu.</p>'}</div>`;
 }
 
 function lvBindKeys() {
@@ -23572,7 +23582,7 @@ const T1_BLOCKS = {
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
-  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng xuống hầm ngục: SURGE, PLUMMET, PLATEAU, SOAR, mỗi người 2 chiêu. Nhìn biểu đồ, nhặt ngọc chữ đúng thứ tự để ghép câu, né cụm sai thông tin, hạ Trùm cuối mỗi phần.', start: 't1SurvStart()' },
+  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng trong phòng hầm ngục: bấm ngọc chữ bỏ túi, xếp câu theo ô chức năng, bỏ cụm bẫy. Lên cấp thì trả lời câu hỏi để nhận chiêu, cấp 3 là Tiến hoá. 3 Trùm, mỗi phần bài một con.', start: 't1SurvStart()' },
   snake:   { icon: '🐍', name: 'Rắn săn mồi',            desc: 'Đề là một biểu đồ. Điều khiển rắn ăn đúng mồi có cụm mô tả nó. Ăn sai mất mạng, đâm tường là thua.', start: 't1SnakeStart()' },
   slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
   hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
@@ -24979,6 +24989,10 @@ function t1FcDeckList(block) {
       .map(c => ({ ...c, deck: d.name, deckIcon: d.icon }));
     out.push({ id: d.id, icon: d.icon, name: d.name, cards: mine, locked });
   };
+  // Phrases the student missed or looked up in Sinh tồn come first, as their own deck.
+  let surv = [];
+  try { surv = JSON.parse(localStorage.getItem('t1Weak_' + block + '_' + walWho()) || '[]'); } catch (e) {}
+  if (surv.length) add({ id: 'surv', icon: '📒', name: 'Từ em chưa biết (Sinh tồn)' }, surv, 0);
   add({ id: 'base', icon: '🖼️', name: 'Cơ bản (có hình)' }, t1Deck(block), 0);
   (T1_FC_DECKS[block] || []).forEach(d => add(d, d.cards.filter(c => t1LvOk(c.lv)), d.cards.filter(c => !t1LvOk(c.lv)).length));
   return out;
@@ -27093,63 +27107,133 @@ function t1SampleOpen(id, show) {
   window.scrollTo({ top: 0 });
 }
 /* ── Sinh tồn ghép câu ────────────────────────────────────────────────────
-   A Survivor.io-style arena. The hero walks (WASD or arrows, or a joystick
-   that appears wherever a finger touches) and attacks on its own. Killed
-   monsters drop gems carrying chunks of a Task 1 sentence (introduction,
-   overview, body); walk over them in sentence order to build it. A wrong
-   chunk, or a real one out of turn, hurts. A finished sentence is a level
-   up: the chart it describes appears and the student types the whole
-   sentence, then picks an upgrade (more beams, faster, splash, spinning
-   blades, lightning...). Upgrades last one run.
-   The heroes are Biệt đội Xu Hướng, each named after a trend verb and
-   built around it: SURGE fires faster and faster, PLUMMET drops meteors,
-   PLATEAU holds the line, SOAR flies far. Each has two skills on J and K
-   (round buttons on a phone) and a passive. SURGE is free; the others
-   unlock for good with coins (wallet slot t1hero).
-   A boss closes each part of the essay. It telegraphs a charge, fires
-   rings of slow bullets, and the last one calls in help. It drops three
-   gold gems: walk over the right linker for the next part (Overall, /
-   In 2000, / By contrast,). Right first time opens an upgrade chest.
+   A Survivor.io-style run in a closed dungeon room about three screens
+   wide. Walls, pillars and rocks block the hero and the monsters (shots fly
+   over them); wooden crates break and may drop a heart. The hero walks
+   (WASD or arrows, or a joystick wherever a finger touches) and attacks on
+   its own.
+   Learning is the core of the run, not a pause in it:
+   · Killed monsters drop word gems, at most three on the floor. Tap (or
+     press 1–3) to put one in the bag; a gem fades after 8 seconds. The bag
+     takes anything, so traps (wrong grammar, or a phrase the chart
+     contradicts) go in too.
+   · Once the bag holds every real chunk of the sentence, the student puts
+     them in order in slots labelled by function (subject, verb, degree,
+     figure, time…), and throws the traps out. Tapping 💬 shows meanings;
+     a chunk looked up goes on the "words I didn't know" list.
+   · Kills give EXP. A level up asks one question on a phrase from this
+     run's sentences or the flashcards of the same chart type, set by how
+     well the student knows it (mastery 0–4): pick the meaning, pick the
+     English, fill the letters, pick the one the chart supports, type it.
+     Right gives a full upgrade, wrong gives a small one and an explanation,
+     and the phrase comes back two or three levels later. Mastery is kept
+     on the server per student; teachers see it in the class vocab tab.
+   · Three parts (introduction, overview, body), each closed by a boss
+     whose gold gems ask for the linker of the next part.
+   · Every run ends with one sentence of the student's own using two of
+     their weakest phrases, sent to the teacher.
+   The heroes are Biệt đội Xu Hướng, each named after a trend verb: SURGE
+   fires faster and faster, PLUMMET drops meteors, PLATEAU holds the line,
+   SOAR flies far. SURGE is free; the others unlock with coins.
    Sprites: 0x72's 16x16 DungeonTileset II (CC0), packed into
    public/img/t1/dungeon.png. */
+// r: the job of each chunk (keys of T1H_ROLES); cv: its meaning; t: each
+// trap's meaning and, for a grammar trap, why it is wrong.
 const T1_SURV = {
   dyn: [
-    { part: 'Mở bài', img: 'line-internet', c: ['The line graph', 'illustrates', 'the proportion of households', 'with internet access', 'in three countries', 'between 2000 and 2020.'], bad: ['shows below', 'illustrate', 'from 2000 to 2020 years', 'In conclusion,'], fake: ['in four countries', 'between 1990 and 2010.', 'The bar chart'],
+    { part: 'Mở bài', img: 'line-internet', c: ['The line graph', 'illustrates', 'the proportion of households', 'with internet access', 'in three countries', 'between 2000 and 2020.'], r: ['s', 'v', 'o', 'o', 'p', 't'],
+      cv: ['Biểu đồ đường', 'minh hoạ', 'tỉ lệ hộ gia đình', 'có truy cập internet', 'ở ba quốc gia', 'từ năm 2000 đến năm 2020'],
+      bad: ['shows below', 'illustrate', 'from 2000 to 2020 years', 'In conclusion,'], fake: ['in four countries', 'between 1990 and 2010.', 'The bar chart'],
+      t: { 'shows below': ['cho thấy bên dưới', 'Không viết "below": bài viết không nằm cạnh biểu đồ.'], 'illustrate': ['minh hoạ', 'Chủ ngữ số ít (The line graph) → illustrates.'], 'from 2000 to 2020 years': ['từ năm 2000 đến 2020', 'Không thêm "years" sau mốc năm: between 2000 and 2020.'], 'In conclusion,': ['Tóm lại,', 'Task 1 không có kết luận, và mở bài không dùng In conclusion.'], 'in four countries': ['ở bốn quốc gia'], 'between 1990 and 2010.': ['từ năm 1990 đến 2010'], 'The bar chart': ['Biểu đồ cột'] },
       vi: 'Biểu đồ đường minh hoạ tỉ lệ hộ gia đình có internet ở ba nước từ 2000 đến 2020.' },
-    { part: 'Overview', img: 'line-internet', c: ['Overall,', 'internet access', 'rose considerably', 'in all three countries,', 'while', 'Vietnam saw', 'the most dramatic growth.'], bad: ['Overall the', 'rised', 'more dramatic', 'In summary of'], fake: ['fell considerably', 'Brazil saw', 'in two of the three countries,'],
+    { part: 'Overview', img: 'line-internet', c: ['Overall,', 'internet access', 'rose considerably', 'in all three countries,', 'while', 'Vietnam saw', 'the most dramatic growth.'], r: ['k', 's', 'v', 'p', 'k', 's', 'm'],
+      cv: ['Nhìn chung,', 'việc truy cập internet', 'tăng đáng kể', 'ở cả ba quốc gia,', 'trong khi', 'Việt Nam có', 'mức tăng mạnh nhất'],
+      bad: ['Overall the', 'rised', 'more dramatic', 'In summary of'], fake: ['fell considerably', 'Brazil saw', 'in two of the three countries,'],
+      t: { 'Overall the': ['Nhìn chung thì', 'Sau Overall cần dấu phẩy: Overall, …'], 'rised': ['đã tăng', 'rise là động từ bất quy tắc: rise – rose – risen.'], 'more dramatic': ['mạnh hơn', 'So sánh trong ba nước → so sánh nhất: the most dramatic.'], 'In summary of': ['Tóm tắt về', 'Không có cụm "in summary of". Overview mở bằng Overall,'], 'fell considerably': ['giảm đáng kể'], 'Brazil saw': ['Brazil có'], 'in two of the three countries,': ['ở hai trong ba nước,'] },
       vi: 'Nhìn chung, tỉ lệ dùng internet tăng đáng kể ở cả ba nước, trong khi Việt Nam tăng mạnh nhất.' },
-    { part: 'Overview', img: 'line-drinks', c: ['Overall,', 'coffee consumption', 'increased dramatically,', 'whereas', 'tea consumption', 'declined steadily.'], bad: ['increased dramatic', 'Firstly,', 'declining steady', 'In the other hand'], fake: ['decreased dramatically,', 'rose steadily.', 'soft drink consumption'],
+    { part: 'Overview', img: 'line-drinks', c: ['Overall,', 'coffee consumption', 'increased dramatically,', 'whereas', 'tea consumption', 'declined steadily.'], r: ['k', 's', 'v', 'k', 's', 'v'],
+      cv: ['Nhìn chung,', 'lượng cà phê tiêu thụ', 'tăng mạnh,', 'trong khi', 'lượng trà tiêu thụ', 'giảm đều'],
+      bad: ['increased dramatic', 'Firstly,', 'declining steady', 'In the other hand'], fake: ['decreased dramatically,', 'rose steadily.', 'soft drink consumption'],
+      t: { 'increased dramatic': ['tăng mạnh', 'Động từ đi với trạng từ: increased dramatically.'], 'Firstly,': ['Thứ nhất,', 'Overview không liệt kê bằng Firstly. Mở bằng Overall,'], 'declining steady': ['giảm đều', 'Cần động từ quá khứ và trạng từ: declined steadily.'], 'In the other hand': ['Mặt khác', 'Cụm đúng là On the other hand, và ở đây cần whereas để nối hai vế.'], 'decreased dramatically,': ['giảm mạnh,'], 'rose steadily.': ['tăng đều'], 'soft drink consumption': ['lượng nước ngọt tiêu thụ'] },
       vi: 'Nhìn chung, lượng cà phê tăng mạnh, trong khi lượng trà giảm đều.' },
-    { part: 'Mở bài', img: 'bar-students', c: ['The bar chart', 'compares', 'the number of international students', 'in Australia, Canada and Japan', 'in four separate years.'], bad: ['compare', 'the amount of students', 'on four years'], fake: ['in Australia, Canada and the UK', 'in three separate years.', 'The line graph'],
+    { part: 'Mở bài', img: 'bar-students', c: ['The bar chart', 'compares', 'the number of international students', 'in Australia, Canada and Japan', 'in four separate years.'], r: ['s', 'v', 'o', 'p', 't'],
+      cv: ['Biểu đồ cột', 'so sánh', 'số sinh viên quốc tế', 'ở Úc, Canada và Nhật Bản', 'trong bốn năm khác nhau'],
+      bad: ['compare', 'the amount of students', 'on four years'], fake: ['in Australia, Canada and the UK', 'in three separate years.', 'The line graph'],
+      t: { 'compare': ['so sánh', 'Chủ ngữ số ít (The bar chart) → compares.'], 'the amount of students': ['lượng sinh viên', 'Danh từ đếm được dùng the number of, không dùng amount.'], 'on four years': ['trong bốn năm', 'Dùng in four separate years, không dùng on.'], 'in Australia, Canada and the UK': ['ở Úc, Canada và Anh'], 'in three separate years.': ['trong ba năm khác nhau'], 'The line graph': ['Biểu đồ đường'] },
       vi: 'Biểu đồ cột so sánh số sinh viên quốc tế ở Úc, Canada và Nhật trong bốn năm.' },
-    { part: 'Thân bài', img: 'line-internet', c: ['In 2000,', 'a quarter of British households', 'were connected,', 'compared with', 'just 5%', 'in Brazil.'], bad: ['was connected', 'compare with', 'in the Brazil'], fake: ['half of British households', 'just 15%', 'in Vietnam.'],
+    { part: 'Thân bài', img: 'line-internet', c: ['In 2000,', 'a quarter of British households', 'were connected,', 'compared with', 'just 5%', 'in Brazil.'], r: ['t', 's', 'v', 'k', 'n', 'p'],
+      cv: ['Năm 2000,', 'một phần tư số hộ ở Anh', 'có kết nối internet,', 'so với', 'chỉ 5%', 'ở Brazil'],
+      bad: ['was connected', 'compare with', 'in the Brazil'], fake: ['half of British households', 'just 15%', 'in Vietnam.'],
+      t: { 'was connected': ['có kết nối', 'Chủ ngữ households số nhiều → were connected.'], 'compare with': ['so với', 'Cụm đúng là compared with.'], 'in the Brazil': ['ở Brazil', 'Tên nước không có the: in Brazil.'], 'half of British households': ['một nửa số hộ ở Anh'], 'just 15%': ['chỉ 15%'], 'in Vietnam.': ['ở Việt Nam'] },
       vi: 'Năm 2000, một phần tư hộ ở Anh có internet, so với chỉ 5% ở Brazil.' },
-    { part: 'Thân bài', img: 'line-internet', c: ["Vietnam's figure", 'surged', 'to 55%', 'in 2015,', 'before overtaking', 'Brazil.'], bad: ['by 55%', 'overtake', 'surge'], fake: ['to 80%', 'in 2010,', 'the UK.'],
+    { part: 'Thân bài', img: 'line-internet', c: ["Vietnam's figure", 'surged', 'to 55%', 'in 2015,', 'before overtaking', 'Brazil.'], r: ['s', 'v', 'n', 't', 'v', 'o'],
+      cv: ['Con số của Việt Nam', 'tăng vọt', 'lên 55%', 'vào năm 2015,', 'trước khi vượt qua', 'Brazil'],
+      bad: ['by 55%', 'overtake', 'surge'], fake: ['to 80%', 'in 2010,', 'the UK.'],
+      t: { 'by 55%': ['thêm 55%', 'to 55% là lên tới 55%; by 55% là tăng thêm 55%. Ở đây là mức cuối → to.'], 'overtake': ['vượt qua', 'Sau before cần V-ing: before overtaking.'], 'surge': ['tăng vọt', 'Kể chuyện đã qua → surged.'], 'to 80%': ['lên 80%'], 'in 2010,': ['vào năm 2010,'], 'the UK.': ['nước Anh'] },
       vi: 'Con số của Việt Nam tăng vọt lên 55% năm 2015, trước khi vượt Brazil.' },
   ],
   sta: [
-    { part: 'Mở bài', img: 'map-riverton', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], bad: ['illustrates', 'that take place', 'below', 'In conclusion,'], fake: ['The three maps', 'in the city of Seaview', 'between 1990 and 2010.'],
+    { part: 'Mở bài', img: 'map-riverton', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], r: ['s', 'v', 'o', 'v', 'p', 't'],
+      cv: ['Hai bản đồ', 'minh hoạ', 'những thay đổi', 'đã diễn ra', 'ở thị trấn Riverton', 'từ năm 2000 đến năm 2020'],
+      bad: ['illustrates', 'that take place', 'below', 'In conclusion,'], fake: ['The three maps', 'in the city of Seaview', 'between 1990 and 2010.'],
+      t: { 'illustrates': ['minh hoạ', 'Chủ ngữ số nhiều (The two maps) → illustrate.'], 'that take place': ['diễn ra', 'Thay đổi đã xảy ra → that took place.'], 'below': ['bên dưới', 'Không viết "below": bài viết không nằm cạnh bản đồ.'], 'In conclusion,': ['Tóm lại,', 'Task 1 không có kết luận, và mở bài không dùng In conclusion.'], 'The three maps': ['Ba bản đồ'], 'in the city of Seaview': ['ở thành phố Seaview'], 'between 1990 and 2010.': ['từ năm 1990 đến 2010'] },
       vi: 'Hai bản đồ minh hoạ những thay đổi diễn ra ở thị trấn Riverton từ 2000 đến 2020.' },
-    { part: 'Overview', img: 'map-riverton', c: ['Overall,', 'the town', 'became more residential,', 'while', 'most of the farmland', 'disappeared.'], bad: ['become', 'was disappeared', 'Firstly,'], fake: ['became more industrial,', 'most of the houses', 'the lake'],
+    { part: 'Overview', img: 'map-riverton', c: ['Overall,', 'the town', 'became more residential,', 'while', 'most of the farmland', 'disappeared.'], r: ['k', 's', 'v', 'k', 's', 'v'],
+      cv: ['Nhìn chung,', 'thị trấn', 'có nhiều khu dân cư hơn,', 'trong khi', 'phần lớn đất nông nghiệp', 'đã biến mất'],
+      bad: ['become', 'was disappeared', 'Firstly,'], fake: ['became more industrial,', 'most of the houses', 'the lake'],
+      t: { 'become': ['trở nên', 'Kể chuyện đã qua → became.'], 'was disappeared': ['đã biến mất', 'disappear là nội động từ, không có bị động: disappeared.'], 'Firstly,': ['Thứ nhất,', 'Overview không liệt kê bằng Firstly. Mở bằng Overall,'], 'became more industrial,': ['có nhiều công nghiệp hơn,'], 'most of the houses': ['phần lớn nhà ở'], 'the lake': ['cái hồ'] },
       vi: 'Nhìn chung, thị trấn có nhiều nhà ở hơn, trong khi phần lớn đất nông nghiệp biến mất.' },
-    { part: 'Thân bài', img: 'map-riverton', c: ['The factory', 'in the north-west', 'was demolished', 'and replaced', 'by apartments.'], bad: ['demolished', 'were demolished', 'replaced with by'], fake: ['in the south-east', 'by a car park.', 'The hospital'],
+    { part: 'Thân bài', img: 'map-riverton', c: ['The factory', 'in the north-west', 'was demolished', 'and replaced', 'by apartments.'], r: ['s', 'p', 'v', 'v', 'o'],
+      cv: ['Nhà máy', 'ở phía tây bắc', 'bị phá bỏ', 'và được thay thế', 'bằng các căn hộ'],
+      bad: ['demolished', 'were demolished', 'replaced with by'], fake: ['in the south-east', 'by a car park.', 'The hospital'],
+      t: { 'demolished': ['phá bỏ', 'Nhà máy bị phá → bị động: was demolished.'], 'were demolished': ['bị phá bỏ', 'Chủ ngữ số ít (The factory) → was demolished.'], 'replaced with by': ['được thay bằng', 'Chỉ dùng một giới từ: replaced by.'], 'in the south-east': ['ở phía đông nam'], 'by a car park.': ['bằng một bãi đỗ xe'], 'The hospital': ['Bệnh viện'] },
       vi: 'Nhà máy ở phía tây bắc bị phá bỏ và thay bằng căn hộ.' },
-    { part: 'Overview', img: 'proc-bricks', c: ['Overall,', 'there are', 'seven stages', 'in the process,', 'beginning with', 'the digging of clay.'], bad: ['there is', 'begin with', 'In conclusion,'], fake: ['five stages', 'the packaging of bricks.', 'ending with'],
+    { part: 'Overview', img: 'proc-bricks', c: ['Overall,', 'there are', 'seven stages', 'in the process,', 'beginning with', 'the digging of clay.'], r: ['k', 'v', 'n', 'p', 'v', 'o'],
+      cv: ['Nhìn chung,', 'có', 'bảy giai đoạn', 'trong quy trình,', 'bắt đầu bằng', 'việc đào đất sét'],
+      bad: ['there is', 'begin with', 'In conclusion,'], fake: ['five stages', 'the packaging of bricks.', 'ending with'],
+      t: { 'there is': ['có', 'seven stages số nhiều → there are.'], 'begin with': ['bắt đầu bằng', 'Sau dấu phẩy dùng mệnh đề rút gọn: beginning with.'], 'In conclusion,': ['Tóm lại,', 'Overview mở bằng Overall, không phải câu kết.'], 'five stages': ['năm giai đoạn'], 'the packaging of bricks.': ['việc đóng gói gạch'], 'ending with': ['kết thúc bằng'] },
       vi: 'Nhìn chung, quy trình có bảy giai đoạn, bắt đầu bằng việc đào đất sét.' },
-    { part: 'Thân bài', img: 'proc-bricks', c: ['Once', 'the clay', 'has been shaped,', 'it is dried', 'in an oven.'], bad: ['has shaped', 'it dries', 'Although'], fake: ['it is packaged', 'in a kiln.', 'has been fired,'],
+    { part: 'Thân bài', img: 'proc-bricks', c: ['Once', 'the clay', 'has been shaped,', 'it is dried', 'in an oven.'], r: ['k', 's', 'v', 'v', 'p'],
+      cv: ['Một khi', 'đất sét', 'đã được tạo hình,', 'nó được sấy khô', 'trong lò sấy'],
+      bad: ['has shaped', 'it dries', 'Although'], fake: ['it is packaged', 'in a kiln.', 'has been fired,'],
+      t: { 'has shaped': ['đã tạo hình', 'Đất sét được tạo hình → bị động: has been shaped.'], 'it dries': ['nó khô', 'Quy trình dùng bị động: it is dried.'], 'Although': ['Mặc dù', 'Although nối hai ý trái ngược; ở đây là trình tự → Once.'], 'it is packaged': ['nó được đóng gói'], 'in a kiln.': ['trong lò nung'], 'has been fired,': ['đã được nung,'] },
       vi: 'Khi đất sét đã được tạo hình, nó được sấy trong lò.' },
-    { part: 'Overview', img: 'pie-budget', c: ['Overall,', 'housing', 'replaced food', 'as the largest expense', 'over the twenty years.'], bad: ['the most large', 'replace', 'In 2000,'], fake: ['transport', 'as the smallest expense', 'over the ten years.'],
+    { part: 'Overview', img: 'pie-budget', c: ['Overall,', 'housing', 'replaced food', 'as the largest expense', 'over the twenty years.'], r: ['k', 's', 'v', 'm', 't'],
+      cv: ['Nhìn chung,', 'nhà ở', 'đã thay thế thực phẩm', 'để thành khoản chi lớn nhất', 'trong suốt hai mươi năm'],
+      bad: ['the most large', 'replace', 'In 2000,'], fake: ['transport', 'as the smallest expense', 'over the ten years.'],
+      t: { 'the most large': ['lớn nhất', 'large → the largest.'], 'replace': ['thay thế', 'Kể chuyện đã qua → replaced.'], 'In 2000,': ['Năm 2000,', 'Overview nói về cả giai đoạn, không mở bằng một mốc năm.'], 'transport': ['đi lại'], 'as the smallest expense': ['thành khoản chi nhỏ nhất'], 'over the ten years.': ['trong mười năm'] },
       vi: 'Nhìn chung, nhà ở thay thế thực phẩm thành khoản chi lớn nhất trong hai mươi năm.' },
   ],
 };
+// What each chunk does in the sentence, shown on the ordering slots.
+const T1H_ROLES = {
+  s: { name: 'Chủ ngữ', color: '#2F6FD8' },
+  v: { name: 'Động từ / xu hướng', color: '#D9483B' },
+  m: { name: 'Mức độ', color: '#B07A00' },
+  n: { name: 'Số liệu', color: '#14864A' },
+  t: { name: 'Thời gian', color: '#8E44AD' },
+  p: { name: 'Nơi chốn / nhóm', color: '#0E8C96' },
+  o: { name: 'Đối tượng', color: '#C2571A' },
+  k: { name: 'Từ nối', color: '#5D6D7E' },
+};
+const T1H_FAKE_WHY = 'Đúng ngữ pháp nhưng sai thông tin so với biểu đồ.';
+// Flashcard decks that go with each chart, for the level-up questions.
+const T1H_DECKS = { line: ['base', 'verb', 'degree', 'prep', 'frame'], bar: ['base', 'verb', 'degree', 'prep', 'frame'], map: ['base', 'map', 'frame'], proc: ['base', 'proc', 'frame'], pie: ['base', 'share', 'frame'] };
 const T1H_CFG = { a: { spawn: 1.3, esp: 50, dmg: 7, bad: 1 }, d: { spawn: 1.05, esp: 60, dmg: 9, bad: 2 }, l: { spawn: 0.85, esp: 70, dmg: 11, bad: 3 } };
+// The room, in world pixels: about three phone screens across.
+const T1H_ROOM = { w: 2400, h: 1440, wall: 64, top: 112 };
+const T1H_FOE_MAX = 35;
+const T1H_GEM_MAX = 3;
+const T1H_GEM_LIFE = 8;
+// Seconds a level up waits after the last one, so questions come every 20–30 s.
+const T1H_LEVEL_GAP = 18;
 // Hero ids stay as they were bought (female, knight, archer); the look is sprite + sex.
 const T1H_HEROES = [
   { id: 'male', name: 'SURGE', title: 'Gunner', sprite: 'dwarf', sex: 'm', role: 'Xạ thủ', icon: '🔫', color: '#E5533D', weapon: 'gun', hp: 100, speed: 175,
     desc: 'Người lùn thợ súng, bắn dồn dập như đường biểu đồ tăng vọt.', passive: 'Bắn liên tục thì càng lúc càng nhanh, tới +50%.',
     skills: [{ id: 'rush', icon: '💢', name: 'Xả đạn', cd: 10, desc: 'Tốc độ bắn x3 trong 3 giây.' }, { id: 'grenade', icon: '💣', name: 'Lựu đạn', cd: 8, desc: 'Ném vào đám đông nhất, nổ to.' }] },
   { id: 'female', name: 'PLUMMET', title: 'Archmage', sprite: 'wizzard', sex: 'f', role: 'Pháp sư', icon: '☄️', color: '#8D5CFF', weapon: 'magic', hp: 90, speed: 170, item: 't1hero_female', price: 100,
-    desc: 'Phù thuỷ gọi thiên thạch lao thẳng xuống như số liệu giảm mạnh.', passive: 'Quái chết thì nổ nhỏ, lan sang con bên cạnh.',
+    desc: 'Phù thuỷ tóc tím gọi thiên thạch lao thẳng xuống như số liệu giảm mạnh.', passive: 'Quái chết thì nổ nhỏ, lan sang con bên cạnh.',
     skills: [{ id: 'meteor', icon: '☄️', name: 'Thiên thạch', cd: 9, desc: 'Rơi vào chỗ đông quái nhất.' }, { id: 'freeze', icon: '❄️', name: 'Băng giá', cd: 14, desc: 'Cả màn hình chậm lại 3 giây.' }] },
   { id: 'knight', name: 'PLATEAU', title: 'Sir', sprite: 'knight', sex: 'm', role: 'Đỡ đòn', icon: '🛡️', color: '#2D7FD3', weapon: 'sword', hp: 140, speed: 160, item: 't1hero_knight', price: 200,
     desc: 'Hiệp sĩ giáp nặng, đứng vững như đường đi ngang, không gì xô ngã được.', passive: 'Nhận ít hơn 30% sát thương.',
@@ -27170,7 +27254,8 @@ const T1H_BOSS_Q = {
     why: 'By contrast mở ý đối lập với đoạn trước. On the contrary dùng để bác bỏ ý vừa nói; "contrastly" không có trong tiếng Anh.' },
 };
 const T1H_BOSS = { a: 380, d: 500, l: 650 };
-const T1H_BOSS_LOOK = [['big_zombie', 'Zombie khổng lồ'], ['ogre', 'Ogre'], ['big_demon', 'Quỷ lớn']];
+// Boss look, name, and where its head is in the frame (x from the middle, y from the top) for the crown.
+const T1H_BOSS_LOOK = [['big_zombie', 'Zombie khổng lồ', 3, 9], ['ogre', 'Ogre', 2, 10], ['big_demon', 'Quỷ lớn', 2, 6]];
 const T1H_WEAPONS = {
   gun:   { dmg: 10, rate: 2.2, count: 1, pierce: 0, splash: 0, speed: 560, range: 430 },
   magic: { dmg: 11, rate: 1.4, count: 1, pierce: 0, splash: 70, speed: 380, range: 400 },
@@ -27190,22 +27275,28 @@ const T1H_UPS = [
   { id: 'speed', icon: '👟', name: () => 'Chạy nhanh', desc: () => 'Tốc độ chạy +12%.', ok: (w, g) => g.p.speed < 280, apply: (w, g) => { g.p.speed *= 1.12; } },
   { id: 'cdr', icon: '⏱️', name: () => 'Hồi chiêu nhanh', desc: () => 'Hai chiêu J, K hồi nhanh hơn 20%.', ok: (w, g) => g.cdMul > 0.5, apply: (w, g) => { g.cdMul *= 0.8; } },
 ];
+// After a wrong answer: a small step, not nothing.
+const T1H_UPS_SMALL = [
+  { id: 'sdmg', icon: '🔸', name: () => 'Sát thương nhỏ', desc: () => 'Sát thương +10%.', ok: () => true, apply: w => { w.dmg *= 1.1; } },
+  { id: 'srate', icon: '🔹', name: () => 'Đánh nhanh nhỏ', desc: () => 'Tốc độ đánh +8%.', ok: w => w.rate < 6, apply: w => { w.rate *= 1.08; } },
+  { id: 'shp', icon: '🩹', name: () => 'Băng bó', desc: () => 'Hồi 25 máu.', ok: () => true, apply: (w, g) => { g.p.hp = Math.min(g.p.maxHp, g.p.hp + 25); } },
+];
 const T1H_FOES = {
-  zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5 },
-  robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6 },
-  brute:  { look: ['orc_warrior', 'masked_orc', 'chort'], hp: 90, sp: 0.75, r: 22, scale: 3.3, dmg: 1.8, pts: 15 },
+  zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5, exp: 1 },
+  robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6, exp: 1 },
+  brute:  { look: ['orc_warrior', 'masked_orc', 'chort'], hp: 90, sp: 0.75, r: 22, scale: 3.3, dmg: 1.8, pts: 15, exp: 3 },
 };
 const T1H_KEYS = { KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
 const T1H_JOY = 46;
 
 // One atlas for every sprite: [x, y, w, h] by frame name, as in the tileset's frames folder.
-const T1D_RECTS = {"big_zombie_idle_anim_f0":[0,0,32,36],"big_zombie_idle_anim_f1":[33,0,32,36],"big_zombie_idle_anim_f2":[66,0,32,36],"big_zombie_idle_anim_f3":[99,0,32,36],"big_zombie_run_anim_f0":[132,0,32,36],"big_zombie_run_anim_f1":[165,0,32,36],"big_zombie_run_anim_f2":[198,0,32,36],"big_zombie_run_anim_f3":[231,0,32,36],"ogre_idle_anim_f0":[264,0,32,36],"ogre_idle_anim_f1":[297,0,32,36],"ogre_idle_anim_f2":[330,0,32,36],"ogre_idle_anim_f3":[363,0,32,36],"ogre_run_anim_f0":[396,0,32,36],"ogre_run_anim_f1":[429,0,32,36],"ogre_run_anim_f2":[462,0,32,36],"ogre_run_anim_f3":[0,37,32,36],"big_demon_idle_anim_f0":[33,37,32,36],"big_demon_idle_anim_f1":[66,37,32,36],"big_demon_idle_anim_f2":[99,37,32,36],"big_demon_idle_anim_f3":[132,37,32,36],"big_demon_run_anim_f0":[165,37,32,36],"big_demon_run_anim_f1":[198,37,32,36],"big_demon_run_anim_f2":[231,37,32,36],"big_demon_run_anim_f3":[264,37,32,36],"weapon_red_magic_staff":[297,37,8,30],"weapon_knight_sword":[306,37,10,29],"knight_m_idle_anim_f0":[317,37,16,28],"knight_m_idle_anim_f1":[334,37,16,28],"knight_m_idle_anim_f2":[351,37,16,28],"knight_m_idle_anim_f3":[368,37,16,28],"knight_m_run_anim_f0":[385,37,16,28],"knight_m_run_anim_f1":[402,37,16,28],"knight_m_run_anim_f2":[419,37,16,28],"knight_m_run_anim_f3":[436,37,16,28],"knight_m_hit_anim_f0":[453,37,16,28],"knight_f_idle_anim_f0":[470,37,16,28],"knight_f_idle_anim_f1":[487,37,16,28],"knight_f_idle_anim_f2":[0,74,16,28],"knight_f_idle_anim_f3":[17,74,16,28],"knight_f_run_anim_f0":[34,74,16,28],"knight_f_run_anim_f1":[51,74,16,28],"knight_f_run_anim_f2":[68,74,16,28],"knight_f_run_anim_f3":[85,74,16,28],"knight_f_hit_anim_f0":[102,74,16,28],"wizzard_m_idle_anim_f0":[119,74,16,28],"wizzard_m_idle_anim_f1":[136,74,16,28],"wizzard_m_idle_anim_f2":[153,74,16,28],"wizzard_m_idle_anim_f3":[170,74,16,28],"wizzard_m_run_anim_f0":[187,74,16,28],"wizzard_m_run_anim_f1":[204,74,16,28],"wizzard_m_run_anim_f2":[221,74,16,28],"wizzard_m_run_anim_f3":[238,74,16,28],"wizzard_m_hit_anim_f0":[255,74,16,28],"wizzard_f_idle_anim_f0":[272,74,16,28],"wizzard_f_idle_anim_f1":[289,74,16,28],"wizzard_f_idle_anim_f2":[306,74,16,28],"wizzard_f_idle_anim_f3":[323,74,16,28],"wizzard_f_run_anim_f0":[340,74,16,28],"wizzard_f_run_anim_f1":[357,74,16,28],"wizzard_f_run_anim_f2":[374,74,16,28],"wizzard_f_run_anim_f3":[391,74,16,28],"wizzard_f_hit_anim_f0":[408,74,16,28],"elf_m_idle_anim_f0":[425,74,16,28],"elf_m_idle_anim_f1":[442,74,16,28],"elf_m_idle_anim_f2":[459,74,16,28],"elf_m_idle_anim_f3":[476,74,16,28],"elf_m_run_anim_f0":[493,74,16,28],"elf_m_run_anim_f1":[0,103,16,28],"elf_m_run_anim_f2":[17,103,16,28],"elf_m_run_anim_f3":[34,103,16,28],"elf_m_hit_anim_f0":[51,103,16,28],"elf_f_idle_anim_f0":[68,103,16,28],"elf_f_idle_anim_f1":[85,103,16,28],"elf_f_idle_anim_f2":[102,103,16,28],"elf_f_idle_anim_f3":[119,103,16,28],"elf_f_run_anim_f0":[136,103,16,28],"elf_f_run_anim_f1":[153,103,16,28],"elf_f_run_anim_f2":[170,103,16,28],"elf_f_run_anim_f3":[187,103,16,28],"elf_f_hit_anim_f0":[204,103,16,28],"dwarf_m_idle_anim_f0":[221,103,16,28],"dwarf_m_idle_anim_f1":[238,103,16,28],"dwarf_m_idle_anim_f2":[255,103,16,28],"dwarf_m_idle_anim_f3":[272,103,16,28],"dwarf_m_run_anim_f0":[289,103,16,28],"dwarf_m_run_anim_f1":[306,103,16,28],"dwarf_m_run_anim_f2":[323,103,16,28],"dwarf_m_run_anim_f3":[340,103,16,28],"dwarf_m_hit_anim_f0":[357,103,16,28],"dwarf_f_idle_anim_f0":[374,103,16,28],"dwarf_f_idle_anim_f1":[391,103,16,28],"dwarf_f_idle_anim_f2":[408,103,16,28],"dwarf_f_idle_anim_f3":[425,103,16,28],"dwarf_f_run_anim_f0":[442,103,16,28],"dwarf_f_run_anim_f1":[459,103,16,28],"dwarf_f_run_anim_f2":[476,103,16,28],"dwarf_f_run_anim_f3":[493,103,16,28],"dwarf_f_hit_anim_f0":[0,132,16,28],"weapon_bow":[17,132,14,26],"orc_warrior_idle_anim_f0":[32,132,16,23],"orc_warrior_idle_anim_f1":[49,132,16,23],"orc_warrior_idle_anim_f2":[66,132,16,23],"orc_warrior_idle_anim_f3":[83,132,16,23],"orc_warrior_run_anim_f0":[100,132,16,23],"orc_warrior_run_anim_f1":[117,132,16,23],"orc_warrior_run_anim_f2":[134,132,16,23],"orc_warrior_run_anim_f3":[151,132,16,23],"masked_orc_idle_anim_f0":[168,132,16,23],"masked_orc_idle_anim_f1":[185,132,16,23],"masked_orc_idle_anim_f2":[202,132,16,23],"masked_orc_idle_anim_f3":[219,132,16,23],"masked_orc_run_anim_f0":[236,132,16,23],"masked_orc_run_anim_f1":[253,132,16,23],"masked_orc_run_anim_f2":[270,132,16,23],"masked_orc_run_anim_f3":[287,132,16,23],"chort_idle_anim_f0":[304,132,16,23],"chort_idle_anim_f1":[321,132,16,23],"chort_idle_anim_f2":[338,132,16,23],"chort_idle_anim_f3":[355,132,16,23],"chort_run_anim_f0":[372,132,16,23],"chort_run_anim_f1":[389,132,16,23],"chort_run_anim_f2":[406,132,16,23],"chort_run_anim_f3":[423,132,16,23],"weapon_arrow":[440,132,7,21],"tiny_zombie_idle_anim_f0":[448,132,16,16],"tiny_zombie_idle_anim_f1":[465,132,16,16],"tiny_zombie_idle_anim_f2":[482,132,16,16],"tiny_zombie_idle_anim_f3":[0,161,16,16],"tiny_zombie_run_anim_f0":[17,161,16,16],"tiny_zombie_run_anim_f1":[34,161,16,16],"tiny_zombie_run_anim_f2":[51,161,16,16],"tiny_zombie_run_anim_f3":[68,161,16,16],"skelet_idle_anim_f0":[85,161,16,16],"skelet_idle_anim_f1":[102,161,16,16],"skelet_idle_anim_f2":[119,161,16,16],"skelet_idle_anim_f3":[136,161,16,16],"skelet_run_anim_f0":[153,161,16,16],"skelet_run_anim_f1":[170,161,16,16],"skelet_run_anim_f2":[187,161,16,16],"skelet_run_anim_f3":[204,161,16,16],"goblin_idle_anim_f0":[221,161,16,16],"goblin_idle_anim_f1":[238,161,16,16],"goblin_idle_anim_f2":[255,161,16,16],"goblin_idle_anim_f3":[272,161,16,16],"goblin_run_anim_f0":[289,161,16,16],"goblin_run_anim_f1":[306,161,16,16],"goblin_run_anim_f2":[323,161,16,16],"goblin_run_anim_f3":[340,161,16,16],"imp_idle_anim_f0":[357,161,16,16],"imp_idle_anim_f1":[374,161,16,16],"imp_idle_anim_f2":[391,161,16,16],"imp_idle_anim_f3":[408,161,16,16],"imp_run_anim_f0":[425,161,16,16],"imp_run_anim_f1":[442,161,16,16],"imp_run_anim_f2":[459,161,16,16],"imp_run_anim_f3":[476,161,16,16],"floor_1":[493,161,16,16],"floor_2":[0,178,16,16],"floor_3":[17,178,16,16],"floor_4":[34,178,16,16],"floor_5":[51,178,16,16],"floor_6":[68,178,16,16],"floor_7":[85,178,16,16],"floor_8":[102,178,16,16],"skull":[119,178,16,16],"ui_heart_full":[136,178,13,12]};
+const T1D_RECTS = {"big_zombie_idle_anim_f0":[0,0,32,36],"big_zombie_idle_anim_f1":[33,0,32,36],"big_zombie_idle_anim_f2":[66,0,32,36],"big_zombie_idle_anim_f3":[99,0,32,36],"big_zombie_run_anim_f0":[132,0,32,36],"big_zombie_run_anim_f1":[165,0,32,36],"big_zombie_run_anim_f2":[198,0,32,36],"big_zombie_run_anim_f3":[231,0,32,36],"ogre_idle_anim_f0":[264,0,32,36],"ogre_idle_anim_f1":[297,0,32,36],"ogre_idle_anim_f2":[330,0,32,36],"ogre_idle_anim_f3":[363,0,32,36],"ogre_run_anim_f0":[396,0,32,36],"ogre_run_anim_f1":[429,0,32,36],"ogre_run_anim_f2":[462,0,32,36],"ogre_run_anim_f3":[0,37,32,36],"big_demon_idle_anim_f0":[33,37,32,36],"big_demon_idle_anim_f1":[66,37,32,36],"big_demon_idle_anim_f2":[99,37,32,36],"big_demon_idle_anim_f3":[132,37,32,36],"big_demon_run_anim_f0":[165,37,32,36],"big_demon_run_anim_f1":[198,37,32,36],"big_demon_run_anim_f2":[231,37,32,36],"big_demon_run_anim_f3":[264,37,32,36],"weapon_red_magic_staff":[297,37,8,30],"weapon_knight_sword":[306,37,10,29],"knight_m_idle_anim_f0":[317,37,16,28],"knight_m_idle_anim_f1":[334,37,16,28],"knight_m_idle_anim_f2":[351,37,16,28],"knight_m_idle_anim_f3":[368,37,16,28],"knight_m_run_anim_f0":[385,37,16,28],"knight_m_run_anim_f1":[402,37,16,28],"knight_m_run_anim_f2":[419,37,16,28],"knight_m_run_anim_f3":[436,37,16,28],"knight_m_hit_anim_f0":[453,37,16,28],"knight_f_idle_anim_f0":[470,37,16,28],"knight_f_idle_anim_f1":[487,37,16,28],"knight_f_idle_anim_f2":[0,74,16,28],"knight_f_idle_anim_f3":[17,74,16,28],"knight_f_run_anim_f0":[34,74,16,28],"knight_f_run_anim_f1":[51,74,16,28],"knight_f_run_anim_f2":[68,74,16,28],"knight_f_run_anim_f3":[85,74,16,28],"knight_f_hit_anim_f0":[102,74,16,28],"wizzard_m_idle_anim_f0":[119,74,16,28],"wizzard_m_idle_anim_f1":[136,74,16,28],"wizzard_m_idle_anim_f2":[153,74,16,28],"wizzard_m_idle_anim_f3":[170,74,16,28],"wizzard_m_run_anim_f0":[187,74,16,28],"wizzard_m_run_anim_f1":[204,74,16,28],"wizzard_m_run_anim_f2":[221,74,16,28],"wizzard_m_run_anim_f3":[238,74,16,28],"wizzard_m_hit_anim_f0":[255,74,16,28],"wizzard_f_idle_anim_f0":[272,74,16,28],"wizzard_f_idle_anim_f1":[289,74,16,28],"wizzard_f_idle_anim_f2":[306,74,16,28],"wizzard_f_idle_anim_f3":[323,74,16,28],"wizzard_f_run_anim_f0":[340,74,16,28],"wizzard_f_run_anim_f1":[357,74,16,28],"wizzard_f_run_anim_f2":[374,74,16,28],"wizzard_f_run_anim_f3":[391,74,16,28],"wizzard_f_hit_anim_f0":[408,74,16,28],"elf_m_idle_anim_f0":[425,74,16,28],"elf_m_idle_anim_f1":[442,74,16,28],"elf_m_idle_anim_f2":[459,74,16,28],"elf_m_idle_anim_f3":[476,74,16,28],"elf_m_run_anim_f0":[493,74,16,28],"elf_m_run_anim_f1":[0,103,16,28],"elf_m_run_anim_f2":[17,103,16,28],"elf_m_run_anim_f3":[34,103,16,28],"elf_m_hit_anim_f0":[51,103,16,28],"elf_f_idle_anim_f0":[68,103,16,28],"elf_f_idle_anim_f1":[85,103,16,28],"elf_f_idle_anim_f2":[102,103,16,28],"elf_f_idle_anim_f3":[119,103,16,28],"elf_f_run_anim_f0":[136,103,16,28],"elf_f_run_anim_f1":[153,103,16,28],"elf_f_run_anim_f2":[170,103,16,28],"elf_f_run_anim_f3":[187,103,16,28],"elf_f_hit_anim_f0":[204,103,16,28],"dwarf_m_idle_anim_f0":[221,103,16,28],"dwarf_m_idle_anim_f1":[238,103,16,28],"dwarf_m_idle_anim_f2":[255,103,16,28],"dwarf_m_idle_anim_f3":[272,103,16,28],"dwarf_m_run_anim_f0":[289,103,16,28],"dwarf_m_run_anim_f1":[306,103,16,28],"dwarf_m_run_anim_f2":[323,103,16,28],"dwarf_m_run_anim_f3":[340,103,16,28],"dwarf_m_hit_anim_f0":[357,103,16,28],"dwarf_f_idle_anim_f0":[374,103,16,28],"dwarf_f_idle_anim_f1":[391,103,16,28],"dwarf_f_idle_anim_f2":[408,103,16,28],"dwarf_f_idle_anim_f3":[425,103,16,28],"dwarf_f_run_anim_f0":[442,103,16,28],"dwarf_f_run_anim_f1":[459,103,16,28],"dwarf_f_run_anim_f2":[476,103,16,28],"dwarf_f_run_anim_f3":[493,103,16,28],"dwarf_f_hit_anim_f0":[0,132,16,28],"weapon_bow":[17,132,14,26],"orc_warrior_idle_anim_f0":[32,132,16,23],"orc_warrior_idle_anim_f1":[49,132,16,23],"orc_warrior_idle_anim_f2":[66,132,16,23],"orc_warrior_idle_anim_f3":[83,132,16,23],"orc_warrior_run_anim_f0":[100,132,16,23],"orc_warrior_run_anim_f1":[117,132,16,23],"orc_warrior_run_anim_f2":[134,132,16,23],"orc_warrior_run_anim_f3":[151,132,16,23],"masked_orc_idle_anim_f0":[168,132,16,23],"masked_orc_idle_anim_f1":[185,132,16,23],"masked_orc_idle_anim_f2":[202,132,16,23],"masked_orc_idle_anim_f3":[219,132,16,23],"masked_orc_run_anim_f0":[236,132,16,23],"masked_orc_run_anim_f1":[253,132,16,23],"masked_orc_run_anim_f2":[270,132,16,23],"masked_orc_run_anim_f3":[287,132,16,23],"chort_idle_anim_f0":[304,132,16,23],"chort_idle_anim_f1":[321,132,16,23],"chort_idle_anim_f2":[338,132,16,23],"chort_idle_anim_f3":[355,132,16,23],"chort_run_anim_f0":[372,132,16,23],"chort_run_anim_f1":[389,132,16,23],"chort_run_anim_f2":[406,132,16,23],"chort_run_anim_f3":[423,132,16,23],"weapon_arrow":[440,132,7,21],"tiny_zombie_idle_anim_f0":[448,132,16,16],"tiny_zombie_idle_anim_f1":[465,132,16,16],"tiny_zombie_idle_anim_f2":[482,132,16,16],"tiny_zombie_idle_anim_f3":[0,161,16,16],"tiny_zombie_run_anim_f0":[17,161,16,16],"tiny_zombie_run_anim_f1":[34,161,16,16],"tiny_zombie_run_anim_f2":[51,161,16,16],"tiny_zombie_run_anim_f3":[68,161,16,16],"skelet_idle_anim_f0":[85,161,16,16],"skelet_idle_anim_f1":[102,161,16,16],"skelet_idle_anim_f2":[119,161,16,16],"skelet_idle_anim_f3":[136,161,16,16],"skelet_run_anim_f0":[153,161,16,16],"skelet_run_anim_f1":[170,161,16,16],"skelet_run_anim_f2":[187,161,16,16],"skelet_run_anim_f3":[204,161,16,16],"goblin_idle_anim_f0":[221,161,16,16],"goblin_idle_anim_f1":[238,161,16,16],"goblin_idle_anim_f2":[255,161,16,16],"goblin_idle_anim_f3":[272,161,16,16],"goblin_run_anim_f0":[289,161,16,16],"goblin_run_anim_f1":[306,161,16,16],"goblin_run_anim_f2":[323,161,16,16],"goblin_run_anim_f3":[340,161,16,16],"imp_idle_anim_f0":[357,161,16,16],"imp_idle_anim_f1":[374,161,16,16],"imp_idle_anim_f2":[391,161,16,16],"imp_idle_anim_f3":[408,161,16,16],"imp_run_anim_f0":[425,161,16,16],"imp_run_anim_f1":[442,161,16,16],"imp_run_anim_f2":[459,161,16,16],"imp_run_anim_f3":[476,161,16,16],"floor_1":[493,161,16,16],"floor_2":[0,178,16,16],"floor_3":[17,178,16,16],"floor_4":[34,178,16,16],"floor_5":[51,178,16,16],"floor_6":[68,178,16,16],"floor_7":[85,178,16,16],"floor_8":[102,178,16,16],"skull":[119,178,16,16],"ui_heart_full":[136,178,13,12],"column":[0,195,16,48],"crate":[17,195,16,24],"wall_mid":[34,195,16,16],"wall_top_mid":[51,195,16,16],"wall_banner_red":[68,195,16,16],"wall_banner_blue":[85,195,16,16],"wall_banner_green":[102,195,16,16],"wall_goo_base":[119,195,16,16],"hole":[136,195,16,16]};
 const T1D = { img: null, ready: false };
 // Loads the atlas once, with white, red and ice silhouettes for hit flashes and effects.
 function t1dLoad() {
   if (T1D.img) return;
   const img = T1D.img = new Image();
-  img.onload = () => { T1D.flash = t1hSilhouette(img, '#fff'); T1D.red = t1hSilhouette(img, '#C0392B'); T1D.ice = t1hSilhouette(img, '#7FC8F8'); T1D.ready = true; };
+  img.onload = () => { T1D.flash = t1hSilhouette(img, '#fff'); T1D.red = t1hSilhouette(img, '#C0392B'); T1D.ice = t1hSilhouette(img, '#7FC8F8'); T1D.gold = t1hSilhouette(img, '#F2C14E'); T1D.ready = true; };
   img.src = '/img/t1/dungeon.png';
 }
 // One frame with its feet at (x, y), crisp pixels, optional shadow and overlays.
@@ -27276,11 +27367,11 @@ function t1hPickScreen() {
         </div>`; }).join('')}
       </div>
       <ul class="t1h-how">
-        <li>🕹️ Đi bằng <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> hoặc phím mũi tên. Điện thoại: chạm chỗ nào cũng được rồi kéo.</li>
-        <li>⚔️ Nhân vật tự đánh. Chiêu riêng: <kbd>J</kbd> <kbd>K</kbd>, điện thoại bấm 2 nút tròn góc phải.</li>
-        <li>💎 Quái chết rơi <b>ngọc chữ</b> tím: đi qua để nhặt <b>đúng thứ tự</b> ghép câu. Biểu đồ của câu hiện bên trái: cụm nào trái với biểu đồ, sai ngữ pháp, hay chưa tới lượt thì nhặt vào mất máu.</li>
-        <li>⬆️ Ghép xong câu là lên cấp: gõ lại cả câu, đúng thì chọn nâng cấp (2 tia, 3 tia, nổ lan, kiếm xoay…).</li>
-        <li>👹 Hết mỗi phần bài có <b>Trùm</b>. Hạ trùm rồi nhặt <b>ngọc vàng</b> đúng câu nối đoạn để mở rương.</li>
+        <li>🕹️ Đi bằng <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> hoặc phím mũi tên. Điện thoại: chạm chỗ trống rồi kéo.</li>
+        <li>💎 Quái chết rơi <b>ngọc chữ</b>. <b>Bấm vào ngọc</b> (hoặc phím <kbd>1</kbd>–<kbd>3</kbd>) để bỏ vào túi. Ngọc tan sau 8 giây. Bẫy cũng rơi, nhặt nhầm thì lúc xếp câu bỏ ra.</li>
+        <li>🧩 Túi đủ cụm đúng thì <b>xếp câu</b> vào các ô theo chức năng (chủ ngữ, động từ, số liệu…), cụm bẫy bỏ vào 🗑.</li>
+        <li>⬆️ Diệt quái lấy EXP. Đầy thanh là lên cấp: trả lời 1 câu về cụm từ, rồi chọn chiêu. Mỗi chiêu 3 cấp, cấp 3 là <b>Tiến hoá</b> và chỉ mở khi trả lời đúng.</li>
+        <li>👹 Hết mỗi phần bài có <b>Trùm</b>. Hạ trùm, bấm <b>ngọc vàng</b> đúng câu nối đoạn để mở rương: chiêu J, K lên cấp.</li>
       </ul>
     </div>`;
   t1hPickAnim();
@@ -27314,21 +27405,62 @@ async function t1hBuy(id, btn) {
   t1hPickScreen();
 }
 
+/* ── Skills ─────────────────────────────────────────────────────────────
+   Picked at level ups, three levels each; level 3 is an evolution with its
+   own name. Six skills at most, so the student builds a kit. A wrong answer
+   still gives a card, but never a level 3: the strongest form is learned. */
+const T1H_SKILLS = {
+  orbit:   { icon: '🌀', name: ['Kiếm xoay', 'Kiếm xoay', 'Rào Bão Kiếm'], desc: ['2 lưỡi kiếm bay vòng quanh người.', '4 lưỡi, vòng rộng hơn, chém mạnh hơn.', '8 lưỡi kín vòng thành rào chắn: hất văng quái, chặn đạn của trùm.'] },
+  chain:   { icon: '🌩️', name: ['Tia sét', 'Tia sét', 'Bão Sét'], desc: ['Cứ 2 giây sét giật 3 con gần nhất.', 'Cứ 1,5 giây giật 6 con.', 'Sét giật liên tục 8 con, trúng là choáng.'] },
+  aura:    { icon: '🔥', name: ['Vòng lửa', 'Vòng lửa', 'Mặt Trời Nhỏ'], desc: ['Lửa đốt quái sát người.', 'Vòng lửa to hơn, đốt mạnh hơn.', 'Vòng lửa rất lớn, quái đi vào bị chậm hẳn.'] },
+  frost:   { icon: '❄️', name: ['Băng giá', 'Băng giá', 'Kỷ Băng Hà'], desc: ['Cứ 6 giây nổ băng quanh người, quái chậm lại.', 'Nổ băng đóng băng quái 1 giây.', 'Cứ 8 giây đóng băng cả màn 2 giây.'] },
+  missile: { icon: '🚀', name: ['Tên lửa đuổi', 'Tên lửa đuổi', 'Mưa Tên Lửa'], desc: ['Cứ 3 giây bắn 2 quả tự tìm quái.', '4 quả mỗi lần.', '8 quả mỗi lần, nổ lan.'] },
+  multi:   { icon: '🔱', name: ['Đa tia', 'Đa tia', 'Quạt 7 Tia'], desc: ['+1 tia (kiếm: +1 hướng chém).', 'Bắn xoè 3 tia.', '7 tia xoè kín phía trước, xuyên thêm 2 con.'] },
+  drone:   { icon: '🤖', name: ['Drone', 'Drone', 'Phi Đội'], desc: ['1 drone bay theo và bắn.', '2 drone.', '3 drone bắn laser xuyên thẳng.'] },
+  boom:    { icon: '🪃', name: ['Boomerang', 'Boomerang', 'Lốc Xoáy'], desc: ['Cứ 2,5 giây phóng 1 lưỡi, bay ra rồi bay về.', '2 lưỡi mỗi lần.', 'Lưỡi thành lốc: hút quái vào giữa rồi nổ tung.'] },
+  thorns:  { icon: '🌵', name: ['Giáp gai', 'Giáp gai', 'Pháo Đài'], desc: ['Quái chạm vào là bị gai đâm ngược.', 'Gai mạnh hơn, hồi 1 máu mỗi 2 giây.', 'Cứ 15 giây tự bật khiên 2 giây.'] },
+};
+const T1H_SKILL_MAX = 6;
+const T1H_STATS = {
+  dmg:   { icon: '💥', name: 'Sát thương', desc: 'Sát thương +25%.', apply: g => { g.w.dmg *= 1.25; } },
+  rate:  { icon: '⚡', name: 'Đánh nhanh', desc: 'Tốc độ đánh +20%.', apply: g => { g.w.rate *= 1.2; } },
+  hp:    { icon: '❤️', name: 'Máu trâu', desc: 'Máu tối đa +25 và hồi đầy.', apply: g => { g.p.maxHp += 25; g.p.hp = g.p.maxHp; } },
+  speed: { icon: '👟', name: 'Chạy nhanh', desc: 'Tốc độ chạy +10%.', apply: g => { g.p.speed *= 1.1; } },
+  cdr:   { icon: '⏱️', name: 'Hồi chiêu nhanh', desc: 'Hai chiêu J, K hồi nhanh hơn 15%.', apply: g => { g.cdMul *= 0.85; } },
+};
+// The hero's own skills (J, K) at levels 2 and 3, raised in the chest after a boss.
+const T1H_SK_UP = {
+  rush:    [['Xả đạn+', 'Tốc độ bắn x3 trong 5 giây.'], ['Bão Đạn', 'Tốc độ bắn x4 trong 5 giây, đạn xuyên 2 con.']],
+  grenade: [['Lựu đạn+', 'Nổ to hơn, mạnh hơn.'], ['Bom Chùm', '5 quả lựu đạn nổ cùng lúc.']],
+  meteor:  [['Thiên thạch+', 'Thiên thạch to hơn, mạnh hơn.'], ['Mưa Thiên Thạch', '5 thiên thạch rơi liền nhau.']],
+  freeze:  [['Băng giá+', 'Cả màn chậm lại 5 giây.'], ['Đóng Băng', 'Cả màn đứng im 3 giây.']],
+  shield:  [['Khiên+', 'Miễn sát thương 5 giây.'], ['Khiên Phản Chấn', 'Miễn sát thương 5 giây, hết khiên thì nổ sóng hất văng quái.']],
+  stomp:   [['Dậm đất+', 'Vòng dậm to hơn, mạnh hơn.'], ['Động Đất', '3 lần dậm liên tiếp, vòng sau to hơn vòng trước.']],
+  dash:    [['Lướt lửa', 'Lướt để lại vệt lửa đốt quái.'], ['Lướt Kép', 'Hồi nhanh gấp đôi, vệt lửa to và nóng hơn.']],
+  rain:    [['Mưa tên+', 'Vùng mưa to hơn, kéo dài 5 giây.'], ['Bão Tên', 'Vùng mưa tên lớn đi theo đám quái 6 giây.']],
+};
+function t1hSkName(s, lv) { return lv > 1 ? T1H_SK_UP[s.id][lv - 2][0] : s.name; }
+function t1hSkDesc(s, lv) { return lv > 1 ? T1H_SK_UP[s.id][lv - 2][1] : s.desc; }
+
 /* ── The run ── */
 function t1hGo(id) {
   const h = T1H_HEROES.find(x => x.id === id && t1hOwned(x)) || T1H_HEROES[0];
   try { localStorage.setItem('t1Hero', h.id); } catch (e) {}
   t1Leave();
   t1dLoad();
-  const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 };
+  const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake();
   const list = t1Shuffle(T1_SURV[_t1Block]).sort((a, b) => order[a.part] - order[b.part]);
-  const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0, got: 0,
-    p: { x: 0, y: 0, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
-    w: { kind: h.weapon, ...T1H_WEAPONS[h.weapon], orbit: 0, chain: 0, cd: 0.6, chainCd: 2, orbitA: 0 },
-    foes: [], shots: [], fx: [], gems: [], hearts: [], ups: [], taken: [], spawnIn: 1, time: 0, kills: 0, level: 1, needT: 3,
-    sk: [0, 0], cdMul: 1, ramp: 0, lastShot: 0, rushT: 0, shieldT: 0, freezeT: 0, lobs: [], zones: [], ebul: [], boss: null, gold: [], goldTries: 0, bosses: 0,
+  const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
+    room, bag: [], ord: null,
+    p: { x: room.w / 2, y: room.h / 2, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
+    w: { kind: h.weapon, ...T1H_WEAPONS[h.weapon], cd: 0.6 },
+    skills: {}, stats: {}, skLv: [1, 1], st: { chain: 1, aura: 0, frost: 3, missile: 1, boom: 1, regen: 2, fort: 4, orbA: 0 }, drones: [], booms: [], quakes: [],
+    foes: [], shots: [], fx: [], gems: [], hearts: [], cards: [], spawnIn: 1, time: 0, kills: 0, level: 1, exp: 0, need: 10, lastLv: 0, gemT: 0,
+    sk: [0, 0], cdMul: 1, ramp: 0, lastShot: 0, rushT: 0, shieldT: 0, freezeT: 0, flashT: 0, lobs: [], zones: [], ebul: [], boss: null, gold: [], goldTries: 0, bosses: 0,
+    block: _t1Block, mast: t1hMastLocal(), mastDirty: {}, weak: new Map(), due: [], asked: 0, quizRight: 0,
     keys: {}, joy: null, phase: '', paused: false, over: false, last: 0, id: 0, sfxT: 0 };
-  g.keyPick = () => {};
+  t1hMastFetch();
+  g.keyPick = i => t1hTapGem(i);
   g.pick = i => g.keyPick(i);
   g.next = () => {};
   g.kd = e => {
@@ -27355,38 +27487,43 @@ function t1hGo(id) {
     window.removeEventListener('blur', g.blur);
     window.removeEventListener('resize', g.rs);
     document.removeEventListener('visibilitychange', g.vis);
+    clearTimeout(g.mastT);
+    t1hMastFlush(g);
   };
   t1Root().innerHTML = `
     <div class="lv-wrap t1-play t1h" style="--hc:${h.color}">
       <div class="t1-top">
         <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
         <span class="t1-stat">Lv <strong id="h-lv">1</strong></span>
+        <span class="t1h-exp" title="EXP: đầy thì lên cấp"><i id="h-exp"></i></span>
         <span class="t1-stat">Câu <strong id="h-n">1</strong>/${list.length}</span>
         <span class="t1-stat">⭐ <strong id="h-score">0</strong></span>
         <span class="t1-stat">💀 <strong id="h-kills">0</strong></span>
         <button class="t1-pause" onclick="t1hPause()" aria-label="Tạm dừng">⏸</button>
       </div>
-      <div class="t1-surv-goal"><span class="t1-step-tag" id="sv-part"></span><span class="t1h-ups-got" id="h-ups"></span><div class="t1-surv-slots" id="sv-slots"></div></div>
+      <div class="t1h-goal"><span class="t1-step-tag" id="sv-part"></span><span class="t1h-ups-got" id="h-ups"></span><div class="t1h-bag" id="h-bag"></div></div>
       <p class="t1h-vi-m" id="h-vim"></p>
       <div class="t1h-play">
       <aside class="t1h-side t1h-graph" id="h-chart" onclick="t1hChartBig(true)" aria-label="Biểu đồ của câu đang ghép"></aside>
       <div class="t1h-stage" id="h-stage">
         <canvas id="h-cv" aria-label="Sân chơi Sinh tồn ghép câu"></canvas>
-        <div class="t1h-skills">${h.skills.map((s, i) => `<button class="t1h-sk ready" id="h-sk${i}" style="--hc:${h.color}" onpointerdown="event.preventDefault(); t1hSkill(${i})" aria-label="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}" title="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}"><span>${s.icon}</span><kbd>${T1H_SKILL_KEYS[i]}</kbd></button>`).join('')}</div>
+        <div class="t1h-skills">${h.skills.map((s, i) => `<button class="t1h-sk ready" id="h-sk${i}" style="--hc:${h.color}" onpointerdown="event.preventDefault(); t1hSkill(${i})" aria-label="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}" title="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}"><span>${s.icon}</span><kbd>${T1H_SKILL_KEYS[i]}</kbd><b class="t1h-sk-lv" id="h-sklv${i}">1</b></button>`).join('')}</div>
         <div class="t1-arena-msg hidden" id="h-msg"></div>
         <div class="t1h-modal hidden" id="h-modal"></div>
       </div>
       <aside class="t1h-side t1h-info" id="h-info"></aside>
       </div>
       <div class="t1h-chartbig hidden" id="h-chartbig" onclick="t1hChartBig(false)"></div>
-      <div class="t1-hint">${h.icon} <b style="color:${h.color}">${h.title} ${h.name}</b> · Đi: <kbd>WASD</kbd> / mũi tên · chiêu <kbd>J</kbd> <kbd>K</kbd> · điện thoại: chạm rồi kéo · <kbd>P</kbd> tạm dừng.</div>
+      <div class="t1-hint">${h.icon} <b style="color:${h.color}">${h.title} ${h.name}</b> · Đi: <kbd>WASD</kbd> / mũi tên · bấm ngọc hoặc phím <kbd>1</kbd>–<kbd>3</kbd> để nhặt · chiêu <kbd>J</kbd> <kbd>K</kbd> · <kbd>P</kbd> tạm dừng.</div>
     </div>`;
   const cv = document.getElementById('h-cv');
   g.ctx = cv.getContext('2d');
   cv.addEventListener('pointerdown', e => {
     if (g.paused || g.over) return;
-    const r = cv.getBoundingClientRect();
-    g.joy = { id: e.pointerId, ox: e.clientX - r.left, oy: e.clientY - r.top, dx: 0, dy: 0 };
+    const r = cv.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+    // A tap on a gem picks it up; anywhere else starts the joystick.
+    if (t1hTapAt(sx, sy)) { e.preventDefault(); return; }
+    g.joy = { id: e.pointerId, ox: sx, oy: sy, dx: 0, dy: 0 };
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     e.preventDefault();
   });
@@ -27402,28 +27539,100 @@ function t1hGo(id) {
   const up = e => { if (g.joy && g.joy.id === e.pointerId) g.joy = null; };
   cv.addEventListener('pointerup', up);
   cv.addEventListener('pointercancel', up);
-  t1hSize();
   t1Bind();
   t1hSentence();
-  t1hSlots();
+  t1hBagUi();
   t1hHud();
+  t1hFit();
   tsSfx('boss');
   g.raf = requestAnimationFrame(t1hTick);
 }
+
+/* ── The room: walls round the edge, blocks, pillars, rocks and crates ── */
+function t1hRoomMake() {
+  const R = T1H_ROOM, obs = [], cx = R.w / 2, cy = R.h / 2;
+  const free = (x, y, w, h, pad) => Math.hypot(x + w / 2 - cx, y + h / 2 - cy) > 320
+    && !obs.some(o => x < o.x + o.w + pad && x + w + pad > o.x && y < o.y + o.h + pad && y + h + pad > o.y);
+  const place = (kind, w, h, n, pad) => {
+    for (let k = 0, t = 0; k < n && t < 600; t++) {
+      const x = Math.round(t1Rand(R.wall + 90, R.w - R.wall - 90 - w)), y = Math.round(t1Rand(R.top + 110, R.h - R.wall - 70 - h));
+      if (free(x, y, w, h, pad)) { obs.push({ kind, x, y, w, h, hp: kind === 'crate' ? 30 : 0, hit: 0, seed: Math.random() }); k++; }
+    }
+  };
+  place('wall', 192, 48, 2, 150);
+  place('wall', 48, 192, 2, 150);
+  place('column', 40, 28, 8, 120);
+  place('rock', 58, 40, 6, 100);
+  place('crate', 40, 30, 9, 70);
+  // Monsters climb out of holes along the walls.
+  const holes = [[0.15, 0], [0.5, 0], [0.85, 0], [0.15, 1], [0.5, 1], [0.85, 1], [0, 0.5], [1, 0.5]]
+    .map(([fx, fy]) => ({ x: R.wall + 50 + fx * (R.w - 2 * R.wall - 100), y: R.top + 40 + fy * (R.h - R.top - R.wall - 80) }));
+  return { ...R, obs, holes };
+}
+// Pushes a body (feet at x, y, radius r) out of every obstacle and the walls.
+function t1hPush(e, r) {
+  const R = _t1.room;
+  for (const o of R.obs) {
+    if (o.dead) continue;
+    const nx = Math.max(o.x, Math.min(e.x, o.x + o.w)), ny = Math.max(o.y, Math.min(e.y, o.y + o.h));
+    const dx = e.x - nx, dy = e.y - ny, d = Math.hypot(dx, dy);
+    if (d >= r) continue;
+    if (d > 0.001) { e.x = nx + dx / d * r; e.y = ny + dy / d * r; continue; }
+    const l = e.x - o.x, rt = o.x + o.w - e.x, t = e.y - o.y, b = o.y + o.h - e.y, m = Math.min(l, rt, t, b);
+    if (m === l) e.x = o.x - r; else if (m === rt) e.x = o.x + o.w + r; else if (m === t) e.y = o.y - r; else e.y = o.y + o.h + r;
+  }
+  e.x = Math.max(R.wall + r, Math.min(R.w - R.wall - r, e.x));
+  e.y = Math.max(R.top + r, Math.min(R.h - R.wall - r, e.y));
+}
+// A spot near (x, y) that is clear of obstacles, for gems and hearts.
+function t1hFreeNear(x, y) {
+  const e = { x, y };
+  t1hPush(e, 26);
+  return e;
+}
+function t1hCrateHit(o, dmg) {
+  const g = _t1;
+  if (o.dead) return;
+  o.hp -= dmg; o.hit = 0.12;
+  if (o.hp > 0) return;
+  o.dead = true;
+  g.fx.push({ kind: 'poof', x: o.x + o.w / 2, y: o.y, r: 26, t: 0, dur: 0.4 });
+  tsSfx('key');
+  if (Math.random() < 0.6) { const s = t1hFreeNear(o.x + o.w / 2, o.y + o.h / 2); g.hearts.push({ x: s.x, y: s.y, life: 20 }); }
+  else { g.exp += 2; g.fx.push({ kind: 'num', x: o.x + o.w / 2, y: o.y - 30, text: '+2 EXP', t: 0, dur: 0.8, color: '#7C5CFF' }); }
+}
+
 function t1hSize() {
   const g = _t1, cv = document.getElementById('h-cv');
   if (!g || !cv) return;
-  // Shorter on narrow screens, where the chart strip and meaning sit above the arena.
-  const W = cv.parentElement.clientWidth, H = Math.round(Math.min(560, Math.max(320, window.innerHeight * (window.innerWidth < 1100 ? 0.44 : 0.62))));
+  const W = cv.parentElement.clientWidth;
+  let H;
+  // On a phone the whole game fits one screen: the arena takes what is left below the bar.
+  if (window.innerWidth < 1100) H = Math.round(Math.max(250, Math.min(620, window.innerHeight - Math.max(0, cv.getBoundingClientRect().top) - 10)));
+  else H = Math.round(Math.min(600, Math.max(360, window.innerHeight * 0.64)));
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   cv.style.height = H + 'px';
   g.W = W; g.H = H; g.dpr = dpr;
+  g.zoom = W < 700 ? Math.max(0.58, W / 640) : 1;
+}
+// Scrolls the game to the top of the screen (below a sticky bar), then sizes the arena.
+function t1hFit() {
+  const root = t1Root();
+  if (!root) return;
+  let bar = 0, el = document.elementFromPoint(window.innerWidth / 2, 2);
+  while (el && el !== document.body && el !== document.documentElement) {
+    const pos = getComputedStyle(el).position;
+    if (pos === 'fixed' || pos === 'sticky') { bar = el.getBoundingClientRect().bottom; break; }
+    el = el.parentElement;
+  }
+  window.scrollBy(0, root.getBoundingClientRect().top - bar - 4);
+  t1hSize();
 }
 // A dungeon floor tile built from the atlas once it has loaded: mostly plain
 // stone, some cracked, the odd skull.
 function t1hGround(c) {
-  const t = document.createElement('canvas'), N = 8, S = 32;
+  const t = document.createElement('canvas'), N = 8, S = 48;
   t.width = t.height = N * S;
   const x = t.getContext('2d');
   x.imageSmoothingEnabled = false;
@@ -27432,23 +27641,22 @@ function t1hGround(c) {
     const R = T1D_RECTS['floor_' + f];
     x.drawImage(T1D.img, R[0], R[1], R[2], R[3], i * S, j * S, S, S);
   }
-  // Dimmed a little so sprites and chunk labels stand out from the stone.
-  x.fillStyle = 'rgba(18,12,26,.28)'; x.fillRect(0, 0, t.width, t.height);
+  x.fillStyle = 'rgba(18,12,26,.3)'; x.fillRect(0, 0, t.width, t.height);
   for (let k = 0; k < 2; k++) { const R = T1D_RECTS.skull; x.drawImage(T1D.img, R[0], R[1], R[2], R[3], Math.floor(Math.random() * N) * S, Math.floor(Math.random() * N) * S, S, S); }
   return c.createPattern(t, 'repeat');
 }
 function t1hSentence() {
   const g = _t1;
   g.S = g.lastS = g.list[g.si];
-  g.got = 0;
+  g.bag = [];
   g.bad = t1Shuffle(g.S.bad).slice(0, g.cfg.bad);
   g.fake = t1Shuffle(g.S.fake || []).slice(0, g.cfg.bad);
   g.gems = [];
-  g.needT = 3;
+  g.gemT = 2;
 }
-// Beside the arena: the chart the sentence describes on the left, its
-// meaning and the essay's progress on the right. On a phone the chart is a
-// strip above the arena that opens full size.
+// Beside the arena: the chart on the left; the meaning, the parts of the
+// essay and the skills on the right. On a phone the chart is a strip above
+// the arena that opens full size.
 function t1hPanels() {
   const g = _t1, L = document.getElementById('h-chart'), R = document.getElementById('h-info');
   if (!L || !R) return;
@@ -27460,11 +27668,14 @@ function t1hPanels() {
   const parts = [...new Set(g.list.map(x => x.part))], cur = g.S ? parts.indexOf(g.S.part) : g.bosses - 1;
   const vi = S ? escapeHtml(S.vi) : '';
   document.getElementById('h-vim').innerHTML = g.S ? '🇻🇳 ' + vi : '';
+  const own = Object.keys(g.skills);
   R.innerHTML = `<div class="t1h-side-h">🇻🇳 Nghĩa câu</div><p class="t1h-side-vi">${g.S ? vi : '👹 Hạ Trùm để mở câu nối đoạn.'}</p>
     <div class="t1h-side-h">🧱 Phần bài</div>
     <ol class="t1h-parts">${parts.map((pt, i) => `<li class="${i < cur ? 'done' : i === cur ? 'now' : ''}"><span>${i < cur ? '✓' : i === cur ? (g.S ? '✍️' : '👹') : '·'}</span>${escapeHtml(pt)}</li>`).join('')}</ol>
+    <div class="t1h-side-h">⚔️ Chiêu ${own.length}/${T1H_SKILL_MAX}</div>
+    ${own.length ? `<ul class="t1h-kitlist">${own.map(k => { const s = T1H_SKILLS[k], lv = g.skills[k]; return `<li class="${lv === 3 ? 'evo' : ''}"><span>${s.icon}</span><b>${escapeHtml(s.name[lv - 1])}</b><i>${'★'.repeat(lv)}${'☆'.repeat(3 - lv)}</i></li>`; }).join('')}</ul>` : '<p class="t1h-side-tip">Lên cấp để nhận chiêu đầu tiên.</p>'}
     <div class="t1h-side-h">⚠️ Ba loại bẫy</div>
-    <ul class="t1h-traps"><li>📊 Sai thông tin so với biểu đồ</li><li>❌ Sai ngữ pháp</li><li>⏳ Đúng nhưng chưa tới lượt</li></ul>`;
+    <ul class="t1h-traps"><li>📊 Sai thông tin so với biểu đồ</li><li>❌ Sai ngữ pháp</li><li>🧩 Đúng cụm nhưng sai chỗ trong câu</li></ul>`;
 }
 function t1hChartBig(open) {
   const g = _t1, big = document.getElementById('h-chartbig');
@@ -27480,19 +27691,37 @@ function t1hChartBig(open) {
     if (g.bigPaused) { g.bigPaused = false; g.paused = false; g.last = 0; }
   }
 }
-function t1hSlots() {
-  const g = _t1, el = document.getElementById('sv-slots');
+// The bag above the arena: what has been picked up. Tap a chunk for its meaning.
+function t1hBagUi() {
+  const g = _t1, el = document.getElementById('h-bag');
   if (!el) return;
   if (!g.S) {
     const q = g.bossQ;
     document.getElementById('sv-part').textContent = '👹 Trùm ' + g.bosses + '/3';
-    el.innerHTML = g.gold.length ? `<span class="now gold">Nhặt ngọc vàng là câu mở <b>${escapeHtml(q.next)}</b></span>` : `<span class="now">Hạ Trùm để nhận câu nối sang <b>${escapeHtml(q ? q.next : '')}</b></span>`;
+    el.innerHTML = g.gold.length ? `<span class="t1h-bag-tip gold">Bấm ngọc vàng là câu mở <b>${escapeHtml(q.next)}</b></span>` : `<span class="t1h-bag-tip">Hạ Trùm để nhận câu nối sang <b>${escapeHtml(q ? q.next : '')}</b></span>`;
     t1hPanels();
     return;
   }
-  el.innerHTML = g.S.c.map((c, i) => `<span class="${i < g.got ? 'on' : i === g.got ? 'now' : ''}">${i < g.got ? escapeHtml(c) : i === g.got ? '❓' : '···'}</span>`).join('');
+  const need = g.S.c.length;
   document.getElementById('sv-part').textContent = g.S.part;
+  el.innerHTML = `<span class="t1h-bag-h">🎒 ${g.bag.length} cụm <small>cần đủ ${need} cụm đúng</small></span>${g.bag.map((b, i) => `<button class="t1h-chip" onclick="t1hBagVi(${i})" title="Bấm để xem nghĩa">${escapeHtml(b.text)}</button>`).join('')}${g.bag.length ? '' : '<span class="t1h-bag-tip">Bấm vào ngọc chữ để bỏ vào túi</span>'}`;
   t1hPanels();
+}
+function t1hChunkVi(S, text) {
+  const i = S.c.indexOf(text);
+  return i >= 0 ? S.cv[i] : (S.t[text] || [''])[0];
+}
+// A meaning looked up goes on the "words I didn't know" list.
+function t1hBagVi(i) {
+  const g = _t1, b = g && g.bag[i];
+  if (!b || !g.S) return;
+  const vi = t1hChunkVi(g.S, b.text);
+  t1hNoteWeak(b.text, vi, g.S.c.join(' '));
+  t1hMsg(`“${b.text}” = ${vi}`, 2600);
+}
+function t1hNoteWeak(en, vi, ex) {
+  const g = _t1, k = t1hKey(en);
+  if (k && vi && !g.weak.has(k)) g.weak.set(k, { en: en.replace(/[.,;:]+$/, ''), vi, ex: ex || '' });
 }
 function t1hHud() {
   const g = _t1, $ = id => document.getElementById(id);
@@ -27501,7 +27730,10 @@ function t1hHud() {
   $('h-n').textContent = Math.min(g.si + 1, g.list.length);
   $('h-score').textContent = g.score;
   $('h-kills').textContent = g.kills;
-  $('h-ups').textContent = g.taken.join('');
+  $('h-exp').style.width = Math.min(100, g.exp / g.need * 100) + '%';
+  $('h-exp').parentElement.classList.toggle('full', g.exp >= g.need);
+  $('h-ups').innerHTML = Object.keys(g.skills).map(k => `<span class="${g.skills[k] === 3 ? 'evo' : ''}">${T1H_SKILLS[k].icon}<sup>${g.skills[k]}</sup></span>`).join('');
+  g.hero.skills.forEach((s, i) => { const b = $('h-sklv' + i); if (b) b.textContent = g.skLv[i]; });
 }
 function t1hMsg(t, ms) {
   const g = _t1, el = document.getElementById('h-msg');
@@ -27533,37 +27765,55 @@ function t1hStep(dt) {
   p.moving = m > 0.05;
   if (p.moving) { p.mx = mx; p.my = my; }
   if (p.dashT > 0) {
-    // SOAR's dash: fast and untouchable along the last direction.
+    // SOAR's dash: fast and untouchable along the last direction, a fire trail from level 2.
     p.dashT -= dt;
     p.x += p.dx * 900 * dt; p.y += p.dy * 900 * dt;
     p.inv = Math.max(p.inv, 0.05);
     if (Math.random() < 0.6) g.fx.push({ kind: 'trail', x: p.x, y: p.y - 30, t: 0, dur: 0.3, color: g.hero.color });
+    const lv = g.skLv[0];
+    if (lv >= 2 && (g.trailT = (g.trailT || 0) - dt) <= 0) { g.trailT = 0.05; g.zones.push({ kind: 'fire', x: p.x, y: p.y, r: lv >= 3 ? 50 : 36, t: 0, dur: 1.6, tick: 0, dmg: w.dmg * (lv >= 3 ? 0.6 : 0.35) + 2 }); }
   } else if (p.moving) {
     p.x += mx * p.speed * dt; p.y += my * p.speed * dt;
     if (Math.abs(mx) > 0.1 && p.atk <= 0) p.face = mx > 0 ? 1 : -1;
   }
+  t1hPush(p, 14);
   if (p.moving || p.dashT > 0) p.anim += dt;
   p.hurt = Math.max(0, p.hurt - dt); p.inv = Math.max(0, p.inv - dt); p.atk = Math.max(0, p.atk - dt);
   g.sk = g.sk.map(c => Math.max(0, c - dt));
-  g.rushT = Math.max(0, g.rushT - dt); g.shieldT = Math.max(0, g.shieldT - dt); g.freezeT = Math.max(0, g.freezeT - dt);
+  const shieldWas = g.shieldT;
+  g.rushT = Math.max(0, g.rushT - dt); g.shieldT = Math.max(0, g.shieldT - dt); g.freezeT = Math.max(0, g.freezeT - dt); g.flashT = Math.max(0, g.flashT - dt);
+  // Khiên Phản Chấn: the shield bursts when it ends.
+  if (g.shieldBoom && shieldWas > 0 && g.shieldT <= 0) { g.shieldBoom = false; t1hShock(p.x, p.y, 230, w.dmg * 2 + 15); }
+  for (const q of g.quakes) { q.at -= dt; if (q.at <= 0 && !q.done) { q.done = true; t1hShock(p.x, p.y, q.r, q.dmg); } }
+  g.quakes = g.quakes.filter(q => !q.done);
+  for (const o of g.room.obs) o.hit = Math.max(0, o.hit - dt);
   if (g.time - g.lastShot > 1.2) g.ramp = 0;
   // Harder with each sentence and each minute; quieter while a boss is up.
-  const diff = g.si + g.time / 70;
+  const diff = g.si * 0.6 + g.time / 80;
   g.spawnIn -= dt;
-  if (g.spawnIn <= 0 && g.foes.length < 70) { t1hSpawnFoe(diff); g.spawnIn = g.cfg.spawn / (1 + diff * 0.35) * t1Rand(0.7, 1.2) * (g.boss ? 2 : 1); }
-  const slow = g.freezeT > 0 ? 0.35 : 1;
+  if (g.spawnIn <= 0 && g.foes.length < T1H_FOE_MAX) { t1hSpawnFoe(diff); g.spawnIn = g.cfg.spawn / (1 + diff * 0.3) * t1Rand(0.7, 1.2) * (g.boss ? 2 : 1); }
+  const slow = g.freezeT > 0 ? 0.35 : 1, auraR = g.skills.aura === 3 ? 150 : 0;
   for (const f of g.foes) {
-    f.anim += dt * slow; f.hit = Math.max(0, f.hit - dt); f.stun = Math.max(0, (f.stun || 0) - dt);
+    f.anim += dt * slow; f.hit = Math.max(0, f.hit - dt); f.stun = Math.max(0, (f.stun || 0) - dt); f.slowT = Math.max(0, (f.slowT || 0) - dt);
     if (f.boss) { t1hBossAI(f, dt * slow); if (g.over) return; continue; }
     const dx = p.x - f.x, dy = p.y - f.y, d = Math.hypot(dx, dy) || 1;
     if (f.stun <= 0) {
-      const sp = f.sp * slow * (f.hit > 0.04 ? 0.3 : 1);
-      f.x += dx / d * sp * dt; f.y += dy / d * sp * dt;
+      const sp = f.sp * slow * (f.hit > 0.04 ? 0.3 : 1) * (f.slowT > 0 || (auraR && d < auraR) ? 0.45 : 1), ox = f.x, oy = f.y;
+      let vx = dx / d, vy = dy / d;
+      // Stuck on a wall: slide round it for a moment.
+      if (f.sideT > 0) { f.sideT -= dt; vx += -dy / d * f.side * 1.3; vy += dx / d * f.side * 1.3; const k = Math.hypot(vx, vy); vx /= k; vy /= k; }
+      f.x += vx * sp * dt; f.y += vy * sp * dt;
+      t1hPush(f, f.r * 0.7);
+      if (sp * dt > 0.4 && Math.hypot(f.x - ox, f.y - oy) < sp * dt * 0.3 && !(f.sideT > 0)) { f.side = Math.random() < 0.5 ? 1 : -1; f.sideT = 0.8; }
       f.face = dx > 0 ? 1 : -1;
     }
     if (d < f.r + 16 && p.inv <= 0) {
       if (g.shieldT > 0) { f.x -= dx / d * 30; f.y -= dy / d * 30; f.stun = 0.3; }
-      else { t1hHurt(f.dmg, f.x, f.y); if (g.over) return; }
+      else {
+        // Giáp gai: whatever touches the hero is hurt back.
+        if (g.skills.thorns) t1hDamage(f, w.dmg * [0.8, 1.3, 1.8][g.skills.thorns - 1] + 6, f.x - p.x, f.y - p.y);
+        t1hHurt(f.dmg, f.x, f.y); if (g.over) return;
+      }
     }
   }
   // Monsters push each other apart so they crowd instead of stacking; the boss doesn't budge.
@@ -27579,20 +27829,35 @@ function t1hStep(dt) {
     const ok = t1hFire();
     // SURGE's passive: the longer it keeps firing, the faster it fires.
     if (ok && w.kind === 'gun') { g.ramp = Math.min(0.5, g.ramp + 0.025); g.lastShot = g.time; }
-    w.cd = ok ? 1 / (w.rate * (1 + g.ramp) * (g.rushT > 0 ? 3 : 1)) : 0.1;
+    w.cd = ok ? 1 / (w.rate * (1 + g.ramp) * (g.rushT > 0 ? g.rushMul || 3 : 1)) : 0.1;
   }
-  if (w.orbit) t1hOrbit(dt);
-  if (w.chain) { w.chainCd -= dt; if (w.chainCd <= 0) { t1hChain(); w.chainCd = 2; } }
+  t1hSkillsTick(dt);
   for (const s of g.shots) {
+    if (s.homing) {
+      // Missiles turn towards their target, or the nearest monster once it is dead.
+      if (!s.target || s.target.dead) s.target = t1hNearestFrom(s.x, s.y + 36, 600);
+      if (s.target) {
+        const ta = Math.atan2(s.target.y - s.target.h * 0.45 - s.y, s.target.x - s.x), ca = Math.atan2(s.vy, s.vx);
+        let da = Math.atan2(Math.sin(ta - ca), Math.cos(ta - ca));
+        const na = ca + Math.max(-6 * dt, Math.min(6 * dt, da)), sp = Math.hypot(s.vx, s.vy);
+        s.vx = Math.cos(na) * sp; s.vy = Math.sin(na) * sp;
+      }
+    }
     s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
     for (const f of g.foes) {
       if (f.dead || s.hitSet.has(f.id)) continue;
-      if (Math.hypot(f.x - s.x, f.y - f.h * 0.45 - s.y) < f.r + 6) {
+      if (Math.hypot(f.x - s.x, f.y - f.h * 0.45 - s.y) < f.r + (s.kind === 'laser' ? 10 : 6)) {
         s.hitSet.add(f.id);
         if (s.splash) t1hBoom(s.x, s.y, s.splash, s.dmg * 0.7);
         t1hDamage(f, s.dmg, s.vx, s.vy);
         if (s.pierce-- <= 0) { s.life = 0; break; }
       }
+    }
+    // Shots fly over walls and rocks; crates are in the way and break.
+    if (s.life > 0) for (const o of g.room.obs) {
+      if (o.kind !== 'crate' || o.dead || s.x < o.x - 4 || s.x > o.x + o.w + 4 || s.y < o.y + o.h - 72 || s.y > o.y + o.h) continue;
+      t1hCrateHit(o, s.dmg);
+      if (s.pierce-- <= 0) { s.life = 0; break; }
     }
   }
   g.shots = g.shots.filter(s => s.life > 0);
@@ -27604,6 +27869,7 @@ function t1hStep(dt) {
   g.lobs = g.lobs.filter(l => !l.done);
   for (const z of g.zones) {
     z.t += dt; z.tick -= dt;
+    if (z.follow) { const t = t1hDensest(700); if (t) { z.x += (t.x - z.x) * Math.min(1, dt * 1.5); z.y += (t.y - z.y) * Math.min(1, dt * 1.5); } }
     if (z.tick <= 0) { z.tick = 0.25; for (const f of g.foes) if (!f.dead && Math.hypot(f.x - z.x, f.y - z.y) < z.r + f.r) t1hDamage(f, z.dmg, 0, 0); }
   }
   g.zones = g.zones.filter(z => z.t < z.dur);
@@ -27612,18 +27878,124 @@ function t1hStep(dt) {
     if (Math.hypot(b.x - p.x, b.y - (p.y - 30)) < 18 && p.inv <= 0) { b.life = 0; if (g.shieldT <= 0) { t1hHurt(10, b.x, b.y); if (g.over) return; } }
   }
   g.ebul = g.ebul.filter(b => b.life > 0);
-  g.foes = g.foes.filter(f => !f.dead && (f.boss || Math.hypot(f.x - p.x, f.y - p.y) < 1400));
+  g.foes = g.foes.filter(f => !f.dead);
   t1hGems(dt);
-  if (g.over) return;
-  t1hGold(dt);
-  if (g.over) return;
   for (const h of g.hearts) {
     h.life -= dt;
-    if (Math.hypot(h.x - p.x, h.y - p.y) < 28) { h.life = 0; p.hp = Math.min(p.maxHp, p.hp + 15); tsSfx('coin'); g.fx.push({ kind: 'num', x: p.x, y: p.y - 80, text: '+15 ❤️', t: 0, dur: 0.8, color: '#12A150' }); }
+    if (Math.hypot(h.x - p.x, h.y - p.y) < 30) { h.life = 0; p.hp = Math.min(p.maxHp, p.hp + 20); tsSfx('coin'); g.fx.push({ kind: 'num', x: p.x, y: p.y - 80, text: '+20 ❤️', t: 0, dur: 0.8, color: '#12A150' }); }
   }
   g.hearts = g.hearts.filter(h => h.life > 0);
   g.fx.forEach(e => { e.t += dt; });
   g.fx = g.fx.filter(e => e.t < e.dur);
+  // A full EXP bar waits for the gap since the last level up, and for any open step to finish.
+  if (g.exp >= g.need && !g.phase && g.time - g.lastLv >= T1H_LEVEL_GAP) t1hLevelUp();
+  if ((g.hudT = (g.hudT || 0) - dt) <= 0) { g.hudT = 0.25; t1hHud(); }
+}
+// The skills that run on their own each frame.
+function t1hSkillsTick(dt) {
+  const g = _t1, S = g.skills, p = g.p, w = g.w, T = g.st;
+  if (S.orbit) t1hOrbit(dt);
+  if (S.chain) { T.chain -= dt; if (T.chain <= 0) { t1hChain([3, 6, 8][S.chain - 1], S.chain === 3); T.chain = [2, 1.5, 0.7][S.chain - 1]; } }
+  if (S.aura) {
+    T.aura -= dt;
+    if (T.aura <= 0) {
+      T.aura = 0.4;
+      const r = [70, 100, 150][S.aura - 1];
+      for (const f of g.foes) if (!f.dead && Math.hypot(f.x - p.x, f.y - p.y) < r + f.r) t1hDamage(f, [5, 9, 13][S.aura - 1] + w.dmg * 0.2, 0, 0);
+    }
+  }
+  if (S.frost) {
+    T.frost -= dt;
+    if (T.frost <= 0) {
+      const lv = S.frost, r = [180, 220, 700][lv - 1];
+      T.frost = lv === 3 ? 8 : 6;
+      g.fx.push({ kind: 'ring', x: p.x, y: p.y - 30, r, color: '#7FC8F8', t: 0, dur: 0.6 });
+      if (lv === 3) { g.freezeT = Math.max(g.freezeT, 2); g.flashT = 0.15; }
+      for (const f of g.foes) {
+        if (f.dead || Math.hypot(f.x - p.x, f.y - p.y) > r + f.r) continue;
+        if (lv === 1) f.slowT = 2; else f.stun = Math.max(f.stun || 0, f.boss ? 0.4 : lv === 3 ? 2 : 1);
+        f.iceT = lv === 1 ? 2 : lv === 3 ? 2 : 1;
+      }
+      tsSfx('slow');
+    }
+  }
+  if (S.missile) {
+    T.missile -= dt;
+    if (T.missile <= 0) {
+      T.missile = 3;
+      const n = [2, 4, 8][S.missile - 1];
+      for (let i = 0; i < n; i++) {
+        const a = -Math.PI / 2 + (i - (n - 1) / 2) * 0.35;
+        g.shots.push({ kind: 'missile', homing: true, x: p.x, y: p.y - 40, vx: Math.cos(a) * 340, vy: Math.sin(a) * 340, dmg: w.dmg * 1.2 + 6, pierce: 0, splash: S.missile === 3 ? 60 : 0, life: 3, hitSet: new Set() });
+      }
+    }
+  }
+  if (S.drone) {
+    const n = S.drone;
+    while (g.drones.length < n) g.drones.push({ cd: Math.random() });
+    g.drones.forEach((d, i) => {
+      const a = g.time * 1.6 + i * Math.PI * 2 / n;
+      d.x = p.x + Math.cos(a) * 52; d.y = p.y - 64 + Math.sin(a) * 18;
+      d.cd -= dt;
+      if (d.cd > 0) return;
+      const t = t1hNearestFrom(d.x, d.y + 40, n === 3 ? 620 : 420);
+      if (!t) { d.cd = 0.15; return; }
+      const ang = Math.atan2(t.y - t.h * 0.45 - d.y, t.x - d.x), laser = n === 3, sp = laser ? 1100 : 520;
+      g.shots.push({ kind: laser ? 'laser' : 'drone', x: d.x, y: d.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, dmg: w.dmg * (laser ? 0.9 : 0.6) + 3, pierce: laser ? 99 : 0, splash: 0, life: laser ? 0.6 : 0.8, hitSet: new Set() });
+      d.cd = laser ? 0.9 : 0.8;
+    });
+  }
+  if (S.boom) {
+    T.boom -= dt;
+    if (T.boom <= 0) {
+      T.boom = 2.5;
+      const t = t1hDensest(500), base = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.random() * Math.PI * 2;
+      for (let i = 0; i < (S.boom >= 2 ? 2 : 1); i++) g.booms.push({ x: p.x, y: p.y - 30, a: base + i * Math.PI, t: 0, st: 'out', lv: S.boom, hit: {} });
+    }
+    t1hBooms(dt);
+  }
+  if (S.thorns >= 2) { T.regen -= dt; if (T.regen <= 0) { T.regen = 2; p.hp = Math.min(p.maxHp, p.hp + 1); } }
+  if (S.thorns >= 3) { T.fort -= dt; if (T.fort <= 0) { T.fort = 15; g.shieldT = Math.max(g.shieldT, 2); g.fx.push({ kind: 'ring', x: p.x, y: p.y - 30, r: 70, color: '#2D7FD3', t: 0, dur: 0.5 }); } }
+}
+// Boomerangs fly out, come back; at level 3 each becomes a tornado that pulls monsters in and bursts.
+function t1hBooms(dt) {
+  const g = _t1, p = g.p, w = g.w;
+  for (const b of g.booms) {
+    b.t += dt;
+    if (b.st === 'out') {
+      b.x += Math.cos(b.a) * 560 * dt; b.y += Math.sin(b.a) * 560 * dt;
+      if (b.t > 0.5) { b.st = b.lv === 3 ? 'spin' : 'back'; b.t = 0; }
+    } else if (b.st === 'spin') {
+      for (const f of g.foes) {
+        if (f.dead || f.boss) continue;
+        const dx = b.x - f.x, dy = b.y + 30 - f.y, d = Math.hypot(dx, dy);
+        if (d < 190 && d > 8) { f.x += dx / d * 140 * dt; f.y += dy / d * 140 * dt; }
+      }
+      if (b.t > 1.2) { t1hBoom(b.x, b.y, 130, w.dmg * 2.5 + 10); g.fx.push({ kind: 'boom', x: b.x, y: b.y, r: 140, t: 0, dur: 0.45 }); tsSfx('kill'); b.st = 'done'; }
+    } else if (b.st === 'back') {
+      const dx = p.x - b.x, dy = p.y - 30 - b.y, d = Math.hypot(dx, dy);
+      if (d < 24) b.st = 'done';
+      else { b.x += dx / d * 620 * dt; b.y += dy / d * 620 * dt; }
+    }
+    for (const f of g.foes) {
+      if (f.dead || (b.hit[f.id] || 0) > g.time) continue;
+      if (Math.hypot(f.x - b.x, f.y - f.h * 0.45 - b.y) < f.r + (b.st === 'spin' ? 40 : 16)) { b.hit[f.id] = g.time + (b.st === 'spin' ? 0.25 : 0.4); t1hDamage(f, w.dmg * (b.st === 'spin' ? 0.5 : 1) + 4, f.x - b.x, f.y - b.y); }
+    }
+  }
+  g.booms = g.booms.filter(b => b.st !== 'done');
+}
+// A shock wave from the hero: damage and a shove for everything in reach.
+function t1hShock(x, y, r, dmg) {
+  const g = _t1;
+  g.fx.push({ kind: 'ring', x, y: y - 10, r, color: g.hero.color, t: 0, dur: 0.45 });
+  tsSfx('kill');
+  for (const f of g.foes) {
+    const dx = f.x - x, dy = f.y - y, d = Math.hypot(dx, dy) || 1;
+    if (f.dead || d > r + f.r) continue;
+    if (!f.boss) { f.x += dx / d * 80; f.y += dy / d * 80; t1hPush(f, f.r * 0.7); }
+    f.stun = Math.max(f.stun || 0, f.boss ? 0.5 : 1.2);
+    t1hDamage(f, dmg, 0, 0);
+  }
 }
 // Where a skill should land: the monster with the most others around it.
 function t1hDensest(range) {
@@ -27640,37 +28012,42 @@ function t1hDensest(range) {
 function t1hSkill(i) {
   const g = _t1;
   if (!g || g.game !== 'survive' || g.paused || g.over || !g.hero || g.sk[i] > 0) return;
-  const s = g.hero.skills[i], p = g.p, w = g.w;
+  const s = g.hero.skills[i], p = g.p, w = g.w, lv = g.skLv[i];
   const at = () => { const t = t1hDensest(460); return t ? { x: t.x, y: t.y - t.h * 0.45 } : null; };
-  if (s.id === 'rush') g.rushT = 3;
+  let cd = s.cd;
+  if (s.id === 'rush') { g.rushT = lv >= 2 ? 5 : 3; g.rushMul = lv >= 3 ? 4 : 3; }
   else if (s.id === 'grenade' || s.id === 'meteor') {
     const t = at();
     if (!t) { t1hMsg('Chưa có quái trong tầm.'); return; }
-    const meteor = s.id === 'meteor';
-    g.lobs.push({ kind: s.id, sx: p.x, sy: p.y - 40, tx: t.x, ty: t.y, t: 0, dur: meteor ? 0.7 : 0.45, r: meteor ? 130 : 105, dmg: w.dmg * (meteor ? 5 : 4) + 10 });
-  }
-  else if (s.id === 'freeze') { g.freezeT = 3; g.fx.push({ kind: 'ring', x: p.x, y: p.y - 30, r: 420, color: '#7FC8F8', t: 0, dur: 0.6 }); }
-  else if (s.id === 'shield') g.shieldT = 3;
-  else if (s.id === 'stomp') {
-    g.fx.push({ kind: 'ring', x: p.x, y: p.y - 10, r: 150, color: g.hero.color, t: 0, dur: 0.45 });
-    for (const f of g.foes) {
-      const dx = f.x - p.x, dy = f.y - p.y, d = Math.hypot(dx, dy) || 1;
-      if (f.dead || d > 150 + f.r) continue;
-      if (!f.boss) { f.x += dx / d * 80; f.y += dy / d * 80; }
-      f.stun = f.boss ? 0.5 : 1.3;
-      t1hDamage(f, w.dmg * 1.5, 0, 0);
+    const meteor = s.id === 'meteor', k = lv >= 2 ? 1.35 : 1, n = lv >= 3 ? 5 : 1;
+    for (let j = 0; j < n; j++) {
+      const a = j * Math.PI * 2 / 4, off = j ? 110 : 0;
+      g.lobs.push({ kind: s.id, sx: p.x, sy: p.y - 40, tx: t.x + Math.cos(a) * off, ty: t.y + Math.sin(a) * off * 0.8, t: 0, dur: (meteor ? 0.7 : 0.45) + j * (meteor ? 0.22 : 0.08), r: (meteor ? 130 : 105) * k, dmg: (w.dmg * (meteor ? 5 : 4) + 10) * k });
     }
+  }
+  else if (s.id === 'freeze') {
+    g.freezeT = lv >= 2 ? 5 : 3;
+    if (lv >= 3) { g.freezeT = 3; for (const f of g.foes) if (!f.dead) f.stun = Math.max(f.stun || 0, f.boss ? 1 : 3); g.flashT = 0.2; }
+    g.fx.push({ kind: 'ring', x: p.x, y: p.y - 30, r: 420, color: '#7FC8F8', t: 0, dur: 0.6 });
+  }
+  else if (s.id === 'shield') { g.shieldT = lv >= 2 ? 5 : 3; g.shieldBoom = lv >= 3; }
+  else if (s.id === 'stomp') {
+    if (lv >= 3) { [0, 0.35, 0.7].forEach((at, j) => g.quakes.push({ at, r: 170 + j * 70, dmg: w.dmg * 2.2 })); }
+    else t1hShock(p.x, p.y, lv >= 2 ? 200 : 150, w.dmg * (lv >= 2 ? 2.2 : 1.5));
   }
   else if (s.id === 'dash') {
     const dx = p.moving ? p.mx : p.face, dy = p.moving ? p.my : 0, d = Math.hypot(dx, dy) || 1;
     p.dx = dx / d; p.dy = dy / d; p.dashT = 0.2;
+    if (lv >= 3) cd = s.cd / 2;
   }
   else if (s.id === 'rain') {
     const t = at() || { x: p.x, y: p.y - 30 };
-    g.zones.push({ x: t.x, y: t.y + 20, r: 115, t: 0, dur: 3, tick: 0, dmg: w.dmg * 0.6 + 2 });
+    g.zones.push({ kind: 'rain', x: t.x, y: t.y + 20, r: [115, 150, 180][lv - 1], t: 0, dur: [3, 5, 6][lv - 1], tick: 0, dmg: w.dmg * 0.6 + 2, follow: lv >= 3 });
   }
   if (s.id === 'rush' || s.id === 'shield') g.fx.push({ kind: 'ring', x: p.x, y: p.y - 30, r: 60, color: g.hero.color, t: 0, dur: 0.4 });
-  g.sk[i] = s.cd * g.cdMul;
+  g.sk[i] = cd * g.cdMul;
+  g.skCd = g.skCd || [];
+  g.skCd[i] = g.sk[i];
   tsSfx('equip');
 }
 // The two skill buttons fill clockwise as they come back.
@@ -27680,25 +28057,42 @@ function t1hSkillUi() {
   g.hero.skills.forEach((s, i) => {
     const b = document.getElementById('h-sk' + i);
     if (!b) return;
-    const f = g.sk[i] > 0 ? g.sk[i] / (s.cd * g.cdMul) : 0, v = f.toFixed(2);
+    const f = g.sk[i] > 0 ? g.sk[i] / ((g.skCd && g.skCd[i]) || s.cd * g.cdMul) : 0, v = f.toFixed(2);
     if (b.dataset.v === v) return;
     b.dataset.v = v;
     b.style.setProperty('--cd', v);
     b.classList.toggle('ready', f === 0);
   });
 }
+// Monsters climb out of a hole away from the hero. Elites (tougher, gold,
+// worth more) turn up more often as the run goes on.
 function t1hSpawnFoe(diff) {
   const g = _t1, p = g.p, r = Math.random();
   const type = diff >= 2 && r < 0.12 ? 'brute' : diff >= 0.8 && r < 0.4 ? 'robot' : 'zombie';
-  const T = T1H_FOES[type], a = Math.random() * Math.PI * 2, R = Math.hypot(g.W, g.H) / 2 + 40;
-  const hp = T.hp * (1 + diff * 0.35), look = t1Pick(T.look);
-  g.foes.push({ id: ++g.id, type, T, look, x: p.x + Math.cos(a) * R, y: p.y + Math.sin(a) * R, hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1),
-    r: T.r, dmg: g.cfg.dmg * T.dmg, anim: Math.random(), hit: 0, face: 1, h: T1D_RECTS[look + '_run_anim_f0'][3] * T.scale });
+  const T = T1H_FOES[type], look = t1Pick(T.look);
+  const far = g.room.holes.filter(h => Math.hypot(h.x - p.x, h.y - p.y) > 380);
+  const hole = t1Pick(far.length ? far : g.room.holes);
+  const elite = Math.random() < Math.min(0.3, Math.max(0, (diff - 1.2) * 0.07) + g.bosses * 0.04);
+  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale * (elite ? 1.25 : 1);
+  g.foes.push({ id: ++g.id, type, T, look, elite, sc, x: hole.x + t1Rand(-20, 20), y: hole.y + t1Rand(-12, 12), hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1) * (elite ? 0.9 : 1),
+    r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: T1D_RECTS[look + '_run_anim_f0'][3] * sc });
 }
-function t1hNearest(range) {
+function t1hNearestFrom(x, y, range) {
   const g = _t1;
   let best = null, bd = range;
-  for (const f of g.foes) { if (f.dead) continue; const d = Math.hypot(f.x - g.p.x, f.y - g.p.y); if (d < bd) { bd = d; best = f; } }
+  for (const f of g.foes) { if (f.dead) continue; const d = Math.hypot(f.x - x, f.y - y); if (d < bd) { bd = d; best = f; } }
+  return best;
+}
+// The nearest monster; with none in range, the nearest crate, so crates get broken too.
+function t1hNearest(range) {
+  const g = _t1, f = t1hNearestFrom(g.p.x, g.p.y, range);
+  if (f) return f;
+  let best = null, bd = range;
+  for (const o of g.room.obs) {
+    if (o.kind !== 'crate' || o.dead) continue;
+    const x = o.x + o.w / 2, y = o.y + o.h, d = Math.hypot(x - g.p.x, y - g.p.y);
+    if (d < bd) { bd = d; best = { x, y, h: 60, r: 22, crate: o }; }
+  }
   return best;
 }
 // One attack. False when nothing is in range, so the weapon tries again soon.
@@ -27720,16 +28114,17 @@ function t1hFire() {
         if (Math.abs(da) <= w.arc / 2) t1hDamage(f, w.dmg, dx, dy);
       }
     }
+    for (const o of g.room.obs) if (o.kind === 'crate' && !o.dead && Math.hypot(o.x + o.w / 2 - p.x, o.y + o.h / 2 - p.y) < w.reach + 30) t1hCrateHit(o, w.dmg);
     p.aim = base; p.atk = 0.18; p.face = Math.cos(base) >= 0 ? 1 : -1;
     return true;
   }
   const t = t1hNearest(w.range);
   if (!t) return false;
   const sx = p.x + p.face * 12, sy = p.y - 36;
-  const base = Math.atan2(t.y - t.h * 0.45 - sy, t.x - sx);
+  const base = Math.atan2(t.y - t.h * 0.45 - sy, t.x - sx), step = w.count > 3 ? 0.17 : 0.2;
   for (let i = 0; i < w.count; i++) {
-    const a = base + (i - (w.count - 1) / 2) * 0.2;
-    g.shots.push({ kind: w.kind, x: sx, y: sy, vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed, dmg: w.dmg, pierce: w.pierce, splash: w.splash, life: w.range / w.speed, hitSet: new Set() });
+    const a = base + (i - (w.count - 1) / 2) * step;
+    g.shots.push({ kind: w.kind, x: sx, y: sy, vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed, dmg: w.dmg, pierce: w.pierce + (g.rushT > 0 && g.rushMul === 4 ? 2 : 0), splash: w.splash, life: w.range / w.speed, hitSet: new Set() });
   }
   p.aim = base; p.atk = 0.12; p.face = Math.cos(base) >= 0 ? 1 : -1;
   return true;
@@ -27739,28 +28134,35 @@ function t1hBoom(x, y, r, dmg) {
   g.fx.push({ kind: 'boom', x, y, r, t: 0, dur: 0.3 });
   for (const f of g.foes) if (!f.dead && Math.hypot(f.x - x, f.y - f.h * 0.45 - y) < r + f.r) t1hDamage(f, dmg, f.x - x, f.y - y);
 }
+// Kiếm xoay: 2, 4, then 8 blades; at level 3 the ring throws monsters out and stops boss bullets.
 function t1hOrbit(dt) {
-  const g = _t1, p = g.p, w = g.w, R = 72, cx = p.x, cy = p.y - 32;
-  w.orbitA += dt * 3.2;
-  for (let i = 0; i < w.orbit; i++) {
-    const a = w.orbitA + i * Math.PI * 2 / w.orbit, bx = cx + Math.cos(a) * R, by = cy + Math.sin(a) * R;
+  const g = _t1, p = g.p, w = g.w, lv = g.skills.orbit, n = [2, 4, 8][lv - 1], R = [72, 90, 112][lv - 1], cx = p.x, cy = p.y - 32;
+  g.st.orbA += dt * (lv === 3 ? 4.2 : 3.2);
+  for (let i = 0; i < n; i++) {
+    const a = g.st.orbA + i * Math.PI * 2 / n, bx = cx + Math.cos(a) * R, by = cy + Math.sin(a) * R;
     for (const f of g.foes) {
       if (f.dead || (f.orbCd || 0) > g.time) continue;
-      if (Math.hypot(f.x - bx, f.y - f.h * 0.45 - by) < f.r + 14) { f.orbCd = g.time + 0.4; t1hDamage(f, w.dmg * 0.6, f.x - cx, f.y - cy); }
+      if (Math.hypot(f.x - bx, f.y - f.h * 0.45 - by) < f.r + 14) {
+        f.orbCd = g.time + 0.35;
+        t1hDamage(f, w.dmg * [0.6, 0.8, 1][lv - 1] + 3, f.x - cx, f.y - cy);
+        if (lv === 3 && !f.boss) { const dx = f.x - cx, dy = f.y - cy, d = Math.hypot(dx, dy) || 1; f.x += dx / d * 34; f.y += dy / d * 34; t1hPush(f, f.r * 0.7); }
+      }
     }
   }
+  if (lv === 3) g.ebul = g.ebul.filter(b => { const d = Math.hypot(b.x - cx, b.y - cy); if (Math.abs(d - R) < 18) { g.fx.push({ kind: 'poof', x: b.x, y: b.y, r: 8, t: 0, dur: 0.25 }); return false; } return true; });
 }
-function t1hChain() {
-  const g = _t1, p = g.p, n = 1 + g.w.chain * 2, hit = new Set();
+function t1hChain(n, stun) {
+  const g = _t1, p = g.p, hit = new Set();
   let from = { x: p.x, y: p.y - 32 };
   const pts = [from];
   for (let k = 0; k < n; k++) {
-    let best = null, bd = k ? 170 : 330;
+    let best = null, bd = k ? 190 : 340;
     for (const f of g.foes) { if (f.dead || hit.has(f.id)) continue; const d = Math.hypot(f.x - from.x, f.y - f.h * 0.45 - from.y); if (d < bd) { bd = d; best = f; } }
     if (!best) break;
     hit.add(best.id);
     from = { x: best.x, y: best.y - best.h * 0.45 };
     pts.push(from);
+    if (stun) best.stun = Math.max(best.stun || 0, best.boss ? 0.15 : 0.5);
     t1hDamage(best, g.w.dmg * 1.2 + 6, 0, 0);
   }
   if (pts.length > 1) g.fx.push({ kind: 'zap', pts, t: 0, dur: 0.25 });
@@ -27777,63 +28179,72 @@ function t1hKill(f, quiet) {
   f.dead = true;
   g.fx.push({ kind: 'poof', x: f.x, y: f.y - f.h * 0.45, r: f.r, t: 0, dur: 0.35 });
   if (quiet) return;
-  g.kills++; g.score += f.T.pts;
+  g.kills++; g.score += f.T.pts * (f.elite ? 3 : 1);
   if (f.boss) { t1hBossDown(f); return; }
+  g.exp += f.T.exp * (f.elite ? 4 : 1);
   if (g.time - g.sfxT > 0.09) { g.sfxT = g.time; tsSfx('kill'); }
   // PLUMMET's passive: every kill bursts and catches its neighbours.
   if (g.hero.weapon === 'magic') t1hBoom(f.x, f.y - f.h * 0.45, 45, g.w.dmg * 0.4);
-  t1hDropGem(f.x, f.y);
-  if (Math.random() < 0.025) g.hearts.push({ x: f.x, y: f.y, life: 15 });
-  t1hHud();
+  t1hDropGem(f.x, f.y, f.elite);
+  if (Math.random() < 0.02) { const s = t1hFreeNear(f.x, f.y); g.hearts.push({ x: s.x, y: s.y, life: 15 }); }
 }
-// What a gem should carry: the chunk the sentence needs if no gem has it,
-// otherwise later real chunks, wrong ones, and ones the chart contradicts.
-function t1hPickChunk() {
-  const g = _t1;
-  if (!g.S) return null;
-  const need = g.S.c[g.got];
-  if (!g.gems.some(m => m.text === need)) return { text: need, real: true };
-  const pool = [...g.S.c.slice(g.got + 1).map(t => ({ text: t, real: true })), ...g.bad.map(t => ({ text: t, real: false })), ...g.fake.map(t => ({ text: t, real: false, fake: true }))].filter(x => !g.gems.some(m => m.text === x.text));
-  return pool.length ? t1Pick(pool) : null;
+
+/* ── Word gems and the bag ── */
+function t1hGemPool() {
+  const g = _t1, have = new Set([...g.bag.map(b => b.text), ...g.gems.map(m => m.text)]);
+  return {
+    real: g.S.c.filter(t => !have.has(t)).map(t => ({ text: t, real: true })),
+    traps: [...g.bad.map(t => ({ text: t, real: false })), ...g.fake.map(t => ({ text: t, real: false, fake: true }))].filter(x => !have.has(x.text)),
+  };
 }
 function t1hDropGem(x, y, force) {
-  const g = _t1, cap = 4 + 2 * g.cfg.bad;
-  if (!g.S) return;
-  if (g.gems.length >= cap) { if (!force) return; g.gems.shift(); }
-  const needOut = g.gems.some(m => m.text === g.S.c[g.got]);
-  if (!force && Math.random() > (needOut ? 0.5 : 0.85)) return;
-  const ch = t1hPickChunk();
-  if (ch) g.gems.push({ id: ++g.id, ...ch, x, y, life: 22, cd: 0, bob: Math.random() * 6 });
+  const g = _t1;
+  if (!g.S || g.phase === 'order' || g.gems.length >= T1H_GEM_MAX) return;
+  if (!force && Math.random() > 0.45) return;
+  const { real, traps } = t1hGemPool(), realOut = g.gems.some(m => m.real);
+  let ch = null;
+  if (real.length && (!realOut || !traps.length || Math.random() < 0.55)) ch = t1Pick(real);
+  else if (traps.length) ch = t1Pick(traps);
+  if (!ch) return;
+  const s = t1hFreeNear(x, y);
+  g.gems.push({ id: ++g.id, ...ch, x: s.x, y: s.y, life: T1H_GEM_LIFE, bob: Math.random() * 6 });
+  g.gemT = 0;
 }
 function t1hGems(dt) {
   const g = _t1, p = g.p;
   if (!g.S) return;
-  const need = g.S.c[g.got];
-  // The needed chunk turns up near the hero if no kill has dropped it for a while.
-  if (g.gems.some(m => m.text === need)) g.needT = 0;
-  else if ((g.needT += dt) > 4) { const a = Math.random() * Math.PI * 2, r = t1Rand(130, 220); t1hDropGem(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, true); g.needT = 0; }
-  for (const m of g.gems) {
-    m.life -= dt; m.cd = Math.max(0, m.cd - dt); m.bob += dt;
-    if (m.life <= 0 || m.cd > 0 || Math.hypot(m.x - p.x, m.y - p.y) > 30) continue;
-    if (m.real && m.text === need) {
-      m.life = 0;
-      g.got++; g.right++; g.combo++;
-      g.score += 12 + Math.min(g.combo, 8) * 2;
-      g.coins += T1_LEVELS[_t1Lv].coin * 0.4 * walMult();
-      tsSfx('coin');
-      g.fx.push({ kind: 'num', x: m.x, y: m.y - 50, text: '✓ ' + m.text, t: 0, dur: 1, color: '#12A150' });
-      t1hSlots();
-      t1hHud();
-      if (g.got === g.S.c.length) t1hLevelUp();
-      break;
-    }
-    if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(g.S.part)}:</b> ${escapeHtml(g.S.c.join(' '))}<br><i>${escapeHtml(g.S.vi)}</i></div>`); }
-    if (m.real) { m.cd = 1.6; t1hMsg(`Chưa tới lượt “${m.text}”. Câu cần cụm khác trước.`); t1hHurt(6, m.x, m.y); }
-    else if (m.fake) { m.life = 0; t1hMsg(`“${m.text}” sai thông tin so với biểu đồ. Nhìn lại biểu đồ bên cạnh!`, 2400); t1hHurt(10, m.x, m.y); }
-    else { m.life = 0; t1hMsg(`“${m.text}” là cụm sai. Tránh nó ra!`); t1hHurt(10, m.x, m.y); }
-    if (g.over) return;
-  }
+  for (const m of g.gems) { m.life -= dt; m.bob += dt; }
   g.gems = g.gems.filter(m => m.life > 0);
+  // No real chunk on the floor for a while: one turns up near the hero.
+  if (g.gems.some(m => m.real) || !t1hGemPool().real.length) g.gemT = 0;
+  else if ((g.gemT += dt) > 3.5 && g.gems.length < T1H_GEM_MAX) { const a = Math.random() * Math.PI * 2, r = t1Rand(130, 220); t1hDropGem(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, true); }
+}
+// A tap on the canvas: a gold gem or a word gem under the finger (boxes are in screen pixels).
+function t1hTapAt(wx, wy) {
+  const g = _t1;
+  const hit = m => m.box && wx >= m.box[0] && wx <= m.box[0] + m.box[2] && wy >= m.box[1] && wy <= m.box[1] + m.box[3];
+  const gold = g.gold.find(hit);
+  if (gold) { t1hGoldPick(gold); return true; }
+  const m = [...g.gems].reverse().find(hit);
+  if (m) { t1hCollect(m); return true; }
+  return false;
+}
+function t1hTapGem(i) {
+  const g = _t1;
+  if (!g || g.paused || g.over || g.phase) return;
+  if (g.gold.length) { if (g.gold[i]) t1hGoldPick(g.gold[i]); return; }
+  if (g.gems[i]) t1hCollect(g.gems[i]);
+}
+function t1hCollect(m) {
+  const g = _t1;
+  if (!g.S || g.phase) return;
+  g.gems = g.gems.filter(x => x !== m);
+  g.bag.push({ text: m.text, real: m.real, fake: !!m.fake });
+  g.score += 2;
+  tsSfx('coin');
+  g.fx.push({ kind: 'num', x: m.x, y: m.y - 50, text: '🎒 ' + m.text, t: 0, dur: 0.9, color: '#5B3FD9' });
+  t1hBagUi();
+  if (g.S.c.every(t => g.bag.some(b => b.text === t))) t1hOrderStart();
 }
 function t1hHurt(dmg, fx, fy) {
   const g = _t1, p = g.p;
@@ -27843,138 +28254,369 @@ function t1hHurt(dmg, fx, fy) {
   p.hp -= dmg; p.inv = 0.6; p.hurt = 0.3; g.combo = 0;
   const dx = p.x - fx, dy = p.y - fy, d = Math.hypot(dx, dy) || 1;
   p.x += dx / d * 18; p.y += dy / d * 18;
+  t1hPush(p, 14);
   tsSfx('wrong');
   g.fx.push({ kind: 'num', x: p.x, y: p.y - 80, text: '-' + Math.round(dmg), t: 0, dur: 0.7, color: '#E5533D' });
   const st = document.getElementById('h-stage');
   if (st) { st.classList.remove('hurt'); void st.offsetWidth; st.classList.add('hurt'); }
   if (p.hp <= 0) { p.hp = 0; t1hOver(false); }
 }
-
-/* ── Level up: type the sentence, then pick an upgrade ── */
-function t1hLevelUp() {
-  const g = _t1;
-  g.paused = true; g.phase = 'type'; g.tries = 0; g.keys = {}; g.joy = null;
-  g.score += 30;
-  // A shock wave clears the monsters near the hero, so play starts calm.
-  g.foes.forEach(f => { if (Math.hypot(f.x - g.p.x, f.y - g.p.y) < 300) t1hKill(f, true); });
-  g.foes = g.foes.filter(f => !f.dead);
-  g.gems = [];
-  g.fx.push({ kind: 'wave', x: g.p.x, y: g.p.y - 30, t: 0, dur: 0.6 });
-  document.getElementById('h-msg')?.classList.add('hidden');
-  tsSfx('level');
-  const S = g.S, sample = T1_SAMPLES.find(s => s.id === S.img), el = document.getElementById('h-modal');
-  el.innerHTML = `<div class="t1h-card">
-      <div class="t1h-lv">⬆️ Lên cấp ${g.level + 1}!</div>
-      <p class="t1h-q">Gõ lại cả câu <b>${escapeHtml(S.part)}</b> em vừa ghép. Nhìn biểu đồ để nhớ thông tin.</p>
-      ${sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}
-      <p class="t1h-vi">${escapeHtml(S.vi)}</p>
-      <textarea id="h-type" rows="3" spellcheck="false" autocomplete="off" autocapitalize="sentences" placeholder="Gõ câu tiếng Anh…" aria-label="Gõ lại câu tiếng Anh"></textarea>
-      <div id="h-typefb"></div>
-      <div class="t1h-row" id="h-typebtn"><button class="vb-start-btn" onclick="t1hCheck()">Kiểm tra → <small>Enter</small></button></div>
-    </div>`;
-  el.classList.remove('hidden');
-  const ta = document.getElementById('h-type');
-  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); t1hCheck(); } });
-  setTimeout(() => ta.focus(), 60);
-}
-// Word-by-word match of the typed sentence against the model (case and punctuation ignored).
-function t1hDiff(target, typed) {
-  const a = target.split(' ').map(t1TypeNorm), b = typed.split(/\s+/).map(t1TypeNorm).filter(Boolean);
-  const L = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
-  const ok = a.map(t => !t);
-  let i = 0, j = 0;
-  while (i < a.length && j < b.length) {
-    if (a[i] === b[j]) { ok[i] = true; i++; j++; }
-    else if (L[i + 1][j] >= L[i][j + 1]) i++;
-    else j++;
-  }
-  return { ok, exact: ok.every(Boolean) && b.length === a.filter(Boolean).length };
-}
-function t1hCheck() {
-  const g = _t1, ta = document.getElementById('h-type');
-  if (!g || g.phase !== 'type' || !ta || !ta.value.trim()) return;
-  const target = g.S.c.join(' '), d = t1hDiff(target, ta.value), words = target.split(' ');
-  g.tries++;
-  if (d.exact) { g.right++; g.score += g.tries === 1 ? 40 : 20; tsSfx('coin'); t1hUpgrades(g.tries === 1 ? 3 : 2); return; }
-  const fb = document.getElementById('h-typefb');
-  tsSfx('wrong');
-  if (g.tries === 1) {
-    // First miss: right words stay, wrong or missing ones show only their first letter.
-    fb.innerHTML = `<div class="t1-fb no"><strong>Gần đúng rồi, sửa lại nhé.</strong><span class="t1h-diff">${words.map((w, i) => d.ok[i] ? `<span class="ok">${escapeHtml(w)}</span>` : `<span class="no">${escapeHtml(w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_'))}</span>`).join(' ')}</span><span>Đúng ở lần 2 thì được chọn 1 trong 2 nâng cấp.</span></div>`;
-    ta.focus();
-    return;
-  }
-  if (!g.missed['t' + g.si]) { g.missed['t' + g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>Gõ lại câu:</b> ${escapeHtml(target)}</div>`); }
-  fb.innerHTML = `<div class="t1-fb no"><strong>Câu đúng là:</strong><span class="t1h-diff">${words.map((w, i) => `<span class="${d.ok[i] ? 'ok' : 'no'}">${escapeHtml(w)}</span>`).join(' ')}</span><span>Lần này không có nâng cấp. Câu sau cố lên!</span></div>`;
-  ta.disabled = true;
-  g.phase = 'missed';
-  document.getElementById('h-typebtn').innerHTML = `<button class="vb-start-btn" onclick="t1hResume()">Chơi tiếp → <small>Enter</small></button>`;
-  g.answered = true;
-  g.next = t1hResume;
-}
-function t1hUpgrades(n, chest) {
-  const g = _t1;
-  g.phase = 'pick';
-  g.chest = !!chest;
-  g.ups = t1Shuffle(T1H_UPS.filter(u => u.ok(g.w, g))).slice(0, n);
+function t1hModal(html) {
   const el = document.getElementById('h-modal');
-  el.innerHTML = `<div class="t1h-card">
-      <div class="t1h-lv">${chest ? '🎁 Rương nâng cấp! Chọn 1' : '✓ Chính xác! Chọn 1 nâng cấp'}</div>
-      <div class="t1h-ups">${g.ups.map((u, i) => `<button class="t1h-up" onclick="t1hTake(${i})"><kbd>${i + 1}</kbd><span class="t1h-up-i">${u.icon}</span><b>${escapeHtml(u.name(g.w))}</b><small>${escapeHtml(u.desc(g.w))}</small></button>`).join('')}</div>
-    </div>`;
+  el.innerHTML = `<div class="t1h-card">${html}</div>`;
   el.classList.remove('hidden');
-  g.keyPick = i => t1hTake(i);
-}
-function t1hTake(i) {
-  const g = _t1;
-  if (!g || g.phase !== 'pick' || !g.ups[i]) return;
-  const u = g.ups[i];
-  u.apply(g.w, g);
-  g.level++;
-  g.taken.push(u.icon);
-  tsSfx('equip');
-  if (g.chest) t1hAfterBoss(); else t1hResume();
+  return el;
 }
 function t1hCloseModal() {
   const g = _t1;
-  g.phase = ''; g.chest = false; g.answered = false; g.next = () => {}; g.keyPick = () => {};
+  g.phase = ''; g.answered = false; g.next = () => {}; g.keyPick = i => t1hTapGem(i);
   document.getElementById('h-modal').classList.add('hidden');
 }
-// After a level up: the next sentence, or a boss when the part just ended.
-function t1hResume() {
+function t1hPlay() {
   const g = _t1;
-  if (!g || g.game !== 'survive' || !g.phase || g.phase === 'type') return;
   t1hCloseModal();
+  g.paused = false; g.last = 0; g.keys = {}; g.joy = null;
+  t1hBagUi();
+  t1hHud();
+}
+
+/* ── Ordering: the bag becomes the sentence ── */
+function t1hOrderStart() {
+  const g = _t1;
+  g.paused = true; g.phase = 'order'; g.keys = {}; g.joy = null;
+  g.gems = [];
+  document.getElementById('h-msg')?.classList.add('hidden');
+  g.ord = { slots: g.S.c.map(() => null), pool: t1Shuffle(g.bag.map((b, i) => i)), trash: [], seen: {}, tries: 0, bad: [], showVi: _t1Lv !== 'l' };
+  tsSfx('level');
+  t1hOrderRender();
+}
+function t1hOrderRender(fb) {
+  const g = _t1, o = g.ord, S = g.S, lv = _t1Lv;
+  const vi = bi => t1hChunkVi(S, g.bag[bi].text);
+  const slot = (bi, i) => {
+    const role = T1H_ROLES[S.r[i]], lab = lv === 'a' ? `${i + 1} · ${role.name}` : lv === 'd' ? role.name : `${i + 1}`;
+    return `<button class="t1h-slot${bi !== null ? ' on' : ''}${o.bad[i] ? ' no' : ''}" style="--rc:${lv === 'l' ? '#8A97A3' : role.color}" onclick="t1hOrderBack(${i})"><small>${escapeHtml(lab)}</small><span>${bi !== null ? escapeHtml(g.bag[bi].text) : '…'}</span>${bi !== null && o.seen[bi] ? `<i>${escapeHtml(vi(bi))}</i>` : ''}</button>`;
+  };
+  const chip = (bi, k) => `<span class="t1h-pc"><button class="t1h-pc-t" onclick="t1hOrderPut(${bi})">${k < 9 ? `<kbd>${k + 1}</kbd>` : ''}${escapeHtml(g.bag[bi].text)}${o.seen[bi] ? `<i>${escapeHtml(vi(bi))}</i>` : ''}</button><button class="t1h-pc-b" onclick="t1hOrderSeen(${bi})" title="Xem nghĩa" aria-label="Xem nghĩa">💬</button><button class="t1h-pc-b" onclick="t1hOrderTrash(${bi})" title="Bỏ cụm bẫy" aria-label="Bỏ cụm này">🗑</button></span>`;
+  const full = o.slots.every(x => x !== null);
+  t1hModal(`<div class="t1h-lv">🧩 Xếp câu · ${escapeHtml(S.part)}</div>
+    <p class="t1h-q">Bấm cụm để đặt vào ô kế tiếp, bấm ô để lấy ra. Cụm nào là <b>bẫy</b> thì bấm 🗑. 💬 xem nghĩa.</p>
+    ${o.showVi ? `<p class="t1h-vi">${escapeHtml(S.vi)}</p>` : `<button class="vb-chip t1h-showvi" onclick="t1hOrderVi()">🇻🇳 Xem nghĩa cả câu</button>`}
+    <div class="t1h-slots">${o.slots.map(slot).join('')}</div>
+    <div class="t1h-pool">${o.pool.map(chip).join('') || '<span class="t1h-bag-tip">Đã đặt hết cụm.</span>'}</div>
+    ${o.trash.length ? `<div class="t1h-trash"><span>🗑 Đã bỏ:</span>${o.trash.map(bi => `<button class="t1h-chip" onclick="t1hOrderRestore(${bi})" title="Lấy lại">${escapeHtml(g.bag[bi].text)}</button>`).join('')}</div>` : ''}
+    <div id="h-ordfb">${fb || ''}</div>
+    <div class="t1h-row" id="h-ordbtn"><button class="vb-start-btn" onclick="t1hOrderCheck()"${full ? '' : ' disabled'}>Kiểm tra → <small>Enter</small></button></div>`);
+  g.keyPick = i => { if (o.pool[i] !== undefined) t1hOrderPut(o.pool[i]); };
+  g.answered = full; g.next = t1hOrderCheck;
+}
+function t1hOrderPut(bi) {
+  const o = _t1.ord, i = o.slots.indexOf(null);
+  if (i < 0 || !o.pool.includes(bi)) return;
+  o.slots[i] = bi; o.pool = o.pool.filter(x => x !== bi); o.bad = [];
+  tsSfx('key');
+  t1hOrderRender();
+}
+function t1hOrderBack(i) {
+  const o = _t1.ord;
+  if (!o || o.slots[i] === null || o.done) return;
+  o.pool.push(o.slots[i]); o.slots[i] = null; o.bad = [];
+  t1hOrderRender();
+}
+function t1hOrderTrash(bi) {
+  const o = _t1.ord;
+  o.pool = o.pool.filter(x => x !== bi); o.trash.push(bi);
+  tsSfx('key');
+  t1hOrderRender();
+}
+function t1hOrderRestore(bi) {
+  const o = _t1.ord;
+  o.trash = o.trash.filter(x => x !== bi); o.pool.push(bi);
+  t1hOrderRender();
+}
+function t1hOrderSeen(bi) {
+  const g = _t1, o = g.ord, b = g.bag[bi];
+  o.seen[bi] = true;
+  t1hNoteWeak(b.text, t1hChunkVi(g.S, b.text), g.S.c.join(' '));
+  t1hOrderRender();
+}
+function t1hOrderVi() { _t1.ord.showVi = true; t1hOrderRender(); }
+function t1hOrderCheck() {
+  const g = _t1, o = g.ord, S = g.S;
+  if (!o || o.done || o.slots.some(x => x === null)) return;
+  o.tries++;
+  o.bad = o.slots.map((bi, i) => g.bag[bi].text !== S.c[i]);
+  const left = o.pool.filter(bi => !g.bag[bi].real);
+  if (!o.bad.some(Boolean) && !left.length) { t1hOrderWin(); return; }
+  tsSfx('wrong');
+  if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(S.part)}:</b> ${escapeHtml(S.c.join(' '))}<br><i>${escapeHtml(S.vi)}</i></div>`); }
+  // Why each wrong slot is wrong: a trap (grammar or chart), or a real chunk out of place.
+  const why = [];
+  o.slots.forEach((bi, i) => {
+    if (!o.bad[i]) return;
+    const b = g.bag[bi];
+    if (!b.real) { why.push(`<li><b>${escapeHtml(b.text)}</b>: ${escapeHtml(b.fake ? T1H_FAKE_WHY : ((S.t[b.text] || [])[1] || 'Sai ngữ pháp.'))}</li>`); t1hNoteWeak(b.text, t1hChunkVi(S, b.text), S.c.join(' ')); }
+  });
+  const moved = o.bad.filter(Boolean).length - why.length;
+  if (moved > 0) why.push(`<li>${moved} cụm đúng nhưng <b>sai chỗ</b> (ô đỏ).</li>`);
+  if (left.length) why.push(`<li>Còn bẫy chưa bỏ: ${left.map(bi => `<b>${escapeHtml(g.bag[bi].text)}</b>`).join(', ')}.</li>`);
+  if (o.tries < 2) { t1hOrderRender(`<div class="t1-fb no"><strong>Chưa đúng, sửa lại nhé.</strong><ul class="t1h-why">${why.join('')}</ul></div>`); return; }
+  // Second miss: show the sentence and move on without the bonus.
+  o.done = true;
+  t1hOrderRender(`<div class="t1-fb no"><strong>Câu đúng là:</strong><span>${S.c.map((c, i) => `<span class="t1h-role" style="--rc:${T1H_ROLES[S.r[i]].color}">${escapeHtml(c)}</span>`).join(' ')}</span><ul class="t1h-why">${why.join('')}</ul></div>`);
+  document.getElementById('h-ordbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hOrderDone()">Chơi tiếp → <small>Enter</small></button>`;
+  g.answered = true; g.next = t1hOrderDone; g.keyPick = () => {};
+}
+function t1hOrderWin() {
+  const g = _t1, o = g.ord, first = o.tries === 1;
+  o.done = true;
+  g.right++; g.combo++;
+  g.score += first ? 60 : 30;
+  g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 1.5 : 0.8);
+  g.exp += first ? 5 : 2;
+  g.p.hp = Math.min(g.p.maxHp, g.p.hp + 20);
+  tsSfx('level');
+  t1hOrderRender(`<div class="t1-fb ok"><strong>${first ? 'Chính xác ngay lần đầu! +60 ⭐' : 'Đúng rồi! +30 ⭐'} · +20 ❤️</strong><span>${g.S.c.map((c, i) => `<span class="t1h-role" style="--rc:${T1H_ROLES[g.S.r[i]].color}">${escapeHtml(c)}</span>`).join(' ')}</span></div>`);
+  document.getElementById('h-ordbtn').innerHTML = `<button class="vb-start-btn" onclick="t1hOrderDone()">Chơi tiếp → <small>Enter</small></button>`;
+  g.answered = true; g.next = t1hOrderDone; g.keyPick = () => {};
+}
+// The next sentence, or a boss when the part just ended.
+function t1hOrderDone() {
+  const g = _t1;
+  if (!g || g.phase !== 'order') return;
   const S = g.S, N = g.list[g.si + 1];
+  g.ord = null; g.bag = [];
   g.si++;
+  t1hCloseModal();
   if (!N || N.part !== S.part) t1hBossStart(S.part);
   else t1hSentence();
-  t1hSlots();
-  t1hHud();
-  g.paused = false; g.last = 0;
+  t1hPlay();
 }
-function t1hAfterBoss() {
+
+/* ── Mastery: how well the student knows each phrase, 0 to 4 ── */
+function t1hKey(en) { return String(en || '').toLowerCase().replace(/[.,;:!?]+$/, '').replace(/\s+/g, ' ').trim().slice(0, 120); }
+function t1hMastLsKey() { return 't1Mast_' + _t1Block + '_' + walWho(); }
+function t1hMastLocal() { try { return JSON.parse(localStorage.getItem(t1hMastLsKey()) || '{}'); } catch (e) { return {}; } }
+function t1hM(key) { return _t1.mast[key] || { m: 0, w: 0 }; }
+// The server copy wins for every phrase it has; the browser copy fills the rest.
+function t1hMastFetch() {
   const g = _t1;
-  t1hCloseModal();
-  g.gold = []; g.bossQ = null;
-  if (g.si >= g.list.length) { t1hOver(true); return; }
-  t1hSentence();
-  t1hSlots();
-  t1hHud();
-  g.paused = false; g.last = 0;
+  api('/api/game/t1mastery').then(r => {
+    if (_t1 !== g || !r || !r[_t1Block]) return;
+    Object.entries(r[_t1Block]).forEach(([k, v]) => { if (!g.mastDirty[k]) g.mast[k] = { m: v.m, w: v.w }; });
+  }).catch(() => {});
+}
+function t1hMastSet(key, m, wrong) {
+  const g = _t1, cur = t1hM(key);
+  g.mast[key] = { m: Math.max(0, Math.min(4, m)), w: cur.w + (wrong ? 1 : 0) };
+  g.mastDirty[key] = 1;
+  try { localStorage.setItem(t1hMastLsKey(), JSON.stringify(g.mast)); } catch (e) {}
+  clearTimeout(g.mastT);
+  g.mastT = setTimeout(() => t1hMastFlush(g), 4000);
+}
+function t1hMastFlush(run) {
+  const g = run || _t1;
+  if (!g || !g.mastDirty) return;
+  const keys = Object.keys(g.mastDirty);
+  if (!keys.length) return;
+  const items = {};
+  keys.slice(0, 200).forEach(k => { items[k] = g.mast[k]; delete g.mastDirty[k]; });
+  api('/api/game/t1mastery', { method: 'POST', body: JSON.stringify({ block: g.block, items }) }).catch(() => { keys.forEach(k => { g.mastDirty[k] = 1; }); });
+}
+// Phrases for the questions: this run's chunks so far, and the flashcards of the chart type.
+function t1hItems() {
+  const g = _t1, out = new Map();
+  const add = it => { const k = t1hKey(it.en); if (k && !out.has(k)) out.set(k, { ...it, key: k }); };
+  g.list.slice(0, Math.min(g.si + 1, g.list.length)).forEach(S => S.c.forEach((c, i) => {
+    if (t1hKey(c) === t1hKey(S.cv[i])) return;
+    add({ en: c, vi: S.cv[i], kind: 'chunk', S, i });
+  }));
+  const kind = (g.S || g.lastS).img.split('-')[0], ids = T1H_DECKS[kind] || ['base'];
+  t1FcDeckList(_t1Block).filter(d => ids.includes(d.id)).forEach(d => d.cards.forEach(c => add({ en: c.en, vi: c.pic && c.vi.includes(':') ? c.vi.split(':')[0] : c.vi, ex: c.ex, pic: c.pic, kind: 'card' })));
+  return [...out.values()];
+}
+// Due phrases first (missed two or three levels ago), then mostly the weakest,
+// with this sentence's chunks weighted up.
+function t1hPickItem(items) {
+  const g = _t1;
+  const due = g.due.find(d => d.at <= g.level && items.some(it => it.key === d.key));
+  if (due) { g.due = g.due.filter(d => d !== due); return items.find(it => it.key === due.key); }
+  const cur = new Set(g.S ? g.S.c.map(t1hKey) : []);
+  const wt = it => it.key === g.lastQ ? 0 : (5 - t1hM(it.key).m) ** 2 * (cur.has(it.key) ? 2 : 1) * (it.kind === 'chunk' ? 1.3 : 1);
+  const total = items.reduce((s, it) => s + wt(it), 0);
+  let r = Math.random() * total;
+  for (const it of items) { r -= wt(it); if (r <= 0) return it; }
+  return items[0];
+}
+const T1H_QLABEL = ['Chọn nghĩa', 'Chọn cụm tiếng Anh', 'Điền chữ còn thiếu', 'Cụm nào khớp biểu đồ?', 'Gõ cả cụm'];
+function t1hMask(en) { return en.split(' ').map(w => w.length < 2 ? w : w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_')).join(' '); }
+function t1hLevelUp() {
+  const g = _t1;
+  const items = t1hItems();
+  g.paused = true; g.phase = 'quiz'; g.keys = {}; g.joy = null; g.lastLv = g.time;
+  // A shock wave clears the monsters near the hero, so play starts calm.
+  g.foes.forEach(f => { if (!f.boss && Math.hypot(f.x - g.p.x, f.y - g.p.y) < 260) t1hKill(f, true); });
+  g.foes = g.foes.filter(f => !f.dead);
+  g.fx.push({ kind: 'wave', x: g.p.x, y: g.p.y - 30, t: 0, dur: 0.6 });
+  document.getElementById('h-msg')?.classList.add('hidden');
+  tsSfx('level');
+  if (!items.length) { t1hCards(3, false); return; }
+  const it = t1hPickItem(items), m = t1hM(it.key).m;
+  g.lastQ = it.key; g.asked++;
+  let type = ['vi', 'en', 'fill', 'chart', 'type'][m];
+  const blankRe = it.ex ? new RegExp(it.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null;
+  if (type === 'chart' && it.kind === 'card' && !(blankRe && blankRe.test(it.ex))) type = 'en';
+  const others = items.filter(x => x.key !== it.key);
+  const q = g.q = { it, type, m };
+  const sample = it.kind === 'chunk' ? T1_SAMPLES.find(s => s.id === it.S.img) : null;
+  let body = '';
+  if (type === 'vi' || type === 'en' || type === 'chart') {
+    let right, wrong;
+    if (type === 'vi') { right = it.vi; wrong = t1Shuffle([...new Set(others.map(x => x.vi))].filter(v => v && v !== right)).slice(0, 3); }
+    else {
+      right = it.en;
+      const traps = it.kind !== 'chunk' ? [] : type === 'chart' ? [...it.S.fake, ...it.S.bad] : it.S.fake;
+      const pool = [...t1Shuffle(traps).slice(0, type === 'chart' ? 3 : 1), ...t1Shuffle(others.map(x => x.en))];
+      wrong = [...new Set(pool)].filter(x => x !== right).slice(0, 3);
+    }
+    q.opts = t1Shuffle([right, ...wrong]); q.right = right;
+    let prompt;
+    if (type === 'vi') prompt = `<p class="t1h-q">Cụm này nghĩa là gì?</p><div class="t1h-big">${escapeHtml(it.en)}</div>`;
+    else if (type === 'en') prompt = `<p class="t1h-q">Chọn cụm tiếng Anh có nghĩa:</p><div class="t1h-big t1h-big--vi">${escapeHtml(it.vi)}</div>${it.pic ? `<div class="t1-fc-pic">${it.pic}</div>` : sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}`;
+    else prompt = it.kind === 'chunk'
+      ? `<p class="t1h-q">Nhìn biểu đồ: cụm nào điền vào chỗ trống mà <b>đúng cả thông tin lẫn ngữ pháp</b>?</p>${sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}<p class="t1h-cloze">${it.S.c.map((c, j) => j === it.i ? '<b>______</b>' : escapeHtml(c)).join(' ')}</p>`
+      : `<p class="t1h-q">Cụm nào điền vào chỗ trống?</p><p class="t1h-cloze">${escapeHtml(it.ex).replace(new RegExp(escapeHtml(it.en).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '<b>______</b>')}</p><p class="t1h-vi">${escapeHtml(it.vi)}</p>`;
+    body = `${prompt}<div class="t1h-opts">${q.opts.map((o, i) => `<button class="t1h-opt" onclick="t1hQuizPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(o)}</button>`).join('')}</div>`;
+    g.keyPick = i => t1hQuizPick(i);
+  } else {
+    body = `<p class="t1h-q">${type === 'fill' ? 'Điền chữ còn thiếu:' : 'Gõ cụm tiếng Anh có nghĩa:'}</p><div class="t1h-big t1h-big--vi">${escapeHtml(it.vi)}</div>
+      ${type === 'fill' ? `<div class="t1h-mask">${escapeHtml(t1hMask(it.en))}</div>` : sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}
+      <input id="h-qin" class="t1h-in" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Gõ tiếng Anh…" aria-label="Gõ cụm tiếng Anh">
+      <div class="t1h-row"><button class="vb-start-btn" onclick="t1hQuizType()">Kiểm tra → <small>Enter</small></button></div>`;
+    g.keyPick = () => {};
+  }
+  t1hModal(`<div class="t1h-lv">⬆️ Lên cấp ${g.level + 1}!</div>
+    <div class="t1h-qhead"><span>${T1H_QLABEL[['vi', 'en', 'fill', 'chart', 'type'].indexOf(type)]}</span><span class="t1h-mast" title="Độ thuộc cụm này">${[0, 1, 2, 3].map(k => `<i class="${k < m ? 'on' : ''}"></i>`).join('')}</span></div>
+    ${body}<div id="h-qfb"></div>`);
+  const inp = document.getElementById('h-qin');
+  if (inp) { inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t1hQuizType(); } }); setTimeout(() => inp.focus(), 60); }
+}
+function t1hQuizPick(i) {
+  const g = _t1, q = g.q;
+  if (!q || q.done || !q.opts[i]) return;
+  document.querySelectorAll('.t1h-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', q.opts[j] === q.right); b.classList.toggle('no', j === i && q.opts[j] !== q.right); });
+  t1hQuizEnd(q.opts[i] === q.right, q.opts[i]);
+}
+function t1hQuizType() {
+  const g = _t1, q = g.q, inp = document.getElementById('h-qin');
+  if (!q || q.done || !inp || !inp.value.trim()) return;
+  inp.disabled = true;
+  t1hQuizEnd(t1TypeNorm(inp.value) === t1TypeNorm(q.it.en), inp.value.trim());
+}
+function t1hQuizEnd(ok, chosen) {
+  const g = _t1, q = g.q, it = q.it;
+  q.done = true;
+  g.exp = Math.max(0, g.exp - g.need);
+  let fb;
+  if (ok) {
+    g.quizRight++; g.right++;
+    g.score += 20 + q.m * 5;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult() * 0.6;
+    t1hMastSet(it.key, q.m + 1, false);
+    tsSfx('coin');
+    fb = `<div class="t1-fb ok"><strong>✓ Đúng! Độ thuộc ${Math.min(4, q.m + 1)}/4</strong><span>${escapeHtml(it.en)} · ${escapeHtml(it.vi)}</span></div>`;
+  } else {
+    t1hMastSet(it.key, q.m - 1, true);
+    t1hNoteWeak(it.en, it.vi, it.kind === 'chunk' ? it.S.c.join(' ') : it.ex);
+    g.due.push({ key: it.key, at: g.level + 2 + (Math.random() < 0.5 ? 1 : 0) });
+    tsSfx('wrong');
+    // Explain: the trap's reason if a trap was picked, then the right phrase in its sentence.
+    const trap = it.kind === 'chunk' && it.S.t[chosen];
+    const why = trap ? (it.S.bad.includes(chosen) ? trap[1] : T1H_FAKE_WHY) : '';
+    const ex = escapeHtml(it.ex || '');
+    fb = `<div class="t1-fb no"><strong>Chưa đúng. Đáp án: ${escapeHtml(it.en)}</strong><span>${escapeHtml(it.vi)}</span>${why ? `<span>“${escapeHtml(chosen)}”: ${escapeHtml(why)}</span>` : ''}<span class="t1h-ex">${it.kind === 'chunk' ? escapeHtml(it.S.c.join(' ')) + '<br><i>' + escapeHtml(it.S.vi) + '</i>' : ex}</span><span>Cụm này sẽ quay lại sau 2–3 cấp. Lần này chỉ được nâng cấp nhỏ.</span></div>`;
+  }
+  document.getElementById('h-qfb').innerHTML = fb + `<div class="t1h-row"><button class="vb-start-btn" onclick="t1hCards(${ok ? 3 : 2}, ${!ok})">${ok ? 'Chọn chiêu →' : 'Chọn nâng cấp nhỏ →'} <small>Enter</small></button></div>`;
+  document.getElementById('h-qfb').scrollIntoView({ block: 'nearest' });
+  g.answered = true; g.next = () => t1hCards(ok ? 3 : 2, !ok); g.keyPick = () => {};
+}
+
+/* ── Upgrade cards ── */
+// Skill cards (new, or the next level), and stat cards. Small means after a
+// wrong answer: two cards, and nothing that reaches level 3.
+function t1hCards(n, small) {
+  const g = _t1;
+  if (!g || g.phase === 'pick') return;
+  g.phase = 'pick'; g.answered = false; g.next = () => {};
+  const own = Object.keys(g.skills).length, cand = [];
+  Object.keys(T1H_SKILLS).forEach(k => {
+    const lv = g.skills[k] || 0;
+    if (lv >= 3 || (!lv && own >= T1H_SKILL_MAX) || (small && lv >= 2)) return;
+    cand.push({ type: 'skill', id: k, lv: lv + 1, wt: lv ? 3 : 2 });
+  });
+  Object.keys(T1H_STATS).forEach(k => { const lv = g.stats[k] || 0; if (lv < 3) cand.push({ type: 'stat', id: k, lv: lv + 1, wt: small ? 2 : 1 }); });
+  const out = [];
+  // A right answer always shows an evolution when one is ready.
+  const evo = cand.filter(c => c.lv === 3 && c.type === 'skill');
+  if (!small && evo.length) { const c = t1Pick(evo); out.push(c); cand.splice(cand.indexOf(c), 1); }
+  while (out.length < n && cand.length) {
+    const total = cand.reduce((s, c) => s + c.wt, 0);
+    let r = Math.random() * total, k = 0;
+    while (k < cand.length - 1 && (r -= cand[k].wt) > 0) k++;
+    out.push(cand.splice(k, 1)[0]);
+  }
+  if (!out.length) out.push({ type: 'heal' });
+  g.cards = out;
+  const card = (c, i) => {
+    if (c.type === 'heal') return `<button class="t1h-up" onclick="t1hTake(${i})"><kbd>${i + 1}</kbd><span class="t1h-up-i">💖</span><b>Hồi đầy máu</b><small>Mọi chiêu đã tối đa.</small></button>`;
+    const S = c.type === 'skill' ? T1H_SKILLS[c.id] : T1H_STATS[c.id];
+    const name = c.type === 'skill' ? S.name[c.lv - 1] : S.name, desc = c.type === 'skill' ? S.desc[c.lv - 1] : S.desc;
+    return `<button class="t1h-up${c.lv === 3 && c.type === 'skill' ? ' evo' : ''}" onclick="t1hTake(${i})"><kbd>${i + 1}</kbd>
+      ${c.lv === 3 && c.type === 'skill' ? '<em class="t1h-tag">TIẾN HOÁ</em>' : c.lv === 1 && c.type === 'skill' ? '<em class="t1h-tag new">CHIÊU MỚI</em>' : ''}
+      <span class="t1h-up-i">${S.icon}</span><b>${escapeHtml(name)}</b><span class="t1h-pips">${'★'.repeat(c.lv)}${'☆'.repeat(3 - c.lv)}</span><small>${escapeHtml(desc)}</small></button>`;
+  };
+  t1hModal(`<div class="t1h-lv">${small ? '🔸 Nâng cấp nhỏ: chọn 1' : '✓ Chọn 1 chiêu'}</div>
+    <p class="t1h-q t1h-c">Chiêu ${own}/${T1H_SKILL_MAX}${small ? ' · Cấp 3 (Tiến hoá) chỉ mở khi trả lời đúng.' : ''}</p>
+    <div class="t1h-ups">${out.map(card).join('')}</div>`);
+  g.keyPick = i => t1hTake(i);
+}
+function t1hTake(i) {
+  const g = _t1, c = g && g.cards[i];
+  if (!c || g.phase !== 'pick') return;
+  g.level++;
+  g.need = 10 + g.level * 4;
+  if (c.type === 'heal') g.p.hp = g.p.maxHp;
+  else if (c.type === 'stat') { g.stats[c.id] = c.lv; T1H_STATS[c.id].apply(g); }
+  else {
+    g.skills[c.id] = c.lv;
+    if (c.id === 'multi') { const sw = g.w.kind === 'sword'; g.w.count = (sw ? [2, 3, 6] : [2, 3, 7])[c.lv - 1]; if (c.lv === 3) g.w.pierce += 2; }
+    if (c.lv === 3) t1hEvolve(T1H_SKILLS[c.id].icon + ' ' + T1H_SKILLS[c.id].name[2]);
+  }
+  tsSfx('equip');
+  g.cards = [];
+  t1hPlay();
+}
+// Level 3: a flash, a gold banner and a burst round the hero.
+function t1hEvolve(text) {
+  const g = _t1;
+  g.flashT = 0.45;
+  g.fx.push({ kind: 'banner', text: 'TIẾN HOÁ! ' + text, t: 0, dur: 2.2 });
+  g.fx.push({ kind: 'wave', x: g.p.x, y: g.p.y - 30, t: 0, dur: 0.8 });
+  tsSfx('rankup');
 }
 
 /* ── Bosses ── */
 function t1hBossStart(part) {
-  const g = _t1, p = g.p, q = T1H_BOSS_Q[part], qq = q[_t1Block] || q;
+  const g = _t1, p = g.p, q = T1H_BOSS_Q[part], qq = q[_t1Block] || q, R = g.room;
   g.S = null; g.gems = []; g.bosses++; g.goldTries = 0;
   g.bossQ = { next: q.next, right: qq.right, bad: qq.bad, why: qq.why };
   const n = g.bosses, a = Math.random() * Math.PI * 2;
-  const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.05);
-  const [look, name] = T1H_BOSS_LOOK[(n - 1) % T1H_BOSS_LOOK.length];
-  const f = { id: ++g.id, boss: true, n, look, name, T: { scale: 3, pts: 100 }, x: p.x + Math.cos(a) * 360, y: p.y + Math.sin(a) * 360,
+  const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.06);
+  const [look, name, hx, hy] = T1H_BOSS_LOOK[(n - 1) % T1H_BOSS_LOOK.length];
+  const f = { id: ++g.id, boss: true, n, look, name, hx, hy, sc: 3, T: { scale: 3, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
     hp, maxHp: hp, r: 34, h: 36 * 3, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
+  f.x = Math.max(R.wall + 60, Math.min(R.w - R.wall - 60, f.x)); f.y = Math.max(R.top + 60, Math.min(R.h - R.wall - 60, f.y));
+  t1hPush(f, 30);
   g.boss = f;
   g.foes.push(f);
   tsSfx('boss');
@@ -28000,10 +28642,11 @@ function t1hBossAI(f, dt) {
     const n = 10 + f.n * 3, off = Math.random() * Math.PI * 2;
     for (let i = 0; i < n; i++) { const a = off + i * Math.PI * 2 / n; g.ebul.push({ x: f.x, y: f.y - f.h * 0.45, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, life: 4 }); }
     // The last boss calls in help.
-    if (f.n >= 3) for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 70; m.y = f.y + Math.sin(a) * 70; }
+    if (f.n >= 3) for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 70; m.y = f.y + Math.sin(a) * 70; t1hPush(m, m.r * 0.7); }
     tsSfx('miss');
     f.st = 'chase'; f.stT = 2.2;
   }
+  t1hPush(f, f.r * 0.8);
   if (d < f.r + 18 && p.inv <= 0 && g.shieldT <= 0) t1hHurt(f.dmg, f.x, f.y);
 }
 function t1hBossDown(f) {
@@ -28013,34 +28656,67 @@ function t1hBossDown(f) {
   tsSfx('level');
   g.fx.push({ kind: 'wave', x: f.x, y: f.y - 40, t: 0, dur: 0.6 });
   const opts = t1Shuffle([{ text: q.right, right: true }, ...q.bad.map(t => ({ text: t, right: false }))]);
-  g.gold = opts.map((o, i) => { const a = -Math.PI / 2 + (i - 1) * 1.3; return { ...o, x: f.x + Math.cos(a) * 120, y: f.y + Math.sin(a) * 90 + 30, bob: i }; });
-  t1hSlots();
-  t1hMsg(`Trùm gục! Nhặt ngọc vàng là câu mở ${q.next}.`, 2600);
+  g.gold = opts.map((o, i) => { const a = -Math.PI / 2 + (i - 1) * 1.3, s = t1hFreeNear(f.x + Math.cos(a) * 130, f.y + Math.sin(a) * 90 + 30); return { ...o, x: s.x, y: s.y, bob: i }; });
+  t1hBagUi();
+  t1hMsg(`Trùm gục! Bấm ngọc vàng là câu mở ${q.next}.`, 2600);
 }
-function t1hGold(dt) {
-  const g = _t1, p = g.p;
-  for (const m of g.gold) {
-    m.bob += dt;
-    if (m.dead || Math.hypot(m.x - p.x, m.y - p.y) > 32) continue;
-    if (m.right) {
-      const first = g.goldTries === 0;
-      g.gold = [];
-      g.score += first ? 60 : 20; g.right++;
-      g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 2 : 1);
-      tsSfx('coin');
-      g.fx.push({ kind: 'num', x: m.x, y: m.y - 50, text: '✓ ' + m.text, t: 0, dur: 1.2, color: '#B8860B' });
-      if (first) { g.paused = true; g.keys = {}; g.joy = null; document.getElementById('h-msg')?.classList.add('hidden'); t1hUpgrades(3, true); }
-      else { t1hMsg(`Đúng rồi: “${m.text}” mở ${g.bossQ.next}.`); t1hAfterBoss(); }
-      return;
-    }
-    g.goldTries++;
-    m.dead = true;
-    if (!g.missed['b' + g.bosses]) { g.missed['b' + g.bosses] = 1; g.misses.push(`<div class="t1-review-line"><b>Câu mở ${escapeHtml(g.bossQ.next)}:</b> ${escapeHtml(g.bossQ.right)}<br><i>${escapeHtml(g.bossQ.why)}</i></div>`); }
-    t1hMsg(`“${m.text}” sai. ${g.bossQ.why}`, 4200);
-    t1hHurt(10, m.x, m.y);
-    if (g.over) return;
+function t1hGoldPick(m) {
+  const g = _t1;
+  if (!g || g.phase || m.dead) return;
+  if (m.right) {
+    const first = g.goldTries === 0;
+    g.gold = [];
+    g.score += first ? 60 : 20; g.right++;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 2 : 1);
+    tsSfx('coin');
+    g.fx.push({ kind: 'num', x: m.x, y: m.y - 50, text: '✓ ' + m.text, t: 0, dur: 1.2, color: '#B8860B' });
+    t1hChest(first);
+    return;
   }
-  g.gold = g.gold.filter(m => !m.dead);
+  g.goldTries++;
+  m.dead = true;
+  g.gold = g.gold.filter(x => !x.dead);
+  if (!g.missed['b' + g.bosses]) { g.missed['b' + g.bosses] = 1; g.misses.push(`<div class="t1-review-line"><b>Câu mở ${escapeHtml(g.bossQ.next)}:</b> ${escapeHtml(g.bossQ.right)}<br><i>${escapeHtml(g.bossQ.why)}</i></div>`); }
+  t1hMsg(`“${m.text}” sai. ${g.bossQ.why}`, 4200);
+  t1hHurt(10, m.x, m.y);
+}
+// The chest after a boss raises the hero's own skills: both when the linker
+// was right first time, one of the two otherwise.
+function t1hChest(first) {
+  const g = _t1, last = g.si >= g.list.length;
+  const up = [0, 1].filter(i => g.skLv[i] < 3);
+  if (last || !up.length) { t1hAfterBoss(); return; }
+  g.paused = true; g.phase = 'chest'; g.keys = {}; g.joy = null;
+  document.getElementById('h-msg')?.classList.add('hidden');
+  const card = (i, k) => {
+    const s = g.hero.skills[i], lv = g.skLv[i] + 1;
+    return `<button class="t1h-up${lv === 3 ? ' evo' : ''}" ${first ? 'disabled' : `onclick="t1hChestTake(${i})"`}>${first ? '' : `<kbd>${k + 1}</kbd>`}${lv === 3 ? '<em class="t1h-tag">TIẾN HOÁ</em>' : ''}<span class="t1h-up-i">${s.icon}</span><b>${T1H_SKILL_KEYS[i]} · ${escapeHtml(t1hSkName(s, lv))}</b><span class="t1h-pips">${'★'.repeat(lv)}${'☆'.repeat(3 - lv)}</span><small>${escapeHtml(t1hSkDesc(s, lv))}</small></button>`;
+  };
+  t1hModal(`<div class="t1h-lv">🎁 Rương của Trùm</div>
+    <p class="t1h-q t1h-c">${first ? 'Câu nối đúng ngay lần đầu: <b>cả hai chiêu J, K lên cấp!</b>' : 'Câu nối đúng ở lần sau: chọn 1 chiêu để lên cấp.'}</p>
+    <div class="t1h-ups">${up.map(card).join('')}</div>
+    ${first ? `<div class="t1h-row"><button class="vb-start-btn" onclick="t1hChestTake(-1)">Nhận cả hai → <small>Enter</small></button></div>` : ''}`);
+  if (first) { g.answered = true; g.next = () => t1hChestTake(-1); g.keyPick = () => {}; }
+  else g.keyPick = k => { if (up[k] !== undefined) t1hChestTake(up[k]); };
+}
+function t1hChestTake(i) {
+  const g = _t1;
+  if (!g || g.phase !== 'chest') return;
+  (i < 0 ? [0, 1] : [i]).forEach(k => {
+    if (g.skLv[k] >= 3) return;
+    g.skLv[k]++;
+    if (g.skLv[k] === 3) t1hEvolve(g.hero.skills[k].icon + ' ' + t1hSkName(g.hero.skills[k], 3));
+  });
+  tsSfx('equip');
+  t1hCloseModal();
+  t1hAfterBoss();
+}
+function t1hAfterBoss() {
+  const g = _t1;
+  g.gold = []; g.bossQ = null;
+  if (g.si >= g.list.length) { t1hOver(true); return; }
+  t1hSentence();
+  t1hPlay();
 }
 function t1hPause() {
   const g = _t1;
@@ -28050,15 +28726,80 @@ function t1hPause() {
   const m = document.getElementById('h-msg');
   if (m) { m.className = 't1-arena-msg' + (g.paused ? '' : ' hidden'); m.innerHTML = g.paused ? '⏸ Tạm dừng<br><button class="vb-start-btn" onclick="t1hPause()">▶ Chơi tiếp</button>' : ''; }
 }
+
+/* ── The end: one sentence of the student's own, then the results ── */
 function t1hOver(won) {
   const g = _t1;
+  if (g.ending) return;
+  g.ending = true;
   g.stop();
   if (won) { g.score += 100; g.p.won = true; }
   t1hDraw();
-  setTimeout(() => {
-    if (_t1 !== g) return;
-    t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `${g.hero.name} · ${Math.min(g.si, g.list.length)}/${g.list.length} câu · ${won ? 3 : Math.max(0, g.bosses - (g.boss ? 1 : 0))} trùm · ${g.kills} quái`, icon: won ? '🏆' : g.si >= 3 ? '👏' : '🛡️', good: !!won });
-  }, won ? 600 : 1100);
+  t1hMastFlush();
+  t1hSaveWeak();
+  setTimeout(() => { if (_t1 === g) t1hFinal(won); }, won ? 600 : 1100);
+}
+// The two weakest phrases the student met: missed or looked up first, then lowest mastery.
+function t1hFinalPair() {
+  const g = _t1, items = t1hItems(), byKey = new Map(items.map(it => [it.key, it]));
+  const weak = [...g.weak.keys()].map(k => byKey.get(k)).filter(Boolean);
+  // Otherwise verbs and degree words of this run, the phrases a sentence turns on.
+  const job = it => ['v', 'm'].includes(it.S.r[it.i]) ? 0 : 1;
+  const rest = items.filter(it => !g.weak.has(it.key) && it.kind === 'chunk' && it.en.split(' ').length > 1).sort((a, b) => job(a) - job(b) || t1hM(a.key).m - t1hM(b.key).m);
+  return [...weak, ...rest].slice(0, 2);
+}
+function t1hFinal(won) {
+  const g = _t1, pair = t1hFinalPair();
+  g.won = won;
+  if (pair.length < 2) { t1hFinish(); return; }
+  g.pair = pair;
+  g.phase = 'final';
+  const sample = T1_SAMPLES.find(s => s.id === (g.lastS || g.list[0]).img);
+  const el = t1hModal(`<div class="t1h-lv">${won ? '🏆 Hạ cả 3 Trùm!' : '🛡️ Hết máu rồi'}</div>
+    <p class="t1h-q">Trước khi xem kết quả: viết <b>1 câu tiếng Anh của riêng em</b> về biểu đồ này, dùng cả hai cụm em còn yếu:</p>
+    <div class="t1h-pair">${pair.map(it => `<span><b>${escapeHtml(it.en.replace(/[.,;:]+$/, ''))}</b><i>${escapeHtml(it.vi)}</i></span>`).join('')}</div>
+    ${sample ? `<div class="t1h-chart">${sample.chart()}</div>` : ''}
+    <textarea id="h-own" rows="3" spellcheck="false" autocomplete="off" placeholder="Viết câu của em…" aria-label="Câu của em"></textarea>
+    <div id="h-ownfb"></div>
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1hFinalCheck()">Gửi câu cho thầy cô →</button></div>`);
+  el.querySelector('textarea').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); t1hFinalCheck(); } });
+  setTimeout(() => document.getElementById('h-own')?.focus(), 60);
+}
+function t1hFinalCheck() {
+  const g = _t1, ta = document.getElementById('h-own');
+  if (!g || g.phase !== 'final' || !ta) return;
+  const text = ta.value.trim(), norm = ' ' + t1TypeNorm(text) + ' ';
+  const missing = g.pair.filter(it => !norm.includes(' ' + t1TypeNorm(it.en) + ' '));
+  const fb = document.getElementById('h-ownfb');
+  if (missing.length) { fb.innerHTML = `<div class="t1-fb no"><strong>Câu chưa có: ${missing.map(it => escapeHtml(it.en.replace(/[.,;:]+$/, ''))).join(', ')}</strong><span>Dùng đúng nguyên cụm nhé.</span></div>`; return; }
+  if (text.split(/\s+/).length < 7) { fb.innerHTML = '<div class="t1-fb no"><strong>Câu hơi ngắn.</strong><span>Viết một câu đầy đủ, ít nhất 7 từ, có số liệu hoặc mốc thời gian.</span></div>'; return; }
+  g.phase = 'done';
+  api('/api/game/feedback', { method: 'POST', body: JSON.stringify({ game: 'survive', kind: 'sentence', text: `[${g.pair.map(it => it.en).join(' | ')}] ${text}` }) }).catch(() => {});
+  g.score += 40;
+  tsSfx('level');
+  t1hFinish();
+}
+// "Words I didn't know" go into a Flashcard deck of their own.
+function t1hWeakLsKey() { return 't1Weak_' + _t1Block + '_' + walWho(); }
+function t1hWeakList() { try { return JSON.parse(localStorage.getItem(t1hWeakLsKey()) || '[]'); } catch (e) { return []; } }
+function t1hSaveWeak() {
+  const g = _t1;
+  if (!g.weak.size) return;
+  const list = t1hWeakList(), have = new Set(list.map(c => t1hKey(c.en))), known = t1Known();
+  g.weak.forEach((c, k) => { if (!have.has(k)) list.unshift({ lv: 'a', en: c.en, vi: c.vi, ex: c.ex }); known.delete(c.en); });
+  try { localStorage.setItem(t1hWeakLsKey(), JSON.stringify(list.slice(0, 80))); } catch (e) {}
+  t1SaveKnown(known);
+}
+function t1hFinish() {
+  const g = _t1, won = g.won;
+  const weak = [...g.weak.values()];
+  const list = (weak.length ? `<div class="t1-review"><div class="t1-review-title">📒 Từ em chưa biết · ${weak.length} cụm, đã thêm vào Flashcard</div>
+      ${weak.map(c => `<div class="t1-review-line"><b>${escapeHtml(c.en)}</b> · ${escapeHtml(c.vi)}</div>`).join('')}
+      <button class="vb-secondary-btn" onclick="t1FcOpen('surv')">🃏 Ôn ngay bằng Flashcard</button></div>` : '')
+    + (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '');
+  t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', {
+    big: `${g.hero.name} · ${Math.min(g.si, g.list.length)}/${g.list.length} câu · ${won ? 3 : Math.max(0, g.bosses - (g.boss ? 1 : 0))} trùm · ${g.quizRight}/${g.asked} câu hỏi đúng`,
+    icon: won ? '🏆' : g.si >= 3 ? '👏' : '🛡️', good: !!won, list: list || undefined });
 }
 
 /* ── Drawing ── */
@@ -28067,16 +28808,28 @@ function t1hRR(c, x, y, w, h, r) {
   c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
+// One atlas tile with its top-left at (x, y).
+function t1dTile(c, name, x, y, s) {
+  const r = T1D_RECTS[name];
+  if (r && T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], x, y, r[2] * s, r[3] * s);
+}
 function t1hDrawHero(c) {
   const g = _t1, p = g.p, sc = 2.7;
   const frame = p.hurt > 0 || p.hp <= 0 ? 'hit_anim_f0' : p.moving && !p.won ? `run_anim_f${Math.floor(p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 6) % 4}`;
-  // The hero's team colour glows underfoot, brighter while a skill runs.
   const glow = g.rushT > 0 || g.shieldT > 0 || p.dashT > 0;
   c.save();
   c.globalAlpha = glow ? 0.6 : 0.32 + Math.sin(g.time * 3) * 0.06;
   c.fillStyle = g.hero.color;
   c.beginPath(); c.ellipse(p.x, p.y - 1, glow ? 34 : 26, glow ? 12 : 9, 0, 0, Math.PI * 2); c.fill();
   c.restore();
+  if (g.skills.aura) {
+    const r = [70, 100, 150][g.skills.aura - 1];
+    c.save();
+    const grd = c.createRadialGradient(p.x, p.y - 10, r * 0.2, p.x, p.y - 10, r);
+    grd.addColorStop(0, 'rgba(255,140,40,0)'); grd.addColorStop(0.75, `rgba(255,120,30,${0.12 + 0.05 * Math.sin(g.time * 8)})`); grd.addColorStop(1, 'rgba(255,90,20,.35)');
+    c.fillStyle = grd; c.beginPath(); c.ellipse(p.x, p.y - 10, r, r * 0.8, 0, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
   c.save();
   if (p.inv > 0 && p.dashT <= 0 && Math.floor(p.inv * 20) % 2) c.globalAlpha = 0.45;
   t1dDraw(c, `${g.look}_${frame}`, p.x, p.y, sc, p.face < 0, p.hurt > 0 ? [['red', 0.35]] : null);
@@ -28088,41 +28841,62 @@ function t1hDrawHero(c) {
     c.beginPath(); c.arc(p.x, p.y - 34, 44, 0, Math.PI * 2); c.fill(); c.stroke();
     c.restore();
   }
-  // The weapon in hand, pointing where the last attack went.
+  // The weapon in hand.
   const hx = p.x + p.face * 12, hy = p.y - 26, k = g.w.kind;
-  const ang = k === 'sword' && p.atk <= 0 ? (p.face > 0 ? -0.9 : -2.24) : (p.aim || 0);
   c.save();
   c.translate(hx, hy);
   c.imageSmoothingEnabled = false;
   if (k === 'gun') {
-    // A stubby pixel blunderbuss, drawn rather than taken from the tileset.
+    // A stubby pixel blunderbuss, pointing where the last shot went.
+    const ang = p.aim || 0;
     c.rotate(ang);
     if (Math.cos(ang) < 0) c.scale(1, -1);
     c.fillStyle = '#5B3A22'; c.fillRect(-6, -2, 9, 6); c.fillRect(-4, 3, 4, 6);
     c.fillStyle = '#9AA6B2'; c.fillRect(2, -4, 18, 5);
     c.fillStyle = '#5E6873'; c.fillRect(18, -5, 4, 7);
   } else if (k === 'bow') {
+    // The bow faces the target with an arrow on the string, ready to fly.
+    const ang = p.aim || (p.face > 0 ? 0 : Math.PI);
     c.rotate(ang);
-    const r = T1D_RECTS.weapon_bow, s2 = 2.2;
-    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 / 2, r[2] * s2, r[3] * s2);
+    const r = T1D_RECTS.weapon_bow, s2 = 2.2, ar = T1D_RECTS.weapon_arrow;
+    if (T1D.ready) {
+      c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 / 2, r[2] * s2, r[3] * s2);
+      if (g.w.cd > 0.12 || p.atk <= 0) { c.save(); c.rotate(Math.PI / 2); const pull = p.atk > 0 ? 0 : 6; c.drawImage(T1D.img, ar[0], ar[1], ar[2], ar[3], -ar[2] * 0.9, -ar[3] * 1.8 + pull + 14, ar[2] * 1.8, ar[3] * 1.8); c.restore(); }
+    }
+  } else if (k === 'magic') {
+    // The staff stands upright, leaning a little; the gem glows brighter on a cast.
+    c.rotate(p.face * (0.12 + (p.atk > 0 ? 0.25 : 0)));
+    const r = T1D_RECTS.weapon_red_magic_staff, s2 = 2;
+    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 + 16, r[2] * s2, r[3] * s2);
+    c.fillStyle = `rgba(190,140,255,${p.atk > 0 ? 0.8 : 0.45})`; c.shadowColor = '#A66BFF'; c.shadowBlur = p.atk > 0 ? 18 : 10;
+    c.beginPath(); c.arc(0, -r[3] * s2 + 22, p.atk > 0 ? 7 : 5, 0, Math.PI * 2); c.fill();
   } else {
-    // Sword and staff stand blade-up in the atlas, so turn them a quarter more.
+    const ang = p.atk <= 0 ? (p.face > 0 ? -0.9 : -2.24) : (p.aim || 0);
     c.rotate(ang + Math.PI / 2);
-    const r = T1D_RECTS[k === 'sword' ? 'weapon_knight_sword' : 'weapon_red_magic_staff'], s2 = 2;
+    const r = T1D_RECTS.weapon_knight_sword, s2 = 2;
     if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 * 0.8, r[2] * s2, r[3] * s2);
-    if (k === 'magic') { c.fillStyle = 'rgba(166,107,255,.5)'; c.shadowColor = '#A66BFF'; c.shadowBlur = 12; c.beginPath(); c.arc(0, -r[3] * s2 * 0.75, 5, 0, Math.PI * 2); c.fill(); }
   }
   c.restore();
-  // Health bar under the hero.
   const bw = 46, f = Math.max(0, p.hp / p.maxHp);
   c.fillStyle = 'rgba(0,0,0,.35)'; t1hRR(c, p.x - bw / 2, p.y + 6, bw, 7, 3); c.fill();
   c.fillStyle = f > 0.5 ? '#2DBE60' : f > 0.25 ? '#F2B233' : '#E5533D'; t1hRR(c, p.x - bw / 2 + 1, p.y + 7, (bw - 2) * f, 5, 2); c.fill();
+}
+// A small pixel crown sitting on the boss's head.
+function t1hCrown(c, x, y) {
+  const u = 3, rows = ['X..X..X', 'XX.X.XX', 'XXXXXXX', 'XXXRXXX'];
+  c.save();
+  rows.forEach((row, j) => [...row].forEach((ch, i) => {
+    if (ch === '.') return;
+    c.fillStyle = ch === 'R' ? '#E5533D' : j === 2 ? '#FFE07A' : '#F2B233';
+    c.fillRect(x + (i - 3.5) * u, y + (j - 4) * u, u, u);
+  }));
+  c.strokeStyle = 'rgba(90,60,10,.8)'; c.lineWidth = 1; c.strokeRect(x - 3.5 * u, y - 2 * u, 7 * u, 2 * u);
+  c.restore();
 }
 function t1hDrawFoe(c, f) {
   const g = _t1, frame = f.stun > 0 ? `idle_anim_f${Math.floor(f.anim * 6) % 4}` : `run_anim_f${Math.floor(f.anim * (f.st === 'charge' ? 16 : 8)) % 4}`;
   if (f.boss) {
     if (f.st === 'aim') {
-      // The lane it is about to charge down.
       c.save();
       c.translate(f.x, f.y - 20); c.rotate(Math.atan2(f.cy, f.cx));
       c.fillStyle = `rgba(229,83,61,${0.18 + 0.2 * Math.sin(g.time * 30) ** 2})`;
@@ -28132,33 +28906,80 @@ function t1hDrawFoe(c, f) {
     c.save(); c.globalAlpha = 0.35; c.fillStyle = '#E5533D';
     c.beginPath(); c.ellipse(f.x, f.y, 44, 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
   }
-  t1dDraw(c, `${f.look}_${frame}`, f.x, f.y, f.T.scale, f.face < 0, [['red', f.st === 'aim' ? 0.35 : 0], ['ice', g.freezeT > 0 ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
-  if (f.stun > 0) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
-  if (f.boss) { c.font = '22px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('👑', f.x, f.y - f.h + 4); return; }
+  if (f.elite) {
+    c.save(); c.globalAlpha = 0.45 + 0.2 * Math.sin(g.time * 6); c.strokeStyle = '#F2C14E'; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(f.x, f.y, f.r * 1.3, f.r * 0.45, 0, 0, Math.PI * 2); c.stroke(); c.restore();
+  }
+  const sc = f.sc || f.T.scale, ice = g.freezeT > 0 || (f.stun > 0 && f.iceT > 0) || f.slowT > 0;
+  t1dDraw(c, `${f.look}_${frame}`, f.x, f.y, sc, f.face < 0, [['gold', f.elite ? 0.22 + 0.1 * Math.sin(g.time * 6) : 0], ['red', f.st === 'aim' ? 0.35 : 0], ['ice', ice ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
+  if (f.stun > 0 && !ice) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
+  if (f.boss) { t1hCrown(c, f.x + (f.face < 0 ? -f.hx : f.hx) * sc, f.y - (36 - f.hy) * sc + 4); return; }
   if (f.hp < f.maxHp) {
     const bw = f.r * 2;
     c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(f.x - bw / 2, f.y - f.h - 6, bw, 4);
-    c.fillStyle = '#E5533D'; c.fillRect(f.x - bw / 2, f.y - f.h - 6, bw * Math.max(0, f.hp / f.maxHp), 4);
+    c.fillStyle = f.elite ? '#F2B233' : '#E5533D'; c.fillRect(f.x - bw / 2, f.y - f.h - 6, bw * Math.max(0, f.hp / f.maxHp), 4);
   }
 }
-// Purple gems carry chunks of the sentence; gold ones are the boss's linkers.
-function t1hDrawGem(c, m, gold) {
-  const y = m.y - 14 + Math.sin(m.bob * 3) * 3, col = gold ? '#E5A52D' : '#7C5CFF', s = gold ? 1.35 : 1;
+// Obstacles, drawn in depth order with the people.
+function t1hDrawProp(c, o) {
+  const cx = o.x + o.w / 2, by = o.y + o.h;
+  if (o.kind === 'column') { t1dDraw(c, 'column', cx, by + 6, 3, false, null, false); return; }
+  if (o.kind === 'crate') { t1dDraw(c, 'crate', cx, by + 4, 2.6, false, o.hit > 0 ? [['flash', 0.6]] : null, false); return; }
+  if (o.kind === 'rock') {
+    // A boulder in three shades, chunky like the tiles around it.
+    const w = o.w, h = o.h + 18, x = o.x, y = by - h, s = o.seed;
+    c.save();
+    c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(cx, by, w * 0.55, 8, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#4A4458'; c.beginPath();
+    c.moveTo(x + 4, by - 4); c.lineTo(x, y + h * 0.5); c.lineTo(x + w * (0.2 + s * 0.1), y + 6); c.lineTo(x + w * 0.62, y); c.lineTo(x + w, y + h * 0.42); c.lineTo(x + w - 3, by - 3); c.closePath(); c.fill();
+    c.fillStyle = '#6E6880'; c.beginPath();
+    c.moveTo(x + 8, y + h * 0.5); c.lineTo(x + w * (0.22 + s * 0.1), y + 10); c.lineTo(x + w * 0.6, y + 5); c.lineTo(x + w * 0.78, y + h * 0.35); c.lineTo(x + w * 0.4, y + h * 0.55); c.closePath(); c.fill();
+    c.fillStyle = '#9C97AE'; c.fillRect(x + w * 0.42, y + 9, 8, 4); c.fillRect(x + w * 0.3, y + 16, 5, 3);
+    c.strokeStyle = '#231C2C'; c.lineWidth = 2; c.beginPath();
+    c.moveTo(x + 4, by - 4); c.lineTo(x, y + h * 0.5); c.lineTo(x + w * (0.2 + s * 0.1), y + 6); c.lineTo(x + w * 0.62, y); c.lineTo(x + w, y + h * 0.42); c.lineTo(x + w - 3, by - 3); c.closePath(); c.stroke();
+    c.restore();
+    return;
+  }
+  // A brick block: a dark top, then the brick face down to its footprint.
   c.save();
-  c.globalAlpha = gold ? 1 : (m.cd > 0 ? 0.5 : 1) * (m.life < 4 && Math.sin(m.life * 14) < 0 ? 0.35 : 1);
-  c.fillStyle = 'rgba(0,0,0,.15)'; c.beginPath(); c.ellipse(m.x, m.y, 10, 4, 0, 0, Math.PI * 2); c.fill();
+  c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(o.x - 4, by - 4, o.w + 8, 10);
+  // The top face: the same bricks, darkened, so it reads as the top of the wall.
+  c.beginPath(); c.rect(o.x, o.y - 48, o.w, o.h); c.clip();
+  for (let tx = o.x; tx < o.x + o.w; tx += 48) for (let ty = o.y - 48; ty < o.y - 48 + o.h; ty += 48) t1dTile(c, 'wall_mid', tx, ty, 3);
+  c.fillStyle = 'rgba(28,18,40,.62)'; c.fillRect(o.x, o.y - 48, o.w, o.h);
+  c.restore(); c.save();
+  c.fillStyle = '#5A4B6E'; c.fillRect(o.x, o.y - 48, o.w, 4); c.fillRect(o.x, o.y - 48, 3, o.h); c.fillRect(o.x + o.w - 3, o.y - 48, 3, o.h);
+  for (let tx = o.x; tx < o.x + o.w; tx += 48) t1dTile(c, 'wall_mid', tx, by - 48, 3);
+  c.restore();
+}
+// Purple gems carry chunks of the sentence; gold ones are the boss's linkers.
+// Drawn in screen pixels so labels stay readable when the room is zoomed out.
+// Each records its box, so a tap can find it, and shows its key (1–3).
+function t1hDrawGem(c, m, gold, idx) {
+  const g = _t1, z = g.zoom || 1, X = (m.x - g.camX) * z, Y = (m.y - g.camY) * z;
+  const y = Y - 14 + Math.sin(m.bob * 3) * 3, col = gold ? '#E5A52D' : '#7C5CFF', s = gold ? 1.35 : 1;
+  const fade = !gold && m.life < 2.5 ? (Math.sin(m.life * 14) < 0 ? 0.35 : 0.85) : 1;
+  c.save();
+  c.globalAlpha = fade;
+  c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(X, Y, 10, 4, 0, 0, Math.PI * 2); c.fill();
   c.shadowColor = col; c.shadowBlur = gold ? 22 : 14;
   c.fillStyle = col;
-  c.beginPath(); c.moveTo(m.x, y - 12 * s); c.lineTo(m.x + 9 * s, y); c.lineTo(m.x, y + 12 * s); c.lineTo(m.x - 9 * s, y); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(X, y - 12 * s); c.lineTo(X + 9 * s, y); c.lineTo(X, y + 12 * s); c.lineTo(X - 9 * s, y); c.closePath(); c.fill();
   c.shadowBlur = 0;
-  c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.moveTo(m.x, y - 12); c.lineTo(m.x + 4, y - 2); c.lineTo(m.x - 3, y - 2); c.closePath(); c.fill();
-  c.font = '700 13px system-ui, -apple-system, Segoe UI, sans-serif';
-  const tw = c.measureText(m.text).width;
+  c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.moveTo(X, y - 12); c.lineTo(X + 4, y - 2); c.lineTo(X - 3, y - 2); c.closePath(); c.fill();
+  c.font = '700 14px system-ui, -apple-system, Segoe UI, sans-serif';
+  const tw = c.measureText(m.text).width, bw = tw + 40, bx = X - bw / 2, byy = y - 46;
   c.fillStyle = gold ? '#FFF3CF' : '#FFFDF6'; c.strokeStyle = gold ? '#B8860B' : '#13294F'; c.lineWidth = 2;
-  t1hRR(c, m.x - tw / 2 - 8, y - 42, tw + 16, 22, 11); c.fill(); c.stroke();
-  c.fillStyle = '#13294F'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.fillText(m.text, m.x, y - 31);
+  t1hRR(c, bx, byy, bw, 26, 13); c.fill(); c.stroke();
+  c.fillStyle = gold ? '#B8860B' : '#5B3FD9'; c.beginPath(); c.arc(bx + 13, byy + 13, 9, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#fff'; c.font = '800 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(String(idx + 1), bx + 13, byy + 13.5);
+  c.fillStyle = '#13294F'; c.font = '700 14px system-ui, -apple-system, Segoe UI, sans-serif';
+  c.fillText(m.text, bx + 26 + tw / 2, byy + 13.5);
+  if (!gold) { c.fillStyle = 'rgba(19,41,79,.25)'; c.fillRect(bx + 10, byy + 22, (bw - 20) * Math.max(0, m.life / T1H_GEM_LIFE), 2); }
   c.restore();
+  // A generous box for fingers: the label and the gem under it.
+  m.box = [bx - 6, byy - 6, bw + 12, Y + 6 - byy + 6];
 }
 function t1hDrawShot(c, s) {
   c.save();
@@ -28168,6 +28989,16 @@ function t1hDrawShot(c, s) {
   } else if (s.kind === 'magic') {
     c.shadowColor = '#A66BFF'; c.shadowBlur = 14; c.fillStyle = '#C9A6FF';
     c.beginPath(); c.arc(s.x, s.y, 6.5, 0, Math.PI * 2); c.fill();
+  } else if (s.kind === 'missile') {
+    const a = Math.atan2(s.vy, s.vx);
+    c.translate(s.x, s.y); c.rotate(a);
+    c.fillStyle = 'rgba(255,160,60,.55)'; c.beginPath(); c.moveTo(-6, 0); c.lineTo(-18, -3); c.lineTo(-18, 3); c.closePath(); c.fill();
+    c.fillStyle = '#E5E9EE'; c.fillRect(-7, -3, 12, 6); c.fillStyle = '#E5533D'; c.fillRect(5, -3, 4, 6);
+  } else if (s.kind === 'drone') {
+    c.fillStyle = '#6EE7F9'; c.shadowColor = '#22D3EE'; c.shadowBlur = 8; c.beginPath(); c.arc(s.x, s.y, 3.5, 0, Math.PI * 2); c.fill();
+  } else if (s.kind === 'laser') {
+    c.strokeStyle = 'rgba(110,231,249,.9)'; c.shadowColor = '#22D3EE'; c.shadowBlur = 12; c.lineWidth = 4; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - s.vx * 0.05, s.y - s.vy * 0.05); c.stroke();
   } else {
     c.translate(s.x, s.y); c.rotate(Math.atan2(s.vy, s.vx) + Math.PI / 2);
     const r = T1D_RECTS.weapon_arrow;
@@ -28210,41 +29041,64 @@ function t1hDrawFx(c, e) {
     c.beginPath(); c.arc(e.x, e.y, 14 * (1 - k) + 4, 0, Math.PI * 2); c.fill();
   } else if (e.kind === 'num') {
     c.globalAlpha = 1 - k * k;
-    c.font = '800 15px system-ui, -apple-system, Segoe UI, sans-serif'; c.textAlign = 'center';
+    c.font = `800 ${Math.round(15 / (_t1.zoom || 1))}px system-ui, -apple-system, Segoe UI, sans-serif`; c.textAlign = 'center';
     c.lineWidth = 3; c.strokeStyle = '#fff'; c.fillStyle = e.color || '#13294F';
     c.strokeText(e.text, e.x, e.y - 24 * k); c.fillText(e.text, e.x, e.y - 24 * k);
   }
   c.restore();
 }
+// Walls round the room: bricks along the top with banners, dark stone on the other sides.
+function t1hDrawWalls(c) {
+  const R = _t1.room, banners = ['wall_banner_red', 'wall_banner_blue', 'wall_banner_green'];
+  c.fillStyle = '#1C1524'; c.fillRect(0, 0, R.w, R.top - 96);
+  for (let x = 0, i = 0; x < R.w; x += 48, i++) {
+    t1dTile(c, 'wall_mid', x, R.top - 96, 3);
+    t1dTile(c, i % 7 === 3 ? banners[(i / 7 | 0) % 3] : 'wall_mid', x, R.top - 48, 3);
+  }
+  c.fillStyle = '#4E4160'; c.fillRect(0, R.top - 100, R.w, 4);
+  c.fillStyle = '#231A2D';
+  c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
+  c.fillStyle = '#3A2F48';
+  c.fillRect(R.wall - 6, R.top, 6, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 6, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 6);
+}
 function t1hDraw() {
-  const g = _t1, c = g.ctx, p = g.p, W = g.W, H = g.H;
+  const g = _t1, c = g.ctx, p = g.p, W = g.W, H = g.H, R = g.room;
   if (!c || !W) return;
   c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
-  const camX = p.x - W / 2, camY = p.y - H / 2 - 20;
+  const z = g.zoom || 1, VW = W / z, VH = H / z;
+  const camX = g.camX = Math.max(0, Math.min(R.w - VW, p.x - VW / 2)), camY = g.camY = Math.max(0, Math.min(R.h - VH, p.y - VH / 2 - 20));
   if (!g.pat && T1D.ready) g.pat = t1hGround(c);
-  const ox = -(((camX % 256) + 256) % 256), oy = -(((camY % 256) + 256) % 256);
-  c.save(); c.translate(ox, oy); c.fillStyle = g.pat || '#2A2333'; c.fillRect(0, 0, W + 256, H + 256); c.restore();
+  c.fillStyle = '#120C18'; c.fillRect(0, 0, W, H);
   c.save();
+  c.scale(z, z);
   c.translate(-camX, -camY);
+  c.imageSmoothingEnabled = false;
+  c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall);
+  R.holes.forEach(h => { c.globalAlpha = 0.9; t1dTile(c, 'hole', h.x - 24, h.y - 24, 3); c.globalAlpha = 1; });
+  t1hDrawWalls(c);
   c.font = '20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.2, false, null, true); });
+  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.4, false, null, true); });
   c.globalAlpha = 1;
   g.zones.forEach(z => {
     c.save();
-    c.fillStyle = 'rgba(229,165,45,.16)'; c.strokeStyle = 'rgba(229,165,45,.6)'; c.lineWidth = 2;
-    c.beginPath(); c.arc(z.x, z.y, z.r, 0, Math.PI * 2); c.fill(); c.stroke();
-    c.strokeStyle = '#8A5A2B'; c.lineWidth = 2;
-    for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2, r = Math.random() * z.r, x = z.x + Math.cos(a) * r, y = z.y + Math.sin(a) * r * 0.8; c.beginPath(); c.moveTo(x - 4, y - 16); c.lineTo(x, y); c.stroke(); }
+    if (z.kind === 'fire') {
+      c.globalAlpha = 0.6 * (1 - z.t / z.dur); c.fillStyle = '#FF8A3D';
+      c.beginPath(); c.ellipse(z.x, z.y, z.r, z.r * 0.5, 0, 0, Math.PI * 2); c.fill();
+    } else {
+      c.fillStyle = 'rgba(229,165,45,.16)'; c.strokeStyle = 'rgba(229,165,45,.6)'; c.lineWidth = 2;
+      c.beginPath(); c.arc(z.x, z.y, z.r, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.strokeStyle = '#8A5A2B'; c.lineWidth = 2;
+      for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2, r = Math.random() * z.r, x = z.x + Math.cos(a) * r, y = z.y + Math.sin(a) * r * 0.8; c.beginPath(); c.moveTo(x - 4, y - 16); c.lineTo(x, y); c.stroke(); }
+    }
     c.restore();
   });
   g.lobs.forEach(l => {
     if (l.kind !== 'meteor') return;
-    c.save(); c.fillStyle = `rgba(229,83,61,${0.15 + 0.25 * l.t / l.dur})`; c.setLineDash([6, 6]); c.strokeStyle = '#E5533D'; c.lineWidth = 2;
+    c.save(); c.fillStyle = `rgba(229,83,61,${0.15 + 0.25 * Math.min(1, l.t / l.dur)})`; c.setLineDash([6, 6]); c.strokeStyle = '#E5533D'; c.lineWidth = 2;
     c.beginPath(); c.arc(l.tx, l.ty, l.r, 0, Math.PI * 2); c.fill(); c.stroke(); c.restore();
   });
-  g.gems.forEach(m => t1hDrawGem(c, m));
-  g.gold.forEach(m => t1hDrawGem(c, m, true));
-  [...g.foes, { hero: true, y: p.y }].sort((a, b) => a.y - b.y).forEach(e => e.hero ? t1hDrawHero(c) : t1hDrawFoe(c, e));
+  const props = R.obs.filter(o => !o.dead).map(o => ({ prop: o, y: o.y + o.h }));
+  [...props, ...g.foes, { hero: true, y: p.y }].sort((a, b) => a.y - b.y).forEach(e => e.hero ? t1hDrawHero(c) : e.prop ? t1hDrawProp(c, e.prop) : t1hDrawFoe(c, e));
   g.shots.forEach(s => t1hDrawShot(c, s));
   g.ebul.forEach(b => { c.save(); c.shadowColor = '#E5533D'; c.shadowBlur = 10; c.fillStyle = '#FF7A59'; c.beginPath(); c.arc(b.x, b.y, 6, 0, Math.PI * 2); c.fill(); c.restore(); });
   g.lobs.forEach(l => {
@@ -28261,18 +29115,47 @@ function t1hDraw() {
     }
     c.restore();
   });
-  for (let i = 0; i < g.w.orbit; i++) {
-    const a = g.w.orbitA + i * Math.PI * 2 / g.w.orbit, bx = p.x + Math.cos(a) * 72, by = p.y - 32 + Math.sin(a) * 72;
-    c.save(); c.translate(bx, by); c.rotate(a + Math.PI / 2 + g.time * 8);
-    c.fillStyle = '#E8EEF2'; c.strokeStyle = '#7C8A99'; c.lineWidth = 1.5;
-    c.beginPath(); c.moveTo(0, -16); c.lineTo(5, 0); c.lineTo(0, 16); c.lineTo(-5, 0); c.closePath(); c.fill(); c.stroke();
-    c.restore();
+  if (g.skills.orbit) {
+    const lv = g.skills.orbit, n = [2, 4, 8][lv - 1], RR = [72, 90, 112][lv - 1];
+    if (lv === 3) { c.save(); c.strokeStyle = `rgba(160,220,255,${0.35 + 0.15 * Math.sin(g.time * 6)})`; c.lineWidth = 10; c.beginPath(); c.arc(p.x, p.y - 32, RR, 0, Math.PI * 2); c.stroke(); c.restore(); }
+    for (let i = 0; i < n; i++) {
+      const a = g.st.orbA + i * Math.PI * 2 / n, bx = p.x + Math.cos(a) * RR, by = p.y - 32 + Math.sin(a) * RR;
+      c.save(); c.translate(bx, by); c.rotate(a + Math.PI / 2 + g.time * 8);
+      c.fillStyle = lv === 3 ? '#DDF4FF' : '#E8EEF2'; c.strokeStyle = lv === 3 ? '#4FB3E8' : '#7C8A99'; c.lineWidth = 1.5;
+      if (lv === 3) { c.shadowColor = '#7FD3FF'; c.shadowBlur = 10; }
+      c.beginPath(); c.moveTo(0, -16); c.lineTo(5, 0); c.lineTo(0, 16); c.lineTo(-5, 0); c.closePath(); c.fill(); c.stroke();
+      c.restore();
+    }
   }
-  g.fx.forEach(e => t1hDrawFx(c, e));
+  g.booms.forEach(b => {
+    c.save(); c.translate(b.x, b.y);
+    if (b.st === 'spin') {
+      c.globalAlpha = 0.5; c.strokeStyle = '#B9E4C9'; c.lineWidth = 3;
+      for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(0, 0, 18 + i * 14, g.time * 9 + i, g.time * 9 + i + 4); c.stroke(); }
+      c.globalAlpha = 1;
+    }
+    c.rotate(g.time * 18);
+    c.fillStyle = '#C98B3C'; c.strokeStyle = '#5B3A22'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(-14, -4); c.lineTo(0, -2); c.lineTo(4, -14); c.lineTo(8, -12); c.lineTo(4, 4); c.lineTo(-14, 4); c.closePath(); c.fill(); c.stroke();
+    c.restore();
+  });
+  g.drones.forEach(d => {
+    if (d.x === undefined) return;
+    c.save(); c.translate(d.x, d.y);
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(0, 46, 10, 3, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#2B3A55'; t1hRR(c, -9, -6, 18, 12, 4); c.fill();
+    c.fillStyle = g.skills.drone === 3 ? '#6EE7F9' : '#9FD8FF'; c.fillRect(-3, -2, 6, 4);
+    c.strokeStyle = '#C9D6E3'; c.lineWidth = 2; const r = Math.sin(g.time * 40) * 8; c.beginPath(); c.moveTo(-r, -9); c.lineTo(r, -9); c.stroke();
+    c.restore();
+  });
+  g.fx.forEach(e => { if (e.kind !== 'banner') t1hDrawFx(c, e); });
   c.restore();
+  // Gems last, so their labels sit on top and are easy to tap.
+  g.gems.forEach((m, i) => t1hDrawGem(c, m, false, i));
+  g.gold.forEach((m, i) => t1hDrawGem(c, m, true, i));
   // Arrows at the edge for gems and the boss off screen.
   [...g.gems, ...g.gold.map(m => ({ ...m, col: '#E5A52D' })), ...(g.boss ? [{ x: g.boss.x, y: g.boss.y, col: '#E5533D' }] : [])].forEach(m => {
-    const sx = m.x - camX, sy = m.y - 20 - camY;
+    const sx = (m.x - camX) * z, sy = (m.y - 20 - camY) * z;
     if (sx > 0 && sx < W && sy > 0 && sy < H) return;
     const cx = Math.max(18, Math.min(W - 18, sx)), cy = Math.max(18, Math.min(H - 18, sy)), a = Math.atan2(sy - H / 2, sx - W / 2);
     c.save(); c.translate(cx, cy); c.rotate(a);
@@ -28289,6 +29172,18 @@ function t1hDraw() {
     c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}`, W / 2, 19);
   }
   if (g.freezeT > 0) { c.fillStyle = `rgba(127,200,248,${Math.min(0.18, g.freezeT * 0.1)})`; c.fillRect(0, 0, W, H); }
+  if (g.flashT > 0) { c.fillStyle = `rgba(255,236,170,${Math.min(0.6, g.flashT * 1.3)})`; c.fillRect(0, 0, W, H); }
+  g.fx.forEach(e => {
+    if (e.kind !== 'banner') return;
+    const k = e.t / e.dur, a = k < 0.15 ? k / 0.15 : k > 0.8 ? (1 - k) / 0.2 : 1, s = 1 + Math.max(0, 0.15 - k) * 2;
+    c.save(); c.globalAlpha = a; c.translate(W / 2, H * 0.3); c.scale(s, s);
+    c.font = `900 ${Math.min(30, W / 16)}px system-ui, -apple-system, Segoe UI, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    const tw = c.measureText(e.text).width;
+    c.fillStyle = 'rgba(40,20,0,.75)'; t1hRR(c, -tw / 2 - 22, -28, tw + 44, 56, 16); c.fill();
+    c.strokeStyle = '#F2C14E'; c.lineWidth = 3; c.stroke();
+    c.fillStyle = '#FFE07A'; c.fillText(e.text, 0, 1);
+    c.restore();
+  });
   if (g.joy) {
     c.fillStyle = 'rgba(255,255,255,.28)'; c.strokeStyle = 'rgba(19,41,79,.35)'; c.lineWidth = 2;
     c.beginPath(); c.arc(g.joy.ox, g.joy.oy, T1H_JOY, 0, Math.PI * 2); c.fill(); c.stroke();
@@ -28296,6 +29191,7 @@ function t1hDraw() {
     c.beginPath(); c.arc(g.joy.ox + g.joy.dx, g.joy.oy + g.joy.dy, 20, 0, Math.PI * 2); c.fill();
   }
 }
+
 // TASK1 END
 
 // TTMON BEGIN

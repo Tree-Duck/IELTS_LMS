@@ -4360,6 +4360,29 @@ app.post('/api/game/score', authenticate, (req, res) => {
   }
 });
 
+// Task 1 Sinh tồn: how well each student knows each phrase (0–4) and how
+// often they missed it, per block. Teachers see it in the class vocab tab.
+const T1M_BLOCKS = ['dyn', 'sta'];
+const T1M_MAX = 800;
+app.get('/api/game/t1mastery', authenticate, (req, res) => {
+  try { res.json(db.getT1Mastery(req.user.id)); }
+  catch (err) { res.status(500).json({ error: 'Failed to load mastery' }); }
+});
+app.post('/api/game/t1mastery', authenticate, (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!T1M_BLOCKS.includes(b.block) || !b.items || typeof b.items !== 'object') return res.status(400).json({ error: 'Bad request' });
+    const clean = new Map();
+    Object.entries(b.items).slice(0, 200).forEach(([k, v]) => {
+      const key = String(k).toLowerCase().trim().slice(0, 120);
+      if (!key || !v || typeof v !== 'object' || ['__proto__', 'constructor', 'prototype'].includes(key)) return;
+      clean.set(key, { m: Math.max(0, Math.min(4, parseInt(v.m, 10) || 0)), w: Math.max(0, Math.min(999, parseInt(v.w, 10) || 0)) });
+    });
+    db.updateT1Mastery(req.user.id, b.block, clean, T1M_MAX);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Failed to save mastery' }); }
+});
+
 // Game feedback from the games hub, and the sentence a student writes at the
 // end of a TinTinMon gym. Students post; teachers and admins read.
 const FEEDBACK_GAMES = ['ttmon', 'survive', 'rain', 'raid', 'shoot', 'tower', 't1', 'other'];
@@ -4550,7 +4573,7 @@ app.get('/api/vocab/progress/class/:id', authenticate, teacherOrAdmin, (req, res
     if (req.user.role !== 'admin' && cls.teacher_id !== req.user.id) return res.status(403).json({ error: 'Not your class' });
     res.json(db.getClassStudents(cls.id).map(s => {
       const p = db.getVocabProgress(s.user_id);
-      return { id: s.user_id, name: s.name, known: p.known, tests: p.tests || [], updated_at: p.updated_at || null };
+      return { id: s.user_id, name: s.name, known: p.known, tests: p.tests || [], updated_at: p.updated_at || null, t1: db.getT1Mastery(s.user_id) };
     }));
   } catch (err) { res.status(500).json({ error: 'Failed to load class progress' }); }
 });
