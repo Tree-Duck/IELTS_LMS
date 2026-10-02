@@ -23582,7 +23582,7 @@ const T1_BLOCKS = {
 };
 const T1_GAMES = {
   rain:    { icon: '🌧️', name: 'Mưa pattern',            desc: 'Biểu đồ nhỏ rơi xuống. Bấm đúng cụm mô tả để bắn trước khi chạm đất. Rơi nhanh dần, 3 mạng.', start: 't1RainStart()' },
-  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng trong phòng hầm ngục: bấm ngọc chữ bỏ túi, xếp câu theo ô chức năng, bỏ cụm bẫy. Lên cấp thì trả lời câu hỏi để nhận chiêu, cấp 3 là Tiến hoá. 3 Trùm, mỗi phần bài một con.', start: 't1SurvStart()' },
+  survive: { icon: '🛡️', name: 'Sinh tồn ghép câu',     desc: 'Biệt đội Xu Hướng trong phòng hầm ngục: bấm ngọc chữ bỏ túi, xếp câu theo ô chức năng, bỏ cụm bẫy. Lên cấp thì trả lời câu hỏi để nhận chiêu, cấp 3 là Tiến hoá. Mỗi lượt là trọn một bài (6 đề xoay vòng), 3 Trùm cho 3 phần bài.', start: 't1SurvStart()' },
   snake:   { icon: '🐍', name: 'Rắn săn mồi',            desc: 'Đề là một biểu đồ. Điều khiển rắn ăn đúng mồi có cụm mô tả nó. Ăn sai mất mạng, đâm tường là thua.', start: 't1SnakeStart()' },
   slope:   { icon: '📐', name: 'Mô tả pattern',          desc: 'Nhìn hình dạng đường, chọn cụm đúng cả hướng lẫn tốc độ.', start: 't1SlopeStart()' },
   hunt:    { icon: '🎯', name: 'Săn feature',            desc: 'Chạm đúng đỉnh, đáy, điểm vượt, đoạn bình ổn, rồi chọn câu tả nó.', start: 't1HuntStart()' },
@@ -26960,6 +26960,31 @@ function t1LibProc(name) {
   const P = T1_PROCS.find(p => p.name === name);
   return `<div class="t1-chart"><div class="t1-chart-title">${P.icon} ${escapeHtml(P.name)}</div><div class="t1-belt t1-belt--lib">${P.steps.map((s, i) => `<div class="t1-belt-slot on"><b>${i + 1}</b><span>${s[0]}</span><small>${escapeHtml(s[1])}</small></div>`).join('<i>›</i>')}</div></div>`;
 }
+const T1_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// A cycle diagram: the stages round a circle, clockwise from the top, joined
+// by arrows; the last arrow leads back to the first. Each stage is
+// [emoji, line 1, line 2, time], its label set outside the circle.
+function t1LibCycle(title, stages, note) {
+  const W = 600, H = 400, cx = 300, cy = 222, R = 125, n = stages.length, deg = Math.PI / 180;
+  const at = i => -90 * deg + i * 2 * Math.PI / n, P = (a, r) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  let g = `<defs><marker id="t1cyc-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7E9C90"/></marker></defs>`;
+  stages.forEach((s, i) => {
+    const [x1, y1] = P(at(i) + 19 * deg, R), [x2, y2] = P(at(i + 1) - 19 * deg, R);
+    g += `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)}A${R} ${R} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" class="t1-cyc-arc" marker-end="url(#t1cyc-ar)"/>`;
+  });
+  stages.forEach(([icon, l1, l2, time], i) => {
+    const a = at(i), [x, y] = P(a, R), c = Math.cos(a);
+    const side = c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
+    const lx = side === 'start' ? x + 44 : side === 'end' ? x - 44 : x;
+    const lines = [l1, l2, time].filter(Boolean);
+    const ly = side === 'middle' ? (Math.sin(a) < 0 ? y - 42 - (lines.length - 1) * 16 : y + 58) : y - (lines.length - 1) * 8 + 4;
+    g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="32" class="t1-cyc-node"/><text x="${x.toFixed(1)}" y="${(y + 10).toFixed(1)}" class="t1-cyc-icon">${icon}</text>`;
+    g += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="t1-cyc-lab" text-anchor="${side}">${lines.map((t, k) => `<tspan x="${lx.toFixed(1)}" dy="${k ? 16 : 0}"${t === time ? ' class="t1-cyc-time"' : ''}>${escapeHtml(t)}</tspan>`).join('')}</text>`;
+    g += `<text x="${(x + (side === 'end' ? 22 : -22)).toFixed(1)}" y="${(y - 22).toFixed(1)}" class="t1-cyc-n">${i + 1}</text>`;
+  });
+  if (note) g += `<text x="${cx}" y="${cy + 5}" class="t1-cyc-note">${escapeHtml(note.split(':')[0])}</text><text x="${cx}" y="${cy + 23}" class="t1-cyc-note t1-cyc-note--b">${escapeHtml((note.split(':')[1] || '').trim())}</text>`;
+  return `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(title)}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(title)}">${g}</svg></div>`;
+}
 function t1LibPie(title, rows) {
   const cols = ['#0E4D3C', '#E5533D', '#3E6FD8', '#B8860B', '#7E9C90', '#C9A3D9'];
   const slices = rows.map(([n, v], i) => ({ name: n, v, color: cols[i] }));
@@ -27071,6 +27096,77 @@ const T1_SAMPLES = [
       'To begin with, used plastic bottles are collected from recycling bins and then transported by truck to a recycling plant. At the plant, the bottles are sorted according to their colour and the type of plastic they are made from, before being washed to remove labels and dirt.',
       'After that, the clean bottles are crushed into small flakes. These flakes are melted down and formed into small pellets, which are easy to transport and store. Finally, the pellets are used as a raw material to produce new products, for example clothing and new bottles, so that waste is turned into useful goods.',
     ] },
+  { id: 'line-energy', block: 'dyn', type: 'Line graph', icon: '📈',
+    prompt: 'The line graph below shows the amount of electricity generated (in TWh) from coal, natural gas and renewable energy in Country X between 1990 and 2020.',
+    chart: () => t1LineChart({ xs: [1990, 2000, 2010, 2020], yMax: 250, yStep: 50, unit: 'TWh', legend: true, title: 'Electricity generation by source, Country X (TWh)',
+      series: [{ name: 'Coal', ys: [180, 210, 195, 120] }, { name: 'Natural gas', ys: [60, 90, 120, 150] }, { name: 'Renewables', ys: [10, 15, 45, 130] }] }),
+    essay: [
+      'The line graph compares how much electricity Country X produced from coal, natural gas and renewable sources over a thirty-year period from 1990.',
+      'Overall, coal was the main source of electricity for most of the period, but it was overtaken by both gas and renewables by 2020. While coal generation declined after 2000, the figures for the other two sources rose throughout, with renewable energy seeing the most dramatic growth.',
+      'In 1990, coal produced 180 TWh, three times as much as natural gas, at 60 TWh, while renewables contributed only 10 TWh. Coal generation peaked at 210 TWh in 2000 and then fell, slightly at first to 195 TWh in 2010 and then more sharply to 120 TWh by the end of the period.',
+      'Natural gas, by contrast, grew steadily throughout, doubling to 120 TWh in 2010 before overtaking coal and reaching 150 TWh in 2020. Renewable energy remained marginal until 2000, at just 15 TWh, but then surged to 130 TWh in 2020, an almost ninefold increase. As a result, coal had fallen from first to last place by the end of the period.',
+    ] },
+  { id: 'table-tourism', block: 'dyn', type: 'Table (theo năm)', icon: '🧮',
+    prompt: 'The table below shows the number of international tourists (in millions) who visited four countries in Southeast Asia in 2005, 2010, 2015 and 2019.',
+    chart: () => `<div class="t1-chart"><div class="t1-chart-title">International tourist arrivals (millions)</div><table class="t1-table"><thead><tr><th>Country</th><th>2005</th><th>2010</th><th>2015</th><th>2019</th></tr></thead><tbody>${[['Thailand', 11.5, 15.9, 29.9, 39.8], ['Malaysia', 16.4, 24.6, 25.7, 26.1], ['Singapore', 7.1, 9.2, 12.1, 15.1], ['Vietnam', 3.5, 5.0, 7.9, 18.0]].map(r => `<tr><th>${r[0]}</th>${r.slice(1).map(v => `<td>${v.toFixed(1)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`,
+    essay: [
+      'The table compares the number of international tourist arrivals, in millions, in Thailand, Malaysia, Singapore and Vietnam in four separate years between 2005 and 2019.',
+      'Overall, all four countries welcomed more international tourists, with Thailand seeing by far the largest increase. Malaysia was the most popular destination at the start of the period, but it had been overtaken by Thailand by 2015.',
+      'In 2005, Malaysia received 16.4 million visitors, compared with 11.5 million in Thailand. Arrivals in Malaysia rose considerably to 24.6 million in 2010 and then remained relatively stable at roughly 25 to 26 million. Thailand\'s figure, meanwhile, almost doubled between 2010 and 2015, reaching 29.9 million, and climbed further to 39.8 million in 2019.',
+      'Singapore and Vietnam attracted far fewer tourists. Singapore\'s figure grew steadily from 7.1 million to 15.1 million over the fourteen years. Vietnam started with the lowest number, at just 3.5 million, and saw slow growth until 2015, before arrivals more than doubled to 18.0 million in 2019, overtaking Singapore.',
+    ] },
+  { id: 'mix-hanoi', block: 'dyn', type: 'Biểu đồ kết hợp', icon: '🌦️',
+    prompt: 'The line graph shows the average monthly temperature and the bar chart shows the average monthly rainfall in Hanoi, Vietnam.',
+    chart: () => `<div class="t1-mix">${t1LineChart({ xs: T1_MONTHS, yMax: 35, yStep: 5, unit: '°C', title: 'Average temperature in Hanoi (°C)', series: [{ name: 'Temperature', ys: [17, 18, 20, 24, 28, 30, 30, 29, 28, 25, 22, 18], color: '#E5533D' }] })}${t1GroupBars({ title: 'Average rainfall in Hanoi (mm)', unit: 'mm', xs: T1_MONTHS, yMax: 350, yStep: 50, series: [{ name: 'Rainfall', ys: [20, 25, 45, 90, 190, 240, 290, 320, 250, 130, 45, 20] }] })}</div>`,
+    essay: [
+      'The line graph illustrates the average temperature in Hanoi in each month of the year, while the bar chart shows how much rain the city typically receives every month.',
+      'Overall, Hanoi is considerably hotter and wetter in the middle of the year than in winter. Both temperature and rainfall reach their highest levels in summer, although rainfall peaks slightly later.',
+      'In January, the average temperature stands at 17°C, the lowest figure of the year. The temperature increases steadily to a high of 30°C in June and July, before declining gradually to 25°C in October and 18°C in December.',
+      'Rainfall follows a similar but more extreme pattern. From December to February, Hanoi receives only 20 to 25 mm of rain a month. Rainfall rises dramatically to a peak of 320 mm in August, which is sixteen times the amount in January. It then falls sharply to 130 mm in October and just 20 mm in December.',
+    ] },
+  { id: 'pie-commute', block: 'sta', type: 'Pie chart', icon: '🥧',
+    prompt: 'The pie chart below shows how people in a Vietnamese city travelled to work in 2023.',
+    chart: () => t1LibPie('How workers travelled to work, 2023', [['Motorbike', 62], ['Bus', 11], ['Car', 9], ['Walking', 7], ['Bicycle', 6], ['Other', 5]]),
+    essay: [
+      'The pie chart illustrates the proportions of workers in a Vietnamese city who used six means of transport to get to work in 2023.',
+      'Overall, motorbikes were by far the most common way of commuting. More people travelled by motorbike than by all the other methods combined, while walking, cycling and other forms of transport were the least popular options.',
+      'Motorbikes accounted for 62% of all journeys to work, just over three fifths of the total. The bus came a distant second, at 11%, followed closely by the car, at 9%. Taken together, these two forms of motorised transport made up a fifth of all commutes, just under a third of the figure for motorbikes.',
+      'The remaining 18% was shared fairly evenly between the other three categories. Walking represented 7% of commutes, slightly more than cycling, at 6%. Other forms of transport made up the smallest share, at just 5%. In other words, fewer than one in five workers travelled to work without a motorbike, a bus or a car.',
+    ] },
+  { id: 'pie-energy', block: 'sta', type: 'Pie chart', icon: '🥧',
+    prompt: 'The two pie charts below show the energy sources used in China and France in 2019.',
+    chart: () => `<div class="t1-pies">${t1LibPie('China, 2019', [['Coal', 62], ['Natural gas', 9], ['Nuclear', 3], ['Hydro', 17], ['Renewables', 9]])}${t1LibPie('France, 2019', [['Coal', 4], ['Natural gas', 14], ['Nuclear', 71], ['Hydro', 6], ['Renewables', 5]])}</div>`,
+    essay: [
+      'The pie charts compare the proportions of energy that China and France obtained from five different sources in 2019.',
+      'Overall, the two countries had markedly different energy profiles: China depended heavily on fossil fuels, while France relied mainly on nuclear power. In both countries, a single source made up well over half of the total.',
+      'Coal accounted for 62% of China\'s energy, whereas it represented a mere 4% in France. Hydroelectric power was the second largest source in China, at 17%, while natural gas and renewables each made up 9%. Nuclear energy accounted for the smallest proportion, at just 3%. In total, coal and natural gas supplied 71% of China\'s energy.',
+      'In France, by contrast, nuclear power supplied well over two thirds of the country\'s energy, at 71%. Natural gas came a distant second in France, with 14%, which was higher than the figure for China. Hydro and renewables played only a minor role, at 6% and 5% respectively.',
+    ] },
+  { id: 'cmp-coffee', block: 'sta', type: 'Bar chart (so sánh)', icon: '📊',
+    prompt: 'The bar chart below shows the amount of coffee consumed per person in eight countries in 2020.',
+    chart: () => t1BarChart({ title: 'Coffee consumption per person, 2020 (kg per year)', unit: 'kg per person per year', max: 13, fmt: v => v.toFixed(1),
+      rows: [['Finland', 12.0], ['Sweden', 9.9], ['Switzerland', 9.5], ['Norway', 7.4], ['Canada', 6.2], ['Brazil', 5.8], ['USA', 4.7], ['Japan', 3.3]].map(([name, v]) => ({ name, v })) }),
+    essay: [
+      'The bar chart compares annual coffee consumption per person in eight countries in 2020.',
+      'Overall, the four European countries consumed considerably more coffee than the other nations surveyed. Finland recorded by far the highest figure, while Japan had the lowest consumption.',
+      'Finland topped the list at 12.0 kg per person, more than three and a half times the figure for Japan. Sweden and Switzerland followed with comparable figures of 9.9 kg and 9.5 kg respectively, while consumption in Norway was noticeably lower, at 7.4 kg, although this was still higher than in any non-European country.',
+      'Among the non-European countries, Canada recorded the highest figure, at 6.2 kg, slightly ahead of Brazil, where the average person consumed 5.8 kg. The average American drank 4.7 kg of coffee a year, roughly 1 kg less than a Brazilian, whereas consumption in Japan was the lowest of all eight countries, at just 3.3 kg, less than a third of the Finnish figure.',
+    ] },
+  { id: 'cycle-monarch', block: 'sta', type: 'Cycle (chu trình)', icon: '🦋',
+    prompt: 'The diagram below shows the life cycle of the monarch butterfly.',
+    chart: () => t1LibCycle('Life cycle of the monarch butterfly', [
+      ['🥚', 'Eggs laid on', 'milkweed leaves', 'hatch in 3–5 days'],
+      ['🐛', 'Caterpillar (larva)', 'feeds on milkweed', '10–14 days'],
+      ['🟢', 'Chrysalis', '(pupa stage)', 'about 10 days'],
+      ['🦋', 'Adult emerges,', 'wings expand and dry', ''],
+      ['🌸', 'Adult feeds on', 'nectar and mates', 'female lays eggs'],
+    ], 'Full cycle: about 4–5 weeks in summer'),
+    essay: [
+      'The diagram illustrates the stages in the life cycle of the monarch butterfly, from egg to adult.',
+      'Overall, there are five main stages in the cycle, which begins with eggs being laid on milkweed leaves and ends when a new adult butterfly is ready to reproduce. The whole cycle takes approximately four to five weeks in summer.',
+      'The cycle starts when an adult female lays her eggs on the leaves of the milkweed plant. After three to five days, the eggs hatch into larvae, known as caterpillars. The caterpillars feed on milkweed leaves for ten to fourteen days before forming a chrysalis, where each one remains for about ten days.',
+      'At the end of this pupa stage, an adult butterfly emerges from the chrysalis, and its wings expand and dry before it can fly. During this adult stage, the butterfly feeds on nectar from flowers. Once the adult butterfly has emerged and mated, the female lays new eggs, and the cycle begins again.',
+    ] },
 ];
 const T1_PARA = ['Mở bài', 'Overview', 'Thân bài 1', 'Thân bài 2'];
 function t1SampleList() {
@@ -27171,6 +27267,162 @@ const T1_SURV = {
       bad: ['by 55%', 'overtake', 'surge'], fake: ['to 80%', 'in 2010,', 'the UK.'],
       t: { 'by 55%': ['thêm 55%', 'to 55% là lên tới 55%; by 55% là tăng thêm 55%. Ở đây là mức cuối → to.'], 'overtake': ['vượt qua', 'Sau before cần V-ing: before overtaking.'], 'surge': ['tăng vọt', 'Kể chuyện đã qua → surged.'], 'to 80%': ['lên 80%'], 'in 2010,': ['vào năm 2010,'], 'the UK.': ['nước Anh'] },
       vi: 'Con số của Việt Nam tăng vọt lên 55% năm 2015, trước khi vượt Brazil.' },
+    // line-internet: the second overview sentence and a third body sentence.
+    { part: 'Overview', img: 'line-internet', c: ['Throughout the period,', 'the UK', 'had', 'the highest rate', 'of internet access', 'among the three countries.'], r: ['t', 's', 'v', 'm', 'o', 'p'],
+      cv: ['Trong suốt giai đoạn,', 'nước Anh', 'có', 'tỉ lệ cao nhất', 'về truy cập internet', 'trong ba quốc gia'],
+      bad: ['Through the period,', 'the most high rate', 'has'], fake: ['Brazil', 'the lowest rate', 'among the four countries.'],
+      t: { 'Through the period,': ['Qua giai đoạn,', 'Cụm đúng là Throughout the period (trong suốt giai đoạn).'], 'the most high rate': ['tỉ lệ cao nhất', 'high → the highest.'], 'has': ['có', 'Kể chuyện đã qua → had.'], 'Brazil': ['Brazil'], 'the lowest rate': ['tỉ lệ thấp nhất'], 'among the four countries.': ['trong bốn quốc gia'] },
+      vi: 'Trong suốt giai đoạn, nước Anh có tỉ lệ truy cập internet cao nhất trong ba nước.' },
+    { part: 'Thân bài', img: 'line-internet', c: ['The UK figure', 'climbed steadily', 'to 70%', 'in 2010,', 'before rising', 'more slowly', 'to 95% in 2020.'], r: ['s', 'v', 'n', 't', 'v', 'm', 'n'],
+      cv: ['Con số của Anh', 'tăng đều', 'lên 70%', 'vào năm 2010,', 'trước khi tăng', 'chậm hơn', 'lên 95% vào năm 2020'],
+      bad: ['climb steady', 'before rise', 'more slow'], fake: ['to 50%', 'more quickly', 'to 85% in 2020.'],
+      t: { 'climb steady': ['tăng đều', 'Cần động từ quá khứ và trạng từ: climbed steadily.'], 'before rise': ['trước khi tăng', 'Sau before cần V-ing: before rising.'], 'more slow': ['chậm hơn', 'Bổ nghĩa cho động từ cần trạng từ: more slowly.'], 'to 50%': ['lên 50%'], 'more quickly': ['nhanh hơn'], 'to 85% in 2020.': ['lên 85% vào năm 2020'] },
+      vi: 'Con số của Anh tăng đều lên 70% năm 2010, rồi tăng chậm hơn lên 95% năm 2020.' },
+    // line-drinks: introduction, a second overview sentence and three body sentences.
+    { part: 'Mở bài', img: 'line-drinks', c: ['The line graph', 'compares', 'the average number of cups', 'of tea, coffee and soft drinks', 'that people in Vietnam drank', 'each week', 'from 1990 to 2020.'], r: ['s', 'v', 'o', 'o', 'o', 't', 't'],
+      cv: ['Biểu đồ đường', 'so sánh', 'số cốc trung bình', 'trà, cà phê và nước ngọt', 'mà người Việt Nam uống', 'mỗi tuần', 'từ năm 1990 đến năm 2020'],
+      bad: ['compare', 'the average amount of cups', 'that people in Vietnam drunk'], fake: ['of tea, coffee and juice', 'each month', 'from 1980 to 2010.'],
+      t: { 'compare': ['so sánh', 'Chủ ngữ số ít (The line graph) → compares.'], 'the average amount of cups': ['lượng cốc trung bình', 'Cốc đếm được → the number of, không dùng amount.'], 'that people in Vietnam drunk': ['mà người Việt Nam đã uống', 'drink – drank – drunk: quá khứ đơn là drank.'], 'of tea, coffee and juice': ['trà, cà phê và nước ép'], 'each month': ['mỗi tháng'], 'from 1980 to 2010.': ['từ năm 1980 đến năm 2010'] },
+      vi: 'Biểu đồ đường so sánh số cốc trà, cà phê và nước ngọt trung bình người Việt uống mỗi tuần từ 1990 đến 2020.' },
+    { part: 'Overview', img: 'line-drinks', c: ['Soft drinks', 'remained', 'the least popular', 'of the three drinks', 'throughout the period.'], r: ['s', 'v', 'm', 'p', 't'],
+      cv: ['Nước ngọt', 'vẫn là', 'ít được ưa chuộng nhất', 'trong ba loại đồ uống', 'trong suốt giai đoạn'],
+      bad: ['remain', 'the less popular', 'through the period.'], fake: ['Tea', 'Coffee', 'the most popular'],
+      t: { 'remain': ['vẫn là', 'Kể chuyện đã qua → remained.'], 'the less popular': ['ít được ưa chuộng hơn', 'So sánh trong ba loại → so sánh nhất: the least popular.'], 'through the period.': ['qua giai đoạn', 'Cụm đúng là throughout the period.'], 'Tea': ['Trà'], 'Coffee': ['Cà phê'], 'the most popular': ['được ưa chuộng nhất'] },
+      vi: 'Nước ngọt luôn là đồ uống ít được ưa chuộng nhất trong ba loại.' },
+    { part: 'Thân bài', img: 'line-drinks', c: ['In 1990,', 'the average Vietnamese person', 'drank', '14 cups of tea', 'a week,', 'almost five times', 'the figure for coffee.'], r: ['t', 's', 'v', 'n', 't', 'm', 'o'],
+      cv: ['Năm 1990,', 'một người Việt trung bình', 'uống', '14 cốc trà', 'mỗi tuần,', 'gần gấp năm lần', 'con số của cà phê'],
+      bad: ['drunk', 'almost five time', 'In the 1990,'], fake: ['7 cups of tea', 'almost twice', 'the figure for soft drinks.'],
+      t: { 'drunk': ['đã uống', 'drink – drank – drunk: quá khứ đơn là drank.'], 'almost five time': ['gần gấp năm lần', 'Gấp nhiều lần → times (số nhiều).'], 'In the 1990,': ['Vào năm 1990,', 'Không dùng the trước số năm: In 1990.'], '7 cups of tea': ['7 cốc trà'], 'almost twice': ['gần gấp đôi'], 'the figure for soft drinks.': ['con số của nước ngọt'] },
+      vi: 'Năm 1990, người Việt uống trung bình 14 cốc trà mỗi tuần, gần gấp năm lần cà phê.' },
+    { part: 'Thân bài', img: 'line-drinks', c: ['Tea consumption', 'fell gradually,', 'reaching a low', 'of 7 cups', 'in 2020,', 'exactly half', 'of its original level.'], r: ['s', 'v', 'v', 'n', 't', 'm', 'o'],
+      cv: ['Lượng trà tiêu thụ', 'giảm dần,', 'chạm mức thấp nhất', '7 cốc', 'vào năm 2020,', 'đúng một nửa', 'mức ban đầu'],
+      bad: ['falled gradually,', 'reach a low', 'exact half'], fake: ['rose gradually,', 'of 3 cups', 'exactly a third'],
+      t: { 'falled gradually,': ['giảm dần', 'fall là động từ bất quy tắc: fall – fell – fallen.'], 'reach a low': ['chạm đáy', 'Sau dấu phẩy dùng V-ing: reaching a low.'], 'exact half': ['đúng một nửa', 'Bổ nghĩa cho half cần trạng từ: exactly half.'], 'rose gradually,': ['tăng dần,'], 'of 3 cups': ['3 cốc'], 'exactly a third': ['đúng một phần ba'] },
+      vi: 'Lượng trà giảm dần, chạm đáy 7 cốc năm 2020, đúng một nửa mức ban đầu.' },
+    { part: 'Thân bài', img: 'line-drinks', c: ['Coffee', 'overtook tea', 'between 2005 and 2010,', 'before finishing', 'the period', 'at 14 cups.'], r: ['s', 'v', 't', 'v', 't', 'n'],
+      cv: ['Cà phê', 'vượt qua trà', 'trong khoảng 2005 đến 2010,', 'trước khi kết thúc', 'giai đoạn', 'ở mức 14 cốc'],
+      bad: ['overtaked tea', 'before finish', 'at 14 cup.'], fake: ['Soft drinks', 'between 1995 and 2000,', 'at 10 cups.'],
+      t: { 'overtaked tea': ['vượt qua trà', 'overtake là động từ bất quy tắc: overtake – overtook – overtaken.'], 'before finish': ['trước khi kết thúc', 'Sau before cần V-ing: before finishing.'], 'at 14 cup.': ['ở mức 14 cốc', 'Số nhiều → cups.'], 'Soft drinks': ['Nước ngọt'], 'between 1995 and 2000,': ['trong khoảng 1995 đến 2000,'], 'at 10 cups.': ['ở mức 10 cốc'] },
+      vi: 'Cà phê vượt trà trong khoảng 2005 đến 2010, rồi kết thúc giai đoạn ở mức 14 cốc.' },
+    // line-energy: the electricity lines that cross (teacher worksheet, Country X).
+    { part: 'Mở bài', img: 'line-energy', c: ['The line graph', 'compares', 'how much electricity', 'Country X produced', 'from coal, natural gas and renewables', 'between 1990 and 2020.'], r: ['s', 'v', 'o', 's', 'p', 't'],
+      cv: ['Biểu đồ đường', 'so sánh', 'lượng điện bao nhiêu', 'mà Quốc gia X sản xuất', 'từ than, khí tự nhiên và năng lượng tái tạo', 'từ năm 1990 đến năm 2020'],
+      bad: ['compare', 'how many electricity', 'from 1990 and 2020.'], fake: ['Country Y produced', 'from coal, oil and renewables', 'between 1980 and 2010.'],
+      t: { 'compare': ['so sánh', 'Chủ ngữ số ít (The line graph) → compares.'], 'how many electricity': ['bao nhiêu điện', 'electricity không đếm được → how much.'], 'from 1990 and 2020.': ['từ 1990 và 2020', 'Dùng between … and … hoặc from … to …, không trộn.'], 'Country Y produced': ['Quốc gia Y sản xuất'], 'from coal, oil and renewables': ['từ than, dầu và năng lượng tái tạo'], 'between 1980 and 2010.': ['từ năm 1980 đến năm 2010'] },
+      vi: 'Biểu đồ đường so sánh lượng điện Quốc gia X sản xuất từ than, khí và năng lượng tái tạo từ 1990 đến 2020.' },
+    { part: 'Overview', img: 'line-energy', c: ['Overall,', 'coal', 'was the main source of electricity', 'for most of the period,', 'but', 'it was overtaken', 'by both gas and renewables.'], r: ['k', 's', 'v', 't', 'k', 'v', 'o'],
+      cv: ['Nhìn chung,', 'than', 'là nguồn điện chính', 'trong phần lớn giai đoạn,', 'nhưng', 'nó bị vượt qua', 'bởi cả khí lẫn năng lượng tái tạo'],
+      bad: ['Overall the', 'it overtook', 'by both gas or renewables.'], fake: ['natural gas', 'for the whole period,', 'by renewables only.'],
+      t: { 'Overall the': ['Nhìn chung thì', 'Sau Overall cần dấu phẩy: Overall, …'], 'it overtook': ['nó vượt qua', 'Than bị vượt → bị động: it was overtaken.'], 'by both gas or renewables.': ['bởi cả khí hoặc năng lượng tái tạo', 'Cặp đúng là both … and …'], 'natural gas': ['khí tự nhiên'], 'for the whole period,': ['trong suốt cả giai đoạn,'], 'by renewables only.': ['chỉ bởi năng lượng tái tạo'] },
+      vi: 'Nhìn chung, than là nguồn điện chính trong phần lớn giai đoạn, nhưng bị cả khí và năng lượng tái tạo vượt qua.' },
+    { part: 'Overview', img: 'line-energy', c: ['Renewable energy', 'saw', 'the most dramatic growth', 'of the three sources', 'over the thirty years.'], r: ['s', 'v', 'm', 'p', 't'],
+      cv: ['Năng lượng tái tạo', 'có', 'mức tăng mạnh nhất', 'trong ba nguồn', 'trong ba mươi năm'],
+      bad: ['seen', 'the most dramatically growth', 'of the three source'], fake: ['Coal', 'the slowest growth', 'over the ten years.'],
+      t: { 'seen': ['đã thấy', 'Quá khứ đơn của see là saw; seen là quá khứ phân từ.'], 'the most dramatically growth': ['mức tăng mạnh nhất', 'Bổ nghĩa cho danh từ growth cần tính từ: dramatic.'], 'of the three source': ['trong ba nguồn', 'Số nhiều → sources.'], 'Coal': ['Than'], 'the slowest growth': ['mức tăng chậm nhất'], 'over the ten years.': ['trong mười năm'] },
+      vi: 'Năng lượng tái tạo tăng mạnh nhất trong ba nguồn suốt ba mươi năm.' },
+    { part: 'Thân bài', img: 'line-energy', c: ['In 1990,', 'coal', 'produced 180 TWh,', 'three times as much as', 'natural gas,', 'at 60 TWh.'], r: ['t', 's', 'n', 'm', 'o', 'n'],
+      cv: ['Năm 1990,', 'than', 'sản xuất 180 TWh,', 'gấp ba lần', 'khí tự nhiên,', 'ở mức 60 TWh'],
+      bad: ['three times as much than', 'three time as much as', 'In the 1990,'], fake: ['produced 210 TWh,', 'twice as much as', 'renewables,'],
+      t: { 'three times as much than': ['gấp ba lần', 'Cấu trúc đúng: three times as much as.'], 'three time as much as': ['gấp ba lần', 'Gấp nhiều lần → times (số nhiều).'], 'In the 1990,': ['Vào năm 1990,', 'Không dùng the trước số năm: In 1990.'], 'produced 210 TWh,': ['sản xuất 210 TWh,'], 'twice as much as': ['gấp đôi'], 'renewables,': ['năng lượng tái tạo,'] },
+      vi: 'Năm 1990, than sản xuất 180 TWh, gấp ba lần khí tự nhiên ở mức 60 TWh.' },
+    { part: 'Thân bài', img: 'line-energy', c: ['Coal generation', 'peaked at 210 TWh', 'in 2000', 'and then fell', 'to 120 TWh', 'by the end of the period.'], r: ['s', 'n', 't', 'v', 'n', 't'],
+      cv: ['Sản lượng điện than', 'đạt đỉnh 210 TWh', 'vào năm 2000', 'rồi giảm', 'xuống 120 TWh', 'vào cuối giai đoạn'],
+      bad: ['peaked on 210 TWh', 'and then falled', 'in the end of the period.'], fake: ['peaked at 195 TWh', 'in 2010', 'to 150 TWh'],
+      t: { 'peaked on 210 TWh': ['đạt đỉnh 210 TWh', 'Giới từ đúng: peaked at.'], 'and then falled': ['rồi giảm', 'fall – fell – fallen: and then fell.'], 'in the end of the period.': ['vào cuối giai đoạn', 'Cụm đúng là by the end of / at the end of the period.'], 'peaked at 195 TWh': ['đạt đỉnh 195 TWh'], 'in 2010': ['vào năm 2010'], 'to 150 TWh': ['xuống 150 TWh'] },
+      vi: 'Điện than đạt đỉnh 210 TWh năm 2000 rồi giảm xuống 120 TWh vào cuối giai đoạn.' },
+    { part: 'Thân bài', img: 'line-energy', c: ['Renewable energy', 'surged', 'from just 15 TWh', 'in 2000', 'to 130 TWh', 'in 2020,', 'overtaking coal.'], r: ['s', 'v', 'n', 't', 'n', 't', 'v'],
+      cv: ['Năng lượng tái tạo', 'tăng vọt', 'từ chỉ 15 TWh', 'vào năm 2000', 'lên 130 TWh', 'vào năm 2020,', 'vượt qua than'],
+      bad: ['surge', 'overtake coal.', 'since just 15 TWh'], fake: ['to 150 TWh', 'in 1990', 'overtaking natural gas.'],
+      t: { 'surge': ['tăng vọt', 'Kể chuyện đã qua → surged.'], 'overtake coal.': ['vượt qua than', 'Sau dấu phẩy dùng V-ing: overtaking coal.'], 'since just 15 TWh': ['kể từ chỉ 15 TWh', 'Mức xuất phát dùng from … to …'], 'to 150 TWh': ['lên 150 TWh'], 'in 1990': ['vào năm 1990'], 'overtaking natural gas.': ['vượt qua khí tự nhiên'] },
+      vi: 'Năng lượng tái tạo tăng vọt từ 15 TWh năm 2000 lên 130 TWh năm 2020, vượt qua than.' },
+    // bar-students: two overview sentences and three body sentences.
+    { part: 'Overview', img: 'bar-students', c: ['Overall,', 'all three countries', 'attracted more international students,', 'with Australia', 'hosting the largest number', 'throughout.'], r: ['k', 's', 'v', 'p', 'v', 't'],
+      cv: ['Nhìn chung,', 'cả ba quốc gia', 'thu hút nhiều sinh viên quốc tế hơn,', 'trong đó Úc', 'đón số lượng lớn nhất', 'trong suốt giai đoạn'],
+      bad: ['all three country', 'hosted the largest number', 'Overall the'], fake: ['attracted fewer international students,', 'with Japan', 'hosting the smallest number'],
+      t: { 'all three country': ['cả ba quốc gia', 'Số nhiều → countries.'], 'hosted the largest number': ['đón số lượng lớn nhất', 'Sau with + danh từ dùng V-ing: with Australia hosting.'], 'Overall the': ['Nhìn chung thì', 'Sau Overall cần dấu phẩy: Overall, …'], 'attracted fewer international students,': ['thu hút ít sinh viên quốc tế hơn,'], 'with Japan': ['trong đó Nhật Bản'], 'hosting the smallest number': ['đón số lượng nhỏ nhất'] },
+      vi: 'Nhìn chung, cả ba nước đều thu hút thêm sinh viên quốc tế, trong đó Úc luôn đón nhiều nhất.' },
+    { part: 'Overview', img: 'bar-students', c: ['Canada,', 'however,', 'recorded', 'the most rapid growth,', 'particularly', 'in the final four years.'], r: ['s', 'k', 'v', 'm', 'k', 't'],
+      cv: ['Canada,', 'tuy nhiên,', 'ghi nhận', 'mức tăng nhanh nhất,', 'đặc biệt', 'trong bốn năm cuối'],
+      bad: ['the most rapidly growth,', 'particular', 'in the final four year.'], fake: ['Japan,', 'the slowest growth,', 'in the first four years.'],
+      t: { 'the most rapidly growth,': ['mức tăng nhanh nhất', 'Bổ nghĩa cho danh từ growth cần tính từ: rapid.'], 'particular': ['đặc biệt', 'Cần trạng từ: particularly.'], 'in the final four year.': ['trong bốn năm cuối', 'Số nhiều → years.'], 'Japan,': ['Nhật Bản,'], 'the slowest growth,': ['mức tăng chậm nhất,'], 'in the first four years.': ['trong bốn năm đầu'] },
+      vi: 'Tuy nhiên, Canada tăng nhanh nhất, đặc biệt trong bốn năm cuối.' },
+    { part: 'Thân bài', img: 'bar-students', c: ['In 2004,', 'Australia', 'had around 150,000', 'international students,', 'compared with', 'only 70,000', 'in Canada.'], r: ['t', 's', 'n', 'o', 'k', 'n', 'p'],
+      cv: ['Năm 2004,', 'Úc', 'có khoảng 150.000', 'sinh viên quốc tế,', 'so với', 'chỉ 70.000', 'ở Canada'],
+      bad: ['had around 150.000', 'compare with', 'in the Canada.'], fake: ['had around 250,000', 'only 130,000', 'in Japan.'],
+      t: { 'had around 150.000': ['có khoảng 150 nghìn', 'Tiếng Anh dùng dấu phẩy ngăn hàng nghìn: 150,000.'], 'compare with': ['so với', 'Cụm đúng là compared with.'], 'in the Canada.': ['ở Canada', 'Tên nước không có the: in Canada.'], 'had around 250,000': ['có khoảng 250.000'], 'only 130,000': ['chỉ 130.000'], 'in Japan.': ['ở Nhật Bản'] },
+      vi: 'Năm 2004, Úc có khoảng 150.000 sinh viên quốc tế, so với chỉ 70.000 ở Canada.' },
+    { part: 'Thân bài', img: 'bar-students', c: ["Australia's figure", 'rose sharply', 'to 230,000', 'in 2008', 'and then climbed', 'to a peak of 310,000', 'in 2016.'], r: ['s', 'v', 'n', 't', 'v', 'n', 't'],
+      cv: ['Con số của Úc', 'tăng mạnh', 'lên 230.000', 'vào năm 2008', 'rồi tiếp tục tăng', 'lên đỉnh 310.000', 'vào năm 2016'],
+      bad: ['Australia figure', 'rised sharply', 'to a peak at 310,000'], fake: ['fell sharply', 'to 150,000', 'in 2012.'],
+      t: { 'Australia figure': ['con số Úc', 'Sở hữu cách: Australia\'s figure.'], 'rised sharply': ['tăng mạnh', 'rise – rose – risen: rose sharply.'], 'to a peak at 310,000': ['lên đỉnh 310.000', 'Cụm đúng là a peak of + số.'], 'fell sharply': ['giảm mạnh'], 'to 150,000': ['lên 150.000'], 'in 2012.': ['vào năm 2012'] },
+      vi: 'Con số của Úc tăng mạnh lên 230.000 năm 2008, rồi lên đỉnh 310.000 năm 2016.' },
+    { part: 'Thân bài', img: 'bar-students', c: ["Canada's figure", 'almost doubled', 'from 130,000', 'to 250,000', 'between 2012 and 2016,', 'overtaking Japan.'], r: ['s', 'v', 'n', 'n', 't', 'v'],
+      cv: ['Con số của Canada', 'gần như tăng gấp đôi', 'từ 130.000', 'lên 250.000', 'trong khoảng 2012 đến 2016,', 'vượt qua Nhật Bản'],
+      bad: ['almost double', 'overtook Japan.', 'between 2012 to 2016,'], fake: ['almost tripled', 'between 2004 and 2008,', 'overtaking Australia.'],
+      t: { 'almost double': ['gần gấp đôi', 'Kể chuyện đã qua → almost doubled.'], 'overtook Japan.': ['vượt qua Nhật Bản', 'Sau dấu phẩy dùng V-ing: overtaking Japan.'], 'between 2012 to 2016,': ['từ 2012 đến 2016', 'Dùng between … and …'], 'almost tripled': ['gần gấp ba'], 'between 2004 and 2008,': ['trong khoảng 2004 đến 2008,'], 'overtaking Australia.': ['vượt qua Úc'] },
+      vi: 'Con số của Canada gần gấp đôi, từ 130.000 lên 250.000 trong 2012–2016, vượt qua Nhật Bản.' },
+    // table-tourism: tourist arrivals in four Southeast Asian countries.
+    { part: 'Mở bài', img: 'table-tourism', c: ['The table', 'compares', 'the number of international tourist arrivals', 'in four Southeast Asian countries', 'between 2005 and 2019.'], r: ['s', 'v', 'o', 'p', 't'],
+      cv: ['Bảng số liệu', 'so sánh', 'số lượt khách du lịch quốc tế', 'ở bốn quốc gia Đông Nam Á', 'từ năm 2005 đến năm 2019'],
+      bad: ['compare', 'the amount of international tourist arrivals', 'from 2005 and 2019.'], fake: ['The bar chart', 'in five Southeast Asian countries', 'between 2005 and 2020.'],
+      t: { 'compare': ['so sánh', 'Chủ ngữ số ít (The table) → compares.'], 'the amount of international tourist arrivals': ['lượng khách du lịch quốc tế', 'Lượt khách đếm được → the number of.'], 'from 2005 and 2019.': ['từ 2005 và 2019', 'Dùng between … and … hoặc from … to …, không trộn.'], 'The bar chart': ['Biểu đồ cột'], 'in five Southeast Asian countries': ['ở năm quốc gia Đông Nam Á'], 'between 2005 and 2020.': ['từ năm 2005 đến năm 2020'] },
+      vi: 'Bảng so sánh số lượt khách quốc tế đến bốn nước Đông Nam Á từ 2005 đến 2019.' },
+    { part: 'Overview', img: 'table-tourism', c: ['Overall,', 'all four countries', 'welcomed more international tourists,', 'with Thailand', 'seeing', 'by far the largest increase.'], r: ['k', 's', 'v', 'p', 'v', 'm'],
+      cv: ['Nhìn chung,', 'cả bốn quốc gia', 'đón nhiều khách quốc tế hơn,', 'trong đó Thái Lan', 'có', 'mức tăng lớn nhất, bỏ xa các nước khác'],
+      bad: ['all four country', 'saw', 'by far the larger increase.'], fake: ['welcomed fewer international tourists,', 'with Malaysia', 'the smallest increase.'],
+      t: { 'all four country': ['cả bốn quốc gia', 'Số nhiều → countries.'], 'saw': ['đã thấy', 'Sau with + danh từ dùng V-ing: with Thailand seeing.'], 'by far the larger increase.': ['mức tăng lớn hơn', 'So sánh bốn nước → so sánh nhất: the largest.'], 'welcomed fewer international tourists,': ['đón ít khách quốc tế hơn,'], 'with Malaysia': ['trong đó Malaysia'], 'the smallest increase.': ['mức tăng nhỏ nhất'] },
+      vi: 'Nhìn chung, cả bốn nước đều đón thêm khách quốc tế, trong đó Thái Lan tăng nhiều nhất.' },
+    { part: 'Overview', img: 'table-tourism', c: ['Malaysia', 'was the most popular destination', 'at the start of the period,', 'but', 'it had been overtaken', 'by Thailand', 'by 2015.'], r: ['s', 'm', 't', 'k', 'v', 'o', 't'],
+      cv: ['Malaysia', 'là điểm đến được ưa chuộng nhất', 'vào đầu giai đoạn,', 'nhưng', 'đã bị vượt qua', 'bởi Thái Lan', 'trước năm 2015'],
+      bad: ['was the more popular destination', 'it had overtaken', 'in the start of the period,'], fake: ['Singapore', 'by Vietnam', 'by 2010.'],
+      t: { 'was the more popular destination': ['là điểm đến được ưa chuộng hơn', 'So sánh bốn nước → the most popular.'], 'it had overtaken': ['nó đã vượt qua', 'Malaysia bị vượt → bị động: it had been overtaken.'], 'in the start of the period,': ['vào đầu giai đoạn', 'Cụm đúng là at the start of the period.'], 'Singapore': ['Singapore'], 'by Vietnam': ['bởi Việt Nam'], 'by 2010.': ['trước năm 2010'] },
+      vi: 'Malaysia là điểm đến được ưa chuộng nhất lúc đầu, nhưng đã bị Thái Lan vượt qua trước năm 2015.' },
+    { part: 'Thân bài', img: 'table-tourism', c: ["Thailand's figure", 'almost doubled', 'between 2010 and 2015,', 'reaching 29.9 million,', 'and climbed further', 'to 39.8 million', 'in 2019.'], r: ['s', 'v', 't', 'n', 'v', 'n', 't'],
+      cv: ['Con số của Thái Lan', 'gần như tăng gấp đôi', 'trong khoảng 2010 đến 2015,', 'đạt 29,9 triệu,', 'và tiếp tục tăng', 'lên 39,8 triệu', 'vào năm 2019'],
+      bad: ['almost double', 'reached 29.9 million,', 'and climb further'], fake: ['almost tripled', 'between 2005 and 2010,', 'to 26.1 million'],
+      t: { 'almost double': ['gần gấp đôi', 'Kể chuyện đã qua → almost doubled.'], 'reached 29.9 million,': ['đạt 29,9 triệu', 'Giữa câu, sau dấu phẩy dùng V-ing: reaching 29.9 million.'], 'and climb further': ['và tăng tiếp', 'Hai động từ nối bằng and cùng thì: climbed.'], 'almost tripled': ['gần gấp ba'], 'between 2005 and 2010,': ['trong khoảng 2005 đến 2010,'], 'to 26.1 million': ['lên 26,1 triệu'] },
+      vi: 'Con số của Thái Lan gần gấp đôi trong 2010–2015, đạt 29,9 triệu, rồi tăng tiếp lên 39,8 triệu năm 2019.' },
+    { part: 'Thân bài', img: 'table-tourism', c: ['By contrast,', 'arrivals in Malaysia', 'remained relatively stable', 'at roughly 25 to 26 million', 'from 2010 onwards.'], r: ['k', 's', 'v', 'n', 't'],
+      cv: ['Ngược lại,', 'lượt khách đến Malaysia', 'giữ khá ổn định', 'ở mức khoảng 25 đến 26 triệu', 'từ năm 2010 trở đi'],
+      bad: ['remained relative stable', 'remain relatively stable', 'By contrary,'], fake: ['arrivals in Singapore', 'at roughly 15 to 16 million', 'from 2005 onwards.'],
+      t: { 'remained relative stable': ['giữ khá ổn định', 'Bổ nghĩa cho tính từ stable cần trạng từ: relatively.'], 'remain relatively stable': ['giữ khá ổn định', 'Kể chuyện đã qua → remained.'], 'By contrary,': ['Ngược lại,', 'Cụm đúng là By contrast, hoặc On the contrary,'], 'arrivals in Singapore': ['lượt khách đến Singapore'], 'at roughly 15 to 16 million': ['ở mức khoảng 15 đến 16 triệu'], 'from 2005 onwards.': ['từ năm 2005 trở đi'] },
+      vi: 'Ngược lại, lượt khách đến Malaysia giữ khá ổn định ở khoảng 25–26 triệu từ 2010 trở đi.' },
+    { part: 'Thân bài', img: 'table-tourism', c: ['Vietnam', 'saw slow growth', 'until 2015,', 'before arrivals', 'more than doubled', 'to 18.0 million in 2019.'], r: ['s', 'v', 't', 'k', 'v', 'n'],
+      cv: ['Việt Nam', 'tăng chậm', 'cho đến năm 2015,', 'trước khi lượt khách', 'tăng hơn gấp đôi', 'lên 18,0 triệu vào năm 2019'],
+      bad: ['saw slowly growth', 'until 2015 year,', 'more than double'], fake: ['until 2010,', 'more than tripled', 'to 15.1 million in 2019.'],
+      t: { 'saw slowly growth': ['tăng chậm', 'Bổ nghĩa cho danh từ growth cần tính từ: slow growth.'], 'until 2015 year,': ['cho đến năm 2015', 'Không thêm year sau số năm: until 2015.'], 'more than double': ['hơn gấp đôi', 'Kể chuyện đã qua → more than doubled.'], 'until 2010,': ['cho đến năm 2010,'], 'more than tripled': ['hơn gấp ba'], 'to 15.1 million in 2019.': ['lên 15,1 triệu vào năm 2019'] },
+      vi: 'Việt Nam tăng chậm đến 2015, rồi lượt khách tăng hơn gấp đôi lên 18 triệu năm 2019.' },
+    // mix-hanoi: a line graph and a bar chart together. General facts, so the present tense.
+    { part: 'Mở bài', img: 'mix-hanoi', c: ['The line graph', 'illustrates', 'the average monthly temperature', 'in Hanoi,', 'while', 'the bar chart', 'shows its monthly rainfall.'], r: ['s', 'v', 'o', 'p', 'k', 's', 'v'],
+      cv: ['Biểu đồ đường', 'minh hoạ', 'nhiệt độ trung bình hằng tháng', 'ở Hà Nội,', 'trong khi', 'biểu đồ cột', 'cho thấy lượng mưa hằng tháng của thành phố'],
+      bad: ['illustrate', 'in the Hanoi,', 'show its monthly rainfall.'], fake: ['in Ho Chi Minh City,', 'the pie chart', 'shows its yearly rainfall.'],
+      t: { 'illustrate': ['minh hoạ', 'Chủ ngữ số ít (The line graph) → illustrates.'], 'in the Hanoi,': ['ở Hà Nội', 'Tên thành phố không có the: in Hanoi.'], 'show its monthly rainfall.': ['cho thấy lượng mưa hằng tháng', 'Chủ ngữ số ít (the bar chart) → shows.'], 'in Ho Chi Minh City,': ['ở Thành phố Hồ Chí Minh,'], 'the pie chart': ['biểu đồ tròn'], 'shows its yearly rainfall.': ['cho thấy lượng mưa hằng năm'] },
+      vi: 'Biểu đồ đường minh hoạ nhiệt độ trung bình từng tháng ở Hà Nội, còn biểu đồ cột cho thấy lượng mưa từng tháng.' },
+    { part: 'Overview', img: 'mix-hanoi', c: ['Overall,', 'Hanoi', 'is considerably hotter and wetter', 'in the middle of the year', 'than in winter.'], r: ['k', 's', 'm', 't', 't'],
+      cv: ['Nhìn chung,', 'Hà Nội', 'nóng hơn và mưa nhiều hơn đáng kể', 'vào giữa năm', 'so với mùa đông'],
+      bad: ['is considerably more hot and wetter', 'was considerably hotter and wetter', 'Overall the'], fake: ['is considerably cooler and drier', 'at the start of the year', 'than in summer.'],
+      t: { 'is considerably more hot and wetter': ['nóng hơn và ẩm hơn', 'hot là tính từ ngắn → hotter, không dùng more hot.'], 'was considerably hotter and wetter': ['đã nóng và mưa nhiều hơn', 'Khí hậu là sự thật chung, không gắn năm nào → dùng hiện tại: is.'], 'Overall the': ['Nhìn chung thì', 'Sau Overall cần dấu phẩy: Overall, …'], 'is considerably cooler and drier': ['mát hơn và khô hơn đáng kể'], 'at the start of the year': ['vào đầu năm'], 'than in summer.': ['so với mùa hè'] },
+      vi: 'Nhìn chung, giữa năm Hà Nội nóng hơn và mưa nhiều hơn hẳn so với mùa đông.' },
+    { part: 'Overview', img: 'mix-hanoi', c: ['Both temperature and rainfall', 'reach their highest levels', 'in summer,', 'although', 'rainfall', 'peaks slightly later.'], r: ['s', 'v', 't', 'k', 's', 'v'],
+      cv: ['Cả nhiệt độ và lượng mưa', 'đạt mức cao nhất', 'vào mùa hè,', 'mặc dù', 'lượng mưa', 'đạt đỉnh muộn hơn một chút'],
+      bad: ['reaches their highest levels', 'peak slightly later.', 'despite'], fake: ['in winter,', 'temperature', 'peaks slightly earlier.'],
+      t: { 'reaches their highest levels': ['đạt mức cao nhất', 'Both … and … là chủ ngữ số nhiều → reach.'], 'peak slightly later.': ['đạt đỉnh muộn hơn', 'rainfall số ít → peaks.'], 'despite': ['mặc dù', 'despite + danh từ; trước một mệnh đề dùng although.'], 'in winter,': ['vào mùa đông,'], 'temperature': ['nhiệt độ'], 'peaks slightly earlier.': ['đạt đỉnh sớm hơn một chút'] },
+      vi: 'Cả nhiệt độ và lượng mưa đều cao nhất vào mùa hè, dù mưa đạt đỉnh muộn hơn một chút.' },
+    { part: 'Thân bài', img: 'mix-hanoi', c: ['In January,', 'the average temperature', 'stands at 17°C,', 'the lowest figure', 'of the year.'], r: ['t', 's', 'n', 'm', 't'],
+      cv: ['Vào tháng Một,', 'nhiệt độ trung bình', 'ở mức 17°C,', 'con số thấp nhất', 'trong năm'],
+      bad: ['stands on 17°C,', 'the most low figure', 'In the January,'], fake: ['In July,', 'stands at 13°C,', 'the highest figure'],
+      t: { 'stands on 17°C,': ['ở mức 17°C', 'Giới từ đúng: stands at.'], 'the most low figure': ['con số thấp nhất', 'low → the lowest.'], 'In the January,': ['Vào tháng Một,', 'Không dùng the trước tên tháng: In January.'], 'In July,': ['Vào tháng Bảy,'], 'stands at 13°C,': ['ở mức 13°C,'], 'the highest figure': ['con số cao nhất'] },
+      vi: 'Tháng Một, nhiệt độ trung bình là 17°C, thấp nhất trong năm.' },
+    { part: 'Thân bài', img: 'mix-hanoi', c: ['The temperature', 'increases steadily', 'to a high of 30°C', 'in June and July,', 'before declining gradually', 'to 18°C in December.'], r: ['s', 'v', 'n', 't', 'v', 'n'],
+      cv: ['Nhiệt độ', 'tăng đều', 'lên mức cao nhất 30°C', 'vào tháng Sáu và tháng Bảy,', 'trước khi giảm dần', 'xuống 18°C vào tháng Mười Hai'],
+      bad: ['increase steadily', 'before decline gradually', 'to a high at 30°C'], fake: ['to a high of 32°C', 'in August and September,', 'to 12°C in December.'],
+      t: { 'increase steadily': ['tăng đều', 'Chủ ngữ số ít (The temperature) → increases.'], 'before decline gradually': ['trước khi giảm dần', 'Sau before cần V-ing: before declining.'], 'to a high at 30°C': ['lên mức cao 30°C', 'Cụm đúng là a high of + số.'], 'to a high of 32°C': ['lên mức cao nhất 32°C'], 'in August and September,': ['vào tháng Tám và tháng Chín,'], 'to 12°C in December.': ['xuống 12°C vào tháng Mười Hai'] },
+      vi: 'Nhiệt độ tăng đều lên mức cao nhất 30°C vào tháng 6–7, rồi giảm dần xuống 18°C vào tháng 12.' },
+    { part: 'Thân bài', img: 'mix-hanoi', c: ['Rainfall', 'rises dramatically', 'to a peak of 320 mm', 'in August,', 'which is sixteen times', 'the amount in January.'], r: ['s', 'v', 'n', 't', 'm', 'o'],
+      cv: ['Lượng mưa', 'tăng mạnh', 'lên đỉnh 320 mm', 'vào tháng Tám,', 'gấp mười sáu lần', 'lượng mưa tháng Một'],
+      bad: ['rise dramatically', 'which are sixteen times', 'the amount on January.'], fake: ['to a peak of 290 mm', 'in July,', 'which is ten times'],
+      t: { 'rise dramatically': ['tăng mạnh', 'Chủ ngữ số ít (Rainfall) → rises.'], 'which are sixteen times': ['gấp mười sáu lần', 'which thay cho 320 mm, một con số → which is.'], 'the amount on January.': ['lượng mưa tháng Một', 'Trước tên tháng dùng in: in January.'], 'to a peak of 290 mm': ['lên đỉnh 290 mm'], 'in July,': ['vào tháng Bảy,'], 'which is ten times': ['gấp mười lần'] },
+      vi: 'Lượng mưa tăng mạnh lên đỉnh 320 mm vào tháng 8, gấp 16 lần tháng 1.' },
   ],
   sta: [
     { part: 'Mở bài', img: 'map-riverton', c: ['The two maps', 'illustrate', 'the changes', 'that took place', 'in the town of Riverton', 'between 2000 and 2020.'], r: ['s', 'v', 'o', 'v', 'p', 't'],
@@ -27203,6 +27455,167 @@ const T1_SURV = {
       bad: ['the most large', 'replace', 'In 2000,'], fake: ['transport', 'as the smallest expense', 'over the ten years.'],
       t: { 'the most large': ['lớn nhất', 'large → the largest.'], 'replace': ['thay thế', 'Kể chuyện đã qua → replaced.'], 'In 2000,': ['Năm 2000,', 'Overview nói về cả giai đoạn, không mở bằng một mốc năm.'], 'transport': ['đi lại'], 'as the smallest expense': ['thành khoản chi nhỏ nhất'], 'over the ten years.': ['trong mười năm'] },
       vi: 'Nhìn chung, nhà ở thay thế thực phẩm thành khoản chi lớn nhất trong hai mươi năm.' },
+    // map-riverton: a second overview sentence and two more body sentences.
+    { part: 'Overview', img: 'map-riverton', c: ['The park', 'and the church,', 'however,', 'remained', 'unchanged.'], r: ['s', 's', 'k', 'v', 'm'],
+      cv: ['Công viên', 'và nhà thờ,', 'tuy nhiên,', 'vẫn', 'giữ nguyên'],
+      bad: ['remain', 'unchange.', 'were remained'], fake: ['The school', 'The hospital', 'The factory'],
+      t: { 'remain': ['vẫn', 'Kể chuyện đã qua → remained.'], 'unchange.': ['giữ nguyên', 'Tính từ đúng là unchanged.'], 'were remained': ['vẫn', 'remain không có bị động: remained.'], 'The school': ['Trường học'], 'The hospital': ['Bệnh viện'], 'The factory': ['Nhà máy'] },
+      vi: 'Tuy nhiên, công viên và nhà thờ vẫn giữ nguyên.' },
+    { part: 'Thân bài', img: 'map-riverton', c: ['The farmland', 'in the north-east', 'made way for', 'new houses,', 'and', 'the school', 'was extended to the east.'], r: ['s', 'p', 'v', 'o', 'k', 's', 'v'],
+      cv: ['Đất nông nghiệp', 'ở phía đông bắc', 'nhường chỗ cho', 'những ngôi nhà mới,', 'và', 'trường học', 'được mở rộng về phía đông'],
+      bad: ['made way to', 'new house,', 'was extend to the east.'], fake: ['in the south-west', 'a car park,', 'was extended to the west.'],
+      t: { 'made way to': ['nhường chỗ cho', 'Cụm đúng là made way for.'], 'new house,': ['nhà mới', 'Nhiều ngôi nhà → houses.'], 'was extend to the east.': ['được mở rộng về phía đông', 'Bị động cần quá khứ phân từ: was extended.'], 'in the south-west': ['ở phía tây nam'], 'a car park,': ['một bãi đỗ xe,'], 'was extended to the west.': ['được mở rộng về phía tây'] },
+      vi: 'Đất nông nghiệp ở phía đông bắc nhường chỗ cho nhà mới, và trường học được mở rộng về phía đông.' },
+    { part: 'Thân bài', img: 'map-riverton', c: ['The car park', 'in the centre', 'was converted into', 'a park,', 'and', 'a shopping centre', 'was built next to the train station.'], r: ['s', 'p', 'v', 'o', 'k', 's', 'v'],
+      cv: ['Bãi đỗ xe', 'ở trung tâm', 'được chuyển thành', 'một công viên,', 'và', 'một trung tâm mua sắm', 'được xây cạnh ga tàu'],
+      bad: ['was convert into', 'were converted into', 'was build next to the train station.'], fake: ['in the north', 'a hospital,', 'was built next to the church.'],
+      t: { 'was convert into': ['được chuyển thành', 'Bị động cần quá khứ phân từ: was converted.'], 'were converted into': ['được chuyển thành', 'Chủ ngữ số ít (The car park) → was.'], 'was build next to the train station.': ['được xây cạnh ga tàu', 'build – built – built: was built.'], 'in the north': ['ở phía bắc'], 'a hospital,': ['một bệnh viện,'], 'was built next to the church.': ['được xây cạnh nhà thờ'] },
+      vi: 'Bãi đỗ xe ở trung tâm được chuyển thành công viên, và một trung tâm mua sắm được xây cạnh ga tàu.' },
+    // proc-bricks: introduction, a second overview sentence and two more body sentences.
+    { part: 'Mở bài', img: 'proc-bricks', c: ['The diagram', 'illustrates', 'the process', 'by which bricks are produced', 'for the building industry.'], r: ['s', 'v', 'o', 'v', 'p'],
+      cv: ['Sơ đồ', 'minh hoạ', 'quy trình', 'mà qua đó gạch được sản xuất', 'cho ngành xây dựng'],
+      bad: ['illustrate', 'by which bricks produce', 'for the build industry.'], fake: ['The map', 'by which tiles are produced', 'for the farming industry.'],
+      t: { 'illustrate': ['minh hoạ', 'Chủ ngữ số ít (The diagram) → illustrates.'], 'by which bricks produce': ['mà qua đó gạch sản xuất', 'Gạch được làm ra → bị động: bricks are produced.'], 'for the build industry.': ['cho ngành xây dựng', 'Cụm đúng là the building industry.'], 'The map': ['Bản đồ'], 'by which tiles are produced': ['mà qua đó ngói được sản xuất'], 'for the farming industry.': ['cho ngành nông nghiệp'] },
+      vi: 'Sơ đồ minh hoạ quy trình sản xuất gạch cho ngành xây dựng.' },
+    { part: 'Overview', img: 'proc-bricks', c: ['The whole process', 'takes', 'several days', 'and', 'ends with', 'the delivery of the finished bricks.'], r: ['s', 'v', 't', 'k', 'v', 'o'],
+      cv: ['Toàn bộ quy trình', 'mất', 'vài ngày', 'và', 'kết thúc bằng', 'việc giao gạch thành phẩm'],
+      bad: ['take', 'end with', 'the delivery of the finish bricks.'], fake: ['several hours', 'begins with', 'the delivery of raw clay.'],
+      t: { 'take': ['mất', 'Chủ ngữ số ít (The whole process) → takes.'], 'end with': ['kết thúc bằng', 'Chủ ngữ số ít → ends with.'], 'the delivery of the finish bricks.': ['việc giao gạch thành phẩm', 'Tính từ đúng là finished (đã hoàn thiện).'], 'several hours': ['vài giờ'], 'begins with': ['bắt đầu bằng'], 'the delivery of raw clay.': ['việc giao đất sét thô'] },
+      vi: 'Toàn bộ quy trình mất vài ngày và kết thúc bằng việc giao gạch thành phẩm.' },
+    { part: 'Thân bài', img: 'proc-bricks', c: ['To begin with,', 'clay', 'is dug', 'from the ground', 'by a large digger.'], r: ['k', 's', 'v', 'p', 'o'],
+      cv: ['Đầu tiên,', 'đất sét', 'được đào', 'từ lòng đất', 'bằng một máy đào lớn'],
+      bad: ['is digged', 'digs', 'To beginning with,'], fake: ['is mixed', 'from the river', 'by hand.'],
+      t: { 'is digged': ['được đào', 'dig – dug – dug: is dug.'], 'digs': ['đào', 'Đất sét không tự đào → bị động: is dug.'], 'To beginning with,': ['Đầu tiên,', 'Cụm cố định: To begin with,'], 'is mixed': ['được trộn'], 'from the river': ['từ dòng sông'], 'by hand.': ['bằng tay'] },
+      vi: 'Đầu tiên, đất sét được đào lên từ lòng đất bằng máy đào lớn.' },
+    { part: 'Thân bài', img: 'proc-bricks', c: ['The bricks', 'are then heated', 'in a kiln,', 'before being left', 'to cool', 'for two to three days.'], r: ['s', 'v', 'p', 'k', 'v', 't'],
+      cv: ['Gạch', 'sau đó được nung', 'trong lò nung,', 'trước khi được để', 'nguội', 'trong hai đến ba ngày'],
+      bad: ['are then heat', 'before left', 'to cooling'], fake: ['are then packaged', 'in a cooling chamber,', 'for 24 to 48 hours.'],
+      t: { 'are then heat': ['sau đó được nung', 'Bị động cần quá khứ phân từ: are heated.'], 'before left': ['trước khi được để', 'Sau before cần V-ing; ở đây bị động: before being left.'], 'to cooling': ['nguội', 'left to + động từ nguyên mẫu: left to cool.'], 'are then packaged': ['sau đó được đóng gói'], 'in a cooling chamber,': ['trong buồng làm nguội,'], 'for 24 to 48 hours.': ['trong 24 đến 48 giờ'] },
+      vi: 'Sau đó gạch được nung trong lò, rồi để nguội trong hai đến ba ngày.' },
+    // pie-commute: one pie chart, how people travelled to work.
+    { part: 'Mở bài', img: 'pie-commute', c: ['The pie chart', 'illustrates', 'the proportions of workers', 'in a Vietnamese city', 'who used six means of transport', 'to get to work in 2023.'], r: ['s', 'v', 'o', 'p', 'v', 't'],
+      cv: ['Biểu đồ tròn', 'minh hoạ', 'tỉ lệ người lao động', 'ở một thành phố Việt Nam', 'dùng sáu phương tiện', 'để đi làm năm 2023'],
+      bad: ['illustrate', 'the proportion of worker', 'who used six mean of transport'], fake: ['The bar chart', 'who used five means of transport', 'to get to school in 2023.'],
+      t: { 'illustrate': ['minh hoạ', 'Chủ ngữ số ít (The pie chart) → illustrates.'], 'the proportion of worker': ['tỉ lệ người lao động', 'Người lao động nói chung → workers (số nhiều).'], 'who used six mean of transport': ['dùng sáu phương tiện', 'means (phương tiện) luôn có s: six means of transport.'], 'The bar chart': ['Biểu đồ cột'], 'who used five means of transport': ['dùng năm phương tiện'], 'to get to school in 2023.': ['để đi học năm 2023'] },
+      vi: 'Biểu đồ tròn minh hoạ tỉ lệ người lao động ở một thành phố Việt Nam dùng sáu phương tiện để đi làm năm 2023.' },
+    { part: 'Overview', img: 'pie-commute', c: ['Overall,', 'motorbikes', 'were by far', 'the most common way', 'of commuting.'], r: ['k', 's', 'v', 'm', 'o'],
+      cv: ['Nhìn chung,', 'xe máy', 'là, bỏ xa các phương tiện khác,', 'cách phổ biến nhất', 'để đi làm'],
+      bad: ['was by far', 'the most commonest way', 'of commute.'], fake: ['buses', 'cars', 'the least common way'],
+      t: { 'was by far': ['là, bỏ xa', 'Chủ ngữ số nhiều (motorbikes) → were.'], 'the most commonest way': ['cách phổ biến nhất', 'Không dùng hai lần so sánh nhất: the most common.'], 'of commute.': ['để đi làm', 'Sau giới từ of dùng V-ing: of commuting.'], 'buses': ['xe buýt'], 'cars': ['ô tô'], 'the least common way': ['cách ít phổ biến nhất'] },
+      vi: 'Nhìn chung, xe máy là cách đi làm phổ biến nhất, bỏ xa các phương tiện khác.' },
+    { part: 'Overview', img: 'pie-commute', c: ['More people', 'travelled by motorbike', 'than by', 'all the other methods', 'combined.'], r: ['s', 'v', 'k', 'o', 'm'],
+      cv: ['Nhiều người', 'đi bằng xe máy', 'hơn là bằng', 'tất cả các cách khác', 'cộng lại'],
+      bad: ['More peoples', 'then by', 'combine.'], fake: ['travelled by bus', 'travelled on foot'],
+      t: { 'More peoples': ['Nhiều người', 'people đã là số nhiều, không thêm s.'], 'then by': ['rồi bằng', 'So sánh dùng than, không phải then.'], 'combine.': ['cộng lại', 'Cụm đúng là … combined (cộng lại).'], 'travelled by bus': ['đi bằng xe buýt'], 'travelled on foot': ['đi bộ'] },
+      vi: 'Số người đi xe máy nhiều hơn tất cả các cách khác cộng lại.' },
+    { part: 'Thân bài', img: 'pie-commute', c: ['Motorbikes', 'accounted for 62%', 'of all journeys to work,', 'just over three fifths', 'of the total.'], r: ['s', 'n', 'o', 'm', 'o'],
+      cv: ['Xe máy', 'chiếm 62%', 'tổng số chuyến đi làm,', 'hơn ba phần năm một chút', 'của tổng'],
+      bad: ['accounted 62%', 'of all journey to work,', 'just over three fifth'], fake: ['Buses', 'accounted for 52%', 'just under half'],
+      t: { 'accounted 62%': ['chiếm 62%', 'Cụm đúng là accounted for + số.'], 'of all journey to work,': ['tổng số chuyến đi làm', 'all + danh từ số nhiều: all journeys.'], 'just over three fifth': ['hơn ba phần năm', 'Phân số có tử lớn hơn 1 → fifths.'], 'Buses': ['Xe buýt'], 'accounted for 52%': ['chiếm 52%'], 'just under half': ['gần một nửa'] },
+      vi: 'Xe máy chiếm 62% chuyến đi làm, hơn ba phần năm tổng số một chút.' },
+    { part: 'Thân bài', img: 'pie-commute', c: ['The bus', 'came a distant second,', 'at 11%,', 'followed closely by', 'the car,', 'at 9%.'], r: ['s', 'm', 'n', 'k', 'o', 'n'],
+      cv: ['Xe buýt', 'đứng thứ hai nhưng cách rất xa,', 'ở mức 11%,', 'theo sát sau là', 'ô tô,', 'ở mức 9%'],
+      bad: ['came a distance second,', 'following closely by', 'at the 11%,'], fake: ['came a close second,', 'walking,', 'at 19%.'],
+      t: { 'came a distance second,': ['đứng thứ hai cách xa', 'Cần tính từ: a distant second.'], 'following closely by': ['theo sát sau là', 'Bị động rút gọn: followed closely by.'], 'at the 11%,': ['ở mức 11%', 'Không dùng the trước con số: at 11%.'], 'came a close second,': ['đứng thứ hai sát nút,'], 'walking,': ['đi bộ,'], 'at 19%.': ['ở mức 19%'] },
+      vi: 'Xe buýt đứng thứ hai nhưng cách rất xa, 11%, theo sát là ô tô với 9%.' },
+    { part: 'Thân bài', img: 'pie-commute', c: ['Walking', 'represented 7% of commutes,', 'slightly more than', 'cycling,', 'at 6%.'], r: ['s', 'n', 'm', 'o', 'n'],
+      cv: ['Đi bộ', 'chiếm 7% số chuyến đi làm,', 'nhiều hơn một chút so với', 'đạp xe,', 'ở mức 6%'],
+      bad: ['represent 7% of commutes,', 'slightly more then', 'Walk'], fake: ['slightly less than', 'cars,', 'at 16%.'],
+      t: { 'represent 7% of commutes,': ['chiếm 7%', 'Kể chuyện đã qua (2023) → represented.'], 'slightly more then': ['nhiều hơn một chút', 'So sánh dùng than, không phải then.'], 'Walk': ['Đi bộ', 'Làm chủ ngữ cần danh động từ: Walking.'], 'slightly less than': ['ít hơn một chút so với'], 'cars,': ['ô tô,'], 'at 16%.': ['ở mức 16%'] },
+      vi: 'Đi bộ chiếm 7% chuyến đi làm, nhỉnh hơn đạp xe với 6%.' },
+    // pie-energy: two pie charts, China and France (teacher worksheet).
+    { part: 'Mở bài', img: 'pie-energy', c: ['The pie charts', 'compare', 'the proportions of energy', 'that China and France obtained', 'from five different sources', 'in 2019.'], r: ['s', 'v', 'o', 's', 'p', 't'],
+      cv: ['Các biểu đồ tròn', 'so sánh', 'tỉ lệ năng lượng', 'mà Trung Quốc và Pháp thu được', 'từ năm nguồn khác nhau', 'vào năm 2019'],
+      bad: ['compares', 'the proportion of energies', 'from five different source'], fake: ['that China and Japan obtained', 'from four different sources', 'in 2009.'],
+      t: { 'compares': ['so sánh', 'Chủ ngữ số nhiều (The pie charts) → compare.'], 'the proportion of energies': ['tỉ lệ năng lượng', 'energy ở đây không đếm được, không thêm s.'], 'from five different source': ['từ năm nguồn khác nhau', 'Số nhiều → sources.'], 'that China and Japan obtained': ['mà Trung Quốc và Nhật Bản thu được'], 'from four different sources': ['từ bốn nguồn khác nhau'], 'in 2009.': ['vào năm 2009'] },
+      vi: 'Hai biểu đồ tròn so sánh tỉ lệ năng lượng Trung Quốc và Pháp lấy từ năm nguồn khác nhau năm 2019.' },
+    { part: 'Overview', img: 'pie-energy', c: ['Overall,', 'China', 'depended heavily', 'on fossil fuels,', 'while', 'France', 'relied mainly on nuclear power.'], r: ['k', 's', 'v', 'o', 'k', 's', 'v'],
+      cv: ['Nhìn chung,', 'Trung Quốc', 'phụ thuộc nhiều', 'vào nhiên liệu hoá thạch,', 'trong khi', 'Pháp', 'chủ yếu dựa vào điện hạt nhân'],
+      bad: ['depend heavily', 'in fossil fuels,', 'relied mainly in nuclear power.'], fake: ['on nuclear power,', 'relied mainly on coal.'],
+      t: { 'depend heavily': ['phụ thuộc nhiều', 'Kể chuyện đã qua (2019) → depended.'], 'in fossil fuels,': ['vào nhiên liệu hoá thạch', 'Cụm đúng là depend on.'], 'relied mainly in nuclear power.': ['chủ yếu dựa vào điện hạt nhân', 'Cụm đúng là rely on.'], 'on nuclear power,': ['vào điện hạt nhân,'], 'relied mainly on coal.': ['chủ yếu dựa vào than'] },
+      vi: 'Nhìn chung, Trung Quốc phụ thuộc nhiều vào nhiên liệu hoá thạch, còn Pháp chủ yếu dựa vào điện hạt nhân.' },
+    { part: 'Overview', img: 'pie-energy', c: ['In both countries,', 'a single source', 'made up', 'well over half', 'of the total.'], r: ['p', 's', 'v', 'm', 'o'],
+      cv: ['Ở cả hai nước,', 'một nguồn duy nhất', 'chiếm', 'hơn hẳn một nửa', 'tổng số'],
+      bad: ['In both country,', 'made of', 'well over a half of'], fake: ['In China only,', 'less than a third'],
+      t: { 'In both country,': ['Ở cả hai nước,', 'both + danh từ số nhiều: both countries.'], 'made of': ['làm bằng', 'made of là "làm bằng"; chiếm tỉ lệ là made up.'], 'well over a half of': ['hơn một nửa', 'Viết well over half of the total, không cần a và không lặp of.'], 'In China only,': ['Chỉ ở Trung Quốc,'], 'less than a third': ['chưa tới một phần ba'] },
+      vi: 'Ở cả hai nước, một nguồn duy nhất chiếm hơn hẳn một nửa tổng số.' },
+    { part: 'Thân bài', img: 'pie-energy', c: ['Coal', 'accounted for 62%', "of China's energy,", 'whereas', 'it represented', 'a mere 4%', 'in France.'], r: ['s', 'n', 'o', 'k', 'v', 'n', 'p'],
+      cv: ['Than', 'chiếm 62%', 'năng lượng của Trung Quốc,', 'trong khi', 'nó chỉ chiếm', 'vỏn vẹn 4%', 'ở Pháp'],
+      bad: ['accounted to 62%', 'it represents', 'a mere 4 percents'], fake: ['accounted for 71%', 'a mere 14%', 'in Japan.'],
+      t: { 'accounted to 62%': ['chiếm 62%', 'Cụm đúng là accounted for.'], 'it represents': ['nó chiếm', 'Số liệu năm 2019 → quá khứ: represented.'], 'a mere 4 percents': ['vỏn vẹn 4%', 'percent không thêm s: 4% / 4 percent.'], 'accounted for 71%': ['chiếm 71%'], 'a mere 14%': ['vỏn vẹn 14%'], 'in Japan.': ['ở Nhật Bản'] },
+      vi: 'Than chiếm 62% năng lượng của Trung Quốc, trong khi chỉ chiếm vỏn vẹn 4% ở Pháp.' },
+    { part: 'Thân bài', img: 'pie-energy', c: ['Nuclear power', 'supplied', 'well over two thirds', "of France's energy,", 'at 71%.'], r: ['s', 'v', 'm', 'o', 'n'],
+      cv: ['Điện hạt nhân', 'cung cấp', 'hơn hẳn hai phần ba', 'năng lượng của Pháp,', 'ở mức 71%'],
+      bad: ['supply', 'well over two third', "of France energy,"], fake: ['Hydro power', 'just under half', 'at 17%.'],
+      t: { 'supply': ['cung cấp', 'Kể chuyện đã qua (2019) → supplied.'], 'well over two third': ['hơn hai phần ba', 'Phân số có tử lớn hơn 1 → thirds.'], "of France energy,": ['năng lượng Pháp', "Sở hữu cách: France's energy."], 'Hydro power': ['Thuỷ điện'], 'just under half': ['gần một nửa'], 'at 17%.': ['ở mức 17%'] },
+      vi: 'Điện hạt nhân cung cấp hơn hai phần ba năng lượng của Pháp, 71%.' },
+    { part: 'Thân bài', img: 'pie-energy', c: ['Natural gas', 'came a distant second', 'in France,', 'with 14%,', 'which was higher than', 'the figure for China.'], r: ['s', 'm', 'p', 'n', 'k', 'o'],
+      cv: ['Khí tự nhiên', 'đứng thứ hai nhưng cách xa', 'ở Pháp,', 'với 14%,', 'cao hơn', 'con số của Trung Quốc'],
+      bad: ['came a distance second', 'which were higher than', 'which was more high than'], fake: ['in China,', 'with 4%,', 'which was lower than'],
+      t: { 'came a distance second': ['đứng thứ hai cách xa', 'Cần tính từ: a distant second.'], 'which were higher than': ['cao hơn', 'which thay cho 14%, một con số → was.'], 'which was more high than': ['cao hơn', 'high là tính từ ngắn → higher.'], 'in China,': ['ở Trung Quốc,'], 'with 4%,': ['với 4%,'], 'which was lower than': ['thấp hơn'] },
+      vi: 'Khí tự nhiên đứng thứ hai ở Pháp nhưng cách xa, 14%, cao hơn con số của Trung Quốc.' },
+    // cmp-coffee: one bar chart comparing eight countries (teacher worksheet).
+    { part: 'Mở bài', img: 'cmp-coffee', c: ['The bar chart', 'compares', 'annual coffee consumption', 'per person', 'in eight countries', 'in 2020.'], r: ['s', 'v', 'o', 'p', 'p', 't'],
+      cv: ['Biểu đồ cột', 'so sánh', 'lượng cà phê tiêu thụ hằng năm', 'trên mỗi người', 'ở tám quốc gia', 'vào năm 2020'],
+      bad: ['compare', 'annually coffee consumption', 'per a person'], fake: ['monthly coffee consumption', 'in six countries', 'in 2010.'],
+      t: { 'compare': ['so sánh', 'Chủ ngữ số ít (The bar chart) → compares.'], 'annually coffee consumption': ['lượng cà phê hằng năm', 'Đứng trước danh từ cần tính từ: annual.'], 'per a person': ['trên mỗi người', 'Sau per không dùng a: per person.'], 'monthly coffee consumption': ['lượng cà phê tiêu thụ hằng tháng'], 'in six countries': ['ở sáu quốc gia'], 'in 2010.': ['vào năm 2010'] },
+      vi: 'Biểu đồ cột so sánh lượng cà phê mỗi người tiêu thụ trong năm ở tám nước năm 2020.' },
+    { part: 'Overview', img: 'cmp-coffee', c: ['Overall,', 'the four European countries', 'consumed considerably more coffee', 'than', 'the other nations surveyed.'], r: ['k', 's', 'v', 'k', 'o'],
+      cv: ['Nhìn chung,', 'bốn nước châu Âu', 'tiêu thụ nhiều cà phê hơn đáng kể', 'so với', 'các nước còn lại được khảo sát'],
+      bad: ['the four European country', 'consumed considerable more coffee', 'then'], fake: ['the three European countries', 'consumed considerably less coffee'],
+      t: { 'the four European country': ['bốn nước châu Âu', 'Số nhiều → countries.'], 'consumed considerable more coffee': ['tiêu thụ nhiều hơn đáng kể', 'Bổ nghĩa cho more cần trạng từ: considerably.'], 'then': ['rồi', 'So sánh dùng than, không phải then.'], 'the three European countries': ['ba nước châu Âu'], 'consumed considerably less coffee': ['tiêu thụ ít cà phê hơn đáng kể'] },
+      vi: 'Nhìn chung, bốn nước châu Âu uống cà phê nhiều hơn hẳn các nước còn lại.' },
+    { part: 'Overview', img: 'cmp-coffee', c: ['Finland', 'recorded', 'by far', 'the highest figure,', 'while', 'Japan', 'had the lowest consumption.'], r: ['s', 'v', 'm', 'm', 'k', 's', 'v'],
+      cv: ['Phần Lan', 'ghi nhận', 'bỏ xa các nước khác,', 'con số cao nhất,', 'trong khi', 'Nhật Bản', 'tiêu thụ thấp nhất'],
+      bad: ['record', 'the most high figure,', 'had the lowest consume.'], fake: ['Sweden', 'Brazil', 'had the second lowest consumption.'],
+      t: { 'record': ['ghi nhận', 'Kể chuyện đã qua (2020) → recorded.'], 'the most high figure,': ['con số cao nhất', 'high → the highest.'], 'had the lowest consume.': ['tiêu thụ thấp nhất', 'Cần danh từ: consumption.'], 'Sweden': ['Thuỵ Điển'], 'Brazil': ['Brazil'], 'had the second lowest consumption.': ['tiêu thụ thấp thứ hai'] },
+      vi: 'Phần Lan cao nhất, bỏ xa các nước khác, trong khi Nhật Bản tiêu thụ thấp nhất.' },
+    { part: 'Thân bài', img: 'cmp-coffee', c: ['Finland', 'topped the list', 'at 12.0 kg per person,', 'more than three and a half times', 'the figure for Japan.'], r: ['s', 'v', 'n', 'm', 'o'],
+      cv: ['Phần Lan', 'đứng đầu danh sách', 'với 12,0 kg mỗi người,', 'gấp hơn ba lần rưỡi', 'con số của Nhật Bản'],
+      bad: ['top the list', 'more than three and a half time', 'the figure for the Japan.'], fake: ['at 9.9 kg per person,', 'more than five times', 'the figure for Brazil.'],
+      t: { 'top the list': ['đứng đầu danh sách', 'Kể chuyện đã qua (2020) → topped.'], 'more than three and a half time': ['gấp hơn ba lần rưỡi', 'Gấp nhiều lần → times.'], 'the figure for the Japan.': ['con số của Nhật Bản', 'Tên nước không có the: Japan.'], 'at 9.9 kg per person,': ['với 9,9 kg mỗi người,'], 'more than five times': ['gấp hơn năm lần'], 'the figure for Brazil.': ['con số của Brazil'] },
+      vi: 'Phần Lan đứng đầu với 12,0 kg mỗi người, gấp hơn ba lần rưỡi Nhật Bản.' },
+    { part: 'Thân bài', img: 'cmp-coffee', c: ['Sweden and Switzerland', 'followed', 'with comparable figures', 'of 9.9 kg and 9.5 kg', 'respectively.'], r: ['s', 'v', 'm', 'n', 'k'],
+      cv: ['Thuỵ Điển và Thuỵ Sĩ', 'theo sau', 'với các con số tương đương', '9,9 kg và 9,5 kg', 'theo thứ tự đó'],
+      bad: ['with comparable figure', 'with comparing figures', 'respective.'], fake: ['Norway and Canada', 'with very different figures', 'of 9.5 kg and 9.9 kg'],
+      t: { 'with comparable figure': ['với con số tương đương', 'Hai nước, hai con số → figures.'], 'with comparing figures': ['với các con số so sánh', 'Tính từ đúng là comparable (tương đương).'], 'respective.': ['tương ứng', 'Cuối câu dùng trạng từ: respectively.'], 'Norway and Canada': ['Na Uy và Canada'], 'with very different figures': ['với các con số rất khác nhau'], 'of 9.5 kg and 9.9 kg': ['9,5 kg và 9,9 kg (đảo thứ tự)'] },
+      vi: 'Thuỵ Điển và Thuỵ Sĩ theo sau với con số tương đương, lần lượt 9,9 kg và 9,5 kg.' },
+    { part: 'Thân bài', img: 'cmp-coffee', c: ['Among the non-European countries,', 'Canada', 'recorded the highest figure,', 'at 6.2 kg,', 'slightly ahead of Brazil.'], r: ['p', 's', 'm', 'n', 'o'],
+      cv: ['Trong các nước ngoài châu Âu,', 'Canada', 'có con số cao nhất,', 'ở mức 6,2 kg,', 'nhỉnh hơn Brazil một chút'],
+      bad: ['Among the non-European country,', 'record the highest figure,', 'slightly ahead Brazil.'], fake: ['the USA', 'at 4.7 kg,', 'slightly behind Brazil.'],
+      t: { 'Among the non-European country,': ['Trong các nước ngoài châu Âu,', 'Among + danh từ số nhiều: countries.'], 'record the highest figure,': ['có con số cao nhất', 'Kể chuyện đã qua (2020) → recorded.'], 'slightly ahead Brazil.': ['nhỉnh hơn Brazil', 'Cụm đúng là ahead of.'], 'the USA': ['Mỹ'], 'at 4.7 kg,': ['ở mức 4,7 kg,'], 'slightly behind Brazil.': ['thấp hơn Brazil một chút'] },
+      vi: 'Trong các nước ngoài châu Âu, Canada cao nhất với 6,2 kg, nhỉnh hơn Brazil.' },
+    // cycle-monarch: a natural cycle, so the active voice (teacher worksheet).
+    { part: 'Mở bài', img: 'cycle-monarch', c: ['The diagram', 'illustrates', 'the stages', 'in the life cycle', 'of the monarch butterfly.'], r: ['s', 'v', 'o', 'p', 'o'],
+      cv: ['Sơ đồ', 'minh hoạ', 'các giai đoạn', 'trong vòng đời', 'của bướm vua (monarch)'],
+      bad: ['illustrate', 'the stage', 'in the life cycles'], fake: ['The map', 'the costs', 'of the honey bee.'],
+      t: { 'illustrate': ['minh hoạ', 'Chủ ngữ số ít (The diagram) → illustrates.'], 'the stage': ['giai đoạn', 'Nhiều giai đoạn → the stages.'], 'in the life cycles': ['trong các vòng đời', 'Một loài, một vòng đời → the life cycle.'], 'The map': ['Bản đồ'], 'the costs': ['các chi phí'], 'of the honey bee.': ['của ong mật'] },
+      vi: 'Sơ đồ minh hoạ các giai đoạn trong vòng đời của bướm monarch.' },
+    { part: 'Overview', img: 'cycle-monarch', c: ['Overall,', 'there are', 'five main stages', 'in the cycle,', 'which begins', 'with eggs being laid', 'on milkweed leaves.'], r: ['k', 'v', 'n', 'p', 'v', 'o', 'p'],
+      cv: ['Nhìn chung,', 'có', 'năm giai đoạn chính', 'trong vòng đời,', 'bắt đầu', 'bằng việc trứng được đẻ', 'trên lá cây bông tai'],
+      bad: ['there is', 'which begin', 'with eggs laying'], fake: ['seven main stages', 'with a butterfly emerging', 'on rose leaves.'],
+      t: { 'there is': ['có', 'five main stages số nhiều → there are.'], 'which begin': ['bắt đầu', 'which thay cho the cycle (số ít) → begins.'], 'with eggs laying': ['bằng việc trứng đẻ', 'Trứng không tự đẻ → bị động: eggs being laid.'], 'seven main stages': ['bảy giai đoạn chính'], 'with a butterfly emerging': ['bằng việc bướm chui ra'], 'on rose leaves.': ['trên lá hoa hồng'] },
+      vi: 'Nhìn chung, vòng đời có năm giai đoạn chính, bắt đầu bằng việc trứng được đẻ trên lá cây bông tai.' },
+    { part: 'Overview', img: 'cycle-monarch', c: ['The whole cycle', 'takes', 'approximately', 'four to five weeks', 'in summer.'], r: ['s', 'v', 'm', 't', 't'],
+      cv: ['Cả vòng đời', 'mất', 'khoảng', 'bốn đến năm tuần', 'vào mùa hè'],
+      bad: ['take', 'four to five week', 'on summer.'], fake: ['exactly', 'four to five months', 'in winter.'],
+      t: { 'take': ['mất', 'Chủ ngữ số ít (The whole cycle) → takes.'], 'four to five week': ['bốn đến năm tuần', 'Số nhiều → weeks.'], 'on summer.': ['vào mùa hè', 'Trước mùa dùng in: in summer.'], 'exactly': ['chính xác'], 'four to five months': ['bốn đến năm tháng'], 'in winter.': ['vào mùa đông'] },
+      vi: 'Cả vòng đời mất khoảng bốn đến năm tuần vào mùa hè.' },
+    { part: 'Thân bài', img: 'cycle-monarch', c: ['After three to five days,', 'the eggs', 'hatch into', 'larvae,', 'known as caterpillars.'], r: ['t', 's', 'v', 'o', 'o'],
+      cv: ['Sau ba đến năm ngày,', 'trứng', 'nở thành', 'ấu trùng,', 'gọi là sâu bướm'],
+      bad: ['hatch to', 'are hatched into', 'known as caterpillar.'], fake: ['After ten days,', 'adult butterflies,', 'known as chrysalises.'],
+      t: { 'hatch to': ['nở thành', 'Cụm đúng là hatch into.'], 'are hatched into': ['được nở thành', 'Quá trình tự nhiên, trứng tự nở → chủ động: hatch into.'], 'known as caterpillar.': ['gọi là sâu bướm', 'larvae số nhiều → caterpillars.'], 'After ten days,': ['Sau mười ngày,'], 'adult butterflies,': ['bướm trưởng thành,'], 'known as chrysalises.': ['gọi là nhộng'] },
+      vi: 'Sau ba đến năm ngày, trứng nở thành ấu trùng, gọi là sâu bướm.' },
+    { part: 'Thân bài', img: 'cycle-monarch', c: ['The caterpillars', 'feed on', 'milkweed leaves', 'for ten to fourteen days', 'before forming', 'a chrysalis.'], r: ['s', 'v', 'o', 't', 'k', 'o'],
+      cv: ['Sâu bướm', 'ăn', 'lá cây bông tai', 'trong mười đến mười bốn ngày', 'trước khi tạo thành', 'một cái nhộng'],
+      bad: ['are fed on', 'for ten to fourteen day', 'before form'], fake: ['nectar from flowers', 'for three to five days', 'an egg.'],
+      t: { 'are fed on': ['được cho ăn', 'Sâu tự ăn → chủ động: feed on.'], 'for ten to fourteen day': ['trong mười đến mười bốn ngày', 'Số nhiều → days.'], 'before form': ['trước khi tạo thành', 'Sau before cần V-ing: before forming.'], 'nectar from flowers': ['mật hoa'], 'for three to five days': ['trong ba đến năm ngày'], 'an egg.': ['một quả trứng'] },
+      vi: 'Sâu bướm ăn lá cây bông tai trong 10–14 ngày rồi hoá nhộng.' },
+    { part: 'Thân bài', img: 'cycle-monarch', c: ['Once', 'the adult butterfly', 'has emerged', 'and mated,', 'the female', 'lays new eggs,', 'and the cycle begins again.'], r: ['k', 's', 'v', 'v', 's', 'v', 'k'],
+      cv: ['Một khi', 'bướm trưởng thành', 'đã chui ra', 'và giao phối,', 'con cái', 'đẻ trứng mới,', 'và vòng đời bắt đầu lại'],
+      bad: ['has emerge', 'lay new eggs,', 'and the cycle begin again.'], fake: ['the male', 'has hatched', 'and the cycle ends.'],
+      t: { 'has emerge': ['đã chui ra', 'Hiện tại hoàn thành cần quá khứ phân từ: has emerged.'], 'lay new eggs,': ['đẻ trứng mới', 'Chủ ngữ số ít (the female) → lays.'], 'and the cycle begin again.': ['và vòng đời bắt đầu lại', 'Chủ ngữ số ít (the cycle) → begins.'], 'the male': ['con đực'], 'has hatched': ['đã nở'], 'and the cycle ends.': ['và vòng đời kết thúc'] },
+      vi: 'Khi bướm trưởng thành đã chui ra và giao phối, con cái đẻ trứng mới và vòng đời bắt đầu lại.' },
   ],
 };
 // What each chunk does in the sentence, shown on the ordering slots.
@@ -27218,7 +27631,28 @@ const T1H_ROLES = {
 };
 const T1H_FAKE_WHY = 'Đúng ngữ pháp nhưng sai thông tin so với biểu đồ.';
 // Flashcard decks that go with each chart, for the level-up questions.
-const T1H_DECKS = { line: ['base', 'verb', 'degree', 'prep', 'frame'], bar: ['base', 'verb', 'degree', 'prep', 'frame'], map: ['base', 'map', 'frame'], proc: ['base', 'proc', 'frame'], pie: ['base', 'share', 'frame'] };
+const T1H_DECKS = { line: ['base', 'verb', 'degree', 'prep', 'frame'], bar: ['base', 'verb', 'degree', 'prep', 'frame'], table: ['base', 'verb', 'degree', 'prep', 'frame'], mix: ['base', 'verb', 'degree', 'prep', 'frame'],
+  map: ['base', 'map', 'frame'], proc: ['base', 'proc', 'frame'], cycle: ['base', 'proc', 'frame'], pie: ['base', 'share', 'frame'], cmp: ['base', 'share', 'frame'] };
+// The prompts a run can be built on: each has an introduction, an overview
+// and three body sentences in T1_SURV.
+const T1H_SETS = {
+  dyn: ['line-internet', 'line-drinks', 'line-energy', 'bar-students', 'table-tourism', 'mix-hanoi'],
+  sta: ['pie-commute', 'pie-energy', 'cmp-coffee', 'map-riverton', 'proc-bricks', 'cycle-monarch'],
+};
+// One whole prompt per run, a different one each time: a student meets every
+// prompt of the block once before any comes back, and never the same one twice
+// in a row.
+function t1hPickSet() {
+  const ids = T1H_SETS[_t1Block], key = 't1Rot_' + _t1Block + '_' + walWho();
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(key) || '[]').filter(id => ids.includes(id)); } catch (e) {}
+  let left = ids.filter(id => !seen.includes(id));
+  if (!left.length) { left = ids.filter(id => id !== seen[seen.length - 1]); seen = []; }
+  const id = t1Pick(left);
+  seen.push(id);
+  try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {}
+  return id;
+}
 const T1H_CFG = { a: { spawn: 1.3, esp: 50, dmg: 7, bad: 1 }, d: { spawn: 1.05, esp: 60, dmg: 9, bad: 2 }, l: { spawn: 0.85, esp: 70, dmg: 11, bad: 3 } };
 // The room, in world pixels: about three phone screens across.
 const T1H_ROOM = { w: 2400, h: 1440, wall: 64, top: 112 };
@@ -27449,7 +27883,7 @@ function t1hGo(id) {
   t1Leave();
   t1dLoad();
   const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake();
-  const list = t1Shuffle(T1_SURV[_t1Block]).sort((a, b) => order[a.part] - order[b.part]);
+  const set = t1hPickSet(), list = t1Shuffle(T1_SURV[_t1Block].filter(S => S.img === set)).sort((a, b) => order[a.part] - order[b.part]);
   const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
     room, bag: [], ord: null,
     p: { x: room.w / 2, y: room.h / 2, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
@@ -27545,6 +27979,8 @@ function t1hGo(id) {
   t1hHud();
   t1hFit();
   tsSfx('boss');
+  const sample = T1_SAMPLES.find(x => x.id === set);
+  if (sample) t1hMsg(`📜 Đề lượt này: ${sample.icon} ${sample.type}. Lượt sau sẽ là đề khác.`, 3200);
   g.raf = requestAnimationFrame(t1hTick);
 }
 

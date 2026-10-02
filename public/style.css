@@ -9025,6 +9025,16 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-map-key { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; font-size: 0.82rem; margin-top: 0.3rem; color: var(--gray-600); }
 .t1-belt--lib .t1-belt-slot { min-width: 4.2rem; }
 @media (max-width: 640px) { .t1-pies { grid-template-columns: 1fr; } }
+.t1-mix { display: grid; gap: 0.6rem; }
+.t1-cyc-arc { fill: none; stroke: #7E9C90; stroke-width: 3; }
+.t1-cyc-node { fill: #FFFDF6; stroke: #0E4D3C; stroke-width: 2.5; }
+.t1-cyc-icon { font-size: 28px; text-anchor: middle; }
+.t1-cyc-n { font-size: 13px; font-weight: 800; fill: #FFFDF6; paint-order: stroke; stroke: #0E4D3C; stroke-width: 5px; text-anchor: middle; }
+.t1-cyc-lab { font-size: 13px; fill: #1E2B25; font-weight: 600; }
+.t1-cyc-time { fill: #B8860B; font-weight: 700; }
+.t1-cyc-note { font-size: 12px; fill: #5B655F; text-anchor: middle; }
+.t1-cyc-note--b { font-size: 14px; font-weight: 700; fill: #0E4D3C; }
+
 
 /* Sinh tồn ghép câu */
 .t1-surv-goal { margin: 0.4rem 0; }
