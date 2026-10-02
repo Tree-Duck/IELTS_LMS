@@ -29784,32 +29784,35 @@ function ttmRoot() { return document.getElementById('ttmon-root'); }
 const TTM_MAP = [
   'YTTTTYTTTTYTTTTYTTTTYTTTTYTT',
   'TYTTTTYTTTTYTTTTYTTTTYTTTTYT',
-  'TT......*...gggg...*......TY',
-  'TT.,.......,gggg.,........TT',
-  'TT..B.......gggg.......B..TT',
-  'YT...........==.........,.TT',
+  'TT.WWWWW.*..gggg...*....B.TY',
+  'TT.WWWWW...,gggg.,...f....TT',
+  'TT.WWWW..f..gggg..r....B..TT',
+  'YT..f........==.........,.TT',
   'TY.""""""",..==..;;;;;;;..YT',
   'TT.""""""".Y.==..;;;;;;;..TY',
   'TT."""""""...==..;;;;;;;.,TT',
   'TT.""""""",..==..;;;;;;;..TT',
   'YT."""""""...==..;;;;;;;..TT',
   'TY.""""""".Y.==..;;;;;;;..YT',
-  'TT.,.r.......==.,....r....TY',
+  'TT.,.r...q...==.,..q.r....TY',
   'TT###########==###########TT',
   'TT..*.....,.s==...*.....*,TT',
-  'YT..hhh......==....ppp....TT',
-  'TY..hhh......==....ppp....YT',
-  'TT..hhh......==....ppp....TY',
+  'YT..hhhH.....==....ppp.k..TT',
+  'TY..hhh......==....ppp.l..YT',
+  'TT..hhh..f...==..f.ppp....TY',
   'TT.======================.TT',
-  'TT.*.........==.......,...TT',
+  'TT.======================.TT',
   'YT..r....w...==..oo....*..TT',
-  'TY.*..,......==*.......r..YT',
+  'TY.*..f......==*...f...r..YT',
   'TTYTTTTYTTTTYTTTTYTTTTYTTTTY',
   'TTTYTTTTYTTTTYTTTTYTTTTYTTTT',
 ];
-const TTM_TILE = { '.': 0, ',': 1, '*': 2, '"': 0, ';': 0, '=': 25, r: 0, T: 0, Y: 0, B: 0, '#': 0, s: 0, w: 0, o: 0, g: 0, h: 0, p: 0 };
-const TTM_PROP = { T: 16, Y: 28, B: 5, '#': 81, s: 83, w: 104, o: 130, r: 29 };
-const TTM_SOLID = new Set(['T', 'Y', 'B', '#', 's', 'w', 'o']);
+// Ground under each letter (paths and water are worked out from neighbours),
+// then a prop on top. W is the pond, f a flower bed, q a field sign, H the
+// beehive, k a barrel, l a log.
+const TTM_TILE = { '.': 0, ',': 1, '*': 2, '"': 0, ';': 0, '=': 25, r: 0, T: 0, Y: 0, B: 0, '#': 0, s: 0, q: 0, w: 0, o: 0, g: 0, h: 0, p: 0, W: 0, f: 0, H: 0, k: 0, l: 0 };
+const TTM_PROP = { T: 16, Y: 28, B: 5, '#': 81, s: 83, q: 83, w: 104, o: 130, r: 29, H: 94, k: 107, l: 106 };
+const TTM_SOLID = new Set(['T', 'Y', 'B', '#', 's', 'q', 'w', 'o', 'W', 'H', 'k', 'l']);
 const TTM_BUILD = [
   { id: 'gym', x: 12, y: 2, t: [[99, 100, 100, 101], [126, 111, 112, 126], [126, 113, 114, 126]], doors: [[13, 4], [14, 4]] },
   { id: 'home', x: 4, y: 15, t: [[52, 53, 54], [64, 67, 66], [84, 86, 84]], doors: [[5, 17]] },
@@ -30038,6 +30041,9 @@ function ttmAct() {
   const [fx, fy] = ttmFront(), n = ttmNpcAt(fx, fy), t = ttmTileAt(fx, fy), b = ttmBuildAt(fx, fy);
   if (n) { n.face = g.p.x < n.x ? -1 : 1; ttmNpcTalk(n); return; }
   if (t === 's') { ttmTalk(['📋 ↑ Tuyến đường 1 · Nhà thi đấu Buổi 1<br>← Nhà em · Nhà Hồi Sức →']); return; }
+  if (t === 'q') { ttmTalk([fx < 14 ? '📋 🌿 Bãi cỏ xanh: <b>Từ-Mon</b>, những cụm từ hay của bài mẫu.' : '📋 🌼 Bãi cỏ hoa: <b>Ý-Mon</b>, từng ý của đoạn văn. Coi chừng con lạc đề!']); return; }
+  if (t === 'W') { ttmTalk(['Mặt ao lấp lánh. Hình như có con gì đang bơi dưới lá sen…']); return; }
+  if (t === 'H') { ttmTalk(['Tổ ong. Ong đang bận làm mật, đừng chọc nhé. 🐝']); return; }
   if (b && b.doors.some(([x, y]) => x === fx && y === fy)) ttmDoor(b);
 }
 function ttmYOk(g) { return TTM_GYM_STEPS.every(st => TTM_Y.some(id => g.caught[id] && !TTM_MONS[id].off && TTM_MONS[id].steps.includes(st))); }
@@ -30105,26 +30111,95 @@ function ttmTalkNext() {
 
 /* ── Drawing the world ── */
 const TTM_GRASS = {};
-function ttmGrassTile(kind) {
-  if (TTM_GRASS[kind]) return TTM_GRASS[kind];
+// Tall grass, four sway frames. Ý-Mon grass is darker and full of flowers.
+function ttmGrassTile(kind, f, v) {
+  const key = kind + (f || 0) + (v ? 'm' : '');
+  if (TTM_GRASS[key]) return TTM_GRASS[key];
   const c = document.createElement('canvas');
   c.width = c.height = 16;
-  const x = c.getContext('2d');
-  const blade = kind === 'y' ? ['#2F7D4F', '#3E9C5F'] : ['#4CA63D', '#6CC24A'];
-  for (let i = 0; i < 9; i++) {
-    const bx = (i * 5 + (i % 3) * 3) % 15, by = 6 + (i * 7) % 9;
-    x.fillStyle = blade[i % 2]; x.fillRect(bx, by, 1, 5); x.fillRect(bx + 1, by + 1, 1, 4);
-    x.fillStyle = '#2B5E2B'; x.fillRect(bx, by + 4, 2, 1);
+  const x = c.getContext('2d'), sw = [0, 1, 0, -1][f || 0];
+  // A mirrored variant per tile breaks up the rows.
+  if (v) { x.translate(16, 0); x.scale(-1, 1); }
+  const blade = kind === 'y' ? ['#2C7A4B', '#3E9C5F', '#55B472'] : ['#3F9A35', '#5DBB45', '#86D65E'];
+  x.fillStyle = kind === 'y' ? 'rgba(30, 90, 50, .22)' : 'rgba(40, 110, 30, .16)';
+  x.fillRect(0, 0, 16, 16);
+  [[1, 7, 0], [4, 5, 1], [7, 8, 2], [10, 4, 0], [13, 6, 1], [2, 10, 2], [6, 11, 0], [11, 10, 1], [14, 11, 2]].forEach(([bx, by, k], i) => {
+    const lean = i % 3 === 1 ? sw : 0;
+    x.fillStyle = blade[k]; x.fillRect(bx, by + 2, 1, 16 - by - 2); x.fillRect(bx + lean, by, 1, 2);
+    x.fillStyle = blade[(k + 1) % 3]; x.fillRect(bx + 1, by + 3, 1, 16 - by - 4);
+  });
+  if (kind === 'y') {
+    [[3, 4, '#F4D35E'], [11, 3, '#F29CB0'], [7, 9, '#FFFFFF'], [13, 10, '#F4D35E'], [1, 11, '#F29CB0']].forEach(([fx, fy, col], i) => {
+      const dx = i % 2 ? sw : 0;
+      x.fillStyle = col; x.fillRect(fx + dx - 1, fy, 3, 1); x.fillRect(fx + dx, fy - 1, 1, 3);
+      x.fillStyle = '#C9940E'; x.fillRect(fx + dx, fy, 1, 1);
+    });
   }
-  if (kind === 'y') { x.fillStyle = '#F4D35E'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 2, 2)); x.fillStyle = '#FFF6C7'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 1, 1)); }
-  return (TTM_GRASS[kind] = c);
+  return (TTM_GRASS[key] = c);
 }
 function ttmTile(c, i, dx, dy) {
   if (!TTM_IMG.ready) return;
   c.drawImage(TTM_IMG.img, (i % 12) * 16, Math.floor(i / 12) * 16, 16, 16, dx, dy, TTM_TS, TTM_TS);
 }
+// A steady pseudo-random number per tile, so trees and pebbles never flicker.
+function ttmHash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) % 100; }
+// Dirt paths pick the Kenney edge tile that matches their neighbours.
+function ttmPathTile(x, y) {
+  const P = (a, b) => ttmTileAt(a, b) === '=' || (b < y && TTM_BUILD.some(B => B.doors.some(([dx, dy]) => dx === a && dy === b)));
+  const n = P(x, y - 1), s = P(x, y + 1), w = P(x - 1, y), e = P(x + 1, y);
+  if (!n) return !w ? 12 : !e ? 14 : 13;
+  if (!s) return !w ? 36 : !e ? 38 : 37;
+  return !w ? 24 : !e ? 26 : 25;
+}
+// Trees on the border: mostly round and pine, a few autumn ones for colour.
+function ttmTreeProp(t, x, y) {
+  const h = ttmHash(x, y);
+  if (h < 9) return 27; if (h < 14) return 3;
+  return t === 'Y' ? 28 : h < 30 ? 4 : 16;
+}
+// Fences get end posts beside the gap and at the edges.
+function ttmFenceProp(x, y) { const L = ttmTileAt(x - 1, y) === '#', R = ttmTileAt(x + 1, y) === '#'; return L && R ? 81 : R ? 80 : L ? 82 : 81; }
+// The pond, drawn in code: a sandy rim, a light edge, ripples and lily pads.
+function ttmWater(c, x, y, X, Y, time) {
+  const u = TTM_TS / 16, W = (a, b) => ttmTileAt(a, b) === 'W';
+  const n = W(x, y - 1), s = W(x, y + 1), w = W(x - 1, y), e = W(x + 1, y);
+  const L = w ? 0 : 2, R = e ? 16 : 14, T = n ? 0 : 2, Bt = s ? 16 : 14;
+  c.fillStyle = '#E9D29A'; c.fillRect(X + (w ? 0 : 1) * u, Y + (n ? 0 : 1) * u, (16 - (w ? 0 : 1) - (e ? 0 : 1)) * u, (16 - (n ? 0 : 1) - (s ? 0 : 1)) * u);
+  c.fillStyle = '#3F8FD2'; c.fillRect(X + L * u, Y + T * u, (R - L) * u, (Bt - T) * u);
+  c.fillStyle = '#2F76B8'; c.fillRect(X + L * u, Y + Math.max(T, 9) * u, (R - L) * u, (Bt - Math.max(T, 9)) * u);
+  c.fillStyle = '#A9E1F7';
+  if (!n) c.fillRect(X + L * u, Y + T * u, (R - L) * u, u);
+  if (!w) c.fillRect(X + L * u, Y + T * u, u, (Bt - T) * u);
+  // Round the outer corners back into grass.
+  const grass = (gx, gy) => TTM_IMG.ready && c.drawImage(TTM_IMG.img, gx, gy, 3, 3, X + gx * u, Y + gy * u, 3 * u, 3 * u);
+  if (!n && !w) grass(0, 0);
+  if (!n && !e) grass(13, 0);
+  if (!s && !w) grass(0, 13);
+  if (!s && !e) grass(13, 13);
+  const h = ttmHash(x, y);
+  c.fillStyle = 'rgba(255, 255, 255, .75)';
+  for (let k = 0; k < 2; k++) {
+    const rx = (Math.floor(time * 4 + h + k * 7) % 12) + 2, ry = 5 + k * 5 + (h % 3);
+    if (rx + 3 <= R && ry >= T && ry < Bt) c.fillRect(X + rx * u, Y + ry * u, 3 * u, u);
+  }
+  if (h % 3 === 0) {
+    const lx = X + (5 + h % 5) * u, ly = Y + (6 + h % 4) * u;
+    c.fillStyle = '#4CA63D'; c.beginPath(); c.arc(lx, ly, 2.4 * u, 0.5, Math.PI * 2); c.lineTo(lx, ly); c.fill();
+    if (h % 2) { c.fillStyle = '#F29CB0'; c.fillRect(lx - u, ly - u, 2 * u, 2 * u); c.fillStyle = '#FFF1B8'; c.fillRect(lx - u / 2, ly - u / 2, u, u); }
+  }
+}
+// A small flower bed on the grass.
+function ttmFlowers(c, x, y, X, Y) {
+  const u = TTM_TS / 16, h = ttmHash(x, y), cols = ['#F29CB0', '#F4D35E', '#FFFFFF', '#B565C9'];
+  for (let k = 0; k < 5; k++) {
+    const fx = 2 + ((h * (k + 3)) % 12), fy = 3 + ((h * (k + 7)) % 10);
+    c.fillStyle = '#3E8E3A'; c.fillRect(X + fx * u, Y + (fy + 1) * u, u, 2 * u);
+    c.fillStyle = cols[(h + k) % 4]; c.fillRect(X + (fx - 1) * u, Y + fy * u, 3 * u, u); c.fillRect(X + fx * u, Y + (fy - 1) * u, u, 3 * u);
+    c.fillStyle = '#C9940E'; c.fillRect(X + fx * u, Y + fy * u, u, u);
+  }
+}
 function ttmDraw() {
-  const g = _ttm, c = g.ctx, W = g.W, H = g.H, S = TTM_TS, p = g.p;
+  const g = _ttm, c = g.ctx, W = g.W, H = g.H, S = TTM_TS, p = g.p, T = g.time;
   if (!c) return;
   c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
   c.imageSmoothingEnabled = false;
@@ -30136,11 +30211,17 @@ function ttmDraw() {
   const x0 = Math.max(0, Math.floor(camX / S)), x1 = Math.min(TTM_MAP[0].length - 1, Math.ceil((camX + W) / S));
   const y0 = Math.max(0, Math.floor(camY / S)), y1 = Math.min(TTM_MAP.length - 1, Math.ceil((camY + H) / S));
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const t = ttmTileAt(x, y);
-    ttmTile(c, TTM_TILE[t] ?? 0, x * S, y * S);
-    if (TTM_PROP[t] != null) ttmTile(c, TTM_PROP[t], x * S, y * S);
-    if (t === '"' || t === ';') c.drawImage(ttmGrassTile(t === ';' ? 'y' : 't'), x * S, y * S, S, S);
+    const t = ttmTileAt(x, y), X = x * S, Y = y * S;
+    ttmTile(c, t === '=' ? ttmPathTile(x, y) : t === '.' && ttmHash(x, y) < 12 ? 1 : TTM_TILE[t] ?? 0, X, Y);
+    if (t === 'W') { ttmWater(c, x, y, X, Y, T); continue; }
+    if (t === 'f') ttmFlowers(c, x, y, X, Y);
+    const prop = t === 'T' || t === 'Y' ? ttmTreeProp(t, x, y) : t === '#' ? ttmFenceProp(x, y) : TTM_PROP[t];
+    if (prop != null) ttmTile(c, prop, X, Y);
+    if (t === '"' || t === ';') c.drawImage(ttmGrassTile(t === ';' ? 'y' : 't', Math.floor(T * 2.4 + x * 0.6 + y * 0.9) % 4, ttmHash(x, y) % 2), X, Y, S, S);
   }
+  // Soft shadows ground the buildings.
+  c.fillStyle = 'rgba(20, 40, 20, .18)';
+  TTM_BUILD.forEach(b => c.fillRect((b.x + 0.2) * S, (b.y + b.t.length) * S - 6, b.t[0].length * S, 8));
   TTM_BUILD.forEach(b => b.t.forEach((row, j) => row.forEach((ti, i) => ttmTile(c, ti, (b.x + i) * S, (b.y + j) * S))));
   // People, back to front.
   const ents = TTM_NPC.map(n => ({ y: n.y, draw: () => ttmPerson(c, n.look, n.x, n.y, n.face || 1, false, n) }));
@@ -30149,16 +30230,36 @@ function ttmDraw() {
   // Tall grass hides the lower legs.
   const pt = ttmTileAt(Math.round(p.fx), Math.round(p.fy));
   if ((pt === '"' || pt === ';') && !p.moving) {
-    c.drawImage(ttmGrassTile(pt === ';' ? 'y' : 't'), 0, 9, 16, 7, Math.round(p.fx) * S, Math.round(p.fy) * S + S * 9 / 16, S, S * 7 / 16);
+    c.drawImage(ttmGrassTile(pt === ';' ? 'y' : 't', 0), 0, 9, 16, 7, Math.round(p.fx) * S, Math.round(p.fy) * S + S * 9 / 16, S, S * 7 / 16);
   }
+  // Butterflies over the flower field and the flower beds.
+  [[20, 8, '#F4D35E'], [6, 4, '#F29CB0'], [9, 17, '#FFFFFF'], [18, 3, '#A9E1F7']].forEach(([bx, by, col], i) => {
+    const px = (bx + Math.sin(T * 0.7 + i * 2) * 1.6) * S + S / 2, py = (by + Math.cos(T * 0.9 + i) * 1.1) * S + Math.sin(T * 3 + i) * 4;
+    const flap = Math.floor(T * 10 + i) % 2 ? 4 : 2;
+    c.fillStyle = col; c.fillRect(px - 1 - flap, py - 2, flap, 4); c.fillRect(px + 1, py - 2, flap, 4);
+    c.fillStyle = '#2A1E2E'; c.fillRect(px - 1, py - 2, 2, 5);
+  });
   if (g.bang) {
     const n = TTM_NPC.find(q => q.id === g.bang.npc);
     c.fillStyle = '#fff'; c.strokeStyle = '#1B1B24'; c.lineWidth = 2;
-    t1hRR(c, n.x * S + S / 2 - 11, n.y * S - S + 2, 22, 26, 6); c.fill(); c.stroke();
+    t1hRR(c, n.x * S + S / 2 - 11, n.y * S - S - 10, 22, 26, 6); c.fill(); c.stroke();
     c.fillStyle = '#E5533D'; c.font = '900 20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText('!', n.x * S + S / 2, n.y * S - S + 15);
+    c.fillText('!', n.x * S + S / 2, n.y * S - S + 3);
   }
+  // Cloud shadows drift across the town.
+  c.fillStyle = 'rgba(30, 50, 70, .07)';
+  [[0, 5, 5, 2.4], [11, 14, 6, 2.8], [20, 2, 4.4, 2]].forEach(([ox, oy, rx, ry], i) => {
+    const cx = ((ox * S + T * 14 * (1 + i * 0.2)) % (MW + 12 * S)) - 6 * S;
+    c.beginPath(); c.ellipse(cx, oy * S, rx * S, ry * S, 0, 0, Math.PI * 2); c.ellipse(cx + rx * S * 0.7, oy * S + S, rx * S * 0.7, ry * S * 0.8, 0, 0, Math.PI * 2); c.fill();
+  });
   c.restore();
+  // A light vignette keeps the eye in the middle.
+  if (!g.vig || g.vig.w !== W || g.vig.h !== H) {
+    const v = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+    v.addColorStop(0, 'rgba(0, 0, 0, 0)'); v.addColorStop(1, 'rgba(10, 20, 30, .22)');
+    g.vig = { w: W, h: H, v };
+  }
+  c.fillStyle = g.vig.v; c.fillRect(0, 0, W, H);
 }
 function ttmPerson(c, look, tx, ty, face, moving, npc) {
   const S = TTM_TS, g = _ttm, cx = tx * S + S / 2, by = ty * S + S - 2;
