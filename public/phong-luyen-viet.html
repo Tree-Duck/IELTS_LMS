@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phòng Luyện Viết</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a quiet exam room. One sticky bar carries the clock; the page is a single column of cards that splits into prompt | answer at desktop width. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#16213A; --muted:#5E6B80; --line:#D9E0EA;
+  --navy:#15294B; --teal:#0E7C86; --teal-soft:#E3F2F3; --coral:#B93A2E; --coral-soft:#FBEDEB; --amber:#A9741A; --amber-soft:#FBF3E4; --green:#2F7A55; --green-soft:#E8F3ED;
+  --en:#13487A;
+  --font-ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1422; --surface:#161E30; --ink:#E6EBF4; --muted:#9AA7BD; --line:#2A3550;
+  --navy:#9FB6E0; --teal:#4FC1C9; --teal-soft:#123338; --coral:#F08A7E; --coral-soft:#3A1F1D; --amber:#E0B25C; --amber-soft:#3A2E17; --green:#6CC498; --green-soft:#16302A;
+  --en:#8CB8E8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1422; --surface:#161E30; --ink:#E6EBF4; --muted:#9AA7BD; --line:#2A3550;
+  --navy:#9FB6E0; --teal:#4FC1C9; --teal-soft:#123338; --coral:#F08A7E; --coral-soft:#3A1F1D; --amber:#E0B25C; --amber-soft:#3A2E17; --green:#6CC498; --green-soft:#16302A;
+  --en:#8CB8E8; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 60px}
+h1,h2,h3{text-wrap:balance;margin:0;color:var(--navy)}
+h1{font-size:1.45rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:600}
+.sub{color:var(--muted);font-size:.9rem}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tabs button{border:0;background:none;color:var(--muted);font:500 .88rem var(--font-ui);padding:7px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--navy);color:var(--bg)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.grid{display:grid;gap:14px}
+.label{font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 .85rem var(--font-ui);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--teal);background:var(--teal-soft);color:var(--teal)}
+.chip:focus-visible,.btn:focus-visible,.tabs button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,.pitem:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+select,input[type=text]{font:400 .9rem var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+.btn{border:1px solid transparent;background:var(--teal);color:#fff;font:600 .9rem var(--font-ui);padding:10px 18px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--teal);border-color:var(--teal)}
+.btn.danger{background:var(--coral)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.plist{display:grid;gap:6px;max-height:340px;overflow:auto;padding-right:4px}
+.pitem{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;cursor:pointer;font:400 .86rem var(--font-ui);color:var(--ink)}
+.pitem[aria-pressed="true"]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.pitem .t{color:var(--en);font-style:italic;min-width:0}
+.badge{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--teal-soft);color:var(--teal);white-space:nowrap}
+.badge.x{background:var(--amber-soft);color:var(--amber)}
+.badge.wait{background:var(--amber-soft);color:var(--amber)}
+.badge.done{background:var(--green-soft);color:var(--green)}
+.promptbox{border-left:4px solid var(--teal);background:var(--teal-soft);border-radius:0 8px 8px 0;padding:12px 14px;color:var(--en);font-style:italic}
+.split{display:grid;gap:14px}
+@media (min-width:920px){.split{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.clock{font:700 1.7rem var(--font-mono);font-variant-numeric:tabular-nums;color:var(--navy)}
+.clock.low{color:var(--coral)}
+.wc{font:500 .95rem var(--font-mono);font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:52vh;resize:vertical;font:400 1rem/1.7 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+textarea[readonly]{background:var(--bg)}
+.notice{font-size:.85rem;padding:8px 12px;border-radius:8px;background:var(--coral-soft);color:var(--coral)}
+.okbox{background:var(--green-soft);color:var(--green);padding:12px 14px;border-radius:8px}
+.check{display:grid;gap:8px}
+.check label{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--teal);width:18px;height:18px}
+.check b{color:var(--navy);font-weight:600}
+.check small{display:block;color:var(--muted)}
+.en{color:var(--en);font-style:italic}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tscroll{overflow-x:auto}
+.hist{display:grid;gap:8px}
+.hrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);cursor:pointer;text-align:left;font:400 .88rem var(--font-ui);color:var(--ink)}
+.hrow .d{font:500 .8rem var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.hrow .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.essay{white-space:pre-wrap;font-size:.95rem;line-height:1.7;background:var(--bg);border-radius:8px;padding:12px;max-height:420px;overflow:auto}
+.fb{white-space:pre-wrap;border-left:4px solid var(--green);background:var(--green-soft);padding:12px 14px;border-radius:0 8px 8px 0}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat .n{font:700 1.5rem var(--font-mono);color:var(--navy);font-variant-numeric:tabular-nums}
+.trend{display:grid;gap:10px}
+.trow{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:12px;align-items:center}
+.trow svg{width:100%;height:34px;display:block}
+.empty{color:var(--muted);text-align:center;padding:26px 10px;border:1px dashed var(--line);border-radius:8px}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.frame summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.frame summary::-webkit-details-marker{display:none}
+.frow{display:grid;grid-template-columns:88px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.frow:last-child{border-bottom:0}
+.frow .k{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.frow .v{color:var(--en);font-style:italic;min-width:0}
+.slot{font-style:normal;font-size:.78rem;font-weight:600;color:var(--amber);background:var(--amber-soft);border-radius:4px;padding:0 4px;white-space:nowrap}
+.fnote{font-size:.82rem;color:var(--muted);border-left:3px solid var(--amber);padding:4px 10px}
+@media (prefers-reduced-motion:no-preference){.btn,.chip,.pitem{transition:background .15s,border-color .15s}}
+/* Bậc thang, ô lên ý, gợi ý câu tiếp theo, nhắc khi kẹt */
+.lvls{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.lvl{display:grid;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 12px;cursor:pointer;font:400 .84rem var(--font-ui)}
+.lvl b{font-weight:600;color:var(--navy)}
+.lvl .m{font:500 .78rem var(--font-mono);color:var(--muted)}
+.lvl[aria-pressed="true"]{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset;background:var(--teal-soft)}
+.lvl:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.split.gate{grid-template-columns:minmax(0,1fr);max-width:760px}
+#editorCard{align-content:start}
+.next,.nudge{align-content:start}
+.pfield{display:grid;gap:4px}
+.pfield label{font-size:.82rem;font-weight:600;color:var(--navy)}
+.pfield small{color:var(--muted);font-size:.78rem}
+.pfield input,.pfield textarea{width:100%;font:400 .92rem/1.5 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.pfield textarea{min-height:64px;resize:vertical}
+.pfield input:focus-visible,.pfield textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.thesis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
+.tick{padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.tick.on{background:var(--green-soft);color:var(--green);border-color:transparent}
+.next{border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--amber-soft);border-radius:0 8px 8px 0;padding:10px 12px;display:grid;gap:4px;font-size:.88rem}
+.next .nh{font-weight:600;color:var(--amber)}
+.next .pl{color:var(--ink)}
+.next .pl b{font-weight:600}
+.nudge{border:1px solid var(--teal);background:var(--teal-soft);border-radius:8px;padding:12px 14px;display:grid;gap:8px;font-size:.88rem}
+.nudge h3{font-size:.95rem;color:var(--teal)}
+.nudge ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.planview{display:grid;gap:4px;font-size:.88rem;background:var(--bg);border-radius:8px;padding:10px 12px}
+.planview b{color:var(--navy);font-weight:600}
+/* Tab Mở & kết bài */
+.gopt{margin:0;padding-left:22px;display:grid;gap:6px}
+.gopt li{color:var(--en);font-style:italic}
+.ghead{font-size:.82rem;font-weight:600;color:var(--navy)}
+.gex{background:var(--bg);border-radius:8px;padding:12px 14px;display:grid;gap:6px;font-size:.92rem;line-height:1.65}
+.gex p{margin:0 0 4px;color:var(--en);font-style:italic}
+.gback{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--amber-soft);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:.88rem}
+.gmist{margin:0;padding-left:20px;display:grid;gap:4px}
+@media (max-width:480px){.tabs button{padding:7px 9px;font-size:.8rem}}
+</style>
+
+<style>body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="label">IELTS Writing · Thi trên máy</div>
+      <h1>Phòng Luyện Viết</h1>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-write" aria-selected="true">Viết bài</button>
+      <button role="tab" id="tab-hist" aria-selected="false">Lịch sử</button>
+      <button role="tab" id="tab-list" aria-selected="false">Checklist lỗi</button>
+      <button role="tab" id="tab-guide" aria-selected="false">Mở &amp; kết bài</button>
+    </div>
+  </div>
+
+  <!-- ============ SETUP ============ -->
+  <section id="v-setup" class="grid">
+    <div class="card grid">
+      <div class="label">1 · Chọn phần thi</div>
+      <div class="seg" id="modes">
+        <button class="chip" data-mode="t2" aria-pressed="true">Task 2 · 40 phút</button>
+        <button class="chip" data-mode="t1" aria-pressed="false">Task 1 · 20 phút</button>
+        <button class="chip" data-mode="full" aria-pressed="false">Cả bài · 60 phút</button>
+      </div>
+      <div class="sub" id="weekline"></div>
+    </div>
+
+    <div class="card grid" id="lvlCard">
+      <div class="label">Bậc Task 2</div>
+      <div class="lvls" id="lvls"></div>
+      <div class="sub" id="lvlNote"></div>
+    </div>
+
+    <div class="card grid" id="t2pick">
+      <div class="label">2 · Chọn đề Task 2</div>
+      <div class="row">
+        <select id="topic" aria-label="Chủ đề"></select>
+        <button class="btn ghost" id="rand">Chọn ngẫu nhiên</button>
+      </div>
+      <div class="seg" id="subs"></div>
+      <div class="plist" id="plist"></div>
+      <details>
+        <summary class="sub" style="cursor:pointer">Hoặc dán đề Task 2 của riêng mình</summary>
+        <textarea id="ownT2" style="min-height:90px;margin-top:8px" placeholder="Dán đề vào đây"></textarea>
+      </details>
+    </div>
+
+    <div class="card grid" id="t1pick" hidden>
+      <div class="label">2 · Đề Task 1</div>
+      <div class="sub">Task 1 cần biểu đồ, nên mở đề trong sách (Cambridge hoặc nguồn khác) rồi chép phần chữ của đề vào đây.</div>
+      <input type="text" id="t1src" placeholder="Nguồn đề, ví dụ Cambridge 18, Test 2">
+      <textarea id="t1prompt" style="min-height:90px" placeholder="Chép phần chữ của đề Task 1"></textarea>
+    </div>
+
+    <div class="card grid">
+      <div class="label">3 · Đề đã chọn</div>
+      <div id="chosen" class="empty">Chưa chọn đề nào.</div>
+      <div class="row"><button class="btn" id="start" disabled>Bắt đầu tính giờ</button><span class="sub" id="startNote"></span></div>
+    </div>
+  </section>
+
+  <!-- ============ WRITING / CHECK ============ -->
+  <section id="v-exam" hidden>
+    <div class="bar">
+      <div class="row" style="gap:14px">
+        <span class="confirm" id="backBox"></span>
+        <span class="label" id="phaseLabel">Đang viết</span>
+        <span class="clock" id="clock">40:00</span>
+      </div>
+      <div class="row" style="gap:14px">
+        <span class="wc" id="wc">0 từ</span>
+        <span class="confirm" id="submitBox"><button class="btn" id="submit">Nộp bài</button></span>
+      </div>
+    </div>
+    <div class="split" id="split">
+      <div class="grid" style="align-content:start">
+        <div class="card grid" id="promptCard"></div>
+        <details class="card frame" id="planCard" open hidden>
+          <summary><span class="label">Ô lên ý</span><span class="sub" id="planToggle">Ẩn</span></summary>
+          <div class="grid" style="gap:12px;margin-top:10px">
+            <div class="sub" id="planClock"></div>
+            <div class="pfield" id="planStance" hidden><label>Lập trường của mình</label><div class="seg" id="planStanceChips"></div><small id="planStanceWhen"></small></div>
+            <div class="grid" style="gap:10px" id="planFields"></div>
+            <div class="thesis" id="thesisTicks"></div>
+            <div class="grid" style="gap:8px" id="planGo" hidden>
+              <div class="notice" id="planWarn" hidden>Chưa có câu trả lời cho đề. Một dòng tiếng Việt là đủ, rồi bắt đầu viết.</div>
+              <div class="row"><button class="btn" id="planDone">Xong ý, bắt đầu viết →</button></div>
+            </div>
+          </div>
+        </details>
+        <details class="card frame" id="frameCard" open hidden>
+          <summary><span class="label">Bộ khung Task 2</span><span class="sub" id="frameToggle">Ẩn</span></summary>
+          <div class="grid" style="gap:10px;margin-top:10px">
+            <select id="frameSel" aria-label="Dạng đề"></select>
+            <div class="seg" id="stanceChips" aria-label="Lập trường"></div>
+            <div id="frameBody"></div>
+            <div class="sub"><span class="slot">mệnh đề</span> là câu đủ chủ ngữ và động từ. <span class="slot">danh từ</span> là cụm danh từ.</div>
+            <div class="row"><button class="btn ghost" id="toGuide">Xem hướng dẫn dạng này →</button></div>
+          </div>
+        </details>
+        <div class="card grid" id="checkCard" hidden>
+          <div class="label">Tự soát 5 phút</div>
+          <div class="sub">Bài lúc hết giờ đã được giữ lại. Giờ ta sửa trực tiếp trong khung viết. Soát từng lỗi, xong thì đánh dấu.</div>
+          <div class="notice" id="bracketNote" hidden></div>
+          <div class="check" id="checklist"></div>
+          <button class="btn" id="save">Lưu bài</button>
+          <div id="saveMsg"></div>
+        </div>
+      </div>
+      <div class="card grid" id="editorCard">
+        <div class="seg" id="taskTabs" hidden>
+          <button class="chip" data-t="t1" aria-pressed="true">Task 1</button>
+          <button class="chip" data-t="t2" aria-pressed="false">Task 2</button>
+        </div>
+        <div class="notice" id="pasteNote" hidden>Máy thi không cho dán chữ từ ngoài vào. Hãy gõ tay.</div>
+        <div class="nudge" id="nudge" hidden>
+          <h3>Dừng hơi lâu rồi. Viết câu đơn giản nhất trước.</h3>
+          <ol id="nudgeList"></ol>
+          <div class="row"><button class="btn ghost" id="nudgeOk">Viết tiếp</button></div>
+        </div>
+        <div class="next" id="nextStrip" hidden></div>
+        <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" data-gramm="false" aria-label="Bài viết"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section id="v-hist" class="grid" hidden>
+    <div class="card grid">
+      <h2>Tiến độ</h2>
+      <div class="stat" id="stats"></div>
+      <div class="trend" id="trend" hidden></div>
+    </div>
+    <div class="card grid">
+      <h2>Các bài đã viết</h2>
+      <div class="sub">Bài được lưu trên trình duyệt của máy này. Muốn được chấm, mở một bài rồi bấm <b>Sao chép bài</b>, sau đó dán cho Claude hoặc gửi giáo viên.</div>
+      <div class="hist" id="hist"></div>
+    </div>
+    <div class="card grid" id="detail" hidden></div>
+  </section>
+
+  <!-- ============ CHECKLIST ============ -->
+  <section id="v-list" class="grid" hidden>
+    <div class="card grid">
+      <h2>Năm lỗi hay gặp</h2>
+      <div class="sub">Lỗi người học Việt hay lặp lại khi viết Task 2. Dùng bảng này ở bước tự soát.</div>
+      <div class="tscroll"><table id="errTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ============ MỞ & KẾT BÀI ============ -->
+  <section id="v-guide" class="grid" hidden>
+    <div id="gBackBox"></div>
+    <div class="card grid">
+      <h2>Mở bài và kết bài theo dạng đề</h2>
+      <div class="sub">Mở bài có 2 câu. Câu 1 nói lại đề bằng lời của mình, câu 2 trả lời thẳng câu hỏi của đề. Kết bài 1 đến 2 câu, nhắc lại lập trường bằng từ khác và không thêm ý mới.</div>
+      <div class="fnote">Muốn ý trôi từ đầu tới cuối, hạn chế Therefore, Hence, Thus. Thay bằng <span class="en">…, which is why …</span> hoặc <span class="en">…, leading to + danh từ</span>.</div>
+      <div class="grid" style="gap:10px" id="gTypes"></div>
+    </div>
+    <div class="grid" id="guideBody"></div>
+  </section>
+</div>
+
+<script id="prompt-data" type="application/json">[{"b":1,"n":"Tuổi tác, thế hệ và gia đình","subs":[{"n":"Gia đình và quan hệ","ps":[{"id":"2-22","p":"The values that we learn from our parents and family have a greater influence on our future success than knowledge and skills we learn at school. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"7-11","p":"Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?","d":"Lợi và hại"},{"id":"1-14","p":"In some parts of the world it is becoming increasingly popular to try to find out one's own family history. Why do you think people do this? Do you think it is a positive or negative development?","d":"Nguyên nhân và đánh giá"}]},{"n":"Người cao tuổi, nghỉ hưu và chăm sóc","ps":[{"id":"2-2","p":"There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.","d":"Đồng ý hay không"},{"id":"2-17","p":"In many countries, life expectancy is increasing, leading to a growing proportion of elderly people. What problems does this cause for individuals and society, and what are the reasons for this trend?","d":"Vấn đề và nguyên nhân"},{"id":"x1B0","p":"In many countries, the retirement age is being raised. Do the advantages of this outweigh the disadvantages?","d":"Lợi và hại","x":1},{"id":"x1B1","p":"Some people think that older people should live with their children, while others believe they are better cared for in nursing homes. Discuss both views and give your opinion.","d":"Hai phe","x":1}]},{"n":"Người trẻ, học hành và áp lực","ps":[{"id":"2-14","p":"Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?","d":"Nguyên nhân và đánh giá"},{"id":"2-18","p":"Many children face pressure from their peers to conform to certain behaviors. Do the disadvantages of peer pressure outweigh the advantages?","d":"Lợi và hại"},{"id":"2-21","p":"Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?","d":"Đánh giá tốt hay xấu"},{"id":"3-14","p":"Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"3-18","p":"Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]}]},{"b":2,"n":"Văn hóa và toàn cầu hóa","subs":[{"n":"Bản sắc và di sản","ps":[{"id":"1-1","p":"Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?","d":"Đồng ý hay không"},{"id":"1-16","p":"Some believe that history has little to teach us about today while others think that the study of the past helps us to understand the present. Discuss both views and give your own opinion.","d":"Hai phe"},{"id":"16-2","p":"Important historical objects should be returned to their country of original. Agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Toàn cầu hóa và tiếp xúc giữa các nước","ps":[{"id":"1-2","p":"Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.","d":"Hai phe"},{"id":"1-11","p":"Some people say that the increasing business and cultural contact between countries has positive effects. Others say it would lead to the loss of national identities. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"5-8","p":"Some people believe it is better to import foreign films and TV programs, while others argue that countries should produce their own shows. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"6-6","p":"Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"1-13","p":"The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?","d":"Đồng ý hay không"}]},{"n":"Du lịch và cộng đồng địa phương","ps":[{"id":"1-15","p":"If people go to live in another country, they should follow the local customs and traditions. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"18-2","p":"Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.","d":"Hai phe"}]}]},{"b":3,"n":"Giáo dục","subs":[{"n":"Trường học, chương trình và cách dạy","ps":[{"id":"3-3","p":"Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?","d":"Nguyên nhân và giải pháp"},{"id":"3-8","p":"In recent years, an increasing number of parents are choosing to educate their children at home rather than sending them to school. Do the advantages of home education outweigh the disadvantages?","d":"Lợi và hại"},{"id":"3-10","p":"Some people think secondary school students should study international news as one of their subjects, while others believe that this is a waste of valuable school time. Discuss both these views and give your own opinion.","d":"Hai phe"},{"id":"3-11","p":"Many people say that schools are no longer necessary as a lot of information is available on the internet, so children can study at home. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"20-1","p":"Some people argue that language learning is only effective in small classes, while others believe that class size does not matter. Discuss both views and give your opinion.","d":"Hai phe"}]},{"n":"Kỹ năng và mục tiêu của việc học","ps":[{"id":"3-2","p":"Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"3-15","p":"Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"3-14","p":"Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"7-3","p":"Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?","d":"Đồng ý hay không"}]},{"n":"Tiếp cận, tiền bạc và cơ hội","ps":[{"id":"3-4","p":"In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?","d":"Lợi và hại"},{"id":"3-18","p":"Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"3-19","p":"Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and state your own opinion.","d":"Hai phe"}]}]},{"b":4,"n":"Kinh tế, tiền và tiêu dùng","subs":[{"n":"Kinh tế và túi tiền hộ gia đình","ps":[{"id":"4-9","p":"Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?","d":"Lợi và hại"},{"id":"7-5","p":"The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"8-6","p":"Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x4A0","p":"In many countries, the gap between the rich and the poor is becoming wider. What problems does this cause, and what measures could be taken to reduce it?","d":"Vấn đề và giải pháp","x":1},{"id":"x4A1","p":"Some people believe that a country's success should be measured by the happiness of its people rather than by the size of its economy. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1}]},{"n":"Doanh nghiệp và thị trường","ps":[{"id":"11-6","p":"Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"14-5","p":"Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"1-2","p":"Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.","d":"Hai phe"}]},{"n":"Tiêu dùng và quảng cáo","ps":[{"id":"5-2","p":"These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?","d":"Mức độ và giải pháp"},{"id":"5-10","p":"Some people believe that the sole purpose of advertising is to encourage consumers to buy products they do not actually need. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"17-3","p":"In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.","d":"Hai phe"},{"id":"17-4","p":"More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"2-10","p":"People's shopping habits depend more on the age group they belong to than other factors. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]}]},{"b":5,"n":"Truyền thông và mạng xã hội","subs":[{"n":"Báo chí và cách đưa tin","ps":[{"id":"5-1","p":"Some people say that news is a good medium to learn, while others argue that other media are more effective. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"5-7","p":"News plays an important part in most people's lives and news media has become more influential in people's lives. Why do you think this is the case? Is it a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"5-11","p":"Some people believe that news media should focus more on reporting positive news rather than negative stories. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"5-6","p":"In some countries, celebrities complain about the way the media publicize their private lives. Some people say that they should accept it as part of their fame. Do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Mạng xã hội và người dùng","ps":[{"id":"5-15","p":"More and more people no longer read newspapers or watch TV programs to get news. They get news about the world through the Internet. Is this a positive or negative development?","d":"Đánh giá tốt hay xấu"},{"id":"5-5","p":"Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?","d":"Đồng ý hay không"},{"id":"1-17","p":"Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x5B0","p":"Some people think that social media companies should be held responsible for the false information that appears on their platforms. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1},{"id":"x5B1","p":"Many young people now spend several hours a day on social media. Why is this the case? Is this a positive or negative development?","d":"Nguyên nhân và đánh giá","x":1}]},{"n":"Thông tin sai và tác động","ps":[{"id":"5-3","p":"Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"5-19","p":"Some people say that what children watch on television influences their behavior, others say that the amount of time children watch on television influences their behavior most. Discuss both views.","d":"Hai phe"},{"id":"5-9","p":"Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"5-16","p":"Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.","d":"Hai phe"}]}]},{"b":6,"n":"Chính phủ và dịch vụ công","subs":[{"n":"Ngân sách và ai trả tiền","ps":[{"id":"11-7","p":"Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"11-1","p":"It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"3-4","p":"In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?","d":"Lợi và hại"},{"id":"16-1","p":"Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"15-1","p":"Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.","d":"Hai phe"},{"id":"14-1","p":"To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Luật, quy định và thực thi","ps":[{"id":"7-9","p":"Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"11-5","p":"Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"12-1","p":"The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Dịch vụ công và người dùng","ps":[{"id":"2-2","p":"There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.","d":"Đồng ý hay không"},{"id":"3-18","p":"Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"14-7","p":"It is important for all towns and cities to have large public outdoor places like squares and parks. To what extent do you agree or disagree with this statement?","d":"Đồng ý hay không"}]}]},{"b":7,"n":"Công việc và sự nghiệp","subs":[{"n":"Trải nghiệm của người đi làm","ps":[{"id":"7-4","p":"Remote work benefits employees more than employers. Agree or disagree?","d":"Đồng ý hay không"},{"id":"7-6","p":"Employers should give their staff at least 4-week holiday a year to help employees perform better in their jobs. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"7-9","p":"Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"7-11","p":"Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?","d":"Lợi và hại"}]},{"n":"Tuyển dụng, lương và cơ cấu","ps":[{"id":"7-1","p":"Interviews are one of the ways to recruit employees in many companies. Some people believe that interviews are an unreliable way of choosing employees, while other people believe that there are better methods. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"7-2","p":"Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"7-5","p":"The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"7-3","p":"Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?","d":"Đồng ý hay không"}]},{"n":"Động lực và thứ tiền không mua được","ps":[{"id":"7-7","p":"Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"7-8","p":"The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x7C0","p":"Some people think that employees work best when they are closely supervised, while others believe that they perform better when they are given the freedom to make their own decisions. Discuss both views and give your opinion.","d":"Hai phe","x":1},{"id":"x7C1","p":"Many employers now offer benefits such as flexible hours and training courses instead of higher pay. Do the advantages of this trend outweigh the disadvantages?","d":"Lợi và hại","x":1}]}]},{"b":8,"n":"Môi trường và năng lượng","subs":[{"n":"Vấn đề môi trường","ps":[{"id":"8-5","p":"The natural resources such as oil, forests and fresh water are being consumed at an alarming rate. What problems does it cause? How can we solve these problems?","d":"Nguyên nhân và giải pháp"},{"id":"8-6","p":"Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?","d":"Đồng ý hay không"},{"id":"19-1","p":"Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"19-2","p":"A significant amount of time and resources is dedicated to protecting wild animals. To what extent do you agree or disagree that these resources should be spent elsewhere?","d":"Đồng ý hay không"}]},{"n":"Năng lượng và nguồn cung","ps":[{"id":"8-10","p":"As demand for oil and gas increases, some people advocate searching for these energy sources in untouched natural areas. Do the advantages of this trend outweigh its disadvantages?","d":"Lợi và hại"},{"id":"8-1","p":"Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x8B0","p":"Some people believe that governments should invest in nuclear power, while others think that renewable sources such as wind and solar energy are a better option. Discuss both views and give your opinion.","d":"Hai phe","x":1},{"id":"x8B1","p":"In many countries, household energy consumption is rising every year. What are the causes of this, and what measures could be taken to reduce it?","d":"Nguyên nhân và giải pháp","x":1}]},{"n":"Giải pháp và ai chịu trách nhiệm","ps":[{"id":"8-8","p":"Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"6-6","p":"Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"11-6","p":"Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?","d":"Nguyên nhân và đánh giá"}]}]},{"b":9,"n":"Khoa học, công nghệ và AI","subs":[{"n":"Công nghệ trong đời sống","ps":[{"id":"9-2","p":"Some people think that the rapid development of smart mobile devices, e.g. smartphones, tablets and other mobile devices, are disadvantageous to human. Agree or disagree?","d":"Đồng ý hay không"},{"id":"9-9","p":"Nowadays, fewer people are writing by hand due to the widespread use of computers and digital technology. Do the advantages of this development outweigh the disadvantages?","d":"Lợi và hại"},{"id":"9-1","p":"Some groups of people have benefited from modern communications technology, but some people do not benefit at all. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"5-5","p":"Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Nghiên cứu và bằng chứng","ps":[{"id":"9-8","p":"There have been many inventions in human history, such as the wheel. Some people think the most important thing is the internet. To what extent do you agree or disagree with this opinion?","d":"Đồng ý hay không"},{"id":"9-6","p":"Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.","d":"Hai phe"}]},{"n":"Mặt trái và rủi ro","ps":[{"id":"9-3","p":"More people today put their personal and private information online (address, telephone number, credit card number) to do everyday activities such as banking, shopping, and socializing. Is this a positive or negative development?","d":"Đánh giá tốt hay xấu"},{"id":"9-7","p":"Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.","d":"Hai phe"},{"id":"x9C0","p":"Many companies now use artificial intelligence to screen job applications before a human reads them. Do the advantages of this development outweigh the disadvantages?","d":"Lợi và hại","x":1},{"id":"x9C1","p":"Some people believe that governments should strictly limit the personal data that technology companies can collect, while others think individuals should be responsible for protecting their own information. Discuss both views and give your own opinion.","d":"Hai phe","x":1}]}]},{"b":10,"n":"Giao thông, đô thị và nhà ở","subs":[{"n":"Đi lại và phương tiện","ps":[{"id":"12-1","p":"The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"12-4","p":"Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.","d":"Lợi và hại, kèm ý kiến"},{"id":"12-6","p":"Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"12-8","p":"The use of bicycles as the main form of transport has declined in many places. Why and what can be done to encourage people to use bicycles more?","d":"Nguyên nhân và giải pháp"},{"id":"8-8","p":"Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Thành phố và quy hoạch","ps":[{"id":"14-2","p":"In many cities, governments have located shops, office, schools far from each other. Do you think the advantages of this policy outweigh the disadvantages?","d":"Lợi và hại"},{"id":"14-4","p":"In many modern cities, urban planners locate shops, schools, and housing in separate, distinct areas. What are the causes of this development, and is it a positive or negative trend?","d":"Nguyên nhân và đánh giá"},{"id":"14-5","p":"Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"14-7","p":"It is important for all towns and cities to have large public outdoor places like squares and parks. To what extent do you agree or disagree with this statement?","d":"Đồng ý hay không"},{"id":"14-1","p":"To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Nhà ở và chi phí sống","ps":[{"id":"11-7","p":"Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x10C0","p":"In many cities, the cost of housing has risen much faster than wages. What are the causes of this problem, and what measures could be taken to solve it?","d":"Nguyên nhân và giải pháp","x":1},{"id":"x10C1","p":"Some people think that governments should build low-cost housing in city centers, while others believe this land should be used for businesses and offices. Discuss both views and give your opinion.","d":"Hai phe","x":1}]}]},{"b":11,"n":"Sức khỏe, thực phẩm và lối sống","subs":[{"n":"Y tế và chính sách","ps":[{"id":"11-1","p":"It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"11-7","p":"Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"11-5","p":"Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Thực phẩm và ăn uống","ps":[{"id":"11-3","p":"In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree with this belief?","d":"Đồng ý hay không"},{"id":"11-8","p":"To what extent do you agree or disagree that international fast food is replacing traditional food and negatively affecting families and society?","d":"Đồng ý hay không"},{"id":"11-6","p":"Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"11-2","p":"In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x11B0","p":"In many countries, people are eating more processed food and cooking less at home. What are the causes of this trend, and what can be done to encourage healthier eating?","d":"Nguyên nhân và giải pháp","x":1},{"id":"x11B1","p":"Some people believe that governments should tax unhealthy food and drinks in order to improve public health. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1}]},{"n":"Thói quen và lối sống","ps":[{"id":"11-4","p":"An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"17-4","p":"More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"3-15","p":"Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]}]},{"b":12,"n":"Nghệ thuật, thể thao và giải trí","subs":[{"n":"Nghệ thuật và không gian công cộng","ps":[{"id":"16-1","p":"Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"16-3","p":"Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"16-4","p":"Museums and art galleries should concentrate on works that show history and culture of their own country rather than works of the other parts in the world. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"16-5","p":"In today's world of advanced science and technology, we still greatly value our artists such as musicians, painters and writers. What can the arts tell us about life that science and technology cannot?","d":"Câu hỏi trực tiếp"},{"id":"16-2","p":"Important historical objects should be returned to their country of original. Agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Thể thao","ps":[{"id":"15-1","p":"Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.","d":"Hai phe"},{"id":"15-5","p":"Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"2-21","p":"Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?","d":"Đánh giá tốt hay xấu"},{"id":"x12B0","p":"Some people think that governments should spend money on building sports facilities in local communities rather than on hosting international sporting events. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1},{"id":"x12B1","p":"Some people believe that all children should be required to take part in team sports at school, while others think they should be free to choose their own physical activities. Discuss both views and give your own opinion.","d":"Hai phe","x":1}]},{"n":"Giải trí và cách lập luận về giá trị","ps":[{"id":"5-16","p":"Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.","d":"Hai phe"},{"id":"5-3","p":"Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.","d":"Hai phe"},{"id":"1-17","p":"Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]}]},{"b":13,"n":"Tội phạm và pháp luật","subs":[{"n":"Luật pháp và hệ thống tư pháp","ps":[{"id":"9-7","p":"Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.","d":"Hai phe"},{"id":"12-1","p":"The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"5-9","p":"Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Hình phạt, tái phạm và tái hòa nhập","ps":[{"id":"10-4","p":"Some people believe that providing criminals with education will reduce the recidivism rate. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"10-5","p":"Research shows that many criminals continue to commit crimes after being released from prison. What is the cause and solution?","d":"Nguyên nhân và giải pháp"},{"id":"x13B0","p":"Some people believe that community service is a better punishment for minor crimes than a prison sentence. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1},{"id":"x13B1","p":"Some people think that prisoners should be given the opportunity to work while they are serving their sentences, while others believe that prison should be a punishment only. Discuss both views and give your own opinion.","d":"Hai phe","x":1}]},{"n":"Người trẻ, hoàn cảnh và phòng ngừa","ps":[{"id":"10-2","p":"Nowadays, a growing number of children are committing crimes. What are the reasons for this, and what punishments should be imposed?","d":"Nguyên nhân và hình phạt"},{"id":"10-9","p":"Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"10-7","p":"Research shows that most criminals have low levels of education. Therefore, some believe that the best way to reduce crime is to educate prisoners while in prison so they can secure employment upon release. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"x13C0","p":"Some people believe that the best way to prevent crime among young people is to provide more after-school activities and youth programs. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1},{"id":"x13C1","p":"In many countries, young people from poor neighborhoods are more likely to become involved in crime. What are the causes of this problem, and what can be done to address it?","d":"Nguyên nhân và giải pháp","x":1}]}]},{"b":14,"n":"Xã hội, bình đẳng và đạo đức","subs":[{"n":"Bình đẳng và cơ hội","ps":[{"id":"2-9","p":"Some people believe that women should play an equal role as men in a country's police force or military force, while others think women are not suitable for these kinds of jobs. Discuss both views and give opinion.","d":"Hai phe"},{"id":"3-19","p":"Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and state your own opinion.","d":"Hai phe"},{"id":"7-2","p":"Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?","d":"Đồng ý hay không"}]},{"n":"Trách nhiệm và chuẩn mực","ps":[{"id":"13-7","p":"Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.","d":"Hai phe"},{"id":"19-1","p":"Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?","d":"Đồng ý hay không"},{"id":"1-13","p":"The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?","d":"Đồng ý hay không"},{"id":"x14B0","p":"Some people believe that wealthy individuals have a moral obligation to donate a large part of their income to charity. To what extent do you agree or disagree?","d":"Đồng ý hay không","x":1},{"id":"x14B1","p":"Some people think that it is the responsibility of governments to help people in need, while others believe that individuals and local communities should take on this role. Discuss both views and give your own opinion.","d":"Hai phe","x":1}]},{"n":"Đạo đức cá nhân và lựa chọn tiêu dùng","ps":[{"id":"11-4","p":"An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?","d":"Nguyên nhân và đánh giá"},{"id":"17-3","p":"In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.","d":"Hai phe"},{"id":"17-4","p":"More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?","d":"Nguyên nhân và đánh giá"}]}]}]</script>
+<script>
+(function(){
+const TOPICS = JSON.parse(document.getElementById('prompt-data').textContent);
+const ERR = [
+  {k:'sva', n:'Chia động từ theo chủ ngữ', ex:'The promotion ... now <span class="en">promote</span> → <span class="en">promotes</span>. <span class="en">a country open</span> → <span class="en">opens</span>.'},
+  {k:'would', n:'Dùng would cho việc đang xảy ra thật', ex:'<span class="en">crime rates would plummet</span> → <span class="en">crime rates tend to fall</span>.'},
+  {k:'dv', n:'Hai động từ đứng liền nhau', ex:'<span class="en">are always remain</span>, <span class="en">are expect</span>, <span class="en">have not yet even have</span>.'},
+  {k:'cnt', n:'Danh từ đếm được và số nhiều', ex:'<span class="en">less patients</span> → <span class="en">fewer patients</span>. <span class="en">two human being</span> → <span class="en">beings</span>.'},
+  {k:'near', n:'Từ gần đúng nghĩa', ex:'<span class="en">supervision</span> (giám sát công việc) thay cho <span class="en">surveillance</span>. <span class="en">oversee</span>, <span class="en">downgraded</span>, <span class="en">suffice the target</span>.'}
+];
+const MIN = {t2:40, t1:20, full:60};
+const MODE_NAME = {t2:'Task 2', t1:'Task 1', full:'Cả bài'};
+const $ = id => document.getElementById(id);
+/* Bậc thang Task 2. roles = vai của từng đoạn theo thứ tự xuống dòng. */
+const LEVELS = {
+  1:{n:'Bậc 1 · Mở bài', min:8,  check:2, plan:2, wc:35,  roles:['intro'], fields:['side','crit','cond'], need:'Viết 2 câu mở bài.', note:'Chỉ viết mở bài 2 câu. Mục tiêu là bắt đầu được, câu chưa hay cũng được.'},
+  2:{n:'Bậc 2 · Mở bài + 2 câu mở đoạn', min:15, check:3, plan:3, wc:70,  roles:['intro','b1open','b2open'], fields:['side','crit','cond','b1','b2'], need:'Viết mở bài, rồi câu mở đầu của thân 1 và thân 2, mỗi phần một đoạn.', note:'Đúng chỗ hay kẹt. Mở bài 2 câu, rồi mỗi thân bài chỉ viết câu đầu tiên.'},
+  3:{n:'Bậc 3 · Một thân bài', min:20, check:4, plan:3, wc:110, roles:['body1'], fields:['side','b1','notes'], need:'Viết một đoạn thân bài, khoảng 110 đến 140 từ.', note:'Viết trọn một đoạn thân bài theo chuỗi A, B, C, D, E.'},
+  4:{n:'Bậc 4 · Cả bài', min:40, check:5, plan:5, wc:250, roles:['intro','body1','body2','concl'], fields:['side','crit','cond','b1','b2','notes'], need:'Viết ít nhất 250 từ.', note:'Thi thật 40 phút, thời gian lên ý tính trong 40 phút.'}
+};
+const lvOf = s => (s && LEVELS[s.level]) ? s.level : 4;
+const SIDE_PH = {agree:'Đồng ý, không đồng ý, hay đồng ý một phần?', discuss:'Mình đứng về phe nào, và vì sao?', outweigh:'Lợi lớn hơn hay hại lớn hơn?', posneg:'Tích cực hay tiêu cực?', cause:'Nguyên nhân chính là gì, và giải pháp chính là gì?', effect:'Nguyên nhân chính là gì, và nó ảnh hưởng tới ai?', which:'Vì sao có xu hướng này, và nó tốt hay xấu?', how:'Vì sao, và ai nên làm gì?', two:'Trả lời ngắn cho từng câu hỏi của đề.'};
+const PFIELDS = {
+  side:{l:'Câu trả lời của mình cho đề', h:'Tiếng Việt cũng được. Một dòng.'},
+  crit:{l:'Tiêu chí, mình đo bằng gì', h:'Ví dụ, ai được lợi về tiền, thời gian, sức khỏe.', ph:'Ví dụ, người lao động có mất thu nhập không'},
+  cond:{l:'Điều kiện hoặc nhượng bộ', h:'Khi nào kết luận của mình không còn đúng, hoặc phe kia đúng ở đâu.', ph:'Ví dụ, chỉ hiệu quả khi có xe buýt đủ dày'},
+  b1:{l:'Ý thân 1, nói trong một câu', h:'Ai làm gì, rồi cái gì tăng hay giảm.', ph:'Một ý thôi, không liệt kê'},
+  b2:{l:'Ý thân 2, nói trong một câu', h:'Khác hẳn ý thân 1, không lặp lại.', ph:'Một ý thôi, không liệt kê'},
+  notes:{l:'Nháp tự do', h:'Từ, ví dụ, nhóm người cụ thể. Ghi gì cũng được.', ph:'', area:true}
+};
+const ROLE = {
+  intro:[
+    {n:'Mở bài · câu 1', h:'Nói lại đề bằng lời của mình. Không chép nguyên câu đề.', f:0},
+    {n:'Mở bài · câu 2, thesis', h:'Ghép câu trả lời, tiêu chí và điều kiện trong ô Lên ý thành một câu.', f:1, p:['side','crit','cond']},
+    {n:'Mở bài đủ rồi', h:'Mở bài chỉ cần 2 câu.', end:true}],
+  b1open:[{n:'Thân 1 · câu mở đoạn', h:'Nói thẳng ý thân 1 trong một câu. Không mở bằng Firstly.', f:2, p:['b1']},{n:'Xong câu mở thân 1', h:'Bậc này chỉ cần câu mở đoạn.', end:true}],
+  b2open:[{n:'Thân 2 · câu mở đoạn', h:'Nói thẳng ý thân 2 trong một câu.', f:3, p:['b2']},{n:'Xong câu mở thân 2', h:'Đủ phần của bậc này.', end:true}],
+  body1:'b1', body2:'b2',
+  concl:[
+    {n:'Kết bài · câu 1', h:'Nhắc lại phe của mình bằng từ khác.', f:4, p:['side']},
+    {n:'Kết bài · câu 2', h:'Nêu điều kiện hoặc giải pháp. Không tóm tắt lại hai thân bài.', p:['cond']},
+    {n:'Xong bài', h:'Còn giờ thì soát lỗi trong Checklist.', end:true}]
+};
+function bodyRole(k, isTwo){ return [
+  {n:(isTwo?'Thân 2':'Thân 1')+' · câu mở đoạn', h:'Bước A. Nói thẳng ý chính trong một câu.'+(isTwo?'':' Không mở bằng Firstly.'), f:isTwo?3:2, p:[k]},
+  {n:'Bước B · ai làm gì', h:'Một nhóm người cụ thể làm một việc nhìn thấy được. Không dùng society hay people làm chủ ngữ.', p:[k]},
+  {n:'Bước C · cái gì tăng hay giảm', h:'Vì việc đó, tiền, thời gian, sức khỏe hay cơ hội của họ nhiều lên hay ít đi?'},
+  {n:'Bước D · ai chịu ảnh hưởng tiếp', h:'Một nhóm khác bị ảnh hưởng bởi đúng thứ vừa thay đổi.'},
+  {n:'Bước E · chốt lại', h:'Câu cuối trả lời lại đúng câu hỏi của đề.', p:['side']},
+  {n:'Đoạn đã đủ dài', h:'Thêm câu nữa dễ lặp ý.', end:true}]; }
+const store = {get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}, del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const words = s => (s.trim().match(/\S+/g)||[]).length;
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtT = sec => { sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); };
+const fmtD = ms => { const d=new Date(ms); return d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}); };
+
+/* ---------- tabs ---------- */
+let sess = store.get('plv_session');
+function showTab(t){
+  for (const b of ['write','hist','list','guide']) $('tab-'+b).setAttribute('aria-selected', String(b===t));
+  $('v-setup').hidden = !(t==='write' && !sess);
+  $('v-exam').hidden = !(t==='write' && !!sess);
+  $('v-hist').hidden = t!=='hist';
+  $('v-list').hidden = t!=='list';
+  $('v-guide').hidden = t!=='guide';
+  if(t==='guide') renderGuide();
+}
+$('tab-write').onclick=()=>showTab('write'); $('tab-hist').onclick=()=>showTab('hist'); $('tab-list').onclick=()=>showTab('list'); $('tab-guide').onclick=()=>showTab('guide');
+
+/* ---------- checklist table ---------- */
+$('errTable').innerHTML = '<tr><th>#</th><th>Lỗi</th><th>Ví dụ</th></tr>' + ERR.map((e,i)=>`<tr><td>${i+1}</td><td><b>${e.n}</b></td><td>${e.ex}</td></tr>`).join('');
+
+/* ---------- setup ---------- */
+let mode='t2', topicIdx=-1, subIdx=-1, picked=null;
+document.querySelectorAll('#modes .chip').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('#modes .chip').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  $('t2pick').hidden = mode==='t1'; $('t1pick').hidden = mode==='t2';
+  $('lvlCard').hidden = mode!=='t2';
+  renderChosen();
+});
+let level = (()=>{ const v=store.get('plv_level'); return LEVELS[v]?v:1; })();
+function renderLevels(){
+  $('lvls').innerHTML = Object.entries(LEVELS).map(([k,L])=>`<button class="lvl" data-lv="${k}" aria-pressed="${+k===level}"><b>${esc(L.n)}</b><span class="m">${L.min} phút</span></button>`).join('');
+  $('lvls').querySelectorAll('.lvl').forEach(b=>b.onclick=()=>{ level=+b.dataset.lv; store.set('plv_level',level); renderLevels(); renderChosen(); });
+  $('lvlNote').textContent = LEVELS[level].note;
+}
+renderLevels();
+const minFor = m => m==='t2' ? LEVELS[level].min : MIN[m];
+$('topic').innerHTML = '<option value="-1">Tất cả 14 chủ đề</option>' + TOPICS.map((t,i)=>`<option value="${i}">Buổi ${t.b} · ${esc(t.n)}</option>`).join('');
+$('topic').onchange = e => { topicIdx=+e.target.value; subIdx=-1; renderSubs(); renderList(); };
+function pool(){
+  const out=[];
+  TOPICS.forEach((t,ti)=>{ if(topicIdx>=0 && ti!==topicIdx) return;
+    t.subs.forEach((s,si)=>{ if(subIdx>=0 && si!==subIdx) return; s.ps.forEach(p=>out.push({...p, topic:t.n, b:t.b, sub:s.n})); }); });
+  const seen=new Set(); return out.filter(p=>seen.has(p.id)?false:(seen.add(p.id),true));
+}
+function renderSubs(){
+  if(topicIdx<0){ $('subs').innerHTML=''; return; }
+  $('subs').innerHTML = TOPICS[topicIdx].subs.map((s,i)=>`<button class="chip" data-i="${i}" aria-pressed="${i===subIdx}">${esc(s.n)} · ${s.ps.length}</button>`).join('');
+  $('subs').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ subIdx = subIdx===+b.dataset.i ? -1 : +b.dataset.i; renderSubs(); renderList(); });
+}
+function renderList(){
+  const ps=pool();
+  $('plist').innerHTML = ps.map((p,i)=>`<button class="pitem" data-i="${i}" aria-pressed="${picked&&picked.id===p.id}"><span class="t">${esc(p.p)}</span><span class="badge ${p.x?'x':''}">${esc(p.d)}${p.x?' · tự soạn':''}</span></button>`).join('') || '<div class="empty">Không có đề.</div>';
+  $('plist').querySelectorAll('.pitem').forEach(b=>b.onclick=()=>{ picked=ps[+b.dataset.i]; $('ownT2').value=''; renderList(); renderChosen(); });
+}
+$('rand').onclick=()=>{ const ps=pool(); picked=ps[Math.floor(Math.random()*ps.length)]; $('ownT2').value=''; renderList(); renderChosen(); };
+$('ownT2').oninput=()=>{ if($('ownT2').value.trim()){ picked={id:'own',p:$('ownT2').value.trim(),d:'Đề riêng',topic:'Đề riêng',sub:''}; } else picked=null; renderList(); renderChosen(); };
+$('t1prompt').oninput=renderChosen;
+function t2Ready(){ return !!picked; }
+function t1Ready(){ return $('t1prompt').value.trim().length>10; }
+function renderChosen(){
+  let html='', ok=false;
+  if(mode!=='t1'){ html += picked ? `<div class="grid" style="gap:6px"><div class="row"><span class="badge">${esc(picked.d)}</span><span class="sub">${esc(picked.topic)}${picked.sub?' · '+esc(picked.sub):''}</span></div><div class="promptbox">${esc(picked.p)}</div></div>` : '<div class="sub">Chưa chọn đề Task 2.</div>'; }
+  if(mode!=='t2'){ html += t1Ready() ? `<div class="promptbox" style="margin-top:8px">${esc($('t1prompt').value.trim())}</div>` : '<div class="sub" style="margin-top:6px">Chưa có đề Task 1.</div>'; }
+  ok = (mode==='t2'&&t2Ready()) || (mode==='t1'&&t1Ready()) || (mode==='full'&&t2Ready()&&t1Ready());
+  $('chosen').className = ''; $('chosen').innerHTML = html;
+  $('start').disabled = !ok;
+  $('startNote').textContent = ok ? `${minFor(mode)} phút, tính cả lúc lên ý. Hết giờ bài tự khóa.` : '';
+}
+renderSubs(); renderList(); renderChosen();
+
+
+const slotify = t => esc(t).replace(/\[([^\]]+)\]/g,'<span class="slot">$1</span>');
+/* ---------- hướng dẫn mở bài, kết bài theo dạng đề ----------
+   Mỗi dạng có i1 (câu 1 mở bài) và các lập trường st. Mỗi lập trường có
+   p (bố cục 4 đoạn), i2 (câu 2 mở bài), t1, t2 (câu mở thân 1, thân 2), c (kết bài).
+   Phần tử đầu tiên của mỗi mảng là câu hiện trong Bộ khung và dải Câu tiếp theo. */
+const GROUPS = [['Một câu hỏi',['agree','discuss','outweigh','posneg']], ['Hai câu hỏi',['cause','effect','which','how']]];
+const GUIDE = {
+ agree:{ n:'Đồng ý / Không đồng ý',
+  detect:'Đề kết thúc bằng "To what extent do you agree or disagree?" hoặc "Do you agree or disagree?".',
+  i1:['Some people argue that [mệnh đề nói lại đề].','It is often proposed that [mệnh đề nói lại đề].','One school of thought holds that [mệnh đề nói lại đề].'],
+  st:[
+   { k:'dis', n:'Không đồng ý', when:'Ta thấy phe kia có lý do, nhưng kết luận của họ sai.',
+     p:[['Mở bài','Nói lại đề, rồi nói rõ ta không đồng ý, kèm cụm thừa nhận lý do của phe kia.'],['Thân 1','Trình bày trọn lý lẽ của phe kia, như thể ta đang nói giúp họ.'],['Thân 2','Phản bác. Chỉ ra chỗ phe kia bỏ sót, kèm một ví dụ.'],['Kết bài','Thừa nhận một vế của phe kia, rồi chốt lại vì sao ta vẫn không đồng ý.']],
+     i2:['I disagree with this proposal, despite acknowledging the reasons for it.','While acknowledging the reasons for this thinking, I would argue that [mệnh đề lập trường].'],
+     t1:['Proponents of [danh từ] often base their arguments on [danh từ].','Critics of [danh từ] often argue that [mệnh đề].'],
+     t2:['However, this perspective overlooks the fact that [mệnh đề].','However, this viewpoint fails to recognize [danh từ].'],
+     c:['In conclusion, while it is understandable to [V nguyên thể], it is shortsighted to dismiss [danh từ] as [tính từ].','In conclusion, while [mệnh đề nhượng bộ], [V-ing] is neither practical nor ethical.'] },
+   { k:'chal', n:'Bác bỏ thẳng', when:'Ta phản đối rõ ràng, và muốn dành một đoạn cho lý lẽ hoặc giải pháp của riêng mình.',
+     p:[['Mở bài','Nói lại đề, rồi tuyên bố bác bỏ. Mở bài không nhượng bộ.'],['Thân 1','Nhượng bộ ngắn bằng Admittedly hoặc Granted, rồi phản bác ngay trong cùng đoạn.'],['Thân 2','Lý lẽ riêng của ta, hoặc một giải pháp tốt hơn điều đề nêu.'],['Kết bài','Nhắc lại lập trường và giải pháp của ta.']],
+     i2:['In this essay, however, I will challenge this school of thought.','In this essay, however, I will challenge this thinking.'],
+     t1:['Admittedly, proponents of [danh từ] might argue that [mệnh đề]. However, this perspective glosses over [danh từ].','Granted, [danh từ] is posing a threat to [danh từ] to some extent.'],
+     t2:['In light of the aforementioned limitations, I believe the following measures would be more effective in countering [danh từ].','It is also noteworthy that [V-ing] is nowhere near a futile effort.'],
+     c:['To summarize, I am strongly convinced that [danh từ] falls short as an effective solution to [danh từ].','In conclusion, while [mệnh đề nhượng bộ], I would contend that [mệnh đề lập trường], given [danh từ lý do].'] },
+   { k:'agr', n:'Đồng ý', when:'Ta đồng ý với nhận định trong đề.',
+     p:[['Mở bài','Nói lại đề, rồi nói ta cũng nghĩ vậy.'],['Thân 1','Lý do mạnh nhất của ta, có ví dụ.'],['Thân 2','Nêu ý của phe kia bằng Granted hoặc Proponents, rồi bẻ lại.'],['Kết bài','Chốt lập trường và nói điều nên làm.']],
+     i2:['I also hold this view.','Many people, myself included, believe that [mệnh đề lập trường].'],
+     t1:['Perhaps the foremost argument for this view lies in [danh từ].','The primary reason for my belief is that [mệnh đề].'],
+     t2:['Granted, proponents of [danh từ] often highlight [danh từ]. However, it must be recognized that [mệnh đề].','Proponents of [danh từ] claim that [mệnh đề]. However, these arguments often overlook [danh từ].'],
+     c:['In conclusion, while [danh từ] may have its merits, [ai] should [V nguyên thể].','In conclusion, I am convinced that [danh từ] is promising in terms of [V-ing], as long as [mệnh đề].'] },
+   { k:'part', n:'Đồng ý có giới hạn', when:'Ta thấy đề đúng trong một số trường hợp, sai trong những trường hợp khác.',
+     p:[['Mở bài','Nói rõ ta đồng ý tới đâu. Câu 2 phải có cả phần đồng ý lẫn phần giới hạn.'],['Thân 1','Phần ta đồng ý. Mở bằng On the one hand.'],['Thân 2','Phần ta không đồng ý, kèm lý do và ví dụ.'],['Kết bài','Chốt lại giới hạn, tức là đề đúng khi nào và sai khi nào.']],
+     i2:['I also hold this view, albeit with some reservations.','While [danh từ] can [V nguyên thể], I am convinced that it is not [danh từ].','While this proposal is indeed beneficial, I would argue it is not a feasible option in [nơi chốn hoặc trường hợp].'],
+     t1:['On the one hand, it is understandable why some people believe that [mệnh đề].','On the one hand, [ai] should be encouraged to [V nguyên thể].'],
+     t2:['However, I am convinced that the aforementioned arguments are questionable at best.','On the other hand, [V-ing] is not a viable option for every [danh từ].'],
+     c:['In conclusion, while there are justifications for believing [mệnh đề], I would contend that [mệnh đề lập trường], given [danh từ lý do].','In conclusion, while there are certain benefits that [danh từ] can confer upon [ai], I believe it can prove unfeasible in [trường hợp].'] }
+  ],
+  note:'Câu "albeit with some reservations" nghĩa là ta đồng ý phần lớn. Câu "While … I am convinced that it is not …" nghĩa là ta không đồng ý phần lớn. Chọn câu khớp với ý mình.',
+  mist:['Mở bài không nói rõ đồng ý hay không. Câu như "This essay will examine the validity of this idea" là giấu lập trường, dạng này phải nêu ngay.','Thân 1 nhượng bộ quá dài, rồi thân 2 không bẻ lại, người đọc tưởng ta đổi phe.','Lập trường ở kết bài khác mở bài.'],
+  phr:[['despite acknowledging the reasons for it','dù thừa nhận lý do của ý kiến đó'],['this perspective overlooks','quan điểm này bỏ sót'],['albeit with some reservations','dù vẫn còn vài điểm chưa đồng ý'],['it is shortsighted to dismiss A as B','thật thiển cận khi gạt A đi vì cho rằng A là B'],['I would contend that','tôi cho rằng (giọng khẳng định)']],
+  ex:{ t:'Support aging parents', s:'dis',
+   i:'Some propose that younger relatives should be legally obligated to provide support when their elders become unable to care for themselves. I disagree with this proposal, despite acknowledging the reasons for it.',
+   c:'In conclusion, while the desire to ensure the well-being of elderly individuals is laudable, legally obligating younger family members to provide care is neither practical nor ethical. It ignores the complexities of family dynamics, imposes undue burdens, and presents significant challenges for implementation.' } },
+
+ discuss:{ n:'Hai phe',
+  detect:'Đề nêu hai ý kiến (Some people think… Others believe…) rồi hỏi "Discuss both views and give your opinion."',
+  i1:['Some people hold the belief that [mệnh đề phe 1].','Some believe that [mệnh đề phe 1], while others contend that [mệnh đề phe 2].','The debate over whether [ai] should [V1] or [V2] is a divisive one.'],
+  st:[
+   { k:'one', n:'Theo một phe', when:'Ta thấy một phe đúng hơn hẳn.',
+     p:[['Mở bài','Nêu phe kia, rồi nói ta theo phe nào.'],['Thân 1','Lý lẽ của phe ta không theo. Thừa nhận chỗ đúng, rồi chỉ ra chỗ yếu.'],['Thân 2','Lý lẽ của phe ta theo, có ví dụ.'],['Kết bài','Nhắc lại phe ta chọn và lý do chính.']],
+     i2:['While there are good grounds for advocating this proposal, I would argue that [mệnh đề phe mình].','Others, myself included, however, believe that [mệnh đề phe mình].','While some believe [mệnh đề phe kia], I side with those who argue that [mệnh đề phe mình].'],
+     t1:['Granted, proponents of [danh từ phe kia] might argue that [mệnh đề].','Granted, there are good grounds for [V-ing].'],
+     t2:['Notwithstanding, I am convinced that [mệnh đề phe mình].','However, this view overlooks [danh từ].'],
+     c:['To summarize, while [danh từ phe kia] has certain benefits, I side with those who [V], believing that [mệnh đề].','In conclusion, while [mệnh đề phe kia], I feel that [mệnh đề phe mình].'] },
+   { k:'both', n:'Kết hợp hai phe', when:'Ta thấy cả hai phe đều đúng một phần, và cách tốt nhất là kết hợp.',
+     p:[['Mở bài','Nêu hai phe, rồi báo bài sẽ xét cả hai trước khi nêu ý kiến.'],['Thân 1','Phe 1. Mở bằng On the one hand.'],['Thân 2','Phe 2. Mở bằng On the other hand.'],['Kết bài','Ý kiến của ta, kết hợp hai phe, nói rõ vì sao. Đoạn này dài 2 tới 4 câu.']],
+     i2:['This essay will first examine both views before presenting my own opinion.','This essay will examine both perspectives before arriving at a personal viewpoint.'],
+     t1:['On the one hand, proponents of the idea that [mệnh đề phe 1] argue that [mệnh đề].','The argument for [danh từ phe 1] rests on the principle of [danh từ].'],
+     t2:['On the other hand, those who assert that [mệnh đề phe 2] argue that [mệnh đề].','On the other end of the spectrum, advocates for [danh từ phe 2] argue that [mệnh đề].'],
+     c:['Upon weighing both views, I believe the challenge is not in [V-ing] but in [V-ing].','From my perspective, a concerted effort from both [A] and [B] is wholly warranted to [V nguyên thể].'] }
+  ],
+  note:'Đề yêu cầu "give your opinion". Nếu mở bài dùng "This essay will examine both views", thì đoạn cuối bắt buộc phải nêu ý kiến thật rõ, nếu không bài mất điểm ý.',
+  mist:['Chỉ trình bày hai phe mà không có ý kiến riêng.','Ý kiến ở mở bài và kết bài khác nhau.','Thân 2 lặp lại ý thân 1 bằng từ khác.'],
+  phr:[['I side with those who argue that','tôi đứng về phía những người cho rằng'],['there are good grounds for','có cơ sở vững chắc để'],['Notwithstanding','dù vậy'],['Upon weighing both views','sau khi cân nhắc cả hai quan điểm'],['a concerted effort from both A and B','sự chung tay của cả A và B']],
+  ex:{ t:'Fixed punishments', s:'one',
+   i:'Some people hold the belief that the government should implement a standardized punishment for every offender of a particular crime. While there are good grounds for advocating this proposal, I would argue that punishment should be tailored to the case.',
+   c:'To summarize, while fixed punishments have certain benefits, I side with opponents of this one-size-fits-all approach, believing that an equitable legal system should take into account the special aspects of each individual case.' } },
+
+ outweigh:{ n:'Lợi lớn hơn hại?',
+  detect:'Đề hỏi "Do the advantages outweigh the disadvantages?", tức là lợi có lớn hơn hại không. Ta phải chọn một bên nặng hơn. Đề viết "Discuss the advantages and disadvantages and give your opinion" cũng dùng khung này.',
+  i1:['The idea of [V-ing] has gained traction in some circles.','Whether [mệnh đề] has been a question of debate lately.','Some [nơi chốn] have experimented with [danh từ], [V-ing chi tiết].'],
+  st:[
+   { k:'dis', n:'Hại lớn hơn', when:'Ta thấy cái giá phải trả nặng hơn lợi ích.',
+     p:[['Mở bài','Nêu chủ đề, rồi nói hại lớn hơn.'],['Thân 1','Những lợi ích mà phe ủng hộ hay nêu.'],['Thân 2','Những tác hại, nói vì sao chúng nặng hơn, có ví dụ.'],['Kết bài','Lợi có thật nhưng bị hại lấn át.']],
+     i2:['However, I believe that the potential disadvantages of [danh từ] significantly outweigh the benefits.','While this policy appears to be beneficial, I believe the disadvantages significantly outweigh the advantages.','In my opinion, the drawbacks of [danh từ] eclipse its benefits.'],
+     t1:['Advocates for [danh từ] often highlight two main benefits.','On the one hand, [danh từ] can bring about certain benefits.'],
+     t2:['However, I am convinced that these benefits are overshadowed by significant drawbacks.','Notwithstanding the aforementioned benefits, I believe the disadvantages of [danh từ] are more substantial.'],
+     c:['In conclusion, while [danh từ] may offer some benefits, these are largely overshadowed by [danh từ].','In conclusion, while the goals of [danh từ] and [danh từ] are laudable, I would contend that [V-ing] can do more harm than good.'] },
+   { k:'adv', n:'Lợi lớn hơn', when:'Ta thấy tác hại có thật nhưng xử lý được, còn lợi ích lớn hơn.',
+     p:[['Mở bài','Nêu chủ đề, rồi nói lợi lớn hơn.'],['Thân 1','Những tác hại mà phe phản đối hay nêu.'],['Thân 2','Cách khắc phục các tác hại đó, rồi những lợi ích lớn hơn hẳn.'],['Kết bài','Tác hại xử lý được, lợi ích đáng giá.']],
+     i2:['While there are potential drawbacks, I am convinced that the benefits far outweigh the disadvantages.','While [danh từ] has certain drawbacks, I believe its benefits are far more significant.'],
+     t1:['Opponents of [danh từ] often raise two main concerns.','One potential drawback is [danh từ].'],
+     t2:['These challenges, nevertheless, are far from insurmountable.','The advantages of [V-ing] are overwhelmingly greater.'],
+     c:['In conclusion, while [V-ing] presents challenges, these are manageable with thoughtful planning.','In conclusion, although [danh từ] has some drawbacks, its benefits are far more significant, as [mệnh đề].'] }
+  ],
+  note:'Bài mẫu "Early language education" viết 3 thân bài: tác hại, cách khắc phục, rồi lợi ích. Nếu chỉ viết 2 thân bài thì gộp cách khắc phục và lợi ích vào thân 2.',
+  mist:['Kể lợi và hại ngang nhau rồi không nói bên nào nặng hơn.','Mở bài nói hại lớn hơn, nhưng đoạn viết về lợi lại dài hơn.','Lặp "advantages" và "disadvantages" suốt bài. Đổi sang benefits, merits, drawbacks.'],
+  phr:[['outweigh','nặng hơn, lớn hơn'],['eclipse','lấn át, che mờ'],['be overshadowed by','bị lu mờ bởi'],['far from insurmountable','hoàn toàn vượt qua được'],['do more harm than good','hại nhiều hơn lợi']],
+  ex:{ t:'Volunteering', s:'dis',
+   i:'The idea of requiring young people to perform unpaid community service has gained traction in some circles. However, I believe that the potential disadvantages of such mandatory programs significantly outweigh the benefits.',
+   c:'In conclusion, while the goals of fostering civic responsibility and providing work experience are laudable, I would contend that mandating unpaid community work for young people can do more harm than good. It undermines the intrinsic value of volunteering, raises ethical concerns about exploitation, and potentially exacerbates existing inequalities.' } },
+
+ posneg:{ n:'Tích cực hay tiêu cực',
+  detect:'Đề chỉ hỏi một câu "Is this a positive or negative development?". Nếu đề hỏi thêm "Why…?" thì đó là dạng hai câu hỏi, chọn "Vì sao + đánh giá".',
+  i1:['It is widely recognized that [mệnh đề nói lại đề].','More and more [ai, số nhiều] are now choosing to [V nguyên thể].'],
+  st:[
+   { k:'pos', n:'Tích cực', when:'Ta thấy xu hướng này nhìn chung có lợi.',
+     p:[['Mở bài','Nói lại đề, rồi nói đây là xu hướng đáng mừng dù có vài mối lo.'],['Thân 1','Mối lo mà phe kia nêu, rồi chỉ ra là xử lý được, có ví dụ.'],['Thân 2','Những lợi ích mà xu hướng này mang lại.'],['Kết bài','Mối lo xử lý được, và xu hướng nhìn chung tích cực.']],
+     i2:['Despite some legitimate concerns, I believe this is a welcome development overall.'],
+     t1:['Granted, opponents might argue that [mệnh đề]. These problems, however, are far from insolvable, as [mệnh đề].'],
+     t2:['The argument in favor of [danh từ] is further fortified by the numerous benefits it can confer upon [ai].'],
+     c:['In conclusion, although there are some concerns about [danh từ], I would contend that these problems can be countered with [danh từ]. In addition, this trend is generally positive, considering [danh từ].'] },
+   { k:'neg', n:'Tiêu cực', when:'Ta thấy xu hướng này nhìn chung có hại.',
+     note:'Khung bên tiêu cực được soạn theo cấu trúc của bài mẫu bên tích cực, vì bộ bài mẫu chỉ có bài viết bên tích cực.',
+     p:[['Mở bài','Nói lại đề, rồi nói đây là xu hướng đáng lo dù có vài lợi ích.'],['Thân 1','Lợi ích mà phe kia nêu, rồi chỉ ra lợi ích đó hẹp hoặc ngắn hạn.'],['Thân 2','Tác hại chính, ai chịu thiệt và thiệt thế nào.'],['Kết bài','Lợi ích có nhưng nhỏ, và xu hướng nhìn chung tiêu cực.']],
+     i2:['Despite some apparent benefits, I believe this is a worrying development overall.'],
+     t1:['Granted, proponents might argue that [mệnh đề]. However, these benefits are limited to [danh từ].'],
+     t2:['The argument against [danh từ] is further fortified by the damage it can cause to [danh từ].'],
+     c:['In conclusion, although [danh từ] brings certain benefits, I would contend that it is a negative development overall, considering the toll it could take on [danh từ].'] }
+  ],
+  mist:['Nói "có cả mặt tốt và xấu" rồi không chốt. Dạng này phải chọn tốt hay xấu.','Nhầm với dạng hai câu hỏi. Đề có hỏi "Why" thì phải trả lời cả lý do.'],
+  phr:[['a welcome development','một xu hướng đáng mừng'],['legitimate concerns','những mối lo có cơ sở'],['far from insolvable','hoàn toàn giải quyết được'],['confer upon','mang lại cho'],['take a toll on','gây tổn hại cho']],
+  ex:{ t:'Remote tourism', s:'pos',
+   i:'It is widely recognized that visiting areas and communities off the beaten track is gaining more popularity, with many travel agencies offering organized tours for those interested. Despite some legitimate concerns, I believe this commercialization is a welcome development overall.',
+   c:'In conclusion, although there are some concerns about the environmental implications of increasing tourism in far-flung areas and communities, I would contend that these problems can be countered with government intervention. In addition, this trend is generally positive, considering the improvements it can make to the locals’ lives.' } },
+
+ cause:{ n:'Nguyên nhân + giải pháp',
+  detect:'Đề hỏi "What are the causes / reasons…?" rồi "How can we solve…?" hoặc "What can be done…?". Cũng dùng cho đề hỏi vấn đề và giải pháp, hoặc nguyên nhân và hình phạt.',
+  i1:['[Danh từ] has become a prevalent issue in today’s world.','Recent years have seen a troubling rise in [danh từ].'],
+  st:[
+   { k:'x', n:'',
+     p:[['Mở bài','Nói lại vấn đề, rồi báo bài sẽ nêu nguyên nhân trước, giải pháp sau.'],['Thân 1','Một hoặc hai nguyên nhân, giải thích vì sao chúng gây ra vấn đề.'],['Thân 2','Giải pháp khớp với từng nguyên nhân ở thân 1.'],['Kết bài','Tóm nguyên nhân chính và giải pháp.']],
+     i2:['This essay will delve into the underlying causes of this phenomenon before proposing some viable solutions.','This stems from various factors, but effective strategies can help [ai] [V nguyên thể].'],
+     t1:['[Danh từ vấn đề] is largely attributed to [danh từ] and [danh từ].','One primary cause of [danh từ] is [danh từ].'],
+     t2:['To combat [danh từ], the following steps should be taken.','Addressing [danh từ] requires a multifaceted approach.'],
+     c:['To summarize, what seems to be at the core of [danh từ] is [danh từ]. By [V-ing], [ai] can work towards reversing this troubling trend.','In conclusion, [danh từ] stems from [danh từ]. Combating this issue will require [danh từ].'] }
+  ],
+  note:'Sau "it is imperative that" động từ để nguyên thể, không thêm s. Ví dụ "it is imperative that the government invest".',
+  mist:['Giải pháp không khớp với nguyên nhân. Thân 1 nói vì A, thì thân 2 phải giải quyết A.','Nêu nguyên nhân mà không giải thích vì sao nó gây ra vấn đề.'],
+  phr:[['be attributed to','được cho là do'],['stem from','bắt nguồn từ'],['a multifaceted approach','cách giải quyết từ nhiều phía'],['a two-pronged approach','cách giải quyết từ hai hướng'],['in tandem with this','song song với việc này']],
+  ex:{ t:'Antisocial behavior', s:'x',
+   i:'The escalation of anti-social conduct and disregard for others has become a prevalent issue in today’s world. This essay will delve into the underlying causes of this phenomenon before proposing some viable solutions to improve the situation.',
+   c:'To summarize, what seems to be at the core of the rise in anti-social conduct and disregard for others is the pervasive influence of technology and the deterioration of traditional values. By fostering a sense of community and promoting responsible technological use, society can work towards reversing this troubling trend.' } },
+
+ effect:{ n:'Nguyên nhân + ảnh hưởng',
+  detect:'Đề hỏi lý do và hậu quả, ví dụ "What are the reasons? What are the impacts?" hoặc "What problems does this cause, and what are the reasons?".',
+  i1:['It is widely recognized that [mệnh đề nói lại đề].','There is an increasing trend towards [V-ing].'],
+  st:[
+   { k:'x', n:'',
+     p:[['Mở bài','Nói lại hiện tượng, rồi báo bài sẽ nêu nguyên nhân và ảnh hưởng.'],['Thân 1','Nguyên nhân.'],['Thân 2','Một hoặc hai ảnh hưởng. Mỗi ảnh hưởng nói rõ ai bị ảnh hưởng và bị thế nào.'],['Kết bài','Tóm nguyên nhân gốc và đánh giá ảnh hưởng.']],
+     i2:['In this essay, I will outline the underlying causes of this phenomenon before showing how it could adversely affect [ai].'],
+     t1:['[Danh từ] is largely a result of [danh từ].'],
+     t2:['[Danh từ] could have several far-reaching repercussions.'],
+     c:['In conclusion, [danh từ] seems to be the root cause of [danh từ]. This trend is nowhere near beneficial, considering the toll it could take on [danh từ].'] }
+  ],
+  note:'Viết theo đúng thứ tự câu hỏi của đề. Đề hỏi vấn đề trước, nguyên nhân sau, thì thân 1 viết vấn đề.',
+  mist:['Đề hỏi theo thứ tự ngược mà bài vẫn viết nguyên nhân trước.','Ảnh hưởng nói chung chung kiểu "affect society". Nói rõ nhóm người nào, mất gì.'],
+  phr:[['adversely affect','ảnh hưởng xấu tới'],['far-reaching repercussions','hậu quả sâu rộng'],['the root cause of','nguyên nhân gốc rễ của'],['take a toll on','gây tổn hại cho']],
+  ex:{ t:'Family meal', s:'x',
+   i:'It is widely recognized that the tradition of family gathering for meals is gradually becoming a thing of the past. In this essay, I will outline the underlying causes of this phenomenon before showing how it could adversely affect the family.',
+   c:'In conclusion, the busy nature of the modern world seems to be the root cause of families not gathering regularly for meals. This trend is nowhere near beneficial, considering the toll it could take on family relationships and health.' } },
+
+ which:{ n:'Vì sao + đánh giá',
+  detect:'Đề hỏi "Why…?" rồi hỏi tiếp "Is it a positive or negative development?" hoặc "Which development do you think is better?". Ta phải trả lời cả lý do lẫn đánh giá.',
+  i1:['In recent years, [nơi chốn] have witnessed divergent trends in [danh từ], with some favoring [A] while others embrace [B].','There is an increasing trend towards [V-ing].'],
+  st:[
+   { k:'x', n:'',
+     p:[['Mở bài','Nói lại hiện tượng, nói có nhiều lý do, và nêu luôn đánh giá của ta.'],['Thân 1','Lý do.'],['Thân 2','Đánh giá của ta, có lý lẽ và ví dụ.'],['Kết bài','Tóm lý do và nhắc lại đánh giá.']],
+     i2:['These contrasting developments can be attributed to a number of factors, and I believe [mệnh đề đánh giá].','This trend can be attributed to several factors, and I believe it is a [positive/negative] development.'],
+     t1:['The preference for [danh từ] often stems from [danh từ].','Perhaps the foremost reason for [danh từ] lies in [danh từ].'],
+     t2:['From an evaluative perspective, [danh từ] offers more far-reaching benefits.','In my view, this is a [positive/negative] development, since [mệnh đề].'],
+     c:['To summarize, [danh từ] is shaped by [danh từ]. From my perspective, [V-ing] represents a more forward-thinking approach.','In conclusion, [danh từ] is mainly the result of [danh từ], and I believe it is a [positive/negative] trend overall.'] }
+  ],
+  note:'Đề so sánh hai xu hướng thì bài mẫu "Cars vs bicycles" viết 3 thân bài: lý do của xu hướng A, lý do của xu hướng B, rồi đánh giá.',
+  mist:['Chỉ trả lời "Why" rồi quên phần đánh giá.','Đánh giá kiểu "vừa tốt vừa xấu". Đề hỏi tốt hay xấu thì chọn một bên.'],
+  phr:[['divergent trends','những xu hướng trái ngược'],['can be attributed to','có thể quy cho'],['From an evaluative perspective','xét về mặt đánh giá'],['forward-thinking','có tầm nhìn xa']],
+  ex:{ t:'Cars vs bicycles', s:'x',
+   i:'In recent years, cities around the world have witnessed divergent trends in transportation preferences, with some favoring cars while others embrace bicycles. These contrasting developments can be attributed to a number of factors, and I believe the shift towards bicycles is a more sustainable choice for urban living.',
+   c:'To summarize, the contrasting transportation preferences across cities are shaped by urban infrastructure, cultural attitudes, and environmental awareness. From my perspective, the adoption of bicycles as a primary mode of transport represents a more forward-thinking and sustainable approach.' } },
+
+ how:{ n:'Vì sao + cách làm',
+  detect:'Đề hỏi "Why…?" rồi hỏi "What can be done to…?" hoặc "How can people…?". Các câu hỏi trực tiếp khác cũng dùng khung này.',
+  i1:['It is widely recognized that [mệnh đề nói lại đề].','There is an increasing trend towards [V-ing].'],
+  st:[
+   { k:'x', n:'',
+     p:[['Mở bài','Nói lại hiện tượng, rồi báo bài sẽ nêu lý do trước, cách làm sau.'],['Thân 1','Lý do.'],['Thân 2','Cách làm. Nói rõ ai làm, và làm thế nào.'],['Kết bài','Tóm lý do và cách làm.']],
+     i2:['This essay will outline the underlying causes of this trend, before suggesting how to [V nguyên thể].','This essay will first outline the underlying causes of this, before giving some methods that people can employ to [V nguyên thể].'],
+     t1:['Perhaps the foremost reason for [danh từ] lies in [danh từ].','To begin with, [danh từ] can be attributed to two main reasons.'],
+     t2:['In order to [V nguyên thể], a concerted effort should be made by both [A] and [B].','Given the aforementioned reasons, the following steps should be taken to [V nguyên thể].'],
+     c:['In conclusion, [danh từ] can be attributed to [danh từ]. To [V nguyên thể], it is imperative that [A] and [B] work in concert to [V nguyên thể].','To summarize, [danh từ] stems from [danh từ]. By [V-ing], [ai] can [V nguyên thể].'] }
+  ],
+  note:'Sau "it is imperative that" động từ để nguyên thể, không thêm s.',
+  mist:['Cách làm chung chung kiểu "the government should do something". Nói rõ ai làm, làm việc gì.','Kết bài thêm ý mới chưa có ở thân bài.'],
+  phr:[['the foremost reason for','lý do hàng đầu của'],['a concerted effort','sự chung tay'],['work in concert','cùng phối hợp'],['it is imperative that','việc … là rất cấp thiết']],
+  ex:{ t:'Old people neglected', s:'x',
+   i:'In various societies across the globe, the treatment of the elderly varies significantly. While some cultures revere and honor their older citizens, others perceive them as burdensome and treat them with neglect. This essay will delve into the underlying causes of this disparity, before showing how to encourage greater respect for the elderly.',
+   c:'In conclusion, the varying attitudes towards the elderly can be attributed to cultural values and traditions. To promote greater respect for older individuals, it is imperative that parents and schools work in concert to nurture a sense of reverence for the aged in children.' } }
+};
+const stanceOf = (fk, sk) => { const st = (GUIDE[fk]||GUIDE.agree).st; return st.find(s=>s.k===sk) || st[0]; };
+function rowsFor(fk, sk){
+  const G = GUIDE[fk]||GUIDE.agree, S = stanceOf(fk, sk);
+  return [['Mở bài 1',G.i1[0]],['Mở bài 2',S.i2[0]],['Thân 1',S.t1[0]],['Thân 2',S.t2[0]],['Kết bài',S.c[0]]];
+}
+/* Nhãn dạng đề trong bộ đề → khóa của GUIDE. Đề tự dán thì đoán theo câu hỏi tiếng Anh. */
+function frameFor(d, p){
+  d = d||''; p = (p||'').toLowerCase();
+  if(/Đồng ý/.test(d)) return 'agree';
+  if(/Hai phe/.test(d)) return 'discuss';
+  if(/Lợi và hại/.test(d)) return 'outweigh';
+  if(/Nguyên nhân và đánh giá/.test(d)) return 'which';
+  if(/tốt hay xấu/.test(d)) return 'posneg';
+  if(/Vấn đề và nguyên nhân/.test(d)) return 'effect';
+  if(/giải pháp|hình phạt/.test(d)) return 'cause';
+  if(d && d!=='Đề riêng') return 'how';
+  const why = /\bwhy\b|reasons?\b|causes?\b/.test(p);
+  if(/agree or disagree/.test(p)) return 'agree';
+  if(/both views|both these views|both sides/.test(p)) return 'discuss';
+  if(/outweigh|advantages and disadvantages/.test(p)) return 'outweigh';
+  if(why && /solv|solution|measures|be done|tackle|address/.test(p)) return 'cause';
+  if(why && /effects?\b|impacts?\b|problems? does/.test(p)) return 'effect';
+  if(/positive or negative/.test(p)) return why ? 'which' : 'posneg';
+  if(why) return 'how';
+  return 'agree';
+}
+/* Đoán lập trường từ ô "Câu trả lời của mình" khi học sinh chưa tự chọn. */
+function guessStance(fk, txt){
+  const t = (txt||'').toLowerCase();
+  if(!t.trim()) return null;
+  if(fk==='agree'){
+    if(/bác bỏ|hoàn toàn không|phản đối hoàn toàn/.test(t)) return 'chal';
+    if(/một phần|phần nào|phần lớn|có điều kiện|giới hạn|tùy|tuỳ/.test(t)) return 'part';
+    if(/không đồng ý|phản đối|disagree/.test(t)) return 'dis';
+    if(/đồng ý|agree/.test(t)) return 'agr';
+  }
+  if(fk==='discuss') return /cả hai|kết hợp|hai bên|both/.test(t) ? 'both' : 'one';
+  if(fk==='outweigh'){
+    const iL = t.search(/lợi/), iH = t.search(/hại|bất lợi/);
+    if(/hơn|lớn|nhiều|nặng/.test(t) && iL>=0 && iH>=0) return iL<iH ? 'adv' : 'dis';
+    if(/hại lớn|hại nhiều|hại nặng/.test(t)) return 'dis';
+    if(/lợi lớn|lợi nhiều/.test(t)) return 'adv';
+  }
+  if(fk==='posneg'){
+    if(/tiêu cực|xấu|negative/.test(t)) return 'neg';
+    if(/tích cực|tốt|positive/.test(t)) return 'pos';
+  }
+  return null;
+}
+function curType(){
+  if(!sess || !sess.t2) return 'agree';
+  if(!GUIDE[sess.t2.frame]){ sess.t2.frame = frameFor(sess.t2.dang, sess.t2.prompt); store.set('plv_session',sess); }
+  return sess.t2.frame;
+}
+function curStance(){
+  const fk = curType(); let k = sess.t2.stance;
+  if(!GUIDE[fk].st.some(s=>s.k===k)){ k = guessStance(fk, (sess.t2.plan||{}).side) || GUIDE[fk].st[0].k; sess.t2.stance = k; sess.t2.stanceSet = false; store.set('plv_session',sess); }
+  return k;
+}
+const stanceChips = (fk, cur) => GUIDE[fk].st.map(s=>`<button class="chip" data-sk="${s.k}" aria-pressed="${s.k===cur}">${esc(s.n)}</button>`).join('');
+function setStance(k){ sess.t2.stance = k; sess.t2.stanceSet = true; store.set('plv_session',sess); renderFrame(); renderPlanStance(); renderNext(); }
+
+/* ---------- Bộ khung trong lúc viết ---------- */
+$('frameSel').innerHTML = GROUPS.map(([gl,ks])=>`<optgroup label="${gl}">${ks.map(k=>`<option value="${k}">${esc(GUIDE[k].n)}</option>`).join('')}</optgroup>`).join('');
+function renderFrame(){
+  if(!sess || !sess.t2) return;
+  const fk = curType(), sk = curStance(), G = GUIDE[fk], S = stanceOf(fk, sk);
+  $('stanceChips').hidden = G.st.length<2;
+  $('stanceChips').innerHTML = G.st.length<2 ? '' : stanceChips(fk, sk);
+  $('stanceChips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setStance(b.dataset.sk));
+  const note = S.note || G.note;
+  $('frameBody').innerHTML = rowsFor(fk, sk).map(([k,v])=>`<div class="frow"><div class="k">${k}</div><div class="v">${slotify(v)}</div></div>`).join('') + (note?`<div class="fnote" style="margin-top:8px">${esc(note)}</div>`:'');
+}
+$('frameSel').onchange=()=>{
+  if(!sess || !sess.t2) return;
+  sess.t2.frame = $('frameSel').value;
+  if(!GUIDE[sess.t2.frame].st.some(s=>s.k===sess.t2.stance)){ sess.t2.stance = null; sess.t2.stanceSet = false; }
+  store.set('plv_session',sess); renderPlan(); renderFrame(); renderNext();
+};
+$('toGuide').onclick=()=>{ gType = curType(); gStance = curStance(); showTab('guide'); window.scrollTo(0,0); };
+let autoClose=false;
+$('frameCard').addEventListener('toggle',()=>{ const o=$('frameCard').open; $('frameToggle').textContent = o?'Ẩn':'Hiện'; if(!autoClose) store.set('plv_frame_open',o); });
+{ const o=store.get('plv_frame_open'); if(o===false){ $('frameCard').open=false; $('frameToggle').textContent='Hiện'; } }
+function showFrame(){
+  const on = !!sess && activeT==='t2' && !!sess.t2.prompt;
+  $('frameCard').hidden = !on;
+  if(!on) return;
+  $('frameSel').value = curType(); renderFrame();
+}
+
+/* ---------- tab Mở & kết bài ---------- */
+let gType=null, gStance=null;
+const gList = arr => `<ol class="gopt">${arr.map(x=>`<li>${slotify(x)}</li>`).join('')}</ol>`;
+function renderGuide(){
+  if(!GUIDE[gType]) gType = (sess && sess.t2 && sess.t2.prompt) ? curType() : 'agree';
+  const G = GUIDE[gType], S = stanceOf(gType, gStance); gStance = S.k;
+  $('gTypes').innerHTML = GROUPS.map(([gl,ks])=>`<div class="grid" style="gap:6px"><div class="label">${gl}</div><div class="seg">${ks.map(k=>`<button class="chip" data-g="${k}" aria-pressed="${k===gType}">${esc(GUIDE[k].n)}</button>`).join('')}</div></div>`).join('');
+  $('gTypes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ gType=b.dataset.g; gStance=null; renderGuide(); });
+  $('gBackBox').innerHTML = sess ? '<div class="gback"><span>Bài đang viết vẫn được giữ, đồng hồ vẫn chạy.</span><button class="btn ghost" id="gBack">← Quay lại bài đang viết</button></div>' : '';
+  if($('gBack')) $('gBack').onclick=()=>{ showTab('write'); window.scrollTo(0,0); };
+  const multi = G.st.length>1;
+  const ex = G.ex, exS = stanceOf(gType, ex.s);
+  $('guideBody').innerHTML = `
+    <div class="card grid">
+      <h2>${esc(G.n)}</h2>
+      <div class="sub">${esc(G.detect)}</div>
+      ${multi?`<div class="grid" style="gap:6px"><div class="label">Lập trường</div><div class="seg" id="gStances">${stanceChips(gType, S.k)}</div><div class="sub">${esc(S.when)}</div></div>`:''}
+    </div>
+    <div class="card grid">
+      <div class="label">Bố cục 4 đoạn</div>
+      <div>${S.p.map(([k,v])=>`<div class="frow"><div class="k">${k}</div><div style="min-width:0">${esc(v)}</div></div>`).join('')}</div>
+    </div>
+    <div class="card grid">
+      <div class="label">Mở bài</div>
+      <div class="ghead">Câu 1 · nói lại đề bằng lời của mình</div>${gList(G.i1)}
+      <div class="ghead">Câu 2 · trả lời thẳng câu hỏi của đề</div>${gList(S.i2)}
+      <div class="label" style="margin-top:6px">Câu mở đầu thân bài</div>
+      <div class="ghead">Thân 1</div>${gList(S.t1)}
+      <div class="ghead">Thân 2</div>${gList(S.t2)}
+      <div class="label" style="margin-top:6px">Kết bài</div>
+      ${gList(S.c)}
+      ${(S.note||G.note)?`<div class="fnote">${esc(S.note||G.note)}</div>`:''}
+      <div class="sub"><span class="slot">mệnh đề</span> là câu đủ chủ ngữ và động từ. <span class="slot">danh từ</span> là cụm danh từ. <span class="slot">V-ing</span> là động từ thêm ing.</div>
+    </div>
+    <div class="card grid">
+      <div class="label">Mở bài và kết bài mẫu · bài "${esc(ex.t)}"${multi?` · lập trường ${esc(exS.n)}`:''}</div>
+      <div class="gex"><div class="ghead">Mở bài</div><p>${esc(ex.i)}</p><div class="ghead">Kết bài</div><p>${esc(ex.c)}</p></div>
+    </div>
+    <div class="card grid">
+      <div class="label">Lỗi hay gặp</div>
+      <ul class="gmist">${G.mist.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      <div class="label" style="margin-top:6px">Cụm nên dùng</div>
+      <div class="tscroll"><table>${G.phr.map(([en,vi])=>`<tr><td class="en">${esc(en)}</td><td>${esc(vi)}</td></tr>`).join('')}</table></div>
+    </div>`;
+  if(multi) $('gStances').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ gStance=b.dataset.sk; renderGuide(); });
+}
+
+/* ---------- exam ---------- */
+let activeT='t2', tick=null;
+$('start').onclick=()=>{
+  sess = { id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), mode, level: mode==='t2'?level:4, startedAt:Date.now(), minutes:minFor(mode), phase:'write', lastInputAt:Date.now(),
+    t2:{prompt: mode==='t1'?null:picked.p, promptId: mode==='t1'?null:picked.id, dang: mode==='t1'?null:picked.d, topic: mode==='t1'?null:picked.topic, sub: mode==='t1'?null:picked.sub, text:'', plan:{}, planDone: mode==='t1'},
+    t1:{prompt: mode==='t2'?null:$('t1prompt').value.trim(), source: mode==='t2'?null:$('t1src').value.trim(), text:''} };
+  activeT = mode==='t1'?'t1':(mode==='full'?'t1':'t2');
+  store.set('plv_session', sess); enterExam();
+};
+function curPart(){ return sess[activeT]; }
+function enterExam(){
+  showTab('write');
+  $('taskTabs').hidden = sess.mode!=='full';
+  document.querySelectorAll('#taskTabs .chip').forEach(b=>{ b.setAttribute('aria-pressed',String(b.dataset.t===activeT)); b.onclick=()=>{ saveEditor(); activeT=b.dataset.t; enterExam(); }; });
+  const p=curPart();
+  const L = LEVELS[lvOf(sess)];
+  $('promptCard').innerHTML = `<div class="label">${activeT==='t1'?'Task 1':'Task 2'}${activeT==='t2'&&sess.mode==='t2'?' · '+esc(L.n):''}${activeT==='t1'&&p.source?' · '+esc(p.source):''}</div><div class="promptbox">${esc(p.prompt)}</div><div class="sub">${activeT==='t1'?'Viết ít nhất 150 từ.':esc(L.need)}</div>`;
+  $('editor').value = sess.phase==='write' ? p.text : (p.final ?? p.text);
+  $('editor').readOnly = false;
+  $('checkCard').hidden = sess.phase!=='check';
+  $('phaseLabel').textContent = sess.phase==='write' ? (inGate()?'Lên ý':'Đang viết') : 'Tự soát';
+  $('submitBox').hidden = sess.phase!=='write'; if(sess.phase==='write' && !$('submit')) resetSubmit();
+  if(sess.phase==='check') renderChecklist();
+  $('nudge').hidden = true;
+  renderPlan(); applyGate(); showFrame(); updWC(); renderNext(); startTick();
+}
+
+/* ---------- ô lên ý ---------- */
+function inGate(){ return !!sess && activeT==='t2' && sess.phase==='write' && sess.t2 && sess.t2.prompt && !sess.t2.planDone; }
+function renderPlan(){
+  const on = !!sess && activeT==='t2' && !!sess.t2.prompt;
+  $('planCard').hidden = !on;
+  if(!on) return;
+  const L = LEVELS[lvOf(sess)], plan = sess.t2.plan || (sess.t2.plan={});
+  const fk = curType();
+  $('planFields').innerHTML = L.fields.map(k=>{
+    const F = PFIELDS[k]; const label = (k==='b1' && L.roles[0]==='body1') ? 'Ý của đoạn này, nói trong một câu' : F.l;
+    const ph = k==='side' ? (SIDE_PH[fk]||'') : (F.ph||'');
+    const ctl = F.area ? `<textarea id="pl-${k}" placeholder="${esc(ph)}">${esc(plan[k]||'')}</textarea>` : `<input type="text" id="pl-${k}" placeholder="${esc(ph)}" value="${esc(plan[k]||'')}">`;
+    return `<div class="pfield"><label for="pl-${k}">${esc(label)}</label>${ctl}<small>${esc(F.h)}</small></div>`;
+  }).join('');
+  L.fields.forEach(k=>{ $('pl-'+k).addEventListener('input',e=>{ plan[k]=e.target.value; if(k==='side') autoStance(e.target.value); store.set('plv_session',sess); renderTicks(); renderNext(); if(k==='side'){ $('planWarn').hidden=true; planWarned=false; $('planDone').textContent='Xong ý, bắt đầu viết →'; } }); });
+  renderTicks(); renderPlanStance();
+}
+function renderPlanStance(){
+  const on = !!sess && activeT==='t2' && !!sess.t2.prompt && GUIDE[curType()].st.length>1;
+  $('planStance').hidden = !on;
+  if(!on) return;
+  const fk = curType(), sk = curStance();
+  $('planStanceChips').innerHTML = stanceChips(fk, sk);
+  $('planStanceChips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setStance(b.dataset.sk));
+  $('planStanceWhen').textContent = stanceOf(fk, sk).when + (sess.t2.stanceSet ? '' : ' Máy tự chọn theo ô Câu trả lời, bấm để đổi.');
+}
+function autoStance(v){
+  if(sess.t2.stanceSet) return;
+  const g = guessStance(curType(), v);
+  if(g && g!==sess.t2.stance){ sess.t2.stance = g; renderPlanStance(); renderFrame(); }
+}
+function renderTicks(){
+  if(!sess || !sess.t2.plan) return;
+  const L = LEVELS[lvOf(sess)];
+  if(!L.fields.includes('crit')){ $('thesisTicks').innerHTML=''; return; }
+  const p = sess.t2.plan, t = (k,n)=>`<span class="tick ${(p[k]||'').trim()?'on':''}">${(p[k]||'').trim()?'✓':'○'} ${n}</span>`;
+  $('thesisTicks').innerHTML = `<span class="sub">Thesis cần đủ</span>${t('side','câu trả lời')}${t('crit','tiêu chí')}${t('cond','điều kiện')}`;
+}
+let planWarned=false;
+function applyGate(){
+  const g = inGate();
+  $('split').classList.toggle('gate', g);
+  $('editorCard').hidden = g;
+  $('planGo').hidden = !g;
+  if(g){ $('planCard').open = true; }
+  planWarned=false; $('planWarn').hidden=true; $('planDone').textContent='Xong ý, bắt đầu viết →';
+}
+$('planDone').onclick=()=>{
+  const side=((sess.t2.plan||{}).side||'').trim();
+  if(!side && !planWarned){ planWarned=true; $('planWarn').hidden=false; $('planDone').textContent='Vẫn bắt đầu viết'; return; }
+  sess.t2.planDone=true; sess.t2.planSec=Math.round((Date.now()-sess.startedAt)/1000); sess.lastInputAt=Date.now();
+  store.set('plv_session',sess); enterExam();
+  if(window.innerWidth<920){ autoClose=true; $('planCard').open=false; $('frameCard').open=false; setTimeout(()=>{autoClose=false;},150); }
+  $('editor').focus();
+};
+$('planCard').addEventListener('toggle',()=>{ $('planToggle').textContent = $('planCard').open?'Ẩn':'Hiện'; });
+
+/* ---------- câu tiếp theo ---------- */
+function slotNow(){
+  const L = LEVELS[lvOf(sess)], text = $('editor').value;
+  const paras = text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  const fresh = !text.trim() || /\n\s*$/.test(text);
+  const pi = fresh ? paras.length : paras.length-1;
+  const cur = fresh ? '' : paras[pi];
+  const si = (cur.match(/[.!?]+(?=\s|$)/g)||[]).length;
+  const role = L.roles[pi];
+  if(!role) return {n:'Đã đủ các đoạn', h:'Bậc này không cần thêm đoạn nào. Soát lại rồi bấm Nộp bài.', end:true};
+  let seq = ROLE[role];
+  if(typeof seq==='string') seq = bodyRole(seq, role==='body2');
+  const s = seq[Math.min(si, seq.length-1)];
+  const isLastPara = pi===L.roles.length-1;
+  if(s.end) return {...s, h: s.h + (isLastPara ? ' Bấm Nộp bài.' : ' Xuống dòng để sang đoạn tiếp theo.')};
+  return s;
+}
+function renderNext(){
+  const on = !!sess && activeT==='t2' && sess.phase==='write' && !inGate();
+  $('nextStrip').hidden = !on;
+  if(!on) return;
+  const s = slotNow(), plan = sess.t2.plan||{};
+  const rows = rowsFor(curType(), curStance());
+  const NAME = {side:'Câu trả lời', crit:'Tiêu chí', cond:'Điều kiện', b1:'Ý thân 1', b2:'Ý thân 2'};
+  const pl = (s.p||[]).filter(k=>(plan[k]||'').trim()).map(k=>`<div class="pl"><b>${NAME[k]}</b> · ${esc(plan[k])}</div>`).join('');
+  const fl = (s.f!==undefined && rows[s.f]) ? `<div class="en">${slotify(rows[s.f][1])}</div>` : '';
+  $('nextStrip').innerHTML = `<div class="label">Câu tiếp theo</div><div class="nh">${esc(s.n)}</div><div>${esc(s.h)}</div>${pl}${fl}`;
+}
+function showNudge(){
+  const L = lvOf(sess);
+  const items = [
+    'Câu này chỉ cần đúng, chưa cần hay. Câu hay để lúc soát.',
+    activeT==='t2' ? 'Nhìn khung vàng ở trên. Chép ý của mình sang tiếng Anh thật đơn giản, gồm một nhóm người, họ làm gì, và vì sao.' : 'Viết câu đơn giản nhất mô tả một số liệu nổi bật.',
+    L<4 ? 'Bí một từ thì gõ [tiếng Việt] trong ngoặc vuông rồi viết tiếp. Lúc soát quay lại sửa.' : 'Bí một từ thì đổi sang từ đơn giản hơn mà mình chắc đúng.'
+  ];
+  $('nudgeList').innerHTML = items.map(x=>`<li>${esc(x)}</li>`).join('');
+  $('nudge').hidden = false;
+}
+$('nudgeOk').onclick=()=>{ $('nudge').hidden=true; if(sess){ sess.lastInputAt=Date.now(); store.set('plv_session',sess); } $('editor').focus(); };
+function saveEditor(){ if(!sess) return; const p=curPart(); if(sess.phase==='write') p.text=$('editor').value; else p.final=$('editor').value; store.set('plv_session',sess); }
+function updWC(){ const n=words($('editor').value); const min = activeT==='t1'?150:(sess?LEVELS[lvOf(sess)].wc:250); $('wc').textContent = n+' từ'; $('wc').style.color = n<min ? 'var(--muted)' : 'var(--green)'; }
+let saveT=null;
+$('editor').addEventListener('input',()=>{ updWC(); renderNext(); updBrackets(); if(sess){ sess.lastInputAt=Date.now(); } $('nudge').hidden=true; clearTimeout(saveT); saveT=setTimeout(saveEditor,400); });
+$('editor').addEventListener('keyup',e=>{ if(e.key&&e.key.startsWith('Arrow')) renderNext(); });
+function updBrackets(){ if(!sess||sess.phase!=='check'){ $('bracketNote').hidden=true; return; } const n=($('editor').value.match(/\[[^\]\n]*\]/g)||[]).length; $('bracketNote').hidden=!n; $('bracketNote').textContent=`Còn ${n} chỗ trong ngoặc vuông [ ] chưa viết lại bằng tiếng Anh.`; }
+$('editor').addEventListener('paste',e=>{ e.preventDefault(); $('pasteNote').hidden=false; setTimeout(()=>$('pasteNote').hidden=true,3000); });
+$('editor').addEventListener('drop',e=>e.preventDefault());
+function startTick(){
+  clearInterval(tick);
+  const run=()=>{
+    if(!sess) return;
+    if(sess.phase==='write'){
+      const left = sess.startedAt + sess.minutes*60000 - Date.now();
+      $('clock').textContent = fmtT(left/1000); $('clock').classList.toggle('low', left<5*60000);
+      if(left<=0) { endWriting(true); return; }
+      if(inGate()){ const L=LEVELS[lvOf(sess)]; const used=(Date.now()-sess.startedAt)/1000; $('planClock').textContent=`Đã lên ý ${fmtT(used)}. Gợi ý tối đa ${L.plan} phút.`; $('planClock').style.color = used>L.plan*60 ? 'var(--coral)' : ''; }
+      else { $('planClock').textContent = sess.t2&&sess.t2.planSec ? `Lên ý mất ${fmtT(sess.t2.planSec)}.` : ''; $('planClock').style.color=''; }
+      if(!inGate() && $('nudge').hidden && Date.now()-(sess.lastInputAt||sess.startedAt) > 90000) showNudge();
+    } else {
+      const cm = LEVELS[lvOf(sess)].check; const left = sess.checkStart + cm*60000 - Date.now();
+      $('clock').textContent = left>0 ? fmtT(left/1000) : 'Hết '+cm+' phút'; $('clock').classList.toggle('low', left<60000);
+    }
+  };
+  run(); tick=setInterval(run,500);
+}
+function resetBack(){ $('backBox').innerHTML='<button class="btn ghost" id="back">← Chọn đề khác</button>'; $('back').onclick=askBack; }
+function askBack(){
+  $('backBox').innerHTML='<span class="sub">Bỏ bài đang viết?</span><button class="btn danger" id="backYes">Bỏ bài</button><button class="btn ghost" id="backNo">Ở lại</button>';
+  $('backYes').onclick=()=>{ clearInterval(tick); sess=null; store.del('plv_session'); resetBack(); resetSubmit(); $('saveMsg').innerHTML=''; $('save').disabled=false; $('clock').classList.remove('low'); showTab('write'); window.scrollTo(0,0); };
+  $('backNo').onclick=resetBack;
+}
+resetBack();
+function resetSubmit(){ $('submitBox').innerHTML='<button class="btn" id="submit">Nộp bài</button>'; $('submit').onclick=askSubmit; }
+function askSubmit(){
+  $('submitBox').innerHTML = '<span class="sub">Nộp bài bây giờ?</span><button class="btn danger" id="yes">Nộp</button><button class="btn ghost" id="no">Viết tiếp</button>';
+  $('yes').onclick=()=>endWriting(false);
+  $('no').onclick=resetSubmit;
+}
+resetSubmit();
+function endWriting(timeUp){
+  saveEditor();
+  for(const t of ['t1','t2']) if(sess[t].prompt){ sess[t].atTime = sess[t].text; sess[t].final = sess[t].text; }
+  sess.usedSec = Math.min(sess.minutes*60, Math.round((Date.now()-sess.startedAt)/1000));
+  sess.timeUp = timeUp; sess.phase='check'; sess.checkStart=Date.now(); sess.checks={};
+  store.set('plv_session',sess);
+  resetSubmit();
+  enterExam();
+}
+function renderChecklist(){
+  $('checklist').innerHTML = ERR.map(e=>`<label><input type="checkbox" id="ck-${e.k}" ${sess.checks[e.k]?'checked':''}><span><b>${e.n}</b><small>${e.ex}</small></span></label>`).join('');
+  ERR.forEach(e=>$('ck-'+e.k).onchange=ev=>{ sess.checks[e.k]=ev.target.checked; store.set('plv_session',sess); });
+  $('checkCard').querySelector('.sub').textContent = `Bài lúc hết giờ đã được giữ lại. Giờ ta sửa trực tiếp trong khung viết, có ${LEVELS[lvOf(sess)].check} phút. Soát từng lỗi, xong thì đánh dấu.`;
+  updBrackets();
+}
+
+/* ---------- db ---------- */
+let db=null, essays=[], local=store.get('plv_local')||[];
+$('save').onclick=async()=>{
+  saveEditor();
+  const doc = { createdAt: sess.startedAt, savedAt: Date.now(), mode: sess.mode, level: lvOf(sess), minutes: sess.minutes, usedSec: sess.usedSec, timeUp: !!sess.timeUp,
+    checks: sess.checks, status: 'waiting' };
+  for(const t of ['t1','t2']) if(sess[t].prompt){
+    const p=sess[t];
+    doc[t] = { prompt:p.prompt, promptId:p.promptId||null, dang:p.dang||null, frame:p.frame||null, stance:p.stance||null, topic:p.topic||null, sub:p.sub||null, source:p.source||null,
+      atTime:p.atTime||'', final:p.final||'', wordsAtTime:words(p.atTime||''), wordsFinal:words(p.final||'') };
+    if(t==='t2'){ doc.t2.plan = p.plan||{}; doc.t2.planSec = p.planSec||null; }
+  }
+  $('save').disabled=true;
+  let ok=false;
+  if(db){ try{ await db.collection('essays').doc(sess.id).set(doc); ok=true; }catch(e){ ok=false; } }
+  if(!ok){ local.unshift({id:sess.id, ...doc}); store.set('plv_local',local); }
+  $('saveMsg').innerHTML = ok
+    ? '<div class="okbox">Đã lưu. Nhắn Claude: <b>chấm bài mới nhất</b>.</div><div class="row" style="margin-top:8px"><button class="btn" id="again">Viết bài mới</button></div>'
+    : '<div class="okbox">Đã lưu trên trình duyệt này. Muốn được chấm thì bấm Sao chép bài rồi dán cho Claude hoặc gửi giáo viên.</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="copy">Sao chép bài</button><button class="btn" id="again">Viết bài mới</button></div>';
+  if($('copy')) $('copy').onclick=()=>{ const txt=['t1','t2'].filter(t=>doc[t]).map(t=>`[${t.toUpperCase()}] ${doc[t].prompt}\n\n${doc[t].final}`).join('\n\n-----\n\n'); navigator.clipboard.writeText(txt).catch(()=>{}); };
+  $('backBox').innerHTML='<button class="btn ghost" id="back">← Chọn đề khác</button>'; $('back').onclick=()=>$('again').click();
+  $('again').onclick=()=>{ $('clock').classList.remove('low'); sess=null; store.del('plv_session'); clearInterval(tick); picked=null; $('ownT2').value=''; $('t1prompt').value=''; renderList(); renderChosen(); $('save').disabled=false; $('saveMsg').innerHTML=''; resetBack(); showTab('write'); renderHist(); };
+  renderHist();
+};
+
+function allEssays(){ const ids=new Set(essays.map(e=>e.id)); return essays.concat(local.filter(e=>!ids.has(e.id))).sort((a,b)=>b.createdAt-a.createdAt); }
+function renderHist(){
+  const list=allEssays();
+  const weekStart = (()=>{ const d=new Date(); const day=(d.getDay()+6)%7; d.setHours(0,0,0,0); d.setDate(d.getDate()-day); return d.getTime(); })();
+  const thisWeek = list.filter(e=>e.createdAt>=weekStart).length;
+  const full = list.filter(e=>e.createdAt>=weekStart && (e.mode!=='t2' || !e.level || e.level===4)).length;
+  $('weekline').textContent = `Tuần này ${thisWeek} bài, trong đó ${full} bài đủ giờ thi thật. Mục tiêu 3 bài đủ giờ mỗi tuần.`;
+  const marked = list.filter(e=>e.marks);
+  $('stats').innerHTML = [
+    ['Tổng số bài', list.length],
+    ['Tuần này', thisWeek+' / 3'],
+  ].map(([l,n])=>`<div><div class="label">${l}</div><div class="n">${n}</div></div>`).join('');
+  const last = marked.slice(0,10).reverse();
+  if(!last.length){ $('trend').innerHTML='<div class="empty">Chưa có bài nào được chấm. Sau khi Claude chấm, số lỗi từng loại sẽ hiện ở đây.</div>'; }
+  else {
+    const maxV = Math.max(1, ...last.flatMap(e=>ERR.map(x=>+e.marks[x.k]||0)));
+    $('trend').innerHTML = ERR.map(x=>{
+      const w=300, h=34, bw=w/10;
+      const bars = last.map((e,i)=>{ const v=+e.marks[x.k]||0; const bh=Math.max(2,(v/maxV)*(h-12)); const isLast=i===last.length-1;
+        return `<rect x="${i*bw+3}" y="${h-bh}" width="${bw-6}" height="${bh}" rx="2" fill="${isLast?'var(--teal)':'var(--line)'}"><title>${fmtD(e.createdAt)}: ${v} lỗi</title></rect><text x="${i*bw+bw/2}" y="${h-bh-2}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="JetBrains Mono,monospace">${v}</text>`; }).join('');
+      return `<div class="trow"><div style="font-size:.85rem">${x.n}</div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${x.n}">${bars}</svg></div>`;
+    }).join('');
+  }
+  $('hist').innerHTML = list.map((e,i)=>{
+    const t = e.t2||e.t1; const st = e.marks ? '<span class="badge done">Đã chấm</span>' : '<span class="badge wait">Chờ chấm</span>';
+    return `<button class="hrow" data-i="${i}"><span class="d">${fmtD(e.createdAt)}</span><span class="t">${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level&&e.level<4?' · Bậc '+e.level:''} · ${esc(t?t.prompt:'')}</span>${st}</button>`;
+  }).join('') || '<div class="empty">Chưa có bài nào. Vào tab Viết bài, chọn một đề, rồi bấm Bắt đầu tính giờ.</div>';
+  $('hist').querySelectorAll('.hrow').forEach(b=>b.onclick=()=>showDetail(list[+b.dataset.i]));
+}
+function showDetail(e){
+  const parts = ['t1','t2'].filter(t=>e[t]).map(t=>{ const p=e[t]; const changed = p.atTime!==p.final;
+    return `<div class="grid" style="gap:8px"><div class="label">${t==='t1'?'Task 1':'Task 2'}${p.topic?' · '+esc(p.topic):''}</div><div class="promptbox">${esc(p.prompt)}</div>
+    ${t==='t2'&&p.plan&&Object.values(p.plan).some(v=>(v||'').trim()) ? `<div class="planview"><div class="label">Ô lên ý${p.planSec?' · '+fmtT(p.planSec):''}</div>${Object.entries(p.plan).filter(([k,v])=>(v||'').trim()).map(([k,v])=>`<div><b>${esc((PFIELDS[k]||{l:k}).l)}</b> · ${esc(v)}</div>`).join('')}</div>` : ''}
+    <div class="sub">${p.wordsFinal} từ${changed?`, tự soát đã sửa (lúc hết giờ ${p.wordsAtTime} từ)`:', không sửa gì khi tự soát'}</div><div class="essay">${esc(p.final)}</div></div>`; }).join('');
+  const marks = e.marks ? `<div class="tscroll"><table><tr><th>Lỗi</th><th>Số lần</th></tr>${ERR.map(x=>`<tr><td>${x.n}</td><td>${+e.marks[x.k]||0}</td></tr>`).join('')}${e.marks.other?`<tr><td>Lỗi khác</td><td>${+e.marks.other||0}</td></tr>`:''}</table></div>` : '';
+  const fb = e.feedback ? `<div class="label">Nhận xét của Claude</div><div class="fb">${esc(e.feedback)}</div>` : '<div class="row"><button class="btn ghost" id="copyD">Sao chép bài</button><span class="sub" id="copyMsg"></span></div>';
+  const used = e.usedSec ? `Dùng ${fmtT(e.usedSec)} trên ${e.minutes}:00${e.timeUp?', hết giờ tự khóa':''}.` : '';
+  $('detail').hidden=false;
+  $('detail').innerHTML = `<div class="row" style="justify-content:space-between"><h2>${fmtD(e.createdAt)} · ${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level?' · '+esc((LEVELS[e.level]||{n:''}).n):''}</h2><button class="btn ghost" id="closeD">Đóng</button></div><div class="sub">${used}</div>${parts}${fb}${marks}`;
+  $('closeD').onclick=()=>{$('detail').hidden=true};
+  if($('copyD')) $('copyD').onclick=()=>{ const txt=['t1','t2'].filter(t=>e[t]).map(t=>{ const p=e[t]; const pl=(t==='t2'&&p.plan)?Object.entries(p.plan).filter(([k,v])=>(v||'').trim()).map(([k,v])=>`- ${(PFIELDS[k]||{l:k}).l}: ${v}`).join('\n'):''; return `[${t.toUpperCase()}${e.level&&e.mode==='t2'?' · Bậc '+e.level:''}] ${p.prompt}${pl?'\n\nÔ lên ý\n'+pl:''}\n\n${p.final}`; }).join('\n\n-----\n\n'); navigator.clipboard.writeText(txt).then(()=>{$('copyMsg').textContent='Đã sao chép.';}).catch(()=>{$('copyMsg').textContent='Máy không cho sao chép tự động. Hãy bôi đen bài ở trên rồi sao chép.';}); };
+  $('detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- boot ---------- */
+if(sess){ if(!sess.level) sess.level=4; if(sess.t2 && sess.t2.planDone===undefined){ sess.t2.planDone=true; sess.t2.plan=sess.t2.plan||{}; } activeT = sess.mode==='t2'?'t2':'t1'; enterExam(); } else showTab('write');
+$('lvlCard').hidden = mode!=='t2';
+renderHist();
+(async()=>{
+  try{ db = await window.claude?.use?.('db'); }catch(e){ db=null; }
+  if(!db) return;
+  db.collection('essays').orderBy('createdAt','desc').limit(200).onSnapshot(snap=>{
+    essays = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderHist();
+  }, ()=>{});
+})();
+})();
+</script>
+
+</body></html>
+</body>
+</html>
