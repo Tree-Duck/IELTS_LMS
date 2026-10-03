@@ -8950,18 +8950,6 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-pie-wrap { text-align: center; }
 .t1-chart svg.t1-pie { width: min(220px, 60vw); height: auto; display: block; margin: 0.4rem auto; }
 .t1-opts--long .t1-opt span { text-align: left; line-height: 1.4; }
-.t1-proc-title { font-weight: 800; font-size: 1.15rem; margin: 0.4rem 0; color: var(--gray-800); }
-.t1-belt { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; padding: 0.6rem; border-radius: 14px; background: repeating-linear-gradient(90deg, #EAEFEC, #EAEFEC 10px, #DFE6E2 10px, #DFE6E2 20px); }
-.t1-belt i { font-style: normal; opacity: 0.5; }
-.t1-belt-slot { min-width: 3rem; min-height: 3rem; padding: 0.25rem 0.4rem; border-radius: 10px; border: 2px dashed #A9B9B1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.6); font-size: 0.7rem; text-align: center; }
-.t1-belt-slot b { color: #7E918A; font-size: 0.95rem; }
-.t1-belt-slot.on { border: 2px solid #1F8A4C; background: #fff; animation: jCard .3s; }
-.t1-belt-slot span { font-size: 1.3rem; }
-.t1-proc-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
-.t1-proc-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; padding: 0.7rem 0.5rem; border-radius: 14px; border: 2px solid var(--line); background: var(--surface, #fff); font: inherit; font-weight: 700; font-size: 0.9rem; color: var(--gray-800); cursor: pointer; }
-.t1-proc-card span { font-size: 1.8rem; }
-.t1-proc-card kbd { position: absolute; top: 4px; left: 6px; font-size: 0.7rem; opacity: 0.55; }
-.t1-proc-card:hover { border-color: var(--forest); }
 .t1-stat.late { color: #E5533D; }
 
 /* Task 1 vocabulary review */
@@ -8996,7 +8984,6 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 .t1-table th, .t1-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #DCE7E1; text-align: center; }
 .t1-table thead th { background: #EEF4F1; }
-.t1-belt--lib .t1-belt-slot { min-width: 4.2rem; }
 @media (max-width: 640px) { .t1-pies { grid-template-columns: 1fr; } }
 .t1-mix { display: grid; gap: 0.6rem; }
 .t1-cyc-arc { fill: none; stroke: #7E9C90; stroke-width: 3; }
@@ -9078,6 +9065,20 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 @media (max-width: 900px) { .t1m-grid { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .t1m-slider .vb-secondary-btn { padding: 0.3rem 0.5rem; font-size: 0.78rem; } .t1m-chip { font-size: 0.86rem; } }
 
+/* ─── TASK 1 · QUY TRÌNH (diagram with arrows, step sentences, joins) ─── */
+.t1p-svg { display: block; width: 100%; height: auto; }
+.t1p-box rect { fill: #FFFFFF; stroke: #3E4A44; stroke-width: 2; }
+.t1p-box.done rect { fill: #EAF6EE; stroke: #1F8A4C; }
+.t1p-box.cur rect { fill: #F1EDFF; stroke: #5B3FD9; stroke-width: 3; stroke-dasharray: 8 5; }
+.t1p-n { font-size: 12px; font-weight: 800; fill: #5B3FD9; text-anchor: middle; }
+.t1p-icon { font-size: 22px; text-anchor: middle; }
+.t1p-lab { font-size: 12px; font-weight: 700; fill: #1E2B25; text-anchor: middle; }
+.t1p-arrow { stroke: #5B655F; stroke-width: 2.5; }
+.t1p-loop { fill: none; stroke: #1F8A4C; stroke-width: 2.5; stroke-dasharray: 7 5; }
+.t1p-looplab { font-size: 12px; font-weight: 700; fill: #1F8A4C; text-anchor: middle; paint-order: stroke; stroke: #FFFDF6; stroke-width: 4px; }
+.t1p-tip { margin: 0.5rem 0 0; padding: 0.5rem 0.8rem; border-radius: 12px; background: #FFFDF6; border: 2px solid #E8DDBE; line-height: 1.45; }
+.t1p-gap { display: inline-block; min-width: 5rem; border-bottom: 3px solid #5B3FD9; color: #5B3FD9; font-weight: 800; }
+
 /* Sinh tồn ghép câu */
 .t1-surv-goal { margin: 0.4rem 0; }
 .t1-surv-slots { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
@@ -9093,7 +9094,6 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1-flash-peek.hidden { display: none; }
 .t1-flash-peek small { color: var(--gray-600); }
 .t1-proc-q { margin: 0 0 0.6rem; padding: 0.55rem 0.8rem; border-radius: 12px; background: #FFF6D6; border: 2px solid #EED58A; color: #4A3A00; line-height: 1.45; }
-.t1-proc-qbtn { margin-bottom: 0.6rem; }
 
 /* Task 1 · Chia đoạn thân bài */
 .t1-gtable { width: 100%; border-collapse: collapse; font-size: 0.95rem; }

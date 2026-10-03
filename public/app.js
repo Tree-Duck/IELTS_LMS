@@ -23590,7 +23590,7 @@ const T1_GAMES = {
   group:   { icon: '🧩', name: 'Chia đoạn thân bài',     desc: 'Biểu đồ có đủ số liệu. Chia các mục thành 2 đoạn thân bài: nhóm lớn và nhóm nhỏ, hoặc bên nào cao hơn ở mục nào. Rồi chọn câu mở đoạn.', start: 't1GroupStart()' },
   type:    { icon: '⌨️', name: 'Gõ nghĩa',               desc: 'Nghĩa tiếng Việt rơi xuống. Gõ đúng cụm tiếng Anh để bắn trước khi chạm đất. 3 mạng, nhanh dần.', start: 't1TypeStart()' },
   map:     { icon: '🗺️', name: 'Bản đồ: tìm thay đổi & viết bài', desc: 'Kéo thanh năm để thấy thị trấn đổi khác. Chạm chỗ thay đổi, ghép câu chủ ngữ + động từ + vị trí, chia đoạn, chọn overview, rồi xem bài em vừa ghép cạnh bài mẫu. 5 thị trấn.', start: 't1MapStart()' },
-  process: { icon: '⚙️', name: 'Dây chuyền quy trình',   desc: 'Các bước bị xáo trộn. Xếp lại đúng thứ tự trước khi hết giờ, rồi chọn câu bị động và từ nối.', start: 't1ProcStart()' },
+  process: { icon: '⚙️', name: 'Quy trình: tả từng bước & viết bài', desc: 'Sơ đồ có sẵn thứ tự như đề thi. Ghép câu từng bước (từ nối + chủ ngữ, động từ + chi tiết), gộp 2 bước thành 1 câu, chọn overview, rồi xem bài em ghép cạnh bài mẫu. 6 quy trình, có cả chu trình tự nhiên.', start: 't1ProcStart()' },
   compare: { icon: '📊', name: 'Cao hơn, thấp hơn',      desc: 'Nhìn các cột, chọn cụm so sánh đúng: cao nhất, gấp đôi, gần bằng nhau…', start: 't1CmpStart()' },
 };
 const T1_COLORS = ['#0E4D3C', '#E5533D', '#3E6FD8', '#B8860B'];
@@ -26842,232 +26842,347 @@ function t1MapEssay() {
   t1Finish(g, 'map', 'map', { big: `${escapeHtml(T.name)} · ${g.right} câu đúng ngay`, icon: g.misses.length ? '👏' : '🏆', good: !g.misses.length, list: html });
 }
 
-/* ── Static · Dây chuyền quy trình ────────────────────────────────────────
-   The steps of a process come shuffled. Put them in order before the clock
-   runs out; then fill the passive verb (and, from Dũng sĩ, the sequencer)
-   in a few of the step sentences. Three processes per game. */
-const T1_PROCS = [
-  { name: 'Brick manufacturing', icon: '🧱', steps: [
-    ['⛏️', 'Digging clay', 'To begin with, clay {is dug} from the ground by a large digger.', 'dig', 'dug'],
-    ['🧺', 'Sieving and mixing', 'Next, the clay {is placed} on a metal grid and mixed with sand and water.', 'place', 'placed'],
-    ['🔲', 'Moulding', 'After that, the mixture {is shaped} into bricks in a mould or by a wire cutter.', 'shape', 'shaped'],
-    ['💨', 'Drying', 'The bricks {are then left} to dry in a drying oven for 24 to 48 hours.', 'leave', 'left'],
-    ['🔥', 'Firing', 'Once they have dried, the bricks {are heated} in a kiln at a very high temperature.', 'heat', 'heated'],
-    ['❄️', 'Cooling', 'Following this, they {are cooled} in a cooling chamber for two to three days.', 'cool', 'cooled'],
-    ['📦', 'Packaging', 'Finally, the bricks {are packaged} and delivered to customers.', 'package', 'packaged'],
-  ] },
-  { name: 'Tea production', icon: '🍵', steps: [
-    ['🌱', 'Picking leaves', 'First, the tea leaves {are picked} by hand on plantations.', 'pick', 'picked'],
-    ['☀️', 'Withering', 'Next, the leaves {are spread} out to wither in warm air for several hours.', 'spread', 'spread'],
-    ['🌀', 'Rolling', 'After that, they {are rolled} by machines to release their natural oils.', 'roll', 'rolled'],
-    ['🫖', 'Fermenting', 'The leaves {are then left} to ferment, which turns them dark brown.', 'leave', 'left'],
-    ['🔥', 'Drying', 'Once they have fermented, the leaves {are dried} in hot ovens.', 'dry', 'dried'],
-    ['⚖️', 'Sorting', 'Following this, the dried leaves {are sorted} by size and quality.', 'sort', 'sorted'],
-    ['📦', 'Packing', 'Finally, the tea {is packed} into boxes and sent to shops.', 'pack', 'packed'],
-  ] },
-  { name: 'Recycling plastic bottles', icon: '♻️', steps: [
-    ['🗑️', 'Collecting', 'To begin with, used bottles {are collected} from recycling bins.', 'collect', 'collected'],
-    ['🚚', 'Transporting', 'They {are then taken} to a recycling plant by truck.', 'take', 'taken'],
-    ['🔍', 'Sorting', 'At the plant, the bottles {are sorted} by colour and type of plastic.', 'sort', 'sorted'],
-    ['💧', 'Washing', 'Next, they {are washed} to remove labels and dirt.', 'wash', 'washed'],
-    ['✂️', 'Shredding', 'After that, the clean bottles {are crushed} into small flakes.', 'crush', 'crushed'],
-    ['🫕', 'Melting', 'These flakes {are melted} down and formed into small pellets.', 'melt', 'melted'],
-    ['🧥', 'New products', 'Finally, the pellets {are used} to make new products such as clothing.', 'use', 'used'],
-  ] },
-  { name: 'Cement production', icon: '🏗️', steps: [
-    ['⛰️', 'Crushing raw materials', 'First, limestone and clay {are crushed} into a fine powder.', 'crush', 'crushed'],
-    ['🌀', 'Mixing', 'Next, the powder {is passed} through a mixer.', 'pass', 'passed'],
-    ['🔥', 'Heating', 'The mixture {is then heated} in a rotating heater.', 'heat', 'heated'],
-    ['⚙️', 'Grinding', 'After that, it {is ground} in a grinder to produce cement.', 'grind', 'ground'],
-    ['🛍️', 'Bagging', 'Finally, the cement {is packed} into bags for sale.', 'pack', 'packed'],
-  ] },
-  { name: 'Rainwater for drinking', icon: '🌧️', steps: [
-    ['🏠', 'Collecting from roofs', 'First, rainwater {is collected} from the roofs of houses.', 'collect', 'collected'],
-    ['🚰', 'Carrying in pipes', 'It {is then carried} through pipes to a storage tank.', 'carry', 'carried'],
-    ['🧹', 'Filtering', 'Next, the water {is filtered} to remove leaves and dirt.', 'filter', 'filtered'],
-    ['🧪', 'Adding chemicals', 'After that, chemicals {are added} to kill bacteria.', 'add', 'added'],
-    ['🛢️', 'Storing', 'The clean water {is stored} in a tank under the house.', 'store', 'stored'],
-    ['🚿', 'Using at home', 'Finally, it {is pumped} to the kitchen and bathroom for daily use.', 'pump', 'pumped'],
-  ] },
-  { name: 'Making chocolate', icon: '🍫', steps: [
-    ['🌳', 'Harvesting pods', 'To begin with, ripe cocoa pods {are harvested} from the trees.', 'harvest', 'harvested'],
-    ['🫘', 'Fermenting beans', 'Next, the beans {are removed} from the pods and left to ferment.', 'remove', 'removed'],
-    ['☀️', 'Drying', 'After that, the beans {are dried} in the sun for about a week.', 'dry', 'dried'],
-    ['🚢', 'Shipping', 'The dried beans {are then transported} to a chocolate factory by ship.', 'transport', 'transported'],
-    ['🔥', 'Roasting', 'Once they have arrived, the beans {are roasted} at a high temperature.', 'roast', 'roasted'],
-    ['⚙️', 'Crushing', 'Following this, they {are crushed} into a thick liquid.', 'crush', 'crushed'],
-    ['🍫', 'Moulding', 'Finally, sugar and milk {are added} and the mixture is poured into moulds.', 'add', 'added'],
-  ] },
+/* ── Static · Quy trình: tả từng bước, gộp câu, viết bài ─────────────────
+   The diagram is given, as in the exam: the order is never guessed. The
+   student describes the steps one by one, each sentence built from three
+   parts (sequencer, subject + verb, detail): the sequencer must fit the
+   step's place, the verb is passive for a man-made process and active for
+   a natural one, and the detail must belong to that step. Then two steps
+   are joined into one band 7 sentence (before being…, once … has been…,
+   which is then…), an overview is chosen, and the sentences become a whole
+   answer beside the model. Six processes: bricks, tea, plastic and glass
+   recycling, water treatment, and the life cycle of the monarch butterfly.
+   A step: { icon, label, s: subject, pl, base, pp (passive) or act with
+   third and past (active), d: the detail }. A join: { pre, gap, post,
+   traps: [[text, why]] }, the gap being the part the student picks. */
+const T1P_PROCS = [
+  { id: 'bricks', name: 'Brick manufacturing', icon: '🧱', sample: 'proc-bricks', kind: 'linear', steps: [
+    { icon: '⛏️', label: 'Digging clay', s: 'clay', base: 'dig', pp: 'dug', d: 'from the ground by a large digger' },
+    { icon: '🧺', label: 'Mixing with sand and water', s: 'the clay', base: 'mix', pp: 'mixed', d: 'with sand and water' },
+    { icon: '🔲', label: 'Moulding', s: 'the mixture', base: 'shape', pp: 'shaped', d: 'into bricks in a mould or by a wire cutter' },
+    { icon: '💨', label: 'Drying (24–48 hours)', s: 'the bricks', pl: true, base: 'dry', pp: 'dried', d: 'in a drying oven for 24 to 48 hours' },
+    { icon: '🔥', label: 'Firing in a kiln', s: 'the bricks', pl: true, base: 'heat', pp: 'heated', d: 'in a kiln at a very high temperature' },
+    { icon: '❄️', label: 'Cooling (2–3 days)', s: 'the bricks', pl: true, base: 'cool', pp: 'cooled', d: 'in a cooling chamber for two to three days' },
+    { icon: '📦', label: 'Packaging and delivery', s: 'the bricks', pl: true, base: 'package', pp: 'packaged', d: 'and delivered to customers' },
+  ], joins: [
+    { pre: 'Clay is dug from the ground by a large digger', gap: 'before being mixed', post: 'with sand and water.', traps: [['before mixed', 'Sau before cần V-ing; đất sét được trộn → before being mixed.'], ['before mixing', 'Đất sét không tự trộn → bị động: before being mixed.'], ['before it mixes', 'Đất sét không tự trộn → cần bị động: before being mixed.']] },
+    { pre: '', gap: 'Once they have been dried,', post: 'the bricks are heated in a kiln.', traps: [['Once they are drying,', 'Đang sấy thì chưa nung được. Bước trước phải xong → have been dried.'], ['Once they dried,', 'Quy trình dùng thì hiện tại: Once they have been dried.'], ['Once dried them,', 'Thiếu chủ ngữ, sai cấu trúc. Viết: Once they have been dried,']] },
+  ], ov: ['Overall, there are seven stages in the process, beginning with the digging of clay and ending with the delivery of the finished bricks to customers.',
+    ['Overall, the bricks are dried in an oven for 24 to 48 hours.', 'Đây là chi tiết có số liệu của một bước. Overview nói số bước, bước đầu và bước cuối.'],
+    ['Overall, the process is a natural cycle in which the clay returns to the ground.', 'Sai: đây là dây chuyền một chiều, có máy móc, không phải chu trình tự nhiên.']] },
+
+  { id: 'tea', name: 'Tea production', icon: '🍵', sample: 'proc-tea', kind: 'linear', steps: [
+    { icon: '🌱', label: 'Picking leaves by hand', s: 'the tea leaves', pl: true, base: 'pick', pp: 'picked', d: 'by hand on plantations' },
+    { icon: '☀️', label: 'Withering in warm air', s: 'the leaves', pl: true, base: 'spread', pp: 'spread', d: 'out to wither in warm air for several hours' },
+    { icon: '🌀', label: 'Rolling by machine', s: 'the leaves', pl: true, base: 'roll', pp: 'rolled', d: 'by machines to release their natural oils' },
+    { icon: '🫖', label: 'Fermenting', s: 'the leaves', pl: true, base: 'leave', pp: 'left', d: 'to ferment, which turns them dark brown' },
+    { icon: '🔥', label: 'Drying in ovens', s: 'the leaves', pl: true, base: 'dry', pp: 'dried', d: 'in hot ovens' },
+    { icon: '⚖️', label: 'Sorting', s: 'the dried leaves', pl: true, base: 'sort', pp: 'sorted', d: 'by size and quality' },
+    { icon: '📦', label: 'Packing', s: 'the tea', base: 'pack', pp: 'packed', d: 'into boxes and sent to shops' },
+  ], joins: [
+    { pre: 'The leaves are rolled by machines', gap: ', after which they are left', post: 'to ferment.', traps: [[', after which they left', 'Lá được để lên men → bị động: they are left.'], [', after that they are left', 'After that là trạng từ, không nối hai mệnh đề bằng dấu phẩy. Dùng after which.'], [', which they are left', 'Thiếu after: after which (sau đó).']] },
+    { pre: 'The leaves are dried in hot ovens', gap: 'and then sorted', post: 'by size and quality.', traps: [['and then sorting', 'Lá được phân loại → bị động: (are) sorted.'], ['and then are sort', 'Bị động = be + V3: sorted.'], ['then sorted', 'Thiếu and: hai động từ cần từ nối, and then sorted.']] },
+  ], ov: ['Overall, tea production involves seven stages, starting with picking the leaves by hand and finishing with packing the tea for shops.',
+    ['Overall, the leaves are rolled by machines to release their natural oils.', 'Đây là chi tiết của một bước. Overview nói số bước, bước đầu và bước cuối.'],
+    ['Overall, the process has three stages and ends when the leaves are picked.', 'Sai: có bảy bước, và hái lá là bước đầu tiên.']] },
+
+  { id: 'plastic', name: 'Recycling plastic bottles', icon: '♻️', sample: 'proc-recycle', kind: 'linear', steps: [
+    { icon: '🗑️', label: 'Collecting from bins', s: 'used bottles', pl: true, base: 'collect', pp: 'collected', d: 'from recycling bins' },
+    { icon: '🚚', label: 'Transporting by truck', s: 'they', pl: true, base: 'take', pp: 'taken', d: 'to a recycling plant by truck' },
+    { icon: '🔍', label: 'Sorting', s: 'the bottles', pl: true, base: 'sort', pp: 'sorted', d: 'by colour and type of plastic' },
+    { icon: '💧', label: 'Washing', s: 'the bottles', pl: true, base: 'wash', pp: 'washed', d: 'to remove labels and dirt' },
+    { icon: '✂️', label: 'Crushing into flakes', s: 'the clean bottles', pl: true, base: 'crush', pp: 'crushed', d: 'into small flakes' },
+    { icon: '🫕', label: 'Melting into pellets', s: 'the flakes', pl: true, base: 'melt', pp: 'melted', d: 'down and formed into small pellets' },
+    { icon: '🧥', label: 'Making new products', s: 'the pellets', pl: true, base: 'use', pp: 'used', d: 'to make new products such as clothing' },
+  ], joins: [
+    { pre: 'Used bottles are collected from recycling bins', gap: 'and then transported', post: 'to a recycling plant by truck.', traps: [['and then transporting', 'Chai được chở đi → bị động: (are) transported.'], ['and then transport', 'Chai không tự chở → bị động: transported.'], ['which then transported', 'which là chai, được chở → which are then transported; ở đây đơn giản nhất là and then transported.']] },
+    { pre: 'The clean bottles are crushed into small flakes', gap: ', which are then melted down', post: 'and formed into pellets.', traps: [[', which then melted down', 'Mảnh nhựa được nấu chảy → bị động: which are then melted.'], [', which are then melt down', 'Bị động = be + V3: melted.'], [', that are then melted down', 'Sau dấu phẩy không dùng that. Dùng which.']] },
+  ], ov: ['Overall, plastic bottles go through seven stages, from collection in recycling bins to the manufacture of new products such as clothing.',
+    ['Overall, the bottles are washed to remove labels and dirt.', 'Đây là chi tiết của một bước. Overview nói số bước, bước đầu và bước cuối.'],
+    ['Overall, the process ends with the bottles being thrown away.', 'Sai: quy trình kết thúc bằng việc làm sản phẩm mới.']] },
+
+  { id: 'glass', name: 'Glass bottles: making and recycling', icon: '🍾', sample: 'proc-glass', kind: 'loop', loop: [7, 1], steps: [
+    { icon: '🏖️', label: 'Collecting sand, soda ash, limestone', s: 'sand, soda ash and limestone', pl: true, base: 'collect', pp: 'collected', d: 'as the raw materials' },
+    { icon: '🔥', label: 'Melting in a furnace (1,500°C)', s: 'the raw materials', pl: true, base: 'melt', pp: 'melted', d: 'in a furnace at 1,500°C' },
+    { icon: '🫙', label: 'Shaping in moulds', s: 'the molten glass', base: 'shape', pp: 'shaped', d: 'into bottles in moulds' },
+    { icon: '❄️', label: 'Cooling slowly (annealing)', s: 'the bottles', pl: true, base: 'cool', pp: 'cooled', d: 'slowly, a stage known as annealing' },
+    { icon: '🏷️', label: 'Inspecting, labelling, filling', s: 'the bottles', pl: true, base: 'inspect', pp: 'inspected', d: 'for quality, labelled and filled' },
+    { icon: '🚚', label: 'Distributing to retailers', s: 'the bottles', pl: true, base: 'distribute', pp: 'distributed', d: 'to retailers' },
+    { icon: '🗑️', label: 'Collecting and sorting by colour', s: 'used bottles', pl: true, base: 'collect', pp: 'collected', d: 'and sorted by colour' },
+    { icon: '🔨', label: 'Crushing into cullet', s: 'the glass', base: 'crush', pp: 'crushed', d: 'into cullet, which is added back to the furnace' },
+  ], joins: [
+    { pre: 'Used bottles are collected and sorted by colour', gap: 'before being crushed', post: 'into cullet.', traps: [['before crushed', 'Sau before cần V-ing; chai được nghiền → before being crushed.'], ['before crushing', 'Chai không tự nghiền → bị động: before being crushed.'], ['before they crush', 'Chai không tự nghiền → cần bị động: before being crushed.']] },
+    { pre: 'The raw materials are melted in a furnace at 1,500°C,', gap: 'after which the molten glass is shaped', post: 'in moulds.', traps: [['after that the molten glass is shaped', 'After that là trạng từ, không nối hai mệnh đề bằng dấu phẩy. Dùng after which.'], ['after which the molten glass shapes', 'Thuỷ tinh không tự tạo hình → bị động: is shaped.'], ['after which the molten glass is shape', 'Bị động = be + V3: shaped.']] },
+  ], ov: ['Overall, the process has two connected parts: new bottles are manufactured in six stages, and used bottles are then recycled and returned to the furnace, creating a loop.',
+    ['Overall, the raw materials are melted in a furnace at 1,500°C.', 'Đây là chi tiết có số liệu của một bước. Overview nói cấu trúc chung của quy trình.'],
+    ['Overall, the process is linear and ends when the bottles are sent to retailers.', 'Thiếu ý chính: chai cũ được tái chế và quay lại lò, tạo thành một vòng.']] },
+
+  { id: 'water', name: 'Water treatment', icon: '🚰', sample: 'proc-water', kind: 'linear', steps: [
+    { icon: '🏞️', label: 'Drawing from rivers or underground', s: 'water', base: 'draw', pp: 'drawn', d: 'from rivers or underground sources' },
+    { icon: '🧱', label: 'Screening out debris', s: 'large debris', base: 'remove', pp: 'removed', d: 'using metal screens' },
+    { icon: '🧪', label: 'Adding chemicals (clumping)', s: 'chemicals', pl: true, base: 'add', pp: 'added', d: 'to make small particles clump together' },
+    { icon: '⏳', label: 'Sand and gravel filters', s: 'the water', base: 'filter', pp: 'filtered', d: 'through layers of sand and gravel' },
+    { icon: '💊', label: 'Adding chlorine', s: 'chlorine', base: 'add', pp: 'added', d: 'to kill any remaining bacteria' },
+    { icon: '🛢️', label: 'Storing in reservoirs', s: 'the treated water', base: 'store', pp: 'stored', d: 'in large reservoirs' },
+    { icon: '🏘️', label: 'Distributing to homes', s: 'the clean water', base: 'distribute', pp: 'distributed', d: 'to homes and businesses' },
+  ], joins: [
+    { pre: '', gap: 'Once large debris has been removed,', post: 'chemicals are added to make small particles clump together.', traps: [['Once large debris has removed,', 'Rác được vớt ra → bị động: has been removed.'], ['Once large debris was removed,', 'Quy trình dùng thì hiện tại: Once … has been removed.'], ['Once removing large debris,', 'Thiếu chủ ngữ cho mệnh đề sau Once. Viết: Once large debris has been removed,']] },
+    { pre: 'Chlorine is added to kill any remaining bacteria,', gap: 'after which the treated water is stored', post: 'in large reservoirs.', traps: [['after that the treated water is stored', 'After that là trạng từ, không nối hai mệnh đề bằng dấu phẩy. Dùng after which.'], ['after which the treated water stores', 'Nước không tự chứa → bị động: is stored.'], ['after which the treated water stored', 'Thiếu is: bị động hiện tại là is stored.']] },
+  ], ov: ['Overall, there are seven stages in the process, beginning with drawing untreated water from rivers or underground sources and ending with the distribution of clean water to homes and businesses.',
+    ['Overall, chlorine is added to the water to kill bacteria.', 'Đây là chi tiết của một bước. Overview nói số bước, bước đầu và bước cuối.'],
+    ['Overall, the process is a natural cycle in which the water returns to the river.', 'Sai: đây là dây chuyền xử lý một chiều, không quay lại sông.']] },
+
+  { id: 'monarch', name: 'Life cycle of the monarch butterfly', icon: '🦋', sample: 'cycle-monarch', kind: 'cycle', natural: true, steps: [
+    { icon: '🥚', label: 'Eggs laid on milkweed', s: 'the adult female', act: true, base: 'lay', third: 'lays', past: 'laid', pp: 'laid', d: 'her eggs on milkweed leaves' },
+    { icon: '🐣', label: 'Eggs hatch (3–5 days)', s: 'the eggs', pl: true, act: true, base: 'hatch', third: 'hatches', past: 'hatched', pp: 'hatched', d: 'into caterpillars after three to five days' },
+    { icon: '🐛', label: 'Caterpillars feed (10–14 days)', s: 'the caterpillars', pl: true, act: true, base: 'feed', third: 'feeds', past: 'fed', pp: 'fed', d: 'on milkweed leaves for ten to fourteen days' },
+    { icon: '🟢', label: 'Chrysalis (about 10 days)', s: 'each caterpillar', act: true, base: 'form', third: 'forms', past: 'formed', pp: 'formed', d: 'a chrysalis, where it remains for about ten days' },
+    { icon: '🦋', label: 'Adult emerges', s: 'an adult butterfly', act: true, base: 'emerge', third: 'emerges', past: 'emerged', pp: 'emerged', d: 'from the chrysalis, and its wings expand and dry' },
+    { icon: '🌸', label: 'Feeds on nectar and mates', s: 'the adult', act: true, base: 'feed', third: 'feeds', past: 'fed', pp: 'fed', d: 'on nectar and mates, and the cycle begins again' },
+  ], joins: [
+    { pre: 'The eggs hatch into caterpillars,', gap: 'which then feed', post: 'on milkweed leaves for ten to fourteen days.', traps: [['which are then fed', 'Sâu tự ăn → chủ động: which then feed.'], ['which then feeds', 'which thay cho caterpillars (số nhiều) → feed.'], ['that then feed', 'Sau dấu phẩy không dùng that. Dùng which.']] },
+    { pre: '', gap: 'Having remained in the chrysalis for about ten days,', post: 'the butterfly emerges with wings that expand and dry.', traps: [['Having been remained in the chrysalis for about ten days,', 'remain không có bị động: Having remained.'], ['Having remain in the chrysalis for about ten days,', 'Having + V3: Having remained.'], ['After remained in the chrysalis for about ten days,', 'Sau after dùng V-ing: After remaining, hoặc Having remained.']] },
+  ], ov: ['Overall, the monarch butterfly develops from egg to caterpillar, chrysalis and adult in a continuous cycle that takes about four to five weeks in summer.',
+    ['Overall, the eggs hatch into caterpillars after three to five days.', 'Đây là chi tiết có số liệu của một bước. Overview nói các giai đoạn chính và vòng lặp.'],
+    ['Overall, the process is linear and ends when the butterfly dies.', 'Sai: đây là chu trình, con cái đẻ trứng và vòng đời bắt đầu lại.']] },
 ];
-// Guiding questions, one per step, shown while ordering: always at Học việc,
-// behind a button above that.
-const T1_PROC_Q = {
-  'Brick manufacturing': ['Where does the raw material come from at the very start?', 'Once the clay is out of the ground, what is it combined with?', 'How does the wet mixture get the shape of a brick?', 'Before the bricks can take great heat, what must happen to the water in them?', 'Which step makes the dry bricks hard, using very high temperatures?', 'After the kiln, the bricks are too hot to touch. What comes next?', 'What is the last thing that happens before the bricks reach customers?'],
-  'Tea production': ['What has to be collected from the plants before anything else?', 'Fresh leaves are stiff. What softens them in warm air?', 'Which machine step breaks the leaves and releases their oils?', 'Which stage turns the green leaves dark brown?', 'How is the fermentation stopped, using heat?', 'Before packing, how are the leaves separated by size and quality?', 'What is the final step before the tea goes to shops?'],
-  'Recycling plastic bottles': ['Where do the used bottles start their journey?', 'How do the bottles get from the bins to the plant?', 'At the plant, how are the bottles divided by colour and type of plastic?', 'What removes the labels and dirt?', 'How are the clean bottles made into small pieces?', 'What turns the flakes into small pellets?', 'What are the pellets finally used for?'],
-  'Cement production': ['What happens first to the limestone and clay?', 'Where does the powder go to be combined?', 'What gives the mixture very high heat?', 'After heating, what turns it into fine cement?', 'How is the cement prepared for sale?'],
-  'Rainwater for drinking': ['Where does the water come from at first?', 'How does the water travel to the tank?', 'What removes leaves and dirt from the water?', 'What is added to kill bacteria?', 'Where is the clean water kept?', 'How does the water finally reach the kitchen and bathroom?'],
-  'Making chocolate': ['What is taken from the cocoa trees first?', 'What happens to the beans after they come out of the pods?', 'How are the beans dried?', 'How do the dried beans reach the factory?', 'What does the factory do to the beans with high heat?', 'What turns the roasted beans into a thick liquid?', 'What is added before the mixture goes into moulds?'],
+// The diagram: boxes in a snake, four to a row, joined by arrows; a loop
+// arrow back for recycling. A natural cycle is drawn round a circle.
+function t1pDiagram(id, cur, done) {
+  const P = T1P_PROCS.find(p => p.id === id);
+  if (P.kind === 'cycle') return t1LibCycle(P.name, P.steps.map(s => { const w = s.label.split(' '), h = Math.ceil(w.length / 2); return [s.icon, w.slice(0, h).join(' '), w.slice(h).join(' '), '']; }), 'Full cycle: about 4–5 weeks in summer');
+  const n = P.steps.length, cols = 4, bw = 124, bh = 84, gx = 25, gy = 46, x0 = (600 - cols * bw - (cols - 1) * gx) / 2, y0 = 12;
+  const rows = Math.ceil(n / cols), H = y0 * 2 + rows * bh + (rows - 1) * gy + (P.loop ? 6 : 0);
+  const pos = i => { const r = Math.floor(i / cols), c = r % 2 ? cols - 1 - (i % cols) : i % cols; return [x0 + c * (bw + gx), y0 + r * (bh + gy)]; };
+  let g = `<defs><marker id="t1p-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5B655F"/></marker><marker id="t1p-arg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1F8A4C"/></marker></defs>`;
+  for (let i = 0; i < n - 1; i++) {
+    const [ax, ay] = pos(i), [bx, by] = pos(i + 1);
+    if (ay === by) g += bx > ax ? `<line x1="${ax + bw + 2}" y1="${ay + bh / 2}" x2="${bx - 4}" y2="${by + bh / 2}" class="t1p-arrow" marker-end="url(#t1p-ar)"/>` : `<line x1="${ax - 2}" y1="${ay + bh / 2}" x2="${bx + bw + 4}" y2="${by + bh / 2}" class="t1p-arrow" marker-end="url(#t1p-ar)"/>`;
+    else g += `<line x1="${ax + bw / 2}" y1="${ay + bh + 2}" x2="${bx + bw / 2}" y2="${by - 4}" class="t1p-arrow" marker-end="url(#t1p-ar)"/>`;
+  }
+  if (P.loop) {
+    const [a, b] = P.loop, [ax, ay] = pos(a), [bx, by] = pos(b), midY = by + bh + gy / 2;
+    g += `<path d="M${ax + bw / 2} ${ay} L${ax + bw / 2} ${midY} L${bx + bw / 2 - 14} ${midY} L${bx + bw / 2 - 14} ${by + bh + 4}" class="t1p-loop" marker-end="url(#t1p-arg)"/><text x="${(ax + bx + bw) / 2}" y="${midY - 5}" class="t1p-looplab">♻ recycling</text>`;
+  }
+  P.steps.forEach((s, i) => {
+    const [x, y] = pos(i), w = s.label.split(' '), lines = [];
+    let line = '';
+    w.forEach(word => { if ((line + ' ' + word).trim().length > 17 && line) { lines.push(line); line = word; } else line = (line + ' ' + word).trim(); });
+    lines.push(line);
+    g += `<g class="t1p-box${cur === i ? ' cur' : ''}${done && done.has(i) ? ' done' : ''}"><rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="12"/><text x="${x + 13}" y="${y + 17}" class="t1p-n">${i + 1}</text><text x="${x + bw / 2}" y="${y + 31}" class="t1p-icon">${s.icon}</text>`
+      + `<text x="${x + bw / 2}" y="${y + 52 - (lines.length - 1) * 6}" class="t1p-lab">${lines.map((l, k) => `<tspan x="${x + bw / 2}" dy="${k ? 13 : 0}">${escapeHtml(l)}</tspan>`).join('')}</text></g>`;
+  });
+  return `<div class="t1-chart"><div class="t1-chart-title">${P.icon} ${escapeHtml(P.name)}</div><svg viewBox="0 0 600 ${H}" class="t1p-svg" role="img" aria-label="${escapeHtml(P.name)}">${g}</svg></div>`;
+}
+
+/* ── Sentences ── */
+const T1P_MID = ['Next,', 'After that,', 'Following this,', 'Subsequently,', 'At the next stage,'];
+const T1P_SEQ_WHY = {
+  'Finally,': 'Finally chỉ dùng cho bước cuối cùng.',
+  'To begin with,': 'To begin with chỉ dùng cho bước đầu tiên.',
+  'At first,': 'At first nghĩa là "lúc đầu (về sau thì khác)", không dùng để liệt kê bước. Dùng First, hoặc To begin with,.',
+  'In the end,': 'In the end nghĩa là "rốt cuộc thì", không dùng cho bước cuối của quy trình. Dùng Finally,.',
+  'Next,': 'Bước đầu tiên chưa có gì trước nó để nói Next.',
 };
-const T1_PROC_CFG = { a: { time: 45, verbs: 3, conns: 0 }, d: { time: 40, verbs: 2, conns: 2 }, l: { time: 32, verbs: 2, conns: 3 } };
-const T1_PROC_CONN = /^(To begin with|First|Next|After that|Following this|Finally|Once [^,]+),/;
+// Sequencer, subject + verb, detail; each [right, ...[trap, why]], fewer at Học việc.
+function t1pParts(P, i) {
+  const st = P.steps[i], n = P.steps.length, lv = _t1Lv, k = lv === 'a' ? 2 : 3;
+  const seq = i === 0 ? [[t1Pick(['To begin with,', 'First,'])], ...['Finally,', 'At first,', 'Next,'].map(t => [t, T1P_SEQ_WHY[t]])]
+    : i === n - 1 ? [['Finally,'], ...['In the end,', 'To begin with,', 'At first,'].map(t => [t, T1P_SEQ_WHY[t]])]
+    : [[T1P_MID[(i - 1) % T1P_MID.length]], ...['To begin with,', 'Finally,', 'At first,'].map(t => [t, T1P_SEQ_WHY[t]])];
+  const s = st.s, be = st.pl ? 'are' : 'is', was = st.pl ? 'were' : 'was', who = s.replace(/^(the|each|an|a) /, '');
+  let sv;
+  if (st.act) {
+    const v = st.pl ? st.base : st.third;
+    sv = [[`${s} ${v}`], [`${s} ${be} ${st.pp}`, `Quá trình tự nhiên: ${who} tự làm việc này → chủ động, không dùng bị động.`]];
+    if (lv !== 'a') sv.push([`${s} ${st.past}`, 'Chu trình lặp lại mãi → thì hiện tại đơn.']);
+    sv.push([`${s} ${st.pl ? st.third : st.base}`, st.pl ? `Chủ ngữ số nhiều (${s}) → ${st.base}.` : `Chủ ngữ số ít (${s}) → ${st.third}.`]);
+  } else {
+    sv = [[`${s} ${be} ${st.pp}`], [`${s} ${st.pl ? st.base : t1Third(st.base)}`, `${t1Cap(who)} không tự làm việc này → bị động: ${be} ${st.pp}.`]];
+    if (lv === 'l') sv.push([`${s} ${was} ${st.pp}`, 'Quy trình là việc lặp lại thường xuyên → hiện tại đơn: is / are + V3.']);
+    sv.push(st.base === st.pp ? [`${s} ${be} ${t1Ing(st.base)}`, 'Bước của quy trình dùng bị động hiện tại đơn: is / are + V3, không dùng đang diễn ra.'] : [`${s} ${be} ${st.base}`, 'Bị động = be + V3 (quá khứ phân từ).']);
+    if (lv !== 'a') sv.push([`${s} ${st.pl ? 'is' : 'are'} ${st.pp}`, st.pl ? `Chủ ngữ số nhiều (${s}) → are.` : `Chủ ngữ số ít (${s}) → is.`]);
+  }
+  const others = t1Shuffle(P.steps.map((x, j) => [x, j]).filter(([x, j]) => j !== i && x.d !== st.d));
+  const det = [[st.d], ...others.slice(0, k).map(([x, j]) => [x.d, `Chi tiết này thuộc bước ${j + 1} (${x.label}).`])];
+  return [seq.slice(0, k + 1), sv.slice(0, k + 1), det];
+}
 function t1Ing(v) { return /ie$/.test(v) ? v.slice(0, -2) + 'ying' : /[^e]e$/.test(v) ? v.slice(0, -1) + 'ing' : v === 'dig' ? 'digging' : v + 'ing'; }
 function t1Third(v) { return /(s|sh|ch|x)$/.test(v) ? v + 'es' : /[^aeiou]y$/.test(v) ? v.slice(0, -1) + 'ies' : v + 's'; }
-// The passive in braces, plus three forms students mix it up with.
-function t1ProcVerb(step) {
-  const [, , t, base, pp] = step;
-  const m = t.match(/\{(is|are)( then)? [^}]+\}/), aux = m[1], then = m[2] || '';
-  const right = `${aux}${then} ${pp}`;
-  const wrong = [`${aux}${then} ${t1Ing(base)}`, `${then.trim() ? 'then ' : ''}${aux === 'is' ? t1Third(base) : base}`, `${then.trim() ? 'then ' : ''}${pp === base ? t1Ing(base).replace(/ing$/, 'ed') : pp}`];
-  if (wrong[2] === right) wrong[2] = `${aux}${then} ${base}`;
-  return { stem: t.replace(/\{[^}]+\}/, '____'), answer: right, opts: t1Shuffle([right, ...[...new Set(wrong)].filter(w => w !== right).slice(0, 3)]),
-    vi: 'Quy trình dùng bị động: is/are + V3. Chủ ngữ là vật, không tự làm hành động.' };
-}
-function t1ProcConn(step, i, n) {
-  const t = step[2].replace(/[{}]/g, ''), m = t.match(T1_PROC_CONN);
-  if (!m) return null;
-  const c = m[1];
-  let pool;
-  if (/^Once/.test(c)) pool = [c.replace('Once', 'Although'), c.replace('Once', 'Unless'), c.replace(/^Once (they|it) have /, 'Before $1 have ')];
-  else if (i === 0) pool = ['Finally', 'After that', 'However', 'In conclusion'];
-  else if (i === n - 1) pool = ['To begin with', 'Firstly', 'However', 'For example'];
-  else pool = ['Finally', 'To begin with', 'In conclusion', 'However', 'For instance'];
-  return { stem: t.replace(c, '____'), answer: c, opts: t1Shuffle([c, ...t1Shuffle(pool.filter(x => x !== c)).slice(0, 3)]),
-    vi: /^Once/.test(c) ? 'Once + hiện tại hoàn thành = ngay sau khi xong bước trước.' : i === 0 ? 'Bước đầu: To begin with / First.' : i === n - 1 ? 'Bước cuối: Finally / In the final stage.' : 'Bước giữa: Next / After that / Following this.' };
+
+/* ── The game ── */
+// Steps to describe: the first and the last always, middles to make up the count.
+const T1P_CFG = { a: { n: 4, joins: 1 }, d: { n: 5, joins: 2 }, l: { n: 99, joins: 2 } };
+function t1ProcPick() {
+  const key = 't1ProcRot_' + walWho(), ids = T1P_PROCS.map(p => p.id);
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(key) || '[]').filter(id => ids.includes(id)); } catch (e) {}
+  let left = ids.filter(id => !seen.includes(id));
+  if (!left.length) { left = ids.filter(id => id !== seen[seen.length - 1]); seen = []; }
+  const id = t1Pick(left);
+  seen.push(id);
+  try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {}
+  return T1P_PROCS.find(p => p.id === id);
 }
 function t1ProcStart() {
   t1Leave();
-  const g = _t1 = { game: 'process', score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, n: 0, answered: false, timer: 0, list: t1Shuffle(T1_PROCS).slice(0, 3) };
-  g.stop = () => { clearInterval(g.timer); };
-  g.keyPick = i => { if (g.phase === 'order') t1ProcTap(i); else if (g.phase === 'gram') t1ProcPick(i); };
+  const P = t1ProcPick(), cfg = T1P_CFG[_t1Lv], n = P.steps.length;
+  const mids = t1Shuffle([...Array(n).keys()].slice(1, -1)).slice(0, Math.max(0, cfg.n - 2));
+  const order = [0, ...mids, n - 1].sort((a, b) => a - b);
+  const g = _t1 = { game: 'process', P, order, oi: 0, sents: [], joins: P.joins.slice(0, cfg.joins), ji: 0, joined: [], cur: null, phase: 'steps', score: 0, combo: 0, right: 0, coins: 0, misses: [], answered: false };
+  g.stop = () => {};
+  g.keyPick = () => {};
   g.pick = g.keyPick;
-  g.next = t1ProcNext;
+  g.next = () => {};
   t1Bind();
   tsSfx('equip');
-  t1ProcNew();
-}
-function t1ProcNew() {
-  const g = _t1, P = g.list[g.n], cfg = T1_PROC_CFG[_t1Lv];
-  g.P = P;
-  g.phase = 'order';
-  g.got = 0;
-  g.cards = t1Shuffle(P.steps.map((s, i) => i));
-  g.answered = false;
-  g.left = cfg.time;
-  // The grammar questions for this process, picked now so they do not repeat.
-  const idx = t1Shuffle(P.steps.map((s, i) => i));
-  const connAt = idx.filter(i => t1ProcConn(P.steps[i], i, P.steps.length)).slice(0, cfg.conns);
-  const verbAt = idx.filter(i => !connAt.includes(i)).slice(0, cfg.verbs);
-  g.qs = t1Shuffle([...verbAt.map(i => t1ProcVerb(P.steps[i])), ...connAt.map(i => t1ProcConn(P.steps[i], i, P.steps.length))]);
-  g.qi = 0;
-  t1ProcRender();
-  clearInterval(g.timer);
-  g.last = performance.now();
-  g.timer = setInterval(() => {
-    if (_t1 !== g || g.phase !== 'order') return;
-    const now = performance.now();
-    if (!document.hidden) g.left -= (now - g.last) / 1000;
-    g.last = now;
-    const el = document.getElementById('pr-time');
-    if (el) { el.textContent = Math.max(0, Math.ceil(g.left)); el.parentNode.classList.toggle('late', g.left <= 8); }
-    if (g.left <= 0) t1ProcTimeUp();
-  }, 200);
-}
-function t1ProcRender() {
-  const g = _t1, P = g.P;
   t1Root().innerHTML = `
-    <div class="lv-wrap lv-wrap--narrow t1-play t1-proc">
-      ${t1ArcTop(g, `<span class="t1-stat">Quy trình <strong>${g.n + 1}</strong>/3</span><span class="t1-stat">⏱️ <strong id="pr-time">${Math.ceil(g.left)}</strong></span>`)}
-      <div class="t1-proc-title">${P.icon} ${escapeHtml(P.name)}</div>
-      <div class="t1-belt" id="pr-belt">${P.steps.map((s, i) => `<div class="t1-belt-slot${i < g.got ? ' on' : ''}">${i < g.got ? `<span>${s[0]}</span><small>${escapeHtml(s[1])}</small>` : `<b>${i + 1}</b>`}</div>`).join('<i>›</i>')}</div>
-      <div id="pr-body"></div>
+    <div class="lv-wrap t1-play t1m t1p">
+      <div class="t1-top">
+        <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
+        <span class="t1-stat">${P.icon} <strong>${escapeHtml(P.name)}</strong></span>
+        <span class="t1-stat">✍️ <strong id="p-n">0</strong>/${order.length}</span>
+        <span class="t1-stat">⭐ <strong id="p-score">0</strong></span>
+      </div>
+      <div class="t1m-grid">
+        <div class="t1m-stage" id="p-diagram"></div>
+        <div class="t1m-panel" id="p-panel"></div>
+      </div>
     </div>`;
-  t1ProcBody();
+  t1ProcStep();
 }
-function t1ProcBody() {
-  const g = _t1, P = g.P, body = document.getElementById('pr-body');
-  if (g.phase === 'order') {
-    const qs = T1_PROC_Q[P.name] || [], showQ = _t1Lv === 'a' || g.showQ;
-    body.innerHTML = `<p class="t1-stem">Chạm các bước theo đúng thứ tự, bước ${g.got + 1} trước.</p>
-      ${qs[g.got] ? (showQ ? `<div class="t1-proc-q">💡 <b>Step ${g.got + 1}:</b> <i>${escapeHtml(qs[g.got])}</i></div>` : `<button class="vb-chip t1-proc-qbtn" onclick="_t1.showQ = true; t1ProcBody()">💡 Câu hỏi gợi ý bằng tiếng Anh</button>`) : ''}
-      <div class="t1-proc-cards">${g.cards.map((si, k) => si < g.got ? '' : `<button class="t1-proc-card" onclick="_t1.pick(${k})"><kbd>${k + 1}</kbd><span>${P.steps[si][0]}</span>${escapeHtml(P.steps[si][1])}</button>`).join('')}</div>`;
-  } else if (g.phase === 'gram') {
-    const q = g.qs[g.qi];
-    body.innerHTML = `<p class="t1-stem">Câu ${g.qi + 1}/${g.qs.length} · ${escapeHtml(q.stem).replace('____', '<span class="t1-blank">______</span>')}</p>
-      <div class="t1-opts">${t1Options(q.opts, null, -1)}</div><div id="pr-fb"></div>`;
+function t1ProcDraw() {
+  const g = _t1, done = new Set(g.sents.map(s => s.i));
+  document.getElementById('p-diagram').innerHTML = t1pDiagram(g.P.id, g.phase === 'steps' ? g.order[g.oi] : -1, done)
+    + `<p class="t1p-tip">${g.P.natural ? '🌿 Quá trình tự nhiên: sinh vật tự làm → động từ <b>chủ động</b>.' : '🏭 Quy trình do con người hay máy móc làm → động từ <b>bị động</b> (is / are + V3).'}</p>`;
+}
+function t1ProcStep() {
+  const g = _t1;
+  if (g.oi >= g.order.length) { t1ProcJoin(); return; }
+  const i = g.order[g.oi];
+  g.cur = { i, parts: t1pParts(g.P, i).map(p => ({ opts: t1Shuffle(p), pick: null })), tries: 0 };
+  t1ProcDraw();
+  t1ProcBuildRender();
+}
+function t1ProcBuildRender(fb) {
+  const g = _t1, c = g.cur, st = g.P.steps[c.i], names = ['Từ nối', 'Chủ ngữ + động từ', 'Chi tiết'];
+  const pick = c.parts.map(p => p.pick == null ? null : p.opts[p.pick][0]);
+  const done = g.sents.length ? `<ol class="t1m-sents">${g.sents.map(s => `<li>${escapeHtml(s.text)}</li>`).join('')}</ol>` : '';
+  document.getElementById('p-panel').innerHTML = `<div class="t1m-build">
+      <div class="t1m-task"><b>✍️ Bước ${c.i + 1}: ${st.icon} ${escapeHtml(st.label)}</b><p>Ghép câu tả bước này. Từ nối phải hợp với vị trí của bước (đầu, giữa hay cuối).</p></div>
+      ${c.parts.map((p, i) => `<div class="t1m-row"><span class="t1m-rowh">${i + 1} · ${names[i]}</span><div class="t1m-chips">${p.opts.map(([t], j) =>
+        `<button class="t1m-chip${p.pick === j ? ' on' : ''}${p.bad && p.pick === j ? ' no' : ''}${p.ok ? ' ok' : ''}" ${p.ok ? 'disabled' : ''} onclick="t1ProcChip(${i}, ${j})">${escapeHtml(t)}</button>`).join('')}</div></div>`).join('')}
+      <div class="t1m-preview">${pick.every(Boolean) ? escapeHtml(t1mSentence(pick)) : pick.map((t, i) => t ? escapeHtml(t) : `<i>${names[i].toLowerCase()}</i>`).join(' ')}</div>
+      <div id="p-fb">${fb || ''}</div>
+      <div class="t1h-row"><button class="vb-start-btn" onclick="t1ProcCheck()" ${pick.every(Boolean) ? '' : 'disabled'}>Kiểm tra →</button></div>
+    </div>${done}`;
+}
+function t1ProcChip(i, j) {
+  const p = _t1.cur.parts[i];
+  if (p.ok) return;
+  p.pick = j; p.bad = false;
+  tsSfx('tick');
+  t1ProcBuildRender();
+}
+function t1ProcCheck() {
+  const g = _t1, c = g.cur;
+  if (!c || c.parts.some(p => p.pick == null)) return;
+  c.tries++;
+  const why = [];
+  c.parts.forEach(p => { const [t, w] = p.opts[p.pick]; if (!w) p.ok = true; else { p.bad = true; why.push(`<li><b>${escapeHtml(t)}</b>: ${escapeHtml(w)}</li>`); } });
+  if (!why.length) { t1ProcStepDone(false); return; }
+  tsSfx('wrong');
+  g.combo = 0;
+  if (c.tries >= 2) {
+    c.parts.forEach(p => { p.pick = p.opts.findIndex(o => !o[1]); p.ok = true; p.bad = false; });
+    g.misses.push(`<div class="t1-review-line">${escapeHtml(t1mSentence(c.parts.map(p => p.opts[p.pick][0])))}</div>`);
+    t1ProcBuildRender(`<div class="t1-fb no"><strong>Đáp án đúng đã hiện.</strong><ul>${why.join('')}</ul></div>`);
+    setTimeout(() => { if (_t1 === g && g.cur === c) t1ProcStepDone(true); }, 2600);
+    return;
   }
+  t1ProcBuildRender(`<div class="t1-fb no"><strong>Còn ${why.length} phần chưa đúng. Sửa rồi kiểm tra lại.</strong><ul>${why.join('')}</ul></div>`);
 }
-function t1ProcTap(k) {
-  const g = _t1;
-  if (!g || g.phase !== 'order' || k < 0 || k >= g.cards.length) return;
-  const si = g.cards[k];
-  if (si < g.got) return;
-  const btn = document.querySelectorAll('#pr-body .t1-proc-card')[g.cards.filter((x, j) => j < k && x >= g.got).length];
-  if (si === g.got) {
-    g.got++;
-    tsSfx('key');
-    if (g.got === g.P.steps.length) {
-      t1Hit(g, Math.max(0, Math.round(g.left / 2)));
-      t1ProcToGram();
-      return;
-    }
-    t1ProcRender();
-  } else {
-    g.left -= 3; g.combo = 0;
-    tsSfx('miss');
-    t1Shake(btn);
-    t1ArcHud();
+function t1ProcStepDone(shown) {
+  const g = _t1, c = g.cur, first = c.tries === 1 && !shown;
+  g.sents.push({ i: c.i, text: t1mSentence(c.parts.map(p => p.opts[p.pick][0])) });
+  if (!shown) {
+    g.right++; g.combo++;
+    g.score += first ? 30 : 15;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 1 : 0.5);
+    tsSfx('coin');
   }
+  g.cur = null; g.oi++;
+  document.getElementById('p-score').textContent = g.score;
+  document.getElementById('p-n').textContent = g.sents.length;
+  t1ProcStep();
 }
-function t1ProcToGram() {
+// Two steps in one sentence: pick the part that joins them.
+function t1ProcJoin() {
   const g = _t1;
-  g.phase = g.qs.length ? 'gram' : 'done';
-  t1ProcRender();
-  if (g.phase === 'done') t1ProcDone();
-}
-function t1ProcTimeUp() {
-  const g = _t1;
-  if (g.phase !== 'order') return;
-  t1Miss(g);
-  g.misses.push(`<div class="t1-review-line">${g.P.icon} ${escapeHtml(g.P.name)}: ${g.P.steps.map(s => s[0] + ' ' + escapeHtml(s[1])).join(' › ')}</div>`);
-  g.got = g.P.steps.length;
-  t1ArcHud();
-  if (g.lives <= 0) { t1ProcEnd(g); return; }
-  showToast('Hết giờ! Đây là thứ tự đúng.');
-  t1ProcToGram();
-}
-function t1ProcPick(i) {
-  const g = _t1, q = g && g.qs[g.qi];
-  if (!q || g.answered || i < 0 || i >= q.opts.length) return;
-  g.answered = true;
-  const ok = q.opts[i] === q.answer;
-  if (ok) t1Hit(g); else { t1Miss(g); g.misses.push(`<div class="t1-review-line">${escapeHtml(q.stem.replace('____', q.answer))}<br>Bạn chọn <s>${escapeHtml(q.opts[i])}</s>. ${escapeHtml(q.vi)}</div>`); }
-  document.querySelector('#pr-body .t1-opts').innerHTML = t1Options(q.opts, i, q.opts.indexOf(q.answer));
-  const last = g.qi + 1 >= g.qs.length;
-  document.getElementById('pr-fb').innerHTML = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Đúng!' : `Chưa đúng. Đáp án: ${escapeHtml(q.answer)}`}</strong><span>${escapeHtml(q.vi)}</span></div>
-    <button class="vb-start-btn t1-next" onclick="_t1.next()">${g.lives <= 0 ? 'Xem kết quả' : last ? (g.n + 1 >= 3 ? 'Xem kết quả' : 'Quy trình tiếp') : 'Câu tiếp'} → <small>Enter</small></button>`;
-  t1ArcHud();
-}
-function t1ProcNext() {
-  const g = _t1;
-  if (!g || g.phase !== 'gram' || !g.answered) return;
-  if (g.lives <= 0) { t1ProcEnd(g); return; }
+  if (g.ji >= g.joins.length) { t1ProcOverview(); return; }
+  g.phase = 'join';
+  const J = g.joins[g.ji];
+  g.jopts = t1Shuffle([[J.gap], ...J.traps]);
   g.answered = false;
-  g.qi++;
-  if (g.qi < g.qs.length) { t1ProcBody(); return; }
-  t1ProcDone();
+  t1ProcDraw();
+  const gapped = `${escapeHtml(J.pre)} <span class="t1p-gap">______</span> ${escapeHtml(J.post)}`;
+  document.getElementById('p-panel').innerHTML = `<div class="t1m-task"><b>🔗 Gộp 2 bước thành 1 câu (${g.ji + 1}/${g.joins.length})</b><p>Bài band 7 nối các bước bằng before being…, once … has been…, which is then…, after which… Chọn phần điền vào chỗ trống.</p></div>
+    <p class="t1h-cloze t1h-cloze--big">${gapped}</p>
+    <div class="t1-opts t1-opts--long">${g.jopts.map(([t], i) => `<button class="t1-opt" onclick="t1ProcJoinPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(t)}</button>`).join('')}</div><div id="p-fb"></div>`;
+  g.keyPick = i => t1ProcJoinPick(i);
 }
-function t1ProcDone() {
+function t1ProcJoinText(J) { const s = [J.pre, J.gap, J.post].filter(Boolean).join(' ').replace(/ ,/g, ','); return s[0].toUpperCase() + s.slice(1); }
+function t1ProcJoinPick(i) {
+  const g = _t1, o = g.jopts[i], J = g.joins[g.ji];
+  if (!o || g.answered) return;
+  g.answered = true;
+  document.querySelectorAll('#p-panel .t1-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', !g.jopts[j][1]); b.classList.toggle('no', j === i && !!o[1]); });
+  if (!o[1]) { g.score += 25; g.right++; g.coins += T1_LEVELS[_t1Lv].coin * walMult(); tsSfx('coin'); }
+  else { tsSfx('wrong'); g.misses.push(`<div class="t1-review-line">${escapeHtml(t1ProcJoinText(J))}</div>`); }
+  g.joined.push(t1ProcJoinText(J));
+  document.getElementById('p-score').textContent = g.score;
+  document.getElementById('p-fb').innerHTML = `<div class="t1-fb ${o[1] ? 'no' : 'ok'}"><strong>${o[1] ? 'Chưa đúng.' : 'Đúng!'}</strong>${o[1] ? `<span>${escapeHtml(o[1])}</span>` : ''}<span class="t1h-ex">${escapeHtml(t1ProcJoinText(J))}</span></div>
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1ProcJoinNext()">Tiếp → <small>Enter</small></button></div>`;
+  g.keyPick = () => {};
+  g.next = t1ProcJoinNext;
+}
+function t1ProcJoinNext() { const g = _t1; if (!g || g.phase !== 'join') return; g.ji++; g.next = () => {}; t1ProcJoin(); }
+function t1ProcOverview() {
+  const g = _t1, P = g.P;
+  g.phase = 'overview';
+  g.answered = false;
+  g.ovOpts = t1Shuffle([[P.ov[0]], P.ov[1], P.ov[2]]);
+  t1ProcDraw();
+  document.getElementById('p-panel').innerHTML = `<div class="t1m-task"><b>👀 Chọn câu overview</b><p>Overview của quy trình nói có bao nhiêu bước, bắt đầu và kết thúc ở đâu, theo đường thẳng hay vòng tròn. Không đưa số liệu của một bước.</p></div>
+    <div class="t1-opts t1-opts--long">${g.ovOpts.map(([t], i) => `<button class="t1-opt" onclick="t1ProcOvPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(t)}</button>`).join('')}</div><div id="p-fb"></div>`;
+  g.keyPick = i => t1ProcOvPick(i);
+}
+function t1ProcOvPick(i) {
+  const g = _t1, o = g.ovOpts[i];
+  if (!o || g.answered) return;
+  g.answered = true;
+  document.querySelectorAll('#p-panel .t1-opt').forEach((b, j) => { b.disabled = true; b.classList.toggle('ok', !g.ovOpts[j][1]); b.classList.toggle('no', j === i && !!o[1]); });
+  if (!o[1]) { g.score += 20; g.right++; tsSfx('coin'); } else { tsSfx('wrong'); g.misses.push(`<div class="t1-review-line">Overview: ${escapeHtml(g.P.ov[0])}</div>`); }
+  document.getElementById('p-fb').innerHTML = `<div class="t1-fb ${o[1] ? 'no' : 'ok'}"><strong>${o[1] ? 'Chưa đúng.' : 'Đúng!'}</strong>${o[1] ? `<span>${escapeHtml(o[1])}</span>` : ''}</div>
+    <div class="t1h-row"><button class="vb-start-btn" onclick="t1ProcEssay()">📝 Ghép thành bài → <small>Enter</small></button></div>`;
+  g.keyPick = () => {};
+  g.next = t1ProcEssay;
+}
+// The step sentences in order, split in two body paragraphs, beside the model.
+function t1ProcEssay() {
   const g = _t1;
-  g.n++;
-  if (g.n >= 3) { t1ProcEnd(g); return; }
-  tsSfx('level');
-  t1ProcNew();
-}
-function t1ProcEnd(g) {
-  if (_t1 !== g) return;
-  g.stop();
-  t1Finish(g, 'process', 'process_diagram', { big: `${g.right} lượt đúng · ${g.n} quy trình xong`, icon: g.lives === 3 ? '🏆' : g.lives > 0 ? '👏' : '⚙️', good: g.lives > 0 });
+  if (!g || g.game !== 'process' || g.phase === 'essay') return;
+  g.phase = 'essay';
+  const P = g.P, sample = T1_SAMPLES.find(s => s.id === P.sample), half = Math.ceil(P.steps.length / 2);
+  const body = k => g.sents.filter(s => (s.i < half) === (k === 0)).sort((a, b) => a.i - b.i).map(s => s.text).join(' ');
+  const mine = [sample.essay[0], P.ov[0], body(0), body(1)].filter(Boolean);
+  const words = mine.join(' ').split(/\s+/).length;
+  const html = `<div class="t1-review"><div class="t1-review-title">📝 Bài của em, ghép từ các câu em vừa làm (${words} từ)</div>
+      ${mine.map((p, i) => `<div class="t1-lib-para"><span class="t1-lib-tag">${T1_PARA[i]}</span><p>${escapeHtml(p)}</p></div>`).join('')}
+      ${g.joined.length ? `<div class="t1-lib-para"><span class="t1-lib-tag">🔗 Câu gộp em đã làm: thay hai câu ngắn bằng câu này</span>${g.joined.map(t => `<p>${escapeHtml(t)}</p>`).join('')}</div>` : ''}
+      <p class="t1m-note">Mỗi câu đứng riêng nên bài còn rời rạc. Bài mẫu bên dưới gộp các bước bằng before being, once, after which để đọc liền mạch.</p></div>
+    <details class="t1-review" open><summary class="t1-review-title">📖 Bài mẫu</summary>${sample.essay.map((p, i) => `<div class="t1-lib-para"><span class="t1-lib-tag">${T1_PARA[i]}</span><p>${escapeHtml(p)}</p></div>`).join('')}</details>`;
+  t1Finish(g, 'process', 'process_diagram', { big: `${P.icon} ${escapeHtml(P.name)} · ${g.right} câu đúng ngay`, icon: g.misses.length ? '👏' : '🏆', good: !g.misses.length, list: html });
 }
 /* ── Bài mẫu: model answers, two or three per chart type ─────────────────
    Each prompt carries its own chart (drawn from the numbers the answer
@@ -27087,10 +27202,6 @@ function t1GroupBars(o) {
   });
   g += `<text x="${L - 44}" y="${T - 12}" class="t1-unit">${escapeHtml(o.unit)}</text><line x1="${L}" x2="${L}" y1="${T}" y2="${T + ph}" class="t1-axis"/><line x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}" class="t1-axis"/>`;
   return `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(o.title)}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(o.title)}">${g}</svg><div class="t1-legend">${o.series.map((s, si) => `<span><i style="background:${T1_COLORS[si]}"></i>${escapeHtml(s.name)}</span>`).join('')}</div></div>`;
-}
-function t1LibProc(name) {
-  const P = T1_PROCS.find(p => p.name === name);
-  return `<div class="t1-chart"><div class="t1-chart-title">${P.icon} ${escapeHtml(P.name)}</div><div class="t1-belt t1-belt--lib">${P.steps.map((s, i) => `<div class="t1-belt-slot on"><b>${i + 1}</b><span>${s[0]}</span><small>${escapeHtml(s[1])}</small></div>`).join('<i>›</i>')}</div></div>`;
 }
 const T1_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 // A cycle diagram: the stages round a circle, clockwise from the top, joined
@@ -27218,7 +27329,7 @@ const T1_SAMPLES = [
     ] },
   { id: 'proc-bricks', block: 'sta', type: 'Process', icon: '⚙️',
     prompt: 'The diagram below shows the process by which bricks are manufactured for the building industry.',
-    chart: () => t1LibProc('Brick manufacturing'),
+    chart: () => t1pDiagram('bricks'),
     essay: [
       'The diagram illustrates the process by which bricks are produced for the building industry.',
       'Overall, there are seven main stages in the process, beginning with the digging of clay and ending with the delivery of the finished bricks to customers, and the whole process takes several days.',
@@ -27227,7 +27338,7 @@ const T1_SAMPLES = [
     ] },
   { id: 'proc-tea', block: 'sta', type: 'Process', icon: '⚙️',
     prompt: 'The diagram below shows how tea is produced.',
-    chart: () => t1LibProc('Tea production'),
+    chart: () => t1pDiagram('tea'),
     essay: [
       'The diagram illustrates the stages involved in producing tea, from picking the leaves to packing the final product.',
       'Overall, the process consists of seven steps, beginning on the plantation and ending when the packed tea is sent to shops, and it combines manual work in the field with machine processing in the factory.',
@@ -27236,12 +27347,30 @@ const T1_SAMPLES = [
     ] },
   { id: 'proc-recycle', block: 'sta', type: 'Process', icon: '⚙️',
     prompt: 'The diagram below shows how plastic bottles are recycled.',
-    chart: () => t1LibProc('Recycling plastic bottles'),
+    chart: () => t1pDiagram('plastic'),
     essay: [
       'The diagram shows how plastic bottles are recycled to make new products.',
       'Overall, there are seven stages in the process, starting with the collection of used bottles and ending with the manufacture of new items such as clothing, and most of these steps take place at a recycling plant.',
       'To begin with, used plastic bottles are collected from recycling bins and then transported by truck to a recycling plant. At the plant, the bottles are sorted according to their colour and the type of plastic they are made from, before being washed to remove labels and dirt.',
       'After that, the clean bottles are crushed into small flakes. These flakes are melted down and formed into small pellets, which are easy to transport and store. Finally, the pellets are used as a raw material to produce new products, for example clothing and new bottles, so that waste is turned into useful goods.',
+    ] },
+  { id: 'proc-glass', block: 'sta', type: 'Process', icon: '⚙️',
+    prompt: 'The diagram below illustrates the process by which glass bottles are manufactured and recycled.',
+    chart: () => t1pDiagram('glass'),
+    essay: [
+      'The diagram illustrates how glass bottles are manufactured and how used bottles are recycled to make new ones.',
+      'Overall, the process consists of two connected parts: the manufacture of new bottles, which involves six main stages, and a recycling loop in which used bottles are returned to the furnace. The process begins with the collection of raw materials and ends with the distribution of bottles to retailers.',
+      'To begin with, sand, soda ash and limestone are collected as the raw materials. These are then melted in a furnace at 1,500°C, after which the molten glass is shaped into bottles in moulds. The bottles are cooled slowly, a stage known as annealing, before being inspected for quality.',
+      'Once they have passed inspection, the bottles are labelled, filled and distributed to retailers. After use, they are collected and sorted by colour before being crushed into small pieces called cullet. This cullet is added back to the furnace, where it is melted and reshaped into new bottles, so the cycle continues.',
+    ] },
+  { id: 'proc-water', block: 'sta', type: 'Process', icon: '⚙️',
+    prompt: 'The diagram below shows how water is treated before it is supplied to homes and businesses.',
+    chart: () => t1pDiagram('water'),
+    essay: [
+      'The diagram shows the stages involved in treating water so that it is safe to drink before it reaches homes and businesses.',
+      'Overall, there are seven stages in the process, beginning with drawing untreated water from rivers or underground sources and ending with the distribution of clean water to homes and businesses. Most of the stages are designed to remove dirt and bacteria.',
+      'To begin with, water is drawn from rivers or underground sources. Large pieces of debris are then removed using metal screens. Once large debris has been removed, chemicals are added to make small particles clump together, so that they can be filtered out more easily at the next stage.',
+      'Following this, the water is filtered through layers of sand and gravel. Chlorine is then added to kill any remaining bacteria, after which the treated water is stored in large reservoirs. Finally, the clean water is distributed through a network of pipes to homes and businesses.',
     ] },
   { id: 'line-energy', block: 'dyn', type: 'Line graph', icon: '📈',
     prompt: 'The line graph below shows the amount of electricity generated (in TWh) from coal, natural gas and renewable energy in Country X between 1990 and 2020.',
