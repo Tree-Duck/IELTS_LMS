@@ -18496,12 +18496,15 @@ function tw2StormDue(g) { return Math.floor(g.floors.length / TW2_STORM_EVERY) >
 function tw2StormNext(g) { return (Math.max(g.stormLv || 0, Math.floor(g.floors.length / TW2_STORM_EVERY)) + 1) * TW2_STORM_EVERY; }
 function tw2StormStart() {
   const g = _tw;
-  g.hz = { ...TW2_STORM, n: 0, right: 0, wrong: 0, need: TW2_STORM_NEED, left: TW2_STORM_SECS, max: TW2_STORM_SECS };
+  const r = g.stormResume;
+  g.stormResume = null;
+  g.hz = { ...TW2_STORM, n: 0, right: r ? r.right || 0 : 0, wrong: 0, need: TW2_STORM_NEED, left: r ? Math.max(5, r.left || 0) : TW2_STORM_SECS, max: TW2_STORM_SECS };
   document.getElementById('tw-scene')?.classList.add('tw-stormy');
   tsSfx('boss');
   jBuzz([60, 40, 60]);
   twHazardScene();
-  twBanner(`Bão lốc! Đúng ${TW2_STORM_NEED} câu trong ${TW2_STORM_SECS} giây`);
+  twBanner(r ? `Bão lốc vẫn còn! Còn ${Math.ceil(g.hz.left)} giây` : `Bão lốc! Đúng ${TW2_STORM_NEED} câu trong ${TW2_STORM_SECS} giây`);
+  twSave(g);
   clearInterval(g.stormTick);
   g.stormTick = setInterval(() => tw2StormTick(g), 200);
 }
@@ -18510,6 +18513,8 @@ function tw2StormTick(g) {
   const hz = g.hz;
   if (_tw !== g || !hz || !hz.storm) { clearInterval(g.stormTick); return; }
   if (g.answered || document.hidden || document.getElementById('lv-modal')) return;
+  const view = document.getElementById('view-lesson-vocab');
+  if (!view || view.classList.contains('hidden') || !document.getElementById('tw-card')) return;
   hz.left -= 0.2;
   const c = document.getElementById('tw2-clock');
   if (c) { c.textContent = Math.max(0, Math.ceil(hz.left)) + ' giây'; c.classList.toggle('low', hz.left <= 10); }
@@ -18522,6 +18527,7 @@ function tw2StormTimeout() {
   clearTimeout(g.timer);
   g.hz.timedOut = true;
   g.answered = true;
+  if (g.q && !g.missed.some(m => m.en === g.q.en)) g.missed.push(g.q);
   const hzEnd = twHazardEnd();
   g.lastResult = { ok: false, timeout: true, hzEnd };
   twRenderCard(g.lastResult);
@@ -18601,7 +18607,8 @@ function twSnapshot(g) {
 // seconds, and at once when the game ends or the student leaves.
 function twSave(g, now) {
   if (g.v2 !== undefined ? g.v2 : _tw && _tw.v2) {
-    lvSave(tw2Key(), JSON.stringify({ ...twSnapshot(g), storm_lv: g.stormLv || 0 }));
+    const st = g.hz && g.hz.storm ? { left: g.hz.left, right: g.hz.right } : null;
+    lvSave(tw2Key(), JSON.stringify({ ...twSnapshot(g), storm_lv: g.stormLv || 0, storm: st }));
     lvSave('twBestV2', String(g.best || 0));
     return;
   }
@@ -18669,7 +18676,7 @@ async function twStart(list, v2) {
     lives: saved && saved.lives > 0 ? saved.lives : TW_LIVES,
     hints: saved ? Math.min(TW_MAX_HINTS, saved.hints || 0) : TW_START_HINTS,
     best: Math.max(v2 ? tw2Best() : twGetBest(), floors.length),
-    peak: floors.length, startedAt: floors.length, v2: !!v2, stormLv: v2 && saved ? saved.storm_lv || 0 : 0,
+    peak: floors.length, startedAt: floors.length, v2: !!v2, stormLv: v2 && saved ? saved.storm_lv || 0 : 0, stormResume: v2 && saved ? saved.storm || null : null,
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
     coins: 0, revivable: false, revives: 0, lastResult: null, shield: false, shielded: 0,
     hz: null, fixQ: [], blocked: false,
@@ -19004,7 +19011,7 @@ function twSkinModal() {
 // Called whenever the wallet changes: keeps the picker and the scene current.
 function twSkinSync() {
   const scene = document.getElementById('tw-scene');
-  if (scene) {
+  if (scene && !(_tw && _tw.v2)) {
     [...scene.classList].filter(c => c.startsWith('tw-skin-')).forEach(c => scene.classList.remove(c));
     const id = walLook('tower').id;
     if (id) scene.classList.add('tw-skin-' + id);
@@ -19222,6 +19229,8 @@ function twHazardScene(end) {
   if (g.v2) {
     el.classList.add('tw2-hz');
     el.style.setProperty('--p', (hz.storm ? 1 - hz.left / hz.max : hz.n / TW_HAZARD_QS).toFixed(2));
+    const tag = hz.storm && el.querySelector('.tw2-tornado') && el.querySelector('.tw-hz-tag');
+    if (tag) { tag.textContent = `đúng ${hz.right}/${hz.need} · ${Math.max(0, Math.ceil(hz.left))} giây`; return; }
     el.innerHTML = hz.storm ? tw2StormMarkup(hz)
       : `${TW2_HZ_ART[hz.id] ? tsImg(TW2_HZ_ART[hz.id], 'tw2-hz-img') : `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.id === 'termite' ? '🐜🐜🐜' : hz.icon}</span>`}<span class="tw-hz-tag">${hz.wrong ? `sai ${hz.wrong} · ` : ''}còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
     return;
@@ -19406,7 +19415,7 @@ function twTiltFall() {
 // Saved as if it had already fallen, so closing the tab while the revive
 // question is open does not keep the tower standing for free.
 function twSaveFallen(g) {
-  twSave({ floors: g.ckFloors, ckFloors: g.ckFloors, lives: TW_LIVES, hints: g.hints, checkpoint: g.checkpoint, best: g.best }, true);
+  twSave({ floors: g.ckFloors, ckFloors: g.ckFloors, lives: TW_LIVES, hints: g.hints, checkpoint: g.checkpoint, best: g.best, stormLv: g.stormLv }, true);
 }
 
 function twRevive() {
@@ -19461,6 +19470,8 @@ function twCollapse() {
     f.style.animationDelay = Math.min(1.1, i * 0.045).toFixed(2) + 's';
     f.classList.add('tw-crumble');
   });
+  const roof = g.v2 && document.getElementById('tw2-roof');
+  if (roof) { roof.style.setProperty('--dx', '60px'); roof.style.setProperty('--rot', '35deg'); roof.style.animationDelay = Math.min(1.1, floors.length * 0.045).toFixed(2) + 's'; roof.classList.add('tw-crumble'); }
   const world = document.getElementById('tw-world');
   if (world) {
     for (let k = 0; k < 14; k++) {
