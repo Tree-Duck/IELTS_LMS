@@ -15356,19 +15356,19 @@ const RARITY = {
 // Looks, by slot. The first entry of each slot is the free default.
 const COSMETICS = {
   ship: [
-    { id: null, name: 'Tàu lá xanh', icon: '', laser: '#C8F169' },
-    { id: 'ship_rocket',  rarity: 'common',    price: 60,  name: 'Tên lửa',         icon: '🚀', tilt: -45, laser: '#FF7A59' },
-    { id: 'ship_ufo',     rarity: 'rare',      price: 150, name: 'Đĩa bay',         icon: '🛸', tilt: 0,   laser: '#5CE1E6' },
-    { id: 'ship_pencil',  rarity: 'rare',      price: 150, name: 'Bút chì thần',    icon: '✏️', tilt: 135, laser: '#FFD166' },
-    { id: 'ship_dragon',  rarity: 'epic',      price: 300, name: 'Rồng lửa',        icon: '🐉', tilt: 0,   laser: '#FF4D2E' },
-    { id: 'ship_unicorn', rarity: 'legendary', price: 600, name: 'Kỳ lân cầu vồng', icon: '🦄', tilt: 0,   laser: 'rainbow' },
+    { id: null, name: 'Tàu lá xanh', icon: '', laser: '#C8F169', art: 'ship_default' },
+    { id: 'ship_rocket',  rarity: 'common',    price: 60,  name: 'Tên lửa',         icon: '🚀', tilt: -45, laser: '#FF7A59', art: 'ship_rocket' },
+    { id: 'ship_ufo',     rarity: 'rare',      price: 150, name: 'Đĩa bay',         icon: '🛸', tilt: 0,   laser: '#5CE1E6', art: 'ship_ufo' },
+    { id: 'ship_pencil',  rarity: 'rare',      price: 150, name: 'Bút chì thần',    icon: '✏️', tilt: 135, laser: '#FFD166', art: 'ship_pencil' },
+    { id: 'ship_dragon',  rarity: 'epic',      price: 300, name: 'Rồng lửa',        icon: '🐉', tilt: 0,   laser: '#FF4D2E', art: 'ship_dragon' },
+    { id: 'ship_unicorn', rarity: 'legendary', price: 600, name: 'Kỳ lân cầu vồng', icon: '🦄', tilt: 0,   laser: 'rainbow', art: 'ship_unicorn' },
   ],
   drop: [
-    { id: null, name: 'Đàn gà', icons: ['🐔', '🐓', '🥚'], burst: '🍗', boss: 'GÀ TRÙM' },
-    { id: 'drop_duck',    rarity: 'common', price: 60,  name: 'Đàn vịt',         icons: ['🦆', '🦢', '🥚'], burst: '🪶', boss: 'THIÊN NGA TRÙM' },
-    { id: 'drop_donut',   rarity: 'rare',   price: 150, name: 'Tiệm bánh ngọt',  icons: ['🍩', '🎂', '🍬'], burst: '✨', boss: 'BÁNH KEM KHỔNG LỒ' },
-    { id: 'drop_balloon', rarity: 'rare',   price: 150, name: 'Lễ hội bóng bay', icons: ['🎈', '🪅', '🎁'], burst: '🎊', boss: 'PIÑATA TRÙM' },
-    { id: 'drop_monster', rarity: 'epic',   price: 300, name: 'Quái vật vũ trụ', icons: ['👾', '👹', '💎'], burst: '💥', boss: 'QUỶ TRÙM' },
+    { id: null, name: 'Đàn gà', icons: ['🐔', '🐓', '🥚'], burst: '🍗', boss: 'GÀ TRÙM', art: ['chick', 'chicken', 'egg'], spark: '#FFD54F' },
+    { id: 'drop_duck',    rarity: 'common', price: 60,  name: 'Đàn vịt',         icons: ['🦆', '🦢', '🥚'], burst: '🪶', boss: 'THIÊN NGA TRÙM', art: ['duck', 'owl', 'egg'], spark: '#7FD3FF' },
+    { id: 'drop_donut',   rarity: 'rare',   price: 150, name: 'Tiệm bánh ngọt',  icons: ['🍩', '🎂', '🍬'], burst: '✨', boss: 'BÁNH KEM KHỔNG LỒ', art: ['donut', 'cake', 'candy'], spark: '#F48FB1' },
+    { id: 'drop_balloon', rarity: 'rare',   price: 150, name: 'Lễ hội bóng bay', icons: ['🎈', '🪅', '🎁'], burst: '🎊', boss: 'PIÑATA TRÙM', art: ['balloon', 'pinata', 'gift'], spark: '#FF7A59' },
+    { id: 'drop_monster', rarity: 'epic',   price: 300, name: 'Quái vật vũ trụ', icons: ['👾', '👹', '💎'], burst: '💥', boss: 'QUỶ TRÙM', art: ['monster', 'monster2', 'gem'], spark: '#7BE08A' },
   ],
   tower: [
     { id: null, name: 'Nhà phố', icon: '🏢' },
@@ -16119,6 +16119,446 @@ async function lbLoad() {
   if (climb) { tsSfx('rankup'); jBuzz([40, 60, 40, 60, 120]); jConfetti(60); }
 }
 
+/* ── Bắn Chữ art ── Kenney's Space Shooter Remastered, its Extension and the
+   Animal Pack Remastered (CC0, licences next to the files in img/ts/kenney).
+   The egg, the cakes and the balloons have no Kenney picture, so they are
+   drawn below in the same thick-outline style. */
+// Bản mới (thử nghiệm): Kenney art, cockpit, meteors, the alien, four bosses.
+// Off by default; the student turns it on from the start screen. Its scores
+// stay off the leaderboard, since boss and alien bonuses would be unfair.
+let _tsV2 = false;
+try { _tsV2 = localStorage.getItem('tsV2') === '1'; } catch (e) {}
+function tsV2() { return _ts ? !!_ts.v2 : _tsV2; }
+function tsPickVer(on) {
+  const g = _ts;
+  if (!g || g.started) return;
+  _tsV2 = !!on;
+  lvSave('tsV2', on ? '1' : '0');
+  tsSfx('key');
+  tsStart(g.mode, g.list);
+}
+const TS_KEN = 'img/ts/kenney/';
+const TS_SS = TS_KEN + 'space-shooter-remastered/PNG/';
+const TS_SX = TS_KEN + 'space-shooter-extension/PNG/Sprites/';
+const TS_AN = TS_KEN + 'animal-pack-remastered/PNG/round-outline/';
+const TS_ART = {
+  ship_default: TS_SS + 'playerShip1_green.png', ship_rocket: TS_SS + 'playerShip2_orange.png', ship_ufo: TS_SS + 'ufoBlue.png',
+  ship_pencil: TS_SS + 'playerShip3_orange.png', ship_dragon: TS_SX + 'Ships/spaceShips_002.png', ship_unicorn: TS_SS + 'playerShip3_blue.png',
+  chick: TS_AN + 'chick.png', chicken: TS_AN + 'chicken.png', duck: TS_AN + 'duck.png', owl: TS_AN + 'owl.png',
+  monster: TS_SS + 'Enemies/enemyGreen1.png', monster2: TS_SS + 'Enemies/enemyRed2.png', gem: TS_SS + 'Power-ups/powerupBlue_star.png',
+  meteor1: TS_SS + 'Meteors/meteorBrown_big1.png', meteor2: TS_SS + 'Meteors/meteorBrown_big3.png', meteor3: TS_SS + 'Meteors/meteorGrey_big2.png',
+  meteorS1: TS_SS + 'Meteors/meteorBrown_med1.png', meteorS2: TS_SS + 'Meteors/meteorGrey_med2.png', meteorS3: TS_SS + 'Meteors/meteorBrown_small1.png', meteorS4: TS_SS + 'Meteors/meteorGrey_small2.png',
+  spark: TS_SS + 'Effects/star3.png', spark2: TS_SS + 'Effects/star2.png',
+  alien: TS_SS + 'ufoRed.png', alienshot: TS_SS + 'Enemies/enemyGreen1.png',
+  boss_chicken: TS_AN + 'chicken.png', boss_dragon: TS_SX + 'Ships/spaceShips_007.png', boss_wizard: TS_SX + 'Ships/spaceShips_009.png',
+  boss_ghost: TS_SS + 'Enemies/enemyBlack5.png', fortress: TS_SX + 'Ships/spaceShips_008.png',
+  smoke: TS_SX + 'Effects/spaceEffects_015.png', smoke2: TS_SX + 'Effects/spaceEffects_013.png',
+  life: TS_SS + 'UI/playerLife1_green.png', coin: TS_SS + 'Power-ups/things_gold.png', star: TS_SS + 'Power-ups/star_gold.png', shield: TS_SS + 'Power-ups/shield_gold.png',
+  pw_freeze: TS_SS + 'Power-ups/powerupBlue_star.png', pw_bomb: TS_SS + 'Power-ups/powerupRed_star.png', pw_life: TS_SS + 'Power-ups/pill_red.png',
+  pw_slow: TS_SS + 'Power-ups/pill_blue.png', pw_double: TS_SS + 'Power-ups/powerupYellow_bolt.png', pw_shield: TS_SS + 'Power-ups/shield_silver.png',
+  pw_coins: TS_SS + 'Power-ups/things_gold.png', pw_x2: TS_SS + 'Power-ups/bolt_gold.png', pw_revive: TS_SS + 'Power-ups/pill_red.png', pw_turtle: TS_SS + 'Power-ups/pill_green.png',
+};
+const TS_INK = '#3A2E39';
+// Drawn on a 64×64 canvas: fill, then the dark outline Kenney uses.
+const TS_DRAW = {
+  egg(x) {
+    x.fillStyle = '#FFF4DA'; x.beginPath(); x.ellipse(32, 35, 18, 24, 0, 0, Math.PI * 2); x.fill(); x.stroke();
+    x.fillStyle = '#F2C14E'; [[25, 30, 3], [38, 40, 2.4], [30, 47, 2], [40, 25, 1.8]].forEach(([a, b, r]) => { x.beginPath(); x.arc(a, b, r, 0, 7); x.fill(); });
+    x.fillStyle = '#FFFFFF'; x.beginPath(); x.ellipse(25, 22, 4, 7, -0.4, 0, 7); x.fill();
+  },
+  donut(x) {
+    x.fillStyle = '#D9944F'; x.beginPath(); x.arc(32, 34, 25, 0, 7); x.fill(); x.stroke();
+    x.fillStyle = '#F48FB1'; x.beginPath();
+    for (let a = 0; a <= Math.PI * 2 + 0.01; a += Math.PI / 10) { const r = 21 + (Math.round(a * 10 / Math.PI) % 2 ? 2 : -1); x.lineTo(32 + Math.cos(a) * r, 32 + Math.sin(a) * r); }
+    x.closePath(); x.fill(); x.stroke();
+    x.save(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); x.arc(32, 33, 8, 0, 7); x.fill(); x.restore();
+    x.beginPath(); x.arc(32, 33, 8, 0, 7); x.stroke();
+    [['#FFF', 18, 22, 0.5], ['#7FD3FF', 44, 22, -0.6], ['#F2C14E', 46, 38, 0.9], ['#7BE08A', 20, 42, -0.3], ['#FFF', 30, 16, 1.2], ['#7FD3FF', 36, 48, 0.2]].forEach(([c, a, b, r]) => {
+      x.save(); x.translate(a, b); x.rotate(r); x.fillStyle = c; x.fillRect(-3, -1.2, 6, 2.4); x.restore();
+    });
+  },
+  cake(x) {
+    x.fillStyle = '#F7E1C1'; x.fillRect(12, 30, 40, 24); x.strokeRect(12, 30, 40, 24);
+    x.fillStyle = '#C97A4A'; x.fillRect(12, 41, 40, 5);
+    x.fillStyle = '#FFFFFF'; x.beginPath(); x.moveTo(10, 32);
+    [[16, 40], [22, 32], [28, 42], [34, 32], [40, 39], [46, 32], [54, 38]].forEach(([a, b]) => x.quadraticCurveTo(a - 3, b, a, 32 + (b - 32) * 0.4));
+    x.lineTo(54, 26); x.lineTo(10, 26); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = '#E5533D'; x.beginPath(); x.arc(32, 20, 6, 0, 7); x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(33, 14); x.quadraticCurveTo(36, 7, 41, 6); x.stroke();
+  },
+  candy(x) {
+    x.fillStyle = '#F48FB1';
+    x.beginPath(); x.moveTo(20, 32); x.lineTo(5, 20); x.lineTo(8, 32); x.lineTo(5, 44); x.closePath(); x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(44, 32); x.lineTo(59, 20); x.lineTo(56, 32); x.lineTo(59, 44); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = '#FFFFFF'; x.beginPath(); x.arc(32, 32, 14, 0, 7); x.fill(); x.stroke();
+    x.save(); x.beginPath(); x.arc(32, 32, 12, 0, 7); x.clip(); x.strokeStyle = '#E5533D'; x.lineWidth = 4;
+    [-16, -6, 4, 14].forEach(d => { x.beginPath(); x.moveTo(20 + d, 50); x.lineTo(40 + d, 14); x.stroke(); }); x.restore();
+    x.beginPath(); x.arc(32, 32, 14, 0, 7); x.stroke();
+  },
+  balloon(x) {
+    x.beginPath(); x.moveTo(32, 50); x.bezierCurveTo(26, 56, 38, 58, 31, 63); x.stroke();
+    x.fillStyle = '#E5533D'; x.beginPath(); x.ellipse(32, 26, 18, 22, 0, 0, 7); x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(28, 50); x.lineTo(36, 50); x.lineTo(32, 46); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = 'rgba(255, 255, 255, .7)'; x.beginPath(); x.ellipse(24, 18, 4, 8, -0.4, 0, 7); x.fill();
+  },
+  pinata(x) {
+    const cols = ['#F2C14E', '#E5533D', '#2F80ED', '#27AE60', '#9B51E0'];
+    cols.forEach((c, i) => {
+      const a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+      x.fillStyle = c; x.beginPath(); x.moveTo(32 + Math.cos(a - 0.35) * 12, 32 + Math.sin(a - 0.35) * 12); x.lineTo(32 + Math.cos(a) * 30, 32 + Math.sin(a) * 30);
+      x.lineTo(32 + Math.cos(a + 0.35) * 12, 32 + Math.sin(a + 0.35) * 12); x.closePath(); x.fill(); x.stroke();
+    });
+    x.fillStyle = '#FFFFFF'; x.beginPath(); x.arc(32, 32, 13, 0, 7); x.fill(); x.stroke();
+    x.fillStyle = '#F48FB1'; x.beginPath(); x.arc(32, 32, 7, 0, 7); x.fill();
+  },
+  gift(x) {
+    x.fillStyle = '#2F80ED'; x.fillRect(12, 28, 40, 28); x.strokeRect(12, 28, 40, 28);
+    x.fillStyle = '#5FA3F5'; x.fillRect(9, 20, 46, 10); x.strokeRect(9, 20, 46, 10);
+    x.fillStyle = '#F2C14E'; x.fillRect(28, 20, 8, 36); x.strokeRect(28, 20, 8, 36);
+    x.beginPath(); x.ellipse(24, 15, 8, 5, 0.4, 0, 7); x.fill(); x.stroke(); x.beginPath(); x.ellipse(40, 15, 8, 5, -0.4, 0, 7); x.fill(); x.stroke();
+  },
+};
+const TS_ART_URL = {};
+function tsArtUrl(key) {
+  if (TS_ART[key]) return TS_ART[key];
+  if (TS_ART_URL[key]) return TS_ART_URL[key];
+  const f = TS_DRAW[key];
+  if (!f) return TS_ART.chick;
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const x = c.getContext('2d');
+  x.lineJoin = 'round'; x.lineCap = 'round'; x.lineWidth = 3.5; x.strokeStyle = TS_INK;
+  f(x);
+  return (TS_ART_URL[key] = c.toDataURL());
+}
+function tsImg(key, cls) { return `<img class="ts-img${cls ? ' ' + cls : ''}" src="${tsArtUrl(key)}" alt="" draggable="false">`; }
+// HUD buttons: small line icons instead of emoji.
+const TS_ICO = {
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  sound: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/>',
+  mute: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>',
+  shop: '<path d="M3 4h3l2.4 11h10.2L21 7H7"/><circle cx="10" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',
+  pause: '<path d="M8 5v14M16 5v14"/>',
+  swap: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+};
+function tsIco(k) { return `<svg class="ts-ico" viewBox="0 0 24 24" aria-hidden="true">${TS_ICO[k]}</svg>`; }
+function tsShipImg(c) { return `<img class="ts-ship-img" src="${tsArtUrl(c.art || 'ship_default')}" alt="" draggable="false">`; }
+// Emoji have no place in the new arena's floating text.
+function tsNoEmoji(s) { return String(s).replace(/✖️2/g, 'x2').replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}]/gu, '').replace(/\s{2,}/g, ' ').trim(); }
+
+/* ── Events: meteors, the alien duel, four bosses with their own tricks ──
+   Single meteors give a one-second warning, then fall three times faster.
+   A meteor shower (levels 4 and 8) is ten seconds of short words. The alien
+   (levels 2 and 6) spits words; clear them all and it drops into range, then
+   its hull words must go before the timer runs out. Losing the duel costs one
+   life. Levels 3, 5 and 7 bring a boss instead of the old miniboss; the
+   fortress stays as the final boss. */
+const TS_EVENTS = { alien: [2, 6], shower: [4, 8] };
+const TS_MBOSSES = {
+  chicken: { name: 'Gà Trùm', art: 'boss_chicken', say: 'Gà Trùm đẻ trứng. Trứng không bắn kịp sẽ nở thành gà con mang từ mới!' },
+  dragon:  { name: 'Rồng Khói', art: 'boss_dragon', say: 'Rồng Khói phun khói che nửa sau của từ. Nhớ lại phần còn thiếu!' },
+  wizard:  { name: 'Phù Thuỷ Đảo Chữ', art: 'boss_wizard', say: 'Phù thuỷ xáo trộn chữ cái. Gõ lại cho đúng chính tả!' },
+  ghost:   { name: 'Ma Tàng Hình', art: 'boss_ghost', say: 'Từ hiện ra rồi mờ dần. Nhìn nhanh và nhớ!' },
+};
+const TS_MBOSS_HP = { easy: 6, medium: 8, hard: 10 };
+const TS_ALIEN = { easy: { spit: 4, gap: 1.8, hull: 2, time: 16 }, medium: { spit: 5, gap: 1.3, hull: 2, time: 13 }, hard: { spit: 6, gap: 1, hull: 3, time: 11 } };
+const TS_METEOR_GAP = { easy: [24, 34], medium: [16, 24], hard: [12, 18] };
+const TS_SHOWER = { easy: { gap: 1.1, most: 3 }, medium: { gap: 0.75, most: 5 }, hard: { gap: 0.55, most: 6 } };
+
+// Letters shuffled inside each word, never left as they were when avoidable.
+function tsScramble(s) {
+  const one = w => { if (w.length < 3) return w; const a = [...w]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.join(''); };
+  let out = s;
+  for (let k = 0; k < 6 && out === s; k++) out = s.split(' ').map(one).join(' ');
+  return out;
+}
+function tsBanner(text) {
+  const a = document.getElementById('ts-arena');
+  if (!a) return;
+  a.querySelectorAll('.ts-banner').forEach(b => b.remove());
+  const b = document.createElement('div');
+  b.className = 'ts-banner';
+  b.textContent = text;
+  a.appendChild(b);
+  setTimeout(() => b.remove(), 3200);
+}
+// One life gone without a word touching the ground.
+function tsLoseLife(word) {
+  const g = _ts;
+  g.drops++;
+  g.lives--;
+  g.combo = 0;
+  if (word && !g.missed.some(m => m.en === word.en)) g.missed.push(word);
+  tsSfx('miss');
+  tsFlash('miss');
+  jBuzz(90);
+  tsShakeArena();
+  tsHud();
+  if (g.lives <= 0) tsOfferRevive();
+}
+function tsRand([a, b]) { return a + Math.random() * (b - a); }
+
+// Runs every frame while the game is not paused or frozen.
+function tsEvTick(dt) {
+  const g = _ts;
+  if (g.won) return;
+  const due = g.finalDue || g.miniDue;
+  // Warnings turn into meteors.
+  g.warns = (g.warns || []).filter(w => {
+    w.left -= dt;
+    if (w.left > 0) return true;
+    w.el.remove();
+    if (!g.boss || g.boss.monster) tsSpawn({ meteor: true, x: w.x, fall: tsFallTime(false) / 3 });
+    return false;
+  });
+  if (!g.ev && !g.boss && !due) {
+    if (g.alienDue) { tsAlienStart(); return; }
+    if (g.showerDue) { tsShowerStart(); return; }
+    if (g.level >= 2) {
+      if (g.metIn == null) g.metIn = tsRand(TS_METEOR_GAP[g.diffKey]) * 0.5;
+      g.metIn -= dt;
+      if (g.metIn <= 0) { tsMeteorWarn(); g.metIn = tsRand(TS_METEOR_GAP[g.diffKey]); }
+    }
+  }
+  if (g.boss && g.boss.monster) tsMBossTick(dt);
+  if (!g.ev) return;
+  if (g.ev.kind === 'shower') tsShowerTick(dt); else tsAlienTick(dt);
+}
+
+function tsMeteorWarn(x) {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!arena) return;
+  const at = x != null ? x : 60 + Math.random() * Math.max(10, g.W - 120);
+  const el = document.createElement('div');
+  el.className = 'ts-warn';
+  el.style.left = at + 'px';
+  arena.appendChild(el);
+  tsSfx('tick');
+  (g.warns || (g.warns = [])).push({ x: at, left: 1, el });
+}
+
+function tsShowerStart() {
+  const g = _ts;
+  g.showerDue = false;
+  g.ev = { kind: 'shower', left: 12.4, spawnIn: 2.4, shown: 12 };
+  document.getElementById('ts-arena')?.classList.add('ts-shower');
+  tsSfx('boss');
+  tsShakeArena();
+  tsFloat('MƯA THIÊN THẠCH!', g.W / 2, 40, 'big');
+  tsBanner('Mười giây mưa thiên thạch. Từ ngắn, rơi dày, gõ thật nhanh!');
+  tsHud();
+}
+function tsShowerTick(dt) {
+  const g = _ts, ev = g.ev, S = TS_SHOWER[g.diffKey];
+  ev.left -= dt;
+  ev.spawnIn -= dt;
+  const alive = g.items.filter(it => !it.dead && !it.fixed).length;
+  if (ev.left > 0 && ev.spawnIn <= 0 && alive < S.most) {
+    tsSpawn({ meteor: true, small: true, short: true, fall: tsFallTime(false) * 0.8 });
+    ev.spawnIn = S.gap;
+  }
+  if (Math.ceil(ev.left) !== ev.shown) { ev.shown = Math.ceil(ev.left); tsHud(); }
+  if (ev.left <= 0) {
+    g.ev = null;
+    document.getElementById('ts-arena')?.classList.remove('ts-shower');
+    const bonus = Math.round(5 * g.diff.coin * walMult());
+    g.coins += bonus;
+    tsFloat(`Hết mưa thiên thạch! +${bonus} xu`, g.W / 2, g.H / 2 - 20, 'big');
+    tsSfx('level');
+    g.spawnIn = 1.2;
+    tsHud();
+  }
+}
+
+function tsAlienStart() {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!arena) return;
+  g.alienDue = false;
+  const A = TS_ALIEN[g.diffKey];
+  const el = document.createElement('div');
+  el.className = 'ts-ufo';
+  el.innerHTML = `${tsImg('alien')}<div class="ts-ufo-bar"><i></i></div>`;
+  arena.appendChild(el);
+  g.ev = { kind: 'alien', phase: 'spit', toSpit: A.spit, spitIn: 3, t: 0, el, x: g.W / 2, y: 6, words: [], hull: [], timer: A.time, max: A.time, shown: 0 };
+  tsSfx('boss');
+  tsFloat('TÀU NGOÀI HÀNH TINH!', g.W / 2, 60, 'big');
+  tsBanner('Bắn hết từ nó nhả ra. Rồi tàu sẽ hạ xuống, bắn tiếp vào thân tàu trước khi hết giờ.');
+  tsHud();
+}
+function tsAlienTick(dt) {
+  const g = _ts, ev = g.ev, A = TS_ALIEN[g.diffKey];
+  ev.t += dt;
+  if (ev.phase === 'spit') {
+    ev.x = g.W / 2 + Math.sin(ev.t * 1.1) * g.W * 0.32;
+    ev.y = 6;
+    ev.spitIn -= dt;
+    if (ev.toSpit > 0 && ev.spitIn <= 0) {
+      const it = tsSpawn({ alien: true, x: ev.x, y: 50 });
+      if (it) ev.words.push(it);
+      ev.toSpit--;
+      ev.spitIn = A.gap;
+      ev.el.classList.remove('spit'); void ev.el.offsetWidth; ev.el.classList.add('spit');
+    }
+    if (ev.toSpit <= 0 && ev.words.every(w => w.dead)) tsAlienHull();
+  } else {
+    ev.x += (g.W / 2 - ev.x) * Math.min(1, dt * 4);
+    ev.y += (g.H * 0.16 - ev.y) * Math.min(1, dt * 4);
+    ev.timer -= dt;
+    const bar = ev.el.querySelector('.ts-ufo-bar i');
+    if (bar) bar.style.width = Math.max(0, ev.timer / ev.max * 100) + '%';
+    if (Math.ceil(ev.timer) !== ev.shown) { ev.shown = Math.ceil(ev.timer); tsHud(); }
+    if (ev.hull.every(w => w.dead)) { tsAlienEnd(true); return; }
+    if (ev.timer <= 0) { tsAlienEnd(false); tsLoseLife(null); return; }
+  }
+  ev.el.style.transform = `translate(${Math.round(ev.x - 50)}px, ${Math.round(ev.y)}px)`;
+}
+// Every word it spat is down: it drops into range and shows its hull words.
+function tsAlienHull() {
+  const g = _ts, ev = g.ev, A = TS_ALIEN[g.diffKey];
+  ev.phase = 'hull';
+  ev.el.classList.add('hull');
+  tsSfx('power');
+  tsFloat('Tàu hạ xuống! Bắn vào thân tàu!', g.W / 2, g.H / 2, 'big');
+  const top = g.H * 0.16 + 118;
+  for (let i = 0; i < A.hull; i++) {
+    const it = tsSpawn({ alien: true, hull: true });
+    if (!it) continue;
+    it.x = Math.max(0, Math.min(g.W - it.w, g.W / 2 + (i - (A.hull - 1) / 2) * Math.min(220, g.W / A.hull) - it.w / 2));
+    it.y = top + (i % 2) * 18;
+    it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
+    ev.hull.push(it);
+  }
+  tsHud();
+}
+// Won or lost, the alien goes. Its words still on screen go with it.
+function tsAlienEnd(won) {
+  const g = _ts, ev = g.ev;
+  if (!ev || ev.kind !== 'alien') return;
+  g.items.filter(x => !x.dead && x.alien).forEach(x => tsExplode(x, false));
+  if (g.lockId && !g.items.some(x => x.id === g.lockId && !x.dead)) {
+    g.lockId = null;
+    const input = document.getElementById('ts-input');
+    if (input) input.value = '';
+  }
+  ev.el.classList.add(won ? 'boom' : 'flee');
+  setTimeout(() => ev.el.remove(), 900);
+  g.ev = null;
+  g.spawnIn = 1.4;
+  if (won) {
+    const bonus = Math.round(20 * g.diff.coin * walMult());
+    g.coins += bonus;
+    g.score += 800 * (1 + ['easy', 'medium', 'hard'].indexOf(g.diffKey));
+    tsFloat(`HẠ TÀU NGOÀI HÀNH TINH! +${bonus} xu`, g.W / 2, g.H / 2 - 20, 'big');
+    tsSfx('rankup');
+    tsShakeArena();
+    jConfetti(40);
+    tsHud();
+  } else {
+    tsFloat('Tàu ngoài hành tinh thắng lượt này. Mất 1 mạng.', g.W / 2, g.H / 2 - 20, 'big');
+    tsHud();
+  }
+  return won;
+}
+// Clears whatever event is running, without reward or penalty.
+function tsEvClear() {
+  const g = _ts;
+  if (!g) return;
+  (g.warns || []).forEach(w => w.el.remove());
+  g.warns = [];
+  if (g.ev) {
+    if (g.ev.el) g.ev.el.remove();
+    document.getElementById('ts-arena')?.classList.remove('ts-shower');
+    g.ev = null;
+  }
+}
+
+/* The four bosses: each spits words with its own trick. */
+function tsMBossStart() {
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!g || !arena || g.boss) return;
+  g.minis++;
+  if (!g.mbOrder) g.mbOrder = vbShuffle(Object.keys(TS_MBOSSES));
+  const kind = g.mbOrder[(g.minis - 1) % g.mbOrder.length];
+  const M = TS_MBOSSES[kind], hp = TS_MBOSS_HP[g.diffKey];
+  const el = document.createElement('div');
+  el.className = 'ts-mboss ts-mboss--' + kind;
+  el.innerHTML = `<div class="ts-mboss-art">${tsImg(M.art)}${kind === 'chicken' ? tsImg('star', 'ts-mboss-crown') : ''}</div>
+    <div class="ts-mboss-bar"><i style="width:100%"></i></div><div class="ts-mboss-name">${escapeHtml(M.name)}</div>`;
+  arena.appendChild(el);
+  g.boss = { monster: true, kind, hp, max: hp, el, t: 0, x: g.W / 2 };
+  arena.classList.add('ts-bossfight', 'ts-bf-' + kind);
+  tsSfx('boss');
+  tsShakeArena();
+  jBuzz([60, 40, 60]);
+  tsFloat(M.name.toUpperCase() + '!', g.W / 2, 150, 'big');
+  tsBanner(M.say);
+  g.spawnIn = 3.3;
+  tsHud();
+}
+function tsMBossTick(dt) {
+  const g = _ts, b = g.boss;
+  b.t += dt;
+  b.x = g.W / 2 + Math.sin(b.t * 0.7) * g.W * 0.3;
+  b.el.style.transform = `translate(${Math.round(b.x - 60)}px, 0)`;
+  // Eggs not shot by the middle of the screen hatch into chicks with new words.
+  if (b.kind === 'chicken') g.items.forEach(it => { if (it.eggling && !it.hatched && !it.dead && it.t / it.fall > 0.45) tsHatch(it); });
+  if (b.kind === 'ghost') g.items.forEach(it => { if (it.fx === 'ghost' && !it.faded && !it.dead && it.t > 1.1) { it.faded = true; it.el.classList.add('ts-faded'); } });
+}
+function tsHatch(it) {
+  const g = _ts;
+  const pick = tsPickWord({});
+  if (!pick) return;
+  if (g.lockId === it.id) {
+    g.lockId = null;
+    it.el.classList.remove('ts-locked');
+    const input = document.getElementById('ts-input');
+    if (input) input.value = '';
+  }
+  ['en', 'vi', 'show', 'answers', 'use', 'ex', 'tag', 'group', 'before', 'after', 'key'].forEach(k => { it[k] = pick[k]; });
+  it.hatched = true;
+  it.art = 'chick';
+  it.fall *= 0.62;
+  it.t *= 0.62;
+  it.el.classList.add('ts-hatched');
+  tsRender(it, '');
+  tsSfx('wrong');
+  tsFloat('Nở rồi!', it.x + it.w / 2, it.y);
+}
+function tsMBossHit() {
+  const g = _ts, b = g.boss;
+  if (!b || !b.monster) return;
+  b.hp--;
+  const bar = b.el.querySelector('.ts-mboss-bar i');
+  if (bar) bar.style.width = Math.max(0, b.hp / b.max * 100) + '%';
+  b.el.classList.remove('hit'); void b.el.offsetWidth; b.el.classList.add('hit');
+  if (b.hp <= 0) tsMBossDown(); else tsHud();
+}
+function tsMBossDown() {
+  const g = _ts, b = g.boss;
+  questBump('ts_boss', 1);
+  g.boss = null;
+  g.items.filter(x => !x.dead && x.mb).forEach(x => tsExplode(x, false));
+  g.lockId = null;
+  const input = document.getElementById('ts-input');
+  if (input) input.value = '';
+  b.el.classList.add('down');
+  setTimeout(() => b.el.remove(), 900);
+  document.getElementById('ts-arena')?.classList.remove('ts-bossfight', 'ts-bf-' + b.kind);
+  const bonus = Math.round(12 * g.diff.coin * walMult());
+  g.coins += bonus;
+  g.score += 500 * (1 + ['easy', 'medium', 'hard'].indexOf(g.diffKey));
+  tsFloat(`HẠ ${TS_MBOSSES[b.kind].name.toUpperCase()}! +${bonus} xu`, g.W / 2, g.H / 2 - 20, 'big');
+  tsSfx('rankup');
+  tsShakeArena();
+  jBuzz([40, 30, 40, 30, 120]);
+  jConfetti(45);
+  g.spawnIn = 1.5;
+  tsHud();
+}
+
 const TS_MODES = {
   copy:    { label: 'Nhìn tiếng Anh', fall: 20, gap: 3.2, gapMin: 1.4, maxOn: 7 },
   meaning: { label: 'Nhìn nghĩa Việt', fall: 30, gap: 4.6, gapMin: 2.2, maxOn: 5 },
@@ -16139,8 +16579,17 @@ function tsCollocOf(w) {
   return { ...w, answers: [key], before: words.slice(0, k).join(' '), after: words.slice(k + 1).join(' '), key: words[k] };
 }
 function tsCollocHtml(it, typed) {
-  const gap = typed && tsNorm(it.key).startsWith(typed) ? `<span class="ts-hit">${escapeHtml(it.key.slice(0, typed.length))}</span>${'_'.repeat(Math.max(0, it.key.length - typed.length))}` : `${escapeHtml(it.key[0])}${'_'.repeat(it.key.length - 1)}`;
-  return `<div class="ts-word ts-colloc">${escapeHtml(it.before)} <span class="ts-gap">${gap}</span> ${escapeHtml(it.after)}</div><div class="ts-vi">${escapeHtml(it.vi)}</div>`;
+  const onKey = typed && tsNorm(it.key).startsWith(typed);
+  const gap = onKey ? `<span class="ts-hit">${escapeHtml(it.key.slice(0, typed.length))}</span>${'_'.repeat(Math.max(0, it.key.length - typed.length))}`
+    : it.fx === 'scramble' ? escapeHtml(it.scr) : `${escapeHtml(it.key[0])}${'_'.repeat(it.key.length - 1)}`;
+  const after = it.fx === 'smoke' ? tsSmoke(it.after, 0) : escapeHtml(it.after);
+  const vi = it.fx === 'smoke' ? tsSmoke(it.vi, 0) : escapeHtml(it.vi);
+  return `<div class="ts-word ts-colloc${it.fx === 'ghost' ? ' ts-fademe' : ''}">${escapeHtml(it.before)} <span class="ts-gap">${gap}</span> ${after}</div><div class="ts-vi">${vi}</div>`;
+}
+// Dragon smoke: the second half of a text hides, letters already typed show.
+function tsSmoke(text, n) {
+  const cut = Math.ceil(String(text).length / 2);
+  return [...String(text)].map((ch, i) => (i < n ? `<span class="ts-hit">${escapeHtml(ch)}</span>` : i < cut || ch === ' ' ? escapeHtml(ch) : `<span class="ts-smoke">${escapeHtml(ch)}</span>`)).join('');
 }
 const TS_MAX_LIVES = 5;
 // Speed levels. "Vừa" is the tuning students already had; "Dễ" is for those
@@ -16170,6 +16619,8 @@ const TS_EGG_EVERY = 11;
 const TS_MINI_EVERY = 2;
 const TS_FINAL_LEVEL = 9;
 const TS_CORE = { easy: [1, 3], medium: [2, 5], hard: [3, 7] };
+const TS_MINIBOSSES = ['👾', '🦂', '🐺', '🦇', '🕷️'];
+const TS_FINALBOSSES = ['🐉', '👹', '🦖'];
 // Left-to-right order of the columns, given them sorted short to tall.
 const TS_SHAPES = {
   pyramid: n => (n === 3 ? [0, 2, 1] : [0, 2, 3, 1]),
@@ -16178,8 +16629,6 @@ const TS_SHAPES = {
   down:    n => [...Array(n).keys()].reverse(),
   zigzag:  n => (n === 3 ? [1, 2, 0] : [1, 3, 0, 2]),
 };
-const TS_MINIBOSSES = ['👾', '🦂', '🐺', '🦇', '🕷️'];
-const TS_FINALBOSSES = ['🐉', '👹', '🦖'];
 let _ts = null;
 let _tsAudio = null;
 
@@ -16283,7 +16732,7 @@ function tsSfx(kind, arg) {
 function tsToggleMute() {
   lvSave('tsMute', tsMuted() ? '0' : '1');
   const b = document.getElementById('ts-mute');
-  if (b) b.textContent = tsMuted() ? '🔇' : '🔊';
+  if (b) b.innerHTML = tsV2() ? tsIco(tsMuted() ? 'mute' : 'sound') : tsMuted() ? '🔇' : '🔊';
   document.getElementById('ts-input')?.focus();
 }
 
@@ -16298,19 +16747,19 @@ function tsStart(mode, list) {
   if (mode === 'colloc' && pool.length < 5) { showToast('Phần đang chọn có quá ít cụm từ để ghép. Chọn thêm buổi hoặc unit.'); return; }
   if (!pool.length || !root || !TS_MODES[mode]) return;
   root.innerHTML = `
-    <div class="ts-wrap" id="ts-wrap">
+    <div class="ts-wrap${_tsV2 ? ' ts-v2' : ''}" id="ts-wrap">
       <div class="ts-hud">
-        <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">←</button>
+        <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">${_tsV2 ? tsIco('back') : '←'}</button>
         <span class="ts-lives" id="ts-lives"></span>
         <span class="ts-combo" id="ts-combo"></span>
         <span class="ts-bossbar" id="ts-bossbar"></span>
         <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
         <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
-        <span class="ts-stat">🪙 <strong id="ts-coins">0</strong></span>
-        <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
-        <button class="ts-icon-btn" onclick="gameShop('ts')" title="Mua vật phẩm" aria-label="Mua vật phẩm">🛒</button>
-        <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">⏸</button>
-        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
+        <span class="ts-stat">${_tsV2 ? tsImg('coin', 'ts-hud-coin') : '🪙'} <strong id="ts-coins">0</strong></span>
+        <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${_tsV2 ? tsIco(tsMuted() ? 'mute' : 'sound') : tsMuted() ? '🔇' : '🔊'}</button>
+        <button class="ts-icon-btn" onclick="gameShop('ts')" title="Mua vật phẩm" aria-label="Mua vật phẩm">${_tsV2 ? tsIco('shop') : '🛒'}</button>
+        <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">${_tsV2 ? tsIco('pause') : '⏸'}</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">${_tsV2 ? tsIco('swap') : '🔀'}</button>
       </div>
       <div class="ts-arena" id="ts-arena">
         <div class="ts-stars"></div>
@@ -16326,13 +16775,14 @@ function tsStart(mode, list) {
       </div>
     </div>`;
   const g = _ts = {
-    mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff],
+    mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff], v2: _tsV2,
     pool, deck: vbShuffle(pool), deckPos: 0,
     items: [], lockId: null, nextId: 1, spawned: 0,
     score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
     missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: true, started: false,
     W: 0, H: 0, coins: 0, slow: 0, dbl: 0, shield: false, revives: 0, reviving: false, powersShown: '',
     lvKills: 0, seen: new Set(), boss: null, minis: 0, miniDue: false, finalDue: false, won: false, lastShape: '',
+    ev: null, warns: [], metIn: null, alienDue: false, showerDue: false, mbOrder: null,
   };
   tsApplySkins();
   const input = document.getElementById('ts-input');
@@ -16361,7 +16811,10 @@ function tsReadyScreen() {
   ov.innerHTML = `<div class="ts-ov-title">${escapeHtml(g.cfg.label)}</div>
     <div class="ts-ov-sub">Chọn tốc độ</div>
     <div class="lv-diff ts-ready-diff">${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${g.diffKey === k ? ' active' : ''}" onclick="tsPickDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}</div>
-    <div class="ts-ov-sub ts-ready-note">Cứ ${TS_MINI_EVERY} cấp gặp một miniboss. Khi đã bắn hết từ thì gặp boss cuối, lõi boss cần ${TS_CORE[g.diffKey][1]} từ mới hạ được. Hạ boss cuối là thắng.</div>
+    <div class="lv-diff ts-ready-diff ts-ready-ver"><button class="vb-chip${g.v2 ? '' : ' active'}" onclick="tsPickVer(false)">Bản cũ</button><button class="vb-chip${g.v2 ? ' active' : ''}" onclick="tsPickVer(true)">🧪 Bản mới (thử nghiệm)</button></div>
+    <div class="ts-ov-sub ts-ready-note">${g.v2
+      ? `Cấp 2 và 6: tàu ngoài hành tinh. Cấp 4 và 8: mưa thiên thạch. Cấp 3, 5, 7: một trong bốn boss. Bắn hết từ thì gặp Pháo đài, lõi cần ${TS_CORE[g.diffKey][1]} từ. Hạ Pháo đài là thắng. Bản thử nghiệm vẫn được xu, nhưng điểm không lên bảng xếp hạng.`
+      : `Cứ ${TS_MINI_EVERY} cấp gặp một miniboss. Khi đã bắn hết từ thì gặp boss cuối, lõi boss cần ${TS_CORE[g.diffKey][1]} từ mới hạ được. Hạ boss cuối là thắng.`}</div>
     <button class="vb-start-btn" id="ts-go" onclick="tsGo()">▶ Bắt đầu</button>`;
   ov.classList.remove('hidden');
   document.getElementById('ts-go')?.focus();
@@ -16393,7 +16846,10 @@ function tsApplySkins() {
   const ship = document.getElementById('ts-ship');
   const arena = document.getElementById('ts-arena');
   const s = walLook('ship');
-  if (ship) {
+  if (ship && tsV2()) {
+    ship.classList.add('ts-ship--img');
+    ship.innerHTML = tsShipImg(s);
+  } else if (ship) {
     ship.classList.toggle('ts-ship--emoji', !!s.icon);
     ship.innerHTML = s.icon ? walShipIcon(s) : '';
   }
@@ -16417,7 +16873,7 @@ function tsCallout(text) {
   if (!a) return;
   const c = document.createElement('div');
   c.className = 'ts-callout';
-  c.textContent = text;
+  c.textContent = tsV2() ? tsNoEmoji(text) : text;
   a.appendChild(c);
   setTimeout(() => c.remove(), 1400);
   tsFlash('combo');
@@ -16435,12 +16891,12 @@ function tsPowers() {
     const it = SHOP_ITEMS.find(i => i.id === id);
     const on = left > 0;
     return `<button class="ts-power${on ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('${id}')" ${!on && !walCount(id) ? 'disabled' : ''} title="${escapeHtml(it.name)}, phím ${key}">
-      <kbd>${key}</kbd>${it.icon} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
+      <kbd>${key}</kbd>${g.v2 ? tsImg(id === 'slow' ? 'pw_slow' : 'pw_double', 'ts-pw-img') : it.icon} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
   };
   const shield = `<button class="ts-power${g.shield ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('shield')" ${!g.shield && !walCount('shield') ? 'disabled' : ''} title="Khiên, phím 3">
-      <kbd>3</kbd>🛡️ <span class="ts-power-name">Khiên</span> <span class="ts-power-n">${g.shield ? 'sẵn sàng' : '×' + walCount('shield')}</span></button>`;
+      <kbd>3</kbd>${g.v2 ? tsImg('pw_shield', 'ts-pw-img') : '🛡️'} <span class="ts-power-name">Khiên</span> <span class="ts-power-n">${g.shield ? 'sẵn sàng' : '×' + walCount('shield')}</span></button>`;
   const html = btn('slow', 1, g.slow) + btn('double', 2, g.dbl) + shield +
-    `<span class="ts-power-revive" title="Hồi sinh">💖 ×${walCount('revive')}</span>`;
+    `<span class="ts-power-revive" title="Hồi sinh">${g.v2 ? tsImg('pw_revive', 'ts-pw-img') : '💖'} ×${walCount('revive')}</span>`;
   if (html === g.powersShown) return;
   g.powersShown = html;
   el.innerHTML = html;
@@ -16517,11 +16973,12 @@ function tsGap() {
 }
 
 function tsItemHtml(it, typed) {
-  const pack = walLook('drop');
-  const icon = it.boss ? pack.icons[1] : it.egg ? `${pack.icons[2]}<b class="ts-egg-pw">${TS_EGG_POWERS[it.power] || ''}</b>` : pack.icons[0];
+  let icon = '';
+  if (!it.fixed && _ts.v2 && it.art) icon = `<span class="ts-chick">${tsImg(it.art)}${it.egg ? tsImg('pw_' + it.power, 'ts-egg-pw') : ''}</span>`;
+  else if (!it.fixed && !_ts.v2) { const pack = walLook('drop'); icon = `<span class="ts-chick">${it.egg ? `${pack.icons[2]}<b class="ts-egg-pw">${TS_EGG_POWERS[it.power] || ''}</b>` : pack.icons[0]}</span>`; }
   if (_ts.mode === 'colloc') {
     const body = tsCollocHtml(it, typed);
-    return it.fixed ? `<div class="ts-cell-w">${body}</div>` : `<span class="ts-chick">${icon}</span>${body}`;
+    return it.fixed ? `<div class="ts-cell-w">${body}</div>` : icon + body;
   }
   if (it.fixed) {
     const onTrack = typed && it.answers.some(x => x.startsWith(typed));
@@ -16532,12 +16989,17 @@ function tsItemHtml(it, typed) {
   }
   if (_ts.mode === 'copy') {
     const onTrack = typed && tsNorm(it.show).startsWith(typed);
-    const word = onTrack
-      ? `<span class="ts-hit">${escapeHtml(it.show.slice(0, typed.length))}</span>${escapeHtml(it.show.slice(typed.length))}`
-      : escapeHtml(it.show);
-    return `<span class="ts-chick">${icon}</span><div class="ts-word">${word}</div>` + (typed && !onTrack ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+    const n = onTrack && it.fx !== 'scramble' ? typed.length : 0;
+    const word = it.fx === 'scramble' ? escapeHtml(it.scr)
+      : it.fx === 'smoke' ? tsSmoke(it.show, n)
+      : n ? `<span class="ts-hit">${escapeHtml(it.show.slice(0, n))}</span>${escapeHtml(it.show.slice(n))}` : escapeHtml(it.show);
+    // Smoke, scrambled letters and the fading ghost all leave the meaning as the cue.
+    const cue = it.fx ? `<div class="ts-vi ts-cue">${escapeHtml(it.vi)}</div>` : '';
+    return icon + `<div class="ts-word${it.fx === 'ghost' ? ' ts-fademe' : ''}${it.fx === 'scramble' ? ' ts-scr' : ''}">${word}</div>${cue}` + (typed && (!onTrack || it.fx === 'scramble') ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
   }
-  return `<span class="ts-chick">${icon}</span><div class="ts-vi">${escapeHtml(it.vi)}</div><div class="ts-mask">${escapeHtml(tsMask(it.show))}</div>` + (typed ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
+  const vi = it.fx === 'smoke' ? tsSmoke(it.vi, 0) : escapeHtml(it.vi);
+  const mask = it.fx === 'scramble' ? escapeHtml(it.scr) : escapeHtml(tsMask(it.show));
+  return icon + `<div class="ts-vi${it.fx === 'ghost' ? ' ts-fademe' : ''}">${vi}</div><div class="ts-mask${it.fx === 'scramble' ? ' ts-scr' : ''}">${mask}</div>` + (typed ? `<div class="ts-typed">${escapeHtml(typed)}</div>` : '');
 }
 
 function tsRender(it, typed) {
@@ -16547,46 +17009,68 @@ function tsRender(it, typed) {
   it.x = Math.min(it.x, Math.max(0, _ts.W - it.w));
 }
 
-function tsSpawn() {
+// The next word: not already falling, and when possible starting with a letter
+// no falling word starts with, so the first keystroke already says which.
+function tsPickWord(opt) {
   const g = _ts;
-  const arena = document.getElementById('ts-arena');
-  if (!arena) return;
-  g.spawned++;
-  const boss = false;
-  const egg = !g.boss && g.spawned % TS_EGG_EVERY === 0;
   const alive = g.items.filter(it => !it.dead);
   const onScreen = new Set(alive.map(it => it.answers[0]));
   const firsts = new Set(alive.map(it => it.answers[0][0]));
-  let pick = null;
-  if (boss) {
-    // The boss is one of the longest phrases in the selection.
-    const long = g.pool.filter(w => !onScreen.has(w.answers[0])).sort((a, b) => b.show.length - a.show.length).slice(0, 12);
-    pick = long.length ? long[Math.floor(Math.random() * long.length)] : null;
+  if (opt.short) {
+    const short = g.pool.filter(w => !onScreen.has(w.answers[0]) && w.show.length <= 9);
+    if (short.length) {
+      const free = short.filter(w => !firsts.has(w.answers[0][0]));
+      const from = free.length ? free : short;
+      return from[Math.floor(Math.random() * from.length)];
+    }
   }
-  // Otherwise prefer a word whose first letter is not already falling, so the
-  // first keystroke already says which word is meant.
+  let pick = null;
   for (let tries = 0; !pick && tries < 12; tries++) {
     if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
     const w = g.deck[g.deckPos++];
     if (onScreen.has(w.answers[0])) continue;
     if (!firsts.has(w.answers[0][0]) || tries >= 11) pick = w;
   }
-  if (!pick) return;
+  return pick;
+}
+// opt: meteor, small, short, alien, hull, x, y, fall. A boss on screen adds its trick.
+function tsSpawn(opt) {
+  opt = opt || {};
+  const g = _ts;
+  const arena = document.getElementById('ts-arena');
+  if (!arena) return null;
+  g.spawned++;
+  const mb = g.boss && g.boss.monster ? g.boss.kind : null;
+  const egg = !g.boss && !opt.meteor && !opt.alien && g.spawned % TS_EGG_EVERY === 0;
+  const pick = tsPickWord(opt);
+  if (!pick) return null;
   if (!g.boss) {
     g.seen.add(pick.answers[0]);
     if (g.seen.size >= new Set(g.pool.map(w => w.answers[0])).size) g.finalDue = true;
   }
+  const art = walLook('drop').art || COSMETICS.drop[0].art;
   const el = document.createElement('div');
-  el.className = 'ts-item' + (boss ? ' ts-boss' : '') + (egg ? ' ts-egg' : '') + (g.boss ? ' ts-shot' : '');
-  const it = { ...pick, boss, egg, power: egg ? tsEggPower() : null, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: tsFallTime(boss), dead: false };
+  el.className = 'ts-item' + (egg ? ' ts-egg' : '') + (g.boss && !mb ? ' ts-shot' : '') +
+    (opt.meteor ? ' ts-meteor' + (opt.small ? ' ts-meteor--s' : '') : '') + (opt.alien ? (opt.hull ? ' ts-hull' : ' ts-alienshot') : '') + (mb ? ' ts-mbshot ts-mb-' + mb : '');
+  const it = { ...pick, boss: false, egg, power: egg ? tsEggPower() : null, id: g.nextId++, el, x: 0, y: 0, w: 0, h: 0, t: 0, fall: opt.fall || tsFallTime(false), dead: false,
+    meteor: !!opt.meteor, alien: !!opt.alien, pin: !!opt.hull, mb };
+  const meteors = opt.small ? ['meteorS1', 'meteorS2', 'meteorS3', 'meteorS4'] : ['meteor1', 'meteor2', 'meteor3'];
+  it.art = opt.meteor ? meteors[Math.floor(Math.random() * meteors.length)] : opt.hull ? null : opt.alien ? 'alienshot' : mb === 'chicken' ? 'egg' : egg ? art[2] : art[0];
+  if (mb === 'chicken') it.eggling = true;
+  if (mb === 'dragon' && Math.random() < 0.75) it.fx = 'smoke';
+  if (mb === 'wizard') { it.fx = 'scramble'; it.scr = tsScramble(g.mode === 'colloc' ? it.key : it.show); }
+  if (mb === 'ghost') it.fx = 'ghost';
   el.dataset.id = it.id;
   arena.appendChild(el);
   tsRender(it, '');
-  it.x = Math.random() * Math.max(0, g.W - it.w);
-  it.y = -it.h;
+  const cx = opt.x != null ? opt.x : mb ? g.boss.x : null;
+  it.x = cx != null ? Math.max(0, Math.min(g.W - it.w, cx - it.w / 2)) : Math.random() * Math.max(0, g.W - it.w);
+  const y0 = opt.y != null ? opt.y : mb ? 70 : null;
+  it.y = y0 != null ? y0 : -it.h;
+  if (y0 != null) it.t = (it.y + it.h) / g.H * it.fall;
   el.style.transform = `translate(${it.x}px, ${it.y}px)`;
   g.items.push(it);
-  if (boss) { const pack = walLook('drop'); tsSfx('boss'); tsFloat(`${pack.icons[1]} ${pack.boss}`, g.W / 2, 40, 'big'); }
+  return it;
 }
 
 function tsFrame(now) {
@@ -16608,17 +17092,21 @@ function tsFrame(now) {
       g.freeze -= dt;
       if (g.freeze <= 0) document.getElementById('ts-arena')?.classList.remove('frozen');
     } else {
+      if (g.v2) tsEvTick(dt * k);
+      if (!g.running) return;
+      if (g.paused) { g.raf = requestAnimationFrame(tsFrame); return; }
       g.spawnIn -= dt * k;
       const alive = g.items.filter(it => !it.dead && !it.fixed).length;
-      // While a boss is on, a few words still fall as its shots.
-      const most = g.boss ? (g.diffKey === 'easy' ? 1 : 2) : Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd));
-      const due = !g.boss && !g.won && (g.finalDue || g.miniDue);
+      // While the fortress is on, a few words still fall as its shots; a boss
+      // keeps a few more on screen, each with its trick.
+      const most = g.boss ? (g.boss.monster ? (g.diffKey === 'easy' ? 2 : 3) : (g.diffKey === 'easy' ? 1 : 2)) : Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd));
+      const due = !g.boss && !g.won && !g.ev && (g.finalDue || g.miniDue);
       if (due) {
-        if (alive === 0) { const kind = g.finalDue ? 'final' : 'mini'; g.miniDue = false; tsBossStart(kind); }
-      } else if (!g.won && g.spawnIn <= 0 && alive < most) { tsSpawn(); g.spawnIn = tsGap() * (g.boss ? 1.8 : 1); }
-      else if (alive === 0 && g.spawnIn > 0.4) g.spawnIn = 0.4;
+        if (alive === 0) { const fin = g.finalDue; g.miniDue = false; if (fin) { tsEvClear(); tsBossStart('final'); } else if (g.v2) tsMBossStart(); else tsBossStart('mini'); }
+      } else if (!g.won && !g.ev && g.spawnIn <= 0 && alive < most) { tsSpawn(); g.spawnIn = tsGap() * (g.boss && !g.boss.monster ? 1.8 : 1); }
+      else if (alive === 0 && !g.ev && g.spawnIn > 0.4) g.spawnIn = 0.4;
       for (const it of g.items) {
-        if (it.dead || it.fixed) continue;
+        if (it.dead || it.fixed || it.pin) continue;
         it.t += dt * k;
         it.y = -it.h + (it.t / it.fall) * g.H;
         it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
@@ -16771,6 +17259,7 @@ function tsExplode(it, withLaser) {
       const p = document.createElement('span');
       const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * (it.boss ? 90 : 45);
       p.className = 'ts-spark';
+      if (g.v2 && k % 2) p.style.background = it.meteor ? '#FFB066' : walLook('drop').spark || '';
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
       p.style.setProperty('--dx', Math.cos(a) * d + 'px');
@@ -16780,7 +17269,7 @@ function tsExplode(it, withLaser) {
     }
     const leg = document.createElement('span');
     leg.className = 'ts-leg';
-    leg.textContent = walLook('drop').burst;
+    if (g.v2) leg.innerHTML = tsImg(it.meteor ? 'spark2' : 'spark'); else leg.textContent = walLook('drop').burst;
     leg.style.left = cx + 'px';
     leg.style.top = cy + 'px';
     arena.appendChild(leg);
@@ -16793,6 +17282,7 @@ function tsExplode(it, withLaser) {
 
 function tsKill(it, second) {
   const g = _ts;
+  const inBoss = !!g.boss;
   g.kills++;
   if (!it.fixed || it.core) questBump('ts_words', 1);
   g.combo++;
@@ -16809,6 +17299,7 @@ function tsKill(it, second) {
   if (TS_CALLOUTS[g.combo]) tsCallout(TS_CALLOUTS[g.combo]);
   if (it.boss) tsShakeArena();
   if (it.egg) tsPower(it.power);
+  if (it.mb && g.boss && g.boss.monster) tsMBossHit();
   // Double shot: the second beam takes the lowest word still falling. A boss
   // still has to be typed out.
   if (g.dbl > 0 && !second) {
@@ -16825,7 +17316,7 @@ function tsKill(it, second) {
       }, 90);
     }
   }
-  if (!it.fixed && !g.boss && ++g.lvKills % TS_PER_LEVEL === 0) {
+  if (!it.fixed && !inBoss && ++g.lvKills % TS_PER_LEVEL === 0) {
     g.level++;
     tsSfx('level');
     tsFlash('level');
@@ -16833,6 +17324,8 @@ function tsKill(it, second) {
     tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
     if (g.level >= TS_FINAL_LEVEL) g.finalDue = true;
     else if (g.level % TS_MINI_EVERY === 1) g.miniDue = true;
+    if (g.v2 && TS_EVENTS.alien.includes(g.level)) g.alienDue = true;
+    if (g.v2 && TS_EVENTS.shower.includes(g.level)) g.showerDue = true;
   }
   if (it.fixed) tsFortHit(it);
   tsHud();
@@ -16925,6 +17418,8 @@ function tsGround(it) {
     tsPowers();
     return;
   }
+  if (it.alien && g.ev && g.ev.kind === 'alien') tsAlienEnd(false);
+  if (it.meteor) tsFlash('meteor');
   g.drops++;
   g.lives--;
   g.combo = 0;
@@ -16964,7 +17459,7 @@ function tsOfferRevive() {
   if (ov) {
     ov.innerHTML = `<div class="ts-ov-title">Hết mạng!</div>
       <div class="ts-ov-sub">Dùng 💖 Hồi sinh để chơi tiếp với ${TS_REVIVE_LIVES} mạng. Màn hình được dọn sạch. Còn ${walCount('revive')} lượt hồi sinh.</div>
-      <button class="vb-start-btn" onclick="tsRevive()">💖 Hồi sinh</button>
+      <button class="vb-start-btn" onclick="tsRevive()">${g.v2 ? tsImg('pw_revive', 'ts-pw-img') : '💖'} Hồi sinh</button>
       <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>`;
     ov.classList.remove('hidden');
   }
@@ -16977,6 +17472,7 @@ function tsRevive() {
   g.reviving = false;
   g.revives++;
   g.lives = TS_REVIVE_LIVES;
+  tsEvClear();
   g.items.filter(x => !x.dead && !x.fixed).forEach(x => tsExplode(x, false));
   g.items = g.items.filter(x => x.fixed && !x.dead);
   g.lockId = null;
@@ -17016,7 +17512,7 @@ function tsBossStart(kind) {
   g.lastShape = shape;
   const order = TS_SHAPES[shape](cols.length);
   const pool = final ? TS_FINALBOSSES : TS_MINIBOSSES;
-  const icon = pool[Math.floor(Math.random() * pool.length)];
+  const icon = g.v2 ? tsImg('fortress', 'ts-core-img') : pool[Math.floor(Math.random() * pool.length)];
   g.boss = { kind, final, cols, coreWords, coreN, coreLeft: coreN, open: false, icon };
   g.items.filter(x => !x.dead).forEach(x => tsExplode(x, false));
   g.items = [];
@@ -17027,7 +17523,7 @@ function tsBossStart(kind) {
   fort.className = 'ts-fort ts-fort--' + (final ? 'final' : 'mini');
   fort.id = 'ts-fort';
   fort.innerHTML = `<div class="ts-fort-in" id="ts-fort-in">
-    <div class="ts-core shut" id="ts-core"><span class="ts-core-boss">${icon}</span><span class="ts-core-shield">🛡️</span><div class="ts-core-slot" id="ts-core-slot"></div></div>
+    <div class="ts-core shut" id="ts-core"><span class="ts-core-boss">${icon}</span><span class="ts-core-shield">${g.v2 ? tsImg('shield') : '🛡️'}</span><div class="ts-core-slot" id="ts-core-slot"></div></div>
     <div class="ts-cols" id="ts-cols"></div>
   </div>`;
   arena.appendChild(fort);
@@ -17037,7 +17533,7 @@ function tsBossStart(kind) {
     const c = cols[ci];
     const col = document.createElement('div');
     col.className = 'ts-col' + (c.rank === 0 ? ' ts-col--short' : c.rank === last ? ' ts-col--long' : '');
-    col.innerHTML = `<div class="ts-col-cells"></div><div class="ts-col-tag">${c.rank === 0 ? '🔥 Ngắn · từ dài' : c.rank === last ? '🌿 Dài · từ dễ' : '⚔️'}</div>`;
+    col.innerHTML = `<div class="ts-col-cells"></div><div class="ts-col-tag">${g.v2 ? (c.rank === 0 ? 'Ngắn · từ dài' : c.rank === last ? 'Dài · từ dễ' : '·') : (c.rank === 0 ? '🔥 Ngắn · từ dài' : c.rank === last ? '🌿 Dài · từ dễ' : '⚔️')}</div>`;
     colsEl.appendChild(col);
     const cellsEl = col.querySelector('.ts-col-cells');
     c.words.forEach((w, j) => {
@@ -17056,7 +17552,7 @@ function tsBossStart(kind) {
   tsSfx('boss');
   tsShakeArena();
   jBuzz([60, 40, 60]);
-  tsFloat(final ? `${icon} BOSS CUỐI!` : `${icon} MINIBOSS!`, g.W / 2, 30, 'big');
+  tsFloat(g.v2 ? 'PHÁO ĐÀI TRÙM!' : final ? `${icon} BOSS CUỐI!` : `${icon} MINIBOSS!`, g.W / 2, 30, 'big');
   g.spawnIn = 3;
   tsHud();
 }
@@ -17141,7 +17637,7 @@ function tsFloat(text, x, y, big) {
   if (!arena) return;
   const f = document.createElement('div');
   f.className = 'ts-float' + (big ? ' ts-float--big' : '');
-  f.textContent = text;
+  f.textContent = tsV2() ? tsNoEmoji(text) : text;
   f.style.left = x + 'px';
   f.style.top = y + 'px';
   arena.appendChild(f);
@@ -17166,14 +17662,19 @@ function tsHud() {
   if (!g) return;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   const left = Math.max(0, g.lives);
-  set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
+  if (g.v2) set('ts-lives', tsImg('life', 'ts-life').repeat(left) + `<span class="ts-life-lost">${tsImg('life', 'ts-life').repeat(Math.max(0, g.diff.lives - left))}</span>`);
+  else set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
   set('ts-score', g.score);
   set('ts-coins', g.coins + (walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''));
   set('ts-level', g.level);
   const b = g.boss;
-  set('ts-bossbar', b ? (b.open ? `${b.icon} lõi ${b.coreLeft}/${b.coreN}` : `${b.icon} 🛡️ phá 1 cột`) : g.finalDue && !g.won ? '👹 boss cuối tới!' : g.miniDue ? '👾 miniboss tới!' : '');
+  const ev = g.ev;
+  if (!g.v2) set('ts-bossbar', b ? (b.open ? `${b.icon} lõi ${b.coreLeft}/${b.coreN}` : `${b.icon} 🛡️ phá 1 cột`) : g.finalDue && !g.won ? '👹 boss cuối tới!' : g.miniDue ? '👾 miniboss tới!' : '');
+  else set('ts-bossbar', b ? (b.monster ? `${TS_MBOSSES[b.kind].name} · còn ${b.hp}/${b.max}` : b.open ? `Pháo đài · lõi ${b.coreLeft}/${b.coreN}` : 'Pháo đài · phá 1 cột')
+    : ev ? (ev.kind === 'alien' ? (ev.phase === 'hull' ? `Bắn thân tàu · ${Math.max(0, Math.ceil(ev.timer))}s` : 'Tàu ngoài hành tinh') : `Mưa thiên thạch · ${Math.max(0, Math.ceil(ev.left))}s`)
+    : g.finalDue && !g.won ? 'Pháo đài sắp tới!' : g.miniDue ? 'Boss sắp tới!' : '');
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
-  set('ts-combo', g.combo >= 3 ? `🔥 ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
+  set('ts-combo', g.combo >= 3 ? `${g.v2 ? 'Combo' : '🔥'} ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
 }
 
 function tsPause() {
@@ -17217,17 +17718,19 @@ function tsRenderResults(g) {
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
   _tsLast = g;
-  const prevBest = tsGetBest(g.mode, g.diffKey);
+  const recKey = g.mode + (g.v2 ? '_v2' : '');
+  const prevBest = tsGetBest(recKey, g.diffKey);
   const isNew = g.score > prevBest;
-  if (isNew) tsSetBest(g.mode, g.diffKey, g.score);
-  if (g.score > 0) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
+  if (isNew) tsSetBest(recKey, g.diffKey, g.score);
+  if (g.score > 0 && !g.v2) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
   const missedHtml = g.missed.length
     ? g.missed.map(w => `<div class="vb-missed-item"><button class="ts-say-btn" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
     : '<div class="vb-missed-empty">Không để rơi từ nào 🎉</div>';
   root.innerHTML = `
     <div class="vb-wrap">
       <div class="vb-results">
-        ${g.won ? `<div class="ts-victory">🏆 CHIẾN THẮNG! Đã hạ boss cuối${g.minis ? ` và ${g.minis} miniboss` : ''}</div>` : ''}
+        ${g.won ? `<div class="ts-victory">🏆 CHIẾN THẮNG! ${g.v2 ? `Đã hạ Pháo đài${g.minis ? ` và ${g.minis} boss` : ''}` : `Đã hạ boss cuối${g.minis ? ` và ${g.minis} miniboss` : ''}`}</div>` : ''}
+        ${g.v2 ? '<div class="ts-trial-note">🧪 Bản thử nghiệm: xu vẫn được cộng, điểm không lên bảng xếp hạng.</div>' : ''}
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
         <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
