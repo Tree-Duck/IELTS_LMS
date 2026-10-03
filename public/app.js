@@ -29953,8 +29953,9 @@ function t1hDraw() {
    Ý-Mon. Answers are the attacks: there is no luck in a catch. The gym is the
    prompt itself: send the Ý-Mon in the order a paragraph needs, write each
    sentence, then write one sentence of your own with two weak phrases.
-   Map tiles: Kenney Tiny Town (CC0). People: 0x72 DungeonTileset II (CC0).
-   Creatures are drawn in code below and pixelated at load. */
+   Map tiles: Kenney Tiny Town (CC0). Creatures, people and the Lọ Chữ are
+   drawn in code below. Catching needs no luck either: hit once, throw a Lọ
+   Chữ, answer the catch question to close the lid. */
 const TTM_TS = 48;
 const TTM_TYPES = {
   gov:     { name: 'Chính phủ', color: '#5B6CD9', fam: 'y' },
@@ -29983,16 +29984,16 @@ const TTM_ROLE = {
 const TTM_GYM_STEPS = ['A', 'B', 'C', 'D', 'E'];
 const TTM_MONS = {
   // Starters: the partner every student begins with.
-  muop:  { name: 'Mướp Mực', fam: 't', type: 'colloc', starter: true, moves: ['play a crucial role', 'have a direct impact on'], desc: 'Mèo mực, quẹt đuôi là ra một cụm kết hợp từ.' },
-  cun:   { name: 'Cún Câu', fam: 't', type: 'linker', starter: true, moves: ['However,', 'As a result,'], desc: 'Cún nối câu, đeo khăn mắt xích.' },
-  rua:   { name: 'Rùa Rào', fam: 't', type: 'hedge', starter: true, moves: ['tend to', 'to some extent'], desc: 'Rùa mai rào, nói gì cũng chừa đường lui.' },
+  muop:  { name: 'Mướp Mực', fam: 't', type: 'colloc', starter: true, moves: ['play a crucial role', 'have a direct impact on'], desc: 'Mèo mướp mực, đuôi là cây bút lông còn ướt mực. Chảnh, ít khi mở to mắt.' },
+  cun:   { name: 'Cún Câu', fam: 't', type: 'linker', starter: true, moves: ['However,', 'As a result,'], desc: 'Chó lạp xưởng thân dài, nối đầu với đuôi như từ nối hai vế câu.' },
+  rua:   { name: 'Rùa Rào', fam: 't', type: 'hedge', starter: true, moves: ['tend to', 'to some extent'], desc: 'Rùa mai rào, trên mai mọc bụi oải hương. Chỉ dám ló đầu ra nhìn.' },
   // Từ-Mon of lesson 1.
-  phaply: { name: 'Pháp Lý', fam: 't', type: 'colloc', p: 'legal duty', vi: 'nghĩa vụ pháp lý', step: 'A', bad: ['law duty', 'legally duty'], desc: 'Cuộn giấy luật, tay cầm búa toà.' },
-  thucte: { name: 'Thực Tế', fam: 't', type: 'linker', p: 'In practice', vi: 'trên thực tế', step: 'B', bad: ['In practise of', 'On practice'], desc: 'Cây cầu nhỏ nối lý thuyết với đời thật.' },
-  dondon: { name: 'Dồn Dồn', fam: 't', type: 'verb', p: 'settles on', vi: 'dồn lên, rơi vào', step: 'B', bad: ['settles in', 'is settle on'], desc: 'Ba cục bột chồng lên nhau, nặng trĩu.' },
-  dolen:  { name: 'Đổ Lên', fam: 't', type: 'verb', p: 'lands instead on', vi: 'thay vào đó lại đổ lên', step: 'D+', bad: ['lands instead to', 'land instead on'], desc: 'Chim sà xuống đúng chỗ không ai muốn.' },
-  khoma:  { name: 'Khó Mà', fam: 't', type: 'hedge', p: 'unlikely to', vi: 'khó có thể', step: 'E', bad: ['unlikely for', 'unlike to'], desc: 'Nhím ngại ngùng, chẳng bao giờ nói chắc.' },
-  vande:  { name: 'Vấn Đề', fam: 't', type: 'band', evo: true, desc: 'Hòn đá lớn dần theo band.',
+  phaply: { name: 'Pháp Lý', fam: 't', type: 'colloc', p: 'legal duty', vi: 'nghĩa vụ pháp lý', step: 'A', bad: ['law duty', 'legally duty'], desc: 'Con dấu công vụ mặt nghiêm, đóng đâu là thành nghĩa vụ ở đó.' },
+  thucte: { name: 'Thực Tế', fam: 't', type: 'linker', p: 'In practice', vi: 'trên thực tế', step: 'B', bad: ['In practise of', 'On practice'], desc: 'Cây cầu từ lý thuyết sang đời thật. Vòm cầu là cái miệng.' },
+  dondon: { name: 'Dồn Dồn', fam: 't', type: 'verb', p: 'settles on', vi: 'dồn lên, rơi vào', step: 'B', bad: ['settles in', 'is settle on'], desc: 'Quả tạ ngồi lì một chỗ, nặng tới mức nứt cả nền.' },
+  dolen:  { name: 'Đổ Lên', fam: 't', type: 'verb', p: 'lands instead on', vi: 'thay vào đó lại đổ lên', step: 'D+', bad: ['lands instead to', 'land instead on'], desc: 'Máy bay giấy lượn xuống đúng chỗ không ai muốn.' },
+  khoma:  { name: 'Khó Mà', fam: 't', type: 'hedge', p: 'unlikely to', vi: 'khó có thể', step: 'E', bad: ['unlikely for', 'unlike to'], desc: 'Dấu hỏi không bao giờ chịu trả lời chắc. Lỗ trong móc là con mắt.' },
+  vande:  { name: 'Vấn Đề', fam: 't', type: 'band', evo: true, desc: 'Hòn sỏi lớn dần theo band, thành tảng đá rồi thành người khổng lồ.',
     stages: [
       { name: 'Vấn Đề', p: 'a big problem', vi: 'một vấn đề lớn', art: 'vande1' },
       { name: 'Vấn Nạn', p: 'a serious issue', vi: 'một vấn đề nghiêm trọng', art: 'vande2' },
@@ -30001,190 +30002,429 @@ const TTM_MONS = {
     ctx: 'Caring for elderly parents can become ____ for working adults.',
     bad: ['a very big problem', 'a problem serious', 'a bigger issue'] },
   // Ý-Mon of lesson 1, one per paragraph step (D carries D+).
-  luatsuong: { name: 'Luật Suông', fam: 'y', type: 'gov', steps: ['A'], gist: 'Luật không tạo thêm chăm sóc, chỉ quyết định ai phải chăm.', desc: 'Phiến đá luật, ngực rỗng một trái tim.' },
-  congan:    { name: 'Con Gần', fam: 'y', type: 'family', steps: ['B'], gist: 'Gánh nặng dồn lên người con sống gần nhất.', desc: 'Ngôi nhà có túi, địu theo đứa con ở gần.' },
-  haoluong:  { name: 'Hao Lương', fam: 'y', type: 'econ', steps: ['C'], gist: 'Họ phải làm bán thời gian, thu nhập giảm đúng lúc cần để dành.', desc: 'Đồng xu nứt, tay cầm đồng hồ ca làm.' },
-  batcong:   { name: 'Bất Công', fam: 'y', type: 'society', steps: ['D', 'D+'], gist: 'Nhà khá giả thuê người giúp, nhà nghèo gánh hết chi phí.', desc: 'Cái cân lệch hẳn về một bên.' },
-  khocai:    { name: 'Khó Cải', fam: 'y', type: 'gov', steps: ['E'], gist: 'Kết luận: luật như vậy khó cải thiện việc chăm sóc người già.', desc: 'Cú quan toà, đội mũ tốt nghiệp.' },
+  luatsuong: { name: 'Luật Suông', fam: 'y', type: 'gov', steps: ['A'], gist: 'Luật không tạo thêm chăm sóc, chỉ quyết định ai phải chăm.', desc: 'Con cua cõng bia luật, giữa bia thủng một lỗ hình trái tim.' },
+  congan:    { name: 'Con Gần', fam: 'y', type: 'family', steps: ['B'], gist: 'Gánh nặng dồn lên người con sống gần nhất.', desc: 'Ốc sên cõng nguyên ngôi nhà, đi đâu cũng mang theo.' },
+  haoluong:  { name: 'Hao Lương', fam: 'y', type: 'econ', steps: ['C'], gist: 'Họ phải làm bán thời gian, thu nhập giảm đúng lúc cần để dành.', desc: 'Bướm đêm có cánh là đồng xu sứt mẻ, râu là kim đồng hồ ca làm.' },
+  batcong:   { name: 'Bất Công', fam: 'y', type: 'society', steps: ['D', 'D+'], gist: 'Nhà khá giả thuê người giúp, nhà nghèo gánh hết chi phí.', desc: 'Con cò gánh đòn gánh lệch, một thúng nặng, một thúng nhẹ.' },
+  khocai:    { name: 'Khó Cải', fam: 'y', type: 'gov', steps: ['E'], gist: 'Kết luận: luật như vậy khó cải thiện việc chăm sóc người già.', desc: 'Rắn đội mũ tốt nghiệp, tự cắn đuôi mình như câu kết quay về luận điểm.' },
   lacde:     { name: 'Lạc Đề', fam: 'y', type: 'culture', off: true, gist: 'Toàn cầu hoá làm mai một lễ hội truyền thống.',
-    t: 'Globalisation is gradually {erasing|xoá dần} {traditional festivals|lễ hội truyền thống}.', vi: 'Toàn cầu hoá đang dần xoá đi các lễ hội truyền thống.', desc: 'Cáo lạc đường, mắt xoáy, đuôi la bàn. Hay, nhưng không hợp đề này.' },
+    t: 'Globalisation is gradually {erasing|xoá dần} {traditional festivals|lễ hội truyền thống}.', vi: 'Toàn cầu hoá đang dần xoá đi các lễ hội truyền thống.', desc: 'Sứa lồng đèn trung thu trôi lạc, mắt xoáy. Hay, nhưng không hợp đề này.' },
 };
 const TTM_TU = ['phaply', 'thucte', 'dondon', 'dolen', 'khoma', 'vande'];
 const TTM_Y = ['luatsuong', 'congan', 'haoluong', 'batcong', 'khocai', 'lacde'];
-const TTM_LOOKS = ['knight_m', 'knight_f', 'elf_m', 'elf_f', 'wizzard_m', 'wizzard_f', 'dwarf_m', 'dwarf_f'];
+/* ── People ── TinTinMon's own pixel people, written as rows of letters and
+   drawn three times bigger. The player is put together from a head, a body
+   and legs for each facing; townsfolk are whole pictures. '.' is empty. */
+const TTM_PX = 3;
+const TTM_PK = '#2A1E2E';
+// Player: head (rows 0–11), body (12–17), legs (18–23), for d(own), u(p), r(ight).
+const TTM_PH = {
+  d: ['................', '.....KKKKKK.....', '...KKHHHHHHKK...', '..KHHHHHHHHHHK..', '..KHHHHHHHHHHK..', '.KHHHHHHHHHHHHK.',
+    '.KHHhHHHHHHhHHK.', '.KHSSSSHHSSSSHK.', '.KHSSESSSSESSHK.', '.KhSSESSSSESShK.', '..KSRSSssSSRSK..', '...KKSSSSSSKK...'],
+  u: ['................', '.....KKKKKK.....', '...KKHHHHHHKK...', '..KHHHHHHHHHHK..', '..KHHHHHHHHHHK..', '.KHHHHHHHHHHHHK.',
+    '.KHHHHHHHHHHHHK.', '.KHHHHHHHHHHHHK.', '.KHhHHHHHHHHhHK.', '.KhHHHHHHHHHHhK.', '..KhHHHHHHHHhK..', '...KKSSSSSSKK...'],
+  r: ['................', '....KKKKKK......', '...KHHHHHHKK....', '..KHHHHHHHHHK...', '..KHHHHHHHHHHK..', '.KHHHHHHHHHHHHK.',
+    '.KHHHHHHHHSSSSK.', '.KHHHHHHHSSSSSK.', '.KHHhHHHSSSSESK.', '.KhHHHHHSSSSESK.', '..KhHHHSSSSRSSK.', '...KKKSSSSSKK...'],
+};
+const TTM_PB = {
+  d: ['...KCCKSSKCCK...', '..KCCCCAACCCCK..', '.KCKCCCAACCCKCK.', '.KCKcCCAACCcKCK.', '.KSKPPPPPPPPKSK.', '..KKPPPPPPPPKK..'],
+  u: ['...KCCCCCCCCK...', '..KCCCCCCCCCCK..', '.KCKCCCCCCCCKCK.', '.KCKcCCCCCCcKCK.', '.KSKPPPPPPPPKSK.', '..KKPPPPPPPPKK..'],
+  r: ['.....KCCCCK.....', '....KCCCCCAK....', '....KCCcCCAK....', '....KCCcCCCK....', '....KCCSCCCK....', '....KPPPPPPK....'],
+};
+const TTM_PL = {
+  d: {
+    idle: ['...KPPPKKPPPK...', '...KPPPKKPPPK...', '...KPPK..KPPK...', '...KBBK..KBBK...', '..KBBBK..KBBBK..', '..KKKKK..KKKKK..'],
+    a: ['...KPPPKKPPPK...', '...KPPPKKPPPK...', '...KPPK..KBBK...', '...KBBK.KBBBK...', '..KBBBK.KKKKK...', '..KKKKK.........'],
+  },
+  r: {
+    idle: ['....KPPPPPPK....', '.....KPPPPK.....', '.....KPPPPK.....', '.....KBBBBK.....', '.....KBBBBBK....', '.....KKKKKKK....'],
+    a: ['....KPPPPPPK....', '...KPPPKKPPPK...', '..KPPK....KPPK..', '..KBBK....KBBK..', '.KBBBK....KBBBK.', '.KKKKK....KKKKK.'],
+  },
+};
+// Hair overlays, row number: row text. Short hair needs none.
+// Hair overlays, row number: row text. '.' keeps what is under it, '_' clears it.
+const TTM_HAIR = {
+  long: {
+    d: { 10: '.KH..........HK.', 11: '.KH..........HK.', 12: '.KHK........KHK.', 13: '.KK..........KK.' },
+    u: { 11: '..KHHHHHHHHHHK..', 12: '..KHHHHHHHHHHK..', 13: '...KhhhhhhhhK...' },
+    r: { 11: '..KHHK..........', 12: '..KHHK..........', 13: '...KK...........' },
+  },
+  bob: {
+    d: { 9: '.KH..........HK.', 10: '.KH..........HK.', 11: '.KKK........KKK.' },
+    u: { 10: '.KHHHHHHHHHHHHK.', 11: '.KhhhhhhhhhhhhK.' },
+    r: { 10: '.KHHK...........', 11: '.KKKK...........' },
+  },
+  tail: {
+    d: { 4: '..KHHHHHHHHHHKK.', 5: '.KHHHHHHHHHHHHAK', 6: '.KHHhHHHHHHhHHHK', 7: '.KHSSSSHHSSSSHKK' },
+    u: { 10: '..KhHHHhhHHHhK..', 11: '...KKKHHHHKKK...', 12: '......KHHK......', 13: '.......KK.......' },
+    r: { 4: '.KAKHHHHHHHHHK..', 5: 'KHHHHHHHHHHHHHK.', 6: 'KHHKHHHHHHSSSSK.', 7: 'KHK.KHHHHSSSSSK.', 8: '.K..KHhHHSSSSESK' },
+  },
+  spiky: {
+    d: { 0: '__K___KK___K____', 1: '_KHK_KHHK_KHK___', 2: '_KHHKHHHHKHHKK__', 3: 'KHHHHHHHHHHHHHK_' },
+    u: { 0: '__K___KK___K____', 1: '_KHK_KHHK_KHK___', 2: '_KHHKHHHHKHHKK__', 3: 'KHHHHHHHHHHHHHK_' },
+    r: { 0: '___K__K___K_____', 1: '__KHKKHK_KHK____', 2: '_KHHHHHHKHHHK___', 3: 'KHHHHHHHHHHHK___' },
+  },
+  bun: {
+    d: { 0: '______KKKK______', 1: '_____KHHHHK_____', 2: '___KKKAAAAKKK___' },
+    u: { 0: '______KKKK______', 1: '_____KHHHHK_____', 2: '___KKKAAAAKKK___' },
+    r: { 0: '___KKKK_________', 1: '__KHHHHK________', 2: '___KAAKHHHKK____' },
+  },
+  cap: {
+    d: { 1: '.....KKKKKK.....', 2: '...KKAAAAAAKK...', 3: '..KAAAAAAAAAAK..', 4: '..KAAAAWWAAAAK..', 5: '.KKKKKKKKKKKKKK.' },
+    u: { 2: '...KKAAAAAAKK...', 3: '..KAAAAAAAAAAK..', 4: '..KAAAAAAAAAAK..', 5: '.KAAAAAAAAAAAAK.' },
+    r: { 1: '....KKKKKK......', 2: '...KAAAAAAKK....', 3: '..KAAAAAAAAAK...', 4: '..KAAAAAAAWAAK..', 5: '.KKKKKKKKKKKKKKK' },
+  },
+};
+// Round glasses over the eyes, front and side.
+const TTM_GLASSES = { d: { 8: '....KEK..KEK....' }, r: { 8: '...........KEK..' } };
+// Sixteen players: six hair cuts, a cap, glasses, several skin tones.
+const TTM_LOOKS = {
+  p1: { hair: 'short', H: '#6B3E26', h: '#43261A', S: '#F2C9A0', s: '#D9A57A', C: '#E5533D', c: '#A8392A', A: '#FFD24D', P: '#2F4A7A', B: '#4A2E1F' },
+  p2: { hair: 'tail', H: '#24202E', h: '#121018', S: '#F5D2B0', s: '#DDAE85', C: '#2E9C88', c: '#1E6B5E', A: '#F7F3E8', P: '#2A2A3A', B: '#6B3E26' },
+  p3: { hair: 'spiky', H: '#F2C14E', h: '#B88A12', S: '#F7D6B8', s: '#E0AD88', C: '#5FAF4A', c: '#3D7A2E', A: '#FFF1B8', P: '#6B5A45', B: '#3A2A20' },
+  p4: { hair: 'long', H: '#B5392A', h: '#7E2419', S: '#F2C9A0', s: '#D9A57A', C: '#8E5BD9', c: '#5F38A0', A: '#F2C14E', P: '#2E3550', B: '#26222E' },
+  p5: { hair: 'cap', H: '#1F1B24', h: '#0E0C12', S: '#A86B45', s: '#82502F', C: '#F08A24', c: '#B4610C', A: '#2F80ED', P: '#3A3A48', B: '#5A3A22' },
+  p6: { hair: 'bun', H: '#5A3420', h: '#382012', S: '#C68B5E', s: '#9F6A40', C: '#2F80ED', c: '#1D58AC', A: '#E5533D', P: '#4A4A4A', B: '#2A2A2A' },
+  p7: { hair: 'long', H: '#1F1B24', h: '#0E0C12', S: '#8E5A38', s: '#6C4126', C: '#E8C33A', c: '#A8861A', A: '#C0392B', P: '#3B2F5C', B: '#2A2A2A' },
+  p8: { hair: 'bob', H: '#D9D2C5', h: '#A39A88', S: '#F5D2B0', s: '#DDAE85', C: '#D9577A', c: '#9E3554', A: '#FFFFFF', P: '#2A3A4A', B: '#4A2E1F' },
+  p9: { hair: 'short', glasses: true, H: '#2B2B33', h: '#16161C', S: '#F2C9A0', s: '#D9A57A', C: '#3E5C76', c: '#26394A', A: '#F7F3E8', P: '#6B5A45', B: '#2A2A2A' },
+  p10: { hair: 'spiky', H: '#4FA3E0', h: '#2B6FA8', S: '#F5D2B0', s: '#DDAE85', C: '#1F1B24', c: '#0E0C12', A: '#E5533D', P: '#5A5A6A', B: '#E5533D' },
+  p11: { hair: 'bun', glasses: true, H: '#1F1B24', h: '#0E0C12', S: '#F5D2B0', s: '#DDAE85', C: '#F29CB0', c: '#C76A80', A: '#FFFFFF', P: '#F7F3E8', B: '#8A5A3C' },
+  p12: { hair: 'cap', H: '#C9844A', h: '#8A5326', S: '#F7D6B8', s: '#E0AD88', C: '#27AE60', c: '#16703D', A: '#E5533D', P: '#2F4A7A', B: '#F7F3E8' },
+  p13: { hair: 'bob', H: '#7E2419', h: '#4E140C', S: '#A86B45', s: '#82502F', C: '#F2C14E', c: '#B88A12', A: '#2E9C88', P: '#2A2A3A', B: '#7E2419' },
+  p14: { hair: 'tail', glasses: true, H: '#9B51E0', h: '#6A2FA8', S: '#F2C9A0', s: '#D9A57A', C: '#F7F3E8', c: '#C9C2B5', A: '#9B51E0', P: '#2A2A3A', B: '#2A2A2A' },
+  p15: { hair: 'short', H: '#E8E4DA', h: '#B5AFA0', S: '#6E4430', s: '#4E2E1F', C: '#C0392B', c: '#82241A', A: '#F2C14E', P: '#1F1B24', B: '#F2C14E' },
+  p16: { hair: 'long', glasses: true, H: '#F2C14E', h: '#B88A12', S: '#C68B5E', s: '#9F6A40', C: '#2E9C88', c: '#1E6B5E', A: '#FFFFFF', P: '#6B3E26', B: '#3A2A20' },
+};
+const TTM_PCOM = { K: TTM_PK, E: '#1B1B24', W: '#FFFFFF', R: '#F29C9C' };
+// Townsfolk, whole pictures, front view. Each has its own outline.
+const TTM_FOLK = {
+  // Cô Hướng Dẫn: long hair with a flower, round glasses, a book held up, a wide dress.
+  guide: {
+    pal: { H: '#3B2418', h: '#24150D', S: '#F5D2B0', s: '#DDAE85', F: '#F29CB0', D: '#E07A5F', d: '#A8452F', O: '#2F80ED', B: '#4A2E1F' },
+    rows: ['................', '.....KKKKKK.....', '...KKHHHHHHKK...', '..KHHHHHHHHFFK..', '..KHHHHHHHHFFK..', '.KHHHHHHHHHHHHK.',
+      '.KHHhHHHHHHhHHK.', '.KHSSSSHHSSSSHK.', '.KHSKEKSSKEKSHK.', '.KhSSSSSSSSSShK.', '.KHSRSSssSSRSHK.', '.KHKKSSSSSSKKHK.',
+      '.KHKDDKSSKDDKHK.', '.KKDDDDDDDDDDKK.', '.KDDKDDDDDDKDDK.', '.KDKOOOOOOOOKDK.', '..KSOWWWWWWOSK..', '..KDOOOOOOOODK..',
+      '..KDDDDDDDDDDK..', '..KDdDDDDDDdDK..', '.KDDdDDDDDDdDDK.', '.KDdDDDDDDDDdDK.', 'KDDDDDDDDDDDDDDK', 'KKKBBKKKKKKBBKKK'],
+  },
+  // Thợ Săn Từ: wide bucket hat, vest with pockets, shorts, a word net on a pole.
+  trainer: {
+    pal: { T: '#C9A86A', t: '#8E7444', A: '#C0392B', S: '#E8B88A', s: '#C99466', V: '#5E7F3A', v: '#3F5A24', C: '#F4EAD0', P: '#8E7444', B: '#4A2E1F', N: '#6B4423', n: '#EDEDED' },
+    rows: ['..............KKK...', '.............KnnnK..', '............Kn.n.nK.', '............KnnnnnK.', '.............KnnnK..',
+      '...............KNK..', '....KKKKKKKK...KNK..', '...KTTTTTTTTK..KNK..', '...KTTTTTTTTK..KNK..', '..KAAAAAAAAAAK.KNK..',
+      'KKTTTTTTTTTTTTKKKNK..', 'KttttttttttttttKKNK.', '.KKSSSSSSSSSSKK.KNK.', '..KSSESSSSESSK...KNK.', '..KSSESSSSESSK...KNK.',
+      '..KSRSSssSSRSK...KNK.', '...KKSSSSSSKK....KNK.', '...KVVKCCKVVK...KNK..', '..KVVVKCCKVVVK..KNK..', '.KCKVVKCCKVVKCKKNK...',
+      '.KCKvVKCCKVvKCKNK....', '.KSKVVVVVVVVKSSK.....', '..KKPPPPPPPPKKK......', '...KPPPKKPPPK........', '...KPPPKKPPPK........',
+      '...KSSK..KSSK........', '...KBBK..KBBK........', '..KBBBK..KBBBK.......', '..KKKKK..KKKKK.......'],
+  },
+  // Lính gác: plumed helmet, armour, a spear standing beside her.
+  guard: {
+    pal: { R: '#D93A3A', M: '#A9B4C7', m: '#66728A', S: '#F2C9A0', s: '#D9A57A', C: '#2F4A9C', P: '#26324F', N: '#6B4423' },
+    rows: ['.K.................', 'KMK.......KRRK.....', 'KMK......KRRRRK....', 'KMK.....KKMMMMKK...', '.N.....KMMMMMMMMK..',
+      '.N....KMMMMMMMMMMK.', '.N....KMmMMMMMMmMK.', '.N....KMKKKKKKKKMK.', '.N....KMSSSSSSSSMK.', '.N....KMSESSSSESMK.',
+      '.N....KMSSSssSSSMK.', '.N....KMKSSSSSSKMK.', '.N.....KKKKKKKKKK..', '.N....KMMMKMMKMMMK.', '.N...KMMMMMMMMMMMMK',
+      '.N...KMKMMMmmMMMKMK', 'KNK..KCKMMMmmMMMKCK', 'KSSK.KSKCCCCCCCCKSK', '.N....KKCCCCCCCCKK.', '.N.....KCCCKKCCCK..',
+      '.N.....KPPPKKPPPK..', '.N.....KPPK..KPPK..', '.N.....KMMK..KMMK..', '.N....KMMMK..KMMMK.', '.K....KKKKK..KKKKK.'],
+  },
+  // Trưởng phái Lập Luận: mortarboard, white beard, long robe, a giant quill.
+  leader: {
+    pal: { M: '#26222E', Y: '#F2C14E', H: '#C9C2B5', S: '#F2C9A0', s: '#D9A57A', W: '#F7F4EC', w: '#C9C2B5', R: '#3B3F8F', r: '#272A66', Q: '#FFFFFF', q: '#BFD0F0' },
+    rows: ['.................K..', '................KQK.', '..KKKKKKKKKKKK.KQqK.', '.KMMMMMMMMMMMMKKQqK.', '.YKKKMMMMMMKKKKQqK..',
+      '.Y.KMMMMMMMMKKQqK...', '.Y.KHSSSSSSHKKQqK...', '..KHSESSSSESHKKqK...', '..KHSSSssSSSHKqK....', '..KWWWSSSSWWWKqK....',
+      '..KWWWWWWWWWWKqK....', '...KWWWWWWWWKqK.....', '..KRKWWWWWWKRqK.....', '.KRRRKWWWWKRRKqK....', '.KRRRRKWWKRRRSqSK...',
+      '.KRYRRRKKRRRYSSK....', '.KRYRRRRRRRRYRK.....', '.KSYRRRRRRRRYRK.....', '..KYRRRRRRRRYK......', '..KYRrRRRRrRYK......',
+      '..KYRRRRRRRRYK......', '.KYRRrRRRRrRRYK.....', '.KYRRRRRRRRRRYK.....', 'KYRRRRRRRRRRRRYK....', 'KKKKKKKKKKKKKKKK....'],
+  },
+};
+const TTM_PCACHE = {};
+function ttmPaintRows(rows, pal, flip) {
+  const w = Math.max(...rows.map(r => r.length)), h = rows.length;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  rows.forEach((row, j) => [...row].forEach((ch, i) => {
+    const col = pal[ch] || TTM_PCOM[ch];
+    if (ch === '.' || !col) return;
+    x.fillStyle = col; x.fillRect(flip ? w - 1 - i : i, j, 1, 1);
+  }));
+  return c;
+}
+// The player's rows for one look, facing and frame (idle, a, b).
+function ttmPlayerRows(look, dir, frame) {
+  const L = TTM_LOOKS[look] || TTM_LOOKS.p1, f = dir === 'l' ? 'r' : dir;
+  const head = TTM_PH[f].slice(), body = TTM_PB[f].slice();
+  let legs = (f === 'r' ? TTM_PL.r : TTM_PL.d)[frame === 'idle' ? 'idle' : 'a'].slice();
+  if (frame === 'b') legs = f === 'r' ? TTM_PL.r.idle.slice() : legs.map(r => [...r].reverse().join(''));
+  const rows = [...head, ...body, ...legs];
+  const lay = over => Object.entries(over || {}).forEach(([j, o]) => {
+    rows[j] = [...rows[j].padEnd(o.length, '.')].map((ch, i) => (o[i] === '_' ? '.' : o[i] && o[i] !== '.' ? o[i] : ch)).join('');
+  });
+  lay((TTM_HAIR[L.hair] || {})[f]);
+  if (L.glasses) lay(TTM_GLASSES[f]);
+  return rows;
+}
+// A cached sprite canvas. Blink swaps the eyes for a closed line.
+function ttmPeople(key, rows, pal, flip, blink) {
+  const k = key + (flip ? '_f' : '') + (blink ? '_b' : '');
+  if (!TTM_PCACHE[k]) TTM_PCACHE[k] = ttmPaintRows(blink ? rows.map(r => r.replace(/E/g, 's')) : rows, pal, flip);
+  return TTM_PCACHE[k];
+}
+function ttmPlayerSprite(look, dir, frame, blink) {
+  const f = dir === 'l' ? 'r' : dir;
+  return ttmPeople(`pl_${look}_${f}_${frame}`, ttmPlayerRows(look, dir, frame), TTM_LOOKS[look] || TTM_LOOKS.p1, dir === 'l', blink);
+}
+function ttmFolkSprite(id, flip, blink) {
+  const F = TTM_FOLK[id];
+  return ttmPeople('folk_' + id, F.rows, F.pal, flip, blink);
+}
+// Draws a sprite with its feet at (cx, by), scaled by sc, crisp.
+function ttmBlit(c, spr, cx, by, sc) {
+  c.imageSmoothingEnabled = false;
+  c.drawImage(spr, Math.round(cx - spr.width * sc / 2), Math.round(by - spr.height * sc), spr.width * sc, spr.height * sc);
+}
 const TTM_LV = { a: 'Học việc · chọn đáp án', d: 'Dũng sĩ · điền chữ thiếu', l: 'Huyền thoại · gõ cả cụm' };
 
 /* ── Creature art ── each draws in a 40×40 box; ttmSprite pixelates it,
-   snaps every pixel to the creature's own colours and adds an outline. */
-const TTM_K = '#1B1B24', TTM_W = '#FFFFFF', TTM_PINK = '#F29CB0';
+   snaps every pixel to the creature's own colours and adds an outline.
+   Two visual languages. Từ-Mon are object or glyph spirits built around
+   their phrase (a seal, a bridge, a weight, a paper plane, a question mark,
+   a stone that grows). Ý-Mon are living creatures built around their idea
+   (a crab under a hollow law, a snail carrying a house, a moth with cracked
+   coin wings, a crane with an uneven carrying pole, a serpent that bites its
+   own tail, a lost festival jellyfish). No two share a body plan or eyes. */
+const TTM_K = '#1B1B24', TTM_W = '#FFFFFF';
 const TTM_ART = {
+  // Starters: the shop pets. A smug ink cat, an eager chain-scarf dog, a
+  // turtle that hides behind a picket-fence shell.
   muop(D) {
-    const A = '#8EA6C8', INK = '#2C3E73';
-    D.l(29, 31, 35, 22, 4, A); D.l(35, 22, 33, 13, 4, A); D.c(33, 11, 3.6, INK);
-    D.e(20, 30, 10, 7, A); D.e(20, 32, 6, 4.5, '#F4F1EA');
-    D.p([[11, 13], [12, 3], [18, 9]], A); D.p([[29, 13], [28, 3], [22, 9]], A);
-    D.p([[13, 10], [13.5, 6], [16, 9]], TTM_PINK); D.p([[27, 10], [26.5, 6], [24, 9]], TTM_PINK);
-    D.c(20, 17, 10, A);
-    D.eyes(20, 16.5, 4.3, 2.6);
-    D.p([[18.8, 20], [21.2, 20], [20, 21.6]], TTM_PINK);
-    D.l(20, 21.6, 18.3, 22.8, 0.8, TTM_K); D.l(20, 21.6, 21.7, 22.8, 0.8, TTM_K);
-    D.c(13.5, 21, 1.5, TTM_PINK); D.c(26.5, 21, 1.5, TTM_PINK);
-    D.l(7, 19.5, 12.5, 20.3, 0.7, INK); D.l(33, 19.5, 27.5, 20.3, 0.7, INK);
-    D.e(15, 36, 3, 2, INK); D.e(25, 36, 3, 2, INK);
+    // Mướp is a tabby: blue stripes on ink, a bell, and a tail that ends in a
+    // calligraphy brush still wet with ink. Unimpressed by everything.
+    const N = '#22305C', B = '#2F80ED', L = '#B9D6FA', Y = '#F2E6A0', GD = '#F2C14E';
+    D.l(27, 35, 34, 30, 2.8, N); D.l(34, 30, 35.5, 22, 2.6, N);
+    D.r(33.6, 19, 4, 2.6, B); D.p([[33.4, 19.4], [38.2, 19.4], [36.6, 11], [35, 11]], L); D.p([[35, 12], [36.6, 12], [36, 7.6]], N);
+    D.c(38.4, 24, 1.1, N); D.c(38.6, 27.4, 0.7, N);
+    D.e(19, 29, 9, 8.6, N); D.e(19, 31, 4, 5.6, L);
+    [[11, 25, 14, 27], [10, 29.4, 13, 30.4], [27, 25, 24, 27], [28, 29.4, 25, 30.4], [11.6, 33, 14, 33.6]].forEach(([a, b, c, d]) => D.l(a, b, c, d, 0.7, B));
+    D.e(14.5, 37, 3.2, 1.8, L); D.e(23.5, 37, 3.2, 1.8, L);
+    D.p([[9, 15], [10, 3], [17, 10]], N); D.p([[25, 11], [33, 5], [29, 15]], N);
+    D.p([[11, 12], [11.4, 6.5], [14.5, 10]], B); D.p([[27, 11], [31, 7.4], [28.6, 13]], B);
+    D.e(19, 17, 10, 7.4, N);
+    D.l(16.4, 12.4, 17, 10, 0.5, B); D.l(19, 12.6, 19, 9.6, 0.5, B); D.l(21.6, 12.4, 21, 10, 0.5, B);
+    D.p([[8.5, 18], [6, 21], [11, 20.5]], N); D.p([[29.5, 18], [32, 21], [27, 20.5]], N);
+    // Half-lidded, unimpressed eyes.
+    [14, 24].forEach(x => { D.r(x - 2.5, 16, 5, 2.4, Y); D.r(x - 2.5, 15, 5, 1.2, B); D.px(x, 16, TTM_K); D.px(x, 17, TTM_K); });
+    D.px(19, 20, L); D.px(18, 21, L); D.px(20, 21, B); D.px(21, 21, B); D.px(22, 20, B);
+    D.l(5, 19, 10, 20, 0.5, L); D.l(33, 19, 28, 20, 0.5, L);
+    D.r(13, 23.4, 12, 1.6, B); D.c(19, 25.6, 1.8, GD); D.px(19, 26, '#8A6206');
   },
   cun(D) {
-    const A = '#D9A066', B = '#B9824A', BR = '#8A5A2B';
-    D.e(20, 30, 9, 7, A); D.e(14, 36, 3, 2.2, B); D.e(26, 36, 3, 2.2, B);
-    D.r(12, 22.5, 16, 3.6, '#27AE60'); [16, 20, 24].forEach(x => D.c(x, 24.3, 0.9, '#BFF0CF'));
-    D.c(20, 15, 9.5, A);
-    D.e(10.5, 16, 3.4, 7, BR, -0.3); D.e(29.5, 16, 3.4, 7, BR, 0.3);
-    D.e(20, 19.2, 5, 3.6, '#F3D9B1'); D.e(20, 17.6, 2, 1.4, TTM_K);
-    D.eyes(20, 13, 4.5, 2.4);
-    D.e(20, 22.6, 1.6, 1.8, TTM_PINK);
+    // A long dachshund: front end and back end, linked. Comma tail, chain scarf.
+    const F = '#C9844A', DF = '#8A5326', LF = '#F4D7AE', G = '#27AE60', DG = '#16703D';
+    D.r(10, 29, 3.4, 7, DF); D.r(29, 29, 3.4, 7, DF);
+    D.e(22, 26, 14, 5.4, F); D.e(22, 29.4, 11, 2.4, LF);
+    D.r(13, 29, 3.4, 8, F); D.r(32, 29, 3.4, 8, F);
+    D.e(14.7, 37, 2.6, 1.2, LF); D.e(33.7, 37, 2.6, 1.2, LF);
+    D.c(37.4, 21, 2.3, F); D.l(38.4, 22, 37.4, 26, 1, F);
+    D.e(8, 19, 6.4, 5.4, F); D.e(3, 22, 4.4, 2.8, LF); D.c(0.9, 20.8, 1.4, TTM_K);
+    D.e(10.6, 21, 2.6, 6.4, DF, 0.3);
+    D.px(5, 17, TTM_K); D.px(6, 16, TTM_K); D.px(7, 16, TTM_K); D.px(8, 17, TTM_K);
+    D.e(4, 25.6, 1.3, 2, '#F29CB0');
+    D.p([[11, 21], [16, 22], [14, 28]], G);
+    [[12.4, 22.4], [14.6, 23.2], [16.8, 22.4], [19, 21.6]].forEach(([x, y]) => { D.e(x, y, 1.5, 1.1, DG); D.e(x, y, 0.5, 0.3, G); });
+    D.l(20, 21, 31, 21, 0.5, DF);
   },
   rua(D) {
-    const G = '#7FBF6A';
-    D.e(10, 33, 3.6, 3, G); D.e(30, 33, 3.6, 3, G); D.e(13, 37, 3, 2, G); D.e(27, 37, 3, 2, G);
-    D.c(20, 13, 6.6, G);
-    D.eyes(20, 12.6, 2.8, 1.9);
-    D.r(14.4, 10, 4.2, 1.7, G); D.r(21.4, 10, 4.2, 1.7, G);
-    D.l(18.3, 16.2, 21.7, 16.2, 0.8, TTM_K);
-    D.e(20, 31, 13.5, 6, '#5E3F86'); D.e(20, 27, 12.5, 9.5, '#7E5BA6');
-    D.c(20, 26, 3.5, '#A586D1'); D.c(13.5, 27.5, 2.6, '#A586D1'); D.c(26.5, 27.5, 2.6, '#A586D1'); D.c(16.5, 21, 2.2, '#A586D1'); D.c(23.5, 21, 2.2, '#A586D1');
+    // A careful turtle with a lavender hedge growing on a fenced shell:
+    // a hedge on top of a hedge. It only ever peeks out.
+    const P = '#7E4FB8', DP = '#4E2A84', LP = '#E3CFFA', SK = '#B7A6D9', LV = '#5E8A4E';
+    D.e(10, 37, 3, 1.8, SK); D.e(32, 37, 3, 1.8, SK);
+    D.e(21, 29, 15, 8, P); D.e(16, 24.6, 4, 1.6, '#A57BDB');
+    D.c(14, 20.4, 5, LV); D.c(21, 16.4, 6.4, LV); D.c(28, 20.4, 5, LV);
+    [[12, 18], [16, 15], [20, 12], [23, 15], [26, 13], [29, 18.4], [18, 19], [24, 19.4]].forEach(([x, y]) => { D.r(x, y, 1.4, 2.2, P); D.px(x, y, LP); });
+    D.r(5, 31, 32, 3, DP); D.e(21, 34, 16, 2.2, DP);
+    for (let x = 7.6; x <= 33; x += 3.4) { D.r(x, 27, 1.6, 4.4, LP); D.p([[x - 0.3, 27], [x + 0.8, 25], [x + 1.9, 27]], LP); }
+    D.r(7, 28.6, 28, 0.9, LP);
+    D.e(7, 33, 4, 2.4, SK); D.c(3.8, 31, 3.4, SK);
+    D.r(1.6, 29.6, 3, 2, TTM_W); D.px(1, 30, TTM_K); D.px(1, 31, TTM_K); D.l(1, 28.4, 5, 28, 0.4, DP);
   },
+
+  // Từ-Mon: object and glyph spirits.
   phaply(D) {
-    const P = '#F1E3C2', R = '#D8C49A';
-    D.l(10, 23, 5, 18, 1.6, '#8A5A2B'); D.r(2, 14.5, 6.5, 4.2, '#6B4423');
-    D.r(11, 9, 18, 24, P); D.e(20, 9, 10, 3, R); D.e(20, 33, 10, 3, R);
-    D.r(14, 24, 12, 1, '#B8A276'); D.r(14, 27, 9, 1, '#B8A276');
-    D.eyes(20, 16, 4, 2.3);
-    D.l(18.4, 20.6, 21.6, 20.6, 0.9, TTM_K);
-    D.p([[24, 31], [24.6, 37], [26.4, 33.6]], '#2F80ED'); D.p([[28, 31], [27.4, 37], [25.6, 33.6]], '#2F80ED'); D.c(26, 29.5, 3, '#2F80ED');
-    D.e(15, 36.6, 2.5, 1.5, R); D.e(25, 36.6, 2.5, 1.5, R);
+    // An official seal, ribbon round its neck: a stern "legal duty".
+    const B = '#2F80ED', DB = '#1A4C96', LB = '#A9CBF7';
+    D.c(20, 6, 4.4, DB); D.c(19, 5, 1.4, LB);
+    D.r(17.5, 9, 5, 8, B);
+    D.p([[17.5, 12], [12, 19], [14.5, 20]], LB); D.p([[22.5, 12], [28, 19], [25.5, 20]], LB);
+    D.p([[13, 17], [27, 17], [31, 31], [9, 31]], B);
+    D.r(6, 30, 28, 6, DB); D.r(8, 36, 24, 1.6, LB);
+    // Narrow stern eyes under flat brows.
+    D.r(13, 22, 4, 1.4, TTM_K); D.r(23, 22, 4, 1.4, TTM_K); D.r(13, 20, 4, 1, DB); D.r(23, 20, 4, 1, DB);
+    D.r(17, 27, 6, 1, DB);
+    D.r(12, 32, 2, 2, LB); D.r(19, 32, 2, 2, LB); D.r(26, 32, 2, 2, LB);
   },
   thucte(D) {
-    const G = '#3FA34D', DG = '#2E7D3A', WD = '#8D6E4A';
-    D.r(6, 14, 28, 10, G); D.r(6, 22, 6, 13, G); D.r(28, 22, 6, 13, G); D.cut(20, 31, 8, 8);
-    D.r(6, 18, 28, 1, DG);
-    D.r(5, 12, 30, 3, WD); [7, 14, 24.4, 31.4].forEach(x => D.r(x, 8, 1.6, 4, WD)); D.r(7, 8, 26, 1.4, WD);
-    D.eyes(20, 19.6, 4.5, 2.2);
-    D.l(18.4, 22.8, 21.6, 22.8, 0.8, TTM_K);
-    D.r(6, 34, 6, 2, DG); D.r(28, 34, 6, 2, DG);
+    // A footbridge from theory to real life; the arch is its mouth.
+    const G = '#27AE60', DG = '#16703D', LG = '#B3EBC6';
+    D.p([[1, 26], [1, 18], [11, 13], [20, 11.5], [29, 13], [39, 18], [39, 26]], G);
+    D.r(1, 24, 9, 13, G); D.r(30, 24, 9, 13, G);
+    D.r(1, 35, 9, 2, DG); D.r(30, 35, 9, 2, DG);
+    D.cut(20, 33, 9.6, 10);
+    D.p([[1, 18], [11, 13], [20, 11.5], [29, 13], [39, 18], [39, 20], [29, 15.4], [20, 14], [11, 15.4], [1, 20]], DG);
+    [5, 12, 20, 28, 35].forEach(x => D.r(x, x === 20 ? 8 : x === 12 || x === 28 ? 9.6 : 12, 1.4, 4, DG));
+    D.r(4, 6, 2, 8, DG); D.c(5, 5, 2.4, LG); D.r(34, 6, 2, 8, DG); D.c(35, 5, 2.4, LG);
+    D.e(12.5, 20.5, 1.8, 2.2, TTM_K); D.e(27.5, 20.5, 1.8, 2.2, TTM_K); D.px(12, 19, LG); D.px(27, 19, LG);
+    D.r(10, 24, 1, 1, LG); D.r(29, 24, 1, 1, LG);
   },
   dondon(D) {
-    D.e(20, 31, 13, 7, '#D9583B'); D.e(20, 19.5, 9, 7, '#E8774F'); D.e(20, 11, 5, 3.6, '#F29A6B');
-    D.eyes(20, 19.5, 3.8, 2);
-    D.r(14.5, 16.6, 4, 1.6, '#E8774F'); D.r(21.5, 16.6, 4, 1.6, '#E8774F');
-    D.l(17.6, 24, 22.4, 24, 0.9, TTM_K);
-    D.l(5, 11, 5, 19, 1.1, '#9E3A26'); D.p([[3.4, 18.5], [6.6, 18.5], [5, 22]], '#9E3A26');
-    D.l(35, 11, 35, 19, 1.1, '#9E3A26'); D.p([[33.4, 18.5], [36.6, 18.5], [35, 22]], '#9E3A26');
+    // A kettlebell that has sat down and will not get up: the burden settles.
+    const R = '#EB5757', DR = '#9E2F2F', LR = '#F8B4B4';
+    D.e(20, 9, 8, 7, DR); D.cut(20, 10, 4.6, 4);
+    D.p([[10, 15], [30, 15], [36, 28], [34, 35], [6, 35], [4, 28]], R);
+    D.e(12, 21, 3, 4, LR, 0.5);
+    // Tired, heavy-lidded eyes with bags.
+    D.r(11, 23, 6, 1.2, TTM_K); D.r(23, 23, 6, 1.2, TTM_K); D.r(13, 24, 2, 1.2, TTM_K); D.r(25, 24, 2, 1.2, TTM_K);
+    D.r(12, 26, 4, 1, DR); D.r(24, 26, 4, 1, DR);
+    D.r(17, 30, 6, 1, DR);
+    D.r(2, 35, 36, 2.4, DR);
+    D.l(2, 38, 7, 37.5, 0.6, DR); D.l(33, 37.5, 38, 38, 0.6, DR);
+    [[1.5, 14], [38.5, 14]].forEach(([x, y]) => { D.r(x - 0.6, y, 1.2, 5, LR); D.p([[x - 2, y + 5], [x + 2, y + 5], [x, y + 8]], LR); });
   },
   dolen(D) {
-    D.p([[18, 18], [3, 24], [8, 29], [18, 24]], '#C0392B'); D.p([[22, 18], [37, 24], [32, 29], [22, 24]], '#C0392B');
-    D.l(17, 29, 15, 35, 1.2, '#F1C40F'); D.l(23, 29, 25, 35, 1.2, '#F1C40F'); D.l(12.5, 35.4, 17, 35.4, 1.2, '#F1C40F'); D.l(23, 35.4, 27.5, 35.4, 1.2, '#F1C40F');
-    D.e(20, 21, 8, 9, '#E67E22'); D.e(20, 24.5, 5, 5.5, '#F6C38B');
-    D.p([[19, 12.6], [20, 6.5], [21, 12.6]], '#C0392B');
-    D.eyes(20, 17, 3.5, 2.1);
-    D.p([[18.4, 20], [21.6, 20], [20, 23.2]], '#F1C40F');
-    D.e(8, 37.4, 3.2, 1.2, '#D5CFC4'); D.e(32, 37.4, 3.2, 1.2, '#D5CFC4');
+    // A paper plane coming in to land where nobody wanted it.
+    const R = '#EB5757', DR = '#9E2F2F', PA = '#FFE1E1';
+    D.l(0, 6, 4, 8, 0.6, R); D.l(1, 13, 5, 14, 0.6, R); D.l(0, 19, 3, 19.5, 0.6, R);
+    D.p([[5, 6], [37, 28], [15, 19]], PA);
+    D.p([[15, 19], [37, 28], [9, 27]], R);
+    D.p([[15, 19], [37, 28], [20, 24]], DR);
+    D.r(23, 18.6, 3, 2.4, TTM_W); D.px(25, 19, TTM_K); D.px(25, 20, TTM_K); D.l(22, 17.4, 26, 18.2, 0.5, DR);
+    D.e(31, 37, 7, 1.8, DR); D.e(31, 37, 4, 0.9, PA);
   },
   khoma(D) {
-    for (let i = -5; i <= 5; i++) {
-      const a = -Math.PI / 2 + i * 0.3, b = 0.15;
-      D.p([[20 + Math.cos(a - b) * 9, 25 + Math.sin(a - b) * 9], [20 + Math.cos(a) * 17, 25 + Math.sin(a) * 17], [20 + Math.cos(a + b) * 9, 25 + Math.sin(a + b) * 9]], '#6C3FA0');
-    }
-    D.e(20, 26, 12, 9, '#9B6BD3'); D.e(20, 28.4, 8, 6, '#F3D9E8');
-    D.eyes(20, 27, 3.4, 1.9);
-    D.c(14.5, 30.4, 1.4, TTM_PINK); D.c(25.5, 30.4, 1.4, TTM_PINK);
-    D.c(20, 31.6, 0.9, TTM_K);
-    D.e(30, 19, 1.3, 2, '#7FC8F8');
-    D.e(15, 35.4, 2.6, 1.6, '#6C3FA0'); D.e(25, 35.4, 2.6, 1.6, '#6C3FA0');
+    // A question mark that will not commit to an answer.
+    const P = '#9B51E0', DP = '#5E2A99', LP = '#DCC2F8';
+    D.e(20, 13, 11, 10, P); D.cut(20, 13.4, 4.8, 4.4);
+    D.cutp([[9, 13], [9, 26], [19, 26], [17, 16]]);
+    D.p([[22.5, 20], [27, 21.5], [23.5, 29], [17.5, 29], [17.5, 23]], P);
+    D.r(17.5, 23, 6, 4, P);
+    D.c(20.5, 35, 3.6, DP);
+    D.e(14, 8, 2, 3, LP, -0.6);
+    // The hollow of the curl is its one eye, looking away.
+    D.c(20, 13.4, 3.6, TTM_W); D.c(21.6, 14, 1.6, TTM_K);
+    D.l(29, 5, 30, 8.4, 0.9, LP); D.c(30.2, 9, 1.4, LP);
+    D.l(7, 24, 10, 22, 0.7, DP); D.l(31, 30, 28, 28, 0.7, DP);
   },
+  // Vấn Đề grows with the band: pebble, horned boulder, then a golem.
   vande1(D) {
-    D.p([[10, 35], [8, 24], [14, 16], [25, 15], [32, 22], [32, 35]], '#B08968'); D.p([[23, 35], [32, 22], [32, 35]], '#8C6A4F');
-    D.l(19, 16, 21, 21.6, 1, '#5A4535'); D.l(21, 21.6, 18.4, 26, 1, '#5A4535');
-    D.eyes(20, 25.6, 4, 2.2);
-    D.l(17, 31, 23, 31, 0.9, TTM_K);
+    const O = '#C46A1E', DO = '#7A3A0C', LO = '#F2B477';
+    D.p([[13, 37], [12, 31], [15, 27], [21, 26], [26, 28], [28, 33], [27, 37]], O);
+    D.e(17, 29.5, 2.4, 1.4, LO);
+    D.l(22, 27, 23, 30, 0.5, DO);
+    D.px(17, 32, TTM_K); D.px(23, 32, TTM_K); D.r(19, 34.4, 2.4, 0.8, DO);
   },
   vande2(D) {
-    D.p([[11, 14], [8, 4.5], [15.5, 11]], '#E0D6C2'); D.p([[29, 14], [32, 4.5], [24.5, 11]], '#E0D6C2');
-    D.p([[7, 36], [5, 22], [12, 12], [28, 11], [35, 20], [35, 36]], '#A0522D'); D.p([[25, 36], [35, 20], [35, 36]], '#7F3F22');
-    D.l(21, 12, 23, 18, 1, '#4A2615'); D.l(23, 18, 20, 23, 1, '#4A2615');
-    D.eyes(20, 23, 5, 2.5);
-    D.l(12.6, 18.4, 18, 20.4, 1.2, TTM_K); D.l(27.4, 18.4, 22, 20.4, 1.2, TTM_K);
-    D.l(15, 30, 25, 30, 1, TTM_K);
+    const O = '#D9711C', DO = '#7A3A0C', LO = '#F6C08A', CR = '#FFE08A';
+    D.p([[8, 15], [5, 5], [13, 11]], LO); D.p([[32, 15], [35, 5], [27, 11]], LO);
+    D.r(8, 30, 6, 7, DO); D.r(26, 30, 6, 7, DO);
+    D.p([[4, 31], [5, 19], [11, 12], [20, 10], [29, 12], [35, 19], [36, 31], [30, 34], [10, 34]], O);
+    D.e(14, 16, 4, 2, LO, -0.3);
+    D.l(22, 11, 24, 17, 0.7, CR); D.l(24, 17, 21, 21, 0.7, CR); D.l(31, 24, 34, 28, 0.6, CR);
+    // Angry slanted brows over small hard eyes.
+    D.l(11, 18, 17, 21, 1, TTM_K); D.l(29, 18, 23, 21, 1, TTM_K);
+    D.r(13, 22, 2.4, 2.4, TTM_K); D.r(25, 22, 2.4, 2.4, TTM_K);
+    D.r(15, 28, 10, 2, TTM_K); D.px(16, 28, CR); D.px(23, 28, CR);
   },
   vande3(D) {
-    D.p([[6, 36], [4, 20], [9, 25], [10, 13], [14, 22], [20, 9], [26, 22], [30, 13], [31, 25], [36, 20], [34, 36]], '#F39C12');
-    D.p([[10, 36], [9, 27], [14, 29], [20, 17], [26, 29], [31, 27], [30, 36]], '#F7DC6F');
-    D.e(20, 29.5, 11, 8, '#7B3F27');
-    D.p([[17, 3.5], [23, 3.5], [25.4, 9], [14.6, 9]], '#F1C40F'); D.c(20, 10, 1.4, '#B7950B'); D.r(19.3, 1.4, 1.4, 2.2, '#B7950B');
-    D.eyes(20, 28, 4.5, 2.3);
-    D.l(13.6, 24.6, 18, 26, 1.2, TTM_K); D.l(26.4, 24.6, 22, 26, 1.2, TTM_K);
-    D.e(20, 33.4, 2.5, 1.5, TTM_K);
+    const O = '#E67E22', DO = '#6B2E08', Y = '#FFD24D', LO = '#FFB066';
+    D.p([[11, 9], [13, 0], [16, 7], [20, 0], [24, 7], [27, 0], [29, 9]], Y);
+    D.r(12, 30, 6, 7, DO); D.r(22, 30, 6, 7, DO); D.r(11, 36, 8, 1.6, DO); D.r(21, 36, 8, 1.6, DO);
+    D.p([[9, 32], [7, 16], [13, 8], [27, 8], [33, 16], [31, 32]], O);
+    D.p([[7, 15], [2, 20], [1, 29], [6, 28], [9, 22]], O); D.p([[33, 15], [38, 20], [39, 29], [34, 28], [31, 22]], O);
+    D.c(3.6, 30.6, 3.4, DO); D.c(36.4, 30.6, 3.4, DO);
+    D.p([[14, 32], [20, 27], [26, 32]], DO);
+    D.p([[13, 14], [16, 9], [17, 15]], LO); D.p([[23, 17], [26, 11], [27, 20]], LO);
+    // Glowing eyes, no pupils: it is past arguing.
+    D.p([[11, 17], [18, 18], [17, 21], [12, 20]], Y); D.p([[29, 17], [22, 18], [23, 21], [28, 20]], Y);
+    D.r(15, 23, 10, 2, DO); D.r(16, 23, 1.4, 2, Y); D.r(19.4, 23, 1.4, 2, Y); D.r(23, 23, 1.4, 2, Y);
+    D.l(5, 22, 7, 27, 0.6, Y); D.l(34, 21, 33, 26, 0.6, Y);
   },
+
+  // Ý-Mon: living creatures built around one idea of the paragraph.
   luatsuong(D) {
-    const S = '#9AACC4', L = '#6E7F96';
-    D.e(8, 24, 3, 6, '#7D8FA6'); D.e(32, 24, 3, 6, '#7D8FA6');
-    D.e(20, 12, 11, 6, S); D.r(9, 12, 22, 22, S);
-    D.r(12, 20.5, 16, 1, L); D.r(12, 23, 16, 1, L);
-    D.c(18.2, 28.6, 2, '#4A5A70'); D.c(21.8, 28.6, 2, '#4A5A70'); D.p([[16.2, 29.2], [23.8, 29.2], [20, 33.6]], '#4A5A70');
-    D.eyes(20, 14, 4.5, 2.3);
-    D.l(18, 17.8, 22, 17.8, 0.9, TTM_K);
-    D.r(11, 34, 6, 3, L); D.r(23, 34, 6, 3, L);
+    // A crab carrying a law tablet with a hole where care should be.
+    const B = '#5B6CD9', DB = '#323D96', ST = '#C9CFF2', LB = '#8E9AEB';
+    [[6, 31, 1, 36], [8, 33, 5, 38], [34, 31, 39, 36], [32, 33, 35, 38]].forEach(([a, b, c, d]) => D.l(a, b, c, d, 0.9, DB));
+    D.l(9, 28, 5, 20, 1.4, B); D.l(31, 28, 35, 20, 1.4, B);
+    D.c(5, 17, 4, B); D.cutp([[5, 17], [9, 12], [10, 17]]);
+    D.c(35, 17, 4, B); D.cutp([[35, 17], [31, 12], [30, 17]]);
+    D.p([[12, 26], [12, 9], [14, 6], [26, 6], [28, 9], [28, 26]], ST);
+    D.r(15, 10, 10, 1, LB); D.r(15, 13, 10, 1, LB);
+    D.cutp([[20, 24], [15.5, 19], [16, 16.4], [18.4, 16], [20, 17.8], [21.6, 16], [24, 16.4], [24.5, 19]]);
+    D.e(20, 30, 12, 6, B); D.e(20, 32.5, 9, 3, DB);
+    D.r(15, 28, 2.4, 1.6, TTM_K); D.r(22.6, 28, 2.4, 1.6, TTM_K); D.px(15, 28, TTM_W); D.px(23, 28, TTM_W);
   },
   congan(D) {
-    const A = '#E07A5F', R = '#B5482F';
-    D.e(9, 26, 2.2, 4, A); D.e(31, 26, 2.2, 4, A);
-    D.e(20, 27, 10, 9.5, A);
-    D.r(25, 5, 3, 6, '#7A2E20');
-    D.r(11, 13, 18, 10, A); D.p([[8, 14], [20, 3], [32, 14]], R);
-    D.eyes(20, 17, 4.2, 2.2);
-    D.l(18.4, 21, 21.6, 21, 0.9, TTM_K);
-    D.e(20, 30.6, 6, 4.6, '#F2B5A0'); D.c(20, 27.6, 3, '#F4D3B8'); D.c(19, 27.4, 0.6, TTM_K); D.c(21, 27.4, 0.6, TTM_K);
-    D.e(13, 36.4, 4, 2, R); D.e(27, 36.4, 4, 2, R);
+    // A snail whose shell is a whole house: the child who lives closest.
+    const C = '#E07A5F', DC = '#9C3E28', LC = '#F7C5B5', Y = '#FFE7A8';
+    D.p([[2, 37], [3, 33], [9, 31], [36, 31], [39, 35], [39, 37]], LC);
+    D.l(6, 30, 4, 22, 0.8, LC); D.l(9, 30, 9, 21, 0.8, LC); D.c(4, 21, 1.6, TTM_K); D.c(9, 20, 1.6, TTM_K);
+    D.e(7, 31, 5, 3.6, LC);
+    D.r(15, 17, 20, 15, C);
+    D.p([[12, 18], [25, 6], [38, 18]], DC);
+    D.r(30, 7, 3, 7, DC); D.e(31.5, 4, 2, 1.4, LC);
+    D.r(17, 22, 6, 5, Y); D.r(19.6, 22, 0.8, 5, DC); D.r(17, 24.2, 6, 0.8, DC);
+    D.r(27, 23, 5, 9, DC); D.px(28, 27, Y);
+    D.l(3, 33, 9, 33, 0.5, DC);
+    D.l(14, 14, 12, 11, 0.6, LC); D.c(12, 10.6, 0.9, LC);
   },
   haoluong(D) {
-    D.l(9, 28, 12, 25, 1.3, '#B7950B'); D.c(6, 30, 4, '#D9D9D9'); D.c(6, 30, 3, TTM_W); D.l(6, 30, 6, 28, 0.8, TTM_K); D.l(6, 30, 7.6, 30, 0.8, TTM_K);
-    D.e(20, 22, 13, 13, '#D4A017'); D.e(20, 22, 10, 10, '#F1C40F');
-    D.l(24, 9.4, 21, 17, 1.2, '#8C6A00'); D.l(21, 17, 24, 22, 1.2, '#8C6A00'); D.l(24, 22, 20.6, 30, 1.2, '#8C6A00');
-    D.eyes(20, 20, 4.2, 2.3);
-    D.l(17, 27, 23, 26.2, 0.9, TTM_K);
-    D.e(31, 14.6, 1.6, 2.4, '#7FC8F8');
-    D.e(15, 36, 3, 1.6, '#B7950B'); D.e(25, 36, 3, 1.6, '#B7950B');
+    // A moth with coin wings, chipped and cracked; its feelers are clock hands.
+    const G = '#C9940E', DG = '#7A5800', LG = '#F5D66E', BR = '#4A3500';
+    D.e(10, 15, 9, 9, G); D.e(30, 15, 9, 9, G);
+    D.e(10, 15, 6.4, 6.4, LG); D.e(30, 15, 6.4, 6.4, LG);
+    D.cut(3, 8, 3.6, 3.6); D.cut(37, 22, 3.4, 3.4);
+    D.l(8, 9, 12, 15, 0.6, DG); D.l(12, 15, 9, 20, 0.6, DG); D.l(31, 10, 28, 16, 0.6, DG);
+    D.e(12, 29, 5.4, 6, G, 0.4); D.e(28, 29, 5.4, 6, G, -0.4);
+    D.e(12, 29, 2.6, 3, DG, 0.4); D.e(28, 29, 2.6, 3, DG, -0.4);
+    D.e(20, 23, 3, 12, BR); [17, 21, 25, 29].forEach(y => D.r(17.6, y, 4.8, 0.8, DG));
+    D.l(19, 11, 15, 2, 0.6, BR); D.l(21, 11, 27, 5, 0.6, BR); D.c(15, 2, 1, BR); D.c(27, 5, 1, BR);
+    // Big round compound eyes.
+    D.c(17.4, 12, 2.2, TTM_K); D.c(22.6, 12, 2.2, TTM_K); D.px(17, 11, LG); D.px(22, 11, LG);
   },
   batcong(D) {
-    const T = '#3FA796', DT = '#2E8B7A';
-    D.r(18.5, 10, 3, 23, DT); D.e(20, 34.4, 9, 3, DT);
-    D.l(6, 10, 34, 16, 2, T);
-    D.l(6, 10, 3.6, 16.4, 0.8, DT); D.l(6, 10, 8.4, 16.4, 0.8, DT); D.e(6, 17, 4.5, 1.8, '#E5B53D');
-    D.l(34, 16, 31.4, 25, 0.8, DT); D.l(34, 16, 36.6, 25, 0.8, DT); D.c(34, 22.6, 3, '#8D6E4A'); D.e(34, 26, 5, 2.2, '#E5B53D');
-    D.c(20, 22, 6.6, T);
-    D.eyes(20, 21, 2.8, 1.8);
-    D.l(18.4, 25.2, 21.6, 24.4, 0.8, TTM_K);
-    D.c(20, 8.6, 2, '#E5B53D');
+    // A crane with a carrying pole: one basket heavy and low, one light and high.
+    const T = '#2E9C88', DT = '#1A6457', LT = '#B5E8DD', BK = '#C9A86A';
+    D.l(17, 27, 15, 38, 0.7, DT); D.l(21, 27, 22, 38, 0.7, DT); D.l(13, 38, 17, 38, 0.6, DT); D.l(20, 38, 24, 38, 0.6, DT);
+    D.e(19, 23, 8, 5.6, T); D.p([[12, 21], [4, 26], [12, 26]], DT);
+    D.e(21, 24.5, 5, 2.6, LT);
+    D.l(25, 21, 27, 13, 1.2, T); D.l(27, 13, 24, 7, 1.2, T);
+    D.c(25, 6, 2.8, T); D.p([[27, 5], [36, 7], [27, 7.6]], DT);
+    D.px(25, 5, TTM_K); D.r(23, 3, 2, 1, LT);
+    // The pole tips: inequality you can see from across the map.
+    D.l(1, 27, 37, 13, 0.7, BK);
+    D.l(5, 25.6, 3, 31, 0.4, BK); D.l(5, 25.6, 8, 31, 0.4, BK); D.e(5.5, 33, 5, 3.6, BK); D.e(5.5, 31.4, 5, 1.4, DT);
+    D.l(35, 14, 34, 18, 0.4, BK); D.l(35, 14, 37, 18, 0.4, BK); D.e(35.5, 19, 2.4, 1.6, BK);
   },
   khocai(D) {
-    const B = '#5B6CD9', DB = '#3F4FB8';
-    D.p([[10, 15], [11, 6.5], [15.5, 12]], DB); D.p([[30, 15], [29, 6.5], [24.5, 12]], DB);
-    D.e(9.6, 26, 2.8, 7, DB); D.e(30.4, 26, 2.8, 7, DB);
-    D.e(20, 24, 11, 12, B); D.e(20, 28.4, 7, 7, '#C9D1F5');
-    D.l(18, 27, 20, 29, 0.7, '#9AA6E8'); D.l(22, 27, 20, 29, 0.7, '#9AA6E8');
-    D.eyes(20, 19, 4.6, 3.2);
-    D.p([[18.8, 22.4], [21.2, 22.4], [20, 25.4]], '#F2B233');
-    D.p([[12, 9.4], [20, 5], [28, 9.4], [20, 13.4]], '#2A2A3A'); D.l(27, 9.6, 29, 14.6, 0.8, '#F2B233');
-    D.l(17, 35.6, 17, 38, 1, '#F2B233'); D.l(23, 35.6, 23, 38, 1, '#F2B233');
+    // A serpent biting its own tail in a mortarboard: the conclusion returns
+    // to where the paragraph began.
+    const B = '#5B6CD9', DB = '#26307A', LB = '#C3CAF6', GD = '#F2C14E';
+    D.e(20, 25, 15, 12, B); D.cut(20, 25, 7.6, 5.4);
+    for (let a = 0; a < Math.PI * 2; a += 0.55) D.c(20 + Math.cos(a) * 11.4, 25 + Math.sin(a) * 8.8, 1, LB);
+    D.e(28, 15, 6, 4.6, B, -0.3); D.p([[30, 18], [33, 22], [28, 21]], DB);
+    D.p([[22, 9], [28, 6], [35, 9], [28, 12]], DB); D.r(27, 9, 2, 3, DB); D.l(34, 9.4, 35.4, 14, 0.5, GD); D.c(35.4, 14.4, 1, GD);
+    // Slit pupils.
+    D.e(29, 14.6, 1.8, 1.6, GD); D.r(28.6, 13.2, 0.9, 2.8, TTM_K);
   },
   lacde(D) {
-    const F = '#B565C9', C = '#F4EAF7';
-    D.e(31, 27, 6, 9, F, 0.5); D.e(34.4, 19.6, 3.5, 4, C, 0.5);
-    D.c(33, 30, 3, '#F1E3C2'); D.l(33, 27.8, 33, 32.2, 0.9, '#C0392B');
-    D.e(19, 29.6, 9, 7, F); D.e(19, 31.6, 4.5, 4, C);
-    D.p([[10, 14], [9, 3.4], [16, 10]], F); D.p([[28, 14], [29, 3.4], [22, 10]], F);
-    D.p([[11.4, 11.6], [10.8, 6.4], [14.4, 10]], TTM_PINK); D.p([[26.6, 11.6], [27.2, 6.4], [23.6, 10]], TTM_PINK);
-    D.e(19, 17, 9, 7, F); D.p([[13, 19], [25, 19], [19, 25]], C); D.c(19, 24, 1.2, TTM_K);
-    D.c(15, 16, 2.6, TTM_W); D.c(23, 16, 2.6, TTM_W); D.c(16.2, 16.6, 1.2, TTM_K); D.c(21.8, 15.4, 1.2, TTM_K);
-    D.e(14, 36, 2.5, 1.6, '#8E44AD'); D.e(23, 36, 2.5, 1.6, '#8E44AD');
+    // A festival-lantern jellyfish, drifting off the map. Lovely, off-topic.
+    const P = '#B565C9', DP = '#6F2D85', LP = '#F0CDF7', GL = '#FFF1B8';
+    D.e(19, 14, 12, 10, P); D.r(7, 14, 24, 5, P); D.r(6, 18, 26, 2.4, DP);
+    D.r(12, 5, 1.2, 13, LP); D.r(18.4, 4, 1.2, 14, LP); D.r(25, 5, 1.2, 13, LP);
+    D.r(16, 2, 6, 2, DP);
+    [8, 13, 19, 25, 30].forEach((x, i) => { D.l(x, 21, x + (i % 2 ? 2 : -2), 28, 0.6, DP); D.l(x + (i % 2 ? 2 : -2), 28, x + 1, 35 - i % 2 * 2, 0.6, DP); D.c(x + 1, 35.6 - i % 2 * 2, 1, GL); });
+    // Dizzy spiral eyes.
+    [14.5, 23.5].forEach(x => { D.c(x, 13, 2.6, TTM_W); D.l(x - 1.4, 13, x + 1.2, 12, 0.4, TTM_K); D.l(x + 1.2, 12, x + 0.6, 14.6, 0.4, TTM_K); });
+    D.e(19, 17, 1.6, 0.9, DP);
   },
 };
 const TTM_ART_CACHE = {};
@@ -30201,14 +30441,11 @@ function ttmSprite(art, sil) {
     e(cx, cy, rx, ry, col, rot) { fill(col); x.beginPath(); x.ellipse(cx, cy, rx, ry, rot || 0, 0, Math.PI * 2); x.fill(); },
     c(cx, cy, r, col) { D.e(cx, cy, r, r, col); },
     r(px, py, w, h, col) { fill(col); x.fillRect(px, py, w, h); },
+    px(px, py, col) { fill(col); x.fillRect(px, py, 1, 1); },
     p(pts, col) { fill(col); x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); x.fill(); },
     l(x1, y1, x2, y2, w, col) { fill(col); x.lineWidth = w * 2; x.lineCap = 'round'; x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); },
     cut(cx, cy, rx, ry) { x.save(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); x.fill(); x.restore(); },
-    eyes(cx, cy, gap, r) {
-      [cx - gap, cx + gap].forEach(ex => {
-        D.c(ex, cy, r, TTM_W); D.c(ex + 0.2, cy + 0.3, r * 0.6, TTM_K); D.c(ex - r * 0.3, cy - r * 0.35, Math.max(0.6, r * 0.26), TTM_W);
-      });
-    },
+    cutp(pts) { x.save(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); x.fill(); x.restore(); },
   };
   (TTM_ART[art] || TTM_ART.vande1)(D);
   const img = x.getImageData(0, 0, N, N), d = img.data;
@@ -30287,7 +30524,7 @@ function ttmSave() {
   const g = _ttm;
   if (!g || !g.started) return;
   try {
-    localStorage.setItem(ttmKey(), JSON.stringify({ look: g.look, lv: g.lv, team: g.team, caught: g.caught, mast: g.mast, fled: g.fled, x: g.p.x, y: g.p.y, badge: g.badge, trainerWon: g.trainerWon }));
+    localStorage.setItem(ttmKey(), JSON.stringify({ look: g.look, lv: g.lv, team: g.team, caught: g.caught, mast: g.mast, fled: g.fled, x: g.p.x, y: g.p.y, badge: g.badge, trainerWon: g.trainerWon, bag: g.bag }));
   } catch (e) {}
 }
 function ttmRoot() { return document.getElementById('ttmon-root'); }
@@ -30296,41 +30533,44 @@ function ttmRoot() { return document.getElementById('ttmon-root'); }
 const TTM_MAP = [
   'YTTTTYTTTTYTTTTYTTTTYTTTTYTT',
   'TYTTTTYTTTTYTTTTYTTTTYTTTTYT',
-  'TT......*...gggg...*......TY',
-  'TT.,.......,gggg.,........TT',
-  'TT..B.......gggg.......B..TT',
-  'YT...........==.........,.TT',
+  'TT.WWWWW.*..gggg...*....B.TY',
+  'TT.WWWWW...,gggg.,...f....TT',
+  'TT.WWWW..f..gggg..r....B..TT',
+  'YT..f........==.........,.TT',
   'TY.""""""",..==..;;;;;;;..YT',
   'TT.""""""".Y.==..;;;;;;;..TY',
   'TT."""""""...==..;;;;;;;.,TT',
   'TT.""""""",..==..;;;;;;;..TT',
   'YT."""""""...==..;;;;;;;..TT',
   'TY.""""""".Y.==..;;;;;;;..YT',
-  'TT.,.r.......==.,....r....TY',
+  'TT.,.r...q...==.,..q.r....TY',
   'TT###########==###########TT',
   'TT..*.....,.s==...*.....*,TT',
-  'YT..hhh......==....ppp....TT',
-  'TY..hhh......==....ppp....YT',
-  'TT..hhh......==....ppp....TY',
+  'YT..hhhH.....==....ppp.k..TT',
+  'TY..hhh......==....ppp.l..YT',
+  'TT..hhh..f...==..f.ppp....TY',
   'TT.======================.TT',
-  'TT.*.........==.......,...TT',
+  'TT.======================.TT',
   'YT..r....w...==..oo....*..TT',
-  'TY.*..,......==*.......r..YT',
+  'TY.*..f......==*...f...r..YT',
   'TTYTTTTYTTTTYTTTTYTTTTYTTTTY',
   'TTTYTTTTYTTTTYTTTTYTTTTYTTTT',
 ];
-const TTM_TILE = { '.': 0, ',': 1, '*': 2, '"': 0, ';': 0, '=': 25, r: 0, T: 0, Y: 0, B: 0, '#': 0, s: 0, w: 0, o: 0, g: 0, h: 0, p: 0 };
-const TTM_PROP = { T: 16, Y: 28, B: 5, '#': 81, s: 83, w: 104, o: 130, r: 29 };
-const TTM_SOLID = new Set(['T', 'Y', 'B', '#', 's', 'w', 'o']);
+// Ground under each letter (paths and water are worked out from neighbours),
+// then a prop on top. W is the pond, f a flower bed, q a field sign, H the
+// beehive, k a barrel, l a log.
+const TTM_TILE = { '.': 0, ',': 1, '*': 2, '"': 0, ';': 0, '=': 25, r: 0, T: 0, Y: 0, B: 0, '#': 0, s: 0, q: 0, w: 0, o: 0, g: 0, h: 0, p: 0, W: 0, f: 0, H: 0, k: 0, l: 0 };
+const TTM_PROP = { T: 16, Y: 28, B: 5, '#': 81, s: 83, q: 83, w: 104, o: 130, r: 29, H: 94, k: 107, l: 106 };
+const TTM_SOLID = new Set(['T', 'Y', 'B', '#', 's', 'q', 'w', 'o', 'W', 'H', 'k', 'l']);
 const TTM_BUILD = [
   { id: 'gym', x: 12, y: 2, t: [[99, 100, 100, 101], [126, 111, 112, 126], [126, 113, 114, 126]], doors: [[13, 4], [14, 4]] },
   { id: 'home', x: 4, y: 15, t: [[52, 53, 54], [64, 67, 66], [84, 86, 84]], doors: [[5, 17]] },
   { id: 'heal', x: 19, y: 15, t: [[48, 49, 50], [60, 63, 62], [76, 89, 79]], doors: [[20, 17]] },
 ];
 const TTM_NPC = [
-  { id: 'guide', x: 11, y: 19, look: 'elf_f', name: 'Cô Hướng Dẫn' },
-  { id: 'trainer', x: 15, y: 9, look: 'dwarf_m', name: 'Thợ Săn Từ', face: -1 },
-  { id: 'guard', x: 15, y: 5, look: 'knight_f', name: 'Lính gác', face: -1 },
+  { id: 'guide', x: 11, y: 19, look: 'guide', name: 'Cô Hướng Dẫn' },
+  { id: 'trainer', x: 15, y: 9, look: 'trainer', name: 'Thợ Săn Từ', face: -1 },
+  { id: 'guard', x: 15, y: 5, look: 'guard', name: 'Lính gác', face: -1 },
 ];
 function ttmTileAt(x, y) { return (TTM_MAP[y] || '')[x] || 'T'; }
 function ttmBuildAt(x, y) { return TTM_BUILD.find(b => x >= b.x && x < b.x + b.t[0].length && y >= b.y && y < b.y + b.t.length); }
@@ -30340,18 +30580,19 @@ function ttmSolid(x, y) { return TTM_SOLID.has(ttmTileAt(x, y)) || !!ttmBuildAt(
 /* ── Entry ── */
 function ttmShow() {
   ttmStop();
-  t1dLoad();
   if (!TTM_IMG.img) { TTM_IMG.img = new Image(); TTM_IMG.img.onload = () => { TTM_IMG.ready = true; }; TTM_IMG.img.src = '/img/ttmon/town.png'; }
   ttmStartScreen();
 }
 const TTM_IMG = { img: null, ready: false };
+// What the home cupboard fills the bag back up to.
+const TTM_BAG = { jar: 5, pot: 3 };
 function ttmStop() {
-  if (_ttm) { cancelAnimationFrame(_ttm.raf); document.removeEventListener('keydown', _ttm.kd); document.removeEventListener('keyup', _ttm.ku); }
+  if (_ttm) { cancelAnimationFrame(_ttm.raf); document.removeEventListener('keydown', _ttm.kd); document.removeEventListener('keyup', _ttm.ku); window.removeEventListener('resize', _ttm.rs); }
   _ttm = null;
 }
 function ttmStartScreen() {
   const save = ttmLoad(), r = ttmRoot();
-  const pick = ttmStartScreen.pick || (ttmStartScreen.pick = { lv: 'a', look: 'knight_m', starter: 'muop' });
+  const pick = ttmStartScreen.pick || (ttmStartScreen.pick = { lv: 'a', look: 'p1', starter: 'muop' });
   r.innerHTML = `<div class="lv-wrap ttm">
     <button class="vb-back" onclick="ttmStop(); showView('games')">← Trò chơi</button>
     <div class="ttm-title"><h2>TinTinMon <span class="ttm-beta">🧪 thử nghiệm</span></h2>
@@ -30360,7 +30601,7 @@ function ttmStartScreen() {
     <h3 class="ttm-h">1 · Cấp độ</h3>
     <div class="ttm-opts">${Object.entries(TTM_LV).map(([k, t]) => `<button class="ttm-opt ${pick.lv === k ? 'on' : ''}" onclick="ttmStartScreen.pick.lv='${k}'; ttmStartScreen()">${t}</button>`).join('')}</div>
     <h3 class="ttm-h">2 · Nhân vật</h3>
-    <div class="ttm-looks">${TTM_LOOKS.map(l => `<button class="ttm-look ${pick.look === l ? 'on' : ''}" onclick="ttmStartScreen.pick.look='${l}'; ttmStartScreen()" aria-label="${l}"><canvas width="48" height="72" data-look="${l}"></canvas></button>`).join('')}</div>
+    <div class="ttm-looks">${Object.keys(TTM_LOOKS).map((l, i) => `<button class="ttm-look ${pick.look === l ? 'on' : ''}" onclick="ttmStartScreen.pick.look='${l}'; ttmStartScreen()" aria-label="Nhân vật ${i + 1}"><canvas width="48" height="72" data-look="${l}"></canvas></button>`).join('')}</div>
     <h3 class="ttm-h">3 · Bạn đồng hành</h3>
     <div class="ttm-starters">${['muop', 'cun', 'rua'].map(id => { const M = TTM_MONS[id]; return `<button class="ttm-starter ${pick.starter === id ? 'on' : ''}" onclick="ttmStartScreen.pick.starter='${id}'; ttmStartScreen()">
       <canvas width="96" height="96" data-ttm="${id}"></canvas><b>${M.name}</b>${ttmChip(M.type)}<small>${M.desc}</small><small class="ttm-moves">Chiêu: ${M.moves.map(escapeHtml).join(' · ')}</small></button>`; }).join('')}</div>
@@ -30368,7 +30609,8 @@ function ttmStartScreen() {
     <details class="ttm-how"><summary>Cách chơi</summary><ul>
       <li>Đi: <kbd>WASD</kbd> / mũi tên, nói chuyện: <kbd>Space</kbd> hoặc <kbd>Enter</kbd>. Điện thoại: nút bấm trên màn hình.</li>
       <li>🌿 Cỏ xanh: <b>Từ-Mon</b> (cụm từ). 🌼 Cỏ hoa: <b>Ý-Mon</b> (ý của đoạn văn).</li>
-      <li>Trả lời đúng là đánh trúng. Hết máu thì thú tự vào bóng. Không có may rủi.</li>
+      <li>Trả lời đúng là đánh trúng. Thú yếu rồi thì ném <b>🫙 Lọ Chữ</b> và trả lời câu hỏi bắt thú để đóng nắp. Không có may rủi.</li>
+      <li><b>🧪 Thuốc</b> hồi 10 máu. Hết lọ hay hết thuốc thì về Nhà của em (mái đỏ) lấy thêm. Nút <b>💾 Lưu</b> lưu tiến độ bất cứ lúc nào.</li>
       <li>Sai 2 lần thì thú bỏ chạy, lát gặp lại. Sổ Thú có nút <b>Luyện</b> để lên độ thuộc.</li>
       <li>Nhà thi đấu: đưa Ý-Mon ra đúng thứ tự một đoạn văn. Ý-Mon lạc đề sẽ không có tác dụng.</li>
     </ul></details>
@@ -30377,17 +30619,17 @@ function ttmStartScreen() {
   ttmPaintLooks(r);
 }
 function ttmPaintLooks(root) {
-  const go = () => root.querySelectorAll('canvas[data-look]').forEach(cv => {
+  root.querySelectorAll('canvas[data-look]').forEach(cv => {
     const x = cv.getContext('2d');
     x.clearRect(0, 0, cv.width, cv.height);
-    t1dDraw(x, `${cv.dataset.look}_idle_anim_f0`, 24, 66, 2, false, null, true);
+    ttmBlit(x, ttmPlayerSprite(cv.dataset.look, 'd', 'idle'), cv.width / 2, cv.height, TTM_PX);
   });
-  if (T1D.ready) go(); else setTimeout(() => ttmPaintLooks(root), 200);
 }
 function ttmBegin(resume) {
   const s = resume ? ttmLoad() : null, pick = ttmStartScreen.pick;
   const g = _ttm = {
-    started: true, lv: s ? s.lv : pick.lv, look: s ? s.look : pick.look,
+    started: true, lv: s ? s.lv : pick.lv, look: TTM_LOOKS[s ? s.look : pick.look] ? (s ? s.look : pick.look) : 'p1',
+    bag: s && s.bag ? s.bag : { jar: TTM_BAG.jar, pot: TTM_BAG.pot },
     team: s ? s.team : [{ id: pick.starter, hp: 20 }],
     caught: s ? s.caught : { [pick.starter]: { stage: 0 } },
     mast: s ? s.mast || {} : {}, fled: s ? s.fled || {} : {}, badge: s ? !!s.badge : false, trainerWon: s ? !!s.trainerWon : false,
@@ -30402,11 +30644,18 @@ function ttmBegin(resume) {
 }
 function ttmWorld() {
   const g = _ttm, r = ttmRoot();
+  // Re-entering (after the gym) must not leave the old loop and keys behind.
+  if (g.raf) cancelAnimationFrame(g.raf);
+  if (g.kd) { document.removeEventListener('keydown', g.kd); document.removeEventListener('keyup', g.ku); }
+  if (g.rs) window.removeEventListener('resize', g.rs);
   r.innerHTML = `<div class="lv-wrap ttm ttm-play">
     <div class="ttm-hud">
       <button class="vb-back" onclick="ttmSave(); ttmStop(); showView('games')">← Thoát</button>
       <button class="ttm-hbtn" onclick="ttmDex()">📖 Sổ Thú <b id="ttm-dexn"></b></button>
       <button class="ttm-hbtn" onclick="ttmTeamView()">🎒 Đội</button>
+      <button class="ttm-hbtn" onclick="ttmSaveBtn()">💾 Lưu</button>
+      <span class="ttm-bagtag" id="ttm-bag" title="Lọ Chữ và thuốc"></span>
+      <span class="ttm-toast hidden" id="ttm-toast" role="status">✓ Đã lưu</span>
       <span class="ttm-lvtag">${TTM_LV[g.lv].split(' · ')[0]}</span>
       ${g.badge ? '<span class="ttm-badge" title="Huy hiệu Buổi 1">🏅</span>' : ''}
     </div>
@@ -30458,6 +30707,20 @@ function ttmOverlay(open) {
 function ttmDexCount() {
   const g = _ttm, el = document.getElementById('ttm-dexn');
   if (el) el.textContent = `${[...TTM_TU, ...TTM_Y].filter(id => g.caught[id]).length}/${TTM_TU.length + TTM_Y.length}`;
+  ttmBagCount();
+}
+function ttmBagCount() {
+  const g = _ttm, el = document.getElementById('ttm-bag');
+  if (g && el) el.textContent = `🫙 ${g.bag.jar} · 🧪 ${g.bag.pot}`;
+}
+function ttmSaveBtn() {
+  ttmSave();
+  tsSfx('equip');
+  const t = document.getElementById('ttm-toast');
+  if (!t) return;
+  t.classList.remove('hidden');
+  clearTimeout(ttmSaveBtn.t);
+  ttmSaveBtn.t = setTimeout(() => t.classList.add('hidden'), 1600);
 }
 
 /* ── Walking ── */
@@ -30527,6 +30790,9 @@ function ttmAct() {
   const [fx, fy] = ttmFront(), n = ttmNpcAt(fx, fy), t = ttmTileAt(fx, fy), b = ttmBuildAt(fx, fy);
   if (n) { n.face = g.p.x < n.x ? -1 : 1; ttmNpcTalk(n); return; }
   if (t === 's') { ttmTalk(['📋 ↑ Tuyến đường 1 · Nhà thi đấu Buổi 1<br>← Nhà em · Nhà Hồi Sức →']); return; }
+  if (t === 'q') { ttmTalk([fx < 14 ? '📋 🌿 Bãi cỏ xanh: <b>Từ-Mon</b>, những cụm từ hay của bài mẫu.' : '📋 🌼 Bãi cỏ hoa: <b>Ý-Mon</b>, từng ý của đoạn văn. Coi chừng con lạc đề!']); return; }
+  if (t === 'W') { ttmTalk(['Mặt ao lấp lánh. Hình như có con gì đang bơi dưới lá sen…']); return; }
+  if (t === 'H') { ttmTalk(['Tổ ong. Ong đang bận làm mật, đừng chọc nhé. 🐝']); return; }
   if (b && b.doors.some(([x, y]) => x === fx && y === fy)) ttmDoor(b);
 }
 function ttmYOk(g) { return TTM_GYM_STEPS.every(st => TTM_Y.some(id => g.caught[id] && !TTM_MONS[id].off && TTM_MONS[id].steps.includes(st))); }
@@ -30537,6 +30803,7 @@ function ttmNpcTalk(n) {
     ttmTalk([
       'Cô Hướng Dẫn: 🌿 Cỏ <b>xanh</b> có <b>Từ-Mon</b>: cụm từ hay trong bài mẫu. 🌼 Cỏ <b>hoa</b> có <b>Ý-Mon</b>: từng ý của đoạn văn.',
       'Muốn vào Nhà thi đấu, em cần đủ <b>5 Ý-Mon đúng đề</b>. Coi chừng Ý-Mon <b>lạc đề</b>: bắt thì được, nhưng đánh trùm không có tác dụng đâu.',
+      'Thú yếu rồi thì ném <b>🫙 Lọ Chữ</b>, trả lời đúng câu hỏi bắt thú là đóng được nắp. <b>🧪 Thuốc</b> hồi máu ngay giữa trận. Hết thì về Nhà của em (mái đỏ) lấy thêm.',
       `Em đang có ${nY}/5 Ý-Mon đúng đề. Thú mệt thì vào Nhà Hồi Sức (mái xám) để hồi máu.`,
     ]);
   } else if (n.id === 'trainer') {
@@ -30554,8 +30821,11 @@ function ttmDoor(b) {
     ttmSave();
     ttmTalk(['Nhà Hồi Sức: Đội của em đã hồi phục hoàn toàn! ✨']);
   } else if (b.id === 'home') {
+    const more = g.bag.jar < TTM_BAG.jar || g.bag.pot < TTM_BAG.pot;
+    g.bag.jar = Math.max(g.bag.jar, TTM_BAG.jar); g.bag.pot = Math.max(g.bag.pot, TTM_BAG.pot);
+    ttmBagCount();
     ttmSave();
-    ttmTalk(['Nhà của em. Tiến độ đã được lưu. 💾']);
+    ttmTalk(['Nhà của em. Tiến độ đã được lưu. 💾', more ? `Em lấy thêm đồ trong tủ: 🫙 ${TTM_BAG.jar} Lọ Chữ, 🧪 ${TTM_BAG.pot} thuốc.` : 'Túi đồ của em vẫn còn đầy.']);
   } else if (b.id === 'gym') {
     if (!ttmYOk(g)) { ttmNpcTalk(TTM_NPC.find(n => n.id === 'guard')); return; }
     const L = ttmLesson().paras[0];
@@ -30590,26 +30860,95 @@ function ttmTalkNext() {
 
 /* ── Drawing the world ── */
 const TTM_GRASS = {};
-function ttmGrassTile(kind) {
-  if (TTM_GRASS[kind]) return TTM_GRASS[kind];
+// Tall grass, four sway frames. Ý-Mon grass is darker and full of flowers.
+function ttmGrassTile(kind, f, v) {
+  const key = kind + (f || 0) + (v ? 'm' : '');
+  if (TTM_GRASS[key]) return TTM_GRASS[key];
   const c = document.createElement('canvas');
   c.width = c.height = 16;
-  const x = c.getContext('2d');
-  const blade = kind === 'y' ? ['#2F7D4F', '#3E9C5F'] : ['#4CA63D', '#6CC24A'];
-  for (let i = 0; i < 9; i++) {
-    const bx = (i * 5 + (i % 3) * 3) % 15, by = 6 + (i * 7) % 9;
-    x.fillStyle = blade[i % 2]; x.fillRect(bx, by, 1, 5); x.fillRect(bx + 1, by + 1, 1, 4);
-    x.fillStyle = '#2B5E2B'; x.fillRect(bx, by + 4, 2, 1);
+  const x = c.getContext('2d'), sw = [0, 1, 0, -1][f || 0];
+  // A mirrored variant per tile breaks up the rows.
+  if (v) { x.translate(16, 0); x.scale(-1, 1); }
+  const blade = kind === 'y' ? ['#2C7A4B', '#3E9C5F', '#55B472'] : ['#3F9A35', '#5DBB45', '#86D65E'];
+  x.fillStyle = kind === 'y' ? 'rgba(30, 90, 50, .22)' : 'rgba(40, 110, 30, .16)';
+  x.fillRect(0, 0, 16, 16);
+  [[1, 7, 0], [4, 5, 1], [7, 8, 2], [10, 4, 0], [13, 6, 1], [2, 10, 2], [6, 11, 0], [11, 10, 1], [14, 11, 2]].forEach(([bx, by, k], i) => {
+    const lean = i % 3 === 1 ? sw : 0;
+    x.fillStyle = blade[k]; x.fillRect(bx, by + 2, 1, 16 - by - 2); x.fillRect(bx + lean, by, 1, 2);
+    x.fillStyle = blade[(k + 1) % 3]; x.fillRect(bx + 1, by + 3, 1, 16 - by - 4);
+  });
+  if (kind === 'y') {
+    [[3, 4, '#F4D35E'], [11, 3, '#F29CB0'], [7, 9, '#FFFFFF'], [13, 10, '#F4D35E'], [1, 11, '#F29CB0']].forEach(([fx, fy, col], i) => {
+      const dx = i % 2 ? sw : 0;
+      x.fillStyle = col; x.fillRect(fx + dx - 1, fy, 3, 1); x.fillRect(fx + dx, fy - 1, 1, 3);
+      x.fillStyle = '#C9940E'; x.fillRect(fx + dx, fy, 1, 1);
+    });
   }
-  if (kind === 'y') { x.fillStyle = '#F4D35E'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 2, 2)); x.fillStyle = '#FFF6C7'; [[3, 5], [11, 4], [7, 11], [13, 12]].forEach(([a, b]) => x.fillRect(a, b, 1, 1)); }
-  return (TTM_GRASS[kind] = c);
+  return (TTM_GRASS[key] = c);
 }
 function ttmTile(c, i, dx, dy) {
   if (!TTM_IMG.ready) return;
   c.drawImage(TTM_IMG.img, (i % 12) * 16, Math.floor(i / 12) * 16, 16, 16, dx, dy, TTM_TS, TTM_TS);
 }
+// A steady pseudo-random number per tile, so trees and pebbles never flicker.
+function ttmHash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) % 100; }
+// Dirt paths pick the Kenney edge tile that matches their neighbours.
+function ttmPathTile(x, y) {
+  const P = (a, b) => ttmTileAt(a, b) === '=' || (b < y && TTM_BUILD.some(B => B.doors.some(([dx, dy]) => dx === a && dy === b)));
+  const n = P(x, y - 1), s = P(x, y + 1), w = P(x - 1, y), e = P(x + 1, y);
+  if (!n) return !w ? 12 : !e ? 14 : 13;
+  if (!s) return !w ? 36 : !e ? 38 : 37;
+  return !w ? 24 : !e ? 26 : 25;
+}
+// Trees on the border: mostly round and pine, a few autumn ones for colour.
+function ttmTreeProp(t, x, y) {
+  const h = ttmHash(x, y);
+  if (h < 9) return 27; if (h < 14) return 3;
+  return t === 'Y' ? 28 : h < 30 ? 4 : 16;
+}
+// Fences get end posts beside the gap and at the edges.
+function ttmFenceProp(x, y) { const L = ttmTileAt(x - 1, y) === '#', R = ttmTileAt(x + 1, y) === '#'; return L && R ? 81 : R ? 80 : L ? 82 : 81; }
+// The pond, drawn in code: a sandy rim, a light edge, ripples and lily pads.
+function ttmWater(c, x, y, X, Y, time) {
+  const u = TTM_TS / 16, W = (a, b) => ttmTileAt(a, b) === 'W';
+  const n = W(x, y - 1), s = W(x, y + 1), w = W(x - 1, y), e = W(x + 1, y);
+  const L = w ? 0 : 2, R = e ? 16 : 14, T = n ? 0 : 2, Bt = s ? 16 : 14;
+  c.fillStyle = '#E9D29A'; c.fillRect(X + (w ? 0 : 1) * u, Y + (n ? 0 : 1) * u, (16 - (w ? 0 : 1) - (e ? 0 : 1)) * u, (16 - (n ? 0 : 1) - (s ? 0 : 1)) * u);
+  c.fillStyle = '#3F8FD2'; c.fillRect(X + L * u, Y + T * u, (R - L) * u, (Bt - T) * u);
+  c.fillStyle = '#2F76B8'; c.fillRect(X + L * u, Y + Math.max(T, 9) * u, (R - L) * u, (Bt - Math.max(T, 9)) * u);
+  c.fillStyle = '#A9E1F7';
+  if (!n) c.fillRect(X + L * u, Y + T * u, (R - L) * u, u);
+  if (!w) c.fillRect(X + L * u, Y + T * u, u, (Bt - T) * u);
+  // Round the outer corners back into grass.
+  const grass = (gx, gy) => TTM_IMG.ready && c.drawImage(TTM_IMG.img, gx, gy, 3, 3, X + gx * u, Y + gy * u, 3 * u, 3 * u);
+  if (!n && !w) grass(0, 0);
+  if (!n && !e) grass(13, 0);
+  if (!s && !w) grass(0, 13);
+  if (!s && !e) grass(13, 13);
+  const h = ttmHash(x, y);
+  c.fillStyle = 'rgba(255, 255, 255, .75)';
+  for (let k = 0; k < 2; k++) {
+    const rx = (Math.floor(time * 4 + h + k * 7) % 12) + 2, ry = 5 + k * 5 + (h % 3);
+    if (rx + 3 <= R && ry >= T && ry < Bt) c.fillRect(X + rx * u, Y + ry * u, 3 * u, u);
+  }
+  if (h % 3 === 0) {
+    const lx = X + (5 + h % 5) * u, ly = Y + (6 + h % 4) * u;
+    c.fillStyle = '#4CA63D'; c.beginPath(); c.arc(lx, ly, 2.4 * u, 0.5, Math.PI * 2); c.lineTo(lx, ly); c.fill();
+    if (h % 2) { c.fillStyle = '#F29CB0'; c.fillRect(lx - u, ly - u, 2 * u, 2 * u); c.fillStyle = '#FFF1B8'; c.fillRect(lx - u / 2, ly - u / 2, u, u); }
+  }
+}
+// A small flower bed on the grass.
+function ttmFlowers(c, x, y, X, Y) {
+  const u = TTM_TS / 16, h = ttmHash(x, y), cols = ['#F29CB0', '#F4D35E', '#FFFFFF', '#B565C9'];
+  for (let k = 0; k < 5; k++) {
+    const fx = 2 + ((h * (k + 3)) % 12), fy = 3 + ((h * (k + 7)) % 10);
+    c.fillStyle = '#3E8E3A'; c.fillRect(X + fx * u, Y + (fy + 1) * u, u, 2 * u);
+    c.fillStyle = cols[(h + k) % 4]; c.fillRect(X + (fx - 1) * u, Y + fy * u, 3 * u, u); c.fillRect(X + fx * u, Y + (fy - 1) * u, u, 3 * u);
+    c.fillStyle = '#C9940E'; c.fillRect(X + fx * u, Y + fy * u, u, u);
+  }
+}
 function ttmDraw() {
-  const g = _ttm, c = g.ctx, W = g.W, H = g.H, S = TTM_TS, p = g.p;
+  const g = _ttm, c = g.ctx, W = g.W, H = g.H, S = TTM_TS, p = g.p, T = g.time;
   if (!c) return;
   c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
   c.imageSmoothingEnabled = false;
@@ -30621,11 +30960,17 @@ function ttmDraw() {
   const x0 = Math.max(0, Math.floor(camX / S)), x1 = Math.min(TTM_MAP[0].length - 1, Math.ceil((camX + W) / S));
   const y0 = Math.max(0, Math.floor(camY / S)), y1 = Math.min(TTM_MAP.length - 1, Math.ceil((camY + H) / S));
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const t = ttmTileAt(x, y);
-    ttmTile(c, TTM_TILE[t] ?? 0, x * S, y * S);
-    if (TTM_PROP[t] != null) ttmTile(c, TTM_PROP[t], x * S, y * S);
-    if (t === '"' || t === ';') c.drawImage(ttmGrassTile(t === ';' ? 'y' : 't'), x * S, y * S, S, S);
+    const t = ttmTileAt(x, y), X = x * S, Y = y * S;
+    ttmTile(c, t === '=' ? ttmPathTile(x, y) : t === '.' && ttmHash(x, y) < 12 ? 1 : TTM_TILE[t] ?? 0, X, Y);
+    if (t === 'W') { ttmWater(c, x, y, X, Y, T); continue; }
+    if (t === 'f') ttmFlowers(c, x, y, X, Y);
+    const prop = t === 'T' || t === 'Y' ? ttmTreeProp(t, x, y) : t === '#' ? ttmFenceProp(x, y) : TTM_PROP[t];
+    if (prop != null) ttmTile(c, prop, X, Y);
+    if (t === '"' || t === ';') c.drawImage(ttmGrassTile(t === ';' ? 'y' : 't', Math.floor(T * 2.4 + x * 0.6 + y * 0.9) % 4, ttmHash(x, y) % 2), X, Y, S, S);
   }
+  // Soft shadows ground the buildings.
+  c.fillStyle = 'rgba(20, 40, 20, .18)';
+  TTM_BUILD.forEach(b => c.fillRect((b.x + 0.2) * S, (b.y + b.t.length) * S - 6, b.t[0].length * S, 8));
   TTM_BUILD.forEach(b => b.t.forEach((row, j) => row.forEach((ti, i) => ttmTile(c, ti, (b.x + i) * S, (b.y + j) * S))));
   // People, back to front.
   const ents = TTM_NPC.map(n => ({ y: n.y, draw: () => ttmPerson(c, n.look, n.x, n.y, n.face || 1, false, n) }));
@@ -30634,21 +30979,45 @@ function ttmDraw() {
   // Tall grass hides the lower legs.
   const pt = ttmTileAt(Math.round(p.fx), Math.round(p.fy));
   if ((pt === '"' || pt === ';') && !p.moving) {
-    c.drawImage(ttmGrassTile(pt === ';' ? 'y' : 't'), 0, 9, 16, 7, Math.round(p.fx) * S, Math.round(p.fy) * S + S * 9 / 16, S, S * 7 / 16);
+    c.drawImage(ttmGrassTile(pt === ';' ? 'y' : 't', 0), 0, 9, 16, 7, Math.round(p.fx) * S, Math.round(p.fy) * S + S * 9 / 16, S, S * 7 / 16);
   }
+  // Butterflies over the flower field and the flower beds.
+  [[20, 8, '#F4D35E'], [6, 4, '#F29CB0'], [9, 17, '#FFFFFF'], [18, 3, '#A9E1F7']].forEach(([bx, by, col], i) => {
+    const px = (bx + Math.sin(T * 0.7 + i * 2) * 1.6) * S + S / 2, py = (by + Math.cos(T * 0.9 + i) * 1.1) * S + Math.sin(T * 3 + i) * 4;
+    const flap = Math.floor(T * 10 + i) % 2 ? 4 : 2;
+    c.fillStyle = col; c.fillRect(px - 1 - flap, py - 2, flap, 4); c.fillRect(px + 1, py - 2, flap, 4);
+    c.fillStyle = '#2A1E2E'; c.fillRect(px - 1, py - 2, 2, 5);
+  });
   if (g.bang) {
     const n = TTM_NPC.find(q => q.id === g.bang.npc);
     c.fillStyle = '#fff'; c.strokeStyle = '#1B1B24'; c.lineWidth = 2;
-    t1hRR(c, n.x * S + S / 2 - 11, n.y * S - S + 2, 22, 26, 6); c.fill(); c.stroke();
+    t1hRR(c, n.x * S + S / 2 - 11, n.y * S - S - 10, 22, 26, 6); c.fill(); c.stroke();
     c.fillStyle = '#E5533D'; c.font = '900 20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText('!', n.x * S + S / 2, n.y * S - S + 15);
+    c.fillText('!', n.x * S + S / 2, n.y * S - S + 3);
   }
+  // Cloud shadows drift across the town.
+  c.fillStyle = 'rgba(30, 50, 70, .07)';
+  [[0, 5, 5, 2.4], [11, 14, 6, 2.8], [20, 2, 4.4, 2]].forEach(([ox, oy, rx, ry], i) => {
+    const cx = ((ox * S + T * 14 * (1 + i * 0.2)) % (MW + 12 * S)) - 6 * S;
+    c.beginPath(); c.ellipse(cx, oy * S, rx * S, ry * S, 0, 0, Math.PI * 2); c.ellipse(cx + rx * S * 0.7, oy * S + S, rx * S * 0.7, ry * S * 0.8, 0, 0, Math.PI * 2); c.fill();
+  });
   c.restore();
+  // A light vignette keeps the eye in the middle.
+  if (!g.vig || g.vig.w !== W || g.vig.h !== H) {
+    const v = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+    v.addColorStop(0, 'rgba(0, 0, 0, 0)'); v.addColorStop(1, 'rgba(10, 20, 30, .22)');
+    g.vig = { w: W, h: H, v };
+  }
+  c.fillStyle = g.vig.v; c.fillRect(0, 0, W, H);
 }
 function ttmPerson(c, look, tx, ty, face, moving, npc) {
-  const S = TTM_TS, g = _ttm;
-  const f = moving ? `run_anim_f${Math.floor(g.p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 5 + (npc ? npc.x : 0)) % 4}`;
-  t1dDraw(c, `${look}_${f}`, tx * S + S / 2, ty * S + S - 3, 2.1, face < 0);
+  const S = TTM_TS, g = _ttm, cx = tx * S + S / 2, by = ty * S + S - 2;
+  const blink = (g.time + (npc ? npc.x * 0.37 : 0)) % 3.4 < 0.14;
+  c.fillStyle = 'rgba(20, 30, 20, .22)';
+  c.beginPath(); c.ellipse(cx, by - 2, 15, 5, 0, 0, Math.PI * 2); c.fill();
+  const spr = npc ? ttmFolkSprite(look, face < 0, blink)
+    : ttmPlayerSprite(look, g.p.dir, moving ? ['a', 'idle', 'b', 'idle'][Math.floor(g.p.anim * 9) % 4] : 'idle', blink && !moving);
+  ttmBlit(c, spr, cx, by, TTM_PX);
 }
 
 /* ── Questions ── one per attack. Level decides the form: choose, fill the
@@ -30725,8 +31094,8 @@ function ttmBattleView() {
   const g = _ttm, B = g.B, el = document.getElementById('ttm-over'), me = ttmActive();
   const foe = ttmFoeId();
   const foeBox = B.kind === 'gym'
-    ? `<div class="ttm-hp"><b>Trưởng phái Lập Luận</b><span class="ttm-fam ttm-fam-y">Nhà thi đấu</span><div class="ttm-steps">${TTM_GYM_STEPS.map((s, i) => `<i class="${i < B.si ? 'done' : i === B.si ? 'now' : ''}">${s}</i>`).join('')}</div></div><canvas class="ttm-leader" width="72" height="108" id="ttm-leader"></canvas>`
-    : `<div class="ttm-hp"><b>${ttmName(foe, g)}</b>${ttmFamTag(foe)}${ttmChip(TTM_MONS[foe].type)}<div class="ttm-bar"><i style="width:${B.hp / B.max * 100}%"></i></div>${B.kind === 'trainer' ? `<small>Thợ Săn Từ · ${B.fi + 1}/${B.foes.length}</small>` : g.caught[foe] ? '<small>✓ Đã có trong Sổ Thú</small>' : ''}</div><canvas class="ttm-spr" id="ttm-foe" width="120" height="120" data-ttm="${ttmArt(foe, g)}"></canvas>`;
+    ? `<div class="ttm-hp"><b>Trưởng phái Lập Luận</b><span class="ttm-fam ttm-fam-y">Nhà thi đấu</span><div class="ttm-steps">${TTM_GYM_STEPS.map((s, i) => `<i class="${i < B.si ? 'done' : i === B.si ? 'now' : ''}">${s}</i>`).join('')}</div></div><canvas class="ttm-leader" width="84" height="104" id="ttm-leader"></canvas>`
+    : `<div class="ttm-hp"><b>${ttmName(foe, g)}</b>${ttmFamTag(foe)}${ttmChip(TTM_MONS[foe].type)}<div class="ttm-bar"><i style="width:${B.hp / B.max * 100}%"></i></div>${B.kind === 'trainer' ? `<small>Thợ Săn Từ · ${B.fi + 1}/${B.foes.length}</small>` : g.caught[foe] ? '<small>✓ Đã có trong Sổ Thú</small>' : ''}</div><canvas class="ttm-spr${B.jarOn ? (B.jarFly ? ' suck' : ' gone') : ''}" id="ttm-foe" width="120" height="120" data-ttm="${ttmArt(foe, g)}"></canvas>${B.jarOn || B.jarPop ? `<canvas class="ttm-jar ${B.jarPop ? 'pop' : B.jarFly ? 'fly' : 'wob'}" id="ttm-jar" width="48" height="56"></canvas>` : ''}`;
   el.innerHTML = `<div class="ttm-bt ttm-bt-${B.kind}">
     <div class="ttm-bt-foe">${foeBox}</div>
     <div class="ttm-bt-me"><canvas class="ttm-spr ttm-back" id="ttm-me" width="120" height="120" data-ttm="${ttmArt(me.id, g)}"></canvas>
@@ -30737,7 +31106,10 @@ function ttmBattleView() {
   ttmOverlay(true);
   ttmPaintAll(el);
   const L = document.getElementById('ttm-leader');
-  if (L) { const x = L.getContext('2d'); const draw = () => { x.clearRect(0, 0, 72, 108); t1dDraw(x, 'wizzard_m_idle_anim_f0', 36, 104, 3.4, true, null, true); }; if (T1D.ready) draw(); else setTimeout(draw, 300); }
+  if (L) { const x = L.getContext('2d'); x.clearRect(0, 0, 84, 104); ttmBlit(x, ttmFolkSprite('leader'), 42, 104, 4); }
+  const J = document.getElementById('ttm-jar');
+  if (J) { const x = J.getContext('2d'); x.clearRect(0, 0, 48, 56); ttmBlit(x, ttmJarSprite(), 24, 56, 4); }
+  B.jarPop = false;
 }
 async function ttmSay(html, ms) {
   const box = document.getElementById('ttm-box');
@@ -30762,14 +31134,14 @@ function ttmNextQ() {
   const id = B.foes[B.fi], M = TTM_MONS[id];
   let q;
   if (B.kind === 'trainer') q = ttmQTu(id, g.lv);
-  else if (M.fam === 't') q = B.hp === B.max ? ttmQTu(id, g.lv) : ttmQMean(id);
-  else q = B.hp === B.max ? ttmQY(id, g.lv) : ttmQField(id);
+  else if (B.hp < B.max) { ttmCatchPrompt(); return; }
+  else q = M.fam === 't' ? ttmQTu(id, g.lv) : ttmQY(id, g.lv);
   ttmAsk(q);
 }
 function ttmAsk(q) {
   const g = _ttm, B = g.B, box = document.getElementById('ttm-box');
   B.q = q;
-  const menu = B.kind === 'wild' ? `<div class="ttm-menu"><button onclick="ttmTeamView(true)">🎒 Đổi thú</button><button onclick="ttmRun()">🏃 Chạy</button></div>` : B.kind === 'trainer' ? '<div class="ttm-menu"><button onclick="ttmTeamView(true)">🎒 Đổi thú</button></div>' : '';
+  const menu = q.catch ? '' : ttmMenu();
   if (q.kind === 'choose') {
     box.innerHTML = `${q.ask}<div class="ttm-opts-q ${q.long ? 'long' : ''}">${q.opts.map((o, i) => `<button onclick="ttmAnswer(${i})"><kbd>${i + 1}</kbd> ${escapeHtml(o)}</button>`).join('')}</div>${menu}`;
   } else {
@@ -30802,6 +31174,13 @@ async function ttmAnswer(i) {
   document.removeEventListener('keydown', B.numKey);
   if (B.kind === 'gym') { await ttmGymAnswer(ok, near); B.busy = false; return; }
   const me = ttmActive(), id = B.foes[B.fi];
+  if (ok && q.catch) {
+    g.mast[id] = Math.min(4, (g.mast[id] || 0) + 1);
+    walEarn(1);
+    B.hp = 0;
+    await ttmCatch(id);
+    return;
+  }
   if (ok) {
     g.mast[id] = Math.min(4, (g.mast[id] || 0) + 1);
     walEarn(1);
@@ -30834,6 +31213,11 @@ async function ttmAnswer(i) {
   tsSfx('wrong');
   ttmShowAnswer(q);
   await new Promise(r => setTimeout(r, 1600));
+  if (q.catch) {
+    B.jarOn = false; B.jarPop = true;
+    ttmBattleView();
+    await ttmSay(`💥 <b>${ttmName(id, g)}</b> phá nắp Lọ Chữ thoát ra!`, 1300);
+  }
   ttmHit('foe');
   me.hp -= 7;
   await ttmSay(`<b>${ttmName(id, g)}</b> phản đòn! ${ttmName(me.id, g)} mất 7 máu.`, 1200);
@@ -30866,10 +31250,10 @@ function ttmHit(who) {
 }
 async function ttmCatch(id) {
   const g = _ttm, M = TTM_MONS[id], had = !!g.caught[id];
-  const foe = document.getElementById('ttm-foe');
-  if (foe) foe.classList.add('caught');
+  const jar = document.getElementById('ttm-jar');
+  if (jar) { jar.classList.remove('wob'); jar.classList.add('sealed'); }
   tsSfx('ring');
-  await ttmSay('Ném TinTin Ball… 🔴', 1100);
+  await ttmSay('🫙 Lắc… lắc… Cạch! Nắp đã đóng.', 1300);
   delete g.fled[id];
   if (!had) {
     g.caught[id] = { stage: 0 };
@@ -30907,6 +31291,80 @@ async function ttmBlackout() {
   ttmEndBattle();
   ttmTalk(['Nhà Hồi Sức: Đội của em đã hồi phục. Ôn lại Sổ Thú rồi thử lại nhé!']);
 }
+
+/* ── Bag: Lọ Chữ and thuốc ── */
+// The battle menu under each question.
+function ttmMenu() {
+  const g = _ttm, B = g.B, me = ttmActive();
+  const pot = `<button onclick="ttmPotion()" ${g.bag.pot > 0 && me && me.hp < 20 ? '' : 'disabled'}>🧪 Thuốc <small>${g.bag.pot}</small></button>`;
+  const team = '<button onclick="ttmTeamView(true)">🎒 Đổi thú</button>';
+  if (B.kind === 'wild') return `<div class="ttm-menu"><button onclick="ttmThrow()" disabled title="Đánh trúng một lần trước đã">🫙 Bắt <small>${g.bag.jar}</small></button>${pot}${team}<button onclick="ttmRun()">🏃 Chạy</button></div>`;
+  if (B.kind === 'trainer') return `<div class="ttm-menu">${pot}${team}</div>`;
+  return '';
+}
+// The creature is weak: throw a Lọ Chữ, or heal, switch, run.
+function ttmCatchPrompt() {
+  const g = _ttm, B = g.B, box = document.getElementById('ttm-box'), id = B.foes[B.fi];
+  B.q = null;
+  document.removeEventListener('keydown', B.numKey);
+  const has = g.bag.jar > 0;
+  box.innerHTML = `<div class="ttm-q-ctx"><b>${ttmName(id, g)}</b> yếu rồi! ${has ? 'Ném Lọ Chữ, rồi trả lời đúng câu hỏi bắt thú để đóng nắp.' : 'Nhưng em hết Lọ Chữ. Về Nhà của em (mái đỏ) lấy thêm nhé.'}</div>
+    ${has ? `<button class="ttm-throw" onclick="ttmThrow()"><canvas width="24" height="28" data-jar="1"></canvas> Ném Lọ Chữ <small>còn ${g.bag.jar}</small></button>` : ''}
+    ${ttmMenu().replace('onclick="ttmThrow()" disabled title="Đánh trúng một lần trước đã"', 'onclick="ttmThrow()"' + (has ? '' : ' disabled'))}`;
+  box.querySelectorAll('canvas[data-jar]').forEach(cv => ttmBlit(cv.getContext('2d'), ttmJarSprite(), 12, 28, 2));
+}
+async function ttmThrow() {
+  const g = _ttm, B = g && g.B;
+  if (!B || B.busy || B.kind !== 'wild' || B.hp >= B.max || g.bag.jar <= 0) return;
+  B.busy = true;
+  document.removeEventListener('keydown', B.numKey);
+  const id = B.foes[B.fi], M = TTM_MONS[id];
+  g.bag.jar--;
+  ttmBagCount();
+  B.jarOn = true; B.jarFly = true;
+  ttmBattleView();
+  tsSfx('ring');
+  await ttmSay(`Em ném Lọ Chữ! 🫙 <b>${ttmName(id, g)}</b> bị hút vào lọ…`, 1300);
+  B.jarFly = false;
+  ttmBattleView();
+  B.busy = false;
+  const q = M.fam === 't' ? ttmQMean(id) : ttmQField(id);
+  q.catch = true;
+  q.ask = `<div class="ttm-catchq">🫙 Câu hỏi bắt thú: trả lời đúng để đóng nắp!</div>${q.ask}`;
+  ttmAsk(q);
+}
+async function ttmPotion() {
+  const g = _ttm, B = g && g.B, me = ttmActive();
+  if (!B || B.busy || !me || g.bag.pot <= 0 || me.hp >= 20) return;
+  B.busy = true;
+  document.removeEventListener('keydown', B.numKey);
+  g.bag.pot--;
+  me.hp = Math.min(20, me.hp + 10);
+  ttmBagCount();
+  tsSfx('heal');
+  ttmBattleView();
+  await ttmSay(`🧪 <b>${ttmName(me.id, g)}</b> uống thuốc, hồi 10 máu.`, 1200);
+  B.busy = false;
+  ttmNextQ();
+}
+// Outside battle: heal one member of the team.
+function ttmPotionOut(i) {
+  const g = _ttm, m = g.team[i];
+  if (!m || g.bag.pot <= 0 || m.hp >= 20) return;
+  g.bag.pot--;
+  m.hp = Math.min(20, Math.max(0, m.hp) + 10);
+  tsSfx('heal');
+  ttmBagCount();
+  ttmSave();
+  ttmTeamView(false);
+}
+// The Lọ Chữ: a corked word jar with a label, drawn like the people.
+const TTM_JAR = {
+  pal: { C: '#B07A45', c: '#7E5230', G: '#BFE6F2', g: '#8CC7DB', W: '#FFFFFF', L: '#F7E9C6', a: '#2F80ED' },
+  rows: ['....KKKK....', '...KCCCCK...', '...KccccK...', '..KKKKKKKK..', '.KGWGGGGGGK.', 'KGWGGGGGGGgK', 'KGWLLLLLLGgK',
+    'KGGLaaLaLGgK', 'KGGLLLLLLGgK', 'KGGGGGGGGGgK', 'KgGGGGGGGGgK', '.KggggggggK.', '..KKKKKKKK..'],
+};
+function ttmJarSprite() { return ttmPeople('jar', TTM_JAR.rows, TTM_JAR.pal); }
 
 /* ── Gym: build the paragraph ── */
 function ttmGymPick() {
@@ -30949,7 +31407,7 @@ async function ttmGymHurt(mon) {
   m.hp -= 6;
   tsSfx('wrong');
   ttmBattleView();
-  if (!g.team.some(x => TTM_MONS[x.id].fam === 'y' && x.hp > 0)) { ttmBlackout(); }
+  if (!g.team.some(x => TTM_MONS[x.id].fam === 'y' && x.hp > 0)) await ttmBlackout();
 }
 async function ttmGymAnswer(ok, near) {
   const g = _ttm, B = g.B, id = B.chosen, M = TTM_MONS[id];
@@ -31020,9 +31478,9 @@ function ttmTeamView(inBattle) {
   if (!inBattle) { g.mode = 'menu'; ttmOverlay(true); }
   el.innerHTML = `<div class="ttm-panel">
     <div class="ttm-panel-h"><b>🎒 Đội của em</b><button class="ttm-x" onclick="${inBattle ? 'ttmNextQ()' : 'ttmMenuClose()'}">✕</button></div>
-    <p class="ttm-small">Chạm một con để cho nó ra sân trước.</p>
-    <div class="ttm-team">${g.team.map((m, i) => `<button class="ttm-mon ${i === 0 ? 'lead' : ''}" ${m.hp <= 0 ? 'disabled' : ''} onclick="ttmLead(${i}, ${!!inBattle})">
-      <canvas width="56" height="56" data-ttm="${ttmArt(m.id, g)}"></canvas><span><b>${ttmName(m.id, g)}</b>${ttmFamTag(m.id)}<div class="ttm-bar me"><i style="width:${Math.max(0, m.hp) / 20 * 100}%"></i></div><small>${Math.max(0, Math.round(m.hp))}/20</small></span></button>`).join('')}</div>
+    <p class="ttm-small">Chạm một con để cho nó ra sân trước.${inBattle ? '' : ` Bấm 🧪 để cho thú uống thuốc (còn ${g.bag.pot}).`}</p>
+    <div class="ttm-team">${g.team.map((m, i) => `<div class="ttm-monw"><button class="ttm-mon ${i === 0 ? 'lead' : ''}" ${m.hp <= 0 ? 'disabled' : ''} onclick="ttmLead(${i}, ${!!inBattle})">
+      <canvas width="56" height="56" data-ttm="${ttmArt(m.id, g)}"></canvas><span><b>${ttmName(m.id, g)}</b>${ttmFamTag(m.id)}<div class="ttm-bar me"><i style="width:${Math.max(0, m.hp) / 20 * 100}%"></i></div><small>${Math.max(0, Math.round(m.hp))}/20</small></span></button>${!inBattle && m.hp < 20 && g.bag.pot > 0 ? `<button class="ttm-heal1" onclick="ttmPotionOut(${i})" aria-label="Cho ${escapeHtml(ttmName(m.id, g))} uống thuốc">🧪</button>` : ''}</div>`).join('')}</div>
   </div>`;
   ttmPaintAll(el);
 }
