@@ -14647,6 +14647,12 @@ function lvRenderHub() {
           <span class="lv-mode-best" id="tw-hub-best">🏆 ${twGetBest()} tầng</span>
           <span class="lv-mode-progress" id="tw-hub-progress"></span>
         </button>
+        <button class="lv-mode" onclick="twStart(null, true)">
+          <span class="lv-mode-icon">🧪</span>
+          <span class="lv-mode-name">Xây tháp (thử nghiệm)</span>
+          <span class="lv-mode-desc">Bản mới: tháp gạch pixel, khu phố mọc dần quanh tháp, cứ 10 tầng có Bão lốc. Tháp riêng, xây từ đầu, không lên bảng xếp hạng.</span>
+          <span class="lv-mode-best">🏆 ${tw2Best()} tầng</span>
+        </button>
         <button class="lv-mode lv-mode--raid" onclick="raidMap()">
           <span class="lv-mode-icon">⚔️</span>
           <span class="lv-mode-name">Chinh phạt hầm ngục</span>
@@ -14670,6 +14676,7 @@ const LV_MODES = [
   { id: 'meaning', icon: '🎯', name: 'Bắn chữ, nhìn nghĩa Việt' },
   { id: 'colloc',  icon: '🧩', name: 'Bắn chữ, ghép cụm từ' },
   { id: 'tower',   icon: '🏗️', name: 'Xây tháp' },
+  { id: 'tower2',  icon: '🧪', name: 'Xây tháp (thử nghiệm)' },
   { id: 'raid',    icon: '⚔️', name: 'Chinh phạt hầm ngục' },
 ];
 
@@ -14678,7 +14685,7 @@ function lvCurrentMode() {
   if (_rd) return 'raid';
   if (document.querySelector('#lesson-vocab-root .qt-wrap, #lesson-vocab-root .qt-setup')) return 'test';
   if (_ts) return _ts.mode;
-  if (_tw && document.getElementById('tw-card')) return 'tower';
+  if (_tw && document.getElementById('tw-card')) return _tw.v2 ? 'tower2' : 'tower';
   if (document.querySelector('#lesson-vocab-root .lv-fc-top')) return 'flash';
   return null;
 }
@@ -14689,8 +14696,9 @@ function tsBank(g) {
   if (!g || g.banked) return;
   g.banked = true;
   walEarn(g.coins, true);
-  if (g.score > tsGetBest(g.mode, g.diffKey)) tsSetBest(g.mode, g.diffKey, g.score);
-  if (g.score > 0) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
+  const recKey = g.mode + (g.v2 ? '_v2' : '');
+  if (g.score > tsGetBest(recKey, g.diffKey)) tsSetBest(recKey, g.diffKey, g.score);
+  if (g.score > 0 && !g.v2) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
 }
 function lvLeaveGame() {
   if (_ts) { const g = _ts; tsStop(); tsBank(g); }
@@ -14721,6 +14729,7 @@ function lvSwitch(mode) {
   if (mode === 'flash') lvStartFlash();
   else if (mode === 'test') qtSetup();
   else if (mode === 'tower') twStart();
+  else if (mode === 'tower2') twStart(null, true);
   else if (mode === 'raid') raidMap();
   else tsStart(mode, list);
 }
@@ -15867,7 +15876,7 @@ function walBar() {
   if (typeof twSkinSync === 'function') twSkinSync();
   const boost = walBoostLeft() > 0 ? `<span class="wal-boost">${walBoostText()}</span>` : '';
   const mini = document.getElementById('wal-mini');
-  if (mini) mini.innerHTML = `🪙 ${walCoins()}${walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''}`;
+  if (mini) mini.innerHTML = `${mini.closest('.tw-v2') ? tsImg('coin', 'tw2-coin') : '🪙'} ${walCoins()}${walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''}`;
   const bar = document.getElementById('wal-bar');
   if (!bar) return;
   const inv = SHOP_ITEMS.map(i => `<span class="wal-inv" title="${escapeHtml(i.name)}">${i.icon} ${walCount(i.id)}</span>`).join('');
@@ -18325,11 +18334,260 @@ const TW_HAZARDS = [
 function twHzLossText(hz) {
   const L = hz.loss || { floors: TW_HAZARD_LOSS };
   if (L.tilt) return `tháp bị lệch thêm ${L.tilt} tầng`;
-  return `mất ${L.floors} tầng${L.life ? ' và 1 mạng' : ''}`;
+  return `mất ${L.floors} tầng${L.life ? ' và 1 mạng' : ''}${L.hints ? ` và ${L.hints} gợi ý` : ''}`;
 }
 const twIsTilt = f => typeof f === 'string' && f.startsWith('~');
 const twPlate = f => (twIsTilt(f) ? f.slice(1) : f);
 const twTilts = g => g.floors.filter(twIsTilt).length;
+/* ── Xây tháp bản mới (thử nghiệm) ── its own tower, kept in this browser
+   only and off the leaderboard. Floors, roof and neighbourhood are Tiny Town
+   bricks (Kenney, CC0, the sheet TinTinMon's town uses), drawn at 2× so every
+   pixel stays square. Every ten floors a storm: three right answers before
+   the clock runs out, or the top three floors blow away. */
+const TW2 = { img: null, ready: false, cache: {} };
+const TW2_FH = 32;
+function tw2Load() {
+  if (TW2.img) return;
+  TW2.img = new Image();
+  TW2.img.onload = () => { TW2.ready = true; TW2.cache = {}; if (_tw && _tw.v2) { _tw.cityN = undefined; twRenderScene(false); } };
+  TW2.img.src = 'img/ttmon/town.png';
+}
+// Rows of tile numbers to one crisp image.
+function tw2Paint(key, rows) {
+  if (TW2.cache[key]) return TW2.cache[key];
+  if (!TW2.ready) return '';
+  const T = TW2_FH, c = document.createElement('canvas');
+  c.width = Math.max(...rows.map(r => r.length)) * T;
+  c.height = rows.length * T;
+  const x = c.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  rows.forEach((r, j) => r.forEach((id, i) => { if (id != null) x.drawImage(TW2.img, (id % 12) * 16, Math.floor(id / 12) * 16, 16, 16, i * T, j * T, T, T); }));
+  return (TW2.cache[key] = c.toDataURL());
+}
+// Wood, stone and castle walls: edges, plain wall, window, door, roof.
+const TW2_MAT = {
+  wood:   { L: 72, M: 73, R: 75, W: 84, D: 86, roof: [[52, 53, 53, 53, 54], [64, 65, 67, 65, 66]] },
+  stone:  { L: 76, M: 77, R: 79, W: 88, D: 90, roof: [[48, 49, 49, 49, 50], [60, 61, 63, 61, 62]] },
+  castle: { L: 108, M: 109, R: 110, W: 125, D: 103, roof: [[96, 97, 97, 97, 98]] },
+};
+// One look per milestone stage, from the shack to Landmark 81.
+const TW2_STAGE = ['wood', 'wood', 'stone', 'stone', 'castle', 'castle', 'castle'];
+function tw2Mat(stage) { return TW2_MAT[TW2_STAGE[stage] || 'wood']; }
+function tw2Floor(stage, i, ground) {
+  const m = tw2Mat(stage), v = ground ? 'g' : i % 3 === 1 ? 'b' : 'a';
+  const row = v === 'g' ? [m.L, m.W, m.D, m.W, m.R] : v === 'b' ? [m.L, m.W, m.W, m.W, m.R] : [m.L, m.W, m.M, m.W, m.R];
+  return tw2Paint(`f_${TW2_STAGE[stage] || 'wood'}_${v}`, [row]);
+}
+function tw2Roof(stage) { return tw2Paint('roof_' + (TW2_STAGE[stage] || 'wood'), tw2Mat(stage).roof); }
+// The neighbourhood grows with the tower, Tiny Town props in place of emoji.
+const TW2_PROPS = {
+  tree: [[16]], tree2: [[28]], tree3: [[27]], tree4: [[4]], bush: [[5]], mush: [[29]], barrels: [[107, 130]], well: [[104]],
+  hive: [[94]], sign: [[83]], fence: [[80, 81, 82]], house: [[64, 66], [84, 85]], house2: [[60, 62], [88, 89]],
+  keep: [[96, 97, 98], [108, 125, 110], [120, 103, 122]],
+};
+const TW2_CITY = [
+  [0, 'tree', 'l'], [0, 'bush', 'r'], [2, 'tree2', 'l'], [4, 'barrels', 'r'], [6, 'mush', 'l'], [8, 'house', 'r'],
+  [10, 'well', 'l'], [13, 'tree3', 'r'], [16, 'hive', 'l'], [20, 'house2', 'r'], [24, 'fence', 'l'], [28, 'tree', 'r'],
+  [32, 'tree4', 'l'], [36, 'sign', 'r'], [40, 'house', 'l'], [45, 'tree2', 'r'], [50, 'house2', 'l'], [56, 'keep', 'r'],
+  [62, 'tree3', 'l'], [68, 'house', 'r'], [74, 'tree', 'l'], [81, 'keep', 'r'],
+];
+function tw2Prop(k) { const u = tw2Paint('p_' + k, TW2_PROPS[k]); return u ? `<img src="${u}" alt="" draggable="false">` : ''; }
+// A pixel heart for the lives.
+let TW2_HEART = '';
+function tw2Heart() {
+  if (TW2_HEART) return TW2_HEART;
+  const rows = ['.KK.KK.', 'KRRKRRK', 'KRWRRRK', 'KRRRRRK', '.KRRRK.', '..KRK..', '...K...'];
+  const pal = { K: '#2A1E2E', R: '#E5533D', W: '#FFD2C8' }, c = document.createElement('canvas');
+  c.width = 7; c.height = 7;
+  const x = c.getContext('2d');
+  rows.forEach((r, j) => [...r].forEach((ch, i) => { if (pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } }));
+  return (TW2_HEART = c.toDataURL());
+}
+// The trial's hazards: the old set without the twister (the storm does
+// that job), plus a meteor shower and a gang that steals hints.
+const TW2_HAZARDS = [
+  ...TW_HAZARDS.filter(h => h.id !== 'twister'),
+  { id: 'shower', icon: '☄️', name: 'Mưa thiên thạch', come: 'Mưa thiên thạch trút xuống!', win: 'Bắn rụng cả cơn mưa thiên thạch!', lose: 'Thiên thạch dội trúng tháp!', loss: { floors: 3 } },
+  { id: 'robber', icon: '💰', name: 'Băng cướp', come: 'Băng cướp leo lên khuân đồ!', win: 'Tóm gọn băng cướp!', lose: 'Băng cướp ôm đồ chạy mất!', loss: { floors: 1, hints: 2 } },
+];
+// Hazards as pixel sprites, inked like the Tiny Town bricks.
+const TW2_PAL = { K: '#2A1E2E', W: '#FFFFFF', G: '#8A8F9C', D: '#5E6370', L: '#C9CED8', O: '#F08A24', Y: '#FFD23F', R: '#D9452B', S: '#F2C7A0', B: '#3B4A7A', H: '#4A3A2E', M: '#26262E', C: '#7FD6F5', N: '#8B5A2B', T: '#C9A66B' };
+const TW2_SPR = {
+  meteor: ['.........YO.', '.......YYOO.', '.....OYYOO..', '...KKKKOO...', '..KGGGGK....', '.KGLGGDGK...', '.KGGGGGGK...', '.KGDGGLGK...', '.KGGGGGGK...', '..KGGDGK....', '...KKKK.....'],
+  bandit: ['...KKKK...', '..KHHHHK..', '.KHHHHHHK.', '.KMMMMMMK.', '.KMWMMWMK.', '.KSSSSSSK.', '..KSSSSK..', '.KRRRRRRK.', 'KSKRRRRKSK', 'KSKRRRRKSK', '.KKBBBBKK.', '..KBKKBK..', '..KBK.KBK.', '..KK...KK.'],
+  sack: ['...KKK...', '..KTKTK..', '...KTK...', '..KTTTK..', '.KTTYTTK.', 'KTTYYYTTK', 'KTTTYTTTK', 'KTTTTTTTK', '.KKKKKKK.'],
+  bomb: ['.......Y.O', '......OYO.', '.....K.Y..', '....K.....', '..KKKK....', '.KMMMMK...', 'KMWMMMMK..', 'KMMMMMMK..', 'KMMMMMMK..', '.KMMMMK...', '..KKKK....'],
+  bolt: ['....KKKKK.....', '..KKLLLLLKK...', '.KLLWWLLLLLK..', 'KLLLLLLLLLLLK.', 'KGGGGGGGGGGGGK', '.KKKKYYKKKKKK.', '.....YY.......', '....YY........', '...YYYYY......', '.....YY.......', '....YY........', '....Y.........'],
+  ufo: ['.....KKKK.....', '....KCCWCK....', '...KCCCCWCK...', '.KKKKKKKKKKKK.', 'KLLYLLYLLYLLLK', '.KKKKKKKKKKKK.', '....KYYYYK....', '...Y.Y..Y.Y...'],
+  dragon: ['...........KK...', '..........KRRK..', '.........KRWKRK.', '.KK.....KRRRRRRK', 'KRRK...KRRRKKKK.', 'KRYRK.KRRK..OY..', '.KRYRKRRRK...O..', '..KRRRRRRK......', '...KRRRRRRK.....', '...KRRKKRRK.....', '...KRK..KRK.....', '...KK....KK.....'],
+  crack: ['K..............K', '.K.....K......K.', '..K...K.K....K..', '...K.K...K..K...', '....K.....KK....'],
+  termite: ['.K....K.', '..K..K..', '.KNNNNK.', 'KNWNNNNK', '.KNNNNK.', 'K.K..K.K'],
+};
+const TW2_SPR_URL = {};
+function tw2Spr(name, scale) {
+  const rows = TW2_SPR[name];
+  const w = Math.max(...rows.map(r => r.length)), h = rows.length;
+  if (!TW2_SPR_URL[name]) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const x = c.getContext('2d');
+    rows.forEach((r, j) => [...r].forEach((ch, i) => { if (TW2_PAL[ch]) { x.fillStyle = TW2_PAL[ch]; x.fillRect(i, j, 1, 1); } }));
+    TW2_SPR_URL[name] = c.toDataURL();
+  }
+  return `<img class="tw2-spr tw2-spr--${name}" src="${TW2_SPR_URL[name]}" style="width:${w * scale}px;height:${h * scale}px" alt="" draggable="false">`;
+}
+function tw2HazMarkup(hz) {
+  const left = Math.max(0, TW_HAZARD_QS - hz.n);
+  const art = {
+    meteor: () => tw2Spr('meteor', 6),
+    shower: () => `<span class="tw2-shower">${tw2Spr('meteor', 4).repeat(Math.max(1, left))}</span>`,
+    bandit: () => `<span class="tw2-gang">${tw2Spr('bandit', 4)}${tw2Spr('bandit', 4)}</span>`,
+    robber: () => `<span class="tw2-gang">${tw2Spr('bandit', 4)}${tw2Spr('sack', 4)}</span>`,
+    bomb: () => tw2Spr('bomb', 5),
+    bolt: () => tw2Spr('bolt', 5),
+    ufo: () => tw2Spr('ufo', 5),
+    dragon: () => tw2Spr('dragon', 5),
+    quake: () => tw2Spr('crack', 8),
+    termite: () => `<span class="tw2-gang">${tw2Spr('termite', 4).repeat(3)}</span>`,
+  }[hz.id];
+  return `${art ? art() : ''}<span class="tw-hz-tag">${hz.wrong ? `sai ${hz.wrong} · ` : ''}còn ${left} câu</span>`;
+}
+
+function tw2RenderScene(animateTop) {
+  const g = _tw;
+  const scene = document.getElementById('tw-scene');
+  const stack = document.getElementById('tw-stack');
+  const world = document.getElementById('tw-world');
+  if (!g || !scene || !stack || !world) return;
+  const h = g.floors.length;
+  const drop = typeof animateTop === 'number' ? animateTop : (animateTop ? 1 : 0);
+  const stage = twStage(h);
+  let lean = 0;
+  stack.innerHTML = g.floors.map((f, i) => {
+    const tilt = twIsTilt(f);
+    if (tilt) lean++;
+    const img = tw2Floor(stage, i, i === 0);
+    const st = [];
+    if (img) st.push(`background-image: url(${img})`);
+    if (lean) st.push(`translate: ${lean * 9}px 0`);
+    if (tilt) st.push(`rotate: ${lean % 2 ? 4 : -3}deg`);
+    return `<div class="tw-floor tw2-floor${i >= h - drop ? ' tw-drop' : ''}${f === '⭐' ? ' tw-floor--star' : ''}${tilt ? ' tw-floor--tilt' : ''}" style="${st.join('; ')}"><span class="tw-plate">${escapeHtml(twPlate(f))}</span></div>`;
+  }).join('');
+  scene.classList.toggle('tw-leaning', lean >= TW_TILT_MAX);
+  // The roof rides on top of the stack, outside it, so lost floors never take it.
+  let roof = document.getElementById('tw2-roof');
+  if (!roof) { roof = document.createElement('div'); roof.id = 'tw2-roof'; world.appendChild(roof); }
+  const mat = TW2_STAGE[stage] || 'wood';
+  const roofH = mat === 'castle' ? TW2_FH : TW2_FH * 2;
+  roof.className = 'tw2-roof tw2-roof--' + mat;
+  roof.style.backgroundImage = tw2Roof(stage) ? `url(${tw2Roof(stage)})` : '';
+  roof.style.height = roofH + 'px';
+  roof.style.bottom = (46 + h * TW2_FH) + 'px';
+  roof.style.display = h ? '' : 'none';
+  roof.style.translate = lean ? `${lean * 9}px 0` : '';
+  const ground = world.querySelector('.tw-ground');
+  if (ground) { const grass = tw2Paint('grass', [[0, 1, 0, 2, 0, 0, 1, 0]]); if (grass) ground.style.backgroundImage = `url(${grass})`; }
+  const city = TW2_CITY.filter(c => h >= c[0]);
+  if (g.cityN !== city.length) {
+    const fresh = g.cityN !== undefined && city.length > g.cityN ? city.slice(g.cityN) : [];
+    ['l', 'r'].forEach(side => {
+      const el = document.getElementById('tw-city-' + side);
+      if (el) el.innerHTML = city.filter(c => c[2] === side).map(c => `<span class="${fresh.includes(c) ? 'new' : ''}">${tw2Prop(c[1])}</span>`).join('');
+    });
+    g.cityN = city.length;
+  }
+  if (g.stage !== stage) {
+    [...scene.classList].filter(c => c.startsWith('tw2-stage-')).forEach(c => scene.classList.remove(c));
+    scene.classList.add('tw2-stage-' + stage);
+    if (g.stage !== undefined && stage > g.stage) {
+      scene.classList.remove('tw-upgrade'); void scene.offsetWidth; scene.classList.add('tw-upgrade');
+      setTimeout(() => scene.classList.remove('tw-upgrade'), 1300);
+      tsSfx('rankup');
+    }
+    g.stage = stage;
+  }
+  const room = scene.clientHeight - 200;
+  world.style.transform = `translateY(${Math.max(0, h * TW2_FH + roofH - room)}px)`;
+  scene.style.background = twSky(h);
+  const stars = document.getElementById('tw-stars');
+  if (stars) stars.style.opacity = Math.max(0, (h - 45) / 36).toFixed(2);
+  const sun = document.getElementById('tw-sun');
+  if (sun) sun.style.transform = `translateY(${Math.min(260, h * 3.2)}px)`;
+  const block = document.getElementById('tw-crane-block');
+  if (block) {
+    const next = tw2Floor(twStage(h + 1), h + 1, false);
+    block.className = 'tw-crane-block tw2-block';
+    block.style.backgroundImage = next ? `url(${next})` : '';
+  }
+  const { cur, next } = twMilestone(h);
+  const meter = document.getElementById('tw-meter');
+  if (meter) meter.innerHTML = `<div class="tw-meter-h">${h}<small> tầng</small></div>` +
+    `<div class="tw-meter-cur">${escapeHtml((cur || TW_STAGE0).name)}</div>` +
+    (next ? `<div class="tw-meter-next">còn ${next.at - h} tầng tới ${escapeHtml(next.name)}</div>` : '<div class="tw-meter-next">Đã lên đỉnh</div>') +
+    `<div class="tw-meter-next tw2-storm-next">${tw2StormDue(g) || (g.hz && g.hz.storm) ? 'Bão lốc tới rồi!' : `Bão lốc sau ${tw2StormNext(g) - h} tầng`}</div>`;
+  const hearts = document.getElementById('tw-hearts');
+  if (hearts) {
+    const img = `<img class="tw2-heart" src="${tw2Heart()}" alt="">`;
+    hearts.innerHTML = img.repeat(Math.max(0, g.lives)) + `<span class="ts-life-lost">${img.repeat(Math.max(0, TW_LIVES - g.lives))}</span>`;
+  }
+}
+
+/* The storm */
+const TW2_STORM_EVERY = 10;
+const TW2_STORM_NEED = 3;
+const TW2_STORM_SECS = 45;
+const TW2_STORM = { id: 'storm', icon: '', name: 'Bão lốc', come: 'Bão lốc kéo tới!', win: 'Bão tan, tháp đứng vững!', lose: 'Bão lốc thổi bay mấy tầng trên cùng!', loss: { floors: 3 }, storm: true };
+// A storm waits at every tenth floor until it is beaten; lose and it comes
+// back the next time the tower reaches that height.
+function tw2StormDue(g) { return Math.floor(g.floors.length / TW2_STORM_EVERY) > (g.stormLv || 0); }
+function tw2StormNext(g) { return (Math.max(g.stormLv || 0, Math.floor(g.floors.length / TW2_STORM_EVERY)) + 1) * TW2_STORM_EVERY; }
+function tw2StormStart() {
+  const g = _tw;
+  const r = g.stormResume;
+  g.stormResume = null;
+  g.hz = { ...TW2_STORM, n: 0, right: r ? r.right || 0 : 0, wrong: 0, need: TW2_STORM_NEED, left: r ? Math.max(5, r.left || 0) : TW2_STORM_SECS, max: TW2_STORM_SECS };
+  document.getElementById('tw-scene')?.classList.add('tw-stormy');
+  tsSfx('boss');
+  jBuzz([60, 40, 60]);
+  twHazardScene();
+  twBanner(r ? `Bão lốc vẫn còn! Còn ${Math.ceil(g.hz.left)} giây` : `Bão lốc! Đúng ${TW2_STORM_NEED} câu trong ${TW2_STORM_SECS} giây`);
+  twSave(g);
+  clearInterval(g.stormTick);
+  g.stormTick = setInterval(() => tw2StormTick(g), 200);
+}
+// The clock only runs while a question is open and the page is in view.
+function tw2StormTick(g) {
+  const hz = g.hz;
+  if (_tw !== g || !hz || !hz.storm) { clearInterval(g.stormTick); return; }
+  if (g.answered || document.hidden || document.getElementById('lv-modal')) return;
+  const view = document.getElementById('view-lesson-vocab');
+  if (!view || view.classList.contains('hidden') || !document.getElementById('tw-card')) return;
+  hz.left -= 0.2;
+  const c = document.getElementById('tw2-clock');
+  if (c) { c.textContent = Math.max(0, Math.ceil(hz.left)) + ' giây'; c.classList.toggle('low', hz.left <= 10); }
+  twHazardScene();
+  if (hz.left <= 0) tw2StormTimeout();
+}
+function tw2StormTimeout() {
+  const g = _tw;
+  clearInterval(g.stormTick);
+  clearTimeout(g.timer);
+  g.hz.timedOut = true;
+  g.answered = true;
+  if (g.q && !g.missed.some(m => m.en === g.q.en)) g.missed.push(g.q);
+  const hzEnd = twHazardEnd();
+  g.lastResult = { ok: false, timeout: true, hzEnd };
+  twRenderCard(g.lastResult);
+}
+function tw2StormMarkup(hz) {
+  return `<div class="tw2-tornado">${'<i></i>'.repeat(7)}</div><span class="tw-hz-tag">đúng ${hz.right}/${hz.need} · ${Math.max(0, Math.ceil(hz.left))} giây</span>`;
+}
+
+// The trial tower lives in this browser only.
+function tw2Key() { return 'twTowerV2_' + ((currentUser && currentUser.id) || 'guest'); }
+function tw2Read() { try { const t = JSON.parse(localStorage.getItem(tw2Key()) || 'null'); return t && Array.isArray(t.floors) ? t : null; } catch (e) { return null; } }
+function tw2Best() { try { return parseInt(localStorage.getItem('twBestV2') || '0', 10) || 0; } catch (e) { return 0; } }
+
 let _tw = null;
 let _twKeyHandler = null;
 let _twSaved = null;
@@ -18395,6 +18653,12 @@ function twSnapshot(g) {
 // Written locally after every answer; sent to the server at most every few
 // seconds, and at once when the game ends or the student leaves.
 function twSave(g, now) {
+  if (g.v2 !== undefined ? g.v2 : _tw && _tw.v2) {
+    const st = g.hz && g.hz.storm ? { left: g.hz.left, right: g.hz.right } : null;
+    lvSave(tw2Key(), JSON.stringify({ ...twSnapshot(g), storm_lv: g.stormLv || 0, storm: st }));
+    lvSave('twBestV2', String(g.best || 0));
+    return;
+  }
   const snap = twSnapshot(g);
   _twSaved = snap;
   _twSavedFor = (currentUser && currentUser.id) || 'guest';
@@ -18437,7 +18701,7 @@ function twOptions(q, pool) {
   return vbShuffle([q, ...picked.slice(0, 3)]);
 }
 
-async function twStart(list) {
+async function twStart(list, v2) {
   tsStop();
   lvUnbindKeys();
   const pool = list && list.length ? list : twPool();
@@ -18445,7 +18709,7 @@ async function twStart(list) {
   if (!root) return;
   if (pool.length < 4) { showToast('Phần đang chọn chưa đủ câu mẫu để xây tháp. Chọn thêm buổi hoặc unit.'); return; }
   root.innerHTML = '<div class="loading">Đang mở công trường…</div>';
-  const saved = await twLoad();
+  const saved = v2 ? tw2Read() : await twLoad();
   // The student may have left while the tower was loading.
   const view = document.getElementById('view-lesson-vocab');
   if (!view || view.classList.contains('hidden') || !document.getElementById('lesson-vocab-root')) return;
@@ -18458,21 +18722,29 @@ async function twStart(list) {
     checkpoint: (saved && saved.checkpoint) || 0,
     lives: saved && saved.lives > 0 ? saved.lives : TW_LIVES,
     hints: saved ? Math.min(TW_MAX_HINTS, saved.hints || 0) : TW_START_HINTS,
-    best: Math.max(twGetBest(), floors.length),
-    peak: floors.length, startedAt: floors.length,
+    best: Math.max(v2 ? tw2Best() : twGetBest(), floors.length),
+    peak: floors.length, startedAt: floors.length, v2: !!v2, stormLv: v2 && saved ? saved.storm_lv || 0 : 0, stormResume: v2 && saved ? saved.storm || null : null,
     right: 0, wrong: 0, missed: [], q: null, answered: false, timer: 0, qCount: 0, collapsed: false,
     coins: 0, revivable: false, revives: 0, lastResult: null, shield: false, shielded: 0,
     hz: null, fixQ: [], blocked: false,
   };
   walLoad().then(() => {
     const sc = document.getElementById('tw-scene'), sk = walLook('tower').id;
-    if (sc && sk) sc.classList.add('tw-skin-' + sk);
+    if (sc && sk && !v2) sc.classList.add('tw-skin-' + sk);
     if (_tw && !_tw.answered) twRenderCard();
     walBar();
   });
   root.innerHTML = `
-    <div class="tw-wrap">
-      <div class="tw-top">
+    <div class="tw-wrap${v2 ? ' tw-v2' : ''}">
+      ${v2 ? `<div class="tw-top">
+        <button class="btn-back-plain" onclick="twQuit()">${tsIco('back')} Chọn buổi</button>
+        <span class="tw2-trial">Thử nghiệm</span>
+        <span class="tw-hearts" id="tw-hearts"></span>
+        <span class="wal-mini" id="wal-mini">${tsImg('coin', 'tw2-coin')} ${walCoins()}</span>
+        <button class="ts-icon-btn" onclick="gameShop('tw')" title="Mua vật phẩm" aria-label="Mua vật phẩm">${tsIco('shop')}</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">${tsIco('swap')}</button>
+        <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsIco(tsMuted() ? 'mute' : 'sound')}</button>
+      </div>` : `<div class="tw-top">
         <button class="btn-back-plain" onclick="twQuit()">← Chọn buổi</button>
         <span class="tw-hearts" id="tw-hearts"></span>
         <span class="wal-mini" id="wal-mini">🪙 ${walCoins()}</span>
@@ -18481,9 +18753,9 @@ async function twStart(list) {
         <button class="ts-icon-btn" onclick="twSkinModal()" title="Đổi kiểu nhà" aria-label="Đổi kiểu nhà">🎨</button>
         <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">🔀</button>
         <button class="ts-icon-btn" id="tw-mute" onclick="twToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsMuted() ? '🔇' : '🔊'}</button>
-      </div>
+      </div>`}
       <div class="tw-grid">
-        <div class="tw-scene${walLook('tower').id ? ' tw-skin-' + walLook('tower').id : ''}" id="tw-scene">
+        <div class="tw-scene${walLook('tower').id && !v2 ? ' tw-skin-' + walLook('tower').id : ''}" id="tw-scene">
           <div class="tw-stars" id="tw-stars"></div>
           <div class="tw-sun" id="tw-sun"></div>
           <div class="tw-crane" aria-hidden="true">
@@ -18503,6 +18775,7 @@ async function twStart(list) {
       </div>
     </div>`;
   twBindKeys();
+  if (v2) tw2Load();
   twRenderScene(false);
   if (floors.length) showToast(`Xây tiếp từ tầng ${floors.length}.`);
   twNext();
@@ -18517,14 +18790,14 @@ function twQuit() {
   lvRenderHub();
 }
 function twStop() {
-  if (_tw) clearTimeout(_tw.timer);
+  if (_tw) { clearTimeout(_tw.timer); clearInterval(_tw.stormTick); }
   if (_twKeyHandler) document.removeEventListener('keydown', _twKeyHandler);
   _twKeyHandler = null;
 }
 function twToggleMute() {
   lvSave('tsMute', tsMuted() ? '0' : '1');
   const b = document.getElementById('tw-mute');
-  if (b) b.textContent = tsMuted() ? '🔇' : '🔊';
+  if (b) { if (_tw && _tw.v2) b.innerHTML = tsIco(tsMuted() ? 'mute' : 'sound'); else b.textContent = tsMuted() ? '🔇' : '🔊'; }
 }
 
 function twMilestone(h) {
@@ -18550,6 +18823,7 @@ function twRenderScene(animateTop) {
   const stack = document.getElementById('tw-stack');
   const world = document.getElementById('tw-world');
   if (!g || !scene || !stack || !world) return;
+  if (g.v2) { tw2RenderScene(animateTop); return; }
   const h = g.floors.length;
   const drop = typeof animateTop === 'number' ? animateTop : (animateTop ? 1 : 0);
   // Each leaning floor pushes everything above it a little further over.
@@ -18617,9 +18891,11 @@ function twNext() {
     if (g.deckPos >= g.deck.length) { g.deck = vbShuffle(g.pool); g.deckPos = 0; }
     q = g.deck[g.deckPos++];
   }
+  if (g.v2 && !g.hz && !fix && tw2StormDue(g)) tw2StormStart();
   if (!g.hz && !fix && g.floors.length >= TW_HAZARD_FROM && g.qCount > 2 && Math.random() < TW_HAZARD_CHANCE) twHazardStart();
   if (!g.hz && !fix) g.qCount++;
-  const typing = !!g.hz || fix || g.floors.length + 1 >= TW_TYPE_FROM;
+  // Storm questions follow the floor: choose below floor 21, type from there.
+  const typing = (!!g.hz && !g.hz.storm) || fix || g.floors.length + 1 >= TW_TYPE_FROM;
   g.q = { ...q, typing, options: typing ? null : twOptions(q, g.all), golden: !g.hz && !fix && g.qCount % TW_EGG_EVERY === 0, hidden: [], reveal: 0, tries: 0, fix, hz: !!g.hz };
   g.answered = false;
   twRenderCard();
@@ -18666,11 +18942,12 @@ function twRenderCard(result) {
     }).join('')}</div>`;
   }
   let feedback = '';
+  const hz = g.hz || (result && result.hzEnd);
   if (done) {
     const coins = result.coins ? ` · +${result.coins} 🪙` : '';
     const hzEnd = result.hzEnd ? `<div class="tw-hz-end ${result.hzEnd.lost ? 'bad' : 'ok'}">${result.hzEnd.icon} ${escapeHtml(result.hzEnd.text)}</div>` : '';
     const line = q.hz
-      ? (result.ok ? `✓ Chặn được một đòn${coins}` : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}.`) + hzEnd
+      ? (result.ok ? `✓ ${hz && hz.storm ? 'Đúng một câu' : 'Chặn được một đòn'}${coins}` : `✗ ${result.timeout ? 'Hết giờ! ' : ''}Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}.`) + hzEnd
       : q.fix
         ? (result.ok ? `✓ Tầng được xây lại thẳng${coins}` : `✗ Đáp án <strong>${escapeHtml(q.blank.text)}</strong>${result.typed ? ` · ta gõ "${escapeHtml(result.typed)}"` : ''}. Tầng này không xây lại được, nhưng không mất mạng.`)
       : result.ok && result.tilt
@@ -18704,18 +18981,18 @@ function twRenderCard(result) {
   const hintsLeft = g.hints + walCount('hint');
   const canHint = !done && hintsLeft > 0 && !q.hinted;
   const special = q.hz || q.fix;
-  const hz = g.hz || (result && result.hzEnd);
   card.className = 'tw-card' + (q.golden ? ' tw-card--gold' : '') + (q.hz ? ' tw-card--hz' : '') + (q.fix ? ' tw-card--fix' : '');
   card.innerHTML = `
     <div class="tw-card-head">
-      <span class="tw-floor-no">${q.hz && hz ? `${hz.icon} ${escapeHtml(hz.name)} · câu ${(g.hz ? g.hz.n : (result && result.hzEnd ? result.hzEnd.n : 0)) + (done ? 0 : 1)}/${TW_HAZARD_QS}` : q.fix ? '🔧 Xây lại tầng lệch' : `${q.golden ? '🥚 ' : ''}Tầng ${floorNo}`}</span>
+      <span class="tw-floor-no">${q.hz && hz && hz.storm ? `Bão lốc · đúng ${hz.right}/${hz.need}${done ? '' : ` · <span class="tw2-clock" id="tw2-clock">${Math.max(0, Math.ceil(hz.left))} giây</span>`}` : q.hz && hz ? `${hz.icon} ${escapeHtml(hz.name)} · câu ${(g.hz ? g.hz.n : (result && result.hzEnd ? result.hzEnd.n : 0)) + (done ? 0 : 1)}/${TW_HAZARD_QS}` : q.fix ? '🔧 Xây lại tầng lệch' : `${q.golden ? '🥚 ' : ''}Tầng ${floorNo}`}</span>
       <span class="tw-mode">${q.typing ? '✍️ Tự gõ' : `👆 Chọn từ · từ tầng ${TW_TYPE_FROM} phải tự gõ`}</span>
       ${done ? '' : `<button class="tw-hint-btn" onclick="twUseHint()" ${canHint ? '' : 'disabled'} title="Câu chọn bỏ 2 đáp án sai, câu tự gõ hiện nửa đầu của từ">💡 Gợi ý · còn ${hintsLeft}</button>`}
       ${done || special ? '' : `<button class="tw-hint-btn tw-skip-btn${g.shield ? ' on' : ''}" onclick="twShield()" ${g.shield || walCount('shield') ? '' : 'disabled'} title="Đỡ một câu sai: không mất mạng, không rơi tầng. Mua ở cửa hàng.">🛡️ ${g.shield ? 'Khiên đang bật' : 'Khiên · ' + walCount('shield')}</button>`}
       ${done || special ? '' : `<button class="tw-hint-btn tw-skip-btn" onclick="twSkip()" ${walCount('skip') ? '' : 'disabled'} title="Đổi câu khác, không mất mạng. Mua ở cửa hàng.">🔁 Đổi câu · ${walCount('skip')}</button>`}
     </div>
     ${q.golden ? '<div class="tw-gold-note">Câu trứng vàng. Đúng thì được thưởng một mạng, hai tầng hoặc một gợi ý. Sai không mất gì.</div>' : ''}
-    ${q.hz && g.hz && !done ? `<div class="tw-hz-note">${g.hz.icon} ${escapeHtml(g.hz.come)} Gõ đúng ${TW_HAZARD_QS - TW_HAZARD_FAIL + 1} câu để chặn. Sai ${TW_HAZARD_FAIL} câu là ${twHzLossText(g.hz)}.</div>` : ''}
+    ${q.hz && g.hz && g.hz.storm && !done ? `<div class="tw-hz-note">Bão lốc! Trả lời đúng ${g.hz.need} câu trước khi hết giờ. Hết giờ thì bão thổi bay ${g.hz.loss.floors} tầng trên cùng. Đồng hồ dừng lúc xem đáp án.</div>` : ''}
+    ${q.hz && g.hz && !g.hz.storm && !done ? `<div class="tw-hz-note">${g.hz.icon} ${escapeHtml(g.hz.come)} Gõ đúng ${TW_HAZARD_QS - TW_HAZARD_FAIL + 1} câu để chặn. Sai ${TW_HAZARD_FAIL} câu là ${twHzLossText(g.hz)}.</div>` : ''}
     ${q.fix && !done ? '<div class="tw-fix-note">🔧 Đúng ngay lần đầu thì tầng này được xây lại thẳng. Sai thì mất tầng này, không mất mạng.</div>' : ''}
     ${q.typing && !special && !q.golden && !done ? `<div class="tw-tilt-note">Đúng ngay lần đầu: tầng thẳng. Phải gõ lại mới đúng: tầng bị lệch${twTilts(g) ? ` (đang lệch ${twTilts(g)}/${TW_TILT_MAX})` : ''}.</div>` : ''}
     <div class="tw-tag">${escapeHtml(q.tag)} · ${escapeHtml(q.group)}</div>
@@ -18723,6 +19000,7 @@ function twRenderCard(result) {
     ${body}
     ${feedback}
     ${!done ? `<div class="vb-hint-text">${q.typing ? 'Enter để xây.' : 'Bấm chọn hoặc gõ phím 1 đến 4.'}</div>` : ''}`;
+  if (g.v2) card.innerHTML = tsNoEmoji(card.innerHTML.replace(/ ?🪙/g, ' xu').replace('🔊', tsIco('sound')));
   if (q.typing && !done) {
     const inp = document.getElementById('tw-input');
     if (inp) { inp.focus(); inp.addEventListener('input', () => { const e = document.getElementById('tw-err'); if (e) e.textContent = ''; }); }
@@ -18780,7 +19058,7 @@ function twSkinModal() {
 // Called whenever the wallet changes: keeps the picker and the scene current.
 function twSkinSync() {
   const scene = document.getElementById('tw-scene');
-  if (scene) {
+  if (scene && !(_tw && _tw.v2)) {
     [...scene.classList].filter(c => c.startsWith('tw-skin-')).forEach(c => scene.classList.remove(c));
     const id = walLook('tower').id;
     if (id) scene.classList.add('tw-skin-' + id);
@@ -18916,7 +19194,7 @@ function twResolve(ok, extra) {
     const before = twMilestone(g.floors.length).cur;
     g.floors.push(tilt ? '~' + q.show : q.show);
     questBump('tw_floors', 1);
-    statBump('tw_best', g.floors.length);
+    if (!g.v2) statBump('tw_best', g.floors.length);
     let dropped = 1;
     if (q.golden) {
       const n = g.floors.length;
@@ -18969,13 +19247,14 @@ function twResolve(ok, extra) {
 /* ── Hazards ── */
 function twHazardStart() {
   const g = _tw;
-  const h = TW_HAZARDS[Math.floor(Math.random() * TW_HAZARDS.length)];
+  const list = g.v2 ? TW2_HAZARDS : TW_HAZARDS;
+  const h = list[Math.floor(Math.random() * list.length)];
   g.hz = { ...h, n: 0, right: 0, wrong: 0 };
   tsSfx('boss');
   jBuzz([60, 40, 60]);
   twHazardScene();
   const b = document.getElementById('tw-banner');
-  if (b) { b.textContent = `${h.icon} ${h.come}`; b.classList.remove('hidden', 'show'); void b.offsetWidth; b.classList.add('show'); }
+  if (b) { b.textContent = g.v2 ? h.come : `${h.icon} ${h.come}`; b.classList.remove('hidden', 'show'); void b.offsetWidth; b.classList.add('show'); }
 }
 // The hazard on screen, a step closer after every answer.
 function twHazardScene(end) {
@@ -18985,7 +19264,7 @@ function twHazardScene(end) {
   let el = document.getElementById('tw-hz');
   const hz = g.hz;
   if (end) {
-    if (el) { el.classList.add(end === 'lose' ? 'tw-hz--hit' : 'tw-hz--gone'); el.id = ''; setTimeout(() => el.remove(), 900); }
+    if (el) { el.classList.add(end === 'run' ? 'tw2-run' : end === 'lose' ? 'tw-hz--hit' : 'tw-hz--gone'); el.id = ''; setTimeout(() => el.remove(), 900); }
     return;
   }
   if (!hz) return;
@@ -18995,6 +19274,15 @@ function twHazardScene(end) {
     scene.appendChild(el);
   }
   el.className = 'tw-hz tw-hz--' + hz.id;
+  if (g.v2) {
+    el.classList.add('tw2-hz');
+    el.style.setProperty('--p', (hz.storm ? 1 - hz.left / hz.max : hz.n / TW_HAZARD_QS).toFixed(2));
+    const tag = hz.storm && el.querySelector('.tw2-tornado') && el.querySelector('.tw-hz-tag');
+    if (tag) { tag.textContent = `đúng ${hz.right}/${hz.need} · ${Math.max(0, Math.ceil(hz.left))} giây`; return; }
+    el.innerHTML = hz.storm ? tw2StormMarkup(hz)
+      : tw2HazMarkup(hz);
+    return;
+  }
   el.style.setProperty('--p', (hz.n / TW_HAZARD_QS).toFixed(2));
   el.innerHTML = `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.id === 'termite' ? '🐜🐜🐜' : hz.icon}</span><span class="tw-hz-tag">${hz.wrong ? '❌'.repeat(hz.wrong) : ''} còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
 }
@@ -19020,7 +19308,7 @@ function twHazardAnswer(ok, extra) {
     tsSfx('wrong');
     jBuzz(60);
   }
-  const over = hz.wrong >= TW_HAZARD_FAIL || hz.right >= TW_HAZARD_QS - TW_HAZARD_FAIL + 1;
+  const over = hz.storm ? hz.right >= hz.need : hz.wrong >= TW_HAZARD_FAIL || hz.right >= TW_HAZARD_QS - TW_HAZARD_FAIL + 1;
   let hzEnd = null;
   if (over) hzEnd = twHazardEnd();
   else twHazardScene();
@@ -19032,8 +19320,13 @@ function twHazardEnd() {
   const g = _tw;
   const hz = g.hz;
   g.hz = null;
-  const lost = hz.wrong >= TW_HAZARD_FAIL;
-  twHazardScene(lost ? 'lose' : 'win');
+  const lost = hz.storm ? !!hz.timedOut : hz.wrong >= TW_HAZARD_FAIL;
+  if (hz.storm) {
+    clearInterval(g.stormTick);
+    document.getElementById('tw-scene')?.classList.remove('tw-stormy');
+    if (!lost) g.stormLv = Math.floor(g.floors.length / TW2_STORM_EVERY);
+  }
+  twHazardScene(lost ? (g.v2 && (hz.id === 'bandit' || hz.id === 'robber') ? 'run' : 'lose') : 'win');
   if (lost) {
     const L = hz.loss || { floors: TW_HAZARD_LOSS };
     const stack = document.getElementById('tw-stack');
@@ -19054,18 +19347,19 @@ function twHazardEnd() {
       text = `${hz.lose} ${t ? `Lệch thêm ${t} tầng (${twTilts(g)}/${TW_TILT_MAX}).` : 'May mà không còn tầng nào để lệch.'}`;
     } else {
       const n = Math.min(L.floors, g.floors.length);
-      const cls = hz.id === 'ufo' ? 'tw-steal' : hz.id === 'dragon' ? 'tw-burn' : 'tw-fall';
+      const cls = hz.storm ? 'tw-blown' : hz.id === 'ufo' ? 'tw-steal' : hz.id === 'dragon' ? 'tw-burn' : g.v2 && (hz.id === 'bandit' || hz.id === 'robber') ? 'tw2-carry' : 'tw-fall';
       if (stack) [...stack.children].slice(-n).forEach((f, i) => { f.style.animationDelay = (i * 0.08) + 's'; f.classList.add(cls); });
       g.floors.splice(g.floors.length - n, n);
       text = `${hz.lose} Mất ${n} tầng`;
       if (L.life && g.lives > 1) { g.lives--; text += ' và 1 mạng'; }
+      if (L.hints) { const k = Math.min(L.hints, g.hints); g.hints -= k; text += k ? ` và ${k} gợi ý` : ', may mà không còn gợi ý nào để cướp'; }
       text += '.';
       setTimeout(() => { if (_tw === g && !g.collapsed) twRenderScene(false); }, 800);
     }
     tsSfx('boss');
     jBuzz([90, 40, 90]);
     twSave(g);
-    return { lost: true, n: hz.n, icon: hz.icon, name: hz.name, text };
+    return { lost: true, n: hz.n, icon: hz.icon, name: hz.name, text, storm: hz.storm, right: hz.right, need: hz.need };
   }
   const bonus = TW_COIN_EGG * walMult();
   g.coins += bonus;
@@ -19073,7 +19367,7 @@ function twHazardEnd() {
   questBump('tw_hazard', 1);
   twBanner(`${hz.icon} ${hz.win} +${bonus} 🪙`);
   twSave(g);
-  return { lost: false, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.win} +${bonus} 🪙` };
+  return { lost: false, n: hz.n, icon: hz.icon, name: hz.name, text: `${hz.win} +${bonus} 🪙`, storm: hz.storm, right: hz.right, need: hz.need };
 }
 
 /* ── Leaning floors and the wrecking ball ── */
@@ -19170,7 +19464,7 @@ function twTiltFall() {
 // Saved as if it had already fallen, so closing the tab while the revive
 // question is open does not keep the tower standing for free.
 function twSaveFallen(g) {
-  twSave({ floors: g.ckFloors, ckFloors: g.ckFloors, lives: TW_LIVES, hints: g.hints, checkpoint: g.checkpoint, best: g.best }, true);
+  twSave({ floors: g.ckFloors, ckFloors: g.ckFloors, lives: TW_LIVES, hints: g.hints, checkpoint: g.checkpoint, best: g.best, stormLv: g.stormLv }, true);
 }
 
 function twRevive() {
@@ -19225,6 +19519,8 @@ function twCollapse() {
     f.style.animationDelay = Math.min(1.1, i * 0.045).toFixed(2) + 's';
     f.classList.add('tw-crumble');
   });
+  const roof = g.v2 && document.getElementById('tw2-roof');
+  if (roof) { roof.style.setProperty('--dx', '60px'); roof.style.setProperty('--rot', '35deg'); roof.style.animationDelay = Math.min(1.1, floors.length * 0.045).toFixed(2) + 's'; roof.classList.add('tw-crumble'); }
   const world = document.getElementById('tw-world');
   if (world) {
     for (let k = 0; k < 14; k++) {
@@ -19247,13 +19543,14 @@ function twCollapse() {
     const btn = document.getElementById('tw-next');
     if (btn) { btn.disabled = false; btn.focus(); }
     const meter = document.getElementById('tw-meter');
-    if (meter) meter.innerHTML = `<div class="tw-meter-h">🏚️</div><div class="tw-meter-cur">Toà nhà sập</div><div class="tw-meter-next">${g.checkpoint ? `đã lưu mốc ${g.checkpoint} tầng` : 'chưa có mốc nào, xây lại từ đầu'}</div>`;
+    if (meter) meter.innerHTML = `<div class="tw-meter-h">${g.v2 ? '' : '🏚️'}</div><div class="tw-meter-cur">Toà nhà sập</div><div class="tw-meter-next">${g.checkpoint ? `đã lưu mốc ${g.checkpoint} tầng` : 'chưa có mốc nào, xây lại từ đầu'}</div>`;
   }, wait);
 }
 
 function twBanner(text) {
   const b = document.getElementById('tw-banner');
   if (!b) return;
+  if (_tw && _tw.v2) text = tsNoEmoji(text.replace(/ ?🪙/g, ' xu'));
   b.textContent = text;
   b.classList.remove('hidden', 'show');
   void b.offsetWidth;
@@ -19304,12 +19601,13 @@ function twBindKeys() {
 // Start again from the saved milestone, or wipe the tower and start at the
 // ground. Either way the best height is kept.
 function twRestart(fromScratch) {
-  const s = _twSaved || { floors: [], ck_floors: [], lives: TW_LIVES, hints: TW_START_HINTS, checkpoint: 0, best: twGetBest() };
+  const v2 = !!(_twLast && _twLast.v2);
+  const s = (v2 ? tw2Read() : _twSaved) || { floors: [], ck_floors: [], lives: TW_LIVES, hints: TW_START_HINTS, checkpoint: 0, best: v2 ? tw2Best() : twGetBest() };
   if (fromScratch) {
-    const g = { floors: [], ckFloors: [], lives: TW_LIVES, hints: Math.max(s.hints || 0, TW_START_HINTS), checkpoint: 0, best: Math.max(s.best || 0, twGetBest()) };
+    const g = { floors: [], ckFloors: [], lives: TW_LIVES, hints: Math.max(s.hints || 0, TW_START_HINTS), checkpoint: 0, best: Math.max(s.best || 0, v2 ? tw2Best() : twGetBest()), v2 };
     twSave(g, true);
   }
-  twStart(_twLast && _twLast.list);
+  twStart(_twLast && _twLast.list, v2);
 }
 
 let _twLast = null;
@@ -19327,10 +19625,11 @@ function twEnd() {
   root.innerHTML = `
     <div class="vb-wrap">
       <div class="vb-results">
-        <div class="tw-ruin">🏚️</div>
+        ${g.v2 ? `<div class="tw-ruin tw2-ruin">${tw2Prop('house2')}</div>` : '<div class="tw-ruin">🏚️</div>'}
         <div class="vb-results-score">${g.peak}</div>
         <div class="vb-results-score-lbl">tầng cao nhất lượt này${top ? ` · ${top.icon} ${escapeHtml(top.name)}` : ''} · kỷ lục ${g.best} tầng</div>
         <div class="wal-earned">+<span class="j-count">0</span> 🪙 xu${g.revives ? ` · đã hồi sinh ${g.revives} lần` : ''}</div>
+        ${g.v2 ? '<div class="ts-trial-note">🧪 Bản thử nghiệm: tháp riêng, xu vẫn được cộng, số tầng không lên bảng xếp hạng.</div>' : ''}
         <div class="tw-restart-note">${g.checkpoint
           ? `Toà nhà sập nhưng mốc ${ck ? ck.icon + ' ' + escapeHtml(ck.name) + ', ' : ''}${g.checkpoint} tầng vẫn còn. Xây lại từ đó, không phải bắt đầu từ mặt đất.`
           : 'Chưa qua mốc nào nên lần này xây lại từ mặt đất. Qua mốc 5 tầng là có chỗ lưu.'}</div>
@@ -19351,7 +19650,7 @@ function twEnd() {
           ${g.checkpoint ? '<button class="vb-secondary-btn" onclick="twRestart(true)">Xây từ mặt đất</button>' : ''}
           ${g.missed.length ? `<button class="vb-secondary-btn" onclick="lvStartFlash(_twLast.missed.map(w => ({ en: w.en, vi: w.vi, use: w.use, ex: w.ex, tag: w.tag, group: w.group })))">🃏 Ôn ${g.missed.length} từ bằng flashcard</button>` : ''}
           <button class="vb-secondary-btn" onclick="lvModeModal()">🔀 Đổi chế độ</button>
-          <button class="vb-secondary-btn" onclick="lbOpen('tower')">🏆 Xếp hạng</button>
+          ${g.v2 ? '' : `<button class="vb-secondary-btn" onclick="lbOpen('tower')">🏆 Xếp hạng</button>`}
           <button class="vb-secondary-btn" onclick="lvRenderHub()">← Chọn buổi</button>
         </div>
       </div>
