@@ -9501,6 +9501,80 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .ts-ready-ver { margin-top: -0.2rem; }
 .ts-trial-note { margin: 0.3rem 0; font-size: 0.85rem; color: var(--moss); }
 
+/* ── Xây tháp bản mới (thử nghiệm, .tw-v2): Tiny Town bricks, pixel frame, the storm ── */
+.tw-v2 { --tw2-ink: #2A1E2E; }
+.tw2-trial { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--tw2-ink); background: #F5C542; border: 2px solid var(--tw2-ink); padding: 1px 7px; }
+.tw-v2 .btn-back-plain { display: inline-flex; align-items: center; gap: 4px; }
+.tw-v2 .ts-icon-btn { display: inline-flex; align-items: center; justify-content: center; }
+.tw-v2 .tw-hearts { display: inline-flex; justify-content: flex-end; align-items: center; gap: 3px; }
+.tw2-heart { display: block; width: 21px; height: 21px; image-rendering: pixelated; }
+.tw-v2 .ts-life-lost { display: inline-flex; gap: 3px; opacity: 1; }
+.tw-v2 .ts-life-lost .tw2-heart { opacity: 0.25; filter: grayscale(1); }
+.tw-v2 .wal-mini { display: inline-flex; align-items: center; gap: 4px; }
+.tw2-coin { display: inline-block; width: 18px; height: 18px; }
+.tw-v2 .tw-scene { border: 3px solid var(--tw2-ink); border-radius: 6px; box-shadow: 5px 5px 0 var(--tw2-ink); }
+.tw-v2 .tw-meter { background: rgba(42, 30, 46, 0.9); border-bottom: 3px solid var(--tw2-ink); }
+.tw-v2 .tw2-storm-next { color: #9FD8FF; font-weight: 700; opacity: 1; }
+.tw-v2 .tw-stack { width: 160px; margin-left: -80px; }
+.tw-v2 .tw2-floor {
+  height: 32px; border: 0; background-color: transparent; background-size: 100% 100%; background-repeat: no-repeat;
+  background-position: 0 0; image-rendering: pixelated;
+}
+.tw-v2 .tw2-floor .tw-plate { font-size: 0.64rem; background: rgba(255, 247, 233, 0.94); color: var(--tw2-ink); border: 2px solid var(--tw2-ink); border-radius: 0; padding: 0 5px; max-width: 74%; }
+.tw-v2 .tw-floor--star { filter: sepia(0.7) saturate(2.6) hue-rotate(-12deg) brightness(1.12); }
+.tw-v2 .tw-floor--tilt { box-shadow: inset 0 0 0 2px rgba(224, 72, 72, 0.85); }
+.tw2-roof { position: absolute; left: 50%; width: 160px; margin-left: -80px; background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated; transition: bottom .55s cubic-bezier(.3,.7,.4,1); pointer-events: none; }
+.tw-v2 .tw-ground { background-color: #6DB24C; border-top: 0; background-size: 256px 32px; background-repeat: repeat-x; background-position: 0 0; image-rendering: pixelated; box-shadow: inset 0 32px 0 transparent, inset 0 -14px 0 #8B6A43; }
+.tw-v2 .tw-city { bottom: 46px; gap: 0 2px; }
+.tw-v2 .tw-city--l { right: calc(50% + 84px); }
+.tw-v2 .tw-city--r { left: calc(50% + 84px); }
+.tw-v2 .tw-city img { display: block; image-rendering: pixelated; }
+.tw-v2 .tw-crane-arm { border-radius: 0; background: repeating-linear-gradient(90deg, #F5C542 0 12px, var(--tw2-ink) 12px 16px); box-shadow: 0 2px 0 var(--tw2-ink); }
+.tw-v2 .tw-crane-arm::before { border-radius: 0; background: var(--tw2-ink); }
+.tw-v2 .tw-crane-rope { background: var(--tw2-ink); }
+.tw-v2 .tw2-block { left: -40px; bottom: -16px; width: 80px; height: 16px; border-radius: 0; background-size: 100% 100%; image-rendering: pixelated; }
+.tw-v2 .tw-banner { border-radius: 4px; border-color: var(--tw2-ink); box-shadow: 4px 4px 0 var(--tw2-ink); }
+/* The card reads like a site clipboard: square, inked, hard shadow. */
+.tw-v2 .tw-card { background: #FFF7E9; border: 3px solid var(--tw2-ink); border-radius: 6px; box-shadow: 5px 5px 0 var(--tw2-ink); }
+.tw-v2 .tw-card--hz { border-color: #C0392B; box-shadow: 5px 5px 0 #7A1E14; }
+.tw-v2 .tw-card--gold { border-color: #B8860B; box-shadow: 5px 5px 0 #7A5A00; }
+.tw-v2 .tw-opt { border: 2px solid var(--tw2-ink); border-radius: 4px; box-shadow: 0 3px 0 var(--tw2-ink); }
+.tw-v2 .tw-opt:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 0 var(--tw2-ink); }
+.tw-v2 .tw-opt:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--tw2-ink); }
+.tw-v2 .tw-hint-btn { border-radius: 4px; }
+.tw-v2 .tw-hz-note, .tw-v2 .tw-tilt-note, .tw-v2 .tw-fix-note, .tw-v2 .tw-gold-note { border-radius: 0; border-left: 4px solid currentColor; }
+.tw2-clock { display: inline-block; min-width: 4.2em; color: #C0392B; font-variant-numeric: tabular-nums; }
+.tw2-clock.low { animation: tw2Blink .5s steps(2) infinite; }
+@keyframes tw2Blink { 50% { opacity: 0.3; } }
+.tw2-hz .tw2-hz-img { width: 64px; height: 64px; filter: drop-shadow(0 0 8px rgba(255, 90, 60, 0.75)); }
+.tw2-ruin img { width: 96px; image-rendering: pixelated; filter: grayscale(0.75) brightness(0.9); rotate: -8deg; }
+/* The storm: dark sky, slanted rain, a swaying tower and a tornado edging closer. */
+.tw-v2 .tw-scene.tw-stormy::before {
+  content: ''; position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  background: repeating-linear-gradient(105deg, rgba(210, 225, 255, 0.55) 0 1px, transparent 1px 13px), linear-gradient(rgba(28, 34, 58, 0.5), rgba(28, 34, 58, 0.22));
+  background-size: 64px 64px, 100% 100%; animation: tw2Rain .35s linear infinite;
+}
+@keyframes tw2Rain { to { background-position: -14px 64px, 0 0; } }
+.tw-v2 .tw-scene.tw-stormy .tw-stack, .tw-v2 .tw-scene.tw-stormy .tw2-roof { animation: tw2Sway 1.4s ease-in-out infinite; }
+@keyframes tw2Sway { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+.tw-hz--storm { left: calc(2% + var(--p) * 24%); top: 30%; }
+.tw2-tornado { display: flex; flex-direction: column; align-items: center; animation: tw2Twist .45s ease-in-out infinite alternate; }
+.tw2-tornado i { display: block; height: 10px; margin-top: -3px; border: 2px solid var(--tw2-ink); border-radius: 50%; background: #9AA6BC; }
+.tw2-tornado i:nth-child(1) { width: 78px; } .tw2-tornado i:nth-child(2) { width: 66px; translate: 4px 0; } .tw2-tornado i:nth-child(3) { width: 54px; translate: -3px 0; }
+.tw2-tornado i:nth-child(4) { width: 42px; translate: 5px 0; } .tw2-tornado i:nth-child(5) { width: 32px; translate: 0 0; } .tw2-tornado i:nth-child(6) { width: 22px; translate: 4px 0; }
+.tw2-tornado i:nth-child(7) { width: 12px; translate: 1px 0; }
+@keyframes tw2Twist { from { transform: skewX(-8deg); } to { transform: skewX(8deg); } }
+.tw-floor.tw-blown { animation: tw2Blown 1s ease-in forwards; z-index: 2; }
+@keyframes tw2Blown { 30% { transform: translate(-24px, -18px) rotate(-12deg); } to { transform: translate(-320px, -150px) rotate(-210deg); opacity: 0; } }
+@media (max-width: 760px) {
+  .tw-v2 .tw-city--l { right: calc(50% + 82px); }
+  .tw-v2 .tw-city--r { left: calc(50% + 82px); }
+  .tw2-trial { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tw-v2 .tw-scene.tw-stormy::before, .tw-v2 .tw-scene.tw-stormy .tw-stack, .tw-v2 .tw-scene.tw-stormy .tw2-roof, .tw2-tornado { animation: none; }
+}
+
 /* ─── TINTINMON (thử nghiệm) ─────────────────────────────────────────────── */
 .game-card--ttm { border-color: #F2B233; background: linear-gradient(160deg, #FFF8E1, #FFFFFF 60%); }
 .lv-wrap.ttm { max-width: 980px; }
