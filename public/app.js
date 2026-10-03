@@ -18334,7 +18334,7 @@ const TW_HAZARDS = [
 function twHzLossText(hz) {
   const L = hz.loss || { floors: TW_HAZARD_LOSS };
   if (L.tilt) return `tháp bị lệch thêm ${L.tilt} tầng`;
-  return `mất ${L.floors} tầng${L.life ? ' và 1 mạng' : ''}`;
+  return `mất ${L.floors} tầng${L.life ? ' và 1 mạng' : ''}${L.hints ? ` và ${L.hints} gợi ý` : ''}`;
 }
 const twIsTilt = f => typeof f === 'string' && f.startsWith('~');
 const twPlate = f => (twIsTilt(f) ? f.slice(1) : f);
@@ -18403,8 +18403,55 @@ function tw2Heart() {
   rows.forEach((r, j) => [...r].forEach((ch, i) => { if (pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } }));
   return (TW2_HEART = c.toDataURL());
 }
-// Hazards that have a Kenney picture show it; the rest keep their icon.
-const TW2_HZ_ART = { meteor: 'meteor1', ufo: 'alien', bolt: 'pw_x2', dragon: 'boss_dragon', bomb: 'pw_bomb' };
+// The trial's hazards: the old set without the twister (the storm does
+// that job), plus a meteor shower and a gang that steals hints.
+const TW2_HAZARDS = [
+  ...TW_HAZARDS.filter(h => h.id !== 'twister'),
+  { id: 'shower', icon: '☄️', name: 'Mưa thiên thạch', come: 'Mưa thiên thạch trút xuống!', win: 'Bắn rụng cả cơn mưa thiên thạch!', lose: 'Thiên thạch dội trúng tháp!', loss: { floors: 3 } },
+  { id: 'robber', icon: '💰', name: 'Băng cướp', come: 'Băng cướp leo lên khuân đồ!', win: 'Tóm gọn băng cướp!', lose: 'Băng cướp ôm đồ chạy mất!', loss: { floors: 1, hints: 2 } },
+];
+// Hazards as pixel sprites, inked like the Tiny Town bricks.
+const TW2_PAL = { K: '#2A1E2E', W: '#FFFFFF', G: '#8A8F9C', D: '#5E6370', L: '#C9CED8', O: '#F08A24', Y: '#FFD23F', R: '#D9452B', S: '#F2C7A0', B: '#3B4A7A', H: '#4A3A2E', M: '#26262E', C: '#7FD6F5', N: '#8B5A2B', T: '#C9A66B' };
+const TW2_SPR = {
+  meteor: ['.........YO.', '.......YYOO.', '.....OYYOO..', '...KKKKOO...', '..KGGGGK....', '.KGLGGDGK...', '.KGGGGGGK...', '.KGDGGLGK...', '.KGGGGGGK...', '..KGGDGK....', '...KKKK.....'],
+  bandit: ['...KKKK...', '..KHHHHK..', '.KHHHHHHK.', '.KMMMMMMK.', '.KMWMMWMK.', '.KSSSSSSK.', '..KSSSSK..', '.KRRRRRRK.', 'KSKRRRRKSK', 'KSKRRRRKSK', '.KKBBBBKK.', '..KBKKBK..', '..KBK.KBK.', '..KK...KK.'],
+  sack: ['...KKK...', '..KTKTK..', '...KTK...', '..KTTTK..', '.KTTYTTK.', 'KTTYYYTTK', 'KTTTYTTTK', 'KTTTTTTTK', '.KKKKKKK.'],
+  bomb: ['.......Y.O', '......OYO.', '.....K.Y..', '....K.....', '..KKKK....', '.KMMMMK...', 'KMWMMMMK..', 'KMMMMMMK..', 'KMMMMMMK..', '.KMMMMK...', '..KKKK....'],
+  bolt: ['....KKKKK.....', '..KKLLLLLKK...', '.KLLWWLLLLLK..', 'KLLLLLLLLLLLK.', 'KGGGGGGGGGGGGK', '.KKKKYYKKKKKK.', '.....YY.......', '....YY........', '...YYYYY......', '.....YY.......', '....YY........', '....Y.........'],
+  ufo: ['.....KKKK.....', '....KCCWCK....', '...KCCCCWCK...', '.KKKKKKKKKKKK.', 'KLLYLLYLLYLLLK', '.KKKKKKKKKKKK.', '....KYYYYK....', '...Y.Y..Y.Y...'],
+  dragon: ['...........KK...', '..........KRRK..', '.........KRWKRK.', '.KK.....KRRRRRRK', 'KRRK...KRRRKKKK.', 'KRYRK.KRRK..OY..', '.KRYRKRRRK...O..', '..KRRRRRRK......', '...KRRRRRRK.....', '...KRRKKRRK.....', '...KRK..KRK.....', '...KK....KK.....'],
+  crack: ['K..............K', '.K.....K......K.', '..K...K.K....K..', '...K.K...K..K...', '....K.....KK....'],
+  termite: ['.K....K.', '..K..K..', '.KNNNNK.', 'KNWNNNNK', '.KNNNNK.', 'K.K..K.K'],
+};
+const TW2_SPR_URL = {};
+function tw2Spr(name, scale) {
+  const rows = TW2_SPR[name];
+  const w = Math.max(...rows.map(r => r.length)), h = rows.length;
+  if (!TW2_SPR_URL[name]) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const x = c.getContext('2d');
+    rows.forEach((r, j) => [...r].forEach((ch, i) => { if (TW2_PAL[ch]) { x.fillStyle = TW2_PAL[ch]; x.fillRect(i, j, 1, 1); } }));
+    TW2_SPR_URL[name] = c.toDataURL();
+  }
+  return `<img class="tw2-spr tw2-spr--${name}" src="${TW2_SPR_URL[name]}" style="width:${w * scale}px;height:${h * scale}px" alt="" draggable="false">`;
+}
+function tw2HazMarkup(hz) {
+  const left = Math.max(0, TW_HAZARD_QS - hz.n);
+  const art = {
+    meteor: () => tw2Spr('meteor', 6),
+    shower: () => `<span class="tw2-shower">${tw2Spr('meteor', 4).repeat(Math.max(1, left))}</span>`,
+    bandit: () => `<span class="tw2-gang">${tw2Spr('bandit', 4)}${tw2Spr('bandit', 4)}</span>`,
+    robber: () => `<span class="tw2-gang">${tw2Spr('bandit', 4)}${tw2Spr('sack', 4)}</span>`,
+    bomb: () => tw2Spr('bomb', 5),
+    bolt: () => tw2Spr('bolt', 5),
+    ufo: () => tw2Spr('ufo', 5),
+    dragon: () => tw2Spr('dragon', 5),
+    quake: () => tw2Spr('crack', 8),
+    termite: () => `<span class="tw2-gang">${tw2Spr('termite', 4).repeat(3)}</span>`,
+  }[hz.id];
+  return `${art ? art() : ''}<span class="tw-hz-tag">${hz.wrong ? `sai ${hz.wrong} · ` : ''}còn ${left} câu</span>`;
+}
 
 function tw2RenderScene(animateTop) {
   const g = _tw;
@@ -19200,7 +19247,8 @@ function twResolve(ok, extra) {
 /* ── Hazards ── */
 function twHazardStart() {
   const g = _tw;
-  const h = TW_HAZARDS[Math.floor(Math.random() * TW_HAZARDS.length)];
+  const list = g.v2 ? TW2_HAZARDS : TW_HAZARDS;
+  const h = list[Math.floor(Math.random() * list.length)];
   g.hz = { ...h, n: 0, right: 0, wrong: 0 };
   tsSfx('boss');
   jBuzz([60, 40, 60]);
@@ -19216,7 +19264,7 @@ function twHazardScene(end) {
   let el = document.getElementById('tw-hz');
   const hz = g.hz;
   if (end) {
-    if (el) { el.classList.add(end === 'lose' ? 'tw-hz--hit' : 'tw-hz--gone'); el.id = ''; setTimeout(() => el.remove(), 900); }
+    if (el) { el.classList.add(end === 'run' ? 'tw2-run' : end === 'lose' ? 'tw-hz--hit' : 'tw-hz--gone'); el.id = ''; setTimeout(() => el.remove(), 900); }
     return;
   }
   if (!hz) return;
@@ -19232,7 +19280,7 @@ function twHazardScene(end) {
     const tag = hz.storm && el.querySelector('.tw2-tornado') && el.querySelector('.tw-hz-tag');
     if (tag) { tag.textContent = `đúng ${hz.right}/${hz.need} · ${Math.max(0, Math.ceil(hz.left))} giây`; return; }
     el.innerHTML = hz.storm ? tw2StormMarkup(hz)
-      : `${TW2_HZ_ART[hz.id] ? tsImg(TW2_HZ_ART[hz.id], 'tw2-hz-img') : `<span class="tw-hz-icon">${hz.id === 'bandit' ? '🥷🥷' : hz.id === 'termite' ? '🐜🐜🐜' : hz.icon}</span>`}<span class="tw-hz-tag">${hz.wrong ? `sai ${hz.wrong} · ` : ''}còn ${Math.max(0, TW_HAZARD_QS - hz.n)} câu</span>`;
+      : tw2HazMarkup(hz);
     return;
   }
   el.style.setProperty('--p', (hz.n / TW_HAZARD_QS).toFixed(2));
@@ -19278,7 +19326,7 @@ function twHazardEnd() {
     document.getElementById('tw-scene')?.classList.remove('tw-stormy');
     if (!lost) g.stormLv = Math.floor(g.floors.length / TW2_STORM_EVERY);
   }
-  twHazardScene(lost ? 'lose' : 'win');
+  twHazardScene(lost ? (g.v2 && (hz.id === 'bandit' || hz.id === 'robber') ? 'run' : 'lose') : 'win');
   if (lost) {
     const L = hz.loss || { floors: TW_HAZARD_LOSS };
     const stack = document.getElementById('tw-stack');
@@ -19299,11 +19347,12 @@ function twHazardEnd() {
       text = `${hz.lose} ${t ? `Lệch thêm ${t} tầng (${twTilts(g)}/${TW_TILT_MAX}).` : 'May mà không còn tầng nào để lệch.'}`;
     } else {
       const n = Math.min(L.floors, g.floors.length);
-      const cls = hz.storm ? 'tw-blown' : hz.id === 'ufo' ? 'tw-steal' : hz.id === 'dragon' ? 'tw-burn' : 'tw-fall';
+      const cls = hz.storm ? 'tw-blown' : hz.id === 'ufo' ? 'tw-steal' : hz.id === 'dragon' ? 'tw-burn' : g.v2 && (hz.id === 'bandit' || hz.id === 'robber') ? 'tw2-carry' : 'tw-fall';
       if (stack) [...stack.children].slice(-n).forEach((f, i) => { f.style.animationDelay = (i * 0.08) + 's'; f.classList.add(cls); });
       g.floors.splice(g.floors.length - n, n);
       text = `${hz.lose} Mất ${n} tầng`;
       if (L.life && g.lives > 1) { g.lives--; text += ' và 1 mạng'; }
+      if (L.hints) { const k = Math.min(L.hints, g.hints); g.hints -= k; text += k ? ` và ${k} gợi ý` : ', may mà không còn gợi ý nào để cướp'; }
       text += '.';
       setTimeout(() => { if (_tw === g && !g.collapsed) twRenderScene(false); }, 800);
     }

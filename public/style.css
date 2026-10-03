@@ -9546,7 +9546,22 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw2-clock { display: inline-block; min-width: 4.2em; color: #C0392B; font-variant-numeric: tabular-nums; }
 .tw2-clock.low { animation: tw2Blink .5s steps(2) infinite; }
 @keyframes tw2Blink { 50% { opacity: 0.3; } }
-.tw2-hz .tw2-hz-img { width: 64px; height: 64px; filter: drop-shadow(0 0 8px rgba(255, 90, 60, 0.75)); }
+.tw2-spr { display: block; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(42, 30, 46, 0.35)); }
+.tw2-gang, .tw2-shower { display: flex; align-items: flex-end; gap: 4px; }
+.tw2-shower .tw2-spr:nth-child(2) { margin-top: 26px; } .tw2-shower .tw2-spr:nth-child(3) { margin-top: -18px; }
+.tw2-hz .tw2-gang .tw2-spr { animation: twHzWalk 0.35s steps(2) infinite; }
+.tw2-hz .tw2-gang .tw2-spr:nth-child(2) { animation-delay: .17s; }
+.tw2-hz.tw-hz--bomb .tw2-spr { animation: twHzTick 0.5s ease-in-out infinite; }
+.tw2-hz.tw-hz--bolt .tw2-spr { animation: tw2Flicker 1.4s steps(1) infinite; }
+@keyframes tw2Flicker { 0%, 70% { filter: none; } 75% { filter: brightness(1.8); } 80% { filter: none; } 85% { filter: brightness(1.8); } }
+.tw-hz--shower { right: calc(5% + var(--p) * 20%); top: calc(10% + var(--p) * 20%); animation: twHzWobble 0.7s ease-in-out infinite; }
+.tw-hz--robber { left: calc(4% + var(--p) * 22%); bottom: 50px; }
+.tw2-hz.tw-hz--bandit, .tw2-hz.tw-hz--robber, .tw2-hz.tw-hz--termite { animation: none; }
+.tw2-hz.tw-hz--quake { margin-left: -64px; }
+.tw2-run { animation: tw2Run .9s ease-in forwards !important; }
+@keyframes tw2Run { 20% { transform: translateY(-10px); } to { transform: translateX(-340px); opacity: 0; } }
+.tw-floor.tw2-carry { animation: tw2Carry .9s ease-in forwards; }
+@keyframes tw2Carry { 25% { transform: translateY(-14px); } to { transform: translate(-340px, -20px); opacity: 0; } }
 .tw2-ruin img { width: 96px; image-rendering: pixelated; filter: grayscale(0.75) brightness(0.9); rotate: -8deg; }
 /* The storm: dark sky, slanted rain, a swaying tower and a tornado edging closer. */
 .tw-v2 .tw-scene.tw-stormy::before {
