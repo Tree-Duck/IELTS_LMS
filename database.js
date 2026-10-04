@@ -947,6 +947,46 @@ const db = {
     return (load().classes || []).find(c => c.id === id) || null;
   },
 
+  // ─── Bảng giảng Task 1: a teacher's step-through lessons over one chart ───
+  // Ids are random so a shared link cannot be guessed from another one.
+  t1LessonList(ownerId) {
+    const all = load().t1_lessons || [];
+    return ownerId == null ? all : all.filter(l => l.owner_id === ownerId);
+  },
+
+  t1LessonGet(id) {
+    return (load().t1_lessons || []).find(l => l.id === id) || null;
+  },
+
+  t1LessonInsert(ownerId, { title, source, steps }) {
+    const data = load();
+    if (!data.t1_lessons) data.t1_lessons = [];
+    const now = new Date().toISOString();
+    const lesson = { id: 't1' + require('crypto').randomBytes(6).toString('hex'), owner_id: ownerId, title, source, steps, created_at: now, updated_at: now };
+    data.t1_lessons.push(lesson);
+    save(data);
+    return lesson;
+  },
+
+  t1LessonUpdate(id, fields) {
+    const data = load();
+    const l = (data.t1_lessons || []).find(x => x.id === id);
+    if (!l) return null;
+    for (const k of ['title', 'source', 'steps']) if (k in fields) l[k] = fields[k];
+    l.updated_at = new Date().toISOString();
+    save(data);
+    return l;
+  },
+
+  t1LessonDelete(id) {
+    const data = load();
+    const before = (data.t1_lessons || []).length;
+    data.t1_lessons = (data.t1_lessons || []).filter(l => l.id !== id);
+    if (data.t1_lessons.length === before) return false;
+    save(data);
+    return true;
+  },
+
   getClassesByTeacher(teacher_id) {
     return (load().classes || []).filter(c => c.teacher_id === teacher_id);
   },
