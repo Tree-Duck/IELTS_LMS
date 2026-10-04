@@ -3394,6 +3394,162 @@ Rules:
   }
 });
 
+// ─── Bảng giảng Task 1 ────────────────────────────────────────────────────────
+// A teacher picks a Task 1 chart, writes steps over it (highlights, marks, a
+// model sentence each) and shares a read-only link with students. Everything
+// a teacher types is checked here: type, length, and coordinates as 0–1
+// fractions of the chart frame.
+const T1L_KINDS = new Set(['sample', 'map', 'process', 'custom']);
+const T1L_CHARTS = new Set(['line', 'bar', 'pie', 'table']);
+const T1L_COLORS = new Set(['red', 'orange', 'blue', 'green', 'purple']);
+const T1L_MARKS = new Set(['ring', 'box', 'arrow', 'text']);
+const T1L_MAX_STEPS = 40, T1L_MAX_MARKS = 30;
+class T1LessonError extends Error {}
+function t1lStr(v, max, what, required) {
+  if (v == null || v === '') { if (required) throw new T1LessonError(`${what} is required`); return ''; }
+  if (typeof v !== 'string') throw new T1LessonError(`${what} must be text`);
+  const s = v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim();
+  if ([...s].length > max) throw new T1LessonError(`${what} is longer than ${max} characters`);
+  if (required && !s) throw new T1LessonError(`${what} is required`);
+  return s;
+}
+function t1lFrac(v, what) {
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 1) throw new T1LessonError(`${what} must be a number from 0 to 1`);
+  return Math.round(v * 10000) / 10000;
+}
+function t1lArr(v, max, what) {
+  if (v == null) return [];
+  if (!Array.isArray(v)) throw new T1LessonError(`${what} must be a list`);
+  if (v.length > max) throw new T1LessonError(`At most ${max} ${what}`);
+  return v;
+}
+function t1lObj(v, what) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) throw new T1LessonError(`${what} must be an object`);
+  return v;
+}
+function t1lCustom(d) {
+  t1lObj(d, 'Chart data');
+  const chart = typeof d.chart === 'string' ? d.chart : '';
+  if (!T1L_CHARTS.has(chart)) throw new T1LessonError('Chart type must be line, bar, pie or table');
+  const cols = t1lArr(d.cols, 12, 'columns').map((c, i) => t1lStr(c, 40, `Column ${i + 1}`, true));
+  if (!cols.length) throw new T1LessonError('At least one column');
+  const rows = t1lArr(d.rows, 12, 'rows').map((r, i) => {
+    t1lObj(r, `Row ${i + 1}`);
+    const vals = t1lArr(r.vals, 12, 'values').map(v => {
+      if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 1e9) throw new T1LessonError(`Row ${i + 1} values must be numbers from 0 to 1,000,000,000`);
+      return v;
+    });
+    if (vals.length !== cols.length) throw new T1LessonError(`Row ${i + 1} needs one value per column`);
+    return { name: t1lStr(r.name, 40, `Row ${i + 1} name`, true), vals };
+  });
+  if (!rows.length) throw new T1LessonError('At least one row');
+  return { chart, title: t1lStr(d.title, 120, 'Chart title'), unit: t1lStr(d.unit, 40, 'Unit'), axis: t1lStr(d.axis, 60, 'Axis label'), cols, rows };
+}
+function t1lBox(m, what) {
+  const x = t1lFrac(m.x, what + ' x'), y = t1lFrac(m.y, what + ' y'), w = t1lFrac(m.w, what + ' width'), h = t1lFrac(m.h, what + ' height');
+  if (x + w > 1.0001 || y + h > 1.0001) throw new T1LessonError(`${what} goes outside the chart`);
+  return { x, y, w, h };
+}
+function t1lStep(s, i) {
+  const what = `Step ${i + 1}`;
+  t1lObj(s, what);
+  const spots = t1lArr(s.spots, T1L_MAX_MARKS, 'highlights per step').map((m, k) => {
+    t1lObj(m, `${what} highlight ${k + 1}`);
+    if (m.shape !== 'rect' && m.shape !== 'ellipse') throw new T1LessonError(`${what} highlight shape must be rect or ellipse`);
+    return { shape: m.shape, ...t1lBox(m, `${what} highlight ${k + 1}`) };
+  });
+  const marks = t1lArr(s.marks, T1L_MAX_MARKS, 'marks per step').map((m, k) => {
+    const mw = `${what} mark ${k + 1}`;
+    t1lObj(m, mw);
+    if (!T1L_MARKS.has(m.t)) throw new T1LessonError(`${mw} has an unknown kind`);
+    const c = T1L_COLORS.has(m.c) ? m.c : 'red';
+    if (m.t === 'arrow') return { t: 'arrow', c, x1: t1lFrac(m.x1, mw), y1: t1lFrac(m.y1, mw), x2: t1lFrac(m.x2, mw), y2: t1lFrac(m.y2, mw) };
+    if (m.t === 'text') return { t: 'text', c, x: t1lFrac(m.x, mw), y: t1lFrac(m.y, mw), text: t1lStr(m.text, 80, `${mw} text`, true) };
+    return { t: m.t, c, ...t1lBox(m, mw) };
+  });
+  return {
+    title: t1lStr(s.title, 120, `${what} title`),
+    sentence: t1lStr(s.sentence, 400, `${what} model sentence`),
+    note: t1lStr(s.note, 400, `${what} note`),
+    spots, marks,
+  };
+}
+// Returns the cleaned fields present in the body; throws T1LessonError.
+function t1lClean(body, isNew) {
+  t1lObj(body, 'Lesson');
+  if (JSON.stringify(body).length > 300000) throw new T1LessonError('Lesson is too large');
+  const out = {};
+  if (isNew || 'title' in body) out.title = t1lStr(body.title, 120, 'Title', true);
+  if (isNew || 'source' in body) {
+    const src = t1lObj(body.source, 'Source');
+    if (!T1L_KINDS.has(src.kind)) throw new T1LessonError('Source kind must be sample, map, process or custom');
+    if (src.kind === 'custom') out.source = { kind: 'custom', ref: null, data: t1lCustom(src.data) };
+    else {
+      if (typeof src.ref !== 'string' || !/^[a-z0-9-]{1,40}$/.test(src.ref)) throw new T1LessonError('Source ref is not valid');
+      out.source = { kind: src.kind, ref: src.ref, data: null };
+    }
+  }
+  if (isNew || 'steps' in body) {
+    if (!Array.isArray(body.steps)) throw new T1LessonError('Steps must be a list');
+    out.steps = t1lArr(body.steps, T1L_MAX_STEPS, 'steps').map(t1lStep);
+  }
+  return out;
+}
+function t1lSummary(l) {
+  const owner = db.getUserById(l.owner_id);
+  return { id: l.id, title: l.title, source: { kind: l.source.kind, ref: l.source.ref }, step_count: (l.steps || []).length,
+    owner_name: owner ? owner.name : '', created_at: l.created_at, updated_at: l.updated_at };
+}
+function t1lOwnedOr403(req, res) {
+  const l = db.t1LessonGet(req.params.id);
+  if (!l) { res.status(404).json({ error: 'Lesson not found' }); return null; }
+  if (req.user.role !== 'admin' && l.owner_id !== req.user.id) { res.status(403).json({ error: 'Only the lesson owner can change it' }); return null; }
+  return l;
+}
+
+app.get('/api/t1-lessons', authenticate, (req, res) => {
+  const list = req.user.role === 'admin' ? db.t1LessonList(null) : db.t1LessonList(req.user.id);
+  res.json(list.map(t1lSummary).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))));
+});
+
+app.post('/api/t1-lessons', authenticate, teacherOrAdmin, (req, res) => {
+  try {
+    const f = t1lClean(req.body, true);
+    if (db.t1LessonList(req.user.id).length >= 500) return res.status(400).json({ error: 'Too many lessons' });
+    res.json(db.t1LessonInsert(req.user.id, f));
+  } catch (e) {
+    if (e instanceof T1LessonError) return res.status(400).json({ error: e.message });
+    throw e;
+  }
+});
+
+app.put('/api/t1-lessons/:id', authenticate, teacherOrAdmin, (req, res) => {
+  const l = t1lOwnedOr403(req, res);
+  if (!l) return;
+  try {
+    res.json(db.t1LessonUpdate(l.id, t1lClean(req.body, false)));
+  } catch (e) {
+    if (e instanceof T1LessonError) return res.status(400).json({ error: e.message });
+    throw e;
+  }
+});
+
+app.delete('/api/t1-lessons/:id', authenticate, teacherOrAdmin, (req, res) => {
+  const l = t1lOwnedOr403(req, res);
+  if (!l) return;
+  db.t1LessonDelete(l.id);
+  res.json({ success: true });
+});
+
+// Read-only, for anyone signed in: this is what a shared link opens.
+app.get('/api/t1-lessons/:id/view', authenticate, (req, res) => {
+  const l = db.t1LessonGet(req.params.id);
+  if (!l) return res.status(404).json({ error: 'Lesson not found' });
+  const owner = db.getUserById(l.owner_id);
+  res.json({ id: l.id, title: l.title, source: l.source, steps: l.steps, owner_name: owner ? owner.name : '',
+    can_edit: req.user.role === 'admin' || (req.user.role === 'teacher' && l.owner_id === req.user.id), updated_at: l.updated_at });
+});
+
 // ─── Classes & Attendance ─────────────────────────────────────────────────────
 
 // Create class

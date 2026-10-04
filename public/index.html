@@ -292,6 +292,7 @@
             <button class="tnav-nav-link" data-view="admin-materials" onclick="showView('admin-materials')">📚 Học liệu</button>
             <button class="tnav-nav-link" data-view="admin-assignments" onclick="showView('admin-assignments')">📋 Giao bài tập</button>
             <button class="tnav-nav-link" data-view="classes" onclick="showView('classes')">🏫 Lớp học</button>
+            <button class="tnav-nav-link" data-view="t1-teach" onclick="showView('t1-teach')">📊 Bảng giảng Task 1</button>
             <button class="tnav-nav-link" onclick="window.open('/whiteboard.html','_blank')">🖊️ Bảng trắng</button>
           </div>
         </div>
@@ -2468,6 +2469,10 @@
         <div id="lesson-vocab-root"></div>
       </div>
 
+      <!-- Bảng giảng Task 1: teacher step-through lessons, read-only for students -->
+      <div id="view-t1-teach" class="view hidden">
+        <div id="t1t-root"></div>
+      </div>
       <!-- Task 1 · Đọc biểu đồ -->
       <div id="view-task1-games" class="view hidden">
         <div id="task1-games-root"></div>

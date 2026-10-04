@@ -1375,7 +1375,8 @@ async function showApp() {
 
   _buildMobileDrawer();
   checkAiStatus();
-  showView('home');
+  // A shared Bảng giảng link (?t1lesson=) opens that lesson instead of home.
+  if (!t1tTakePending()) showView('home');
 }
 
 function isOnSubmitWithContent() {
@@ -1425,6 +1426,7 @@ function showView(name) {
   if (name !== 'submit' && isOnSubmitWithContent()) {
     if (!confirm('Ta đang viết dở một bài. Rời khỏi đây mà chưa lưu nháp?')) return;
   }
+  if (t1tHasUnsaved() && !confirm('Bài giảng Task 1 chưa lưu. Rời đi mà không lưu?')) return;
   // Track navigation history so the Back button returns to the real previous view
   if (!_goingBack && _currentView && _currentView !== name && !_NO_BACK.has(_currentView)) {
     _viewHistory.push(_currentView);
@@ -1460,6 +1462,7 @@ function showView(name) {
   else if (name === 'admin-materials') loadAdminMaterials();
   else if (name === 'admin-assignments') loadAdminAssignments();
   else if (name === 'grade-queue') loadGradeQueue();
+  else if (name === 't1-teach') t1tOpen();
   else if (name === 'submissions-archive') loadSubmissionsArchive();
   else if (name === 'admin-student-history') { /* loaded by viewStudentHistory() */ }
   else if (name === 'homework') loadHomework();
@@ -31148,6 +31151,856 @@ function t1hDraw() {
 }
 
 // TASK1 END
+// T1TEACH BEGIN
+/* ═══════════════════════════════════════════════════════════════════════════
+   BẢNG GIẢNG TASK 1 — a teacher picks one of the Task 1 charts above (or types
+   in a line, bar, pie or table), writes steps over it, presents them in class
+   with ←/→, and shares a read-only link (/?t1lesson=<id>) with students.
+   Each step dims everything outside its highlights and adds rings, boxes,
+   arrows and labels, with one model sentence. The charts are the ones the
+   Task 1 games draw; marks sit in a shared overlay, every coordinate a 0–1
+   fraction of a fixed 640px frame that is scaled as a whole, so a mark stays
+   on its bar or slice at any zoom and on any screen.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const T1T_W = 640;
+const T1T_MAX_STEPS = 40, T1T_MAX_MARKS = 30;
+const T1T_COLORS = { red: '#E5533D', orange: '#F08A24', blue: '#3E6FD8', green: '#1F8A4C', purple: '#8E44AD' };
+const T1T_LINE_COLORS = [...T1_COLORS, '#8E44AD', '#7E9C90', '#F08A24', '#C2185B'];
+const T1T_TOOLS = [
+  ['spot', '🔦 Vùng sáng', 'Kéo để chọn vùng cần bàn. Mọi chỗ khác bị làm mờ.'],
+  ['ring', '⭕ Khoanh', 'Kéo để khoanh một elip.'],
+  ['arrow', '➜ Mũi tên', 'Kéo từ gốc tới đầu mũi tên.'],
+  ['box', '▭ Khung', 'Kéo để vẽ khung chữ nhật.'],
+  ['text', '🔤 Nhãn chữ', 'Gõ chữ ở ô bên cạnh, rồi bấm vào biểu đồ để đặt nhãn.'],
+];
+const T1T_KIND_LABEL = { sample: 'Bài mẫu', map: 'Bản đồ', process: 'Quy trình', custom: 'Tự nhập' };
+const T1T_CHART_LABEL = { line: 'Đường', bar: 'Cột', pie: 'Tròn', table: 'Bảng' };
+const T1T_GROUPS = ['Đường', 'Cột', 'Tròn', 'Bảng', 'Kết hợp', 'Bản đồ', 'Quy trình', 'Chu trình'];
+
+let _t1t = null;            // the screen in use: { mode, lesson, cur, ... }
+let _t1tRoute = null;       // set before showView('t1-teach') to open a lesson to view
+let _t1tPending = null;     // ?t1lesson=<id> waiting for sign-in
+try { const p = new URLSearchParams(location.search).get('t1lesson'); if (p && /^t1[0-9a-f]{12}$/.test(p)) _t1tPending = p; } catch (e) {}
+
+const t1tRoot = () => document.getElementById('t1t-root');
+const t1tCanEdit = () => !!currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin');
+const t1tClone = o => JSON.parse(JSON.stringify(o));
+const t1tReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Opened from showApp(): a shared link goes straight to the lesson.
+function t1tTakePending() {
+  if (!_t1tPending || !currentUser || !token) return false;
+  _t1tRoute = { view: _t1tPending };
+  _t1tPending = null;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  showView('t1-teach');
+  return true;
+}
+
+/* ── Charts: where a lesson's chart and model essay come from ── */
+function t1tGroupOf(id) {
+  return /^line-/.test(id) ? 'Đường' : /^(bar|cmp)-/.test(id) ? 'Cột' : /^pie-/.test(id) ? 'Tròn' : /^table-/.test(id) ? 'Bảng'
+    : /^mix-/.test(id) ? 'Kết hợp' : /^map-/.test(id) ? 'Bản đồ' : /^proc-/.test(id) ? 'Quy trình' : /^cycle-/.test(id) ? 'Chu trình' : 'Khác';
+}
+function t1tSourceOf(sample) {
+  if (/^map-/.test(sample.id)) { const t = T1M_TOWNS.find(x => x.sample === sample.id); if (t) return { kind: 'map', ref: t.id, data: null }; }
+  if (/^proc-/.test(sample.id)) { const p = T1P_PROCS.find(x => x.sample === sample.id); if (p) return { kind: 'process', ref: p.id, data: null }; }
+  return { kind: 'sample', ref: sample.id, data: null };
+}
+// Pies start at a random angle; a lesson's marks need the same picture every time.
+function t1tSteady(fn) {
+  const r = Math.random;
+  Math.random = () => 0;
+  try { return fn(); } finally { Math.random = r; }
+}
+function t1tResolve(src) {
+  try {
+    if (!src) throw new Error('no source');
+    if (src.kind === 'custom') return { html: t1tCustomHtml(src.data), essay: [], prompt: (src.data && src.data.title) || '', group: T1T_CHART_LABEL[src.data && src.data.chart] || '' };
+    let sample = null, html = '';
+    if (src.kind === 'map') {
+      const t = T1M_TOWNS.find(x => x.id === src.ref);
+      if (!t) throw new Error('no map');
+      html = t1mPair(t.id);
+      sample = T1_SAMPLES.find(s => s.id === t.sample);
+    } else if (src.kind === 'process') {
+      const p = T1P_PROCS.find(x => x.id === src.ref);
+      if (!p) throw new Error('no process');
+      html = t1pDiagram(p.id);
+      sample = T1_SAMPLES.find(s => s.id === p.sample);
+    } else {
+      sample = T1_SAMPLES.find(s => s.id === src.ref);
+      if (!sample) throw new Error('no sample');
+      html = t1tSteady(() => sample.chart());
+    }
+    return { html, essay: (sample && sample.essay) || [], prompt: (sample && sample.prompt) || '', group: sample ? t1tGroupOf(sample.id) : '' };
+  } catch (e) {
+    return { html: '<div class="t1t-missing">Không tìm thấy biểu đồ của bài giảng này.</div>', essay: [], prompt: '', group: '' };
+  }
+}
+// Model essay paragraphs, split into sentences a teacher can pick from.
+function t1tSentences(essay) {
+  return (essay || []).flatMap(p => p.split(/(?<=[.!?])\s+(?=[A-Z0-9"'‘“(])/)).map(s => s.trim()).filter(Boolean);
+}
+
+/* ── Typed-in charts: the Task 1 drawing functions, fed from a small table ── */
+function t1tNiceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p;
+  return 10 * p;
+}
+function t1tScale(rows) {
+  const max = Math.max(0, ...rows.flatMap(r => r.vals));
+  if (!(max > 0)) return { yMax: 1, yStep: 0.2 };
+  const yStep = t1tNiceStep(max / 5);
+  return { yMax: Math.ceil(max / yStep - 1e-9) * yStep, yStep };
+}
+function t1tCustomHtml(d) {
+  if (!d || !Array.isArray(d.rows) || !Array.isArray(d.cols)) throw new Error('bad data');
+  const title = d.title || '', unit = d.unit || '', axis = d.axis || '';
+  const cap = axis && d.chart !== 'table' ? `<div class="t1t-axis-cap">${escapeHtml(axis)}</div>` : '';
+  let html;
+  if (d.chart === 'line') {
+    const { yMax, yStep } = t1tScale(d.rows);
+    // t1LineChart writes x labels as they are, so they are escaped here.
+    html = t1LineChart({ xs: d.cols.map(c => escapeHtml(c)), yMax, yStep, unit, legend: true, title,
+      series: d.rows.map((r, i) => ({ name: r.name, ys: r.vals, color: T1T_LINE_COLORS[i % T1T_LINE_COLORS.length] })) });
+  } else if (d.chart === 'bar') {
+    if (d.rows.length === 1) {
+      html = t1BarChart({ title, unit, rows: d.cols.map((c, i) => ({ name: c, v: d.rows[0].vals[i] })) });
+    } else {
+      const { yMax, yStep } = t1tScale(d.rows);
+      html = t1GroupBars({ title, unit, xs: d.cols.map(c => escapeHtml(c)), yMax, yStep, series: d.rows.slice(0, T1_COLORS.length).map(r => ({ name: r.name, ys: r.vals })) });
+    }
+  } else if (d.chart === 'pie') {
+    html = t1tSteady(() => t1LibPie(title, d.rows.slice(0, 6).map(r => [r.name, r.vals[0]])));
+  } else {
+    html = `<div class="t1-chart">${title ? `<div class="t1-chart-title">${escapeHtml(title)}</div>` : ''}<table class="t1-table"><thead><tr><th>${escapeHtml(axis)}</th>${d.cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr></thead>
+      <tbody>${d.rows.map(r => `<tr><th>${escapeHtml(r.name)}</th>${r.vals.map(v => `<td>${escapeHtml(t1Num(v))}</td>`).join('')}</tr>`).join('')}</tbody></table>${unit ? `<div class="t1-bar-unit">Đơn vị: ${escapeHtml(unit)}</div>` : ''}</div>`;
+  }
+  return `<div class="t1t-custom">${html}${cap}</div>`;
+}
+
+/* ── The overlay: dimming, rings, boxes, arrows, labels ── */
+function t1tOverlaySvg(step, W, H, uid, draft) {
+  const spots = (step && step.spots) || [], marks = (step && step.marks) || [];
+  const px = v => (v * W).toFixed(1), py = v => (v * H).toFixed(1);
+  const fs = Math.round(W * 0.034);
+  let defs = Object.entries(T1T_COLORS).map(([k, c]) => `<marker id="${uid}-ar-${k}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`).join('');
+  const spotShape = (s, attrs) => s.shape === 'ellipse'
+    ? `<ellipse cx="${px(s.x + s.w / 2)}" cy="${py(s.y + s.h / 2)}" rx="${px(s.w / 2)}" ry="${py(s.h / 2)}" ${attrs}/>`
+    : `<rect x="${px(s.x)}" y="${py(s.y)}" width="${px(s.w)}" height="${py(s.h)}" rx="6" ${attrs}/>`;
+  let g = '';
+  const allSpots = draft && draft.t === 'spot' ? spots.concat([draft]) : spots;
+  if (allSpots.length) {
+    defs += `<mask id="${uid}-m" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/>${allSpots.map(s => spotShape(s, 'fill="#000"')).join('')}</mask>`;
+    g += `<rect width="${W}" height="${H}" fill="rgba(10,18,14,0.65)" mask="url(#${uid}-m)"/>`;
+    g += allSpots.map(s => spotShape(s, `fill="none" stroke="rgba(255,255,255,0.95)" stroke-width="2"${s === draft ? ' stroke-dasharray="6 5"' : ''}`)).join('');
+  }
+  const mark = (m, dash) => {
+    const c = T1T_COLORS[m.c] || T1T_COLORS.red, d = dash ? ' stroke-dasharray="8 6"' : '';
+    if (m.t === 'ring') return `<ellipse cx="${px(m.x + m.w / 2)}" cy="${py(m.y + m.h / 2)}" rx="${px(m.w / 2)}" ry="${py(m.h / 2)}" fill="none" stroke="${c}" stroke-width="5"${d}/>`;
+    if (m.t === 'box') return `<rect x="${px(m.x)}" y="${py(m.y)}" width="${px(m.w)}" height="${py(m.h)}" rx="6" fill="none" stroke="${c}" stroke-width="4"${d}/>`;
+    if (m.t === 'arrow') return `<line x1="${px(m.x1)}" y1="${py(m.y1)}" x2="${px(m.x2)}" y2="${py(m.y2)}" stroke="${c}" stroke-width="5" stroke-linecap="round" marker-end="url(#${uid}-ar-${T1T_COLORS[m.c] ? m.c : 'red'})"${d}/>`;
+    if (m.t === 'text') return `<text x="${px(m.x)}" y="${py(m.y)}" font-size="${fs}" font-weight="800" fill="${c}" text-anchor="middle" dominant-baseline="middle" paint-order="stroke" stroke="#fff" stroke-width="${Math.max(4, fs * 0.22).toFixed(1)}" stroke-linejoin="round">${escapeHtml(m.text)}</text>`;
+    return '';
+  };
+  g += marks.map(m => mark(m)).join('');
+  if (draft && draft.t !== 'spot') g += mark(draft, true);
+  return `<svg class="t1t-ov" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${g}</svg>`;
+}
+
+/* ── A stage: the chart in its 640px frame, scaled to fit, overlay on top ── */
+let _t1tStageSeq = 0;
+function t1tStageHtml(html) {
+  return `<div class="t1t-stage"><div class="t1t-sizer"><div class="t1t-scale"><div class="t1t-frame">${html}<div class="t1t-ovwrap"></div></div></div></div></div>`;
+}
+// Mounts a stage inside `host`. get() returns the step to draw.
+// The charts reuse fixed ids (arrow markers); a copy here would capture the
+// games' url(#…) references, or the other way round. Each stage renames its own.
+function t1tUniqIds(html, uid) {
+  const ids = [...new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(m => m[1]))];
+  for (const id of ids) {
+    const esc = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(new RegExp(`(\\sid=")${esc}"`, 'g'), `$1${uid}-${id}"`)
+      .replace(new RegExp(`url\\(#${esc}\\)`, 'g'), `url(#${uid}-${id})`)
+      .replace(new RegExp(`href="#${esc}"`, 'g'), `href="#${uid}-${id}"`);
+  }
+  return html;
+}
+function t1tMountStage(host, html, opts) {
+  const uid = 't1tov' + (++_t1tStageSeq);
+  host.innerHTML = t1tStageHtml(t1tUniqIds(html, uid));
+  const st = { host, stage: host.firstElementChild, uid, zoom: 1, maxH: opts.maxH || null, get: opts.get, draft: null };
+  st.sizer = st.stage.querySelector('.t1t-sizer');
+  st.scale = st.stage.querySelector('.t1t-scale');
+  st.frame = st.stage.querySelector('.t1t-frame');
+  st.ov = st.stage.querySelector('.t1t-ovwrap');
+  st.fit = () => {
+    if (!st.stage.isConnected) return;
+    const H = st.frame.offsetHeight || 1, avail = st.stage.clientWidth || T1T_W;
+    const maxH = typeof st.maxH === 'function' ? st.maxH() : st.maxH;
+    const k = Math.min(avail / T1T_W, maxH ? maxH / H : Infinity) * st.zoom;
+    st.scale.style.transform = `scale(${k})`;
+    st.sizer.style.width = (T1T_W * k) + 'px';
+    st.sizer.style.height = (H * k) + 'px';
+    st.k = k;
+    st.draw();
+  };
+  st.draw = () => {
+    const H = st.frame.offsetHeight || 1;
+    st.H = H;
+    st.ov.innerHTML = t1tOverlaySvg(st.get(), T1T_W, H, st.uid, st.draft);
+  };
+  st.setZoom = z => { st.zoom = Math.max(0.5, Math.min(3, z)); st.fit(); };
+  st.ro = new ResizeObserver(() => st.fit());
+  st.ro.observe(st.stage);
+  st.ro.observe(st.frame);
+  st.fit();
+  return st;
+}
+function t1tFade(...els) {
+  if (t1tReduced()) return;
+  els.forEach(el => { if (!el) return; el.classList.remove('t1t-fade'); void el.offsetWidth; el.classList.add('t1t-fade'); });
+}
+
+/* ── Entry ── */
+function t1tOpen() {
+  t1tLeave();
+  const route = _t1tRoute;
+  _t1tRoute = null;
+  if (route && route.view) return t1tViewOpen(route.view);
+  if (!t1tCanEdit()) {
+    t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">Mục này dành cho giáo viên. Học sinh mở bài giảng bằng link giáo viên gửi.</div></div>`;
+    return;
+  }
+  t1tList();
+}
+function t1tLeave() {
+  if (_t1t && _t1t.stage && _t1t.stage.ro) _t1t.stage.ro.disconnect();
+  t1tPresentClose();
+  document.removeEventListener('keydown', t1tKey);
+  _t1t = null;
+}
+function t1tHasUnsaved() { return !!_t1t && _t1t.mode === 'edit' && _t1t.dirty && t1tOnView(); }
+window.addEventListener('beforeunload', e => { if (t1tHasUnsaved()) { e.preventDefault(); e.returnValue = ''; } });
+function t1tOnView() {
+  const v = document.getElementById('view-t1-teach');
+  return !!v && !v.classList.contains('hidden');
+}
+
+/* ── Bài giảng của tôi ── */
+async function t1tList() {
+  t1tLeave();
+  _t1t = { mode: 'list' };
+  t1tRoot().innerHTML = '<div class="t1t-wrap"><div class="loading">Đang tải bài giảng…</div></div>';
+  let list = [];
+  try { list = await api('/api/t1-lessons'); } catch (e) {
+    t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">Chưa tải được danh sách: ${escapeHtml(e.message)}</div></div>`;
+    return;
+  }
+  if (!_t1t || _t1t.mode !== 'list') return;
+  const fmt = iso => { try { return new Date(iso).toLocaleDateString('vi-VN'); } catch (e) { return ''; } };
+  t1tRoot().innerHTML = `
+    <div class="t1t-wrap">
+      <div class="t1t-head">
+        <div><h2>📊 Bảng giảng Task 1</h2><p class="t1t-sub">Chọn một biểu đồ, soạn từng bước giảng, trình chiếu trên lớp rồi gửi link cho học sinh xem lại.</p></div>
+        <button class="btn btn-primary" onclick="t1tPick()">＋ Bài giảng mới</button>
+      </div>
+      <h3 class="t1t-sec">Bài giảng của tôi <small>${list.length}</small></h3>
+      ${list.length ? `<div class="t1t-list">${list.map(l => `
+        <div class="t1t-item">
+          <div class="t1t-item-main">
+            <div class="t1t-item-title">${escapeHtml(l.title)}</div>
+            <div class="t1t-item-meta">${escapeHtml(T1T_KIND_LABEL[l.source.kind] || '')} · ${l.step_count} bước · sửa ${escapeHtml(fmt(l.updated_at))}${currentUser.role === 'admin' && l.owner_name ? ` · ${escapeHtml(l.owner_name)}` : ''}</div>
+          </div>
+          <div class="t1t-item-acts">
+            <button class="btn btn-secondary btn-sm" data-act="view" data-id="${escapeHtml(l.id)}">▶ Mở</button>
+            <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${escapeHtml(l.id)}">✏️ Sửa</button>
+            <button class="btn btn-secondary btn-sm" data-act="rename" data-id="${escapeHtml(l.id)}">Đổi tên</button>
+            <button class="btn btn-secondary btn-sm" data-act="link" data-id="${escapeHtml(l.id)}">🔗 Lấy link</button>
+            <button class="btn btn-secondary btn-sm t1t-del" data-act="del" data-id="${escapeHtml(l.id)}">Xoá</button>
+          </div>
+        </div>`).join('')}</div>` : '<div class="t1t-empty">Chưa có bài giảng nào. Bấm "Bài giảng mới" để bắt đầu.</div>'}
+      <div class="t1t-msg" id="t1t-list-msg" role="status"></div>
+    </div>`;
+  t1tRoot().querySelectorAll('[data-act]').forEach(b => {
+    const l = list.find(x => x.id === b.dataset.id);
+    b.onclick = () => t1tListAct(b.dataset.act, l);
+  });
+}
+async function t1tListAct(act, l) {
+  const msg = document.getElementById('t1t-list-msg');
+  if (act === 'view') return t1tViewOpen(l.id);
+  if (act === 'edit') return t1tEditOpen(l.id);
+  if (act === 'link') return t1tLinkBox(l.id, msg);
+  if (act === 'rename') {
+    const t = prompt('Tên mới cho bài giảng', l.title);
+    if (t == null || !t.trim()) return;
+    try { await api('/api/t1-lessons/' + encodeURIComponent(l.id), { method: 'PUT', body: JSON.stringify({ title: t.trim().slice(0, 120) }) }); t1tList(); }
+    catch (e) { if (msg) msg.textContent = 'Chưa đổi được tên: ' + e.message; }
+  }
+  if (act === 'del') {
+    if (!confirm(`Xoá bài giảng "${l.title}"? Link đã gửi học sinh sẽ không mở được nữa.`)) return;
+    try { await api('/api/t1-lessons/' + encodeURIComponent(l.id), { method: 'DELETE' }); t1tList(); }
+    catch (e) { if (msg) msg.textContent = 'Chưa xoá được: ' + e.message; }
+  }
+}
+function t1tLink(id) { return `${location.origin}/?t1lesson=${encodeURIComponent(id)}`; }
+function t1tLinkBox(id, host) {
+  const url = t1tLink(id);
+  if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+  if (!host) return;
+  host.innerHTML = `<div class="t1t-linkbox"><span>Đã chép link. Gửi cho học sinh:</span><input type="text" readonly class="t1t-linkin"></div>`;
+  const inp = host.querySelector('input');
+  inp.value = url;
+  inp.onfocus = () => inp.select();
+}
+
+/* ── Chọn biểu đồ ── */
+function t1tPick() {
+  t1tLeave();
+  _t1t = { mode: 'pick' };
+  const lib = T1_SAMPLES.map(s => ({ s, group: t1tGroupOf(s.id) }));
+  t1tRoot().innerHTML = `
+    <div class="t1t-wrap">
+      <div class="t1t-bar"><button class="btn-back-plain" onclick="t1tList()">← Bài giảng của tôi</button></div>
+      <h2>Chọn biểu đồ</h2>
+      <p class="t1t-sub">Biểu đồ lấy từ thư viện bài mẫu Task 1, kèm bài mẫu để chọn câu nhanh. Đề mới thì bấm Tự nhập.</p>
+      <div class="t1t-picks">
+        <button class="t1t-pick t1t-pick--custom" onclick="t1tCustomForm()"><span class="t1t-pick-group">Tự nhập</span><span class="t1t-pick-name">＋ Đề mới: đường, cột, tròn hoặc bảng</span></button>
+        ${T1T_GROUPS.map(gn => lib.filter(x => x.group === gn).map(({ s }) => `<button class="t1t-pick" data-id="${escapeHtml(s.id)}"><span class="t1t-pick-group">${escapeHtml(gn)}</span><span class="t1t-pick-name">${escapeHtml(s.prompt)}</span></button>`).join('')).join('')}
+      </div>
+    </div>`;
+  t1tRoot().querySelectorAll('.t1t-pick[data-id]').forEach(b => {
+    b.onclick = () => {
+      const s = T1_SAMPLES.find(x => x.id === b.dataset.id);
+      const title = s.prompt.replace(/^The (graph|chart|charts|maps?|diagram|table|line graph|bar chart|pie charts?|two pie charts) below (shows|show|illustrates|illustrate|compares|compare)\s+/i, '').replace(/\.$/, '');
+      t1tEditStart({ title: (title.charAt(0).toUpperCase() + title.slice(1)).slice(0, 120), source: t1tSourceOf(s), steps: [t1tNewStep(1)] });
+    };
+  });
+}
+function t1tNewStep(n) { return { title: `Bước ${n}`, sentence: '', note: '', spots: [], marks: [] }; }
+
+/* ── Tự nhập ── */
+function t1tCustomForm(existing) {
+  // existing: { lesson } when editing a custom lesson's numbers
+  const lesson = existing && existing.lesson, wasDirty = !!(existing && existing.dirty);
+  const d = lesson ? t1tClone(lesson.source.data) : { chart: 'bar', title: '', unit: '', axis: '', cols: ['2010', '2015', '2020'], rows: [{ name: 'A', vals: [10, 20, 30] }, { name: 'B', vals: [15, 25, 20] }] };
+  t1tLeave();
+  _t1t = { mode: 'custom', d, lesson };
+  const render = () => {
+    const D = _t1t.d;
+    t1tRoot().innerHTML = `
+      <div class="t1t-wrap">
+        <div class="t1t-bar"><button class="btn-back-plain" id="t1t-cback">← ${lesson ? 'Quay lại bài giảng' : 'Chọn biểu đồ'}</button></div>
+        <h2>Tự nhập biểu đồ</h2>
+        <div class="t1t-cform">
+          <label>Loại<select id="t1t-ctype">${Object.entries(T1T_CHART_LABEL).map(([k, v]) => `<option value="${k}"${k === D.chart ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
+          <label>Tiêu đề<input id="t1t-ctitle" maxlength="120" placeholder="Ví dụ: Coffee consumption per person (kg)"></label>
+          <label>Đơn vị<input id="t1t-cunit" maxlength="40" placeholder="%, kg, millions…"></label>
+          <label>Nhãn trục ngang / cột đầu<input id="t1t-caxis" maxlength="60" placeholder="Year, Country…"></label>
+        </div>
+        <p class="t1t-sub">${{ line: 'Mỗi dòng là một đường, mỗi cột là một mốc trên trục ngang (tối đa 8 đường).', bar: 'Một dòng: cột ngang theo từng cột. Nhiều dòng: cột nhóm, mỗi dòng một màu (tối đa 4 dòng).', pie: 'Mỗi dòng là một phần của biểu đồ tròn, lấy số ở cột đầu, tính bằng % (tối đa 6 phần).', table: 'Bảng như trong đề: dòng và cột tuỳ ý.' }[D.chart]}</p>
+        <div class="t1t-gridwrap"><table class="t1t-grid">
+          <thead><tr><th></th>${D.cols.map((c, j) => `<th><input data-col="${j}" maxlength="40"><button class="t1t-x" data-delcol="${j}" title="Xoá cột" aria-label="Xoá cột">×</button></th>`).join('')}<th><button class="btn btn-secondary btn-sm" id="t1t-addcol"${D.cols.length >= 12 ? ' disabled' : ''}>＋ Cột</button></th></tr></thead>
+          <tbody>${D.rows.map((r, i) => `<tr><th><input data-row="${i}" maxlength="40"><button class="t1t-x" data-delrow="${i}" title="Xoá dòng" aria-label="Xoá dòng">×</button></th>${r.vals.map((v, j) => `<td><input type="number" min="0" step="any" data-r="${i}" data-c="${j}"></td>`).join('')}</tr>`).join('')}
+            <tr><th><button class="btn btn-secondary btn-sm" id="t1t-addrow"${D.rows.length >= 12 ? ' disabled' : ''}>＋ Dòng</button></th></tr></tbody>
+        </table></div>
+        <div class="t1t-msg" id="t1t-cmsg" role="alert"></div>
+        <h3 class="t1t-sec">Xem trước</h3>
+        <div id="t1t-cprev" class="t1t-cprev"></div>
+        <div class="t1t-acts"><button class="btn btn-primary" id="t1t-cuse">${lesson ? 'Cập nhật biểu đồ' : 'Dùng biểu đồ này'}</button></div>
+      </div>`;
+    const R = t1tRoot();
+    R.querySelector('#t1t-ctitle').value = D.title;
+    R.querySelector('#t1t-cunit').value = D.unit;
+    R.querySelector('#t1t-caxis').value = D.axis;
+    R.querySelectorAll('[data-col]').forEach(el => { el.value = D.cols[+el.dataset.col]; el.oninput = () => { D.cols[+el.dataset.col] = el.value; prev(); }; });
+    R.querySelectorAll('[data-row]').forEach(el => { el.value = D.rows[+el.dataset.row].name; el.oninput = () => { D.rows[+el.dataset.row].name = el.value; prev(); }; });
+    R.querySelectorAll('[data-r]').forEach(el => { el.value = D.rows[+el.dataset.r].vals[+el.dataset.c]; el.oninput = () => { D.rows[+el.dataset.r].vals[+el.dataset.c] = el.value === '' ? NaN : +el.value; prev(); }; });
+    R.querySelector('#t1t-ctype').onchange = e => { D.chart = e.target.value; render(); };
+    R.querySelector('#t1t-ctitle').oninput = e => { D.title = e.target.value; prev(); };
+    R.querySelector('#t1t-cunit').oninput = e => { D.unit = e.target.value; prev(); };
+    R.querySelector('#t1t-caxis').oninput = e => { D.axis = e.target.value; prev(); };
+    R.querySelector('#t1t-addcol').onclick = () => { D.cols.push(''); D.rows.forEach(r => r.vals.push(0)); render(); };
+    R.querySelector('#t1t-addrow').onclick = () => { D.rows.push({ name: '', vals: D.cols.map(() => 0) }); render(); };
+    R.querySelectorAll('[data-delcol]').forEach(b => b.onclick = () => { if (D.cols.length < 2) return; const j = +b.dataset.delcol; D.cols.splice(j, 1); D.rows.forEach(r => r.vals.splice(j, 1)); render(); });
+    R.querySelectorAll('[data-delrow]').forEach(b => b.onclick = () => { if (D.rows.length < 2) return; D.rows.splice(+b.dataset.delrow, 1); render(); });
+    R.querySelector('#t1t-cback').onclick = () => lesson ? t1tEditStart(lesson, wasDirty) : t1tPick();
+    R.querySelector('#t1t-cuse').onclick = () => {
+      const err = t1tCustomCheck(D);
+      if (err) { document.getElementById('t1t-cmsg').textContent = err; return; }
+      const data = t1tCustomClean(D);
+      if (lesson) { lesson.source = { kind: 'custom', ref: null, data }; t1tEditStart(lesson, true); }
+      else t1tEditStart({ title: (data.title || 'Biểu đồ tự nhập').slice(0, 120), source: { kind: 'custom', ref: null, data }, steps: [t1tNewStep(1)] }, true);
+    };
+    prev();
+  };
+  const prev = () => {
+    const box = document.getElementById('t1t-cprev'), err = t1tCustomCheck(_t1t.d);
+    document.getElementById('t1t-cmsg').textContent = err || '';
+    if (err) { box.innerHTML = ''; return; }
+    try { box.innerHTML = t1tCustomHtml(t1tCustomClean(_t1t.d)); } catch (e) { box.innerHTML = ''; }
+  };
+  render();
+}
+function t1tCustomCheck(D) {
+  if (D.cols.some(c => !String(c).trim())) return 'Cột nào cũng cần tên.';
+  if (D.rows.some(r => !String(r.name).trim())) return 'Dòng nào cũng cần tên.';
+  if (D.rows.some(r => r.vals.some(v => !Number.isFinite(v) || v < 0 || v > 1e9))) return 'Số liệu phải là số không âm.';
+  if (D.chart === 'bar' && D.rows.length > T1_COLORS.length) return `Cột nhóm tối đa ${T1_COLORS.length} dòng.`;
+  if (D.chart === 'line' && D.rows.length > T1T_LINE_COLORS.length) return `Tối đa ${T1T_LINE_COLORS.length} đường.`;
+  if (D.chart === 'pie' && D.rows.length > 6) return 'Biểu đồ tròn tối đa 6 phần.';
+  if (D.chart === 'pie') { const sum = D.rows.reduce((a, r) => a + r.vals[0], 0); if (Math.abs(sum - 100) > 1) return `Các phần của biểu đồ tròn phải cộng lại khoảng 100%, hiện là ${t1Num(sum)}%.`; }
+  return '';
+}
+function t1tCustomClean(D) {
+  return { chart: D.chart, title: D.title.trim(), unit: D.unit.trim(), axis: D.axis.trim(), cols: D.cols.map(c => String(c).trim()), rows: D.rows.map(r => ({ name: String(r.name).trim(), vals: r.vals.slice() })) };
+}
+
+/* ── Soạn bài: tools, steps, sentences ── */
+async function t1tEditOpen(id) {
+  t1tLeave();
+  const ticket = _t1t = { mode: 'loading' };
+  t1tRoot().innerHTML = '<div class="t1t-wrap"><div class="loading">Đang mở bài giảng…</div></div>';
+  try {
+    const l = await api('/api/t1-lessons/' + encodeURIComponent(id) + '/view');
+    if (_t1t !== ticket) return;
+    if (!l.can_edit) return t1tViewOpen(id);
+    t1tEditStart({ id: l.id, title: l.title, source: l.source, steps: l.steps.length ? l.steps : [t1tNewStep(1)] });
+  } catch (e) {
+    if (_t1t === ticket) t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">Chưa mở được bài giảng: ${escapeHtml(e.message)}</div></div>`;
+  }
+}
+function t1tEditStart(lesson, dirty) {
+  t1tLeave();
+  _t1t = { mode: 'edit', lesson, cur: 0, tool: 'spot', shape: 'rect', color: 'red', label: '', undo: [], dirty: !!dirty, saving: false };
+  const src = t1tResolve(lesson.source);
+  _t1t.sentences = t1tSentences(src.essay);
+  t1tRoot().innerHTML = `
+    <div class="t1t-wrap t1t-edit">
+      <div class="t1t-bar">
+        <button class="btn-back-plain" id="t1t-eback">← Bài giảng của tôi</button>
+        <input class="t1t-titlein" id="t1t-title" maxlength="120" aria-label="Tên bài giảng">
+        <span class="t1t-status" id="t1t-status" role="status"></span>
+        <button class="btn btn-primary btn-sm" id="t1t-save">Lưu</button>
+        <button class="btn btn-secondary btn-sm" id="t1t-present">▶ Trình chiếu</button>
+        <button class="btn btn-secondary btn-sm" id="t1t-link">🔗 Lấy link</button>
+      </div>
+      <div class="t1t-msg" id="t1t-emsg"></div>
+      <div class="t1t-cols">
+        <div class="t1t-main">
+          <div class="t1t-tools" id="t1t-tools"></div>
+          <div id="t1t-ehost"></div>
+          ${src.prompt ? `<div class="t1t-prompt">📜 ${escapeHtml(src.prompt)}</div>` : ''}
+          ${lesson.source.kind === 'custom' ? '<button class="btn btn-secondary btn-sm" id="t1t-editdata">✏️ Sửa số liệu</button>' : ''}
+        </div>
+        <aside class="t1t-side">
+          <div class="t1t-steps-head"><span>Các bước <small id="t1t-count"></small></span><button class="btn btn-secondary btn-sm" id="t1t-add">＋ Thêm bước</button></div>
+          <ol class="t1t-steps" id="t1t-steps"></ol>
+          <div class="t1t-form" id="t1t-form"></div>
+        </aside>
+      </div>
+    </div>`;
+  const R = t1tRoot();
+  const title = R.querySelector('#t1t-title');
+  title.value = lesson.title;
+  title.oninput = () => { lesson.title = title.value; t1tDirty(); };
+  R.querySelector('#t1t-eback').onclick = () => { if (!_t1t.dirty || confirm('Bài giảng chưa lưu. Rời đi mà không lưu?')) t1tList(); };
+  R.querySelector('#t1t-save').onclick = () => t1tSave();
+  R.querySelector('#t1t-present').onclick = () => t1tPresent(lesson, _t1t.cur);
+  R.querySelector('#t1t-link').onclick = async () => { if (await t1tSave()) t1tLinkBox(lesson.id, document.getElementById('t1t-emsg')); };
+  R.querySelector('#t1t-add').onclick = () => t1tStepAdd();
+  const ed = R.querySelector('#t1t-editdata');
+  if (ed) ed.onclick = () => { if (!_t1t.dirty || confirm('Bài giảng chưa lưu. Vẫn sang sửa số liệu? Các bước vẫn được giữ.')) t1tCustomForm({ lesson, dirty: _t1t.dirty }); };
+  _t1t.stage = t1tMountStage(R.querySelector('#t1t-ehost'), src.html, { get: () => lesson.steps[_t1t.cur], maxH: () => Math.max(320, window.innerHeight - 260) });
+  t1tBindDraw();
+  t1tToolsRender();
+  t1tStepsRender();
+  t1tFormRender();
+  t1tStatus();
+  document.addEventListener('keydown', t1tKey);
+}
+function t1tDirty() { _t1t.dirty = true; _t1t.rev = (_t1t.rev || 0) + 1; t1tStatus(); }
+function t1tStatus() {
+  const el = document.getElementById('t1t-status');
+  if (el) el.textContent = _t1t.saving ? 'Đang lưu…' : _t1t.dirty ? 'Chưa lưu' : (_t1t.lesson.id ? 'Đã lưu' : '');
+}
+function t1tToolsRender() {
+  const T = _t1t, box = document.getElementById('t1t-tools');
+  if (!box) return;
+  const tip = (T1T_TOOLS.find(t => t[0] === T.tool) || [])[2] || '';
+  box.innerHTML = `
+    <div class="t1t-toolrow">${T1T_TOOLS.map(([k, name]) => `<button class="t1t-tool" data-tool="${k}" aria-pressed="${T.tool === k}">${name}</button>`).join('')}</div>
+    <div class="t1t-toolrow">
+      ${T.tool === 'spot' ? `<span class="t1t-seg"><button class="t1t-tool" data-shape="rect" aria-pressed="${T.shape === 'rect'}">▭ Chữ nhật</button><button class="t1t-tool" data-shape="ellipse" aria-pressed="${T.shape === 'ellipse'}">⬭ Elip</button></span>` : ''}
+      ${T.tool === 'spot' ? '' : `<span class="t1t-colors">${Object.entries(T1T_COLORS).map(([k, c]) => `<button class="t1t-color" data-color="${k}" aria-pressed="${T.color === k}" aria-label="Màu ${k}" style="background:${c}"></button>`).join('')}</span>`}
+      ${T.tool === 'text' ? '<input class="t1t-labelin" id="t1t-label" maxlength="80" placeholder="Chữ của nhãn, ví dụ Peak">' : ''}
+      <span class="t1t-toolspacer"></span>
+      <button class="btn btn-secondary btn-sm" id="t1t-undo"${T.undo.length ? '' : ' disabled'}>↶ Hoàn tác</button>
+      <button class="btn btn-secondary btn-sm" id="t1t-clear">Xoá dấu</button>
+    </div>
+    <div class="t1t-tip">${escapeHtml(tip)}</div>`;
+  box.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => { T.tool = b.dataset.tool; t1tToolsRender(); });
+  box.querySelectorAll('[data-shape]').forEach(b => b.onclick = () => { T.shape = b.dataset.shape; t1tToolsRender(); });
+  box.querySelectorAll('[data-color]').forEach(b => b.onclick = () => { T.color = b.dataset.color; t1tToolsRender(); });
+  const li = box.querySelector('#t1t-label');
+  if (li) { li.value = T.label; li.oninput = () => { T.label = li.value; }; }
+  box.querySelector('#t1t-undo').onclick = () => t1tUndo();
+  box.querySelector('#t1t-clear').onclick = () => {
+    const s = T.lesson.steps[T.cur];
+    if (!s.spots.length && !s.marks.length) return;
+    t1tPushUndo();
+    s.spots = []; s.marks = [];
+    t1tAfterMarks();
+  };
+}
+function t1tPushUndo() {
+  const s = _t1t.lesson.steps[_t1t.cur];
+  _t1t.undo.push({ step: s, spots: t1tClone(s.spots), marks: t1tClone(s.marks) });
+  if (_t1t.undo.length > 60) _t1t.undo.shift();
+}
+function t1tUndo() {
+  const T = _t1t, u = T.undo.pop();
+  if (!u) return;
+  const i = T.lesson.steps.indexOf(u.step);
+  if (i < 0) { t1tUndo(); return; }
+  u.step.spots = u.spots; u.step.marks = u.marks;
+  T.cur = i;
+  t1tStepsRender(); t1tFormRender();
+  t1tAfterMarks();
+}
+function t1tAfterMarks() { t1tDirty(); _t1t.stage.draw(); t1tToolsRender(); t1tStepsRender(); }
+// Drawing on the overlay: drag for shapes and arrows, click for labels.
+function t1tBindDraw() {
+  const T = _t1t, st = T.stage;
+  st.ov.classList.add('t1t-ovwrap--edit');
+  const at = e => {
+    const r = st.frame.getBoundingClientRect();
+    return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
+  };
+  let start = null;
+  const shapeOf = (a, b) => {
+    const x = Math.min(a[0], b[0]), y = Math.min(a[1], b[1]), w = Math.abs(a[0] - b[0]), h = Math.abs(a[1] - b[1]);
+    const r4 = v => Math.round(v * 10000) / 10000;
+    if (T.tool === 'arrow') return { t: 'arrow', c: T.color, x1: r4(a[0]), y1: r4(a[1]), x2: r4(b[0]), y2: r4(b[1]) };
+    if (T.tool === 'spot') return { t: 'spot', shape: T.shape, x: r4(x), y: r4(y), w: r4(Math.min(w, 1 - x)), h: r4(Math.min(h, 1 - y)) };
+    return { t: T.tool, c: T.color, x: r4(x), y: r4(y), w: r4(Math.min(w, 1 - x)), h: r4(Math.min(h, 1 - y)) };
+  };
+  st.ov.addEventListener('pointerdown', e => {
+    if (_t1t !== T || e.button > 0) return;
+    e.preventDefault();
+    const s = T.lesson.steps[T.cur], p = at(e);
+    if (T.tool === 'text') {
+      const text = T.label.trim();
+      if (!text) { const li = document.getElementById('t1t-label'); if (li) { li.focus(); li.classList.add('t1t-need'); setTimeout(() => li.classList.remove('t1t-need'), 900); } return; }
+      if (s.marks.length >= T1T_MAX_MARKS) return t1tFlash(`Mỗi bước tối đa ${T1T_MAX_MARKS} dấu.`);
+      t1tPushUndo();
+      s.marks.push({ t: 'text', c: T.color, x: Math.round(p[0] * 10000) / 10000, y: Math.round(p[1] * 10000) / 10000, text: text.slice(0, 80) });
+      t1tAfterMarks();
+      return;
+    }
+    start = p;
+    st.ov.setPointerCapture(e.pointerId);
+  });
+  st.ov.addEventListener('pointermove', e => {
+    if (!start || _t1t !== T) return;
+    st.draft = shapeOf(start, at(e));
+    st.draw();
+  });
+  const end = e => {
+    if (!start || _t1t !== T) return;
+    const d = shapeOf(start, at(e));
+    start = null;
+    st.draft = null;
+    const s = T.lesson.steps[T.cur];
+    const big = d.t === 'arrow' ? Math.hypot(d.x2 - d.x1, d.y2 - d.y1) > 0.02 : d.w > 0.008 && d.h > 0.008;
+    if (!big) { st.draw(); return; }
+    const list = d.t === 'spot' ? s.spots : s.marks;
+    if (list.length >= T1T_MAX_MARKS) { st.draw(); return t1tFlash(`Mỗi bước tối đa ${T1T_MAX_MARKS} ${d.t === 'spot' ? 'vùng sáng' : 'dấu'}.`); }
+    t1tPushUndo();
+    if (d.t === 'spot') { delete d.t; s.spots.push(d); } else s.marks.push(d);
+    t1tAfterMarks();
+  };
+  st.ov.addEventListener('pointerup', end);
+  st.ov.addEventListener('pointercancel', () => { start = null; st.draft = null; st.draw(); });
+}
+function t1tFlash(text) { const m = document.getElementById('t1t-emsg'); if (m) { m.textContent = text; setTimeout(() => { if (m.textContent === text) m.textContent = ''; }, 2500); } }
+function t1tStepsRender() {
+  const T = _t1t, ol = document.getElementById('t1t-steps');
+  if (!ol) return;
+  const steps = T.lesson.steps;
+  document.getElementById('t1t-count').textContent = `${steps.length}/${T1T_MAX_STEPS}`;
+  document.getElementById('t1t-add').disabled = steps.length >= T1T_MAX_STEPS;
+  ol.innerHTML = steps.map((s, i) => `
+    <li class="t1t-step${i === T.cur ? ' cur' : ''}" draggable="true" data-i="${i}">
+      <button class="t1t-step-pick" data-pick="${i}"><span class="t1t-step-n">${i + 1}</span><span class="t1t-step-t"></span><span class="t1t-step-c">${s.spots.length + s.marks.length ? `${s.spots.length + s.marks.length} dấu` : ''}</span></button>
+      <span class="t1t-step-acts">
+        <button data-up="${i}" title="Lên" aria-label="Chuyển bước lên"${i ? '' : ' disabled'}>↑</button>
+        <button data-down="${i}" title="Xuống" aria-label="Chuyển bước xuống"${i < steps.length - 1 ? '' : ' disabled'}>↓</button>
+        <button data-dup="${i}" title="Nhân đôi" aria-label="Nhân đôi bước"${steps.length >= T1T_MAX_STEPS ? ' disabled' : ''}>⧉</button>
+        <button data-del="${i}" title="Xoá" aria-label="Xoá bước"${steps.length > 1 ? '' : ' disabled'}>✕</button>
+      </span>
+    </li>`).join('');
+  ol.querySelectorAll('.t1t-step-t').forEach((el, i) => { el.textContent = steps[i].title || `Bước ${i + 1}`; });
+  const move = (from, to) => {
+    if (to < 0 || to >= steps.length || from === to) return;
+    const curStep = steps[T.cur];
+    const [s] = steps.splice(from, 1);
+    steps.splice(to, 0, s);
+    T.cur = steps.indexOf(curStep);
+    t1tDirty(); t1tStepsRender(); t1tFormRender();
+  };
+  ol.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => t1tGo(+b.dataset.pick));
+  ol.querySelectorAll('[data-up]').forEach(b => b.onclick = () => move(+b.dataset.up, +b.dataset.up - 1));
+  ol.querySelectorAll('[data-down]').forEach(b => b.onclick = () => move(+b.dataset.down, +b.dataset.down + 1));
+  ol.querySelectorAll('[data-dup]').forEach(b => b.onclick = () => {
+    if (steps.length >= T1T_MAX_STEPS) return;
+    const i = +b.dataset.dup, c = t1tClone(steps[i]);
+    c.title = (c.title || `Bước ${i + 1}`).slice(0, 110) + ' (bản sao)';
+    steps.splice(i + 1, 0, c);
+    T.cur = i + 1;
+    t1tDirty(); t1tStepsRender(); t1tFormRender(); T.stage.draw();
+  });
+  ol.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.del;
+    if (steps.length < 2) return;
+    const s = steps[i];
+    if ((s.sentence || s.spots.length || s.marks.length) && !confirm(`Xoá bước ${i + 1}?`)) return;
+    steps.splice(i, 1);
+    T.cur = Math.min(T.cur >= i && T.cur > 0 ? T.cur - 1 : T.cur, steps.length - 1);
+    t1tDirty(); t1tStepsRender(); t1tFormRender(); T.stage.draw();
+  });
+  // Drag to reorder.
+  let from = null;
+  ol.querySelectorAll('.t1t-step').forEach(li => {
+    li.addEventListener('dragstart', e => { from = +li.dataset.i; li.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(from)); } catch (er) {} });
+    li.addEventListener('dragend', () => li.classList.remove('drag'));
+    li.addEventListener('dragover', e => { e.preventDefault(); li.classList.add('over'); });
+    li.addEventListener('dragleave', () => li.classList.remove('over'));
+    li.addEventListener('drop', e => { e.preventDefault(); li.classList.remove('over'); if (from != null) move(from, +li.dataset.i); from = null; });
+  });
+}
+function t1tGo(i) {
+  const T = _t1t;
+  T.cur = Math.max(0, Math.min(T.lesson.steps.length - 1, i));
+  t1tStepsRender(); t1tFormRender(); T.stage.draw();
+}
+function t1tStepAdd() {
+  const T = _t1t, steps = T.lesson.steps;
+  if (steps.length >= T1T_MAX_STEPS) return;
+  steps.splice(T.cur + 1, 0, t1tNewStep(T.cur + 2));
+  T.cur++;
+  t1tDirty(); t1tStepsRender(); t1tFormRender(); T.stage.draw();
+}
+function t1tFormRender() {
+  const T = _t1t, box = document.getElementById('t1t-form');
+  if (!box) return;
+  const s = T.lesson.steps[T.cur];
+  box.innerHTML = `
+    <div class="t1t-form-head">Bước ${T.cur + 1}</div>
+    <label>Tiêu đề ngắn<input id="t1t-stitle" maxlength="120" placeholder="Ví dụ: Overview, xu hướng chung"></label>
+    <label>Câu mẫu tiếng Anh<textarea id="t1t-ssent" maxlength="400" rows="3" placeholder="Gõ câu mẫu, hoặc chọn từ bài mẫu bên dưới"></textarea></label>
+    ${T.sentences.length ? `<details class="t1t-pickers"><summary>Chọn câu từ bài mẫu (${T.sentences.length} câu)</summary><div class="t1t-sents">${T.sentences.map((x, i) => `<button class="t1t-sent" data-s="${i}"></button>`).join('')}</div></details>` : ''}
+    <label>Ghi chú tiếng Việt <small>(tuỳ chọn)</small><textarea id="t1t-snote" maxlength="400" rows="2" placeholder="Ví dụ: chú ý thì quá khứ, so sánh hai đỉnh"></textarea></label>`;
+  const q = sel => box.querySelector(sel);
+  q('#t1t-stitle').value = s.title || '';
+  q('#t1t-ssent').value = s.sentence || '';
+  q('#t1t-snote').value = s.note || '';
+  q('#t1t-stitle').oninput = e => { s.title = e.target.value; t1tDirty(); const t = document.querySelector(`#t1t-steps .t1t-step[data-i="${T.cur}"] .t1t-step-t`); if (t) t.textContent = s.title || `Bước ${T.cur + 1}`; };
+  q('#t1t-ssent').oninput = e => { s.sentence = e.target.value; t1tDirty(); };
+  q('#t1t-snote').oninput = e => { s.note = e.target.value; t1tDirty(); };
+  box.querySelectorAll('.t1t-sent').forEach(b => {
+    b.textContent = T.sentences[+b.dataset.s];
+    b.onclick = () => { s.sentence = T.sentences[+b.dataset.s].slice(0, 400); q('#t1t-ssent').value = s.sentence; t1tDirty(); };
+  });
+}
+async function t1tSave() {
+  const T = _t1t;
+  if (!T || T.mode !== 'edit' || T.saving) return false;
+  const L = T.lesson;
+  if (!String(L.title).trim()) { t1tFlash('Bài giảng cần có tên.'); return false; }
+  if (L.id && !T.dirty) return true;
+  T.saving = true; t1tStatus();
+  const rev = T.rev || 0;
+  const body = JSON.stringify({ title: L.title.trim(), source: L.source, steps: L.steps });
+  try {
+    const res = L.id ? await api('/api/t1-lessons/' + encodeURIComponent(L.id), { method: 'PUT', body })
+      : await api('/api/t1-lessons', { method: 'POST', body });
+    if (_t1t !== T) return true;
+    L.id = res.id;
+    // An edit typed while the request was out still needs saving.
+    T.dirty = (T.rev || 0) !== rev;
+    return true;
+  } catch (e) {
+    if (_t1t === T) t1tFlash('Chưa lưu được: ' + e.message);
+    return false;
+  } finally {
+    T.saving = false;
+    if (_t1t === T) t1tStatus();
+  }
+}
+
+/* ── Xem (học sinh, hoặc giáo viên xem lại): read-only, ←/→ ── */
+async function t1tViewOpen(id) {
+  t1tLeave();
+  const ticket = _t1t = { mode: 'loading' };
+  t1tRoot().innerHTML = '<div class="t1t-wrap"><div class="loading">Đang mở bài giảng…</div></div>';
+  let l;
+  try { l = await api('/api/t1-lessons/' + encodeURIComponent(id) + '/view'); } catch (e) {
+    if (_t1t !== ticket) return;
+    t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">${e.status === 404 ? 'Bài giảng này không còn nữa, hoặc link bị sai.' : 'Chưa mở được bài giảng: ' + escapeHtml(e.message)}</div><button class="btn btn-secondary" onclick="showView('home')">← Trang chủ</button></div>`;
+    return;
+  }
+  if (_t1t !== ticket) return;
+  t1tLeave();
+  if (!l.steps.length) l.steps = [t1tNewStep(1)];
+  _t1t = { mode: 'view', lesson: l, cur: 0 };
+  const src = t1tResolve(l.source);
+  t1tRoot().innerHTML = `
+    <div class="t1t-wrap t1t-view">
+      <div class="t1t-bar">
+        <button class="btn-back-plain" id="t1t-vback">← ${t1tCanEdit() ? 'Bài giảng của tôi' : 'Trang chủ'}</button>
+        <span class="t1t-toolspacer"></span>
+        ${l.can_edit ? '<button class="btn btn-secondary btn-sm" id="t1t-vedit">✏️ Sửa</button>' : ''}
+        <button class="btn btn-secondary btn-sm" id="t1t-vfull">⛶ Toàn màn hình</button>
+      </div>
+      <h2 class="t1t-vtitle" id="t1t-vtitle"></h2>
+      <div class="t1t-vmeta" id="t1t-vmeta"></div>
+      <div id="t1t-vhost"></div>
+      <div class="t1t-zoom"><button class="btn btn-secondary btn-sm" data-z="-">−</button><button class="btn btn-secondary btn-sm" data-z="0">100%</button><button class="btn btn-secondary btn-sm" data-z="+">＋</button></div>
+      <div class="t1t-card" id="t1t-vcard"></div>
+      <div class="t1t-nav">
+        <button class="btn btn-secondary" id="t1t-vprev">← Trước</button>
+        <span class="t1t-dots" id="t1t-vdots"></span>
+        <button class="btn btn-primary" id="t1t-vnext">Tiếp →</button>
+      </div>
+      ${src.prompt ? `<div class="t1t-prompt">📜 ${escapeHtml(src.prompt)}</div>` : ''}
+    </div>`;
+  const R = t1tRoot();
+  R.querySelector('#t1t-vtitle').textContent = l.title;
+  R.querySelector('#t1t-vmeta').textContent = l.owner_name ? `Giáo viên: ${l.owner_name}` : '';
+  R.querySelector('#t1t-vback').onclick = () => (t1tCanEdit() ? t1tList() : showView('home'));
+  if (l.can_edit) R.querySelector('#t1t-vedit').onclick = () => t1tEditOpen(l.id);
+  R.querySelector('#t1t-vfull').onclick = () => t1tPresent(l, _t1t.cur);
+  R.querySelector('#t1t-vprev').onclick = () => t1tViewGo(_t1t.cur - 1);
+  R.querySelector('#t1t-vnext').onclick = () => t1tViewGo(_t1t.cur + 1);
+  R.querySelectorAll('[data-z]').forEach(b => b.onclick = () => t1tZoom(_t1t.stage, b.dataset.z));
+  _t1t.stage = t1tMountStage(R.querySelector('#t1t-vhost'), src.html, { get: () => l.steps[_t1t.cur], maxH: () => Math.max(260, window.innerHeight * 0.62) });
+  t1tViewGo(0, true);
+  document.addEventListener('keydown', t1tKey);
+}
+function t1tViewGo(i, first) {
+  const T = _t1t;
+  if (!T || T.mode !== 'view') return;
+  const n = T.lesson.steps.length;
+  T.cur = Math.max(0, Math.min(n - 1, i));
+  t1tCardRender(document.getElementById('t1t-vcard'), T.lesson.steps[T.cur], T.cur, n);
+  t1tDotsRender(document.getElementById('t1t-vdots'), n, T.cur, j => t1tViewGo(j));
+  document.getElementById('t1t-vprev').disabled = T.cur === 0;
+  document.getElementById('t1t-vnext').disabled = T.cur === n - 1;
+  T.stage.draw();
+  if (!first) t1tFade(T.stage.ov, document.getElementById('t1t-vcard'));
+}
+function t1tCardRender(el, s, i, n) {
+  if (!el) return;
+  el.innerHTML = `<div class="t1t-card-head"><span class="t1t-card-n">Bước ${i + 1}/${n}</span><span class="t1t-card-t"></span></div><p class="t1t-sent-big"></p><p class="t1t-note"></p>`;
+  el.querySelector('.t1t-card-t').textContent = s.title || '';
+  el.querySelector('.t1t-sent-big').textContent = s.sentence || '';
+  el.querySelector('.t1t-sent-big').hidden = !s.sentence;
+  el.querySelector('.t1t-note').textContent = s.note || '';
+  el.querySelector('.t1t-note').hidden = !s.note;
+}
+function t1tDotsRender(el, n, cur, go) {
+  if (!el) return;
+  el.innerHTML = Array.from({ length: n }, (_, j) => `<button class="t1t-dot${j === cur ? ' on' : ''}" data-j="${j}" aria-label="Bước ${j + 1}"${j === cur ? ' aria-current="step"' : ''}></button>`).join('');
+  el.querySelectorAll('.t1t-dot').forEach(b => b.onclick = () => go(+b.dataset.j));
+}
+function t1tZoom(st, how) {
+  if (!st) return;
+  if (how === '+') st.setZoom(+(st.zoom + 0.25).toFixed(2));
+  else if (how === '-') st.setZoom(+(st.zoom - 0.25).toFixed(2));
+  else st.setZoom(1);
+}
+function t1tKey(e) {
+  if (_t1tShow) return;   // the presenter has its own keys
+  if (!_t1t || !t1tOnView()) { document.removeEventListener('keydown', t1tKey); return; }
+  const typing = e.target && /input|textarea|select/i.test(e.target.tagName);
+  if (_t1t.mode === 'edit') {
+    if (!typing && (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); t1tUndo(); }
+    return;
+  }
+  if (_t1t.mode !== 'view' || typing || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); t1tViewGo(_t1t.cur + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); t1tViewGo(_t1t.cur - 1); }
+  else if (e.key === '+' || e.key === '=') t1tZoom(_t1t.stage, '+');
+  else if (e.key === '-' || e.key === '_') t1tZoom(_t1t.stage, '-');
+  else if (e.key === '0') t1tZoom(_t1t.stage, '0');
+}
+
+/* ── Trình chiếu: full screen, big sentence, ←/→, Esc, +/−/0 ── */
+let _t1tShow = null;
+function t1tPresent(lesson, start) {
+  t1tPresentClose();
+  if (!lesson.steps.length) return;
+  const src = t1tResolve(lesson.source);
+  const el = document.createElement('div');
+  el.className = 't1t-present';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-label', 'Trình chiếu bài giảng');
+  el.innerHTML = `
+    <div class="t1t-p-top"><span class="t1t-p-title"></span><span class="t1t-p-n" id="t1t-pn"></span><button class="t1t-p-x" aria-label="Thoát trình chiếu">×</button></div>
+    <div class="t1t-p-stage" id="t1t-phost"></div>
+    <div class="t1t-p-card" id="t1t-pcard"></div>
+    <div class="t1t-p-foot"><span class="t1t-dots" id="t1t-pdots"></span><span class="t1t-p-keys">← → chuyển bước · + − 0 phóng to · Esc thoát</span></div>`;
+  document.body.appendChild(el);
+  el.querySelector('.t1t-p-title').textContent = lesson.title;
+  const S = _t1tShow = { el, lesson, cur: Math.max(0, Math.min(lesson.steps.length - 1, start || 0)) };
+  S.stage = t1tMountStage(el.querySelector('#t1t-phost'), src.html, { get: () => lesson.steps[S.cur], maxH: () => Math.max(200, el.querySelector('#t1t-phost').clientHeight - 8) });
+  S.go = (i, first) => {
+    const n = lesson.steps.length;
+    S.cur = Math.max(0, Math.min(n - 1, i));
+    el.querySelector('#t1t-pn').textContent = `${S.cur + 1}/${n}`;
+    t1tCardRender(el.querySelector('#t1t-pcard'), lesson.steps[S.cur], S.cur, n);
+    t1tDotsRender(el.querySelector('#t1t-pdots'), n, S.cur, j => S.go(j));
+    S.stage.draw();
+    if (!first) t1tFade(S.stage.ov, el.querySelector('#t1t-pcard'));
+  };
+  S.key = e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); S.go(S.cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); S.go(S.cur - 1); }
+    else if (e.key === 'Escape') { e.preventDefault(); t1tPresentClose(); }
+    else if (e.key === '+' || e.key === '=') t1tZoom(S.stage, '+');
+    else if (e.key === '-' || e.key === '_') t1tZoom(S.stage, '-');
+    else if (e.key === '0') t1tZoom(S.stage, '0');
+  };
+  S.fs = () => { if (!document.fullscreenElement && S.wasFull) t1tPresentClose(); };
+  document.addEventListener('keydown', S.key, true);
+  document.addEventListener('fullscreenchange', S.fs);
+  el.querySelector('.t1t-p-x').onclick = () => t1tPresentClose();
+  S.go(S.cur, true);
+  if (el.requestFullscreen) el.requestFullscreen().then(() => { S.wasFull = true; S.stage.fit(); }).catch(() => {});
+  el.querySelector('.t1t-p-x').focus();
+}
+function t1tPresentClose() {
+  const S = _t1tShow;
+  if (!S) return;
+  _t1tShow = null;
+  document.removeEventListener('keydown', S.key, true);
+  document.removeEventListener('fullscreenchange', S.fs);
+  if (S.stage && S.stage.ro) S.stage.ro.disconnect();
+  if (document.fullscreenElement === S.el && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  S.el.remove();
+  // Back on the view or editor: show the step the class stopped at.
+  if (_t1t && _t1t.lesson === S.lesson) {
+    if (_t1t.mode === 'view') t1tViewGo(S.cur, true);
+    else if (_t1t.mode === 'edit') t1tGo(S.cur);
+  }
+}
+// T1TEACH END
 
 // TTMON BEGIN
 /* ── TinTinMon (thử nghiệm) ────────────────────────────────────────────────
