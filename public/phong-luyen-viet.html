@@ -130,6 +130,9 @@ th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mu
 .planview b{color:var(--navy);font-weight:600}
 /* Tab Mở & kết bài */
 .gopt{margin:0;padding-left:22px;display:grid;gap:6px}
+.pbodies{display:grid;gap:8px}
+.pbody{display:grid;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.pbody .gopt{font-size:.88rem}
 .gopt li{color:var(--en);font-style:italic}
 .ghead{font-size:.82rem;font-weight:600;color:var(--navy)}
 .gex{background:var(--bg);border-radius:8px;padding:12px 14px;display:grid;gap:6px;font-size:.92rem;line-height:1.65}
@@ -223,6 +226,7 @@ th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mu
           <div class="grid" style="gap:12px;margin-top:10px">
             <div class="sub" id="planClock"></div>
             <div class="pfield" id="planStance" hidden><label>Lập trường của mình</label><div class="seg" id="planStanceChips"></div><small id="planStanceWhen"></small></div>
+            <div class="pfield" id="planBodies" hidden><label>Chia thân bài</label><div class="pbodies" id="planBodiesList"></div></div>
             <div class="grid" style="gap:10px" id="planFields"></div>
             <div class="thesis" id="thesisTicks"></div>
             <div class="grid" style="gap:8px" id="planGo" hidden>
@@ -476,13 +480,19 @@ const GUIDE = {
   detect:'Đề nêu hai ý kiến (Some people think… Others believe…) rồi hỏi "Discuss both views and give your opinion."',
   i1:['Some people hold the belief that [mệnh đề phe 1].','Some believe that [mệnh đề phe 1], while others contend that [mệnh đề phe 2].','The debate over whether [ai] should [V1] or [V2] is a divisive one.'],
   st:[
-   { k:'one', n:'Theo một phe', when:'Ta thấy một phe đúng hơn hẳn.',
-     p:[['Mở bài','Nêu phe kia, rồi nói ta theo phe nào.'],['Thân 1','Lý lẽ của phe ta không theo. Thừa nhận chỗ đúng, rồi chỉ ra chỗ yếu.'],['Thân 2','Lý lẽ của phe ta theo, có ví dụ.'],['Kết bài','Nhắc lại phe ta chọn và lý do chính.']],
-     i2:['While there are good grounds for advocating this proposal, I would argue that [mệnh đề phe mình].','Others, myself included, however, believe that [mệnh đề phe mình].','While some believe [mệnh đề phe kia], I side with those who argue that [mệnh đề phe mình].'],
-     t1:['Granted, proponents of [danh từ phe kia] might argue that [mệnh đề].','Granted, there are good grounds for [V-ing].'],
-     t2:['Notwithstanding, I am convinced that [mệnh đề phe mình].','However, this view overlooks [danh từ].'],
-     c:['To summarize, while [danh từ phe kia] has certain benefits, I side with those who [V], believing that [mệnh đề].','In conclusion, while [mệnh đề phe kia], I feel that [mệnh đề phe mình].'] },
-   { k:'both', n:'Kết hợp hai phe', when:'Ta thấy cả hai phe đều đúng một phần, và cách tốt nhất là kết hợp.',
+   { k:'one1', n:'Theo ý 1', when:'Ta thấy ý thứ nhất trong đề đúng hơn.',
+     p:[['Mở bài','Nêu ý 2, rồi nói ta theo ý 1.'],['Thân 1','Lý lẽ của ý 2, phe ta không theo. Thừa nhận chỗ đúng, rồi chỉ ra chỗ yếu.'],['Thân 2','Lý lẽ của ý 1, phe ta theo, có ví dụ.'],['Kết bài','Nhắc lại ta theo ý 1 và lý do chính.']],
+     i2:['While there are good grounds for advocating this proposal, I would argue that [mệnh đề ý 1].','Others, myself included, however, believe that [mệnh đề ý 1].','While some believe [mệnh đề ý 2], I side with those who argue that [mệnh đề ý 1].'],
+     t1:['Granted, proponents of [danh từ ý 2] might argue that [mệnh đề].','Granted, there are good grounds for [V-ing ý 2].'],
+     t2:['Notwithstanding, I am convinced that [mệnh đề ý 1].','However, this view overlooks [danh từ].'],
+     c:['To summarize, while [danh từ ý 2] has certain benefits, I side with those who [V ý 1], believing that [mệnh đề].','In conclusion, while [mệnh đề ý 2], I feel that [mệnh đề ý 1].'] },
+   { k:'one2', n:'Theo ý 2', when:'Ta thấy ý thứ hai trong đề đúng hơn.',
+     p:[['Mở bài','Nêu ý 1, rồi nói ta theo ý 2.'],['Thân 1','Lý lẽ của ý 1, phe ta không theo. Thừa nhận chỗ đúng, rồi chỉ ra chỗ yếu.'],['Thân 2','Lý lẽ của ý 2, phe ta theo, có ví dụ.'],['Kết bài','Nhắc lại ta theo ý 2 và lý do chính.']],
+     i2:['While there are good grounds for advocating this proposal, I would argue that [mệnh đề ý 2].','Others, myself included, however, believe that [mệnh đề ý 2].','While some believe [mệnh đề ý 1], I side with those who argue that [mệnh đề ý 2].'],
+     t1:['Granted, proponents of [danh từ ý 1] might argue that [mệnh đề].','Granted, there are good grounds for [V-ing ý 1].'],
+     t2:['Notwithstanding, I am convinced that [mệnh đề ý 2].','However, this view overlooks [danh từ].'],
+     c:['To summarize, while [danh từ ý 1] has certain benefits, I side with those who [V ý 2], believing that [mệnh đề].','In conclusion, while [mệnh đề ý 1], I feel that [mệnh đề ý 2].'] },
+   { k:'both', n:'Kết hợp hai ý', when:'Ta thấy cả hai phe đều đúng một phần, và cách tốt nhất là kết hợp.',
      p:[['Mở bài','Nêu hai phe, rồi báo bài sẽ xét cả hai trước khi nêu ý kiến.'],['Thân 1','Phe 1. Mở bằng On the one hand.'],['Thân 2','Phe 2. Mở bằng On the other hand.'],['Kết bài','Ý kiến của ta, kết hợp hai phe, nói rõ vì sao. Đoạn này dài 2 tới 4 câu.']],
      i2:['This essay will first examine both views before presenting my own opinion.','This essay will examine both perspectives before arriving at a personal viewpoint.'],
      t1:['On the one hand, proponents of the idea that [mệnh đề phe 1] argue that [mệnh đề].','The argument for [danh từ phe 1] rests on the principle of [danh từ].'],
@@ -492,7 +502,7 @@ const GUIDE = {
   note:'Đề yêu cầu "give your opinion". Nếu mở bài dùng "This essay will examine both views", thì đoạn cuối bắt buộc phải nêu ý kiến thật rõ, nếu không bài mất điểm ý.',
   mist:['Chỉ trình bày hai phe mà không có ý kiến riêng.','Ý kiến ở mở bài và kết bài khác nhau.','Thân 2 lặp lại ý thân 1 bằng từ khác.'],
   phr:[['I side with those who argue that','tôi đứng về phía những người cho rằng'],['there are good grounds for','có cơ sở vững chắc để'],['Notwithstanding','dù vậy'],['Upon weighing both views','sau khi cân nhắc cả hai quan điểm'],['a concerted effort from both A and B','sự chung tay của cả A và B']],
-  ex:{ s:'one',
+  ex:{ s:'one2',
    i:'Some people hold the belief that the government should implement a standardized punishment for every offender of a particular crime. While there are good grounds for advocating this proposal, I would argue that punishment should be tailored to the case.',
    c:'To summarize, while fixed punishments have certain benefits, I side with opponents of this one-size-fits-all approach, believing that an equitable legal system should take into account the special aspects of each individual case.' } },
 
@@ -652,7 +662,13 @@ function guessStance(fk, txt){
     if(/không đồng ý|phản đối|disagree/.test(t)) return 'dis';
     if(/đồng ý|agree/.test(t)) return 'agr';
   }
-  if(fk==='discuss') return /cả hai|kết hợp|hai bên|both/.test(t) ? 'both' : 'one';
+  if(fk==='discuss'){
+    if(/kết hợp|cả hai|hai bên|both/.test(t)) return 'both';
+    // "Theo ý 2, vì ý 1 …": ý nhắc tới trước là ý mình theo.
+    const a1 = t.search(/ý\s*(1|một)\b|phe\s*(1|một)\b|thứ nhất/), a2 = t.search(/ý\s*(2|hai)\b|phe\s*(2|hai)\b|thứ hai/);
+    if(a1<0 && a2<0) return null;
+    return a2<0 || (a1>=0 && a1<a2) ? 'one1' : 'one2';
+  }
   if(fk==='outweigh'){
     const iL = t.search(/lợi/), iH = t.search(/hại|bất lợi/);
     if(/hơn|lớn|nhiều|nặng/.test(t) && iL>=0 && iH>=0) return iL<iH ? 'adv' : 'dis';
@@ -797,7 +813,16 @@ function renderPlan(){
   L.fields.forEach(k=>{ $('pl-'+k).addEventListener('input',e=>{ plan[k]=e.target.value; if(k==='side') autoStance(e.target.value); store.set('plv_session',sess); renderTicks(); renderNext(); if(k==='side'){ $('planWarn').hidden=true; planWarned=false; $('planDone').textContent='Xong ý, bắt đầu viết →'; } }); });
   renderTicks(); renderPlanStance();
 }
+/* Thân 1 và thân 2 theo lập trường đang chọn, kèm mọi câu mở đoạn của mỗi thân. */
+function renderPlanBodies(){
+  const on = !!sess && activeT==='t2' && !!sess.t2.prompt;
+  $('planBodies').hidden = !on;
+  if(!on) return;
+  const S = stanceOf(curType(), curStance());
+  $('planBodiesList').innerHTML = [[1,S.t1],[2,S.t2]].map(([i,arr])=>`<div class="pbody"><div class="ghead">Thân ${i} · ${esc(S.p[i][1])}</div><ol class="gopt">${arr.map(x=>`<li>${slotify(x)}</li>`).join('')}</ol></div>`).join('');
+}
 function renderPlanStance(){
+  renderPlanBodies();
   const on = !!sess && activeT==='t2' && !!sess.t2.prompt && GUIDE[curType()].st.length>1;
   $('planStance').hidden = !on;
   if(!on) return;
