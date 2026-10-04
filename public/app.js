@@ -1426,6 +1426,7 @@ function showView(name) {
   if (name !== 'submit' && isOnSubmitWithContent()) {
     if (!confirm('Ta đang viết dở một bài. Rời khỏi đây mà chưa lưu nháp?')) return;
   }
+  if (t1tHasUnsaved() && !confirm('Bài giảng Task 1 chưa lưu. Rời đi mà không lưu?')) return;
   // Track navigation history so the Back button returns to the real previous view
   if (!_goingBack && _currentView && _currentView !== name && !_NO_BACK.has(_currentView)) {
     _viewHistory.push(_currentView);
@@ -31188,7 +31189,7 @@ const t1tReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').m
 
 // Opened from showApp(): a shared link goes straight to the lesson.
 function t1tTakePending() {
-  if (!_t1tPending) return false;
+  if (!_t1tPending || !currentUser || !token) return false;
   _t1tRoute = { view: _t1tPending };
   _t1tPending = null;
   try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -31315,9 +31316,22 @@ function t1tStageHtml(html) {
   return `<div class="t1t-stage"><div class="t1t-sizer"><div class="t1t-scale"><div class="t1t-frame">${html}<div class="t1t-ovwrap"></div></div></div></div></div>`;
 }
 // Mounts a stage inside `host`. get() returns the step to draw.
+// The charts reuse fixed ids (arrow markers); a copy here would capture the
+// games' url(#…) references, or the other way round. Each stage renames its own.
+function t1tUniqIds(html, uid) {
+  const ids = [...new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(m => m[1]))];
+  for (const id of ids) {
+    const esc = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(new RegExp(`(\\sid=")${esc}"`, 'g'), `$1${uid}-${id}"`)
+      .replace(new RegExp(`url\\(#${esc}\\)`, 'g'), `url(#${uid}-${id})`)
+      .replace(new RegExp(`href="#${esc}"`, 'g'), `href="#${uid}-${id}"`);
+  }
+  return html;
+}
 function t1tMountStage(host, html, opts) {
-  host.innerHTML = t1tStageHtml(html);
-  const st = { host, stage: host.firstElementChild, uid: 't1tov' + (++_t1tStageSeq), zoom: 1, maxH: opts.maxH || null, get: opts.get, draft: null };
+  const uid = 't1tov' + (++_t1tStageSeq);
+  host.innerHTML = t1tStageHtml(t1tUniqIds(html, uid));
+  const st = { host, stage: host.firstElementChild, uid, zoom: 1, maxH: opts.maxH || null, get: opts.get, draft: null };
   st.sizer = st.stage.querySelector('.t1t-sizer');
   st.scale = st.stage.querySelector('.t1t-scale');
   st.frame = st.stage.querySelector('.t1t-frame');
@@ -31368,6 +31382,8 @@ function t1tLeave() {
   document.removeEventListener('keydown', t1tKey);
   _t1t = null;
 }
+function t1tHasUnsaved() { return !!_t1t && _t1t.mode === 'edit' && _t1t.dirty && t1tOnView(); }
+window.addEventListener('beforeunload', e => { if (t1tHasUnsaved()) { e.preventDefault(); e.returnValue = ''; } });
 function t1tOnView() {
   const v = document.getElementById('view-t1-teach');
   return !!v && !v.classList.contains('hidden');
@@ -31469,7 +31485,7 @@ function t1tNewStep(n) { return { title: `Bước ${n}`, sentence: '', note: '',
 /* ── Tự nhập ── */
 function t1tCustomForm(existing) {
   // existing: { lesson } when editing a custom lesson's numbers
-  const lesson = existing && existing.lesson;
+  const lesson = existing && existing.lesson, wasDirty = !!(existing && existing.dirty);
   const d = lesson ? t1tClone(lesson.source.data) : { chart: 'bar', title: '', unit: '', axis: '', cols: ['2010', '2015', '2020'], rows: [{ name: 'A', vals: [10, 20, 30] }, { name: 'B', vals: [15, 25, 20] }] };
   t1tLeave();
   _t1t = { mode: 'custom', d, lesson };
@@ -31511,7 +31527,7 @@ function t1tCustomForm(existing) {
     R.querySelector('#t1t-addrow').onclick = () => { D.rows.push({ name: '', vals: D.cols.map(() => 0) }); render(); };
     R.querySelectorAll('[data-delcol]').forEach(b => b.onclick = () => { if (D.cols.length < 2) return; const j = +b.dataset.delcol; D.cols.splice(j, 1); D.rows.forEach(r => r.vals.splice(j, 1)); render(); });
     R.querySelectorAll('[data-delrow]').forEach(b => b.onclick = () => { if (D.rows.length < 2) return; D.rows.splice(+b.dataset.delrow, 1); render(); });
-    R.querySelector('#t1t-cback').onclick = () => lesson ? t1tEditStart(lesson) : t1tPick();
+    R.querySelector('#t1t-cback').onclick = () => lesson ? t1tEditStart(lesson, wasDirty) : t1tPick();
     R.querySelector('#t1t-cuse').onclick = () => {
       const err = t1tCustomCheck(D);
       if (err) { document.getElementById('t1t-cmsg').textContent = err; return; }
@@ -31536,6 +31552,7 @@ function t1tCustomCheck(D) {
   if (D.chart === 'bar' && D.rows.length > T1_COLORS.length) return `Cột nhóm tối đa ${T1_COLORS.length} dòng.`;
   if (D.chart === 'line' && D.rows.length > T1T_LINE_COLORS.length) return `Tối đa ${T1T_LINE_COLORS.length} đường.`;
   if (D.chart === 'pie' && D.rows.length > 6) return 'Biểu đồ tròn tối đa 6 phần.';
+  if (D.chart === 'pie') { const sum = D.rows.reduce((a, r) => a + r.vals[0], 0); if (Math.abs(sum - 100) > 1) return `Các phần của biểu đồ tròn phải cộng lại khoảng 100%, hiện là ${t1Num(sum)}%.`; }
   return '';
 }
 function t1tCustomClean(D) {
@@ -31545,14 +31562,15 @@ function t1tCustomClean(D) {
 /* ── Soạn bài: tools, steps, sentences ── */
 async function t1tEditOpen(id) {
   t1tLeave();
-  _t1t = { mode: 'loading' };
+  const ticket = _t1t = { mode: 'loading' };
   t1tRoot().innerHTML = '<div class="t1t-wrap"><div class="loading">Đang mở bài giảng…</div></div>';
   try {
     const l = await api('/api/t1-lessons/' + encodeURIComponent(id) + '/view');
+    if (_t1t !== ticket) return;
     if (!l.can_edit) return t1tViewOpen(id);
     t1tEditStart({ id: l.id, title: l.title, source: l.source, steps: l.steps.length ? l.steps : [t1tNewStep(1)] });
   } catch (e) {
-    t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">Chưa mở được bài giảng: ${escapeHtml(e.message)}</div></div>`;
+    if (_t1t === ticket) t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">Chưa mở được bài giảng: ${escapeHtml(e.message)}</div></div>`;
   }
 }
 function t1tEditStart(lesson, dirty) {
@@ -31595,7 +31613,7 @@ function t1tEditStart(lesson, dirty) {
   R.querySelector('#t1t-link').onclick = async () => { if (await t1tSave()) t1tLinkBox(lesson.id, document.getElementById('t1t-emsg')); };
   R.querySelector('#t1t-add').onclick = () => t1tStepAdd();
   const ed = R.querySelector('#t1t-editdata');
-  if (ed) ed.onclick = () => { if (!_t1t.dirty || confirm('Bài giảng chưa lưu. Vẫn sang sửa số liệu? Các bước vẫn được giữ.')) t1tCustomForm({ lesson }); };
+  if (ed) ed.onclick = () => { if (!_t1t.dirty || confirm('Bài giảng chưa lưu. Vẫn sang sửa số liệu? Các bước vẫn được giữ.')) t1tCustomForm({ lesson, dirty: _t1t.dirty }); };
   _t1t.stage = t1tMountStage(R.querySelector('#t1t-ehost'), src.html, { get: () => lesson.steps[_t1t.cur], maxH: () => Math.max(320, window.innerHeight - 260) });
   t1tBindDraw();
   t1tToolsRender();
@@ -31604,7 +31622,7 @@ function t1tEditStart(lesson, dirty) {
   t1tStatus();
   document.addEventListener('keydown', t1tKey);
 }
-function t1tDirty() { _t1t.dirty = true; t1tStatus(); }
+function t1tDirty() { _t1t.dirty = true; _t1t.rev = (_t1t.rev || 0) + 1; t1tStatus(); }
 function t1tStatus() {
   const el = document.getElementById('t1t-status');
   if (el) el.textContent = _t1t.saving ? 'Đang lưu…' : _t1t.dirty ? 'Chưa lưu' : (_t1t.lesson.id ? 'Đã lưu' : '');
@@ -31732,7 +31750,7 @@ function t1tStepsRender() {
     const [s] = steps.splice(from, 1);
     steps.splice(to, 0, s);
     T.cur = steps.indexOf(curStep);
-    t1tDirty(); t1tStepsRender();
+    t1tDirty(); t1tStepsRender(); t1tFormRender();
   };
   ol.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => t1tGo(+b.dataset.pick));
   ol.querySelectorAll('[data-up]').forEach(b => b.onclick = () => move(+b.dataset.up, +b.dataset.up - 1));
@@ -31740,7 +31758,7 @@ function t1tStepsRender() {
   ol.querySelectorAll('[data-dup]').forEach(b => b.onclick = () => {
     if (steps.length >= T1T_MAX_STEPS) return;
     const i = +b.dataset.dup, c = t1tClone(steps[i]);
-    c.title = (c.title || `Bước ${i + 1}`).slice(0, 112) + ' (bản sao)';
+    c.title = (c.title || `Bước ${i + 1}`).slice(0, 110) + ' (bản sao)';
     steps.splice(i + 1, 0, c);
     T.cur = i + 1;
     t1tDirty(); t1tStepsRender(); t1tFormRender(); T.stage.draw();
@@ -31805,13 +31823,15 @@ async function t1tSave() {
   if (!String(L.title).trim()) { t1tFlash('Bài giảng cần có tên.'); return false; }
   if (L.id && !T.dirty) return true;
   T.saving = true; t1tStatus();
+  const rev = T.rev || 0;
   const body = JSON.stringify({ title: L.title.trim(), source: L.source, steps: L.steps });
   try {
     const res = L.id ? await api('/api/t1-lessons/' + encodeURIComponent(L.id), { method: 'PUT', body })
       : await api('/api/t1-lessons', { method: 'POST', body });
     if (_t1t !== T) return true;
     L.id = res.id;
-    T.dirty = false;
+    // An edit typed while the request was out still needs saving.
+    T.dirty = (T.rev || 0) !== rev;
     return true;
   } catch (e) {
     if (_t1t === T) t1tFlash('Chưa lưu được: ' + e.message);
@@ -31825,13 +31845,15 @@ async function t1tSave() {
 /* ── Xem (học sinh, hoặc giáo viên xem lại): read-only, ←/→ ── */
 async function t1tViewOpen(id) {
   t1tLeave();
-  _t1t = { mode: 'loading' };
+  const ticket = _t1t = { mode: 'loading' };
   t1tRoot().innerHTML = '<div class="t1t-wrap"><div class="loading">Đang mở bài giảng…</div></div>';
   let l;
   try { l = await api('/api/t1-lessons/' + encodeURIComponent(id) + '/view'); } catch (e) {
+    if (_t1t !== ticket) return;
     t1tRoot().innerHTML = `<div class="t1t-wrap"><div class="t1t-empty">${e.status === 404 ? 'Bài giảng này không còn nữa, hoặc link bị sai.' : 'Chưa mở được bài giảng: ' + escapeHtml(e.message)}</div><button class="btn btn-secondary" onclick="showView('home')">← Trang chủ</button></div>`;
     return;
   }
+  if (_t1t !== ticket) return;
   t1tLeave();
   if (!l.steps.length) l.steps = [t1tNewStep(1)];
   _t1t = { mode: 'view', lesson: l, cur: 0 };
@@ -31906,7 +31928,7 @@ function t1tKey(e) {
   if (!_t1t || !t1tOnView()) { document.removeEventListener('keydown', t1tKey); return; }
   const typing = e.target && /input|textarea|select/i.test(e.target.tagName);
   if (_t1t.mode === 'edit') {
-    if (!typing && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); t1tUndo(); }
+    if (!typing && (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); t1tUndo(); }
     return;
   }
   if (_t1t.mode !== 'view' || typing || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -31947,6 +31969,7 @@ function t1tPresent(lesson, start) {
     if (!first) t1tFade(S.stage.ov, el.querySelector('#t1t-pcard'));
   };
   S.key = e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); S.go(S.cur + 1); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); S.go(S.cur - 1); }
     else if (e.key === 'Escape') { e.preventDefault(); t1tPresentClose(); }

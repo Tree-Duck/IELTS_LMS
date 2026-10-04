@@ -3429,7 +3429,7 @@ function t1lObj(v, what) {
 }
 function t1lCustom(d) {
   t1lObj(d, 'Chart data');
-  const chart = String(d.chart || '');
+  const chart = typeof d.chart === 'string' ? d.chart : '';
   if (!T1L_CHARTS.has(chart)) throw new T1LessonError('Chart type must be line, bar, pie or table');
   const cols = t1lArr(d.cols, 12, 'columns').map((c, i) => t1lStr(c, 40, `Column ${i + 1}`, true));
   if (!cols.length) throw new T1LessonError('At least one column');
@@ -3489,7 +3489,10 @@ function t1lClean(body, isNew) {
       out.source = { kind: src.kind, ref: src.ref, data: null };
     }
   }
-  if (isNew || 'steps' in body) out.steps = t1lArr(body.steps, T1L_MAX_STEPS, 'steps').map(t1lStep);
+  if (isNew || 'steps' in body) {
+    if (!Array.isArray(body.steps)) throw new T1LessonError('Steps must be a list');
+    out.steps = t1lArr(body.steps, T1L_MAX_STEPS, 'steps').map(t1lStep);
+  }
   return out;
 }
 function t1lSummary(l) {
