@@ -1941,6 +1941,7 @@ async function loadHomeScreen() {
   renderHomeQuote();
   renderHomeMascot(currentUser && currentUser.mascot);
 
+  const mascotSeen = _mascotSavedAt;
   try {
     const [submissions, profile] = await Promise.all([
       api('/api/submissions').catch(() => []),
@@ -1958,7 +1959,7 @@ async function loadHomeScreen() {
     const bestEl   = document.getElementById('home-stat-best');
     if (streakEl) streakEl.textContent = profile.current_streak || 0;
     // The server copy wins: the mascot follows the student between devices.
-    if (profile && 'mascot' in profile) {
+    if (profile && 'mascot' in profile && _mascotSavedAt === mascotSeen) {
       mascotStore(profile.mascot);
       renderHomeMascot(profile.mascot);
     }
@@ -24496,11 +24497,13 @@ function mascotOctoCopy() {
 function mascotStore(m) {
   if (!currentUser) return;
   currentUser.mascot = m || null;
-  localStorage.setItem('ielts_user', JSON.stringify(currentUser));
+  try { localStorage.setItem('ielts_user', JSON.stringify(currentUser)); } catch (e) { /* private mode or full: the server copy still holds it */ }
 }
 
 // Home hero: the octopus (default, or picked) or the chosen sprite, recoloured.
 let _homeMascot = null;
+let _mascotSavedAt = 0;
+let _mascotClose = null;
 function renderHomeMascot(m) {
   const box = document.querySelector('.home-hero-octo');
   const svg = document.getElementById('banner-octo');
@@ -24524,7 +24527,7 @@ function renderHomeMascot(m) {
 
 /* The picker: live preview, a name, seven colours, forty characters. */
 function mascotPicker() {
-  document.getElementById('ms-modal')?.remove();
+  if (_mascotClose) _mascotClose();
   const opener = document.activeElement;
   const saved = mascotValid(currentUser && currentUser.mascot);
   const st = { id: saved ? saved.id : 'octo', hue: saved && Number.isInteger(saved.hue) ? saved.hue : 0, name: (saved && saved.name) || '' };
@@ -24582,14 +24585,19 @@ function mascotPicker() {
     el.querySelectorAll('.ms-hue').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.h === st.hue)));
   };
   const close = () => {
+    if (_mascotClose !== close) return;
+    _mascotClose = null;
     if (preview) preview.destroy();
     document.removeEventListener('keydown', onKey);
     el.remove();
     if (opener && opener.focus) opener.focus();
   };
+  _mascotClose = close;
   const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
   document.addEventListener('keydown', onKey);
-  el.addEventListener('click', e => { if (e.target === el) close(); });
+  let downOnBackdrop = false;
+  el.addEventListener('mousedown', e => { downOnBackdrop = e.target === el; });
+  el.addEventListener('click', e => { if (e.target === el && downOnBackdrop) close(); downOnBackdrop = false; });
   $m('.ms-x').onclick = close;
   // The octopus preview has no sheets, so a click just bounces it.
   $m('.ms-preview-octo').onclick = () => { if (!msReduced() && $m('.ms-preview-octo').animate) $m('.ms-preview-octo').animate(MS_SQUASH, { duration: MS_SQUASH_MS, easing: 'linear' }); };
@@ -24600,12 +24608,13 @@ function mascotPicker() {
   el.querySelectorAll('.ms-tile').forEach(b => { b.onclick = () => { st.id = b.dataset.id; draw(); }; });
   $m('#ms-save').onclick = async () => {
     const btn = $m('#ms-save');
-    const name = st.name.replace(/[\u0000-\u001F\u007F<>]/g, '').trim().slice(0, 20);
+    const name = [...st.name.replace(/[\u0000-\u001F\u007F<>]/g, '').trim()].slice(0, 20).join('').trim();
     btn.disabled = true;
     $m('#ms-err').textContent = '';
     try {
       const res = await api('/api/user/profile', { method: 'PUT', body: JSON.stringify({ mascot: { id: st.id, hue: st.hue, name } }) });
       const m = res && res.mascot !== undefined ? res.mascot : { id: st.id, hue: st.hue, name };
+      _mascotSavedAt = Date.now();
       mascotStore(m);
       renderHomeMascot(m);
       close();
