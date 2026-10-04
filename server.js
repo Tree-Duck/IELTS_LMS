@@ -2405,6 +2405,28 @@ app.post('/api/admin/users/batch', authenticate, adminOnly, (req, res) => {
 });
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
+// Companion mascots a student can pick: the home octopus, plus every sprite
+// sheet shipped in public/mascots (page-mascot, MIT).
+let MASCOT_IDS = new Set();
+try {
+  MASCOT_IDS = new Set(fs.readdirSync(path.join(__dirname, 'public', 'mascots'))
+    .filter(f => f.endsWith('-directions.webp'))
+    .map(f => f.slice(0, -'-directions.webp'.length)));
+} catch (e) {
+  console.warn('Mascot sheets not found:', e.message);
+}
+// null clears the choice; a bad id is refused; hue and name are cleaned up.
+function cleanMascot(m) {
+  if (m === null) return { value: null };
+  if (typeof m !== 'object' || Array.isArray(m)) return { error: 'mascot must be an object or null' };
+  const id = typeof m.id === 'string' ? m.id : '';
+  if (id !== 'octo' && !MASCOT_IDS.has(id)) return { error: 'Unknown mascot' };
+  const hue = Number.isInteger(m.hue) && m.hue >= 0 && m.hue <= 359 ? m.hue : 0;
+  const name = typeof m.name === 'string'
+    ? [...m.name.replace(/[\u0000-\u001F\u007F<>]/g, '').trim()].slice(0, 20).join('').trim()
+    : '';
+  return { value: { id, hue, name } };
+}
 app.get('/api/user/profile', authenticate, (req, res) => {
   const user = db.getUserById(req.user.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -2415,6 +2437,7 @@ app.get('/api/user/profile', authenticate, (req, res) => {
     role: user.role,
     target_band: user.target_band ?? null,
     avatar: user.avatar ?? null,
+    mascot: user.mascot ?? null,
     current_streak: (() => {
       if (!user.last_activity_date || !(user.current_streak > 0)) return 0;
       const today = new Date().toISOString().slice(0, 10);
@@ -2429,7 +2452,12 @@ app.get('/api/user/profile', authenticate, (req, res) => {
 });
 
 app.put('/api/user/profile', authenticate, (req, res) => {
-  const { target_band, avatar } = req.body;
+  const { target_band, avatar, mascot } = req.body;
+  let cleanedMascot;
+  if (mascot !== undefined) {
+    cleanedMascot = cleanMascot(mascot);
+    if (cleanedMascot.error) return res.status(400).json({ error: cleanedMascot.error });
+  }
   if (target_band !== null && target_band !== undefined) {
     const band = parseFloat(target_band);
     if (isNaN(band) || band < 4 || band > 9) {
@@ -2442,7 +2470,8 @@ app.put('/api/user/profile', authenticate, (req, res) => {
     const av = (typeof avatar === 'string' && avatar.trim()) ? avatar.trim().slice(0, 8) : null;
     db.updateUserProfile(req.user.id, { avatar: av });
   }
-  res.json({ success: true });
+  if (cleanedMascot) db.updateUserProfile(req.user.id, { mascot: cleanedMascot.value });
+  res.json({ success: true, ...(cleanedMascot ? { mascot: cleanedMascot.value } : {}) });
 });
 
 // ─── Band Score Tables ────────────────────────────────────────────────────────
