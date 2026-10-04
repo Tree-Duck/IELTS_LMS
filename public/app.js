@@ -1939,7 +1939,9 @@ async function loadHomeScreen() {
   const nameEl = document.getElementById('home-welcome-name');
   if (nameEl && currentUser) nameEl.textContent = currentUser.name || currentUser.email.split('@')[0];
   renderHomeQuote();
+  renderHomeMascot(currentUser && currentUser.mascot);
 
+  const mascotSeen = _mascotSavedAt;
   try {
     const [submissions, profile] = await Promise.all([
       api('/api/submissions').catch(() => []),
@@ -1956,6 +1958,11 @@ async function loadHomeScreen() {
     const avgEl    = document.getElementById('home-stat-avg');
     const bestEl   = document.getElementById('home-stat-best');
     if (streakEl) streakEl.textContent = profile.current_streak || 0;
+    // The server copy wins: the mascot follows the student between devices.
+    if (profile && 'mascot' in profile && _mascotSavedAt === mascotSeen) {
+      mascotStore(profile.mascot);
+      renderHomeMascot(profile.mascot);
+    }
     if (subsEl)   subsEl.textContent   = (submissions || []).length;
     if (avgEl)    avgEl.textContent    = avg;
     if (bestEl)   bestEl.textContent   = best;
@@ -24352,6 +24359,274 @@ function renderBcFinal() {
   }
   tick();
 })();
+
+/* ─── Bạn đồng hành: the home mascot ────────────────────────────────────────
+   The banner octopus is the default. A student can swap it for one of the
+   page-mascot characters (MIT, github.com/nilbuild/page-mascot; sheets and
+   licence in public/mascots), name it and recolour it. The choice is saved
+   on the account. mascotMount() is a plain-JS port of page-mascot's Mascot:
+   two 3x3 sprite sheets, the head follows the pointer, a click boops it. */
+const MASCOT_LIST = [
+  ['octo', 'Bạch tuộc'], ['bear', 'Gấu'], ['bunny', 'Thỏ'], ['cat', 'Mèo'], ['deer', 'Hươu'], ['dino', 'Khủng long'],
+  ['fox', 'Cáo'], ['fox-ink', 'Cáo nét mực'], ['fox-paper', 'Cáo giấy'], ['fox-pixel', 'Cáo pixel'], ['fox-riso', 'Cáo in riso'],
+  ['fox-sketch', 'Cáo phác thảo'], ['frog', 'Ếch'], ['hamster', 'Chuột hamster'], ['hedgehog', 'Nhím'], ['koala', 'Koala'],
+  ['mouse', 'Chuột'], ['otter', 'Rái cá'], ['owl', 'Cú'], ['panda', 'Gấu trúc'], ['penguin', 'Chim cánh cụt'], ['pug', 'Chó pug'],
+  ['raccoon', 'Gấu mèo'], ['redpanda', 'Gấu trúc đỏ'], ['sheep', 'Cừu'], ['sloth', 'Con lười'], ['tiger', 'Hổ'],
+  ['clockwork', 'Rô-bốt lên dây'], ['crt', 'Máy tính cổ'], ['cube', 'Khối vuông'], ['drone', 'Drone'], ['gearbot', 'Rô-bốt bánh răng'],
+  ['knight', 'Rô-bốt hiệp sĩ'], ['lantern', 'Đèn lồng'], ['postbot', 'Rô-bốt đưa thư'], ['radio', 'Radio'], ['rocket', 'Tên lửa'],
+  ['scout', 'Rô-bốt thám hiểm'], ['toaster', 'Máy nướng bánh'], ['tv', 'Ti vi'],
+];
+const MASCOT_HUES = [0, 40, 100, 170, 220, 280, 320];
+const MS_DIRS = ['up-left', 'up', 'up-right', 'left', 'center', 'right', 'down-left', 'down', 'down-right'];
+const MS_REACTS = ['blink', 'heart', 'sparkle', 'surprised', 'wink', 'bashful', 'sleepy', 'dizzy', 'delighted'];
+// Clockwise from the right, matching atan2 with y pointing down.
+const MS_CLOCKWISE = ['right', 'down-right', 'down', 'down-left', 'left', 'up-left', 'up', 'up-right'];
+const MS_SECTOR = (Math.PI * 2) / MS_CLOCKWISE.length;
+const MS_HYSTERESIS = 0.12;
+const MS_DEAD_ZONE = 70;
+const MS_PAYOFFS = ['heart', 'sparkle', 'delighted'];
+const MS_BOOP_PAYOFF = 120, MS_BOOP_END = 560, MS_SQUASH_MS = 420;
+const MS_DIZZY_AFTER = 4, MS_DIZZY_WINDOW = 1600, MS_DIZZY_END = 1100;
+const MS_SQUASH = [
+  { transform: 'scale(1, 1)', easing: 'ease-in' },
+  { transform: 'scale(1.10, 0.86)', offset: 0.18, easing: 'ease-out' },
+  { transform: 'scale(0.95, 1.08)', offset: 0.45, easing: 'ease-in-out' },
+  { transform: 'scale(1.03, 0.97)', offset: 0.72, easing: 'ease-in-out' },
+  { transform: 'scale(1, 1)' },
+];
+// background-size 300% makes each cell a clean 0/50/100% step on both axes.
+const msCell = i => `${(i % 3) * 50}% ${Math.floor(i / 3) * 50}%`;
+const msWrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+const msReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function mascotLabel(id) { const m = MASCOT_LIST.find(x => x[0] === id); return m ? m[1] : 'Bạch tuộc'; }
+function mascotValid(m) { return m && typeof m === 'object' && MASCOT_LIST.some(x => x[0] === m.id) ? m : null; }
+
+// Fills an empty <button> with a live mascot. set() swaps the character,
+// destroy() drops the window listeners and timers.
+function mascotMount(btn, id, label) {
+  btn.type = 'button';
+  btn.classList.add('ms-sprite');
+  btn.innerHTML = '<span class="ms-squash"><span class="ms-layer"></span><span class="ms-layer"></span></span>';
+  const squash = btn.firstElementChild;
+  const [dirEl, reactEl] = squash.children;
+  let timers = [], boops = { count: 0, at: 0 }, sector = -1, pointer = null;
+  const setDirection = d => { dirEl.style.backgroundPosition = msCell(MS_DIRS.indexOf(d)); };
+  const setReaction = r => {
+    // The reaction sheet stays mounted so it is fetched up front, never on the first click.
+    reactEl.style.backgroundPosition = msCell(MS_REACTS.indexOf(r || 'blink'));
+    reactEl.style.opacity = r ? 1 : 0;
+    dirEl.style.opacity = r ? 0 : 1;
+  };
+  const aim = () => {
+    if (!pointer || !btn.isConnected || btn.offsetParent === null) return;
+    const box = btn.getBoundingClientRect();
+    const dx = pointer.x - (box.left + box.width / 2);
+    const dy = pointer.y - (box.top + box.height / 2);
+    if (Math.hypot(dx, dy) < MS_DEAD_ZONE) { sector = -1; setDirection('center'); return; }
+    // Hold the current sector until the pointer is well past its edge.
+    const angle = Math.atan2(dy, dx);
+    if (sector !== -1 && Math.abs(msWrap(angle - sector * MS_SECTOR)) < MS_SECTOR / 2 + MS_HYSTERESIS) return;
+    sector = (Math.round(angle / MS_SECTOR) + MS_CLOCKWISE.length) % MS_CLOCKWISE.length;
+    setDirection(MS_CLOCKWISE[sector]);
+  };
+  const onMove = e => { pointer = { x: e.clientX, y: e.clientY }; aim(); };
+  const tracks = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (tracks) {
+    window.addEventListener('pointermove', onMove, { passive: true });
+    window.addEventListener('scroll', aim, { passive: true });
+  }
+  const boop = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    const later = (ms, next) => timers.push(setTimeout(() => setReaction(next), ms));
+    const now = Date.now();
+    boops.count = now - boops.at < MS_DIZZY_WINDOW ? boops.count + 1 : 1;
+    boops.at = now;
+    if (boops.count >= MS_DIZZY_AFTER) {
+      boops.count = 0;
+      setReaction('dizzy');
+      later(MS_DIZZY_END, null);
+    } else {
+      setReaction('blink');
+      later(MS_BOOP_PAYOFF, MS_PAYOFFS[(boops.count - 1) % MS_PAYOFFS.length]);
+      later(MS_BOOP_END, null);
+    }
+    if (msReduced() || !squash.animate) return;
+    // Per-keyframe easing with the effect itself linear: an easing on the effect
+    // would reinterpret every offset and front-load the whole bounce.
+    squash.animate(MS_SQUASH, { duration: MS_SQUASH_MS, easing: 'linear' });
+  };
+  btn.addEventListener('click', boop);
+  const set = (nid, nlabel) => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    dirEl.style.backgroundImage = `url(/mascots/${nid}-directions.webp)`;
+    reactEl.style.backgroundImage = `url(/mascots/${nid}-reactions.webp)`;
+    btn.setAttribute('aria-label', `Bấm để chơi với ${nlabel}`);
+    sector = -1;
+    setDirection('center');
+    setReaction(null);
+    aim();
+  };
+  set(id, label);
+  return {
+    set,
+    destroy() {
+      timers.forEach(clearTimeout);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('scroll', aim);
+    },
+  };
+}
+
+// A still copy of the banner octopus (ids stripped, so the live eyes keep theirs).
+function mascotOctoCopy() {
+  const src = document.getElementById('banner-octo');
+  if (!src) return '';
+  const svg = src.cloneNode(true);
+  svg.removeAttribute('id');
+  svg.removeAttribute('style'); // the live one is display:none while a sprite is shown
+  svg.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add('ms-octo');
+  return svg.outerHTML;
+}
+
+function mascotStore(m) {
+  if (!currentUser) return;
+  currentUser.mascot = m || null;
+  try { localStorage.setItem('ielts_user', JSON.stringify(currentUser)); } catch (e) { /* private mode or full: the server copy still holds it */ }
+}
+
+// Home hero: the octopus (default, or picked) or the chosen sprite, recoloured.
+let _homeMascot = null;
+let _mascotSavedAt = 0;
+let _mascotClose = null;
+function renderHomeMascot(m) {
+  const box = document.querySelector('.home-hero-octo');
+  const svg = document.getElementById('banner-octo');
+  const btn = document.getElementById('home-mascot-sprite');
+  const tag = document.getElementById('home-mascot-name');
+  if (!box || !svg || !btn) return;
+  m = mascotValid(m);
+  const id = m ? m.id : 'octo';
+  box.style.filter = m && m.hue ? `hue-rotate(${m.hue}deg)` : '';
+  if (id === 'octo') {
+    svg.style.display = '';
+    btn.hidden = true;
+  } else {
+    svg.style.display = 'none';
+    btn.hidden = false;
+    const label = m.name || mascotLabel(id);
+    if (_homeMascot) _homeMascot.set(id, label); else _homeMascot = mascotMount(btn, id, label);
+  }
+  if (tag) { tag.textContent = (m && m.name) || ''; tag.hidden = !(m && m.name); }
+}
+
+/* The picker: live preview, a name, seven colours, forty characters. */
+function mascotPicker() {
+  if (_mascotClose) _mascotClose();
+  const opener = document.activeElement;
+  const saved = mascotValid(currentUser && currentUser.mascot);
+  const st = { id: saved ? saved.id : 'octo', hue: saved && Number.isInteger(saved.hue) ? saved.hue : 0, name: (saved && saved.name) || '' };
+  const octo = mascotOctoCopy();
+  const el = document.createElement('div');
+  el.id = 'ms-modal';
+  el.className = 'ms-modal';
+  el.innerHTML = `
+    <div class="ms-card" role="dialog" aria-modal="true" aria-labelledby="ms-title">
+      <div class="ms-head">
+        <h3 id="ms-title">Bạn đồng hành</h3>
+        <button type="button" class="ms-x" aria-label="Đóng">×</button>
+      </div>
+      <div class="ms-body">
+        <div class="ms-top">
+          <div class="ms-preview" id="ms-preview">
+            <div class="ms-preview-octo">${octo}</div>
+            <button type="button" id="ms-preview-sprite" hidden></button>
+          </div>
+          <div class="ms-side">
+            <label class="ms-label" for="ms-name">Tên</label>
+            <input type="text" id="ms-name" class="ms-name" maxlength="20" placeholder="Đặt tên, ví dụ Mực" autocomplete="off">
+            <div class="ms-label">Màu</div>
+            <div class="ms-hues">${MASCOT_HUES.map(h => `<button type="button" class="ms-hue" data-h="${h}" aria-label="${h ? `Màu ${h} độ` : 'Màu gốc'}"><span style="filter:hue-rotate(${h}deg)"></span></button>`).join('')}</div>
+          </div>
+        </div>
+        <div class="ms-grid">${MASCOT_LIST.map(([id, name]) => `
+          <button type="button" class="ms-tile" data-id="${id}">
+            ${id === 'octo' ? `<span class="ms-tile-art">${octo}</span>` : `<img class="ms-tile-art" src="/mascots/thumbs/${id}.webp" loading="lazy" alt="">`}
+            <span class="ms-tile-name">${escapeHtml(name)}</span>
+          </button>`).join('')}
+        </div>
+      </div>
+      <div class="ms-foot">
+        <span class="ms-err" id="ms-err" role="alert"></span>
+        <button type="button" class="btn btn-primary" id="ms-save">Lưu</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  const $m = sel => el.querySelector(sel);
+  let preview = null;
+  const draw = () => {
+    // Recolour the character only, not the green stage behind it.
+    const f = st.hue ? `hue-rotate(${st.hue}deg)` : '';
+    $m('.ms-preview-octo').style.filter = f;
+    $m('#ms-preview-sprite').style.filter = f;
+    const isOcto = st.id === 'octo';
+    $m('.ms-preview-octo').hidden = !isOcto;
+    $m('#ms-preview-sprite').hidden = isOcto;
+    if (!isOcto) {
+      const label = st.name || mascotLabel(st.id);
+      if (preview) preview.set(st.id, label); else preview = mascotMount($m('#ms-preview-sprite'), st.id, label);
+    }
+    el.querySelectorAll('.ms-tile').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === st.id)));
+    el.querySelectorAll('.ms-hue').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.h === st.hue)));
+  };
+  const close = () => {
+    if (_mascotClose !== close) return;
+    _mascotClose = null;
+    if (preview) preview.destroy();
+    document.removeEventListener('keydown', onKey);
+    el.remove();
+    if (opener && opener.focus) opener.focus();
+  };
+  _mascotClose = close;
+  const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+  document.addEventListener('keydown', onKey);
+  let downOnBackdrop = false;
+  el.addEventListener('mousedown', e => { downOnBackdrop = e.target === el; });
+  el.addEventListener('click', e => { if (e.target === el && downOnBackdrop) close(); downOnBackdrop = false; });
+  $m('.ms-x').onclick = close;
+  // The octopus preview has no sheets, so a click just bounces it.
+  $m('.ms-preview-octo').onclick = () => { if (!msReduced() && $m('.ms-preview-octo').animate) $m('.ms-preview-octo').animate(MS_SQUASH, { duration: MS_SQUASH_MS, easing: 'linear' }); };
+  const nameIn = $m('#ms-name');
+  nameIn.value = st.name;
+  nameIn.oninput = () => { st.name = nameIn.value; };
+  el.querySelectorAll('.ms-hue').forEach(b => { b.onclick = () => { st.hue = +b.dataset.h; draw(); }; });
+  el.querySelectorAll('.ms-tile').forEach(b => { b.onclick = () => { st.id = b.dataset.id; draw(); }; });
+  $m('#ms-save').onclick = async () => {
+    const btn = $m('#ms-save');
+    const name = [...st.name.replace(/[\u0000-\u001F\u007F<>]/g, '').trim()].slice(0, 20).join('').trim();
+    btn.disabled = true;
+    $m('#ms-err').textContent = '';
+    try {
+      const res = await api('/api/user/profile', { method: 'PUT', body: JSON.stringify({ mascot: { id: st.id, hue: st.hue, name } }) });
+      const m = res && res.mascot !== undefined ? res.mascot : { id: st.id, hue: st.hue, name };
+      _mascotSavedAt = Date.now();
+      mascotStore(m);
+      renderHomeMascot(m);
+      close();
+    } catch (e) {
+      $m('#ms-err').textContent = `Chưa lưu được: ${e.message || 'lỗi mạng'}. Thử lại nhé.`;
+      btn.disabled = false;
+    }
+  };
+  draw();
+  nameIn.focus();
+}
+
 // TASK1 BEGIN
 /* ═══════════════════════════════════════════════════════════════════════════
    TASK 1 · ĐỌC BIỂU ĐỒ — four games over chart language, all charts drawn

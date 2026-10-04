@@ -350,6 +350,7 @@
             <p class="home-hero-eyebrow">Nền tảng học IELTS SSP</p>
             <h1 class="home-hero-title">Chào mừng trở lại, <span id="home-welcome-name">Học sinh</span>! 👋</h1>
             <p class="home-hero-sub">Tiếp tục từ lần trước, hoặc khám phá kỹ năng mới.</p>
+            <button type="button" class="home-mascot-btn" onclick="mascotPicker()">🎨 Bạn đồng hành</button>
             <div class="home-hero-quote" id="home-quote" hidden>
               <span class="hq-mark">"</span>
               <span class="hq-en" id="home-quote-en"></span>
@@ -357,8 +358,8 @@
             </div>
           </div>
           <!-- Octopus banner mascot — flat coral; tentacles are FILLED tapered shapes (wide base → curled point) -->
-          <div class="home-hero-octo" aria-hidden="true">
-            <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210">
+          <div class="home-hero-octo">
+            <svg id="banner-octo" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg" width="200" height="210" aria-hidden="true">
               <!-- Raised side arms: filled, tapered, wing-like -->
               <path fill="#FF7A59" d="M56,112 C38,108 22,100 12,86 C7,79 13,71 19,76 C30,86 44,95 62,100 C68,102 66,110 56,112 Z"/>
               <path fill="#FF7A59" d="M144,112 C162,108 178,100 188,86 C193,79 187,71 181,76 C170,86 156,95 138,100 C132,102 134,110 144,112 Z"/>
@@ -385,6 +386,8 @@
               <!-- Pursed lips (ε) -->
               <path d="M96 105 q5 -4 10 0 q-5 4 -10 0 q5 4 10 0" fill="none" stroke="#B23A24" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
+            <button type="button" id="home-mascot-sprite" class="home-mascot-sprite" hidden></button>
+            <span class="home-mascot-name" id="home-mascot-name" hidden></span>
           </div>
         </div>
 

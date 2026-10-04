@@ -498,6 +498,7 @@ const db = {
     if (u) {
       if ('target_band' in fields) u.target_band = fields.target_band;
       if ('avatar' in fields) u.avatar = fields.avatar;
+      if ('mascot' in fields) u.mascot = fields.mascot;
       save(data);
     }
   },
