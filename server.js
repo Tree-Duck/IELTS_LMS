@@ -2305,21 +2305,6 @@ app.get('/health', (req, res) => {
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
 
-// AI connectivity health check — admin only
-app.get('/api/admin/ai-health', authenticate, adminOnly, async (req, res) => {
-  try {
-    const start = Date.now();
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 5,
-      messages: [{ role: 'user', content: 'Reply "ok"' }],
-    });
-    res.json({ ok: true, ms: Date.now() - start, reply: response.content[0]?.text, model: MODEL });
-  } catch (err) {
-    res.json({ ok: false, error: err.message, type: err.constructor?.name, model: MODEL });
-  }
-});
-
 // Database backup — admin only, returns full lms-data.json as download
 app.get('/api/admin/backup', authenticate, adminOnly, (req, res) => {
   try {
