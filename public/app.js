@@ -28834,12 +28834,15 @@ const T1N_TELE = 0.8;
 const T1N_ZONES = [
   { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A',
     tiles: [['tiles/TilesetField.png', 1, 4, 1]],
+    props: { column: ['tiles/TilesetNature.png', 0, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 0, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 96, 176, 16, 16, 3] },
     decor: [['tiles/TilesetHouse.png', 0, 0, 64, 64, 4], ['tiles/TilesetHouse.png', 192, 0, 64, 64, 3], ['tiles/TilesetNature.png', 0, 160, 16, 16, 40], ['tiles/TilesetNature.png', 0, 176, 16, 16, 24], ['tiles/TilesetNature.png', 16, 176, 16, 16, 24]] },
   { name: 'Rừng Overview', part: 'Overview', top: '#24452A', side: '#1A3320', line: '#4E8A4A',
     tiles: [['tiles/TilesetField.png', 1, 7, 1]],
-    decor: [['tiles/TilesetNature.png', 0, 32, 64, 64, 6], ['tiles/TilesetNature.png', 64, 32, 64, 64, 5], ['tiles/TilesetNature.png', 32, 288, 32, 48, 6], ['tiles/TilesetNature.png', 0, 0, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
+    props: { column: ['tiles/TilesetNature.png', 32, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 32, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 272, 128, 32, 32, 2.2], crate: ['tiles/TilesetNature.png', 128, 224, 32, 32, 1.6] },
+    decor: [['tiles/TilesetNature.png', 0, 32, 64, 48, 6], ['tiles/TilesetNature.png', 64, 32, 64, 48, 5], ['tiles/TilesetNature.png', 96, 128, 32, 32, 8], ['tiles/TilesetNature.png', 64, 160, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
   { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#B5793A', side: '#94602C', line: '#E6B474',
     tiles: [['tiles/TilesetField.png', 1, 1, 1]],
+    props: { column: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 3], wall: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 112, 176, 16, 16, 3] },
     decor: [['tiles/TilesetDesert.png', 160, 64, 64, 64, 7], ['tiles/TilesetDesert.png', 160, 160, 64, 64, 5], ['tiles/TilesetNature.png', 192, 96, 64, 48, 4]] },
   { name: 'Đấu trường trùm cuối', part: null, dungeon: true,
     tiles: [['tiles/TilesetFloor.png', 13, 15, 0.8], ['tiles/TilesetFloor.png', 15, 15, 0.2]],
@@ -28860,9 +28863,9 @@ function t1nZoneGround(z) {
   }
   // Decor keeps clear of the middle, where the hero starts.
   z.decor.forEach(([f, sx, sy, w, h, n]) => {
-    for (let k = 0, tries = 0; k < n && tries < 200; tries++) {
+    for (let k = 0, tries = 0; k < n * 2 && tries < 400; tries++) {
       const px = Math.random() * (cv.width - w), py = R.top / 2 + Math.random() * (cv.height - R.top / 2 - h);
-      if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 170) continue;
+      if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 80) continue;
       x.drawImage(t1nImg(f).img, sx, sy, w, h, Math.round(px), Math.round(py), w, h);
       k++;
     }
@@ -29037,12 +29040,15 @@ const T1N_PARTS = ['Mở bài', 'Overview', 'Thân bài'];
 function t1nEssayAdd(S) {
   const g = _t1;
   if (!g.essay) g.essay = {};
-  (g.essay[S.part] = g.essay[S.part] || []).push(S.c.join(' '));
+  // Sentences come in shuffled; the essay keeps the model answer's order.
+  const all = T1_SURV[_t1Block], E = g.essay[S.part] = g.essay[S.part] || [];
+  E.push({ i: all.indexOf(S), t: S.c.join(' ') });
+  E.sort((a, b) => a.i - b.i);
   t1nEssayUi();
 }
 function t1nEssayHtml(cls) {
   const g = _t1, E = g.essay || {};
-  return T1N_PARTS.filter(p => (E[p] || []).length).map(p => `<div class="${cls}"><b>${escapeHtml(p)}</b><p>${escapeHtml(E[p].join(' '))}</p></div>`).join('');
+  return T1N_PARTS.filter(p => (E[p] || []).length).map(p => `<div class="${cls}"><b>${escapeHtml(p)}</b><p>${escapeHtml(E[p].map(x => x.t).join(' '))}</p></div>`).join('');
 }
 function t1nEssayUi() {
   const g = _t1, box = document.getElementById('h-essay-body'), n = document.getElementById('h-essay-n');
@@ -30838,7 +30844,7 @@ function t1hFinish() {
       ${weak.map(c => `<div class="t1-review-line"><b>${escapeHtml(c.en)}</b> · ${escapeHtml(c.vi)}</div>`).join('')}
       <button class="vb-secondary-btn" onclick="t1FcOpen('surv')">🃏 Ôn ngay bằng Flashcard</button></div>` : '')
     + (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '');
-  const { stars, wrong } = t1nStars(g, won), chest = Math.round(T1_LEVELS[_t1Lv].coin * walMult() * [0, 3, 6, 10][stars]);
+  const { stars, wrong } = t1nStars(g, won), chest = won ? Math.round(T1_LEVELS[_t1Lv].coin * walMult() * [0, 3, 6, 10][stars]) : 0;
   g.coins += chest;
   const essay = t1nEssayHtml('t1h-essay-p');
   t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', {
@@ -30849,8 +30855,8 @@ function t1hFinish() {
   if (essay) res.insertAdjacentHTML('beforebegin', `<div class="t1h-essay-final"><div class="t1-review-title">📝 Bài em vừa ghép</div>${essay}</div>`);
   res.querySelector('.t1-result-row')?.insertAdjacentHTML('afterend', `<div class="t1h-reward">
     <div class="t1h-stars" aria-label="${stars} sao">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('')}</div>
-    <img class="t1h-chest" src="/img/t1/ninja/items/BigTreasureChest.png" alt="" width="128" height="56">
-    <div class="t1h-chest-n">Rương: +${chest} xu · ${wrong ? `sai ${wrong} lần` : 'không sai lần nào'}</div></div>`);
+    ${won ? `<img class="t1h-chest" src="/img/t1/ninja/items/BigTreasureChest.png" alt="" width="128" height="56">` : ''}
+    <div class="t1h-chest-n">${won ? `Rương: +${chest} xu · ` : 'Thắng để mở rương · '}${wrong ? `sai ${wrong} lần` : 'không sai lần nào'}</div></div>`);
 }
 
 /* ── Drawing ── */
@@ -30977,6 +30983,18 @@ function t1hDrawFoe(c, f) {
 // Obstacles, drawn in depth order with the people.
 function t1hDrawProp(c, o) {
   const cx = o.x + o.w / 2, by = o.y + o.h;
+  const zp = (T1N_ZONES[_t1.zone || 0].props || {})[o.kind];
+  if (zp) {
+    const [f, sx, sy, w, h, sc] = zp, over = o.hit > 0 ? [['flash', 0.6]] : null;
+    if (o.kind !== 'wall') { t1nDraw(c, f, sx, sy, w, h, cx, by + 4, sc, o.seed < 0.5, over); return; }
+    // A wall becomes a row (or column) of trees standing on its footprint.
+    const step = w * sc * 0.7, n = Math.max(1, Math.round(Math.max(o.w, o.h) / step));
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n;
+      t1nDraw(c, f, sx, sy, w, h, o.w > o.h ? o.x + o.w * t : cx, o.w > o.h ? by + 4 : o.y + o.h * t + 12, sc, (o.seed * 7 + i) % 2 < 1, null);
+    }
+    return;
+  }
   if (o.kind === 'column') { t1dDraw(c, 'column', cx, by + 6, 3, false, null, false); return; }
   if (o.kind === 'crate') { t1dDraw(c, 'crate', cx, by + 4, 2.6, false, o.hit > 0 ? [['flash', 0.6]] : null, false); return; }
   if (o.kind === 'rock') {
