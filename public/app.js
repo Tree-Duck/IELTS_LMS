@@ -3,7 +3,6 @@ let token = localStorage.getItem('ielts_token');
 let currentUser = JSON.parse(localStorage.getItem('ielts_user') || 'null');
 let pollingInterval = null;
 let selectedTopic = 'random';
-let activeChart = null;       // Chart.js instance
 let promptUserTyped = false;  // tracks manual paste/type in prompt
 let pendingVerifyEmail = null; // email awaiting verification
 let pendingResetEmail = null;  // email awaiting password reset
@@ -2411,7 +2410,6 @@ function displayTask1Topic(topic) {
   if (!container || !imgEl) return;
 
   // Destroy any existing Chart.js instance
-  if (activeChart) { activeChart.destroy(); activeChart = null; }
 
   // Hide canvas & table, show image frame
   if (canvas) canvas.style.display = 'none';
@@ -2467,7 +2465,6 @@ function hidePasteNudge() {
 
 /* ─── Chart Generation & Rendering ──────────────────────────────────────── */
 function clearChart() {
-  if (activeChart) { activeChart.destroy(); activeChart = null; }
   const container = document.getElementById('chart-container');
   const tableArea = document.getElementById('table-area');
   const canvas = document.getElementById('task1-chart');
@@ -2481,101 +2478,6 @@ function clearChart() {
   // Clear task1 image state
   task1ImageBase64 = null;
   task1ImageMediaType = null;
-}
-
-const CHART_COLORS = [
-  'rgba(99,102,241,0.8)',   // indigo
-  'rgba(16,185,129,0.8)',   // emerald
-  'rgba(245,158,11,0.8)',   // amber
-  'rgba(239,68,68,0.8)',    // red
-  'rgba(59,130,246,0.8)',   // blue
-  'rgba(168,85,247,0.8)',   // purple
-  'rgba(20,184,166,0.8)',   // teal
-  'rgba(251,146,60,0.8)',   // orange
-];
-const CHART_BORDERS = CHART_COLORS.map(c => c.replace('0.8', '1'));
-
-function renderChart(data) {
-  if (data.type === 'table') {
-    renderTable(data);
-    return;
-  }
-
-  const canvas = document.getElementById('task1-chart');
-  if (!canvas) return;
-  canvas.style.display = '';
-
-  if (activeChart) { activeChart.destroy(); activeChart = null; }
-
-  const titleEl = document.getElementById('chart-title-label');
-  if (titleEl && data.title) titleEl.textContent = '📊 ' + data.title;
-
-  const datasets = (data.datasets || []).map((ds, i) => ({
-    label: ds.label || '',
-    data: ds.data,
-    backgroundColor: data.type === 'pie'
-      ? CHART_COLORS.slice(0, (ds.data || []).length)
-      : CHART_COLORS[i % CHART_COLORS.length],
-    borderColor: data.type === 'pie'
-      ? CHART_BORDERS.slice(0, (ds.data || []).length)
-      : CHART_BORDERS[i % CHART_BORDERS.length],
-    borderWidth: data.type === 'pie' ? 2 : 1.5,
-    fill: data.type === 'line' ? false : undefined,
-    tension: data.type === 'line' ? 0.3 : undefined,
-    pointRadius: data.type === 'line' ? 4 : undefined,
-  }));
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: {
-        display: data.type === 'pie' || datasets.length > 1,
-        position: 'bottom',
-        labels: { font: { size: 12 }, padding: 12 },
-      },
-      title: { display: false },
-    },
-    scales: data.type === 'pie' ? {} : {
-      x: {
-        title: { display: !!data.xlabel, text: data.xlabel || '', font: { size: 12 } },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-      y: {
-        title: { display: !!data.ylabel, text: data.ylabel || '', font: { size: 12 } },
-        beginAtZero: true,
-        grid: { color: 'rgba(0,0,0,0.07)' },
-      },
-    },
-  };
-
-  activeChart = new Chart(canvas, {
-    type: data.type,
-    data: { labels: data.labels || [], datasets },
-    options,
-  });
-}
-
-function renderTable(data) {
-  const canvas = document.getElementById('task1-chart');
-  const tableArea = document.getElementById('table-area');
-  if (!tableArea) return;
-  if (canvas) canvas.style.display = 'none';
-
-  const titleEl = document.getElementById('chart-title-label');
-  if (titleEl && data.title) titleEl.textContent = '📋 ' + data.title;
-
-  const headers = (data.headers || []).map(h => `<th>${escHtml(String(h))}</th>`).join('');
-  const rows = (data.rows || []).map(row =>
-    `<tr>${row.map(cell => `<td>${escHtml(String(cell))}</td>`).join('')}</tr>`
-  ).join('');
-
-  tableArea.innerHTML = `
-    <table class="chart-table">
-      <thead><tr>${headers}</tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  tableArea.classList.remove('hidden');
 }
 
 /* ─── Hints ──────────────────────────────────────────────────────────────── */
@@ -5620,7 +5522,6 @@ async function showHomeworkChart(url, label) {
   const titleEl = document.getElementById('chart-title-label');
   if (!imgEl) return;
 
-  if (activeChart) { activeChart.destroy(); activeChart = null; }
   if (canvas) canvas.style.display = 'none';
   if (tableArea) { tableArea.classList.add('hidden'); tableArea.innerHTML = ''; }
 
@@ -17166,10 +17067,6 @@ function tsKill(it, second) {
 
 // A golden egg gives one of three rewards. Extra life is offered only while
 // there is room for it.
-// Each golden egg shows its power, so it is worth aiming for.
-const TS_EGG_POWERS = {
-  freeze: '❄️', bomb: '💣', life: '❤️', slow: '🐢', double: '🔱', shield: '🛡️', coins: '🪙', x2: '✖️2',
-};
 function tsEggPower() {
   const g = _ts;
   const opts = ['freeze', 'bomb', 'slow', 'double', 'shield', 'coins', 'x2'];
