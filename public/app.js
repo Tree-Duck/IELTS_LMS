@@ -28829,11 +28829,115 @@ const T1N_BOSSES = [
   { id: 'GiantBlueSamurai', name: 'Samurai xanh', idle: ['Idle.png', 12], sc: 3, kind: 'spin', say: 'Vòng đỏ quanh nó là đường kiếm xoay, chạy ra ngoài.' },
 ];
 const T1N_TELE = 0.8;
+/* Zones: one per stage of the essay, ground pre-rendered once from the Ninja
+   tilesets at half size and drawn at 2x. A gate opens when a part is done. */
+const T1N_ZONES = [
+  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A',
+    tiles: [['tiles/TilesetField.png', 1, 4, 1]],
+    decor: [['tiles/TilesetHouse.png', 0, 0, 64, 64, 4], ['tiles/TilesetHouse.png', 192, 0, 64, 64, 3], ['tiles/TilesetNature.png', 0, 160, 16, 16, 40], ['tiles/TilesetNature.png', 0, 176, 16, 16, 24], ['tiles/TilesetNature.png', 16, 176, 16, 16, 24]] },
+  { name: 'Rừng Overview', part: 'Overview', top: '#24452A', side: '#1A3320', line: '#4E8A4A',
+    tiles: [['tiles/TilesetField.png', 1, 7, 1]],
+    decor: [['tiles/TilesetNature.png', 0, 32, 64, 64, 6], ['tiles/TilesetNature.png', 64, 32, 64, 64, 5], ['tiles/TilesetNature.png', 32, 288, 32, 48, 6], ['tiles/TilesetNature.png', 0, 0, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
+  { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#B5793A', side: '#94602C', line: '#E6B474',
+    tiles: [['tiles/TilesetField.png', 1, 1, 1]],
+    decor: [['tiles/TilesetDesert.png', 160, 64, 64, 64, 7], ['tiles/TilesetDesert.png', 160, 160, 64, 64, 5], ['tiles/TilesetNature.png', 192, 96, 64, 48, 4]] },
+  { name: 'Đấu trường trùm cuối', part: null, dungeon: true,
+    tiles: [['tiles/TilesetFloor.png', 13, 15, 0.8], ['tiles/TilesetFloor.png', 15, 15, 0.2]],
+    decor: [['tiles/TilesetDungeon.png', 32, 48, 16, 16, 10], ['tiles/TilesetDungeon.png', 128, 48, 16, 16, 8]] },
+];
+function t1nZoneGround(z) {
+  if (z.canvas) return z.canvas;
+  const files = [...new Set([...z.tiles, ...z.decor].map(t => t[0]))];
+  if (!files.every(f => t1nImg(f).ready)) return null;
+  const R = T1H_ROOM, cv = document.createElement('canvas');
+  cv.width = R.w / 2; cv.height = R.h / 2;
+  const x = cv.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  for (let i = 0; i < cv.width / 16; i++) for (let j = 0; j < cv.height / 16; j++) {
+    let r = Math.random(), t = z.tiles[0];
+    for (const tt of z.tiles) { if (r < tt[3]) { t = tt; break; } r -= tt[3]; }
+    x.drawImage(t1nImg(t[0]).img, t[1] * 16, t[2] * 16, 16, 16, i * 16, j * 16, 16, 16);
+  }
+  // Decor keeps clear of the middle, where the hero starts.
+  z.decor.forEach(([f, sx, sy, w, h, n]) => {
+    for (let k = 0, tries = 0; k < n && tries < 200; tries++) {
+      const px = Math.random() * (cv.width - w), py = R.top / 2 + Math.random() * (cv.height - R.top / 2 - h);
+      if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 170) continue;
+      x.drawImage(t1nImg(f).img, sx, sy, w, h, Math.round(px), Math.round(py), w, h);
+      k++;
+    }
+  });
+  return (z.canvas = cv);
+}
+// Sentences left in the part being written, the current one included.
+function t1nLeft() {
+  const g = _t1, S = g.list[g.si];
+  if (!S) return 0;
+  let n = 0;
+  for (let i = g.si; i < g.list.length && g.list[i].part === S.part; i++) n++;
+  return n;
+}
+// A gate to the next zone; walking into it fades over.
+function t1nGateOpen(to, boss) {
+  const g = _t1, p = g.p, s = t1hFreeNear(Math.min(g.room.w - 200, p.x + 240), p.y);
+  g.gate = { x: s.x, y: s.y, to, boss };
+  t1hMsg(`🌀 Cổng mở! Đi vào cổng để sang ${T1N_ZONES[to].name}.`, 3200);
+  tsSfx('rankup');
+}
+function t1nGateTick(dt) {
+  const g = _t1, p = g.p;
+  if (g.fadeT != null) {
+    g.fadeT += dt; p.inv = Math.max(p.inv, 0.2);
+    if (g.fadeT >= 0.45 && !g.fadeSwap) { g.fadeSwap = true; t1nZoneEnter(g.gate.to, g.gate.boss); }
+    if (g.fadeT >= 0.9) { g.fadeT = null; g.fadeSwap = false; g.gate = null; }
+    return;
+  }
+  if (g.gate && Math.hypot(p.x - g.gate.x, p.y - g.gate.y) < 46) { g.fadeT = 0; tsSfx('equip'); }
+}
+function t1nZoneEnter(to, boss) {
+  const g = _t1, R = T1H_ROOM;
+  g.zone = to;
+  g.room = t1hRoomMake();
+  g.foes = []; g.gems = []; g.ebul = []; g.gold = []; g.hearts = [];
+  g.p.x = R.w / 2; g.p.y = R.h / 2;
+  if (boss) t1hBossStart(boss);
+  else { t1hSentence(); t1hMsg(`${T1N_ZONES[to].name}: ${t1nLeft()} câu tới trùm.`, 2600); }
+}
+function t1nDrawGate(c) {
+  const g = _t1, G = g.gate;
+  if (!G) return;
+  c.save();
+  const t = g.time;
+  c.translate(G.x, G.y - 34);
+  c.shadowColor = '#7FD6F5'; c.shadowBlur = 24;
+  for (let i = 0; i < 3; i++) {
+    c.strokeStyle = ['#7FD6F5', '#B48CFF', '#FFFFFF'][i]; c.lineWidth = 6 - i * 2;
+    c.beginPath(); c.ellipse(0, 0, 30 - i * 7, 44 - i * 9, 0, t * (2 + i) % (Math.PI * 2), t * (2 + i) % (Math.PI * 2) + Math.PI * 1.6); c.stroke();
+  }
+  c.fillStyle = 'rgba(127,214,245,.25)'; c.beginPath(); c.ellipse(0, 0, 30, 44, 0, 0, Math.PI * 2); c.fill();
+  c.shadowBlur = 0;
+  c.font = '800 13px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = 4;
+  c.strokeText('CỔNG', 0, -56); c.fillText('CỔNG', 0, -56);
+  c.restore();
+}
+// Zone name and how far the boss is, top left of the arena.
+function t1nDrawZoneHud(c, W) {
+  const g = _t1, z = T1N_ZONES[g.zone || 0];
+  const left = g.boss ? 'Đánh trùm!' : g.gate ? 'Vào cổng' : `Còn ${t1nLeft()} câu tới trùm`;
+  const text = `${z.name} · ${left}`;
+  c.save();
+  c.font = '800 12px system-ui, -apple-system, Segoe UI, sans-serif';
+  const w = c.measureText(text).width + 18, y = g.boss ? 52 : 10;
+  c.fillStyle = 'rgba(19,41,79,.78)'; t1hRR(c, 10, y, Math.min(w, W - 20), 24, 8); c.fill();
+  c.fillStyle = '#fff'; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(text, 19, y + 12);
+  c.restore();
+}
 function t1nPreload() {
   Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
   Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
   T1N_BOSSES.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
   T1N_MINI.forEach(([n]) => t1nImg(`foe/${n}.png`));
+  T1N_ZONES.forEach(z => [...z.tiles, ...z.decor].forEach(t => t1nImg(t[0])));
 }
 function t1nBossDraw(c, f, over) {
   const B = f.B, path = `boss/${B.id}/${B.idle[0]}`, e = t1nImg(path);
@@ -29307,6 +29411,7 @@ function t1hStep(dt) {
     if (Math.abs(mx) > 0.1 && p.atk <= 0) p.face = mx > 0 ? 1 : -1;
   }
   t1hPush(p, 14);
+  if (g.gate || g.fadeT != null) t1nGateTick(dt);
   if (p.moving || p.dashT > 0) p.anim += dt;
   p.hurt = Math.max(0, p.hurt - dt); p.inv = Math.max(0, p.inv - dt); p.atk = Math.max(0, p.atk - dt);
   g.sk = g.sk.map(c => Math.max(0, c - dt));
@@ -29927,7 +30032,8 @@ function t1hOrderDone() {
   g.ord = null; g.bag = [];
   g.si++;
   t1hCloseModal();
-  if (!N || N.part !== S.part) t1hBossStart(S.part);
+  if (!N) { g.S = null; g.gems = []; t1nGateOpen(T1N_ZONES.length - 1, S.part); }
+  else if (N.part !== S.part) t1hBossStart(S.part);
   else t1hSentence();
   t1hPlay();
 }
@@ -30504,7 +30610,8 @@ function t1hAfterBoss() {
   const g = _t1;
   g.gold = []; g.bossQ = null;
   if (g.si >= g.list.length) { t1hOver(true); return; }
-  t1hSentence();
+  // A part is done: a gate to the next zone, where the next part begins.
+  t1nGateOpen(Math.min((g.zone || 0) + 1, T1N_ZONES.length - 2));
   t1hPlay();
 }
 function t1hPause() {
@@ -30835,6 +30942,14 @@ function t1hDrawFx(c, e) {
 }
 // Walls round the room: bricks along the top with banners, dark stone on the other sides.
 function t1hDrawWalls(c) {
+  const z = T1N_ZONES[_t1.zone || 0];
+  if (!z.dungeon) {
+    const R = _t1.room;
+    c.fillStyle = z.top; c.fillRect(0, 0, R.w, R.top);
+    c.fillStyle = z.side; c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
+    c.fillStyle = z.line; c.fillRect(0, R.top - 4, R.w, 4); c.fillRect(R.wall - 4, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 4);
+    return;
+  }
   const R = _t1.room, banners = ['wall_banner_red', 'wall_banner_blue', 'wall_banner_green'];
   c.fillStyle = '#1C1524'; c.fillRect(0, 0, R.w, R.top - 96);
   for (let x = 0, i = 0; x < R.w; x += 48, i++) {
@@ -30859,9 +30974,12 @@ function t1hDraw() {
   c.scale(z, z);
   c.translate(-camX, -camY);
   c.imageSmoothingEnabled = false;
-  c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall);
+  const zc = t1nZoneGround(T1N_ZONES[g.zone || 0]);
+  if (zc) c.drawImage(zc, 0, 0, zc.width, zc.height, 0, 0, R.w, R.h);
+  else { c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall); }
   R.holes.forEach(h => { c.globalAlpha = 0.9; t1dTile(c, 'hole', h.x - 24, h.y - 24, 3); c.globalAlpha = 1; });
   t1hDrawWalls(c);
+  t1nDrawGate(c);
   c.font = '20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
   g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.4, false, null, true); });
   c.globalAlpha = 1;
@@ -30940,7 +31058,7 @@ function t1hDraw() {
   g.gems.forEach((m, i) => t1hDrawGem(c, m, false, i));
   g.gold.forEach((m, i) => t1hDrawGem(c, m, true, i));
   // Arrows at the edge for gems and the boss off screen.
-  [...g.gems, ...g.gold.map(m => ({ ...m, col: '#E5A52D' })), ...(g.boss ? [{ x: g.boss.x, y: g.boss.y, col: '#E5533D' }] : [])].forEach(m => {
+  [...g.gems, ...g.gold.map(m => ({ ...m, col: '#E5A52D' })), ...(g.boss ? [{ x: g.boss.x, y: g.boss.y, col: '#E5533D' }] : []), ...(g.gate ? [{ x: g.gate.x, y: g.gate.y, col: '#7FD6F5' }] : [])].forEach(m => {
     const sx = (m.x - camX) * z, sy = (m.y - 20 - camY) * z;
     if (sx > 0 && sx < W && sy > 0 && sy < H) return;
     const cx = Math.max(18, Math.min(W - 18, sx)), cy = Math.max(18, Math.min(H - 18, sy)), a = Math.atan2(sy - H / 2, sx - W / 2);
@@ -30959,6 +31077,8 @@ function t1hDraw() {
     const fe = b.B && t1nImg(`boss/${b.B.id}/Faceset.png`);
     if (fe && fe.ready) { c.imageSmoothingEnabled = false; c.fillStyle = '#13294F'; t1hRR(c, (W - bw) / 2 - 44, 4, 40, 40, 6); c.fill(); c.drawImage(fe.img, (W - bw) / 2 - 43, 5, 38, 38); }
   }
+  t1nDrawZoneHud(c, W);
+  if (g.fadeT != null) { c.fillStyle = `rgba(8,6,14,${Math.min(1, 1 - Math.abs(g.fadeT - 0.45) / 0.45)})`; c.fillRect(0, 0, W, H); }
   if (g.freezeT > 0) { c.fillStyle = `rgba(127,200,248,${Math.min(0.18, g.freezeT * 0.1)})`; c.fillRect(0, 0, W, H); }
   if (g.flashT > 0) { c.fillStyle = `rgba(255,236,170,${Math.min(0.6, g.flashT * 1.3)})`; c.fillRect(0, 0, W, H); }
   g.fx.forEach(e => {
