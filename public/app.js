@@ -817,12 +817,6 @@ const ACCENT_THEMES = [
   { id: 'amber',       name: 'Hổ phách', primary: '#c2790f', dark: '#8f570a', light: '#fcedcf', mid: '#e0a43a' },
 ];
 
-function _hexToRgba(hex, a) {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
-
 function applyAccentTheme(id) {
   // Single-brand redesign: accent presets are retired. The brand palette lives
   // in style.css :root; inline overrides here would defeat it, so this is a no-op.
@@ -892,21 +886,6 @@ function loadSettings() {
       <button type="button" class="avatar-opt ${a === cur ? 'active' : ''}" onclick="saveAvatar('${a}')">${a}</button>`).join('')
       + `<button type="button" class="avatar-opt avatar-opt-reset ${cur === '' ? 'active' : ''}" onclick="saveAvatar('')" title="Dùng chữ cái tên">Aa</button>`;
   }
-}
-
-function openThemeModal() {
-  const overlay = document.getElementById('theme-modal-overlay');
-  const grid = document.getElementById('theme-swatches');
-  if (!overlay || !grid) return;
-  const current = localStorage.getItem('ielts_bg_theme') || '';
-  grid.innerHTML = THEMES.map(t => `
-    <div class="theme-swatch ${t.id === current ? 'active' : ''}" data-theme-id="${t.id}"
-         style="background:${t.bg}" onclick="applyTheme('${t.id}')">
-      <div class="theme-swatch-dot" style="background:${t.dot}"></div>
-      <div class="theme-swatch-name">${t.name}</div>
-    </div>
-  `).join('');
-  overlay.classList.remove('hidden');
 }
 
 function closeThemeModal(e) {
@@ -1384,15 +1363,6 @@ function isOnSubmitWithContent() {
   if (!submitView || submitView.classList.contains('hidden')) return false;
   const essay = (document.getElementById('essay-text') || {}).value || '';
   return essay.trim().length > 0;
-}
-
-function toggleMobileSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  if (!sidebar || !backdrop) return;
-  const isOpen = sidebar.classList.contains('sidebar-open');
-  sidebar.classList.toggle('sidebar-open', !isOpen);
-  backdrop.classList.toggle('active', !isOpen);
 }
 
 /* ─── View history — real "back to the previous page" ────────────────────── */
@@ -2513,38 +2483,6 @@ function clearChart() {
   task1ImageMediaType = null;
 }
 
-async function generateChart(taskText) {
-  const container = document.getElementById('chart-container');
-  const statusEl = document.getElementById('chart-status');
-  if (!container) return;
-
-  clearChart();
-  container.classList.remove('hidden');
-  if (statusEl) { statusEl.textContent = '⏳ Generating chart…'; statusEl.className = 'chart-status loading'; }
-
-  try {
-    const res = await fetch('/api/generate-chart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ task_text: taskText }),
-    });
-    if (!res.ok) throw new Error('Chart request failed');
-    const data = await res.json();
-
-    if (data.type === 'unsupported') {
-      if (statusEl) { statusEl.textContent = data.message || 'No preview for this chart type'; statusEl.className = 'chart-status'; }
-      container.classList.add('hidden');
-      return;
-    }
-
-    renderChart(data);
-    if (statusEl) { statusEl.textContent = ''; statusEl.className = 'chart-status'; }
-  } catch (err) {
-    if (statusEl) { statusEl.textContent = 'Chart preview unavailable'; statusEl.className = 'chart-status'; }
-    console.error('Chart error:', err);
-  }
-}
-
 const CHART_COLORS = [
   'rgba(99,102,241,0.8)',   // indigo
   'rgba(16,185,129,0.8)',   // emerald
@@ -2641,46 +2579,6 @@ function renderTable(data) {
 }
 
 /* ─── Hints ──────────────────────────────────────────────────────────────── */
-// Legacy function kept for backward compatibility
-function closeHintPanel() {
-  const panel = document.getElementById('hint-panel');
-  if (panel) panel.classList.add('hidden');
-}
-
-async function requestHint(hint_type) {
-  const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
-  const prompt = document.getElementById('essay-prompt').value.trim();
-  const essay = document.getElementById('essay-text').value.trim();
-
-  const panel = document.getElementById('hint-panel');
-  const panelTitle = document.getElementById('hint-panel-title');
-  const panelBody = document.getElementById('hint-panel-body');
-
-  if (!panel) return; // Legacy panel may not exist
-
-  panelTitle.textContent = hint_type === 'ideas' ? '💡 Idea Hints' : '📚 Vocabulary & Collocations';
-  panelBody.innerHTML = '<span class="hint-thinking">Thinking…</span>';
-  panel.classList.remove('hidden');
-
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  let raw = '';
-  try {
-    await streamSSE(
-      '/api/hint',
-      { task_type, prompt, essay, hint_type },
-      (chunk) => {
-        raw += chunk;
-        panelBody.innerHTML = renderHintMarkdown(raw);
-      },
-      () => {
-        panelBody.innerHTML = renderHintMarkdown(raw);
-      }
-    );
-  } catch (err) {
-    panelBody.innerHTML = `<span style="color:var(--danger)">Failed to load hints. ${escHtml(err.message)}</span>`;
-  }
-}
 
 async function requestSingleHint(hint_type) {
   const task_type = document.querySelector('input[name="task_type"]:checked')?.value || 'task2';
@@ -5151,13 +5049,6 @@ function previewEditTopicImage(id, input) {
     prev.classList.remove('hidden');
   };
   reader.readAsDataURL(file);
-}
-
-function toggleCreateTestForm() {
-  const form = document.getElementById('mat-panel-create');
-  if (!form) return;
-  form.classList.toggle('hidden');
-  if (!form.classList.contains('hidden')) buildSectionsForm();
 }
 
 function buildSectionsForm() {
@@ -10736,16 +10627,6 @@ async function openParagraphAttempt(id) {
 
 
 
-// Clear the editor and pull a fresh claim for the same axis.
-function ppReset() {
-  const ta = document.getElementById('pp-textarea');
-  if (ta) ta.value = '';
-  const fb = document.getElementById('pp-feedback-area');
-  if (fb) { fb.classList.add('hidden'); fb.innerHTML = ''; }
-  ppCountWords();
-  ppLoadTask();
-}
-
 /* ─── Grammar Guide ──────────────────────────────────────────────────────── */
 const GRAMMAR_LESSONS = [
   {
@@ -11670,13 +11551,6 @@ function clearWritingEssay() {
   document.getElementById('wp-ai-result').innerHTML = '';
 }
 
-function toggleWpTools() {
-  const body = document.getElementById('wp-tools-body');
-  const icon = document.getElementById('wp-tools-icon');
-  const isHidden = body.classList.toggle('hidden');
-  icon.textContent = isHidden ? '▸' : '▾';
-}
-
 function resetWpTools() {
   const ownText = document.getElementById('wp-own-text');
   if (ownText) ownText.value = '';
@@ -11770,34 +11644,6 @@ async function submitWritingEssay() {
     resultEl.innerHTML = `<div class="wp-ai-error">${escHtml(e.message || 'Lỗi kết nối. Kiểm tra mạng và thử lại.')}</div>`;
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✨ Chấm bài với AI'; }
-  }
-}
-
-// Rewrite the student's own essay to a Band 8+ model — shown when they review their work
-async function improveWritingEssay() {
-  if (!_wpCurrentQuestion) return;
-  const essay = document.getElementById('wp-essay-input').value.trim();
-  if (!essay) { showToast('Chưa có bài để cải thiện.'); return; }
-  const box = document.getElementById('wp-improve-result');
-  const btn = document.querySelector('.wp-improve-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang viết lại Band 8+…'; }
-  if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="wp-ai-loading">✨ Đang nâng cấp bài của ta lên chuẩn Band 8+…</div>'; }
-  try {
-    const data = await api('/api/ai/improve-writing', {
-      method: 'POST',
-      body: JSON.stringify({ prompt: _wpCurrentQuestion.prompt, essay, type: _wpCurrentQuestion.type })
-    });
-    if (data.improved && box) {
-      box.innerHTML = `<div class="wp-improve-title">📈 Bản viết mẫu Band 8+</div>
-        <div class="wp-improve-body"><p>${escHtml(data.improved).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p></div>
-        <p class="wp-improve-note">Bản này nâng cấp từ chính bài của ta — giữ ý của ta, cải thiện từ vựng, ngữ pháp và liên kết.</p>`;
-    } else if (box) {
-      box.innerHTML = '<div class="wp-ai-error">Không tạo được bản cải thiện. Thử lại.</div>';
-    }
-  } catch (e) {
-    if (box) box.innerHTML = `<div class="wp-ai-error">${escHtml(e.message || 'Lỗi. Thử lại.')}</div>`;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📈 Xem bản viết mẫu Band 8+'; }
   }
 }
 
@@ -12714,20 +12560,6 @@ let _transTotal = 0;
 let _transOrder = [];
 let _activeTranslationBank = null; // null = not fetched yet
 let _transHintsRevealed = new Set();
-
-async function loadTranslation() {
-  _transScore = 0; _transTotal = 0; _transIdx = 0;
-  try {
-    const serverSentences = await api('/api/translation-sentences').catch(() => []);
-    _activeTranslationBank = (serverSentences && serverSentences.length > 0)
-      ? serverSentences
-      : TRANSLATION_BANK;
-  } catch (e) {
-    _activeTranslationBank = TRANSLATION_BANK;
-  }
-  _transOrder = [...Array(_activeTranslationBank.length).keys()].sort(() => Math.random() - 0.5);
-  renderTranslationSentence();
-}
 
 function renderTranslationSentence() {
   const item = _activeTranslationBank[_transOrder[_transIdx]];
@@ -16624,7 +16456,6 @@ const TS_DOUBLE_SECS = 15;
 const TS_REVIVE_LIVES = 3;
 let _tsDiff = 'easy';
 try { const d = localStorage.getItem('tsDiff'); if (TS_DIFFS[d]) _tsDiff = d; } catch (e) {}
-function tsSetDiff(d) { if (TS_DIFFS[d]) { _tsDiff = d; lvSave('tsDiff', d); } lvRenderHub(); }
 const TS_PER_LEVEL = 8;
 const TS_EGG_EVERY = 11;
 // Bosses. Every TS_MINI_EVERY levels a miniboss; once every word of the
@@ -21231,9 +21062,6 @@ const RAID_BOSSES = {
 };
 const RAID_MINIONS = [
   { icon: '👺', name: 'Yêu tinh' }, { icon: '🦇', name: 'Dơi hút máu' }, { icon: '🧟', name: 'Xác sống' }, { icon: '👻', name: 'Hồn ma' },
-];
-const RAID_BRUTES = [
-  { icon: '👹', name: 'Quỷ đầu đàn' }, { icon: '🐺', name: 'Sói xám' }, { icon: '🦂', name: 'Bọ cạp khổng lồ' }, { icon: '🕷️', name: 'Nhện độc' },
 ];
 const RAID_PESTS = [
   { icon: '🐀', name: 'Chuột gặm chữ' }, { icon: '🦟', name: 'Muỗi vo ve' }, { icon: '🐸', name: 'Ếch ồn ào' }, { icon: '🪲', name: 'Bọ cánh cứng' },
@@ -29051,25 +28879,6 @@ const T1H_WEAPONS = {
   bow:   { dmg: 15, rate: 1.55, count: 1, pierce: 3, splash: 0, speed: 680, range: 560 },
   sword: { dmg: 18, rate: 1.5, count: 1, pierce: 0, splash: 0, reach: 95, arc: 2.0 },
 };
-const T1H_UPS = [
-  { id: 'multi', icon: '🔱', name: w => w.kind === 'sword' ? '+1 hướng chém' : '+1 tia', desc: w => w.kind === 'sword' ? `Chém ${w.count + 1} hướng cùng lúc.` : `Bắn ${w.count + 1} tia cùng lúc.`, ok: w => w.count < 5, apply: w => { w.count++; } },
-  { id: 'rate', icon: '⚡', name: () => 'Đánh nhanh', desc: () => 'Tốc độ đánh +25%.', ok: w => w.rate < 6, apply: w => { w.rate *= 1.25; } },
-  { id: 'dmg', icon: '💥', name: () => 'Sát thương', desc: () => 'Sát thương +30%.', ok: () => true, apply: w => { w.dmg *= 1.3; } },
-  { id: 'pierce', icon: '🎯', name: () => 'Xuyên thấu', desc: () => 'Mỗi phát xuyên thêm 1 con.', ok: w => w.kind !== 'sword' && w.pierce < 5, apply: w => { w.pierce++; } },
-  { id: 'splash', icon: '🔥', name: () => 'Nổ lan', desc: w => w.splash ? 'Vụ nổ to hơn.' : 'Đạn nổ, gây sát thương cả vùng.', ok: w => w.kind !== 'sword' && w.splash < 150, apply: w => { w.splash = w.splash ? w.splash * 1.3 : 55; } },
-  { id: 'reach', icon: '🗡️', name: () => 'Kiếm dài', desc: () => 'Tầm chém +20%.', ok: w => w.kind === 'sword' && w.reach < 180, apply: w => { w.reach *= 1.2; } },
-  { id: 'orbit', icon: '🌀', name: () => 'Kiếm xoay', desc: w => `${w.orbit + 1} lưỡi kiếm bay vòng quanh người.`, ok: w => w.orbit < 5, apply: w => { w.orbit++; } },
-  { id: 'chain', icon: '🌩️', name: () => 'Tia sét', desc: w => w.chain ? 'Sét giật thêm 2 con.' : 'Cứ 2 giây, sét giật 3 con gần nhất.', ok: w => w.chain < 4, apply: w => { w.chain++; } },
-  { id: 'hp', icon: '❤️', name: () => 'Máu trâu', desc: () => 'Máu tối đa +25 và hồi đầy.', ok: () => true, apply: (w, g) => { g.p.maxHp += 25; g.p.hp = g.p.maxHp; } },
-  { id: 'speed', icon: '👟', name: () => 'Chạy nhanh', desc: () => 'Tốc độ chạy +12%.', ok: (w, g) => g.p.speed < 280, apply: (w, g) => { g.p.speed *= 1.12; } },
-  { id: 'cdr', icon: '⏱️', name: () => 'Hồi chiêu nhanh', desc: () => 'Hai chiêu J, K hồi nhanh hơn 20%.', ok: (w, g) => g.cdMul > 0.5, apply: (w, g) => { g.cdMul *= 0.8; } },
-];
-// After a wrong answer: a small step, not nothing.
-const T1H_UPS_SMALL = [
-  { id: 'sdmg', icon: '🔸', name: () => 'Sát thương nhỏ', desc: () => 'Sát thương +10%.', ok: () => true, apply: w => { w.dmg *= 1.1; } },
-  { id: 'srate', icon: '🔹', name: () => 'Đánh nhanh nhỏ', desc: () => 'Tốc độ đánh +8%.', ok: w => w.rate < 6, apply: w => { w.rate *= 1.08; } },
-  { id: 'shp', icon: '🩹', name: () => 'Băng bó', desc: () => 'Hồi 25 máu.', ok: () => true, apply: (w, g) => { g.p.hp = Math.min(g.p.maxHp, g.p.hp + 25); } },
-];
 const T1H_FOES = {
   zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5, exp: 1 },
   robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6, exp: 1 },
