@@ -29030,6 +29030,35 @@ function t1nShieldResume() {
   g.shQ = null;
   t1hPlay();
 }
+/* "Bài đang thành hình": every sentence put in order joins its paragraph, in
+   a small panel in the corner of the arena; the whole essay comes back above
+   the result. */
+const T1N_PARTS = ['Mở bài', 'Overview', 'Thân bài'];
+function t1nEssayAdd(S) {
+  const g = _t1;
+  if (!g.essay) g.essay = {};
+  (g.essay[S.part] = g.essay[S.part] || []).push(S.c.join(' '));
+  t1nEssayUi();
+}
+function t1nEssayHtml(cls) {
+  const g = _t1, E = g.essay || {};
+  return T1N_PARTS.filter(p => (E[p] || []).length).map(p => `<div class="${cls}"><b>${escapeHtml(p)}</b><p>${escapeHtml(E[p].join(' '))}</p></div>`).join('');
+}
+function t1nEssayUi() {
+  const g = _t1, box = document.getElementById('h-essay-body'), n = document.getElementById('h-essay-n');
+  if (!box) return;
+  const count = Object.values(g.essay || {}).reduce((a, x) => a + x.length, 0);
+  if (n) n.textContent = `${count}/${g.list.length}`;
+  box.innerHTML = t1nEssayHtml('t1h-essay-p') || '<p class="t1h-essay-empty">Xếp đúng câu đầu tiên để bắt đầu bài viết.</p>';
+  box.scrollTop = box.scrollHeight;
+}
+// Stars by wrong attempts (orders, linkers, shields, level-up questions), as
+// in Bắn Chữ; the chest's coins scale with them, so they come from learning.
+function t1nStars(g, won) {
+  const wrong = (g.wrongs || 0) + Math.max(0, (g.asked || 0) - (g.quizRight || 0));
+  const s = wrong === 0 ? 3 : wrong <= 2 ? 2 : 1;
+  return { stars: won ? s : 1, wrong };
+}
 function t1nPreload() {
   Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
   Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
@@ -29240,6 +29269,7 @@ function t1hGo(id) {
         <div class="t1h-skills">${h.skills.map((s, i) => `<button class="t1h-sk ready" id="h-sk${i}" style="--hc:${h.color}" onpointerdown="event.preventDefault(); t1hSkill(${i})" aria-label="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}" title="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}"><span>${s.icon}</span><kbd>${T1H_SKILL_KEYS[i]}</kbd><b class="t1h-sk-lv" id="h-sklv${i}">1</b></button>`).join('')}</div>
         <div class="t1-arena-msg hidden" id="h-msg"></div>
         <div class="t1h-modal hidden" id="h-modal"></div>
+        <details class="t1h-essay" id="h-essay"${window.matchMedia('(max-width: 600px)').matches ? '' : ' open'}><summary>📝 Bài đang thành hình <span id="h-essay-n"></span></summary><div class="t1h-essay-body" id="h-essay-body"></div></details>
       </div>
       <aside class="t1h-side t1h-info" id="h-info"></aside>
       </div>
@@ -30023,6 +30053,7 @@ function t1hPlay() {
   g.paused = false; g.last = 0; g.keys = {}; g.joy = null;
   t1hBagUi();
   t1hHud();
+  t1nEssayUi();
 }
 
 /* ── Ordering: the bag becomes the sentence ── */
@@ -30101,6 +30132,7 @@ function t1hOrderCheck() {
   o.bad = o.slots.map((bi, i) => g.bag[bi].text !== S.c[i]);
   const left = o.pool.filter(bi => !g.bag[bi].real);
   if (!o.bad.some(Boolean) && !left.length) { t1hOrderWin(); return; }
+  g.wrongs = (g.wrongs || 0) + 1;
   tsSfx('wrong');
   if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(S.part)}:</b> ${escapeHtml(S.c.join(' '))}<br><i>${escapeHtml(S.vi)}</i></div>`); }
   // Why each wrong slot is wrong: a trap (grammar or chart), or a real chunk out of place.
@@ -30123,6 +30155,7 @@ function t1hOrderCheck() {
 function t1hOrderWin() {
   const g = _t1, o = g.ord, first = o.tries === 1;
   o.done = true;
+  t1nEssayAdd(g.S);
   g.right++; g.combo++;
   g.score += first ? 60 : 30;
   g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 1.5 : 0.8);
@@ -30681,6 +30714,7 @@ function t1hGoldPick(m) {
     return;
   }
   g.goldTries++;
+  g.wrongs = (g.wrongs || 0) + 1;
   m.dead = true;
   g.gold = g.gold.filter(x => !x.dead);
   if (!g.missed['b' + g.bosses]) { g.missed['b' + g.bosses] = 1; g.misses.push(`<div class="t1-review-line"><b>Câu mở ${escapeHtml(g.bossQ.next)}:</b> ${escapeHtml(g.bossQ.right)}<br><i>${escapeHtml(g.bossQ.why)}</i></div>`); }
@@ -30804,9 +30838,19 @@ function t1hFinish() {
       ${weak.map(c => `<div class="t1-review-line"><b>${escapeHtml(c.en)}</b> · ${escapeHtml(c.vi)}</div>`).join('')}
       <button class="vb-secondary-btn" onclick="t1FcOpen('surv')">🃏 Ôn ngay bằng Flashcard</button></div>` : '')
     + (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '');
+  const { stars, wrong } = t1nStars(g, won), chest = Math.round(T1_LEVELS[_t1Lv].coin * walMult() * [0, 3, 6, 10][stars]);
+  g.coins += chest;
+  const essay = t1nEssayHtml('t1h-essay-p');
   t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', {
     big: `${g.hero.name} · ${Math.min(g.si, g.list.length)}/${g.list.length} câu · ${won ? 3 : Math.max(0, g.bosses - (g.boss ? 1 : 0))} trùm · ${g.quizRight}/${g.asked} câu hỏi đúng`,
     icon: won ? '🏆' : g.si >= 3 ? '👏' : '🛡️', good: !!won, list: list || undefined });
+  const res = t1Root().querySelector('.t1-result');
+  if (!res) return;
+  if (essay) res.insertAdjacentHTML('beforebegin', `<div class="t1h-essay-final"><div class="t1-review-title">📝 Bài em vừa ghép</div>${essay}</div>`);
+  res.querySelector('.t1-result-row')?.insertAdjacentHTML('afterend', `<div class="t1h-reward">
+    <div class="t1h-stars" aria-label="${stars} sao">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('')}</div>
+    <img class="t1h-chest" src="/img/t1/ninja/items/BigTreasureChest.png" alt="" width="128" height="56">
+    <div class="t1h-chest-n">Rương: +${chest} xu · ${wrong ? `sai ${wrong} lần` : 'không sai lần nào'}</div></div>`);
 }
 
 /* ── Drawing ── */
