@@ -357,11 +357,6 @@ app.post('/api/login', authStrictLimiter, async (req, res) => {
 });
 
 // Public config the frontend needs before auth (e.g. the Google client id)
-app.get('/api/ai-status', async (req, res) => {
-  const s = await refreshAiStatus(false);
-  res.json({ ok: s.ok, reason: s.reason, hard_down: AI_HARD_DOWN.includes(s.reason), checked_at: s.checked_at });
-});
-
 app.get('/api/public-config', async (req, res) => {
   // Wait for a verdict rather than reporting the optimistic default before the
   // first check has run. Cached for ten minutes, so this is at most one probe.
@@ -435,25 +430,6 @@ app.post('/api/resend-verification', authLooseLimiter, async (req, res) => {
     console.error('Resend error:', err);
     res.status(500).json({ error: 'Failed to resend code' });
   }
-});
-
-// ─── Balance Route ────────────────────────────────────────────────────────────
-app.get('/api/balance', authenticate, (req, res) => {
-  const envDefault = parseFloat(process.env.STARTING_BALANCE || '4.98');
-  const startingBalance = parseFloat(db.getSetting('starting_balance', envDefault));
-  const totalCost = db.getTotalCost();
-  const remaining = Math.max(0, startingBalance - totalCost);
-  const gradedCount = db.getGradedCount();
-  const avgCost = gradedCount > 0 ? totalCost / gradedCount : 0.05;
-  const estimatedEssays = avgCost > 0 ? Math.floor(remaining / avgCost) : '?';
-
-  res.json({
-    total_cost: Math.round(totalCost * 10000) / 10000,
-    remaining_balance: Math.round(remaining * 10000) / 10000,
-    graded_count: gradedCount,
-    avg_cost_per_essay: Math.round(avgCost * 10000) / 10000,
-    estimated_essays_remaining: estimatedEssays
-  });
 });
 
 // ─── Submission Routes ────────────────────────────────────────────────────────
@@ -2257,26 +2233,6 @@ app.post('/api/change-password', authenticate, async (req, res) => {
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: 'Failed to change password' });
-  }
-});
-
-// ─── Test Email (temporary public debug endpoint) ─────────────────────────────
-app.get('/api/test-email', authenticate, adminOnly, async (req, res) => {
-  const to = process.env.ADMIN_EMAIL;
-  if (!process.env.RESEND_API_KEY) return res.json({ ok: false, error: 'RESEND_API_KEY not set' });
-  if (!to) return res.json({ ok: false, error: 'ADMIN_EMAIL not set' });
-  try {
-    const { error } = await getResend().emails.send({
-      from: "SSP's IELTS Writing LMS <noreply@tintinlab.com>",
-      to,
-      subject: 'IELTS LMS — email test ✅',
-      html: '<p>Email is working correctly!</p>'
-    });
-    if (error) throw new Error(error.message);
-    res.json({ ok: true, message: `Test email sent to ${to}` });
-  } catch (err) {
-    console.error('Test email error:', err);
-    res.status(500).json({ ok: false, error: err.message });
   }
 });
 
@@ -5166,72 +5122,6 @@ io.on('connection', (socket) => {
       }, 100);
     }
   });
-});
-
-// ── AI: Grade Writing Essay ────────────────────────────────────────────────
-app.post('/api/ai/grade-writing', authenticate, aiLimiter, async (req, res) => {
-  const { prompt, essay, type } = req.body;
-  if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
-  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
-
-  const taskLabel = type === 'task1' ? 'Task 1 (Report)' : 'Task 2 (Essay)';
-  const system = `You are an expert IELTS examiner. Grade the student's IELTS Writing ${taskLabel} submission.
-Provide feedback in Vietnamese, covering:
-1. **Band score estimate** (overall and brief note on TA/CC/LR/GRA)
-2. **Điểm mạnh** — 2-3 things done well
-3. **Điểm cần cải thiện** — 2-3 specific issues with examples from their essay
-4. **Gợi ý từ vựng / cấu trúc** — suggest 2-3 better phrases or sentence structures
-
-Be encouraging but honest. Keep total response under 350 words.`;
-
-  const userMsg = `IELTS Writing ${taskLabel} Prompt:\n${prompt}\n\nStudent Essay:\n${essay}`;
-
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 8000,
-      system,
-      messages: [{ role: 'user', content: userMsg }],
-    });
-    const feedback = replyText(response);
-    res.json({ feedback });
-  } catch (e) {
-    console.error('grade-writing AI error:', e.message);
-    res.status(500).json({ error: 'AI error', detail: e.message });
-  }
-});
-
-// Rewrite the student's OWN essay up to a Band 8+ standard (model improvement)
-app.post('/api/ai/improve-writing', authenticate, aiLimiter, async (req, res) => {
-  const { prompt, essay, type } = req.body;
-  if (!prompt || !essay) return res.status(400).json({ error: 'Missing prompt or essay' });
-  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI service unavailable' });
-
-  const taskLabel = type === 'task1' ? 'Task 1 (Report)' : 'Task 2 (Essay)';
-  const system = `You are an expert IELTS writing tutor. Rewrite the student's IELTS Writing ${taskLabel} so it would score around Band 8.0–8.5.
-RULES:
-- Keep the student's own ideas, opinion and overall structure — upgrade their writing, do not replace the content with a different argument.
-- Improve lexical resource (precise words, natural collocations), grammatical range & accuracy, cohesion, and task response.
-- Keep a realistic length (Task 1 ~170–190 words; Task 2 ~270–300 words). Do not pad.
-- Output ONLY the improved essay in English: clean paragraphs, no preamble, no commentary, no markdown headings.`;
-  const userMsg = `IELTS Writing ${taskLabel} Prompt:\n${prompt}\n\nStudent Essay:\n${essay}`;
-
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 8000,
-      system,
-      messages: [{ role: 'user', content: userMsg }],
-    });
-    const inputTokens = response.usage?.input_tokens || 0;
-    const outputTokens = response.usage?.output_tokens || 0;
-    db.logUsage('improve-writing', calculateCost(inputTokens, outputTokens), inputTokens + outputTokens);
-    const improved = replyText(response);
-    res.json({ improved });
-  } catch (e) {
-    console.error('improve-writing AI error:', e.message);
-    res.status(500).json({ error: 'AI error', detail: e.message });
-  }
 });
 
 app.post('/api/ai/grade-paragraph', authenticate, aiLimiter, async (req, res) => {
