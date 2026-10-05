@@ -8825,7 +8825,10 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-hero.on { border-color: var(--forest); box-shadow: 0 6px 18px -10px rgba(14, 77, 60, .6); }
 .t1h-hero.locked .t1h-face { filter: grayscale(1) brightness(.8); opacity: .7; }
 .t1h-hero small { color: var(--moss); line-height: 1.35; min-height: 2.7em; }
-.t1h-face { width: 72px; height: 96px; image-rendering: pixelated; border-radius: 12px; background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--hc, #13294F) 22%, transparent), transparent 70%); }
+.t1h-look { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.t1h-faceset { width: 76px; height: 76px; image-rendering: pixelated; border-radius: 10px; border: 2px solid var(--hc, #13294F); background: #13294F; }
+.t1h-hero.locked .t1h-faceset { filter: grayscale(1) brightness(.8); opacity: .7; }
+.t1h-face { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 12px; background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--hc, #13294F) 22%, transparent), transparent 70%); }
 .t1h-stats { font-size: 0.85rem; font-weight: 700; color: #13294F; }
 .t1h-hero .vb-start-btn, .t1h-buy { width: 100%; margin-top: auto; }
 .t1h-how { margin: 0; padding-left: 1.1rem; line-height: 1.6; color: #13294F; }
@@ -9470,3 +9473,23 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1t-present .t1t-dot { background: rgba(255,255,255,.3); }
 .t1t-present .t1t-dot.on { background: #9FE0B8; }
 .t1t-p-keys { font-size: 0.8rem; opacity: 0.6; }
+
+/* Sinh tồn ghép câu: the essay taking shape, stars and chest */
+.t1h-essay { position: absolute; left: 8px; bottom: 8px; z-index: 4; width: min(300px, calc(100% - 140px)); background: rgba(255, 253, 246, 0.94); border: 2px solid #13294F; border-radius: 10px; font-size: 12.5px; line-height: 1.45; color: #13294F; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); }
+.t1h-essay summary { cursor: pointer; padding: 5px 9px; font-weight: 800; list-style: none; }
+.t1h-essay summary::-webkit-details-marker { display: none; }
+.t1h-essay summary span { font-weight: 600; opacity: 0.7; margin-left: 4px; }
+.t1h-essay-body { max-height: 150px; overflow-y: auto; padding: 0 9px 7px; }
+.t1h-essay-p { margin-bottom: 5px; }
+.t1h-essay-p b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #B8860B; }
+.t1h-essay-p p { margin: 1px 0 0; }
+.t1h-essay-empty { margin: 0; font-style: italic; opacity: 0.75; }
+.t1h-essay-final { background: #FFFDF6; border: 2px solid #E6DCC3; border-radius: 14px; padding: 12px 14px; margin: 8px 0 12px; }
+.t1h-essay-final .t1h-essay-p { margin-bottom: 8px; font-size: 0.98rem; line-height: 1.55; }
+.t1h-essay-final .t1h-essay-p b { font-size: 0.75rem; }
+.t1h-reward { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; }
+.t1h-stars { font-size: 2rem; letter-spacing: 4px; color: #D9D2BF; }
+.t1h-stars .on { color: #F2B233; text-shadow: 0 2px 0 #B8860B; }
+.t1h-chest { width: 128px; height: 56px; image-rendering: pixelated; }
+.t1h-chest-n { font-weight: 800; color: #7A5A00; }
+@media (max-width: 600px) { .t1h-essay { width: calc(100% - 130px); font-size: 12px; } .t1h-essay-body { max-height: 110px; } }

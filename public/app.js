@@ -28734,8 +28734,6 @@ const T1H_BOSS_Q = {
     why: 'By contrast mở ý đối lập với đoạn trước. On the contrary dùng để bác bỏ ý vừa nói; "contrastly" không có trong tiếng Anh.' },
 };
 const T1H_BOSS = { a: 380, d: 500, l: 650 };
-// Boss look, name, and where its head is in the frame (x from the middle, y from the top) for the crown.
-const T1H_BOSS_LOOK = [['big_zombie', 'Zombie khổng lồ', 3, 9], ['ogre', 'Ogre', 2, 10], ['big_demon', 'Quỷ lớn', 2, 6]];
 const T1H_WEAPONS = {
   gun:   { dmg: 10, rate: 2.2, count: 1, pierce: 0, splash: 0, speed: 560, range: 430 },
   magic: { dmg: 11, rate: 1.4, count: 1, pierce: 0, splash: 70, speed: 380, range: 400 },
@@ -28743,9 +28741,9 @@ const T1H_WEAPONS = {
   sword: { dmg: 18, rate: 1.5, count: 1, pierce: 0, splash: 0, reach: 95, arc: 2.0 },
 };
 const T1H_FOES = {
-  zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5, exp: 1 },
-  robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6, exp: 1 },
-  brute:  { look: ['orc_warrior', 'masked_orc', 'chort'], hp: 90, sp: 0.75, r: 22, scale: 3.3, dmg: 1.8, pts: 15, exp: 3 },
+  zombie: { look: ['Slime', 'Mushroom', 'Skull'], hp: 22, sp: 1, r: 15, scale: 3, dmg: 1, pts: 5, exp: 1 },
+  robot:  { look: ['BlueBat', 'Spirit', 'Eye'], hp: 14, sp: 1.45, r: 14, scale: 3, dmg: 0.8, pts: 6, exp: 1 },
+  brute:  { look: ['Cyclope', 'Beast', 'Bear'], hp: 90, sp: 0.75, r: 22, scale: 4, dmg: 1.8, pts: 15, exp: 3 },
 };
 const T1H_KEYS = { KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
 const T1H_JOY = 46;
@@ -28775,6 +28773,310 @@ function t1dDraw(c, name, x, y, scale, flip, over, noShadow) {
   (over || []).forEach(([k, a]) => { if (a > 0) { c.globalAlpha = a; c.drawImage(T1D[k], r[0], r[1], r[2], r[3], -w / 2, -h, w, h); } });
   c.restore();
 }
+/* Ninja Adventure sprites (Pixel-boy & AAA, CC0; public/img/t1/ninja). Heroes,
+   foes and bosses of Sinh tồn ghép câu. Hero and foe sheets are 16px cells,
+   four columns facing down, up, left, right, one row per frame. Boss sheets
+   are horizontal strips. The 0x72 atlas above stays for weapons, props and
+   Xây tháp. */
+const T1N = {};
+const T1N_SIL = { flash: '#fff', red: '#C0392B', ice: '#7FC8F8', gold: '#F2C14E' };
+// Column of a 4-way sheet for a direction: down, up, left, right.
+function t1nDir(dx, dy) { return Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? 0 : 1) : (dx < 0 ? 2 : 3); }
+function t1nImg(path) {
+  let e = T1N[path];
+  if (!e) {
+    e = T1N[path] = { img: new Image(), ready: false };
+    e.img.onload = () => { e.ready = true; };
+    e.img.src = '/img/t1/ninja/' + path;
+  }
+  return e;
+}
+// Draws one frame with its feet at (x, y), with optional colour overlays.
+function t1nDraw(c, path, sx, sy, sw, sh, x, y, scale, flip, over, noShadow) {
+  const e = t1nImg(path), w = sw * scale, h = sh * scale;
+  if (!noShadow) { c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x, y - 1, w * 0.36, 3 + scale * 1.2, 0, 0, Math.PI * 2); c.fill(); }
+  if (!e.ready) return;
+  c.save();
+  c.imageSmoothingEnabled = false;
+  c.translate(x, y);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(e.img, sx, sy, sw, sh, -w / 2, -h, w, h);
+  (over || []).forEach(([k, a]) => {
+    if (a <= 0) return;
+    if (!e[k]) e[k] = t1hSilhouette(e.img, T1N_SIL[k]);
+    c.globalAlpha = a;
+    c.drawImage(e[k], sx, sy, sw, sh, -w / 2, -h, w, h);
+  });
+  c.restore();
+}
+function t1nGrid(c, path, dir, row, x, y, scale, over, noShadow) { t1nDraw(c, path, dir * 16, row * 16, 16, 16, x, y, scale, false, over, noShadow); }
+// Hero looks, male | female, by the shop ids that were bought.
+const T1N_HERO = { male: ['Hunter', 'Woman'], female: ['NinjaMageBlack', 'SorcererBlack'], knight: ['Knight', 'Princess'], archer: ['Villager5', 'Cavegirl'] };
+function t1nHeroName(h) { return (T1N_HERO[h.id] || T1N_HERO.male)[t1hSex(h) === 'f' ? 1 : 0]; }
+// Mini bosses: monster sheets drawn big.
+const T1N_MINI = [['Trex', 'Khủng long'], ['Octopus', 'Bạch tuộc'], ['Cyclope2', 'Mắt một mí'], ['Beast2', 'Mãnh thú'], ['DragonYellow', 'Rồng vàng'], ['KappaRed', 'Kappa đỏ']];
+// Big bosses: strip file and frame count, draw scale, attack. Every attack is
+// telegraphed in red for 0.8 s before it lands.
+const T1N_BOSSES = [
+  { id: 'GiantSlime', name: 'Slime khổng lồ', idle: ['Idle.png', 5], sc: 3, kind: 'jump', split: true, say: 'Nó nhảy đè, hết nửa máu thì tách đôi.' },
+  { id: 'GiantFrog', name: 'Ếch khổng lồ', idle: ['Idle40x40.png', 5], sc: 4, kind: 'jump', say: 'Nó nhảy tới vòng đỏ, đáp xuống là sóng chấn động.' },
+  { id: 'GiantFlam', name: 'Hoả linh', idle: ['Idle.png', 5], sc: 3, kind: 'firering', say: 'Vòng lửa nở rộng ra, đứng sát nó hoặc thật xa.' },
+  { id: 'SquidRed', name: 'Mực đỏ', idle: ['Idle.png', 4], sc: 2, kind: 'ink', say: 'Nó phun vòng mực, len qua khe giữa các viên.' },
+  { id: 'TenguRed', name: 'Tengu đỏ', idle: ['Idle.png', 6], sc: 2, kind: 'teleport', say: 'Chớp đỏ cạnh em là nó sắp dịch chuyển tới đó.' },
+  { id: 'GiantSpirit', name: 'Hồn ma khổng lồ', idle: ['Idle.png', 5], sc: 3, kind: 'laser', say: 'Vạch đỏ mảnh là tia laser, bước ra khỏi vạch.' },
+  { id: 'DemonCyclop', name: 'Quỷ một mắt', idle: ['Idle.png', 5], sc: 3, kind: 'charge', say: 'Vạch đỏ là đường nó lao tới, né sang bên.' },
+  { id: 'GiantRacoon', name: 'Gấu mèo khổng lồ', idle: ['Idle.png', 6], sc: 2, kind: 'summon', say: 'Nó gọi quái con, dọn quái trước rồi đánh nó.' },
+  { id: 'GiantBlueSamurai', name: 'Samurai xanh', idle: ['Idle.png', 12], sc: 3, kind: 'spin', say: 'Vòng đỏ quanh nó là đường kiếm xoay, chạy ra ngoài.' },
+];
+const T1N_TELE = 0.8;
+/* Zones: one per stage of the essay, ground pre-rendered once from the Ninja
+   tilesets at half size and drawn at 2x. A gate opens when a part is done. */
+const T1N_ZONES = [
+  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A',
+    tiles: [['tiles/TilesetField.png', 1, 4, 1]],
+    props: { column: ['tiles/TilesetNature.png', 0, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 0, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 96, 176, 16, 16, 3] },
+    decor: [['tiles/TilesetHouse.png', 0, 0, 64, 64, 4], ['tiles/TilesetHouse.png', 192, 0, 64, 64, 3], ['tiles/TilesetNature.png', 0, 160, 16, 16, 40], ['tiles/TilesetNature.png', 0, 176, 16, 16, 24], ['tiles/TilesetNature.png', 16, 176, 16, 16, 24]] },
+  { name: 'Rừng Overview', part: 'Overview', top: '#24452A', side: '#1A3320', line: '#4E8A4A',
+    tiles: [['tiles/TilesetField.png', 1, 7, 1]],
+    props: { column: ['tiles/TilesetNature.png', 32, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 32, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 272, 128, 32, 32, 2.2], crate: ['tiles/TilesetNature.png', 128, 224, 32, 32, 1.6] },
+    decor: [['tiles/TilesetNature.png', 0, 32, 64, 48, 6], ['tiles/TilesetNature.png', 64, 32, 64, 48, 5], ['tiles/TilesetNature.png', 96, 128, 32, 32, 8], ['tiles/TilesetNature.png', 64, 160, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
+  { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#B5793A', side: '#94602C', line: '#E6B474',
+    tiles: [['tiles/TilesetField.png', 1, 1, 1]],
+    props: { column: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 3], wall: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 112, 176, 16, 16, 3] },
+    decor: [['tiles/TilesetDesert.png', 160, 64, 64, 64, 7], ['tiles/TilesetDesert.png', 160, 160, 64, 64, 5], ['tiles/TilesetNature.png', 192, 96, 64, 48, 4]] },
+  { name: 'Đấu trường trùm cuối', part: null, dungeon: true,
+    tiles: [['tiles/TilesetFloor.png', 13, 15, 0.8], ['tiles/TilesetFloor.png', 15, 15, 0.2]],
+    decor: [['tiles/TilesetDungeon.png', 32, 48, 16, 16, 10], ['tiles/TilesetDungeon.png', 128, 48, 16, 16, 8]] },
+];
+function t1nZoneGround(z) {
+  if (z.canvas) return z.canvas;
+  const files = [...new Set([...z.tiles, ...z.decor].map(t => t[0]))];
+  if (!files.every(f => t1nImg(f).ready)) return null;
+  const R = T1H_ROOM, cv = document.createElement('canvas');
+  cv.width = R.w / 2; cv.height = R.h / 2;
+  const x = cv.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  for (let i = 0; i < cv.width / 16; i++) for (let j = 0; j < cv.height / 16; j++) {
+    let r = Math.random(), t = z.tiles[0];
+    for (const tt of z.tiles) { if (r < tt[3]) { t = tt; break; } r -= tt[3]; }
+    x.drawImage(t1nImg(t[0]).img, t[1] * 16, t[2] * 16, 16, 16, i * 16, j * 16, 16, 16);
+  }
+  // Decor keeps clear of the middle, where the hero starts.
+  z.decor.forEach(([f, sx, sy, w, h, n]) => {
+    for (let k = 0, tries = 0; k < n * 2 && tries < 400; tries++) {
+      const px = Math.random() * (cv.width - w), py = R.top / 2 + Math.random() * (cv.height - R.top / 2 - h);
+      if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 80) continue;
+      x.drawImage(t1nImg(f).img, sx, sy, w, h, Math.round(px), Math.round(py), w, h);
+      k++;
+    }
+  });
+  return (z.canvas = cv);
+}
+// Sentences left in the part being written, the current one included.
+function t1nLeft() {
+  const g = _t1, S = g.list[g.si];
+  if (!S) return 0;
+  let n = 0;
+  for (let i = g.si; i < g.list.length && g.list[i].part === S.part; i++) n++;
+  return n;
+}
+// A gate to the next zone; walking into it fades over.
+function t1nGateOpen(to, boss) {
+  const g = _t1, p = g.p, s = t1hFreeNear(Math.min(g.room.w - 200, p.x + 240), p.y);
+  g.gate = { x: s.x, y: s.y, to, boss };
+  t1hMsg(`🌀 Cổng mở! Đi vào cổng để sang ${T1N_ZONES[to].name}.`, 3200);
+  tsSfx('rankup');
+}
+function t1nGateTick(dt) {
+  const g = _t1, p = g.p;
+  if (g.fadeT != null) {
+    g.fadeT += dt; p.inv = Math.max(p.inv, 0.2);
+    if (g.fadeT >= 0.45 && !g.fadeSwap) { g.fadeSwap = true; t1nZoneEnter(g.gate.to, g.gate.boss); }
+    if (g.fadeT >= 0.9) { g.fadeT = null; g.fadeSwap = false; g.gate = null; }
+    return;
+  }
+  if (g.gate && Math.hypot(p.x - g.gate.x, p.y - g.gate.y) < 46) { g.fadeT = 0; tsSfx('equip'); }
+}
+function t1nZoneEnter(to, boss) {
+  const g = _t1, R = T1H_ROOM;
+  g.zone = to;
+  g.room = t1hRoomMake();
+  g.foes = []; g.gems = []; g.ebul = []; g.gold = []; g.hearts = [];
+  g.p.x = R.w / 2; g.p.y = R.h / 2;
+  if (boss) t1hBossStart(boss);
+  else { t1hSentence(); t1hMsg(`${T1N_ZONES[to].name}: ${t1nLeft()} câu tới trùm.`, 2600); }
+}
+function t1nDrawGate(c) {
+  const g = _t1, G = g.gate;
+  if (!G) return;
+  c.save();
+  const t = g.time;
+  c.translate(G.x, G.y - 34);
+  c.shadowColor = '#7FD6F5'; c.shadowBlur = 24;
+  for (let i = 0; i < 3; i++) {
+    c.strokeStyle = ['#7FD6F5', '#B48CFF', '#FFFFFF'][i]; c.lineWidth = 6 - i * 2;
+    c.beginPath(); c.ellipse(0, 0, 30 - i * 7, 44 - i * 9, 0, t * (2 + i) % (Math.PI * 2), t * (2 + i) % (Math.PI * 2) + Math.PI * 1.6); c.stroke();
+  }
+  c.fillStyle = 'rgba(127,214,245,.25)'; c.beginPath(); c.ellipse(0, 0, 30, 44, 0, 0, Math.PI * 2); c.fill();
+  c.shadowBlur = 0;
+  c.font = '800 13px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = 4;
+  c.strokeText('CỔNG', 0, -56); c.fillText('CỔNG', 0, -56);
+  c.restore();
+}
+// Zone name and how far the boss is, top left of the arena.
+function t1nDrawZoneHud(c, W) {
+  const g = _t1, z = T1N_ZONES[g.zone || 0];
+  const left = g.boss ? 'Đánh trùm!' : g.gate ? 'Vào cổng' : `Còn ${t1nLeft()} câu tới trùm`;
+  const text = `${z.name} · ${left}`;
+  c.save();
+  c.font = '800 12px system-ui, -apple-system, Segoe UI, sans-serif';
+  const w = c.measureText(text).width + 18, y = g.boss ? 52 : 10;
+  c.fillStyle = 'rgba(19,41,79,.78)'; t1hRR(c, 10, y, Math.min(w, W - 20), 24, 8); c.fill();
+  c.fillStyle = '#fff'; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(text, 19, y + 12);
+  c.restore();
+}
+/* Mini bosses: every sentence put in order calls one. A short fight that
+   drops coins and EXP, earned by the sentence. */
+function t1nMiniSpawn() {
+  const g = _t1, p = g.p, k = g.minis = (g.minis || 0) + 1, [look, name] = T1N_MINI[(k - 1) % T1N_MINI.length];
+  const a = Math.random() * Math.PI * 2, s = t1hFreeNear(p.x + Math.cos(a) * 300, p.y + Math.sin(a) * 220);
+  const hp = 120 * (1 + g.si * 0.15) * (_t1Lv === 'l' ? 1.3 : _t1Lv === 'd' ? 1.15 : 1);
+  g.foes.push({ id: ++g.id, type: 'mini', mini: true, name, T: { scale: 7, pts: 40, exp: 8 }, look, sc: 7, x: s.x, y: s.y, hp, maxHp: hp,
+    sp: g.cfg.esp * 0.8, r: 34, dmg: g.cfg.dmg * 1.6, anim: 0, hit: 0, face: 1, h: 16 * 7 });
+  t1hMsg(`⚔️ Câu đúng gọi boss nhỏ ${name}! Hạ nó lấy xu và EXP.`, 2400);
+}
+
+/* The big boss's shield: damage wears it down to a floor; one question about
+   the part just written breaks it. The question is built from this prompt's
+   own sentences: the right one against copies with a fact-wrong chunk (the
+   decoys already in T1_SURV), so no number is ever made up. */
+// The chunk a fact-wrong decoy replaces: most shared words, same first word.
+function t1nFakeSlot(S, fk) {
+  const words = t => t.toLowerCase().replace(/[.,]/g, '').split(/\s+/).filter(Boolean);
+  const fw = words(fk);
+  let best = -1, bi = 0;
+  S.c.forEach((ch, i) => {
+    const cw = words(ch);
+    let sc = fw.filter(w => cw.includes(w)).length;
+    if (ch.split(' ')[0] === fk.split(' ')[0]) sc += 1;
+    if (/[.,]$/.test(ch) === /[.,]$/.test(fk)) sc += 0.5;
+    if (sc > best) { best = sc; bi = i; }
+  });
+  return bi;
+}
+function t1nShieldQ(part) {
+  const g = _t1, has = S => (S.fake || []).length;
+  const pool = g.list.filter(S => S.part === part && has(S));
+  const S = t1Pick(pool.length ? pool : g.list.filter(has));
+  if (!S) return null;
+  const right = S.c.join(' ');
+  const wrongs = t1Shuffle(S.fake).slice(0, 2).map(fk => {
+    const i = t1nFakeSlot(S, fk), c = S.c.slice(), real = c[i];
+    c[i] = fk;
+    return { text: c.join(' '), fake: fk, real };
+  }).filter(w => w.text !== right);
+  if (!wrongs.length) return null;
+  return { S, part, opts: t1Shuffle([{ text: right, right: true }, ...wrongs]) };
+}
+function t1nShieldAsk(f) {
+  const g = _t1, Q = t1nShieldQ(g.bossPart);
+  if (!Q) { f.shield = false; return; }
+  g.shQ = { ...Q, f, locked: false };
+  g.paused = true; g.phase = 'shield'; g.keys = {}; g.joy = null;
+  document.getElementById('h-msg')?.classList.add('hidden');
+  t1nShieldRender();
+  g.keyPick = k => t1nShieldPick(k);
+  g.next = () => {};
+}
+function t1nShieldRender(fb) {
+  const g = _t1, Q = g.shQ, sample = T1_SAMPLES.find(x => x.id === Q.S.img);
+  t1hModal(`<div class="t1h-lv">🛡️ Phá khiên của trùm</div>
+    <p class="t1h-q">Câu nào <b>đúng với biểu đồ</b>? (phần ${escapeHtml(Q.part)})</p>
+    <div class="t1-opts">${Q.opts.map((o, i) => `<button class="t1-opt${fb && o.picked ? ' no' : ''}" ${Q.locked ? 'disabled' : `onclick="t1nShieldPick(${i})"`}><kbd>${i + 1}</kbd>${escapeHtml(o.text)}</button>`).join('')}</div>
+    ${fb || ''}`, sample ? sample.chart() : '');
+}
+function t1nShieldPick(i) {
+  const g = _t1, Q = g.shQ;
+  if (!Q || Q.locked || g.phase !== 'shield') return;
+  const o = Q.opts[i];
+  if (!o) return;
+  const f = Q.f;
+  if (o.right) {
+    f.shield = false;
+    g.right++; g.score += 40;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+    tsSfx('level');
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 40, t: 0, dur: 0.6 });
+    g.shQ = null;
+    t1hPlay();
+    t1hMsg('🛡️ Khiên vỡ! Giờ đánh thẳng vào máu trùm.', 2400);
+    return;
+  }
+  // Wrong: the shield grows back, a short reason, and a 2 s lock before play.
+  g.wrongs = (g.wrongs || 0) + 1;
+  o.picked = true; Q.locked = true;
+  f.hp = Math.min(f.maxHp, f.floor + f.maxHp * 0.25);
+  tsSfx('wrong');
+  const key = 'sh' + o.fake;
+  if (!g.missed[key]) { g.missed[key] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(o.fake)}</b> ✗ → <b>${escapeHtml(o.real)}</b><br><i>${escapeHtml(T1H_FAKE_WHY)}</i></div>`); }
+  t1nShieldRender(`<div class="t1-fb no"><strong>Chưa đúng, khiên hồi lại.</strong><span>${escapeHtml(T1H_FAKE_WHY)} Biểu đồ không phải “${escapeHtml(o.fake)}”, mà là “${escapeHtml(o.real)}”.</span></div><div class="t1h-row" id="sh-go"><small>Đọc lại biểu đồ… 2 giây</small></div>`);
+  setTimeout(() => {
+    if (_t1 !== g || g.shQ !== Q) return;
+    const box = document.getElementById('sh-go');
+    if (box) box.innerHTML = '<button class="vb-start-btn" onclick="t1nShieldResume()">Đánh tiếp → <small>Enter</small></button>';
+    g.answered = true; g.next = t1nShieldResume;
+  }, 2000);
+}
+function t1nShieldResume() {
+  const g = _t1;
+  if (!g || !g.shQ || !g.shQ.locked) return;
+  g.shQ = null;
+  t1hPlay();
+}
+/* "Bài đang thành hình": every sentence put in order joins its paragraph, in
+   a small panel in the corner of the arena; the whole essay comes back above
+   the result. */
+const T1N_PARTS = ['Mở bài', 'Overview', 'Thân bài'];
+function t1nEssayAdd(S) {
+  const g = _t1;
+  if (!g.essay) g.essay = {};
+  // Sentences come in shuffled; the essay keeps the model answer's order.
+  const all = T1_SURV[_t1Block], E = g.essay[S.part] = g.essay[S.part] || [];
+  E.push({ i: all.indexOf(S), t: S.c.join(' ') });
+  E.sort((a, b) => a.i - b.i);
+  t1nEssayUi();
+}
+function t1nEssayHtml(cls) {
+  const g = _t1, E = g.essay || {};
+  return T1N_PARTS.filter(p => (E[p] || []).length).map(p => `<div class="${cls}"><b>${escapeHtml(p)}</b><p>${escapeHtml(E[p].map(x => x.t).join(' '))}</p></div>`).join('');
+}
+function t1nEssayUi() {
+  const g = _t1, box = document.getElementById('h-essay-body'), n = document.getElementById('h-essay-n');
+  if (!box) return;
+  const count = Object.values(g.essay || {}).reduce((a, x) => a + x.length, 0);
+  if (n) n.textContent = `${count}/${g.list.length}`;
+  box.innerHTML = t1nEssayHtml('t1h-essay-p') || '<p class="t1h-essay-empty">Xếp đúng câu đầu tiên để bắt đầu bài viết.</p>';
+  box.scrollTop = box.scrollHeight;
+}
+// Stars by wrong attempts (orders, linkers, shields, level-up questions), as
+// in Bắn Chữ; the chest's coins scale with them, so they come from learning.
+function t1nStars(g, won) {
+  const wrong = (g.wrongs || 0) + Math.max(0, (g.asked || 0) - (g.quizRight || 0));
+  const s = wrong === 0 ? 3 : wrong <= 2 ? 2 : 1;
+  return { stars: won ? s : 1, wrong };
+}
+function t1nPreload() {
+  Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
+  Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
+  T1N_BOSSES.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
+  T1N_MINI.forEach(([n]) => t1nImg(`foe/${n}.png`));
+  T1N_ZONES.forEach(z => [...z.tiles, ...z.decor].forEach(t => t1nImg(t[0])));
+}
+function t1nBossDraw(c, f, over) {
+  const B = f.B, path = `boss/${B.id}/${B.idle[0]}`, e = t1nImg(path);
+  const n = B.idle[1], fw = e.ready ? e.img.width / n : 50, fh = e.ready ? e.img.height : 50, k = Math.floor((_t1.time + f.id) * 8) % n;
+  t1nDraw(c, path, k * fw, 0, fw, fh, f.x, f.y - (f.air || 0), f.sc, false, over);
+}
 function t1hSex(h) { try { return localStorage.getItem('t1Sex_' + h.id) || h.sex; } catch (e) { return h.sex; } }
 function t1hSetSex(id, sex) {
   try { localStorage.setItem('t1Sex_' + id, sex); } catch (e) {}
@@ -28798,6 +29100,7 @@ function t1hChosen() { let id = 'male'; try { id = localStorage.getItem('t1Hero'
 function t1SurvStart() {
   t1Leave();
   t1dLoad();
+  t1nPreload();
   t1hPickScreen();
   walLoad().then(() => { if (!_t1 && t1Root()?.querySelector('.t1h-pick')) t1hPickScreen(); });
 }
@@ -28814,7 +29117,7 @@ function t1hPickScreen() {
         const own = t1hOwned(h);
         return `<div class="t1h-hero${h.id === sel.id ? ' on' : ''}${own ? '' : ' locked'}" style="--hc:${h.color}">
           <span class="t1h-role">${h.icon} ${h.role}</span>
-          <canvas class="t1h-face" width="72" height="96" data-look="${h.sprite}_${t1hSex(h)}" aria-hidden="true"></canvas>
+          <span class="t1h-look"><img class="t1h-faceset" src="/img/t1/ninja/hero/${t1nHeroName(h)}_face.png" alt="" width="76" height="76"><canvas class="t1h-face" width="64" height="64" data-look="${t1nHeroName(h)}" aria-hidden="true"></canvas></span>
           <span class="t1h-sex" role="group" aria-label="Chọn nam hay nữ">${[['m', '♂ Nam'], ['f', '♀ Nữ']].map(([k, t]) => `<button class="${t1hSex(h) === k ? 'on' : ''}" aria-pressed="${t1hSex(h) === k}" onclick="t1hSetSex('${h.id}', '${k}')">${t}</button>`).join('')}</span>
           <b class="t1h-name"><small>${h.title}</small>${h.name}</b>
           <small>${escapeHtml(h.desc)}</small>
@@ -28848,7 +29151,8 @@ function t1hPickAnim() {
     cs.forEach(cv => {
       const x = cv.getContext('2d'), run = cv.closest('.t1h-hero.on');
       x.clearRect(0, 0, cv.width, cv.height);
-      t1dDraw(x, `${cv.dataset.look}_${run ? 'run' : 'idle'}_anim_f${f % 4}`, 36, 92, 3, false, null, true);
+      x.imageSmoothingEnabled = false;
+      t1nGrid(x, `hero/${cv.dataset.look}.png`, 0, run ? f % 4 : 0, 32, 64, 4, null, true);
     });
   }, 140);
 }
@@ -28911,7 +29215,7 @@ function t1hGo(id) {
   t1dLoad();
   const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake();
   const set = t1hPickSet(), list = t1Shuffle(T1_SURV[_t1Block].filter(S => S.img === set)).sort((a, b) => order[a.part] - order[b.part]);
-  const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
+  const g = _t1 = { game: 'survive', cfg, hero: h, look: t1nHeroName(h), score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
     room, bag: [], ord: null,
     p: { x: room.w / 2, y: room.h / 2, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
     w: { kind: h.weapon, ...T1H_WEAPONS[h.weapon], cd: 0.6 },
@@ -28971,6 +29275,7 @@ function t1hGo(id) {
         <div class="t1h-skills">${h.skills.map((s, i) => `<button class="t1h-sk ready" id="h-sk${i}" style="--hc:${h.color}" onpointerdown="event.preventDefault(); t1hSkill(${i})" aria-label="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}" title="${escapeHtml(s.name)}: ${escapeHtml(s.desc)}"><span>${s.icon}</span><kbd>${T1H_SKILL_KEYS[i]}</kbd><b class="t1h-sk-lv" id="h-sklv${i}">1</b></button>`).join('')}</div>
         <div class="t1-arena-msg hidden" id="h-msg"></div>
         <div class="t1h-modal hidden" id="h-modal"></div>
+        <details class="t1h-essay" id="h-essay"${window.matchMedia('(max-width: 600px)').matches ? '' : ' open'}><summary>📝 Bài đang thành hình <span id="h-essay-n"></span></summary><div class="t1h-essay-body" id="h-essay-body"></div></details>
       </div>
       <aside class="t1h-side t1h-info" id="h-info"></aside>
       </div>
@@ -29240,6 +29545,7 @@ function t1hStep(dt) {
     if (Math.abs(mx) > 0.1 && p.atk <= 0) p.face = mx > 0 ? 1 : -1;
   }
   t1hPush(p, 14);
+  if (g.gate || g.fadeT != null) t1nGateTick(dt);
   if (p.moving || p.dashT > 0) p.anim += dt;
   p.hurt = Math.max(0, p.hurt - dt); p.inv = Math.max(0, p.inv - dt); p.atk = Math.max(0, p.atk - dt);
   g.sk = g.sk.map(c => Math.max(0, c - dt));
@@ -29536,9 +29842,9 @@ function t1hSpawnFoe(diff) {
   const far = g.room.holes.filter(h => Math.hypot(h.x - p.x, h.y - p.y) > 380);
   const hole = t1Pick(far.length ? far : g.room.holes);
   const elite = Math.random() < Math.min(0.3, Math.max(0, (diff - 1.2) * 0.07) + g.bosses * 0.04);
-  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale * (elite ? 1.25 : 1);
+  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale + (elite ? 1 : 0);
   g.foes.push({ id: ++g.id, type, T, look, elite, sc, x: hole.x + t1Rand(-20, 20), y: hole.y + t1Rand(-12, 12), hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1) * (elite ? 0.9 : 1),
-    r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: T1D_RECTS[look + '_run_anim_f0'][3] * sc });
+    r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: 16 * sc });
 }
 function t1hNearestFrom(x, y, range) {
   const g = _t1;
@@ -29632,6 +29938,11 @@ function t1hChain(n, stun) {
 }
 function t1hDamage(f, dmg, kx, ky) {
   if (f.dead) return;
+  if (f.boss && f.shield) {
+    f.hp = Math.max(f.floor, f.hp - dmg); f.hit = 0.06;
+    if (f.hp <= f.floor && !_t1.phase && !_t1.over) t1nShieldAsk(f);
+    return;
+  }
   f.hp -= dmg; f.hit = f.boss ? 0.06 : 0.12;
   const k = Math.hypot(kx, ky);
   if (k && !f.boss) { f.x += kx / k * 5; f.y += ky / k * 5; }
@@ -29645,6 +29956,12 @@ function t1hKill(f, quiet) {
   g.kills++; g.score += f.T.pts * (f.elite ? 3 : 1);
   if (f.boss) { t1hBossDown(f); return; }
   g.exp += f.T.exp * (f.elite ? 4 : 1);
+  if (f.mini) {
+    const c = T1_LEVELS[_t1Lv].coin * walMult();
+    g.coins += c;
+    tsSfx('coin');
+    g.fx.push({ kind: 'num', x: f.x, y: f.y - f.h - 10, text: `+${Math.round(c)} 🪙 · +${f.T.exp} EXP`, t: 0, dur: 1.2, color: '#B8860B' });
+  }
   if (g.time - g.sfxT > 0.09) { g.sfxT = g.time; tsSfx('kill'); }
   // PLUMMET's passive: every kill bursts and catches its neighbours.
   if (g.hero.weapon === 'magic') t1hBoom(f.x, f.y - f.h * 0.45, 45, g.w.dmg * 0.4);
@@ -29742,6 +30059,7 @@ function t1hPlay() {
   g.paused = false; g.last = 0; g.keys = {}; g.joy = null;
   t1hBagUi();
   t1hHud();
+  t1nEssayUi();
 }
 
 /* ── Ordering: the bag becomes the sentence ── */
@@ -29820,6 +30138,7 @@ function t1hOrderCheck() {
   o.bad = o.slots.map((bi, i) => g.bag[bi].text !== S.c[i]);
   const left = o.pool.filter(bi => !g.bag[bi].real);
   if (!o.bad.some(Boolean) && !left.length) { t1hOrderWin(); return; }
+  g.wrongs = (g.wrongs || 0) + 1;
   tsSfx('wrong');
   if (!g.missed[g.si]) { g.missed[g.si] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(S.part)}:</b> ${escapeHtml(S.c.join(' '))}<br><i>${escapeHtml(S.vi)}</i></div>`); }
   // Why each wrong slot is wrong: a trap (grammar or chart), or a real chunk out of place.
@@ -29842,6 +30161,7 @@ function t1hOrderCheck() {
 function t1hOrderWin() {
   const g = _t1, o = g.ord, first = o.tries === 1;
   o.done = true;
+  t1nEssayAdd(g.S);
   g.right++; g.combo++;
   g.score += first ? 60 : 30;
   g.coins += T1_LEVELS[_t1Lv].coin * walMult() * (first ? 1.5 : 0.8);
@@ -29860,7 +30180,9 @@ function t1hOrderDone() {
   g.ord = null; g.bag = [];
   g.si++;
   t1hCloseModal();
-  if (!N || N.part !== S.part) t1hBossStart(S.part);
+  t1nMiniSpawn();
+  if (!N) { g.S = null; g.gems = []; t1nGateOpen(T1N_ZONES.length - 1, S.part); }
+  else if (N.part !== S.part) t1hBossStart(S.part);
   else t1hSentence();
   t1hPlay();
 }
@@ -30240,49 +30562,143 @@ function t1hBossStart(part) {
   const g = _t1, p = g.p, q = T1H_BOSS_Q[part], qq = q[_t1Block] || q, R = g.room;
   g.S = null; g.gems = []; g.bosses++; g.goldTries = 0;
   g.bossQ = { next: q.next, right: qq.right, bad: qq.bad, why: qq.why };
-  const n = g.bosses, a = Math.random() * Math.PI * 2;
+  // Bosses rotate across runs, so a student keeps meeting new ones.
+  if (g.bossOff == null) {
+    let off = 0;
+    try { off = (parseInt(localStorage.getItem('t1BossRot'), 10) || 0) % T1N_BOSSES.length; localStorage.setItem('t1BossRot', String(off + 3)); } catch (e) {}
+    g.bossOff = off;
+  }
+  const n = g.bosses, a = Math.random() * Math.PI * 2, B = T1N_BOSSES[(g.bossOff + n - 1) % T1N_BOSSES.length];
   const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.06);
-  const [look, name, hx, hy] = T1H_BOSS_LOOK[(n - 1) % T1H_BOSS_LOOK.length];
-  const f = { id: ++g.id, boss: true, n, look, name, hx, hy, sc: 3, T: { scale: 3, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
-    hp, maxHp: hp, r: 34, h: 36 * 3, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
+  const e = t1nImg(`boss/${B.id}/${B.idle[0]}`), fh = e.ready ? e.img.height : 50, fw = e.ready ? e.img.width / B.idle[1] : 50;
+  const f = { id: ++g.id, boss: true, n, B, name: B.name, sc: B.sc, T: { scale: B.sc, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
+    hp, maxHp: hp, r: Math.max(26, fw * B.sc * 0.3), h: fh * B.sc, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
   f.x = Math.max(R.wall + 60, Math.min(R.w - R.wall - 60, f.x)); f.y = Math.max(R.top + 60, Math.min(R.h - R.wall - 60, f.y));
+  f.shield = true; f.floor = hp * 0.45;
+  g.bossPart = part;
   t1hPush(f, 30);
   g.boss = f;
   g.foes.push(f);
   tsSfx('boss');
-  t1hMsg(`👹 Trùm ${n}: ${name} xuất hiện! Né vạch đỏ và vòng đạn.`, 2600);
+  t1hMsg(`👹 Trùm ${n}: ${B.name}! ${B.say} Có khiên 🛡️: đánh mòn khiên rồi trả lời 1 câu để phá.`, 3600);
 }
-// Chase, then alternately a telegraphed charge or a ring of slow bullets.
+// A hit from a boss attack, unless the hero is untouchable.
+function t1hBossHit(f, dmg) {
+  const g = _t1, p = g.p;
+  if (p.inv <= 0 && g.shieldT <= 0 && !(p.dashT > 0)) t1hHurt(dmg, f.x, f.y);
+}
+// Picks the next attack and shows where it will land.
+function t1hBossTele(f, ux, uy) {
+  const g = _t1, p = g.p, k = f.B.kind;
+  f.st = 'tele'; f.stT = T1N_TELE; f.cx = ux; f.cy = uy; f.face = ux > 0 ? 1 : -1;
+  if (k === 'jump') { f.tx = p.x; f.ty = p.y; f.tr = f.B.split ? 95 : 115; }
+  else if (k === 'teleport') { const s = Math.random() < 0.5 ? 1 : -1; const pt = t1hFreeNear(p.x + s * 90, p.y + 20); f.tx = pt.x; f.ty = pt.y; f.tr = 80; }
+  else if (k === 'firering') f.tr = 340;
+  else if (k === 'spin') f.tr = 135;
+  else if (k === 'ink' || k === 'summon') f.tr = 70;
+  tsSfx('tick');
+}
+// The attack itself, 0.8 s after its telegraph.
+function t1hBossAct(f) {
+  const g = _t1, p = g.p, k = f.B.kind;
+  f.st = 'act'; f.hitDone = false;
+  if (k === 'charge') { f.stT = 0.55; tsSfx('miss'); }
+  else if (k === 'jump') { f.stT = 0.45; f.jx = f.x; f.jy = f.y; tsSfx('miss'); }
+  else if (k === 'laser') { f.stT = 0.35; tsSfx('shield'); }
+  else if (k === 'firering') { f.stT = 1.1; f.rr = 30; tsSfx('boss'); }
+  else if (k === 'teleport') {
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.4 });
+    f.x = f.tx; f.y = f.ty;
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    g.flashT = 0.15;
+    if (Math.hypot(p.x - f.tx, p.y - f.ty) < f.tr) t1hBossHit(f, f.dmg);
+    f.stT = 0.3; tsSfx('miss');
+  } else if (k === 'spin') {
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    if (Math.hypot(p.x - f.x, p.y - f.y) < f.tr) t1hBossHit(f, f.dmg * 1.2);
+    f.stT = 0.35; tsSfx('miss');
+  } else {
+    // Ink: a ring of slow bullets with gaps. Summon: helpers, and a smaller ring.
+    const n = k === 'ink' ? 12 + f.n * 3 : 8, off = Math.random() * Math.PI * 2;
+    for (let i = 0; i < n; i++) { const a = off + i * Math.PI * 2 / n; g.ebul.push({ x: f.x, y: f.y - f.h * 0.45, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, life: 4 }); }
+    if (k === 'summon') for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 80; m.y = f.y + Math.sin(a) * 80; t1hPush(m, m.r * 0.7); }
+    f.stT = 0.3; tsSfx('miss');
+  }
+}
 function t1hBossAI(f, dt) {
-  const g = _t1, p = g.p, dx = p.x - f.x, dy = p.y - f.y, d = Math.hypot(dx, dy) || 1;
+  const g = _t1, p = g.p, dx = p.x - f.x, dy = p.y - f.y, d = Math.hypot(dx, dy) || 1, k = f.B.kind;
   f.stT -= dt;
   if (f.st === 'chase') {
     if (f.stun <= 0) { f.x += dx / d * f.sp * dt; f.y += dy / d * f.sp * dt; f.face = dx > 0 ? 1 : -1; }
-    if (f.stT <= 0) {
-      f.cycle++;
-      if (f.cycle % 2) { f.st = 'aim'; f.stT = 0.9; f.cx = dx / d; f.cy = dy / d; f.face = dx > 0 ? 1 : -1; }
-      else { f.st = 'ring'; f.stT = 0.5; }
+    if (f.stT <= 0) { f.cycle++; t1hBossTele(f, dx / d, dy / d); }
+  } else if (f.st === 'tele') {
+    if (f.stT <= 0) t1hBossAct(f);
+  } else if (f.st === 'act') {
+    if (k === 'charge' && f.stun <= 0) { f.x += f.cx * 560 * dt; f.y += f.cy * 560 * dt; }
+    if (k === 'jump') {
+      const t = Math.min(1, 1 - f.stT / 0.45);
+      f.x = f.jx + (f.tx - f.jx) * t; f.y = f.jy + (f.ty - f.jy) * t; f.air = Math.sin(t * Math.PI) * 90;
+      if (f.stT <= 0 && !f.hitDone) {
+        f.hitDone = true; f.air = 0;
+        g.fx.push({ kind: 'wave', x: f.x, y: f.y - 10, t: 0, dur: 0.5 });
+        if (Math.hypot(p.x - f.x, p.y - f.y) < f.tr) t1hBossHit(f, f.dmg);
+        tsSfx('boss');
+      }
     }
-  } else if (f.st === 'aim') {
-    if (f.stT <= 0) { f.st = 'charge'; f.stT = 0.55; tsSfx('miss'); }
-  } else if (f.st === 'charge') {
-    if (f.stun <= 0) { f.x += f.cx * 560 * dt; f.y += f.cy * 560 * dt; }
-    if (f.stT <= 0) { f.st = 'chase'; f.stT = 2.2; }
-  } else if (f.st === 'ring' && f.stT <= 0) {
-    const n = 10 + f.n * 3, off = Math.random() * Math.PI * 2;
-    for (let i = 0; i < n; i++) { const a = off + i * Math.PI * 2 / n; g.ebul.push({ x: f.x, y: f.y - f.h * 0.45, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, life: 4 }); }
-    // The last boss calls in help.
-    if (f.n >= 3) for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 70; m.y = f.y + Math.sin(a) * 70; t1hPush(m, m.r * 0.7); }
-    tsSfx('miss');
-    f.st = 'chase'; f.stT = 2.2;
+    if (k === 'laser' && !f.hitDone) {
+      // Distance from the hero to the beam, which starts at the boss.
+      const bx = f.x, by = f.y - f.h * 0.45, t = Math.max(0, (p.x - bx) * f.cx + (p.y - 30 - by) * f.cy);
+      if (Math.hypot(p.x - (bx + f.cx * t), p.y - 30 - (by + f.cy * t)) < 26) { f.hitDone = true; t1hBossHit(f, f.dmg); }
+    }
+    if (k === 'firering') {
+      f.rr = 30 + (1 - f.stT / 1.1) * 310;
+      if (!f.hitDone && Math.abs(Math.hypot(p.x - f.x, p.y - f.y) - f.rr) < 22) { f.hitDone = true; t1hBossHit(f, f.dmg); }
+    }
+    if (f.stT <= 0) { f.st = 'chase'; f.stT = Math.max(1.3, 2.2 - f.n * 0.2); f.air = 0; f.rr = 0; }
+  }
+  // GiantSlime: at half health it splits; the twin is a smaller copy.
+  if (f.B.split && !f.split && f.hp < f.maxHp / 2) {
+    f.split = true; f.sc = Math.max(2, f.sc - 1); f.h = f.h * f.sc / (f.sc + 1);
+    const hp = f.hp * 0.6, twin = { ...f, id: ++g.id, boss: false, kid: true, hp, maxHp: hp, r: f.r * 0.8, sp: f.sp * 1.3, dmg: f.dmg * 0.6, T: { scale: f.sc, pts: 30, exp: 6 }, st: 'chase', x: f.x + 60, y: f.y, air: 0 };
+    t1hPush(twin, twin.r);
+    g.foes.push(twin);
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    t1hMsg('Slime tách đôi!', 1600);
   }
   t1hPush(f, f.r * 0.8);
-  if (d < f.r + 18 && p.inv <= 0 && g.shieldT <= 0) t1hHurt(f.dmg, f.x, f.y);
+  if (!(f.air > 20) && d < f.r + 18 && p.inv <= 0 && g.shieldT <= 0) t1hHurt(f.dmg, f.x, f.y);
+}
+// Telegraphs in red, and the fire ring and laser while they are live.
+function t1hDrawTele(c, f) {
+  const g = _t1, k = f.B.kind, pulse = 0.18 + 0.2 * Math.sin(g.time * 30) ** 2, cy = f.y - f.h * 0.45;
+  c.save();
+  if (f.st === 'tele') {
+    c.fillStyle = `rgba(229,83,61,${pulse})`; c.strokeStyle = 'rgba(229,83,61,.85)'; c.lineWidth = 3;
+    if (k === 'charge' || k === 'laser') {
+      c.translate(f.x, k === 'laser' ? cy : f.y - 20); c.rotate(Math.atan2(f.cy, f.cx));
+      if (k === 'laser') { c.fillRect(0, -4, 1100, 8); c.strokeRect(0, -4, 1100, 8); } else c.fillRect(0, -32, 320, 64);
+    } else {
+      const x = k === 'jump' || k === 'teleport' ? f.tx : f.x, y = k === 'jump' || k === 'teleport' ? f.ty : f.y;
+      c.beginPath(); c.ellipse(x, y, f.tr, f.tr * 0.6, 0, 0, Math.PI * 2);
+      if (k === 'firering') c.stroke(); else { c.fill(); c.stroke(); }
+      // The fill grows to the edge as the hit gets closer.
+      const t = 1 - f.stT / T1N_TELE;
+      c.beginPath(); c.ellipse(x, y, f.tr * t, f.tr * 0.6 * t, 0, 0, Math.PI * 2); c.stroke();
+    }
+  } else if (f.st === 'act' && k === 'laser') {
+    c.translate(f.x, cy); c.rotate(Math.atan2(f.cy, f.cx));
+    c.fillStyle = 'rgba(255,240,200,.95)'; c.shadowColor = '#FF5A3C'; c.shadowBlur = 18; c.fillRect(0, -9, 1100, 18);
+  } else if (f.st === 'act' && k === 'firering' && f.rr) {
+    c.strokeStyle = 'rgba(255,138,61,.9)'; c.lineWidth = 18; c.shadowColor = '#FF5A3C'; c.shadowBlur = 16;
+    c.beginPath(); c.ellipse(f.x, f.y, f.rr, f.rr * 0.6, 0, 0, Math.PI * 2); c.stroke();
+  }
+  c.restore();
 }
 function t1hBossDown(f) {
   const g = _t1, q = g.bossQ;
   g.boss = null;
   g.ebul = [];
+  g.foes.forEach(x => { if (x.kid && !x.dead) t1hKill(x, true); });
   tsSfx('level');
   g.fx.push({ kind: 'wave', x: f.x, y: f.y - 40, t: 0, dur: 0.6 });
   const opts = t1Shuffle([{ text: q.right, right: true }, ...q.bad.map(t => ({ text: t, right: false }))]);
@@ -30304,6 +30720,7 @@ function t1hGoldPick(m) {
     return;
   }
   g.goldTries++;
+  g.wrongs = (g.wrongs || 0) + 1;
   m.dead = true;
   g.gold = g.gold.filter(x => !x.dead);
   if (!g.missed['b' + g.bosses]) { g.missed['b' + g.bosses] = 1; g.misses.push(`<div class="t1-review-line"><b>Câu mở ${escapeHtml(g.bossQ.next)}:</b> ${escapeHtml(g.bossQ.right)}<br><i>${escapeHtml(g.bossQ.why)}</i></div>`); }
@@ -30345,7 +30762,8 @@ function t1hAfterBoss() {
   const g = _t1;
   g.gold = []; g.bossQ = null;
   if (g.si >= g.list.length) { t1hOver(true); return; }
-  t1hSentence();
+  // A part is done: a gate to the next zone, where the next part begins.
+  t1nGateOpen(Math.min((g.zone || 0) + 1, T1N_ZONES.length - 2));
   t1hPlay();
 }
 function t1hPause() {
@@ -30426,9 +30844,19 @@ function t1hFinish() {
       ${weak.map(c => `<div class="t1-review-line"><b>${escapeHtml(c.en)}</b> · ${escapeHtml(c.vi)}</div>`).join('')}
       <button class="vb-secondary-btn" onclick="t1FcOpen('surv')">🃏 Ôn ngay bằng Flashcard</button></div>` : '')
     + (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '');
+  const { stars, wrong } = t1nStars(g, won), chest = won ? Math.round(T1_LEVELS[_t1Lv].coin * walMult() * [0, 3, 6, 10][stars]) : 0;
+  g.coins += chest;
+  const essay = t1nEssayHtml('t1h-essay-p');
   t1Finish(g, 'survive', _t1Block === 'dyn' ? 'line_graph' : 'map', {
     big: `${g.hero.name} · ${Math.min(g.si, g.list.length)}/${g.list.length} câu · ${won ? 3 : Math.max(0, g.bosses - (g.boss ? 1 : 0))} trùm · ${g.quizRight}/${g.asked} câu hỏi đúng`,
     icon: won ? '🏆' : g.si >= 3 ? '👏' : '🛡️', good: !!won, list: list || undefined });
+  const res = t1Root().querySelector('.t1-result');
+  if (!res) return;
+  if (essay) res.insertAdjacentHTML('beforebegin', `<div class="t1h-essay-final"><div class="t1-review-title">📝 Bài em vừa ghép</div>${essay}</div>`);
+  res.querySelector('.t1-result-row')?.insertAdjacentHTML('afterend', `<div class="t1h-reward">
+    <div class="t1h-stars" aria-label="${stars} sao">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}">★</span>`).join('')}</div>
+    ${won ? `<img class="t1h-chest" src="/img/t1/ninja/items/BigTreasureChest.png" alt="" width="128" height="56">` : ''}
+    <div class="t1h-chest-n">${won ? `Rương: +${chest} xu · ` : 'Thắng để mở rương · '}${wrong ? `sai ${wrong} lần` : 'không sai lần nào'}</div></div>`);
 }
 
 /* ── Drawing ── */
@@ -30443,8 +30871,10 @@ function t1dTile(c, name, x, y, s) {
   if (r && T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], x, y, r[2] * s, r[3] * s);
 }
 function t1hDrawHero(c) {
-  const g = _t1, p = g.p, sc = 2.7;
-  const frame = p.hurt > 0 || p.hp <= 0 ? 'hit_anim_f0' : p.moving && !p.won ? `run_anim_f${Math.floor(p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 6) % 4}`;
+  const g = _t1, p = g.p, sc = 4;
+  // Facing: where the last shot went while attacking, else the way it walks.
+  const dir = p.atk > 0 ? t1nDir(Math.cos(p.aim || 0), Math.sin(p.aim || 0)) : t1nDir(p.mx || 0, p.my || 0);
+  const row = p.atk > 0 ? 4 : p.moving && !p.won ? Math.floor(p.anim * 10) % 4 : 0;
   const glow = g.rushT > 0 || g.shieldT > 0 || p.dashT > 0;
   c.save();
   c.globalAlpha = glow ? 0.6 : 0.32 + Math.sin(g.time * 3) * 0.06;
@@ -30461,7 +30891,7 @@ function t1hDrawHero(c) {
   }
   c.save();
   if (p.inv > 0 && p.dashT <= 0 && Math.floor(p.inv * 20) % 2) c.globalAlpha = 0.45;
-  t1dDraw(c, `${g.look}_${frame}`, p.x, p.y, sc, p.face < 0, p.hurt > 0 ? [['red', 0.35]] : null);
+  t1nGrid(c, `hero/${g.look}.png`, dir, row, p.x, p.y, sc, p.hurt > 0 ? [['red', 0.35]] : null);
   c.restore();
   if (g.shieldT > 0) {
     c.save();
@@ -30523,26 +30953,27 @@ function t1hCrown(c, x, y) {
   c.restore();
 }
 function t1hDrawFoe(c, f) {
-  const g = _t1, frame = f.stun > 0 ? `idle_anim_f${Math.floor(f.anim * 6) % 4}` : `run_anim_f${Math.floor(f.anim * (f.st === 'charge' ? 16 : 8)) % 4}`;
+  const g = _t1;
   if (f.boss) {
-    if (f.st === 'aim') {
-      c.save();
-      c.translate(f.x, f.y - 20); c.rotate(Math.atan2(f.cy, f.cx));
-      c.fillStyle = `rgba(229,83,61,${0.18 + 0.2 * Math.sin(g.time * 30) ** 2})`;
-      c.fillRect(0, -32, 320, 64);
-      c.restore();
-    }
+    t1hDrawTele(c, f);
     c.save(); c.globalAlpha = 0.35; c.fillStyle = '#E5533D';
-    c.beginPath(); c.ellipse(f.x, f.y, 44, 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
+    c.beginPath(); c.ellipse(f.x, f.y, Math.max(44, f.r * 1.3), 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
   }
   if (f.elite) {
     c.save(); c.globalAlpha = 0.45 + 0.2 * Math.sin(g.time * 6); c.strokeStyle = '#F2C14E'; c.lineWidth = 3;
     c.beginPath(); c.ellipse(f.x, f.y, f.r * 1.3, f.r * 0.45, 0, 0, Math.PI * 2); c.stroke(); c.restore();
   }
   const sc = f.sc || f.T.scale, ice = g.freezeT > 0 || (f.stun > 0 && f.iceT > 0) || f.slowT > 0;
-  t1dDraw(c, `${f.look}_${frame}`, f.x, f.y, sc, f.face < 0, [['gold', f.elite ? 0.22 + 0.1 * Math.sin(g.time * 6) : 0], ['red', f.st === 'aim' ? 0.35 : 0], ['ice', ice ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
+  const over = [['gold', f.elite ? 0.22 + 0.1 * Math.sin(g.time * 6) : 0], ['red', f.st === 'tele' ? 0.35 : 0], ['ice', ice ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]];
+  if (f.B) t1nBossDraw(c, f, over);
+  else t1nGrid(c, `foe/${f.look}.png`, t1nDir(g.p.x - f.x, g.p.y - f.y), f.stun > 0 ? 0 : Math.floor(f.anim * (f.mini ? 6 : 8)) % 4, f.x, f.y, sc, over);
   if (f.stun > 0 && !ice) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
-  if (f.boss) { t1hCrown(c, f.x + (f.face < 0 ? -f.hx : f.hx) * sc, f.y - (36 - f.hy) * sc + 4); return; }
+  if (f.boss && f.shield) {
+    c.save(); c.globalAlpha = 0.35 + 0.15 * Math.sin(g.time * 5); c.strokeStyle = '#7FD6F5'; c.fillStyle = 'rgba(127,214,245,.12)'; c.lineWidth = 4;
+    c.beginPath(); c.ellipse(f.x, f.y - f.h * 0.5 - (f.air || 0), f.r * 1.7, f.h * 0.62, 0, 0, Math.PI * 2); c.fill(); c.stroke(); c.restore();
+  }
+  if (f.mini) { c.font = '800 12px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = '#FFE07A'; c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = 3; c.strokeText(f.name, f.x, f.y - f.h - 14); c.fillText(f.name, f.x, f.y - f.h - 14); }
+  if (f.boss) { t1hCrown(c, f.x, f.y - f.h - (f.air || 0) + 2); return; }
   if (f.hp < f.maxHp) {
     const bw = f.r * 2;
     c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(f.x - bw / 2, f.y - f.h - 6, bw, 4);
@@ -30552,6 +30983,18 @@ function t1hDrawFoe(c, f) {
 // Obstacles, drawn in depth order with the people.
 function t1hDrawProp(c, o) {
   const cx = o.x + o.w / 2, by = o.y + o.h;
+  const zp = (T1N_ZONES[_t1.zone || 0].props || {})[o.kind];
+  if (zp) {
+    const [f, sx, sy, w, h, sc] = zp, over = o.hit > 0 ? [['flash', 0.6]] : null;
+    if (o.kind !== 'wall') { t1nDraw(c, f, sx, sy, w, h, cx, by + 4, sc, o.seed < 0.5, over); return; }
+    // A wall becomes a row (or column) of trees standing on its footprint.
+    const step = w * sc * 0.7, n = Math.max(1, Math.round(Math.max(o.w, o.h) / step));
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n;
+      t1nDraw(c, f, sx, sy, w, h, o.w > o.h ? o.x + o.w * t : cx, o.w > o.h ? by + 4 : o.y + o.h * t + 12, sc, (o.seed * 7 + i) % 2 < 1, null);
+    }
+    return;
+  }
   if (o.kind === 'column') { t1dDraw(c, 'column', cx, by + 6, 3, false, null, false); return; }
   if (o.kind === 'crate') { t1dDraw(c, 'crate', cx, by + 4, 2.6, false, o.hit > 0 ? [['flash', 0.6]] : null, false); return; }
   if (o.kind === 'rock') {
@@ -30678,6 +31121,14 @@ function t1hDrawFx(c, e) {
 }
 // Walls round the room: bricks along the top with banners, dark stone on the other sides.
 function t1hDrawWalls(c) {
+  const z = T1N_ZONES[_t1.zone || 0];
+  if (!z.dungeon) {
+    const R = _t1.room;
+    c.fillStyle = z.top; c.fillRect(0, 0, R.w, R.top);
+    c.fillStyle = z.side; c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
+    c.fillStyle = z.line; c.fillRect(0, R.top - 4, R.w, 4); c.fillRect(R.wall - 4, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 4);
+    return;
+  }
   const R = _t1.room, banners = ['wall_banner_red', 'wall_banner_blue', 'wall_banner_green'];
   c.fillStyle = '#1C1524'; c.fillRect(0, 0, R.w, R.top - 96);
   for (let x = 0, i = 0; x < R.w; x += 48, i++) {
@@ -30702,9 +31153,12 @@ function t1hDraw() {
   c.scale(z, z);
   c.translate(-camX, -camY);
   c.imageSmoothingEnabled = false;
-  c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall);
+  const zc = t1nZoneGround(T1N_ZONES[g.zone || 0]);
+  if (zc) c.drawImage(zc, 0, 0, zc.width, zc.height, 0, 0, R.w, R.h);
+  else { c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall); }
   R.holes.forEach(h => { c.globalAlpha = 0.9; t1dTile(c, 'hole', h.x - 24, h.y - 24, 3); c.globalAlpha = 1; });
   t1hDrawWalls(c);
+  t1nDrawGate(c);
   c.font = '20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
   g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.4, false, null, true); });
   c.globalAlpha = 1;
@@ -30783,7 +31237,7 @@ function t1hDraw() {
   g.gems.forEach((m, i) => t1hDrawGem(c, m, false, i));
   g.gold.forEach((m, i) => t1hDrawGem(c, m, true, i));
   // Arrows at the edge for gems and the boss off screen.
-  [...g.gems, ...g.gold.map(m => ({ ...m, col: '#E5A52D' })), ...(g.boss ? [{ x: g.boss.x, y: g.boss.y, col: '#E5533D' }] : [])].forEach(m => {
+  [...g.gems, ...g.gold.map(m => ({ ...m, col: '#E5A52D' })), ...(g.boss ? [{ x: g.boss.x, y: g.boss.y, col: '#E5533D' }] : []), ...(g.gate ? [{ x: g.gate.x, y: g.gate.y, col: '#7FD6F5' }] : [])].forEach(m => {
     const sx = (m.x - camX) * z, sy = (m.y - 20 - camY) * z;
     if (sx > 0 && sx < W && sy > 0 && sy < H) return;
     const cx = Math.max(18, Math.min(W - 18, sx)), cy = Math.max(18, Math.min(H - 18, sy)), a = Math.atan2(sy - H / 2, sx - W / 2);
@@ -30798,8 +31252,13 @@ function t1hDraw() {
     c.fillStyle = '#3A2020'; t1hRR(c, (W - bw) / 2, 22, bw, 10, 5); c.fill();
     c.fillStyle = '#E5533D'; t1hRR(c, (W - bw) / 2, 22, bw * f, 10, 5); c.fill();
     c.font = '800 11px system-ui, -apple-system, Segoe UI, sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}`, W / 2, 19);
+    if (b.shield) { const fx = (W - bw) / 2 + bw * (b.floor / b.maxHp); c.fillStyle = '#7FD6F5'; c.fillRect(fx - 1, 19, 3, 16); }
+    c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}${b.shield ? ' · 🛡️ KHIÊN' : ''}`, W / 2, 19);
+    const fe = b.B && t1nImg(`boss/${b.B.id}/Faceset.png`);
+    if (fe && fe.ready) { c.imageSmoothingEnabled = false; c.fillStyle = '#13294F'; t1hRR(c, (W - bw) / 2 - 44, 4, 40, 40, 6); c.fill(); c.drawImage(fe.img, (W - bw) / 2 - 43, 5, 38, 38); }
   }
+  t1nDrawZoneHud(c, W);
+  if (g.fadeT != null) { c.fillStyle = `rgba(8,6,14,${Math.min(1, 1 - Math.abs(g.fadeT - 0.45) / 0.45)})`; c.fillRect(0, 0, W, H); }
   if (g.freezeT > 0) { c.fillStyle = `rgba(127,200,248,${Math.min(0.18, g.freezeT * 0.1)})`; c.fillRect(0, 0, W, H); }
   if (g.flashT > 0) { c.fillStyle = `rgba(255,236,170,${Math.min(0.6, g.flashT * 1.3)})`; c.fillRect(0, 0, W, H); }
   g.fx.forEach(e => {
