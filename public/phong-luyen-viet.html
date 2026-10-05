@@ -110,6 +110,15 @@ th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mu
 .split.gate{grid-template-columns:minmax(0,1fr);max-width:760px}
 #editorCard{align-content:start}
 .next,.nudge{align-content:start}
+textarea.draft{min-height:150px;font-size:.92rem;line-height:1.6;padding:10px 12px}
+@media (min-width:920px){
+  #v-exam:not([hidden]){display:flex;flex-direction:column;height:100dvh;padding-bottom:12px}
+  #v-exam .bar{flex:none}
+  #split{flex:1;min-height:0}
+  #split>*{min-height:0;overflow:auto;padding-right:4px}
+  #editorCard{display:flex;flex-direction:column}
+  #editorCard>#editor{flex:1;min-height:40vh;resize:none}
+}
 .pfield{display:grid;gap:4px}
 .pfield label{font-size:.82rem;font-weight:600;color:var(--navy)}
 .pfield small{color:var(--muted);font-size:.78rem}
@@ -235,6 +244,10 @@ th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mu
             </div>
           </div>
         </details>
+        <div class="card grid" id="draftCard" style="gap:8px">
+          <label class="label" for="draft">Nháp</label>
+          <textarea id="draft" class="draft" spellcheck="false" placeholder="Ghi gì cũng được: từ, số liệu, ý, ví dụ. Nháp không được lưu khi nộp bài."></textarea>
+        </div>
         <details class="card frame" id="frameCard" open hidden>
           <summary><span class="label">Bộ khung Task 2</span><span class="sub" id="frameToggle">Ẩn</span></summary>
           <div class="grid" style="gap:10px;margin-top:10px">
@@ -326,8 +339,8 @@ const $ = id => document.getElementById(id);
 const LEVELS = {
   1:{n:'Bậc 1 · Mở bài', min:8,  check:2, plan:2, wc:35,  roles:['intro'], fields:['side','crit','cond'], need:'Viết 2 câu mở bài.', note:'Chỉ viết mở bài 2 câu. Mục tiêu là bắt đầu được, câu chưa hay cũng được.'},
   2:{n:'Bậc 2 · Mở bài + 2 câu mở đoạn', min:15, check:3, plan:3, wc:70,  roles:['intro','b1open','b2open'], fields:['side','crit','cond','b1','b2'], need:'Viết mở bài, rồi câu mở đầu của thân 1 và thân 2, mỗi phần một đoạn.', note:'Đúng chỗ hay kẹt. Mở bài 2 câu, rồi mỗi thân bài chỉ viết câu đầu tiên.'},
-  3:{n:'Bậc 3 · Một thân bài', min:20, check:4, plan:3, wc:110, roles:['body1'], fields:['side','b1','notes'], need:'Viết một đoạn thân bài, khoảng 110 đến 140 từ.', note:'Viết trọn một đoạn thân bài theo chuỗi A, B, C, D, E.'},
-  4:{n:'Bậc 4 · Cả bài', min:40, check:5, plan:5, wc:250, roles:['intro','body1','body2','concl'], fields:['side','crit','cond','b1','b2','notes'], need:'Viết ít nhất 250 từ.', note:'Thi thật 40 phút, thời gian lên ý tính trong 40 phút.'}
+  3:{n:'Bậc 3 · Một thân bài', min:20, check:4, plan:3, wc:110, roles:['body1'], fields:['side','b1'], need:'Viết một đoạn thân bài, khoảng 110 đến 140 từ.', note:'Viết trọn một đoạn thân bài theo chuỗi A, B, C, D, E.'},
+  4:{n:'Bậc 4 · Cả bài', min:40, check:5, plan:5, wc:250, roles:['intro','body1','body2','concl'], fields:['side','crit','cond','b1','b2'], need:'Viết ít nhất 250 từ.', note:'Thi thật 40 phút, thời gian lên ý tính trong 40 phút.'}
 };
 const lvOf = s => (s && LEVELS[s.level]) ? s.level : 4;
 const SIDE_PH = {agree:'Đồng ý, không đồng ý, hay đồng ý một phần?', discuss:'Mình đứng về phe nào, và vì sao?', outweigh:'Lợi lớn hơn hay hại lớn hơn?', posneg:'Tích cực hay tiêu cực?', cause:'Nguyên nhân chính là gì, và giải pháp chính là gì?', effect:'Nguyên nhân chính là gì, và nó ảnh hưởng tới ai?', which:'Vì sao có xu hướng này, và nó tốt hay xấu?', how:'Vì sao, và ai nên làm gì?', two:'Trả lời ngắn cho từng câu hỏi của đề.'};
@@ -779,6 +792,7 @@ $('start').onclick=()=>{
   store.set('plv_session', sess); enterExam();
 };
 function curPart(){ return sess[activeT]; }
+$('draft').addEventListener('input', e=>{ if(!sess) return; curPart().draft = e.target.value; store.set('plv_session', sess); });
 function enterExam(){
   showTab('write');
   $('taskTabs').hidden = sess.mode!=='full';
@@ -788,12 +802,14 @@ function enterExam(){
   $('promptCard').innerHTML = `<div class="label">${activeT==='t1'?'Task 1':'Task 2'}${activeT==='t2'&&sess.mode==='t2'?' · '+esc(L.n):''}${activeT==='t1'&&p.source?' · '+esc(p.source):''}</div><div class="promptbox">${esc(p.prompt)}</div><div class="sub">${activeT==='t1'?'Viết ít nhất 150 từ.':esc(L.need)}</div>`;
   $('editor').value = sess.phase==='write' ? p.text : (p.final ?? p.text);
   $('editor').readOnly = false;
+  $('draft').value = p.draft || '';
   $('checkCard').hidden = sess.phase!=='check';
   $('phaseLabel').textContent = sess.phase==='write' ? (inGate()?'Lên ý':'Đang viết') : 'Tự soát';
   $('submitBox').hidden = sess.phase!=='write'; if(sess.phase==='write' && !$('submit')) resetSubmit();
   if(sess.phase==='check') renderChecklist();
   $('nudge').hidden = true;
   renderPlan(); applyGate(); showFrame(); updWC(); renderNext(); startTick();
+  if(matchMedia('(min-width:920px)').matches) $('v-exam').scrollIntoView({block:'start'});
 }
 
 /* ---------- ô lên ý ---------- */
@@ -1027,7 +1043,7 @@ function showDetail(e){
 }
 
 /* ---------- boot ---------- */
-if(sess){ if(!sess.level) sess.level=4; if(sess.t2 && sess.t2.planDone===undefined){ sess.t2.planDone=true; sess.t2.plan=sess.t2.plan||{}; } activeT = sess.mode==='t2'?'t2':'t1'; enterExam(); } else showTab('write');
+if(sess){ if(!sess.level) sess.level=4; if(sess.t2 && sess.t2.plan && sess.t2.plan.notes){ sess.t2.draft = sess.t2.plan.notes; delete sess.t2.plan.notes; } if(sess.t2 && sess.t2.planDone===undefined){ sess.t2.planDone=true; sess.t2.plan=sess.t2.plan||{}; } activeT = sess.mode==='t2'?'t2':'t1'; enterExam(); } else showTab('write');
 $('lvlCard').hidden = mode!=='t2';
 renderHist();
 (async()=>{
