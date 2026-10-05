@@ -28932,6 +28932,104 @@ function t1nDrawZoneHud(c, W) {
   c.fillStyle = '#fff'; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(text, 19, y + 12);
   c.restore();
 }
+/* Mini bosses: every sentence put in order calls one. A short fight that
+   drops coins and EXP, earned by the sentence. */
+function t1nMiniSpawn() {
+  const g = _t1, p = g.p, k = g.minis = (g.minis || 0) + 1, [look, name] = T1N_MINI[(k - 1) % T1N_MINI.length];
+  const a = Math.random() * Math.PI * 2, s = t1hFreeNear(p.x + Math.cos(a) * 300, p.y + Math.sin(a) * 220);
+  const hp = 120 * (1 + g.si * 0.15) * (_t1Lv === 'l' ? 1.3 : _t1Lv === 'd' ? 1.15 : 1);
+  g.foes.push({ id: ++g.id, type: 'mini', mini: true, name, T: { scale: 7, pts: 40, exp: 8 }, look, sc: 7, x: s.x, y: s.y, hp, maxHp: hp,
+    sp: g.cfg.esp * 0.8, r: 34, dmg: g.cfg.dmg * 1.6, anim: 0, hit: 0, face: 1, h: 16 * 7 });
+  t1hMsg(`⚔️ Câu đúng gọi boss nhỏ ${name}! Hạ nó lấy xu và EXP.`, 2400);
+}
+
+/* The big boss's shield: damage wears it down to a floor; one question about
+   the part just written breaks it. The question is built from this prompt's
+   own sentences: the right one against copies with a fact-wrong chunk (the
+   decoys already in T1_SURV), so no number is ever made up. */
+// The chunk a fact-wrong decoy replaces: most shared words, same first word.
+function t1nFakeSlot(S, fk) {
+  const words = t => t.toLowerCase().replace(/[.,]/g, '').split(/\s+/).filter(Boolean);
+  const fw = words(fk);
+  let best = -1, bi = 0;
+  S.c.forEach((ch, i) => {
+    const cw = words(ch);
+    let sc = fw.filter(w => cw.includes(w)).length;
+    if (ch.split(' ')[0] === fk.split(' ')[0]) sc += 1;
+    if (/[.,]$/.test(ch) === /[.,]$/.test(fk)) sc += 0.5;
+    if (sc > best) { best = sc; bi = i; }
+  });
+  return bi;
+}
+function t1nShieldQ(part) {
+  const g = _t1, has = S => (S.fake || []).length;
+  const pool = g.list.filter(S => S.part === part && has(S));
+  const S = t1Pick(pool.length ? pool : g.list.filter(has));
+  if (!S) return null;
+  const right = S.c.join(' ');
+  const wrongs = t1Shuffle(S.fake).slice(0, 2).map(fk => {
+    const i = t1nFakeSlot(S, fk), c = S.c.slice(), real = c[i];
+    c[i] = fk;
+    return { text: c.join(' '), fake: fk, real };
+  }).filter(w => w.text !== right);
+  if (!wrongs.length) return null;
+  return { S, part, opts: t1Shuffle([{ text: right, right: true }, ...wrongs]) };
+}
+function t1nShieldAsk(f) {
+  const g = _t1, Q = t1nShieldQ(g.bossPart);
+  if (!Q) { f.shield = false; return; }
+  g.shQ = { ...Q, f, locked: false };
+  g.paused = true; g.phase = 'shield'; g.keys = {}; g.joy = null;
+  document.getElementById('h-msg')?.classList.add('hidden');
+  t1nShieldRender();
+  g.keyPick = k => t1nShieldPick(k);
+  g.next = () => {};
+}
+function t1nShieldRender(fb) {
+  const g = _t1, Q = g.shQ, sample = T1_SAMPLES.find(x => x.id === Q.S.img);
+  t1hModal(`<div class="t1h-lv">🛡️ Phá khiên của trùm</div>
+    <p class="t1h-q">Câu nào <b>đúng với biểu đồ</b>? (phần ${escapeHtml(Q.part)})</p>
+    <div class="t1-opts">${Q.opts.map((o, i) => `<button class="t1-opt${fb && o.picked ? ' no' : ''}" ${Q.locked ? 'disabled' : `onclick="t1nShieldPick(${i})"`}><kbd>${i + 1}</kbd>${escapeHtml(o.text)}</button>`).join('')}</div>
+    ${fb || ''}`, sample ? sample.chart() : '');
+}
+function t1nShieldPick(i) {
+  const g = _t1, Q = g.shQ;
+  if (!Q || Q.locked || g.phase !== 'shield') return;
+  const o = Q.opts[i];
+  if (!o) return;
+  const f = Q.f;
+  if (o.right) {
+    f.shield = false;
+    g.right++; g.score += 40;
+    g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+    tsSfx('level');
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 40, t: 0, dur: 0.6 });
+    g.shQ = null;
+    t1hPlay();
+    t1hMsg('🛡️ Khiên vỡ! Giờ đánh thẳng vào máu trùm.', 2400);
+    return;
+  }
+  // Wrong: the shield grows back, a short reason, and a 2 s lock before play.
+  g.wrongs = (g.wrongs || 0) + 1;
+  o.picked = true; Q.locked = true;
+  f.hp = Math.min(f.maxHp, f.floor + f.maxHp * 0.25);
+  tsSfx('wrong');
+  const key = 'sh' + o.fake;
+  if (!g.missed[key]) { g.missed[key] = 1; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(o.fake)}</b> ✗ → <b>${escapeHtml(o.real)}</b><br><i>${escapeHtml(T1H_FAKE_WHY)}</i></div>`); }
+  t1nShieldRender(`<div class="t1-fb no"><strong>Chưa đúng, khiên hồi lại.</strong><span>${escapeHtml(T1H_FAKE_WHY)} Biểu đồ không phải “${escapeHtml(o.fake)}”, mà là “${escapeHtml(o.real)}”.</span></div><div class="t1h-row" id="sh-go"><small>Đọc lại biểu đồ… 2 giây</small></div>`);
+  setTimeout(() => {
+    if (_t1 !== g || g.shQ !== Q) return;
+    const box = document.getElementById('sh-go');
+    if (box) box.innerHTML = '<button class="vb-start-btn" onclick="t1nShieldResume()">Đánh tiếp → <small>Enter</small></button>';
+    g.answered = true; g.next = t1nShieldResume;
+  }, 2000);
+}
+function t1nShieldResume() {
+  const g = _t1;
+  if (!g || !g.shQ || !g.shQ.locked) return;
+  g.shQ = null;
+  t1hPlay();
+}
 function t1nPreload() {
   Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
   Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
@@ -29804,6 +29902,11 @@ function t1hChain(n, stun) {
 }
 function t1hDamage(f, dmg, kx, ky) {
   if (f.dead) return;
+  if (f.boss && f.shield) {
+    f.hp = Math.max(f.floor, f.hp - dmg); f.hit = 0.06;
+    if (f.hp <= f.floor && !_t1.phase && !_t1.over) t1nShieldAsk(f);
+    return;
+  }
   f.hp -= dmg; f.hit = f.boss ? 0.06 : 0.12;
   const k = Math.hypot(kx, ky);
   if (k && !f.boss) { f.x += kx / k * 5; f.y += ky / k * 5; }
@@ -29817,6 +29920,12 @@ function t1hKill(f, quiet) {
   g.kills++; g.score += f.T.pts * (f.elite ? 3 : 1);
   if (f.boss) { t1hBossDown(f); return; }
   g.exp += f.T.exp * (f.elite ? 4 : 1);
+  if (f.mini) {
+    const c = T1_LEVELS[_t1Lv].coin * walMult();
+    g.coins += c;
+    tsSfx('coin');
+    g.fx.push({ kind: 'num', x: f.x, y: f.y - f.h - 10, text: `+${Math.round(c)} 🪙 · +${f.T.exp} EXP`, t: 0, dur: 1.2, color: '#B8860B' });
+  }
   if (g.time - g.sfxT > 0.09) { g.sfxT = g.time; tsSfx('kill'); }
   // PLUMMET's passive: every kill bursts and catches its neighbours.
   if (g.hero.weapon === 'magic') t1hBoom(f.x, f.y - f.h * 0.45, 45, g.w.dmg * 0.4);
@@ -30032,6 +30141,7 @@ function t1hOrderDone() {
   g.ord = null; g.bag = [];
   g.si++;
   t1hCloseModal();
+  t1nMiniSpawn();
   if (!N) { g.S = null; g.gems = []; t1nGateOpen(T1N_ZONES.length - 1, S.part); }
   else if (N.part !== S.part) t1hBossStart(S.part);
   else t1hSentence();
@@ -30425,11 +30535,13 @@ function t1hBossStart(part) {
   const f = { id: ++g.id, boss: true, n, B, name: B.name, sc: B.sc, T: { scale: B.sc, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
     hp, maxHp: hp, r: Math.max(26, fw * B.sc * 0.3), h: fh * B.sc, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
   f.x = Math.max(R.wall + 60, Math.min(R.w - R.wall - 60, f.x)); f.y = Math.max(R.top + 60, Math.min(R.h - R.wall - 60, f.y));
+  f.shield = true; f.floor = hp * 0.45;
+  g.bossPart = part;
   t1hPush(f, 30);
   g.boss = f;
   g.foes.push(f);
   tsSfx('boss');
-  t1hMsg(`👹 Trùm ${n}: ${B.name}! ${B.say}`, 3200);
+  t1hMsg(`👹 Trùm ${n}: ${B.name}! ${B.say} Có khiên 🛡️: đánh mòn khiên rồi trả lời 1 câu để phá.`, 3600);
 }
 // A hit from a boss attack, unless the hero is untouchable.
 function t1hBossHit(f, dmg) {
@@ -30806,6 +30918,11 @@ function t1hDrawFoe(c, f) {
   if (f.B) t1nBossDraw(c, f, over);
   else t1nGrid(c, `foe/${f.look}.png`, t1nDir(g.p.x - f.x, g.p.y - f.y), f.stun > 0 ? 0 : Math.floor(f.anim * (f.mini ? 6 : 8)) % 4, f.x, f.y, sc, over);
   if (f.stun > 0 && !ice) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
+  if (f.boss && f.shield) {
+    c.save(); c.globalAlpha = 0.35 + 0.15 * Math.sin(g.time * 5); c.strokeStyle = '#7FD6F5'; c.fillStyle = 'rgba(127,214,245,.12)'; c.lineWidth = 4;
+    c.beginPath(); c.ellipse(f.x, f.y - f.h * 0.5 - (f.air || 0), f.r * 1.7, f.h * 0.62, 0, 0, Math.PI * 2); c.fill(); c.stroke(); c.restore();
+  }
+  if (f.mini) { c.font = '800 12px system-ui, sans-serif'; c.textAlign = 'center'; c.fillStyle = '#FFE07A'; c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = 3; c.strokeText(f.name, f.x, f.y - f.h - 14); c.fillText(f.name, f.x, f.y - f.h - 14); }
   if (f.boss) { t1hCrown(c, f.x, f.y - f.h - (f.air || 0) + 2); return; }
   if (f.hp < f.maxHp) {
     const bw = f.r * 2;
@@ -31073,7 +31190,8 @@ function t1hDraw() {
     c.fillStyle = '#3A2020'; t1hRR(c, (W - bw) / 2, 22, bw, 10, 5); c.fill();
     c.fillStyle = '#E5533D'; t1hRR(c, (W - bw) / 2, 22, bw * f, 10, 5); c.fill();
     c.font = '800 11px system-ui, -apple-system, Segoe UI, sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-    c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}`, W / 2, 19);
+    if (b.shield) { const fx = (W - bw) / 2 + bw * (b.floor / b.maxHp); c.fillStyle = '#7FD6F5'; c.fillRect(fx - 1, 19, 3, 16); }
+    c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}${b.shield ? ' · 🛡️ KHIÊN' : ''}`, W / 2, 19);
     const fe = b.B && t1nImg(`boss/${b.B.id}/Faceset.png`);
     if (fe && fe.ready) { c.imageSmoothingEnabled = false; c.fillStyle = '#13294F'; t1hRR(c, (W - bw) / 2 - 44, 4, 40, 40, 6); c.fill(); c.drawImage(fe.img, (W - bw) / 2 - 43, 5, 38, 38); }
   }
