@@ -4085,6 +4085,9 @@ function cleanTower(b) {
     hints: int(b.hints, 0, 20),
     checkpoint: int(b.checkpoint, 0, TOWER_MAX_FLOORS),
     best: int(b.best, 0, 100000),
+    // Bosses beaten (one every five floors) and a boss fight left half done.
+    boss_lv: int(b.boss_lv, 0, TOWER_MAX_FLOORS),
+    boss: b.boss && typeof b.boss === 'object' ? { left: int(b.boss.left, 0, 120), right: int(b.boss.right, 0, 10) } : null,
     saved_at: int(b.saved_at, 0, 9e15),
   };
 }

@@ -7487,7 +7487,7 @@ input.ts-input.ts-shake { animation: tsInputShake .25s; border-color: var(--dang
 
 /* ─── Xây tháp ──────────────────────────────────────────────────────────── */
 .tw-wrap { max-width: 1000px; margin: 0 auto; padding: 0.75rem 1rem 2rem; }
-.tw-top { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+.tw-top { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.8rem; margin-bottom: 0.6rem; }
 .tw-hearts { flex: 1; text-align: right; font-size: 1.05rem; letter-spacing: 1px; }
 .tw-grid { display: grid; grid-template-columns: minmax(260px, 380px) 1fr; gap: 1rem; align-items: start; }
 .tw-scene {
@@ -9670,6 +9670,35 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .tw2-clock.low { animation: tw2Blink .5s steps(2) infinite; }
 @keyframes tw2Blink { 50% { opacity: 0.3; } }
 .tw2-spr { display: block; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(42, 30, 46, 0.35)); }
+.tw2-mob { display: block; width: var(--w); height: var(--h); background-size: calc(var(--w) * 4) var(--h); background-repeat: no-repeat; image-rendering: pixelated; animation: tw2MobIdle .7s steps(4) infinite; filter: drop-shadow(2px 2px 0 rgba(42, 30, 46, 0.35)); }
+@keyframes tw2MobIdle { to { background-position: calc(var(--w) * -4) 0; } }
+.tw2-art { display: block; width: 44px; height: auto; filter: drop-shadow(2px 2px 0 rgba(42, 30, 46, 0.35)); }
+.tw2-art--md { width: 52px; } .tw2-art--lg { width: 78px; } .tw2-art--xl { width: 104px; }
+.tw2-shower .tw2-art { width: 34px; }
+.tw-hz--imp { left: 50%; top: calc(30% + var(--p) * 10%); margin-left: 60px; animation: twHzTick 0.6s ease-in-out infinite; }
+.tw-hz--fire { right: calc(4% + var(--p) * 22%); bottom: calc(50px + var(--p) * 40px); }
+.tw-hz--demon { left: calc(2% + var(--p) * 22%); bottom: 46px; }
+.tw-hz--mothership { right: calc(4% + var(--p) * 18%); top: calc(6% + var(--p) * 10%); animation: twHzWobble 1.6s ease-in-out infinite; }
+.tw-hz--gang { left: calc(2% + var(--p) * 22%); bottom: 46px; }
+.tw2-boss .tw-hz-tag { font-size: 0.8rem; background: #7A1E14; }
+.tw2-boss .tw2-mob, .tw2-boss .tw2-art { filter: drop-shadow(0 0 8px rgba(255, 90, 60, 0.75)) drop-shadow(2px 2px 0 rgba(42, 30, 46, 0.4)); }
+.tw-v2 .tw-scene.tw-bossy { box-shadow: 5px 5px 0 var(--tw2-ink), inset 0 0 0 3px rgba(192, 57, 43, 0.7); }
+/* Five pips for the floors of this leg, then the boss */
+.tw-v2 .tw2-boss-next { color: #FFB3A8; font-weight: 700; opacity: 1; }
+.tw2-leg { display: flex; gap: 3px; margin-top: 3px; }
+.tw2-leg i { flex: 1; height: 6px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); }
+.tw2-leg i.on { background: #F5C542; border-color: #F5C542; }
+/* Stars for a beaten boss */
+.tw2-stars { display: inline-flex; gap: 2px; margin-right: 6px; vertical-align: -5px; }
+.tw2-star { width: 20px; height: 20px; }
+.tw2-star.off { filter: grayscale(1) brightness(.6); opacity: .45; }
+/* A bought tower style tints the pixel tower; the shop preview keeps its own look. */
+.tw-v2 .tw-scene .tw2-floor::before, .tw-v2 .tw-scene .tw2-floor::after { content: none; }
+.tw-v2 .tw-skin-tower_wood :is(.tw-stack, .tw2-roof) { filter: sepia(.55) saturate(1.4) hue-rotate(-12deg); }
+.tw-v2 .tw-skin-tower_glass :is(.tw-stack, .tw2-roof) { filter: hue-rotate(175deg) saturate(1.5) brightness(1.08); }
+.tw-v2 .tw-skin-tower_castle :is(.tw-stack, .tw2-roof) { filter: grayscale(.85) brightness(1.08) contrast(1.05); }
+.tw-v2 .tw-skin-tower_pagoda :is(.tw-stack, .tw2-roof) { filter: sepia(1) saturate(3.2) hue-rotate(-8deg) brightness(1.12); }
+@media (prefers-reduced-motion: reduce) { .tw2-mob { animation: none; } }
 .tw2-gang, .tw2-shower { display: flex; align-items: flex-end; gap: 4px; }
 .tw2-shower .tw2-spr:nth-child(2) { margin-top: 26px; } .tw2-shower .tw2-spr:nth-child(3) { margin-top: -18px; }
 .tw2-hz .tw2-gang .tw2-spr { animation: twHzWalk 0.35s steps(2) infinite; }
@@ -9679,7 +9708,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 @keyframes tw2Flicker { 0%, 70% { filter: none; } 75% { filter: brightness(1.8); } 80% { filter: none; } 85% { filter: brightness(1.8); } }
 .tw-hz--shower { right: calc(5% + var(--p) * 20%); top: calc(10% + var(--p) * 20%); animation: twHzWobble 0.7s ease-in-out infinite; }
 .tw-hz--robber { left: calc(4% + var(--p) * 22%); bottom: 50px; }
-.tw2-hz.tw-hz--bandit, .tw2-hz.tw-hz--robber, .tw2-hz.tw-hz--termite { animation: none; }
+.tw2-hz.tw-hz--bandit, .tw2-hz.tw-hz--robber, .tw2-hz.tw-hz--termite, .tw2-hz.tw-hz--gang, .tw2-hz.tw-hz--demon { animation: none; }
 .tw2-hz.tw-hz--quake { margin-left: -64px; }
 .tw2-run { animation: tw2Run .9s ease-in forwards !important; }
 @keyframes tw2Run { 20% { transform: translateY(-10px); } to { transform: translateX(-340px); opacity: 0; } }
