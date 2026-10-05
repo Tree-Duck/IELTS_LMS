@@ -28734,8 +28734,6 @@ const T1H_BOSS_Q = {
     why: 'By contrast mở ý đối lập với đoạn trước. On the contrary dùng để bác bỏ ý vừa nói; "contrastly" không có trong tiếng Anh.' },
 };
 const T1H_BOSS = { a: 380, d: 500, l: 650 };
-// Boss look, name, and where its head is in the frame (x from the middle, y from the top) for the crown.
-const T1H_BOSS_LOOK = [['big_zombie', 'Zombie khổng lồ', 3, 9], ['ogre', 'Ogre', 2, 10], ['big_demon', 'Quỷ lớn', 2, 6]];
 const T1H_WEAPONS = {
   gun:   { dmg: 10, rate: 2.2, count: 1, pierce: 0, splash: 0, speed: 560, range: 430 },
   magic: { dmg: 11, rate: 1.4, count: 1, pierce: 0, splash: 70, speed: 380, range: 400 },
@@ -28743,9 +28741,9 @@ const T1H_WEAPONS = {
   sword: { dmg: 18, rate: 1.5, count: 1, pierce: 0, splash: 0, reach: 95, arc: 2.0 },
 };
 const T1H_FOES = {
-  zombie: { look: ['tiny_zombie', 'skelet'], hp: 22, sp: 1, r: 15, scale: 2.8, dmg: 1, pts: 5, exp: 1 },
-  robot:  { look: ['goblin', 'imp'], hp: 14, sp: 1.45, r: 14, scale: 2.6, dmg: 0.8, pts: 6, exp: 1 },
-  brute:  { look: ['orc_warrior', 'masked_orc', 'chort'], hp: 90, sp: 0.75, r: 22, scale: 3.3, dmg: 1.8, pts: 15, exp: 3 },
+  zombie: { look: ['Slime', 'Mushroom', 'Skull'], hp: 22, sp: 1, r: 15, scale: 3, dmg: 1, pts: 5, exp: 1 },
+  robot:  { look: ['BlueBat', 'Spirit', 'Eye'], hp: 14, sp: 1.45, r: 14, scale: 3, dmg: 0.8, pts: 6, exp: 1 },
+  brute:  { look: ['Cyclope', 'Beast', 'Bear'], hp: 90, sp: 0.75, r: 22, scale: 4, dmg: 1.8, pts: 15, exp: 3 },
 };
 const T1H_KEYS = { KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
 const T1H_JOY = 46;
@@ -28775,6 +28773,73 @@ function t1dDraw(c, name, x, y, scale, flip, over, noShadow) {
   (over || []).forEach(([k, a]) => { if (a > 0) { c.globalAlpha = a; c.drawImage(T1D[k], r[0], r[1], r[2], r[3], -w / 2, -h, w, h); } });
   c.restore();
 }
+/* Ninja Adventure sprites (Pixel-boy & AAA, CC0; public/img/t1/ninja). Heroes,
+   foes and bosses of Sinh tồn ghép câu. Hero and foe sheets are 16px cells,
+   four columns facing down, up, left, right, one row per frame. Boss sheets
+   are horizontal strips. The 0x72 atlas above stays for weapons, props and
+   Xây tháp. */
+const T1N = {};
+const T1N_SIL = { flash: '#fff', red: '#C0392B', ice: '#7FC8F8', gold: '#F2C14E' };
+// Column of a 4-way sheet for a direction: down, up, left, right.
+function t1nDir(dx, dy) { return Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? 0 : 1) : (dx < 0 ? 2 : 3); }
+function t1nImg(path) {
+  let e = T1N[path];
+  if (!e) {
+    e = T1N[path] = { img: new Image(), ready: false };
+    e.img.onload = () => { e.ready = true; };
+    e.img.src = '/img/t1/ninja/' + path;
+  }
+  return e;
+}
+// Draws one frame with its feet at (x, y), with optional colour overlays.
+function t1nDraw(c, path, sx, sy, sw, sh, x, y, scale, flip, over, noShadow) {
+  const e = t1nImg(path), w = sw * scale, h = sh * scale;
+  if (!noShadow) { c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x, y - 1, w * 0.36, 3 + scale * 1.2, 0, 0, Math.PI * 2); c.fill(); }
+  if (!e.ready) return;
+  c.save();
+  c.imageSmoothingEnabled = false;
+  c.translate(x, y);
+  if (flip) c.scale(-1, 1);
+  c.drawImage(e.img, sx, sy, sw, sh, -w / 2, -h, w, h);
+  (over || []).forEach(([k, a]) => {
+    if (a <= 0) return;
+    if (!e[k]) e[k] = t1hSilhouette(e.img, T1N_SIL[k]);
+    c.globalAlpha = a;
+    c.drawImage(e[k], sx, sy, sw, sh, -w / 2, -h, w, h);
+  });
+  c.restore();
+}
+function t1nGrid(c, path, dir, row, x, y, scale, over, noShadow) { t1nDraw(c, path, dir * 16, row * 16, 16, 16, x, y, scale, false, over, noShadow); }
+// Hero looks, male | female, by the shop ids that were bought.
+const T1N_HERO = { male: ['Hunter', 'Woman'], female: ['NinjaMageBlack', 'SorcererBlack'], knight: ['Knight', 'Princess'], archer: ['Villager5', 'Cavegirl'] };
+function t1nHeroName(h) { return (T1N_HERO[h.id] || T1N_HERO.male)[t1hSex(h) === 'f' ? 1 : 0]; }
+// Mini bosses: monster sheets drawn big.
+const T1N_MINI = [['Trex', 'Khủng long'], ['Octopus', 'Bạch tuộc'], ['Cyclope2', 'Mắt một mí'], ['Beast2', 'Mãnh thú'], ['DragonYellow', 'Rồng vàng'], ['KappaRed', 'Kappa đỏ']];
+// Big bosses: strip file and frame count, draw scale, attack. Every attack is
+// telegraphed in red for 0.8 s before it lands.
+const T1N_BOSSES = [
+  { id: 'GiantSlime', name: 'Slime khổng lồ', idle: ['Idle.png', 5], sc: 3, kind: 'jump', split: true, say: 'Nó nhảy đè, hết nửa máu thì tách đôi.' },
+  { id: 'GiantFrog', name: 'Ếch khổng lồ', idle: ['Idle40x40.png', 5], sc: 4, kind: 'jump', say: 'Nó nhảy tới vòng đỏ, đáp xuống là sóng chấn động.' },
+  { id: 'GiantFlam', name: 'Hoả linh', idle: ['Idle.png', 5], sc: 3, kind: 'firering', say: 'Vòng lửa nở rộng ra, đứng sát nó hoặc thật xa.' },
+  { id: 'SquidRed', name: 'Mực đỏ', idle: ['Idle.png', 4], sc: 2, kind: 'ink', say: 'Nó phun vòng mực, len qua khe giữa các viên.' },
+  { id: 'TenguRed', name: 'Tengu đỏ', idle: ['Idle.png', 6], sc: 2, kind: 'teleport', say: 'Chớp đỏ cạnh em là nó sắp dịch chuyển tới đó.' },
+  { id: 'GiantSpirit', name: 'Hồn ma khổng lồ', idle: ['Idle.png', 5], sc: 3, kind: 'laser', say: 'Vạch đỏ mảnh là tia laser, bước ra khỏi vạch.' },
+  { id: 'DemonCyclop', name: 'Quỷ một mắt', idle: ['Idle.png', 5], sc: 3, kind: 'charge', say: 'Vạch đỏ là đường nó lao tới, né sang bên.' },
+  { id: 'GiantRacoon', name: 'Gấu mèo khổng lồ', idle: ['Idle.png', 6], sc: 2, kind: 'summon', say: 'Nó gọi quái con, dọn quái trước rồi đánh nó.' },
+  { id: 'GiantBlueSamurai', name: 'Samurai xanh', idle: ['Idle.png', 12], sc: 3, kind: 'spin', say: 'Vòng đỏ quanh nó là đường kiếm xoay, chạy ra ngoài.' },
+];
+const T1N_TELE = 0.8;
+function t1nPreload() {
+  Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
+  Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
+  T1N_BOSSES.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
+  T1N_MINI.forEach(([n]) => t1nImg(`foe/${n}.png`));
+}
+function t1nBossDraw(c, f, over) {
+  const B = f.B, path = `boss/${B.id}/${B.idle[0]}`, e = t1nImg(path);
+  const n = B.idle[1], fw = e.ready ? e.img.width / n : 50, fh = e.ready ? e.img.height : 50, k = Math.floor((_t1.time + f.id) * 8) % n;
+  t1nDraw(c, path, k * fw, 0, fw, fh, f.x, f.y - (f.air || 0), f.sc, false, over);
+}
 function t1hSex(h) { try { return localStorage.getItem('t1Sex_' + h.id) || h.sex; } catch (e) { return h.sex; } }
 function t1hSetSex(id, sex) {
   try { localStorage.setItem('t1Sex_' + id, sex); } catch (e) {}
@@ -28798,6 +28863,7 @@ function t1hChosen() { let id = 'male'; try { id = localStorage.getItem('t1Hero'
 function t1SurvStart() {
   t1Leave();
   t1dLoad();
+  t1nPreload();
   t1hPickScreen();
   walLoad().then(() => { if (!_t1 && t1Root()?.querySelector('.t1h-pick')) t1hPickScreen(); });
 }
@@ -28814,7 +28880,7 @@ function t1hPickScreen() {
         const own = t1hOwned(h);
         return `<div class="t1h-hero${h.id === sel.id ? ' on' : ''}${own ? '' : ' locked'}" style="--hc:${h.color}">
           <span class="t1h-role">${h.icon} ${h.role}</span>
-          <canvas class="t1h-face" width="72" height="96" data-look="${h.sprite}_${t1hSex(h)}" aria-hidden="true"></canvas>
+          <span class="t1h-look"><img class="t1h-faceset" src="/img/t1/ninja/hero/${t1nHeroName(h)}_face.png" alt="" width="76" height="76"><canvas class="t1h-face" width="64" height="64" data-look="${t1nHeroName(h)}" aria-hidden="true"></canvas></span>
           <span class="t1h-sex" role="group" aria-label="Chọn nam hay nữ">${[['m', '♂ Nam'], ['f', '♀ Nữ']].map(([k, t]) => `<button class="${t1hSex(h) === k ? 'on' : ''}" aria-pressed="${t1hSex(h) === k}" onclick="t1hSetSex('${h.id}', '${k}')">${t}</button>`).join('')}</span>
           <b class="t1h-name"><small>${h.title}</small>${h.name}</b>
           <small>${escapeHtml(h.desc)}</small>
@@ -28848,7 +28914,8 @@ function t1hPickAnim() {
     cs.forEach(cv => {
       const x = cv.getContext('2d'), run = cv.closest('.t1h-hero.on');
       x.clearRect(0, 0, cv.width, cv.height);
-      t1dDraw(x, `${cv.dataset.look}_${run ? 'run' : 'idle'}_anim_f${f % 4}`, 36, 92, 3, false, null, true);
+      x.imageSmoothingEnabled = false;
+      t1nGrid(x, `hero/${cv.dataset.look}.png`, 0, run ? f % 4 : 0, 32, 64, 4, null, true);
     });
   }, 140);
 }
@@ -28911,7 +28978,7 @@ function t1hGo(id) {
   t1dLoad();
   const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake();
   const set = t1hPickSet(), list = t1Shuffle(T1_SURV[_t1Block].filter(S => S.img === set)).sort((a, b) => order[a.part] - order[b.part]);
-  const g = _t1 = { game: 'survive', cfg, hero: h, look: `${h.sprite}_${t1hSex(h)}`, score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
+  const g = _t1 = { game: 'survive', cfg, hero: h, look: t1nHeroName(h), score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
     room, bag: [], ord: null,
     p: { x: room.w / 2, y: room.h / 2, hp: h.hp, maxHp: h.hp, speed: h.speed, face: 1, aim: 0, moving: false, anim: 0, hurt: 0, inv: 0, atk: 0, dashT: 0, mx: 1, my: 0 },
     w: { kind: h.weapon, ...T1H_WEAPONS[h.weapon], cd: 0.6 },
@@ -29536,9 +29603,9 @@ function t1hSpawnFoe(diff) {
   const far = g.room.holes.filter(h => Math.hypot(h.x - p.x, h.y - p.y) > 380);
   const hole = t1Pick(far.length ? far : g.room.holes);
   const elite = Math.random() < Math.min(0.3, Math.max(0, (diff - 1.2) * 0.07) + g.bosses * 0.04);
-  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale * (elite ? 1.25 : 1);
+  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale + (elite ? 1 : 0);
   g.foes.push({ id: ++g.id, type, T, look, elite, sc, x: hole.x + t1Rand(-20, 20), y: hole.y + t1Rand(-12, 12), hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1) * (elite ? 0.9 : 1),
-    r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: T1D_RECTS[look + '_run_anim_f0'][3] * sc });
+    r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: 16 * sc });
 }
 function t1hNearestFrom(x, y, range) {
   const g = _t1;
@@ -30240,49 +30307,141 @@ function t1hBossStart(part) {
   const g = _t1, p = g.p, q = T1H_BOSS_Q[part], qq = q[_t1Block] || q, R = g.room;
   g.S = null; g.gems = []; g.bosses++; g.goldTries = 0;
   g.bossQ = { next: q.next, right: qq.right, bad: qq.bad, why: qq.why };
-  const n = g.bosses, a = Math.random() * Math.PI * 2;
+  // Bosses rotate across runs, so a student keeps meeting new ones.
+  if (g.bossOff == null) {
+    let off = 0;
+    try { off = (parseInt(localStorage.getItem('t1BossRot'), 10) || 0) % T1N_BOSSES.length; localStorage.setItem('t1BossRot', String(off + 3)); } catch (e) {}
+    g.bossOff = off;
+  }
+  const n = g.bosses, a = Math.random() * Math.PI * 2, B = T1N_BOSSES[(g.bossOff + n - 1) % T1N_BOSSES.length];
   const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.06);
-  const [look, name, hx, hy] = T1H_BOSS_LOOK[(n - 1) % T1H_BOSS_LOOK.length];
-  const f = { id: ++g.id, boss: true, n, look, name, hx, hy, sc: 3, T: { scale: 3, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
-    hp, maxHp: hp, r: 34, h: 36 * 3, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
+  const e = t1nImg(`boss/${B.id}/${B.idle[0]}`), fh = e.ready ? e.img.height : 50, fw = e.ready ? e.img.width / B.idle[1] : 50;
+  const f = { id: ++g.id, boss: true, n, B, name: B.name, sc: B.sc, T: { scale: B.sc, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
+    hp, maxHp: hp, r: Math.max(26, fw * B.sc * 0.3), h: fh * B.sc, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
   f.x = Math.max(R.wall + 60, Math.min(R.w - R.wall - 60, f.x)); f.y = Math.max(R.top + 60, Math.min(R.h - R.wall - 60, f.y));
   t1hPush(f, 30);
   g.boss = f;
   g.foes.push(f);
   tsSfx('boss');
-  t1hMsg(`👹 Trùm ${n}: ${name} xuất hiện! Né vạch đỏ và vòng đạn.`, 2600);
+  t1hMsg(`👹 Trùm ${n}: ${B.name}! ${B.say}`, 3200);
 }
-// Chase, then alternately a telegraphed charge or a ring of slow bullets.
+// A hit from a boss attack, unless the hero is untouchable.
+function t1hBossHit(f, dmg) {
+  const g = _t1, p = g.p;
+  if (p.inv <= 0 && g.shieldT <= 0 && !(p.dashT > 0)) t1hHurt(dmg, f.x, f.y);
+}
+// Picks the next attack and shows where it will land.
+function t1hBossTele(f, ux, uy) {
+  const g = _t1, p = g.p, k = f.B.kind;
+  f.st = 'tele'; f.stT = T1N_TELE; f.cx = ux; f.cy = uy; f.face = ux > 0 ? 1 : -1;
+  if (k === 'jump') { f.tx = p.x; f.ty = p.y; f.tr = f.B.split ? 95 : 115; }
+  else if (k === 'teleport') { const s = Math.random() < 0.5 ? 1 : -1; const pt = t1hFreeNear(p.x + s * 90, p.y + 20); f.tx = pt.x; f.ty = pt.y; f.tr = 80; }
+  else if (k === 'firering') f.tr = 340;
+  else if (k === 'spin') f.tr = 135;
+  else if (k === 'ink' || k === 'summon') f.tr = 70;
+  tsSfx('tick');
+}
+// The attack itself, 0.8 s after its telegraph.
+function t1hBossAct(f) {
+  const g = _t1, p = g.p, k = f.B.kind;
+  f.st = 'act'; f.hitDone = false;
+  if (k === 'charge') { f.stT = 0.55; tsSfx('miss'); }
+  else if (k === 'jump') { f.stT = 0.45; f.jx = f.x; f.jy = f.y; tsSfx('miss'); }
+  else if (k === 'laser') { f.stT = 0.35; tsSfx('shield'); }
+  else if (k === 'firering') { f.stT = 1.1; f.rr = 30; tsSfx('boss'); }
+  else if (k === 'teleport') {
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.4 });
+    f.x = f.tx; f.y = f.ty;
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    g.flashT = 0.15;
+    if (Math.hypot(p.x - f.tx, p.y - f.ty) < f.tr) t1hBossHit(f, f.dmg);
+    f.stT = 0.3; tsSfx('miss');
+  } else if (k === 'spin') {
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    if (Math.hypot(p.x - f.x, p.y - f.y) < f.tr) t1hBossHit(f, f.dmg * 1.2);
+    f.stT = 0.35; tsSfx('miss');
+  } else {
+    // Ink: a ring of slow bullets with gaps. Summon: helpers, and a smaller ring.
+    const n = k === 'ink' ? 12 + f.n * 3 : 8, off = Math.random() * Math.PI * 2;
+    for (let i = 0; i < n; i++) { const a = off + i * Math.PI * 2 / n; g.ebul.push({ x: f.x, y: f.y - f.h * 0.45, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, life: 4 }); }
+    if (k === 'summon') for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 80; m.y = f.y + Math.sin(a) * 80; t1hPush(m, m.r * 0.7); }
+    f.stT = 0.3; tsSfx('miss');
+  }
+}
 function t1hBossAI(f, dt) {
-  const g = _t1, p = g.p, dx = p.x - f.x, dy = p.y - f.y, d = Math.hypot(dx, dy) || 1;
+  const g = _t1, p = g.p, dx = p.x - f.x, dy = p.y - f.y, d = Math.hypot(dx, dy) || 1, k = f.B.kind;
   f.stT -= dt;
   if (f.st === 'chase') {
     if (f.stun <= 0) { f.x += dx / d * f.sp * dt; f.y += dy / d * f.sp * dt; f.face = dx > 0 ? 1 : -1; }
-    if (f.stT <= 0) {
-      f.cycle++;
-      if (f.cycle % 2) { f.st = 'aim'; f.stT = 0.9; f.cx = dx / d; f.cy = dy / d; f.face = dx > 0 ? 1 : -1; }
-      else { f.st = 'ring'; f.stT = 0.5; }
+    if (f.stT <= 0) { f.cycle++; t1hBossTele(f, dx / d, dy / d); }
+  } else if (f.st === 'tele') {
+    if (f.stT <= 0) t1hBossAct(f);
+  } else if (f.st === 'act') {
+    if (k === 'charge' && f.stun <= 0) { f.x += f.cx * 560 * dt; f.y += f.cy * 560 * dt; }
+    if (k === 'jump') {
+      const t = Math.min(1, 1 - f.stT / 0.45);
+      f.x = f.jx + (f.tx - f.jx) * t; f.y = f.jy + (f.ty - f.jy) * t; f.air = Math.sin(t * Math.PI) * 90;
+      if (f.stT <= 0 && !f.hitDone) {
+        f.hitDone = true; f.air = 0;
+        g.fx.push({ kind: 'wave', x: f.x, y: f.y - 10, t: 0, dur: 0.5 });
+        if (Math.hypot(p.x - f.x, p.y - f.y) < f.tr) t1hBossHit(f, f.dmg);
+        tsSfx('boss');
+      }
     }
-  } else if (f.st === 'aim') {
-    if (f.stT <= 0) { f.st = 'charge'; f.stT = 0.55; tsSfx('miss'); }
-  } else if (f.st === 'charge') {
-    if (f.stun <= 0) { f.x += f.cx * 560 * dt; f.y += f.cy * 560 * dt; }
-    if (f.stT <= 0) { f.st = 'chase'; f.stT = 2.2; }
-  } else if (f.st === 'ring' && f.stT <= 0) {
-    const n = 10 + f.n * 3, off = Math.random() * Math.PI * 2;
-    for (let i = 0; i < n; i++) { const a = off + i * Math.PI * 2 / n; g.ebul.push({ x: f.x, y: f.y - f.h * 0.45, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, life: 4 }); }
-    // The last boss calls in help.
-    if (f.n >= 3) for (let i = 0; i < 4; i++) { t1hSpawnFoe(g.si); const m = g.foes[g.foes.length - 1], a = i * Math.PI / 2; m.x = f.x + Math.cos(a) * 70; m.y = f.y + Math.sin(a) * 70; t1hPush(m, m.r * 0.7); }
-    tsSfx('miss');
-    f.st = 'chase'; f.stT = 2.2;
+    if (k === 'laser' && !f.hitDone) {
+      // Distance from the hero to the beam, which starts at the boss.
+      const bx = f.x, by = f.y - f.h * 0.45, t = Math.max(0, (p.x - bx) * f.cx + (p.y - 30 - by) * f.cy);
+      if (Math.hypot(p.x - (bx + f.cx * t), p.y - 30 - (by + f.cy * t)) < 26) { f.hitDone = true; t1hBossHit(f, f.dmg); }
+    }
+    if (k === 'firering') {
+      f.rr = 30 + (1 - f.stT / 1.1) * 310;
+      if (!f.hitDone && Math.abs(Math.hypot(p.x - f.x, p.y - f.y) - f.rr) < 22) { f.hitDone = true; t1hBossHit(f, f.dmg); }
+    }
+    if (f.stT <= 0) { f.st = 'chase'; f.stT = Math.max(1.3, 2.2 - f.n * 0.2); f.air = 0; f.rr = 0; }
+  }
+  // GiantSlime: at half health it splits; the twin is a smaller copy.
+  if (f.B.split && !f.split && f.hp < f.maxHp / 2) {
+    f.split = true; f.sc = Math.max(2, f.sc - 1); f.h = f.h * f.sc / (f.sc + 1);
+    const hp = f.hp * 0.6, twin = { ...f, id: ++g.id, boss: false, kid: true, hp, maxHp: hp, r: f.r * 0.8, sp: f.sp * 1.3, dmg: f.dmg * 0.6, T: { scale: f.sc, pts: 30, exp: 6 }, st: 'chase', x: f.x + 60, y: f.y, air: 0 };
+    t1hPush(twin, twin.r);
+    g.foes.push(twin);
+    g.fx.push({ kind: 'wave', x: f.x, y: f.y - 30, t: 0, dur: 0.5 });
+    t1hMsg('Slime tách đôi!', 1600);
   }
   t1hPush(f, f.r * 0.8);
-  if (d < f.r + 18 && p.inv <= 0 && g.shieldT <= 0) t1hHurt(f.dmg, f.x, f.y);
+  if (!(f.air > 20) && d < f.r + 18 && p.inv <= 0 && g.shieldT <= 0) t1hHurt(f.dmg, f.x, f.y);
+}
+// Telegraphs in red, and the fire ring and laser while they are live.
+function t1hDrawTele(c, f) {
+  const g = _t1, k = f.B.kind, pulse = 0.18 + 0.2 * Math.sin(g.time * 30) ** 2, cy = f.y - f.h * 0.45;
+  c.save();
+  if (f.st === 'tele') {
+    c.fillStyle = `rgba(229,83,61,${pulse})`; c.strokeStyle = 'rgba(229,83,61,.85)'; c.lineWidth = 3;
+    if (k === 'charge' || k === 'laser') {
+      c.translate(f.x, k === 'laser' ? cy : f.y - 20); c.rotate(Math.atan2(f.cy, f.cx));
+      if (k === 'laser') { c.fillRect(0, -4, 1100, 8); c.strokeRect(0, -4, 1100, 8); } else c.fillRect(0, -32, 320, 64);
+    } else {
+      const x = k === 'jump' || k === 'teleport' ? f.tx : f.x, y = k === 'jump' || k === 'teleport' ? f.ty : f.y;
+      c.beginPath(); c.ellipse(x, y, f.tr, f.tr * 0.6, 0, 0, Math.PI * 2);
+      if (k === 'firering') c.stroke(); else { c.fill(); c.stroke(); }
+      // The fill grows to the edge as the hit gets closer.
+      const t = 1 - f.stT / T1N_TELE;
+      c.beginPath(); c.ellipse(x, y, f.tr * t, f.tr * 0.6 * t, 0, 0, Math.PI * 2); c.stroke();
+    }
+  } else if (f.st === 'act' && k === 'laser') {
+    c.translate(f.x, cy); c.rotate(Math.atan2(f.cy, f.cx));
+    c.fillStyle = 'rgba(255,240,200,.95)'; c.shadowColor = '#FF5A3C'; c.shadowBlur = 18; c.fillRect(0, -9, 1100, 18);
+  } else if (f.st === 'act' && k === 'firering' && f.rr) {
+    c.strokeStyle = 'rgba(255,138,61,.9)'; c.lineWidth = 18; c.shadowColor = '#FF5A3C'; c.shadowBlur = 16;
+    c.beginPath(); c.ellipse(f.x, f.y, f.rr, f.rr * 0.6, 0, 0, Math.PI * 2); c.stroke();
+  }
+  c.restore();
 }
 function t1hBossDown(f) {
   const g = _t1, q = g.bossQ;
   g.boss = null;
   g.ebul = [];
+  g.foes.forEach(x => { if (x.kid && !x.dead) t1hKill(x, true); });
   tsSfx('level');
   g.fx.push({ kind: 'wave', x: f.x, y: f.y - 40, t: 0, dur: 0.6 });
   const opts = t1Shuffle([{ text: q.right, right: true }, ...q.bad.map(t => ({ text: t, right: false }))]);
@@ -30443,8 +30602,10 @@ function t1dTile(c, name, x, y, s) {
   if (r && T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], x, y, r[2] * s, r[3] * s);
 }
 function t1hDrawHero(c) {
-  const g = _t1, p = g.p, sc = 2.7;
-  const frame = p.hurt > 0 || p.hp <= 0 ? 'hit_anim_f0' : p.moving && !p.won ? `run_anim_f${Math.floor(p.anim * 10) % 4}` : `idle_anim_f${Math.floor(g.time * 6) % 4}`;
+  const g = _t1, p = g.p, sc = 4;
+  // Facing: where the last shot went while attacking, else the way it walks.
+  const dir = p.atk > 0 ? t1nDir(Math.cos(p.aim || 0), Math.sin(p.aim || 0)) : t1nDir(p.mx || 0, p.my || 0);
+  const row = p.atk > 0 ? 4 : p.moving && !p.won ? Math.floor(p.anim * 10) % 4 : 0;
   const glow = g.rushT > 0 || g.shieldT > 0 || p.dashT > 0;
   c.save();
   c.globalAlpha = glow ? 0.6 : 0.32 + Math.sin(g.time * 3) * 0.06;
@@ -30461,7 +30622,7 @@ function t1hDrawHero(c) {
   }
   c.save();
   if (p.inv > 0 && p.dashT <= 0 && Math.floor(p.inv * 20) % 2) c.globalAlpha = 0.45;
-  t1dDraw(c, `${g.look}_${frame}`, p.x, p.y, sc, p.face < 0, p.hurt > 0 ? [['red', 0.35]] : null);
+  t1nGrid(c, `hero/${g.look}.png`, dir, row, p.x, p.y, sc, p.hurt > 0 ? [['red', 0.35]] : null);
   c.restore();
   if (g.shieldT > 0) {
     c.save();
@@ -30523,26 +30684,22 @@ function t1hCrown(c, x, y) {
   c.restore();
 }
 function t1hDrawFoe(c, f) {
-  const g = _t1, frame = f.stun > 0 ? `idle_anim_f${Math.floor(f.anim * 6) % 4}` : `run_anim_f${Math.floor(f.anim * (f.st === 'charge' ? 16 : 8)) % 4}`;
+  const g = _t1;
   if (f.boss) {
-    if (f.st === 'aim') {
-      c.save();
-      c.translate(f.x, f.y - 20); c.rotate(Math.atan2(f.cy, f.cx));
-      c.fillStyle = `rgba(229,83,61,${0.18 + 0.2 * Math.sin(g.time * 30) ** 2})`;
-      c.fillRect(0, -32, 320, 64);
-      c.restore();
-    }
+    t1hDrawTele(c, f);
     c.save(); c.globalAlpha = 0.35; c.fillStyle = '#E5533D';
-    c.beginPath(); c.ellipse(f.x, f.y, 44, 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
+    c.beginPath(); c.ellipse(f.x, f.y, Math.max(44, f.r * 1.3), 14, 0, 0, Math.PI * 2); c.fill(); c.restore();
   }
   if (f.elite) {
     c.save(); c.globalAlpha = 0.45 + 0.2 * Math.sin(g.time * 6); c.strokeStyle = '#F2C14E'; c.lineWidth = 3;
     c.beginPath(); c.ellipse(f.x, f.y, f.r * 1.3, f.r * 0.45, 0, 0, Math.PI * 2); c.stroke(); c.restore();
   }
   const sc = f.sc || f.T.scale, ice = g.freezeT > 0 || (f.stun > 0 && f.iceT > 0) || f.slowT > 0;
-  t1dDraw(c, `${f.look}_${frame}`, f.x, f.y, sc, f.face < 0, [['gold', f.elite ? 0.22 + 0.1 * Math.sin(g.time * 6) : 0], ['red', f.st === 'aim' ? 0.35 : 0], ['ice', ice ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]]);
+  const over = [['gold', f.elite ? 0.22 + 0.1 * Math.sin(g.time * 6) : 0], ['red', f.st === 'tele' ? 0.35 : 0], ['ice', ice ? 0.45 : 0], ['flash', f.hit > 0 ? 0.6 : 0]];
+  if (f.B) t1nBossDraw(c, f, over);
+  else t1nGrid(c, `foe/${f.look}.png`, t1nDir(g.p.x - f.x, g.p.y - f.y), f.stun > 0 ? 0 : Math.floor(f.anim * (f.mini ? 6 : 8)) % 4, f.x, f.y, sc, over);
   if (f.stun > 0 && !ice) { c.font = '16px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText('💫', f.x, f.y - f.h - 8); }
-  if (f.boss) { t1hCrown(c, f.x + (f.face < 0 ? -f.hx : f.hx) * sc, f.y - (36 - f.hy) * sc + 4); return; }
+  if (f.boss) { t1hCrown(c, f.x, f.y - f.h - (f.air || 0) + 2); return; }
   if (f.hp < f.maxHp) {
     const bw = f.r * 2;
     c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(f.x - bw / 2, f.y - f.h - 6, bw, 4);
@@ -30799,6 +30956,8 @@ function t1hDraw() {
     c.fillStyle = '#E5533D'; t1hRR(c, (W - bw) / 2, 22, bw * f, 10, 5); c.fill();
     c.font = '800 11px system-ui, -apple-system, Segoe UI, sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
     c.fillText(`👹 TRÙM ${b.n}/3 · ${b.name.toUpperCase()}`, W / 2, 19);
+    const fe = b.B && t1nImg(`boss/${b.B.id}/Faceset.png`);
+    if (fe && fe.ready) { c.imageSmoothingEnabled = false; c.fillStyle = '#13294F'; t1hRR(c, (W - bw) / 2 - 44, 4, 40, 40, 6); c.fill(); c.drawImage(fe.img, (W - bw) / 2 - 43, 5, 38, 38); }
   }
   if (g.freezeT > 0) { c.fillStyle = `rgba(127,200,248,${Math.min(0.18, g.freezeT * 0.1)})`; c.fillRect(0, 0, W, H); }
   if (g.flashT > 0) { c.fillStyle = `rgba(255,236,170,${Math.min(0.6, g.flashT * 1.3)})`; c.fillRect(0, 0, W, H); }

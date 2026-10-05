@@ -8825,7 +8825,10 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-hero.on { border-color: var(--forest); box-shadow: 0 6px 18px -10px rgba(14, 77, 60, .6); }
 .t1h-hero.locked .t1h-face { filter: grayscale(1) brightness(.8); opacity: .7; }
 .t1h-hero small { color: var(--moss); line-height: 1.35; min-height: 2.7em; }
-.t1h-face { width: 72px; height: 96px; image-rendering: pixelated; border-radius: 12px; background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--hc, #13294F) 22%, transparent), transparent 70%); }
+.t1h-look { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.t1h-faceset { width: 76px; height: 76px; image-rendering: pixelated; border-radius: 10px; border: 2px solid var(--hc, #13294F); background: #13294F; }
+.t1h-hero.locked .t1h-faceset { filter: grayscale(1) brightness(.8); opacity: .7; }
+.t1h-face { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 12px; background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--hc, #13294F) 22%, transparent), transparent 70%); }
 .t1h-stats { font-size: 0.85rem; font-weight: 700; color: #13294F; }
 .t1h-hero .vb-start-btn, .t1h-buy { width: 100%; margin-top: auto; }
 .t1h-how { margin: 0; padding-left: 1.1rem; line-height: 1.6; color: #13294F; }
