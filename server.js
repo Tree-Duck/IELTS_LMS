@@ -4475,12 +4475,15 @@ app.post('/api/game/merchant', authenticate, walletRoute((w, b) => {
 // they can be ranked. Only the best per mode and speed is kept.
 const SHOOT_MODES = ['copy', 'meaning', 'colloc'];
 const SHOOT_DIFFS = ['easy', 'medium', 'hard'];
+// Bắn Chữ season 2 (Oct 2026): a round became five levels, so the board
+// starts again. Season 1 scores stay stored under their unprefixed keys.
+const SHOOT_SEASON = 's2_';
 app.post('/api/game/score', authenticate, (req, res) => {
   try {
     const { mode, diff } = req.body || {};
     if (!SHOOT_MODES.includes(mode) || !SHOOT_DIFFS.includes(diff)) return res.status(400).json({ error: 'Unknown game' });
     const score = Math.max(0, Math.min(1000000, parseInt(req.body.score, 10) || 0));
-    res.json({ best: db.saveShootBest(req.user.id, `${mode}_${diff}`, score) });
+    res.json({ best: db.saveShootBest(req.user.id, `${SHOOT_SEASON}${mode}_${diff}`, score) });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save score' });
   }
@@ -4729,7 +4732,7 @@ app.get('/api/game/leaderboard', authenticate, (req, res) => {
       if (board === 'tower') return (g.towers[uid] && g.towers[uid].best) || 0;
       if (board === 'raid') return Object.values((g.raids[uid] && g.raids[uid].stars) || {}).reduce((a, b) => a + b, 0);
       const s = g.scores[uid] || {};
-      return Math.max(...SHOOT_MODES.map(m => s[`${m}_${diff}`] || 0));
+      return Math.max(...SHOOT_MODES.map(m => s[`${SHOOT_SEASON}${m}_${diff}`] || 0));
     };
     const ranked = db.getAllUsers()
       .filter(u => u.role === 'student' && !getAdminEmails().includes(String(u.email || '').toLowerCase()) && (!inScope || inScope.has(u.id)))

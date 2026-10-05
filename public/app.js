@@ -14537,9 +14537,15 @@ function tsBank(g) {
   if (!g || g.banked) return;
   g.banked = true;
   walEarn(g.coins, true);
-  const recKey = g.mode + (g.v2 ? '_v2' : '');
+  const recKey = tsRecKey(g);
   if (g.score > tsGetBest(recKey, g.diffKey)) tsSetBest(recKey, g.diffKey, g.score);
-  if (g.score > 0 && !g.v2) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
+  tsSendScore(g);
+}
+// Season 2 began with the five-level round (Oct 2026): records start again.
+// The server keeps season 1 scores; the board only reads this season.
+function tsRecKey(g) { return g.mode + '_s2'; }
+function tsSendScore(g) {
+  if (g.score > 0) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
 }
 function lvLeaveGame() {
   if (_ts) { const g = _ts; tsStop(); tsBank(g); }
@@ -15891,7 +15897,7 @@ function jUnbox(c, note) {
 const LB_BOARDS = [
   { id: 'week',  label: '🪙 Xu tuần này',  unit: 'xu',   note: 'Tính xu kiếm được từ thứ Hai tuần này. Sáng thứ Hai cả lớp về 0 và đua lại.' },
   { id: 'tower', label: '🏗️ Tháp cao nhất', unit: 'tầng', note: 'Kỷ lục số tầng Xây tháp.' },
-  { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Điểm cao nhất của một lượt, lấy chế độ tốt hơn trong hai chế độ.' },
+  { id: 'shoot', label: '🚀 Bắn Chữ',       unit: 'điểm', note: 'Mùa 2 (từ 05/10): điểm cao nhất của một lượt 5 cấp, lấy chế độ tốt nhất. Điểm mùa trước vẫn được lưu.' },
   { id: 'coins', label: '💰 Tổng xu',       unit: 'xu',   note: 'Tất cả xu từng kiếm được. Mua đồ không làm tụt hạng.' },
   { id: 'raid',  label: '⚔️ Hầm ngục',      unit: 'sao',  note: 'Tổng số sao ở 14 hầm ngục, cả 3 cấp Học việc, Dũng sĩ, Huyền thoại. Mỗi cấp tối đa 3 sao (sai không quá 2 lần), tính lần đánh tốt nhất.' },
 ];
@@ -15973,20 +15979,6 @@ async function lbLoad() {
    Animal Pack Remastered (CC0, licences next to the files in img/ts/kenney).
    The egg, the cakes and the balloons have no Kenney picture, so they are
    drawn below in the same thick-outline style. */
-// Bản mới (thử nghiệm): Kenney art, cockpit, meteors, the alien, four bosses.
-// Off by default; the student turns it on from the start screen. Its scores
-// stay off the leaderboard, since boss and alien bonuses would be unfair.
-let _tsV2 = false;
-try { _tsV2 = localStorage.getItem('tsV2') === '1'; } catch (e) {}
-function tsV2() { return _ts ? !!_ts.v2 : _tsV2; }
-function tsPickVer(on) {
-  const g = _ts;
-  if (!g || g.started) return;
-  _tsV2 = !!on;
-  lvSave('tsV2', on ? '1' : '0');
-  tsSfx('key');
-  tsStart(g.mode, g.list);
-}
 const TS_KEN = 'img/ts/kenney/';
 const TS_SS = TS_KEN + 'space-shooter-remastered/PNG/';
 const TS_SX = TS_KEN + 'space-shooter-extension/PNG/Sprites/';
@@ -16098,12 +16090,10 @@ function tsNoEmoji(s) { return String(s).replace(/✖️2/g, 'x2').replace(/[\p{
 
 /* ── Events: meteors, the alien duel, four bosses with their own tricks ──
    Single meteors give a one-second warning, then fall three times faster.
-   A meteor shower (levels 4 and 8) is ten seconds of short words. The alien
-   (levels 2 and 6) spits words; clear them all and it drops into range, then
-   its hull words must go before the timer runs out. Losing the duel costs one
-   life. Levels 3, 5 and 7 bring a boss instead of the old miniboss; the
-   fortress stays as the final boss. */
-const TS_EVENTS = { alien: [2, 6], shower: [4, 8] };
+   A meteor shower (level 5) is ten seconds of short words. The alien (level 3)
+   spits words; clear them all and it drops into range, then its hull words
+   must go before the timer runs out. Losing the duel costs one life. Levels 2
+   and 4 bring a boss; the fortress closes the round (TS_ROUTE). */
 const TS_MBOSSES = {
   chicken: { name: 'Gà Trùm', art: 'boss_chicken', say: 'Gà Trùm đẻ trứng. Trứng không bắn kịp sẽ nở thành gà con mang từ mới!' },
   dragon:  { name: 'Rồng Khói', art: 'boss_dragon', say: 'Rồng Khói phun khói che nửa sau của từ. Nhớ lại phần còn thiếu!' },
@@ -16456,20 +16446,22 @@ const TS_DOUBLE_SECS = 15;
 const TS_REVIVE_LIVES = 3;
 let _tsDiff = 'easy';
 try { const d = localStorage.getItem('tsDiff'); if (TS_DIFFS[d]) _tsDiff = d; } catch (e) {}
-const TS_PER_LEVEL = 8;
+const TS_PER_LEVEL = 5;
 const TS_EGG_EVERY = 11;
-// Bosses. Every TS_MINI_EVERY levels a miniboss; once every word of the
-// selection has fallen, or at level TS_FINAL_LEVEL for a big selection, the
-// final boss, and beating it wins the round. A boss is a fortress: columns of
+// A round is TS_LEVELS levels. Reaching a level brings what TS_ROUTE names;
+// past the last one, or once every word of a small selection has fallen, the
+// fortress, and beating it wins the round. The fortress: columns of
 // word blocks stand under a core, only the bottom block of a column can be
 // hit, and clearing one whole column opens the core. The shortest column
 // holds the longest words and the tallest column the easiest, so every
 // student has a way in. The core then takes TS_CORE words: [miniboss, final].
-const TS_MINI_EVERY = 2;
-const TS_FINAL_LEVEL = 9;
+const TS_LEVELS = 5;
+const TS_ROUTE = { 2: 'boss', 3: 'alien', 4: 'boss', 5: 'shower', 6: 'fort' };
+const TS_ROUTE_ART = { boss: 'monster', alien: 'alien', shower: 'meteor1', fort: 'fortress' };
+// Winning opens a chest: TS_CHEST coins a star, times the speed's coin rate.
+// Three stars for no life lost, two for at most two.
+const TS_CHEST = 10;
 const TS_CORE = { easy: [1, 3], medium: [2, 5], hard: [3, 7] };
-const TS_MINIBOSSES = ['👾', '🦂', '🐺', '🦇', '🕷️'];
-const TS_FINALBOSSES = ['🐉', '👹', '🦖'];
 // Left-to-right order of the columns, given them sorted short to tall.
 const TS_SHAPES = {
   pyramid: n => (n === 3 ? [0, 2, 1] : [0, 2, 3, 1]),
@@ -16581,7 +16573,7 @@ function tsSfx(kind, arg) {
 function tsToggleMute() {
   lvSave('tsMute', tsMuted() ? '0' : '1');
   const b = document.getElementById('ts-mute');
-  if (b) b.innerHTML = tsV2() ? tsIco(tsMuted() ? 'mute' : 'sound') : tsMuted() ? '🔇' : '🔊';
+  if (b) b.innerHTML = tsIco(tsMuted() ? 'mute' : 'sound');
   document.getElementById('ts-input')?.focus();
 }
 
@@ -16596,20 +16588,21 @@ function tsStart(mode, list) {
   if (mode === 'colloc' && pool.length < 5) { showToast('Phần đang chọn có quá ít cụm từ để ghép. Chọn thêm buổi hoặc unit.'); return; }
   if (!pool.length || !root || !TS_MODES[mode]) return;
   root.innerHTML = `
-    <div class="ts-wrap${_tsV2 ? ' ts-v2' : ''}" id="ts-wrap">
+    <div class="ts-wrap ts-v2" id="ts-wrap">
       <div class="ts-hud">
-        <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">${_tsV2 ? tsIco('back') : '←'}</button>
+        <button class="ts-icon-btn" onclick="lvBack()" title="Quay về chọn buổi" aria-label="Quay về chọn buổi">${tsIco('back')}</button>
         <span class="ts-lives" id="ts-lives"></span>
         <span class="ts-combo" id="ts-combo"></span>
         <span class="ts-bossbar" id="ts-bossbar"></span>
-        <span class="ts-stat">Cấp <strong id="ts-level">1</strong></span>
+        <span class="ts-stat">Cấp <strong id="ts-level">1</strong>/${TS_LEVELS}</span>
         <span class="ts-stat">Điểm <strong id="ts-score">0</strong></span>
-        <span class="ts-stat">${_tsV2 ? tsImg('coin', 'ts-hud-coin') : '🪙'} <strong id="ts-coins">0</strong></span>
-        <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${_tsV2 ? tsIco(tsMuted() ? 'mute' : 'sound') : tsMuted() ? '🔇' : '🔊'}</button>
-        <button class="ts-icon-btn" onclick="gameShop('ts')" title="Mua vật phẩm" aria-label="Mua vật phẩm">${_tsV2 ? tsIco('shop') : '🛒'}</button>
-        <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">${_tsV2 ? tsIco('pause') : '⏸'}</button>
-        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">${_tsV2 ? tsIco('swap') : '🔀'}</button>
+        <span class="ts-stat">${tsImg('coin', 'ts-hud-coin')} <strong id="ts-coins">0</strong></span>
+        <button class="ts-icon-btn" id="ts-mute" onclick="tsToggleMute()" title="Tắt hoặc bật tiếng" aria-label="Tắt hoặc bật tiếng">${tsIco(tsMuted() ? 'mute' : 'sound')}</button>
+        <button class="ts-icon-btn" onclick="gameShop('ts')" title="Mua vật phẩm" aria-label="Mua vật phẩm">${tsIco('shop')}</button>
+        <button class="ts-icon-btn" onclick="tsPause()" title="Tạm dừng" aria-label="Tạm dừng">${tsIco('pause')}</button>
+        <button class="ts-icon-btn" onclick="lvModeModal()" title="Đổi chế độ" aria-label="Đổi chế độ">${tsIco('swap')}</button>
       </div>
+      <div class="ts-route" id="ts-route" aria-hidden="true"></div>
       <div class="ts-arena" id="ts-arena">
         <div class="ts-stars"></div>
         <div class="ts-ship" id="ts-ship"></div>
@@ -16624,14 +16617,14 @@ function tsStart(mode, list) {
       </div>
     </div>`;
   const g = _ts = {
-    mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff], v2: _tsV2,
+    mode, cfg: TS_MODES[mode], list: list || null, diffKey: _tsDiff, diff: TS_DIFFS[_tsDiff],
     pool, deck: vbShuffle(pool), deckPos: 0,
     items: [], lockId: null, nextId: 1, spawned: 0,
     score: 0, lives: TS_DIFFS[_tsDiff].lives, level: 1, kills: 0, drops: 0, combo: 0, bestCombo: 0, typos: 0,
     missed: [], spawnIn: 0.6, freeze: 0, last: performance.now(), raf: 0, running: true, paused: true, started: false,
     W: 0, H: 0, coins: 0, slow: 0, dbl: 0, shield: false, revives: 0, reviving: false, powersShown: '',
     lvKills: 0, seen: new Set(), boss: null, minis: 0, miniDue: false, finalDue: false, won: false, lastShape: '',
-    ev: null, warns: [], metIn: null, alienDue: false, showerDue: false, mbOrder: null,
+    ev: null, warns: [], metIn: null, alienDue: false, showerDue: false, mbOrder: null, stars: 0, chest: 0,
   };
   tsApplySkins();
   const input = document.getElementById('ts-input');
@@ -16660,10 +16653,7 @@ function tsReadyScreen() {
   ov.innerHTML = `<div class="ts-ov-title">${escapeHtml(g.cfg.label)}</div>
     <div class="ts-ov-sub">Chọn tốc độ</div>
     <div class="lv-diff ts-ready-diff">${Object.entries(TS_DIFFS).map(([k, d]) => `<button class="vb-chip${g.diffKey === k ? ' active' : ''}" onclick="tsPickDiff('${k}')">${d.label}, ${d.note}</button>`).join('')}</div>
-    <div class="lv-diff ts-ready-diff ts-ready-ver"><button class="vb-chip${g.v2 ? '' : ' active'}" onclick="tsPickVer(false)">Bản cũ</button><button class="vb-chip${g.v2 ? ' active' : ''}" onclick="tsPickVer(true)">🧪 Bản mới (thử nghiệm)</button></div>
-    <div class="ts-ov-sub ts-ready-note">${g.v2
-      ? `Cấp 2 và 6: tàu ngoài hành tinh. Cấp 4 và 8: mưa thiên thạch. Cấp 3, 5, 7: một trong bốn boss. Bắn hết từ thì gặp Pháo đài, lõi cần ${TS_CORE[g.diffKey][1]} từ. Hạ Pháo đài là thắng. Bản thử nghiệm vẫn được xu, nhưng điểm không lên bảng xếp hạng.`
-      : `Cứ ${TS_MINI_EVERY} cấp gặp một miniboss. Khi đã bắn hết từ thì gặp boss cuối, lõi boss cần ${TS_CORE[g.diffKey][1]} từ mới hạ được. Hạ boss cuối là thắng.`}</div>
+    <div class="ts-ov-sub ts-ready-note">${TS_LEVELS} cấp, mỗi cấp ${TS_PER_LEVEL} từ. Lên cấp 2 và 4: một boss. Cấp 3: tàu ngoài hành tinh. Cấp 5: mưa thiên thạch. Qua cấp ${TS_LEVELS} là Pháo đài, lõi cần ${TS_CORE[g.diffKey][1]} từ. Hạ Pháo đài để nhận sao và rương xu, không mất mạng nào là 3 sao.</div>
     <button class="vb-start-btn" id="ts-go" onclick="tsGo()">▶ Bắt đầu</button>`;
   ov.classList.remove('hidden');
   document.getElementById('ts-go')?.focus();
@@ -16695,12 +16685,9 @@ function tsApplySkins() {
   const ship = document.getElementById('ts-ship');
   const arena = document.getElementById('ts-arena');
   const s = walLook('ship');
-  if (ship && tsV2()) {
+  if (ship) {
     ship.classList.add('ts-ship--img');
     ship.innerHTML = tsShipImg(s);
-  } else if (ship) {
-    ship.classList.toggle('ts-ship--emoji', !!s.icon);
-    ship.innerHTML = s.icon ? walShipIcon(s) : '';
   }
   if (arena) {
     arena.style.setProperty('--laser', s.laser === 'rainbow' ? '#ffffff' : s.laser);
@@ -16722,7 +16709,7 @@ function tsCallout(text) {
   if (!a) return;
   const c = document.createElement('div');
   c.className = 'ts-callout';
-  c.textContent = tsV2() ? tsNoEmoji(text) : text;
+  c.textContent = tsNoEmoji(text);
   a.appendChild(c);
   setTimeout(() => c.remove(), 1400);
   tsFlash('combo');
@@ -16740,12 +16727,12 @@ function tsPowers() {
     const it = SHOP_ITEMS.find(i => i.id === id);
     const on = left > 0;
     return `<button class="ts-power${on ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('${id}')" ${!on && !walCount(id) ? 'disabled' : ''} title="${escapeHtml(it.name)}, phím ${key}">
-      <kbd>${key}</kbd>${g.v2 ? tsImg(id === 'slow' ? 'pw_slow' : 'pw_double', 'ts-pw-img') : it.icon} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
+      <kbd>${key}</kbd>${tsImg(id === 'slow' ? 'pw_slow' : 'pw_double', 'ts-pw-img')} <span class="ts-power-name">${escapeHtml(it.name)}</span> <span class="ts-power-n">${on ? Math.ceil(left) + 's' : '×' + walCount(id)}</span></button>`;
   };
   const shield = `<button class="ts-power${g.shield ? ' on' : ''}" onpointerdown="event.preventDefault()" onclick="tsUsePower('shield')" ${!g.shield && !walCount('shield') ? 'disabled' : ''} title="Khiên, phím 3">
-      <kbd>3</kbd>${g.v2 ? tsImg('pw_shield', 'ts-pw-img') : '🛡️'} <span class="ts-power-name">Khiên</span> <span class="ts-power-n">${g.shield ? 'sẵn sàng' : '×' + walCount('shield')}</span></button>`;
+      <kbd>3</kbd>${tsImg('pw_shield', 'ts-pw-img')} <span class="ts-power-name">Khiên</span> <span class="ts-power-n">${g.shield ? 'sẵn sàng' : '×' + walCount('shield')}</span></button>`;
   const html = btn('slow', 1, g.slow) + btn('double', 2, g.dbl) + shield +
-    `<span class="ts-power-revive" title="Hồi sinh">${g.v2 ? tsImg('pw_revive', 'ts-pw-img') : '💖'} ×${walCount('revive')}</span>`;
+    `<span class="ts-power-revive" title="Hồi sinh">${tsImg('pw_revive', 'ts-pw-img')} ×${walCount('revive')}</span>`;
   if (html === g.powersShown) return;
   g.powersShown = html;
   el.innerHTML = html;
@@ -16823,8 +16810,7 @@ function tsGap() {
 
 function tsItemHtml(it, typed) {
   let icon = '';
-  if (!it.fixed && _ts.v2 && it.art) icon = `<span class="ts-chick">${tsImg(it.art)}${it.egg ? tsImg('pw_' + it.power, 'ts-egg-pw') : ''}</span>`;
-  else if (!it.fixed && !_ts.v2) { const pack = walLook('drop'); icon = `<span class="ts-chick">${it.egg ? `${pack.icons[2]}<b class="ts-egg-pw">${TS_EGG_POWERS[it.power] || ''}</b>` : pack.icons[0]}</span>`; }
+  if (!it.fixed && it.art) icon = `<span class="ts-chick">${tsImg(it.art)}${it.egg ? tsImg('pw_' + it.power, 'ts-egg-pw') : ''}</span>`;
   if (_ts.mode === 'colloc') {
     const body = tsCollocHtml(it, typed);
     return it.fixed ? `<div class="ts-cell-w">${body}</div>` : icon + body;
@@ -16941,7 +16927,7 @@ function tsFrame(now) {
       g.freeze -= dt;
       if (g.freeze <= 0) document.getElementById('ts-arena')?.classList.remove('frozen');
     } else {
-      if (g.v2) tsEvTick(dt * k);
+      tsEvTick(dt * k);
       if (!g.running) return;
       if (g.paused) { g.raf = requestAnimationFrame(tsFrame); return; }
       g.spawnIn -= dt * k;
@@ -16951,7 +16937,7 @@ function tsFrame(now) {
       const most = g.boss ? (g.boss.monster ? (g.diffKey === 'easy' ? 2 : 3) : (g.diffKey === 'easy' ? 1 : 2)) : Math.max(2, Math.round(g.cfg.maxOn * g.diff.crowd));
       const due = !g.boss && !g.won && !g.ev && (g.finalDue || g.miniDue);
       if (due) {
-        if (alive === 0) { const fin = g.finalDue; g.miniDue = false; if (fin) { tsEvClear(); tsBossStart('final'); } else if (g.v2) tsMBossStart(); else tsBossStart('mini'); }
+        if (alive === 0) { const fin = g.finalDue; g.miniDue = false; if (fin) { tsEvClear(); tsBossStart('final'); } else tsMBossStart(); }
       } else if (!g.won && !g.ev && g.spawnIn <= 0 && alive < most) { tsSpawn(); g.spawnIn = tsGap() * (g.boss && !g.boss.monster ? 1.8 : 1); }
       else if (alive === 0 && !g.ev && g.spawnIn > 0.4) g.spawnIn = 0.4;
       for (const it of g.items) {
@@ -17108,7 +17094,7 @@ function tsExplode(it, withLaser) {
       const p = document.createElement('span');
       const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * (it.boss ? 90 : 45);
       p.className = 'ts-spark';
-      if (g.v2 && k % 2) p.style.background = it.meteor ? '#FFB066' : walLook('drop').spark || '';
+      if (k % 2) p.style.background = it.meteor ? '#FFB066' : walLook('drop').spark || '';
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
       p.style.setProperty('--dx', Math.cos(a) * d + 'px');
@@ -17118,7 +17104,7 @@ function tsExplode(it, withLaser) {
     }
     const leg = document.createElement('span');
     leg.className = 'ts-leg';
-    if (g.v2) leg.innerHTML = tsImg(it.meteor ? 'spark2' : 'spark'); else leg.textContent = walLook('drop').burst;
+    leg.innerHTML = tsImg(it.meteor ? 'spark2' : 'spark');
     leg.style.left = cx + 'px';
     leg.style.top = cy + 'px';
     arena.appendChild(leg);
@@ -17165,16 +17151,19 @@ function tsKill(it, second) {
       }, 90);
     }
   }
-  if (!it.fixed && !inBoss && ++g.lvKills % TS_PER_LEVEL === 0) {
+  // Words from the alien and the meteor shower are their own fight: only the
+  // ordinary words move the round on, so no level slips by inside an event.
+  if (!it.fixed && !inBoss && !g.ev && g.level <= TS_LEVELS && ++g.lvKills % TS_PER_LEVEL === 0) {
     g.level++;
     tsSfx('level');
     tsFlash('level');
     jBuzz([20, 30, 20]);
-    tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
-    if (g.level >= TS_FINAL_LEVEL) g.finalDue = true;
-    else if (g.level % TS_MINI_EVERY === 1) g.miniDue = true;
-    if (g.v2 && TS_EVENTS.alien.includes(g.level)) g.alienDue = true;
-    if (g.v2 && TS_EVENTS.shower.includes(g.level)) g.showerDue = true;
+    if (g.level <= TS_LEVELS) tsFloat(`Cấp ${g.level}`, g.W / 2, g.H / 2 - 30, 'big');
+    const next = g.level > TS_LEVELS ? 'fort' : TS_ROUTE[g.level];
+    if (next === 'fort') g.finalDue = true;
+    else if (next === 'boss') g.miniDue = true;
+    else if (next === 'alien') g.alienDue = true;
+    else if (next === 'shower') g.showerDue = true;
   }
   if (it.fixed) tsFortHit(it);
   tsHud();
@@ -17308,7 +17297,7 @@ function tsOfferRevive() {
   if (ov) {
     ov.innerHTML = `<div class="ts-ov-title">Hết mạng!</div>
       <div class="ts-ov-sub">Dùng 💖 Hồi sinh để chơi tiếp với ${TS_REVIVE_LIVES} mạng. Màn hình được dọn sạch. Còn ${walCount('revive')} lượt hồi sinh.</div>
-      <button class="vb-start-btn" onclick="tsRevive()">${g.v2 ? tsImg('pw_revive', 'ts-pw-img') : '💖'} Hồi sinh</button>
+      <button class="vb-start-btn" onclick="tsRevive()">${tsImg('pw_revive', 'ts-pw-img')} Hồi sinh</button>
       <button class="vb-secondary-btn" onclick="tsEnd()">Kết thúc lượt</button>`;
     ov.classList.remove('hidden');
   }
@@ -17360,8 +17349,7 @@ function tsBossStart(kind) {
   const shape = shapes[Math.floor(Math.random() * shapes.length)];
   g.lastShape = shape;
   const order = TS_SHAPES[shape](cols.length);
-  const pool = final ? TS_FINALBOSSES : TS_MINIBOSSES;
-  const icon = g.v2 ? tsImg('fortress', 'ts-core-img') : pool[Math.floor(Math.random() * pool.length)];
+  const icon = tsImg('fortress', 'ts-core-img');
   g.boss = { kind, final, cols, coreWords, coreN, coreLeft: coreN, open: false, icon };
   g.items.filter(x => !x.dead).forEach(x => tsExplode(x, false));
   g.items = [];
@@ -17372,7 +17360,7 @@ function tsBossStart(kind) {
   fort.className = 'ts-fort ts-fort--' + (final ? 'final' : 'mini');
   fort.id = 'ts-fort';
   fort.innerHTML = `<div class="ts-fort-in" id="ts-fort-in">
-    <div class="ts-core shut" id="ts-core"><span class="ts-core-boss">${icon}</span><span class="ts-core-shield">${g.v2 ? tsImg('shield') : '🛡️'}</span><div class="ts-core-slot" id="ts-core-slot"></div></div>
+    <div class="ts-core shut" id="ts-core"><span class="ts-core-boss">${icon}</span><span class="ts-core-shield">${tsImg('shield')}</span><div class="ts-core-slot" id="ts-core-slot"></div></div>
     <div class="ts-cols" id="ts-cols"></div>
   </div>`;
   arena.appendChild(fort);
@@ -17382,7 +17370,7 @@ function tsBossStart(kind) {
     const c = cols[ci];
     const col = document.createElement('div');
     col.className = 'ts-col' + (c.rank === 0 ? ' ts-col--short' : c.rank === last ? ' ts-col--long' : '');
-    col.innerHTML = `<div class="ts-col-cells"></div><div class="ts-col-tag">${g.v2 ? (c.rank === 0 ? 'Ngắn · từ dài' : c.rank === last ? 'Dài · từ dễ' : '·') : (c.rank === 0 ? '🔥 Ngắn · từ dài' : c.rank === last ? '🌿 Dài · từ dễ' : '⚔️')}</div>`;
+    col.innerHTML = `<div class="ts-col-cells"></div><div class="ts-col-tag">${c.rank === 0 ? 'Ngắn · từ dài' : c.rank === last ? 'Dài · từ dễ' : '·'}</div>`;
     colsEl.appendChild(col);
     const cellsEl = col.querySelector('.ts-col-cells');
     c.words.forEach((w, j) => {
@@ -17401,7 +17389,7 @@ function tsBossStart(kind) {
   tsSfx('boss');
   tsShakeArena();
   jBuzz([60, 40, 60]);
-  tsFloat(g.v2 ? 'PHÁO ĐÀI TRÙM!' : final ? `${icon} BOSS CUỐI!` : `${icon} MINIBOSS!`, g.W / 2, 30, 'big');
+  tsFloat('PHÁO ĐÀI TRÙM!', g.W / 2, 30, 'big');
   g.spawnIn = 3;
   tsHud();
 }
@@ -17486,7 +17474,7 @@ function tsFloat(text, x, y, big) {
   if (!arena) return;
   const f = document.createElement('div');
   f.className = 'ts-float' + (big ? ' ts-float--big' : '');
-  f.textContent = tsV2() ? tsNoEmoji(text) : text;
+  f.textContent = tsNoEmoji(text);
   f.style.left = x + 'px';
   f.style.top = y + 'px';
   arena.appendChild(f);
@@ -17511,19 +17499,42 @@ function tsHud() {
   if (!g) return;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
   const left = Math.max(0, g.lives);
-  if (g.v2) set('ts-lives', tsImg('life', 'ts-life').repeat(left) + `<span class="ts-life-lost">${tsImg('life', 'ts-life').repeat(Math.max(0, g.diff.lives - left))}</span>`);
-  else set('ts-lives', '❤️'.repeat(left) + `<span class="ts-life-lost">${'🤍'.repeat(Math.max(0, g.diff.lives - left))}</span>`);
+  set('ts-lives', tsImg('life', 'ts-life').repeat(left) + `<span class="ts-life-lost">${tsImg('life', 'ts-life').repeat(Math.max(0, g.diff.lives - left))}</span>`);
   set('ts-score', g.score);
   set('ts-coins', g.coins + (walMult() > 1 ? ' <b class="wal-x2">×2</b>' : ''));
-  set('ts-level', g.level);
+  set('ts-level', Math.min(g.level, TS_LEVELS));
   const b = g.boss;
   const ev = g.ev;
-  if (!g.v2) set('ts-bossbar', b ? (b.open ? `${b.icon} lõi ${b.coreLeft}/${b.coreN}` : `${b.icon} 🛡️ phá 1 cột`) : g.finalDue && !g.won ? '👹 boss cuối tới!' : g.miniDue ? '👾 miniboss tới!' : '');
-  else set('ts-bossbar', b ? (b.monster ? `${TS_MBOSSES[b.kind].name} · còn ${b.hp}/${b.max}` : b.open ? `Pháo đài · lõi ${b.coreLeft}/${b.coreN}` : 'Pháo đài · phá 1 cột')
+  set('ts-bossbar', b ? (b.monster ? `${TS_MBOSSES[b.kind].name} · còn ${b.hp}/${b.max}` : b.open ? `Pháo đài · lõi ${b.coreLeft}/${b.coreN}` : 'Pháo đài · phá 1 cột')
     : ev ? (ev.kind === 'alien' ? (ev.phase === 'hull' ? `Bắn thân tàu · ${Math.max(0, Math.ceil(ev.timer))}s` : 'Tàu ngoài hành tinh') : `Mưa thiên thạch · ${Math.max(0, Math.ceil(ev.left))}s`)
-    : g.finalDue && !g.won ? 'Pháo đài sắp tới!' : g.miniDue ? 'Boss sắp tới!' : '');
+    : g.finalDue && !g.won ? 'Pháo đài sắp tới!' : g.miniDue ? 'Boss sắp tới!' : g.won ? '' : tsNextText(g));
+  tsRoute(g);
   const mult = 1 + Math.min(4, Math.floor(g.combo / 5));
-  set('ts-combo', g.combo >= 3 ? `${g.v2 ? 'Combo' : '🔥'} ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
+  set('ts-combo', g.combo >= 3 ? `Combo ${g.combo}${mult > 1 ? ' · x' + mult : ''}` : '');
+}
+
+const TS_NEXT_NAME = { boss: 'boss', alien: 'tàu ngoài hành tinh', shower: 'mưa thiên thạch', fort: 'Pháo đài' };
+// "còn 3 từ tới boss": what the next level brings and how far it is.
+function tsNextText(g) {
+  const next = TS_ROUTE[g.level + 1];
+  if (!next) return '';
+  const left = TS_PER_LEVEL - (g.lvKills % TS_PER_LEVEL);
+  return `còn ${left} từ tới ${TS_NEXT_NAME[next]}`;
+}
+// The strip under the HUD: one bar a level, and the stop it leads to.
+function tsRoute(g) {
+  const el = document.getElementById('ts-route');
+  if (!el) return;
+  const into = g.lvKills % TS_PER_LEVEL;
+  const html = Array.from({ length: TS_LEVELS }, (_, i) => {
+    const lv = i + 1, stop = TS_ROUTE[lv + 1];
+    const fill = g.level > lv ? 100 : g.level === lv ? Math.round(into / TS_PER_LEVEL * 100) : 0;
+    const done = stop === 'fort' ? g.won : g.level > lv;
+    return `<span class="ts-route-bar"><i style="width:${fill}%"></i></span><span class="ts-route-stop${done ? ' done' : g.level === lv || (stop === 'fort' && g.level > lv) ? ' next' : ''}">${tsImg(TS_ROUTE_ART[stop])}</span>`;
+  }).join('');
+  if (html === el.dataset.html) return;
+  el.dataset.html = html;
+  el.innerHTML = html;
 }
 
 function tsPause() {
@@ -17558,6 +17569,11 @@ function tsEnd() {
   if (!g) return;
   tsStop();
   g.banked = true;
+  if (g.won && !g.stars) {
+    g.stars = g.drops === 0 ? 3 : g.drops <= 2 ? 2 : 1;
+    g.chest = Math.round(g.stars * TS_CHEST * g.diff.coin * walMult());
+    g.coins += g.chest;
+  }
   walEarn(g.coins, true);
   tsRenderResults(g);
 }
@@ -17567,19 +17583,22 @@ function tsRenderResults(g) {
   const root = document.getElementById('lesson-vocab-root');
   if (!root) return;
   _tsLast = g;
-  const recKey = g.mode + (g.v2 ? '_v2' : '');
+  const recKey = tsRecKey(g);
   const prevBest = tsGetBest(recKey, g.diffKey);
   const isNew = g.score > prevBest;
   if (isNew) tsSetBest(recKey, g.diffKey, g.score);
-  if (g.score > 0 && !g.v2) api('/api/game/score', { method: 'POST', body: JSON.stringify({ mode: g.mode, diff: g.diffKey, score: g.score }) }).catch(() => {});
+  tsSendScore(g);
   const missedHtml = g.missed.length
     ? g.missed.map(w => `<div class="vb-missed-item"><button class="ts-say-btn" onclick="tsSpeak(${escapeHtml(JSON.stringify(w.en))})" title="Nghe" aria-label="Nghe">🔊</button><strong>${escapeHtml(w.en)}</strong> · ${escapeHtml(w.vi)}</div>`).join('')
     : '<div class="vb-missed-empty">Không để rơi từ nào 🎉</div>';
   root.innerHTML = `
     <div class="vb-wrap">
       <div class="vb-results">
-        ${g.won ? `<div class="ts-victory">🏆 CHIẾN THẮNG! ${g.v2 ? `Đã hạ Pháo đài${g.minis ? ` và ${g.minis} boss` : ''}` : `Đã hạ boss cuối${g.minis ? ` và ${g.minis} miniboss` : ''}`}</div>` : ''}
-        ${g.v2 ? '<div class="ts-trial-note">🧪 Bản thử nghiệm: xu vẫn được cộng, điểm không lên bảng xếp hạng.</div>' : ''}
+        ${g.won ? `<div class="ts-victory">🏆 CHIẾN THẮNG! Đã hạ Pháo đài${g.minis ? ` và ${g.minis} boss` : ''}</div>
+        <div class="ts-res-stars" role="img" aria-label="${g.stars} trên 3 sao">${[1, 2, 3].map(i => tsImg('star', 'ts-res-star' + (i <= g.stars ? '' : ' off'))).join('')}</div>
+        <div class="ts-chest"><span class="ts-chest-coins">${tsImg('coin')}${tsImg('coin')}${tsImg('coin')}</span> Rương xu: +${g.chest} xu
+          <small>${g.stars === 3 ? 'Trọn 3 sao: không mất mạng nào!' : `Không để mất mạng nào thì được 3 sao (lượt này mất ${g.drops}).`}</small></div>`
+        : `<div class="ts-res-hint">Qua ${TS_LEVELS} cấp rồi hạ Pháo đài để nhận sao và rương xu.</div>`}
         ${isNew ? '<div class="vb-newbest">🎉 KỶ LỤC MỚI!</div>' : ''}
         <div class="vb-results-score">${g.score}</div>
         <div class="vb-results-score-lbl">điểm · ${escapeHtml(g.cfg.label)} · ${escapeHtml(g.diff.label)} · kỷ lục cũ ${prevBest}</div>
