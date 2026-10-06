@@ -24448,6 +24448,7 @@ function t1Hub() {
   const root = t1Root();
   if (!root) return;
   t1Leave();
+  if (_t1Block === 'sta') t1mArtLoad();
   const b = T1_BLOCKS[_t1Block], other = _t1Block === 'dyn' ? 'sta' : 'dyn', lv = T1_LEVELS[_t1Lv];
   root.innerHTML = `
     <div class="lv-wrap t1-hub t1-hub--${_t1Block}">
@@ -27450,19 +27451,21 @@ function t1mLabel(x, y, text, cls) {
   const words = String(text).split(' '), lines = text.length > 11 && words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [text];
   return `<text x="${x}" y="${y - (lines.length - 1) * 6.5 + 4}" class="t1m-lab ${cls || ''}">${lines.map((l, i) => `<tspan x="${x}" dy="${i ? 13 : 0}">${escapeHtml(l)}</tspan>`).join('')}</text>`;
 }
-function t1mFeature(f) {
-  const cx = f.x + f.w / 2, cy = f.y + f.h / 2;
-  if (f.t === 'water') return `<ellipse cx="${cx}" cy="${cy}" rx="${f.w / 2}" ry="${f.h / 2}" class="t1m-water"/>${t1mLabel(cx, cy, f.label, 'water')}`;
-  if (f.t === 'river') return `<path d="M0 ${f.y + 4} C150 ${f.y - 6} 450 ${f.y + 10} 600 ${f.y} L600 ${f.y + f.h} C450 ${f.y + f.h + 8} 150 ${f.y + f.h - 8} 0 ${f.y + f.h + 2}Z" class="t1m-water"/>${t1mLabel(80, f.y + f.h / 2, f.label, 'water')}`;
+// art: the town is drawn as pixel art underneath, so only the labels (and
+// the railway, pitch lines and car park P) are drawn here.
+function t1mFeature(f, art) {
+  const cx = f.x + f.w / 2, cy = f.y + f.h / 2, out = (shape, lab) => (art ? '' : shape) + lab;
+  if (f.t === 'water') return out(`<ellipse cx="${cx}" cy="${cy}" rx="${f.w / 2}" ry="${f.h / 2}" class="t1m-water"/>`, t1mLabel(cx, cy, f.label, 'water'));
+  if (f.t === 'river') return out(`<path d="M0 ${f.y + 4} C150 ${f.y - 6} 450 ${f.y + 10} 600 ${f.y} L600 ${f.y + f.h} C450 ${f.y + f.h + 8} 150 ${f.y + f.h - 8} 0 ${f.y + f.h + 2}Z" class="t1m-water"/>`, t1mLabel(80, f.y + f.h / 2, f.label, 'water'));
   if (f.t === 'road') {
     const d = f.pts.map((p, i) => (i ? 'L' : 'M') + p.join(' ')).join('');
     const body = f.kind === 'track' ? `<path d="${d}" class="t1m-track"/>`
-      : f.kind === 'rail' ? `<path d="${d}" class="t1m-rail"/><path d="${d}" class="t1m-rail-ties"/>`
-      : f.kind === 'dual' ? `<path d="${d}" class="t1m-road t1m-road--dual"/><path d="${d}" class="t1m-road-mid"/>`
+      : f.kind === 'rail' ? '' : f.kind === 'dual' ? `<path d="${d}" class="t1m-road t1m-road--dual"/><path d="${d}" class="t1m-road-mid"/>`
       : `<path d="${d}" class="t1m-road"/>`;
-    return body + (f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab"${f.side ? ' text-anchor="start"' : ''}>${escapeHtml(f.label)}</text>` : '');
+    return out(body, (f.kind === 'rail' ? `<path d="${d}" class="t1m-rail"/><path d="${d}" class="t1m-rail-ties"/>` : '')
+      + (f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab"${f.side ? ' text-anchor="start"' : ''}>${escapeHtml(f.label)}</text>` : ''));
   }
-  if (f.t === 'bridge') return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="3" class="t1m-bridge${f.wood ? ' wood' : ''}"/>${f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab" text-anchor="start">${escapeHtml(f.label)}</text>` : ''}`;
+  if (f.t === 'bridge') return out(`<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="3" class="t1m-bridge${f.wood ? ' wood' : ''}"/>`, f.label ? `<text x="${f.lx}" y="${f.ly}" class="t1m-roadlab" text-anchor="start">${escapeHtml(f.label)}</text>` : '');
   if (f.t === 'area') {
     let g = `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="${f.kind === 'sea' || f.kind === 'beach' ? 0 : 10}" fill="${T1M_FILL[f.kind]}" class="t1m-area"/>`;
     if (f.kind === 'farm') for (let x = f.x + 12; x < f.x + f.w - 4; x += 14) g += `<line x1="${x}" y1="${f.y + 6}" x2="${x}" y2="${f.y + f.h - 6}" class="t1m-furrow"/>`;
@@ -27470,24 +27473,137 @@ function t1mFeature(f) {
       const step = f.kind === 'park' ? 34 : 22;
       for (let y = f.y + 14; y < f.y + f.h - 8; y += step) for (let x = f.x + 14 + ((y / step) % 2) * step / 2; x < f.x + f.w - 8; x += step) g += `<circle cx="${x.toFixed(1)}" cy="${y}" r="${f.kind === 'park' ? 6 : 8}" class="t1m-tree"/>`;
     }
-    if (f.kind === 'field') g += `<rect x="${f.x + 8}" y="${f.y + 8}" width="${f.w - 16}" height="${f.h - 16}" class="t1m-pitch"/>`;
-    return g + (f.label ? t1mLabel(cx, cy, f.label, f.kind === 'sea' ? 'water' : '') : '');
+    const pitch = f.kind === 'field' ? `<rect x="${f.x + 8}" y="${f.y + 8}" width="${f.w - 16}" height="${f.h - 16}" class="t1m-pitch"/>` : '';
+    return out(g, pitch + (f.label ? t1mLabel(cx, cy, f.label, f.kind === 'sea' ? 'water' : '') : ''));
   }
   if (f.t === 'houses') {
     const n = f.n || Math.max(4, Math.round(f.w * f.h / 900)), cols = Math.ceil(Math.sqrt(n * f.w / f.h)), rows = Math.ceil(n / cols);
     const cw = f.w / cols, ch = f.h / rows, s = Math.min(cw, ch) * 0.58;
     let g = `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="8" class="t1m-lot"/>`;
     for (let i = 0; i < n; i++) { const c = i % cols, r = Math.floor(i / cols); g += `<rect x="${(f.x + c * cw + (cw - s) / 2).toFixed(1)}" y="${(f.y + r * ch + (ch - s) / 2).toFixed(1)}" width="${s.toFixed(1)}" height="${s.toFixed(1)}" class="t1m-house"/>`; }
-    return g + t1mLabel(cx, cy, f.label, 'pill');
+    return out(g, t1mLabel(cx, cy, f.label, 'pill'));
   }
-  if (f.t === 'car') return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="6" class="t1m-car"/><text x="${cx}" y="${cy - 2}" class="t1m-p">P</text>${t1mLabel(cx, cy + 16, 'Car park', 'small')}`;
-  return `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4" class="t1m-bld"/>` + (f.vertical
+  if (f.t === 'car') return out(`<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="6" class="t1m-car"/>`, `<text x="${cx}" y="${cy - 2}" class="t1m-p">P</text>${t1mLabel(cx, cy + 16, 'Car park', 'small')}`);
+  return out(`<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4" class="t1m-bld"/>`, f.vertical
     ? `<text x="${cx}" y="${cy}" class="t1m-lab small" transform="rotate(-90 ${cx} ${cy})">${escapeHtml(f.label)}</text>`
     : t1mLabel(cx, cy, f.label));
 }
-function t1mLayer(list) {
+function t1mLayer(list, art) {
   const order = { river: 0, water: 0, area: 1, road: 2, bridge: 3, car: 4, houses: 4, bld: 5 };
-  return [...list].sort((a, b) => order[a.t] - order[b.t]).map(t1mFeature).join('');
+  return [...list].sort((a, b) => order[a.t] - order[b.t]).map(f => t1mFeature(f, art)).join('');
+}
+/* The same towns as pixel art from the Ninja Adventure tiles (CC0), one
+   picture per year on a 16-unit grid: grass, dirt roads, water, fields,
+   trees and buildings. Unchanged places come out the same in both years,
+   so the slider fades only what changed. Until the tiles have loaded the
+   vector map is drawn instead. */
+const T1M_TILES = ['Floor', 'Water', 'Nature', 'House', 'Field', 'Element'].map(n => `tiles/Tileset${n}.png`);
+function t1mArtReady() { return T1M_TILES.every(f => { const i = t1nImg(f).img; return i.complete && i.naturalWidth > 0; }); }
+function t1mArtLoad() { return Promise.all(T1M_TILES.map(f => t1nImg(f).img.decode().catch(() => {}))); }
+// Fields drawn as a patch: [column, row] of the 3 x 3 piece in TilesetField.
+const T1M_PATCH = { farm: [0, 0], park: [0, 3], field: [0, 6] };
+// Roof of a building, by the column of its house in TilesetHouse:
+// 0 orange, 4 beige (flat), 12 red tiles.
+const T1M_ROOF = { church: 12, school: 12, classrooms: 12, 'main building': 12, library: 12, 'train station': 12,
+  hospital: 4, 'sports hall': 4, 'community centre': 4, 'shopping centre': 4, supermarket: 4, hotel: 0, apartments: 0, cafeteria: 0 };
+function t1mArt(T, which) {
+  const key = '_art' + which;
+  if (T[key] || !t1mArtReady()) return T[key] || null;
+  const [F, Wt, N, H, Fd, E] = T1M_TILES.map(f => t1nImg(f).img), list = [...T.both, ...(which ? T.after : T.before)];
+  const cv = document.createElement('canvas'), x = cv.getContext('2d'), C = 38, R = 25, cells = new Map();
+  cv.width = 600; cv.height = 400;
+  x.imageSmoothingEnabled = false;
+  // Off the board counts as the nearest cell on it, so rivers and roads run off the edge.
+  const at = (c, r) => cells.get(Math.min(C - 1, Math.max(0, c)) + ',' + Math.min(R - 1, Math.max(0, r))) || 'g';
+  const rnd = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const tile = (img, tc, tr, px, py) => x.drawImage(img, tc * 16, tr * 16, 16, 16, px, py, 16, 16);
+  const each = fn => { for (let c = 0; c < C; c++) for (let r = 0; r < R; r++) fn(c, r, c * 16 + 8, r * 16 + 8); };
+  const inside = (f, px, py) => px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h;
+  const seg = (px, py, [ax, ay], [bx, by]) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(px - ax - t * dx, py - ay - t * dy); };
+  // Ground per cell: w water, S sea, s sand, d dirt, g grass.
+  list.forEach(f => each((c, r, px, py) => {
+    const v = f.t === 'water' ? ((px - f.x - f.w / 2) / (f.w / 2)) ** 2 + ((py - f.y - f.h / 2) / (f.h / 2)) ** 2 <= 1 && 'w'
+      : f.t === 'river' ? py >= f.y - 4 && py <= f.y + f.h + 4 && 'w'
+      : f.t === 'area' && f.kind === 'sea' ? inside(f, px, py) && 'S'
+      : f.t === 'area' && f.kind === 'beach' ? inside(f, px, py) && 's'
+      : f.t === 'car' ? inside(f, px, py) && 'd' : '';
+    if (v) cells.set(c + ',' + r, v);
+  }));
+  list.filter(f => f.t === 'road' && f.kind !== 'rail').forEach(f => {
+    const hw = f.kind === 'dual' ? 20 : f.kind === 'road' ? 16 : 12;
+    each((c, r, px, py) => { if (!/[wS]/.test(at(c, r)) && f.pts.slice(1).some((p, i) => seg(px, py, f.pts[i], p) <= hw)) cells.set(c + ',' + r, 'd'); });
+  });
+  const wet = (c, r) => /[wS]/.test(at(c, r)), dirt = (c, r) => at(c, r) === 'd';
+  each((c, r) => {
+    const v = at(c, r), k = rnd(c, r), px = c * 16, py = r * 16;
+    if (v === 'w' || v === 'S') tile(Wt, (!wet(c - 1, r) ? 0 : !wet(c + 1, r) ? 2 : 1), (v === 'S' ? 0 : 6) + (!wet(c, r - 1) ? 0 : !wet(c, r + 1) ? 2 : 1), px, py);
+    else if (v === 's') tile(F, k < 0.75 ? 0 : 1 + Math.floor((k - 0.75) * 16), 5, px, py);
+    else tile(F, k < 0.8 ? 0 : 1 + Math.floor((k - 0.8) * 20), 12, px, py);
+  });
+  // Farmland, parks and playing fields as rounded patches.
+  const nine = (img, ox, oy, f) => {
+    const cols = Math.max(2, Math.round(f.w / 16)), rows = Math.max(2, Math.round(f.h / 16)), x0 = Math.round(f.x + (f.w - cols * 16) / 2), y0 = Math.round(f.y + (f.h - rows * 16) / 2);
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) tile(img, ox + (i ? i < cols - 1 ? 1 : 2 : 0), oy + (j ? j < rows - 1 ? 1 : 2 : 0), x0 + i * 16, y0 + j * 16);
+  };
+  list.filter(f => f.t === 'area' && T1M_PATCH[f.kind]).forEach(f => nine(Fd, ...T1M_PATCH[f.kind], f));
+  // Dirt roads and car parks, edged with grass.
+  each((c, r) => {
+    if (!dirt(c, r)) return;
+    const n = dirt(c, r - 1), so = dirt(c, r + 1), w = dirt(c - 1, r), e = dirt(c + 1, r), px = c * 16, py = r * 16;
+    if (!(n && so && w && e)) tile(F, !w ? 0 : !e ? 2 : 1, 7 + (!n ? 0 : !so ? 2 : 1), px, py);
+    else if (!dirt(c + 1, r + 1)) tile(F, 5, 8, px, py); else if (!dirt(c - 1, r + 1)) tile(F, 6, 8, px, py);
+    else if (!dirt(c + 1, r - 1)) tile(F, 5, 9, px, py); else if (!dirt(c - 1, r - 1)) tile(F, 6, 9, px, py); else tile(F, 1, 8, px, py);
+  });
+  // Bridges and piers lie flat: planks, or pale stone for concrete.
+  const planks = (f, stone) => {
+    x.save(); x.beginPath(); x.rect(f.x, f.y, f.w, f.h); x.clip();
+    if (stone) { x.fillStyle = '#C9C4B8'; x.fillRect(f.x, f.y, f.w, f.h); } else for (let px = f.x; px < f.x + f.w; px += 16) for (let py = f.y; py < f.y + f.h; py += 16) tile(Wt, 5, 13, px, py);
+    x.restore(); x.strokeStyle = stone ? '#6E6A60' : '#5A3A22'; x.lineWidth = 2; x.strokeRect(f.x + 1, f.y + 1, f.w - 2, f.h - 2);
+  };
+  list.filter(f => f.t === 'bridge').forEach(f => planks(f, /concrete/i.test(f.label || '')));
+  list.filter(f => f.t === 'bld' && f.vertical).forEach(f => planks(f));
+  // Everything that stands, drawn from the back row to the front.
+  const props = [], spr = (img, sx, sy, w, h, fx, fy, dw, dh) => props.push([fy, () => x.drawImage(img, sx, sy, w, h, Math.round(fx - (dw || w) / 2), Math.round(fy - (dh || h)), dw || w, dh || h)]);
+  list.filter(f => f.t === 'area' && /forest|trees|park/.test(f.kind)).forEach(f => {
+    const step = f.kind === 'forest' ? 20 : f.kind === 'trees' ? 26 : 46;
+    for (let y = f.y + 30, row = 0; y <= f.y + f.h; y += step * 0.75, row++) for (let fx = f.x + 16 + (row % 2) * step / 2; fx <= f.x + f.w - 14; fx += step) {
+      const k = rnd(fx, y), art = f.kind === 'park' ? [96, 128] : k < 0.45 ? [32, 0] : k < 0.9 ? [0, 0] : [96, 128];
+      spr(N, art[0], art[1], 32, 32, fx + (k - 0.5) * 6, y);
+    }
+    if (f.kind === 'park') for (let i = 0; i < f.w * f.h / 700; i++) { const k = rnd(f.x + i, f.y - i), fl = [[0, 176], [16, 176], [48, 176]][i % 3]; spr(N, fl[0], fl[1], 16, 16, f.x + 10 + k * (f.w - 20), f.y + 18 + rnd(i, f.x) * (f.h - 22)); }
+  });
+  list.filter(f => f.t === 'area' && f.kind === 'farm').forEach(f => {
+    for (let y = f.y + 24; y < f.y + f.h - 6; y += 22) for (let fx = f.x + 14; fx < f.x + f.w - 10; fx += 16) spr(N, rnd(fx, y) < 0.5 ? 64 : 80, 160, 16, 16, fx, y);
+  });
+  list.filter(f => f.t === 'car').forEach(f => {
+    const cols = Math.max(1, Math.floor((f.w - 6) / 34)), rows = Math.max(1, Math.floor((f.h - 22) / 30));
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (rnd(f.x + i, f.y + j) < 0.7) spr(E, 0, 48, 32, 32, f.x + (i + 0.5) * f.w / cols, f.y + 30 + j * 30);
+  });
+  list.filter(f => f.t === 'houses').forEach(f => {
+    const n = f.n || Math.max(4, Math.round(f.w * f.h / 900)), cols = Math.ceil(Math.sqrt(n * f.w / f.h)), rows = Math.ceil(n / cols), cw = f.w / cols, ch = f.h / rows;
+    for (let i = 0; i < n; i++) { const c = i % cols, r = Math.floor(i / cols); spr(H, [0, 4, 12][Math.floor(rnd(f.x + c, f.y + r) * 3) % 3] * 16, 0, 64, 48, f.x + (c + 0.5) * cw, f.y + (r + 0.5) * ch + 12, 32, 24); }
+  });
+  list.filter(f => f.t === 'bld' && !f.vertical).forEach(f => {
+    const name = (f.label || '').toLowerCase();
+    // Shops and factories are whole sprites; anything else is a house
+    // stretched to its plot: roof edges, roof, then a wall with one door.
+    // Inner roof rows are cut from between the roof's edges, so a flat roof
+    // does not stripe.
+    const whole = /^(shop|café)$/.test(name) ? 16 : /factory/.test(name) ? 20 : null;
+    if (whole != null) {
+      const cols = Math.max(1, Math.floor(f.w / 60)), rows = Math.max(1, Math.floor(f.h / 46));
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) spr(H, whole * 16, 0, 64, 48, f.x + (i + 0.5) * f.w / cols, f.y + (j + 1) * f.h / rows);
+      return;
+    }
+    const roof = T1M_ROOF[name] != null ? T1M_ROOF[name] : [0, 4, 12][Math.floor(rnd(f.x, f.y) * 3) % 3];
+    const cols = Math.max(3, Math.round(f.w / 16)), rows = Math.max(3, Math.round(f.h / 16)), x0 = Math.round(f.x + (f.w - cols * 16) / 2), y0 = Math.round(f.y + (f.h - rows * 16) / 2);
+    props.push([y0 + rows * 16, () => { for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+      const last = j === rows - 1, sx = i === 0 ? 0 : i === cols - 1 ? 3 : last && i === Math.floor(cols / 2) ? 1 : 2;
+      x.drawImage(H, (roof + sx) * 16, j === 0 ? 0 : last ? 32 : j === rows - 2 ? 16 : 10, 16, 16, x0 + i * 16, y0 + j * 16, 16, 16);
+    } }]);
+  });
+  props.sort((a, b) => a[0] - b[0]).forEach(p => p[1]());
+  return (T[key] = cv.toDataURL());
 }
 function t1mCompass(T) {
   const [x, y] = T.compass || [570, 36];
@@ -27495,7 +27611,8 @@ function t1mCompass(T) {
 }
 // One year of a town, for Bài mẫu and the chart beside the Sinh tồn questions.
 function t1mOne(T, which) {
-  return `<svg viewBox="0 0 600 400" class="t1m-svg" role="img" aria-label="${escapeHtml(T.name + ' ' + T.years[which])}"><rect width="600" height="400" class="t1m-land"/>${t1mLayer([...T.both, ...(which ? T.after : T.before)])}${t1mCompass(T)}</svg>`;
+  const art = t1mArt(T, which);
+  return `<svg viewBox="0 0 600 400" class="t1m-svg${art ? ' t1m-pix' : ''}" role="img" aria-label="${escapeHtml(T.name + ' ' + T.years[which])}"><rect width="600" height="400" class="t1m-land"/>${art ? `<image href="${art}" width="600" height="400"/>` : ''}${t1mLayer([...T.both, ...(which ? T.after : T.before)], !!art)}${t1mCompass(T)}</svg>`;
 }
 function t1mPair(id) {
   const T = T1M_TOWNS.find(t => t.id === id);
@@ -27583,7 +27700,8 @@ function t1MapStart() {
   t1MapRender();
 }
 function t1MapRender() {
-  const g = _t1, T = g.T;
+  const g = _t1, T = g.T, a0 = t1mArt(T, 0), a1 = a0 && t1mArt(T, 1), art = !!a1;
+  if (!art) t1mArtLoad().then(() => { if (_t1 === g && t1mArtReady()) t1MapRender(); });
   t1Root().innerHTML = `
     <div class="lv-wrap t1-play t1m">
       <div class="t1-top">
@@ -27595,11 +27713,12 @@ function t1MapRender() {
       <div class="t1m-grid">
         <div class="t1m-stage">
           <div class="t1m-yearbig" id="m-year">${T.years[0]}</div>
-          <svg viewBox="0 0 600 400" class="t1m-svg t1m-play" id="m-svg" onclick="t1MapTap(event)">
+          <svg viewBox="0 0 600 400" class="t1m-svg t1m-play${art ? ' t1m-pix' : ''}" id="m-svg" onclick="t1MapTap(event)">
             <rect width="600" height="400" class="t1m-land"/>
-            <g>${t1mLayer(T.both)}</g>
-            <g id="m-before">${t1mLayer(T.before)}</g>
-            <g id="m-after" style="opacity:0">${t1mLayer(T.after)}</g>
+            ${art ? `<image href="${a0}" width="600" height="400"/><image id="m-after-art" href="${a1}" width="600" height="400" style="opacity:0"/>` : ''}
+            <g>${t1mLayer(T.both, art)}</g>
+            <g id="m-before">${t1mLayer(T.before, art)}</g>
+            <g id="m-after" style="opacity:0">${t1mLayer(T.after, art)}</g>
             <g id="m-marks"></g>
             ${t1mCompass(T)}
           </svg>
@@ -27630,6 +27749,8 @@ function t1MapSlide(t, animate) {
   const b = document.getElementById('m-before'), a = document.getElementById('m-after'), r = document.getElementById('m-range'), y = document.getElementById('m-year');
   if (!b) return;
   b.style.opacity = 1 - t; a.style.opacity = t;
+  const art = document.getElementById('m-after-art');
+  if (art) art.style.opacity = t;
   if (r && Math.abs(r.value - t * 100) > 0.5) r.value = Math.round(t * 100);
   y.textContent = g.T.years[t < 0.5 ? 0 : 1];
 }
