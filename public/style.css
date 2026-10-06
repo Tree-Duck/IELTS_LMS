@@ -8757,6 +8757,36 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1p-loop { fill: none; stroke: #1F8A4C; stroke-width: 2.5; stroke-dasharray: 7 5; }
 .t1p-looplab { font-size: 12px; font-weight: 700; fill: #1F8A4C; text-anchor: middle; paint-order: stroke; stroke: #FFFDF6; stroke-width: 4px; }
 .t1p-tip { margin: 0.5rem 0 0; padding: 0.5rem 0.8rem; border-radius: 12px; background: #FFFDF6; border: 2px solid #E8DDBE; line-height: 1.45; }
+/* Task 1 hub: the four-step path */
+.t1-path { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.4rem; margin: 2.6rem 0 1.4rem; padding: 0; counter-reset: none; }
+.t1-stop { position: relative; }
+.t1-stop:not(:last-child)::after { content: ''; position: absolute; top: 38px; left: calc(50% + 34px); width: calc(100% - 68px + 1.4rem); border-top: 4px dashed #C9BFA4; }
+.t1-stop.done:not(:last-child)::after { border-top-color: #1F8A4C; border-top-style: solid; }
+.t1-stop > button { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0 0.4rem 0.8rem; background: none; border: 0; font: inherit; color: inherit; text-align: center; cursor: pointer; }
+.t1-stop-icon { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: #FFFFFF; border: 3px solid #C9BFA4; font-size: 2rem; transition: transform 0.15s; }
+.t1-stop > button:hover .t1-stop-icon, .t1-stop > button:focus-visible .t1-stop-icon { transform: translateY(-3px); }
+.t1-stop.done .t1-stop-icon { border-color: #1F8A4C; background: #EAF6EE; }
+.t1-stop.cur .t1-stop-icon { border: 4px solid #5B3FD9; box-shadow: 0 0 0 7px rgba(91, 63, 217, 0.16); }
+.t1-stop-name { font-weight: 800; font-size: 1.05rem; color: #1E2B25; line-height: 1.2; }
+.t1-stop-name small { display: block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #5B655F; }
+.t1-stars { font-size: 1.15rem; letter-spacing: 0.1em; }
+.t1-stars i { font-style: normal; color: #D8D2C2; }
+.t1-stars i.on { color: #E5A52D; }
+.t1-stop-desc { font-size: 0.85rem; line-height: 1.4; color: #3E4A44; }
+.t1-stop-note { font-size: 0.8rem; font-weight: 700; color: #1F8A4C; }
+.t1-walker { position: absolute; top: -46px; left: calc(50% - 24px); width: 48px; height: 48px; background-size: 192px 336px; background-position: 0 0; image-rendering: pixelated; animation: t1-walk 0.9s steps(4) infinite; }
+@keyframes t1-walk { to { background-position: 0 -192px; } }
+@media (max-width: 720px) {
+  .t1-path { grid-template-columns: 1fr; gap: 0.9rem; margin-top: 1.2rem; }
+  .t1-stop > button { display: grid; grid-template-columns: 64px 1fr auto; grid-template-areas: 'i n s' 'i d d' 'i t t'; align-items: center; column-gap: 0.8rem; row-gap: 0.15rem; text-align: left; padding: 0.4rem 0; }
+  .t1-stop-icon { grid-area: i; width: 60px; height: 60px; font-size: 1.6rem; align-self: start; }
+  .t1-stop-name { grid-area: n; } .t1-stars { grid-area: s; } .t1-stop-desc { grid-area: d; } .t1-stop-note { grid-area: t; }
+  .t1-stop:not(:last-child)::after { top: 66px; left: 29px; width: 0; height: calc(100% - 60px); border-top: 0; border-left: 4px dashed #C9BFA4; }
+  .t1-stop.done:not(:last-child)::after { border-left: 4px solid #1F8A4C; }
+  .t1-walker { top: -6px; left: 34px; width: 40px; height: 40px; background-size: 160px 280px; }
+  @keyframes t1-walk { to { background-position: 0 -160px; } }
+}
+@media (prefers-reduced-motion: reduce) { .t1-walker { animation: none; } }
 /* Process: the conveyor (man-made) and the wheel (natural cycle) */
 .t1p-line { position: relative; display: flex; padding: 0.4rem 0.2rem 2.6rem; margin-bottom: 0.6rem; border-radius: 14px; background: #F4F1E8; border: 2px solid #E8DDBE; --x: 0%; }
 .t1p-line .t1p-node { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }

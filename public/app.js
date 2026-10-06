@@ -24400,6 +24400,39 @@ function t1SetLevel(id) {
   tsSfx('equip');
   t1Hub();
 }
+// Stars a student has earned at a step of this block, kept on this device.
+function t1StarKey(step) { return 't1Stars_' + step + '_' + _t1Block + '_' + walWho(); }
+function t1GetStars(step) { try { return +localStorage.getItem(t1StarKey(step)) || 0; } catch (e) { return 0; } }
+function t1AddStars(step, n) { if (n > t1GetStars(step)) try { localStorage.setItem(t1StarKey(step), String(n)); } catch (e) {} }
+// The four steps as one path: Flashcard, Mưa pattern, Gõ nghĩa, the games.
+// The hero stands at the first step without a star yet.
+function t1PathHtml(b) {
+  const k = t1Known(), all = t1AllCards(), known = all.filter(c => k.has(c.en)).length, share = all.length ? known / all.length : 0;
+  const played = b.games.filter(id => t1GetBest(id) > 0).length;
+  const stops = [
+    { icon: '🃏', name: 'Flashcard', go: 't1FcPick()', stars: share >= 0.9 ? 3 : share >= 0.6 ? 2 : share >= 0.3 ? 1 : 0,
+      desc: `${b.fc} ${t1FcDeckList().filter(d => d.cards.length).length} bộ thẻ.`, note: `✓ ${known}/${all.length} thẻ đã nhớ` },
+    { icon: '🌧️', name: 'Mưa pattern', go: "t1RainStart('review')", stars: t1GetStars('rain'),
+      desc: 'Hình rơi xuống, bắn bằng đúng cụm vừa học.', note: 'Qua hết các đợt để lấy sao' },
+    { icon: '⌨️', name: 'Gõ nghĩa', go: 't1TypeStart()', stars: t1GetStars('type'),
+      desc: `${t1Words().length} cụm ${_t1Block === 'dyn' ? 'tả xu hướng' : 'so sánh, bản đồ, quy trình'}. Nghĩa tiếng Việt rơi xuống, gõ cụm tiếng Anh.`, note: `🏆 ${t1GetBest('type')}` },
+    { icon: '🎮', name: 'Trò chơi', go: "document.getElementById('t1-games').scrollIntoView({ behavior: 'smooth' })", stars: Math.min(3, Math.floor(played / b.games.length * 3)),
+      desc: 'Dùng các cụm đã ôn trong biểu đồ thật.', note: `${played}/${b.games.length} trò đã chơi` },
+  ];
+  let at = stops.findIndex(x => !x.stars);
+  if (at < 0) at = stops.findIndex(x => x.stars < 3);
+  if (at < 0) at = stops.length - 1;
+  const hero = t1nHeroName(t1hChosen());
+  return `<ol class="t1-path">${stops.map((x, i) => `<li class="t1-stop${x.stars ? ' done' : ''}${i === at ? ' cur' : ''}">
+      <button onclick="${x.go}">
+        ${i === at ? `<span class="t1-walker" style="background-image:url('/img/t1/ninja/hero/${hero}.png')" aria-hidden="true"></span>` : ''}
+        <span class="t1-stop-icon">${x.icon}</span>
+        <span class="t1-stop-name"><small>Bước ${i + 1}</small>${x.name}</span>
+        <span class="t1-stars" aria-label="${x.stars} trên 3 sao">${[0, 1, 2].map(j => `<i class="${j < x.stars ? 'on' : ''}">★</i>`).join('')}</span>
+        <span class="t1-stop-desc">${escapeHtml(x.desc)}</span>
+        <span class="t1-stop-note">${escapeHtml(x.note)}</span>
+      </button></li>`).join('')}</ol>`;
+}
 function t1DeckKnown() { const k = t1Known(), all = t1AllCards(); return all.filter(c => k.has(c.en)).length + '/' + all.length; }
 function t1GameCard(id, warm) {
   const g = T1_GAMES[id];
@@ -24435,26 +24468,8 @@ function t1Hub() {
           <ul><li>${escapeHtml(b.lv[l.id])}</li></ul>
         </button>`).join('')}
       </div>
-      <h3 class="t1-sec">📚 Ôn từ vựng trước <small>làm trước khi chơi</small></h3>
-      <div class="lv-modes t1-modes t1-modes--steps">
-        <button class="lv-mode t1-mode t1-mode--step" onclick="t1FcPick()">
-          <span class="lv-mode-icon">🃏</span>
-          <span class="lv-mode-name">Bước 1 · Flashcard</span>
-          <span class="lv-mode-desc">${escapeHtml(b.fc)} ${t1FcDeckList().filter(d => d.cards.length).length} bộ thẻ, chọn bộ rồi lật thẻ.</span>
-          <span class="lv-mode-best">✓ ${t1DeckKnown()} thẻ đã nhớ</span>
-        </button>
-        <button class="lv-mode t1-mode t1-mode--step" onclick="t1RainStart('review')">
-          <span class="lv-mode-icon">🌧️</span>
-          <span class="lv-mode-name">Bước 2 · Ôn lại bằng Mưa pattern</span>
-          <span class="lv-mode-desc">Hình rơi xuống, bắn bằng đúng cụm vừa học. Mỗi đợt 6 hình, hết đợt thì đổi cụm ở các nút số.</span>
-        </button>
-        <button class="lv-mode t1-mode t1-mode--step" onclick="t1TypeStart()">
-          <span class="lv-mode-icon">⌨️</span>
-          <span class="lv-mode-name">Bước 3 · Gõ nghĩa</span>
-          <span class="lv-mode-desc">${t1Words().length} cụm ${_t1Block === 'dyn' ? 'tả xu hướng' : 'so sánh, bản đồ, quy trình'}. Nghĩa tiếng Việt rơi xuống, gõ cụm tiếng Anh để bắn.</span>
-          <span class="lv-mode-best">🏆 ${t1GetBest('type')}</span>
-        </button>
-      </div>
+      <h3 class="t1-sec">🗺️ Hành trình <small>đi lần lượt 4 trạm, mỗi trạm tối đa 3 sao</small></h3>
+      ${t1PathHtml(b)}
       <h3 class="t1-sec" id="t1-games">🎮 Bước 4 · Trò chơi</h3>
       <div class="lv-modes t1-modes">${b.games.map(id => t1GameCard(id)).join('')}</div>
       <h3 class="t1-sec">📖 Bài mẫu <small>${T1_SAMPLES.filter(x => x.block === _t1Block).length} đề, mỗi đề một bài</small></h3>
@@ -24587,7 +24602,7 @@ function t1Finish(g, game, writeType, opts) {
       </div>
       ${opts.list || (g.misses.length ? `<div class="t1-review"><div class="t1-review-title">Xem lại câu sai</div>${g.misses.map(m => `<div class="t1-review-item">${m}</div>`).join('')}</div>` : '<div class="t1-review-none">Không sai câu nào. Thử lên cấp tiếp theo nhé!</div>')}
       <div class="t1-result-btns">
-        ${opts.review ? `<button class="vb-start-btn" onclick="t1Hub(); setTimeout(() => document.getElementById('t1-games')?.scrollIntoView({ behavior: 'smooth' }), 50)">🎮 Bước 3 · Vào trò chơi →</button>
+        ${opts.review ? `<button class="vb-start-btn" onclick="t1TypeStart()">⌨️ Bước 3 · Gõ nghĩa →</button>
         <button class="vb-secondary-btn" onclick="t1RainStart('review')">↺ Ôn lại lần nữa</button>` : `<button class="vb-start-btn" onclick="${meta.start}">↺ Chơi lại</button>`}
         <button class="vb-secondary-btn" onclick="t1GoWrite('${writeType}')">✍️ Áp dụng: viết một đề ${T1_WRITE_LABEL[writeType] || 'Task 1'}</button>
       </div>
@@ -26123,6 +26138,8 @@ function t1RainOver(cleared) {
     if (_t1 !== g) return;
     const list = t1RainAnswers(g);
     if (g.review) {
+      // A cleared review earns a star for each life still left.
+      if (cleared) t1AddStars('rain', g.lives);
       t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Ôn xong ${g.covered.size} cụm · ${g.kills} hình bắn hạ` : `${g.kills} hình bắn hạ · hết mạng ở đợt ${g.wave}`, icon: cleared ? '✅' : '💪', good: !!cleared, review: true, list });
       return;
     }
@@ -26997,6 +27014,7 @@ function t1TypeLand(d) {
   t1TypeHud();
   if (g.lives <= 0) {
     g.stop();
+    t1AddStars('type', g.kills >= 30 ? 3 : g.kills >= 20 ? 2 : g.kills >= 10 ? 1 : 0);
     setTimeout(() => { if (_t1 === g) t1Finish(g, 'type', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `${g.kills} cụm gõ đúng · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '⌨️', good: g.kills >= 20 }); }, 1500);
   }
 }
