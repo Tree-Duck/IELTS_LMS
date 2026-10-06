@@ -24413,9 +24413,9 @@ function t1PathHtml(b) {
     { icon: '🃏', name: 'Flashcard', go: 't1FcPick()', stars: share >= 0.9 ? 3 : share >= 0.6 ? 2 : share >= 0.3 ? 1 : 0,
       desc: `${b.fc} ${t1FcDeckList().filter(d => d.cards.length).length} bộ thẻ.`, note: `✓ ${known}/${all.length} thẻ đã nhớ` },
     { icon: '🌧️', name: 'Mưa pattern', go: "t1RainStart('review')", stars: t1GetStars('rain'),
-      desc: 'Hình rơi xuống, bắn bằng đúng cụm vừa học.', note: 'Qua hết các đợt để lấy sao' },
+      desc: 'Hình rơi xuống, bắn bằng đúng cụm vừa học. 3 đợt rồi tới boss.', note: 'Hạ boss: mỗi ❤️ còn lại là 1 sao' },
     { icon: '⌨️', name: 'Gõ nghĩa', go: 't1TypeStart()', stars: t1GetStars('type'),
-      desc: `${t1Words().length} cụm ${_t1Block === 'dyn' ? 'tả xu hướng' : 'so sánh, bản đồ, quy trình'}. Nghĩa tiếng Việt rơi xuống, gõ cụm tiếng Anh.`, note: `🏆 ${t1GetBest('type')}` },
+      desc: `${t1Words().length} cụm ${_t1Block === 'dyn' ? 'tả xu hướng' : 'so sánh, bản đồ, quy trình'}. Nghĩa tiếng Việt rơi xuống, gõ cụm tiếng Anh. 3 đợt rồi tới boss.`, note: `Hạ boss: mỗi ❤️ còn lại là 1 sao · 🏆 ${t1GetBest('type')}` },
     { icon: '🎮', name: 'Trò chơi', go: "document.getElementById('t1-games').scrollIntoView({ behavior: 'smooth' })", stars: Math.min(3, Math.floor(played / b.games.length * 3)),
       desc: 'Dùng các cụm đã ôn trong biểu đồ thật.', note: `${played}/${b.games.length} trò đã chơi` },
   ];
@@ -25905,7 +25905,51 @@ const T1_RAIN_SET = {
       'double', 'halve', 'overtake', 'converge', 'diverge', 'parallel'],
 };
 const T1_RAIN_CFG = { a: { n: 4, spawn: 2.6, speed: 34 }, d: { n: 5, spawn: 2.2, speed: 40 }, l: { n: 6, spawn: 1.9, speed: 46 } };
-const T1_RAIN_REVIEW_WAVE = 6;
+const T1_RAIN_REVIEW_WAVE = 8;
+/* After three waves a Ninja boss comes down holding a prompt: a chart to
+   name (Mưa pattern) or a meaning to type (Gõ nghĩa). A right answer takes
+   one of its hearts and brings a new prompt, a wrong one gives a heart
+   back, so it takes at least five different right phrases to beat it. */
+const T1_BOSS_HP = 5;
+function t1BossEnter(g, arenaId) {
+  const B = t1Pick(T1N_BOSSES);
+  g.boss = { B, hp: T1_BOSS_HP, used: new Set() };
+  document.getElementById(arenaId).insertAdjacentHTML('beforeend', `<div class="t1-boss" id="t1-boss">
+    <div class="t1-boss-who"><canvas aria-hidden="true"></canvas><b>👹 ${escapeHtml(B.name)}</b><span class="t1-boss-hp" id="t1-boss-hp"></span></div>
+    <div class="t1-boss-card" id="t1-boss-card"></div></div>`);
+  t1BossHp(g);
+  tsSfx('level');
+}
+function t1BossHp(g) {
+  const el = document.getElementById('t1-boss-hp');
+  if (el) el.innerHTML = [...Array(T1_BOSS_HP)].map((_, i) => `<i class="${i < g.boss.hp ? 'on' : ''}"></i>`).join('');
+}
+function t1BossFx(g, fx) {
+  const el = document.getElementById('t1-boss');
+  if (!el) return;
+  el.classList.remove('hurt', 'heal'); void el.offsetWidth; el.classList.add(fx);
+  t1BossHp(g);
+}
+// True once the last heart is gone.
+function t1BossHit(g) {
+  g.boss.hp--;
+  t1BossFx(g, 'hurt');
+  if (!g.boss.hp) document.getElementById('t1-boss')?.classList.add('down');
+  return !g.boss.hp;
+}
+function t1BossHeal(g) { g.boss.hp = Math.min(T1_BOSS_HP, g.boss.hp + 1); t1BossFx(g, 'heal'); }
+function t1BossDraw(g, ts) {
+  const cv = document.querySelector('#t1-boss canvas'), B = g.boss && g.boss.B;
+  if (!cv) return;
+  const e = t1nImg(`boss/${B.id}/${B.idle[0]}`);
+  if (!e.ready) return;
+  const n = B.idle[1], fw = e.img.width / n, [y0, y1] = T1N_BOX[B.id] || [0, e.img.height];
+  if (cv.width !== fw) { cv.width = fw; cv.height = y1 - y0; }
+  const c = cv.getContext('2d');
+  c.imageSmoothingEnabled = false;
+  c.clearRect(0, 0, cv.width, cv.height);
+  c.drawImage(e.img, (Math.floor(ts / 150) % n) * fw, y0, fw, y1 - y0, 0, 0, fw, y1 - y0);
+}
 function t1RainClasses() { return T1_RAIN_SET[_t1Lv] || Object.keys(T1_SLOPE).filter(k => T1_SLOPE[k][_t1Lv]); }
 // A chart small enough to fall: fixed 0..1 scale so "slightly" and "sharply"
 // keep their size. ys is one line, or [A, B] for two lines. opts.lab prints
@@ -25976,7 +26020,7 @@ function t1RainRender() {
   const total = new Set(g.src.keys.map(g.src.phrase)).size;
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow t1-play t1-rain">
-      ${g.review ? `<div class="t1-step-tag">Bước 2 · Ôn lại nhanh · bắn ${T1_RAIN_REVIEW_WAVE} hình mỗi đợt, hết đợt thì đổi cụm · <span id="rn-cover">${g.covered.size}/${total}</span> cụm</div>` : ''}
+      ${g.review ? `<div class="t1-step-tag">Bước 2 · Ôn lại nhanh · 3 đợt, mỗi đợt ${T1_RAIN_REVIEW_WAVE} hình, rồi hạ boss · <span id="rn-cover">${g.covered.size}/${total}</span> cụm</div>` : ''}
       <div class="t1-top">
         <button class="btn-back-plain" onclick="t1Hub()">← ${T1_BLOCKS[_t1Block].name}</button>
         <span class="t1-stat" id="rn-lives">${'❤️'.repeat(g.lives)}${'🖤'.repeat(3 - g.lives)}</span>
@@ -25987,7 +26031,7 @@ function t1RainRender() {
       </div>
       <div class="t1-arena" id="rn-arena"><div class="t1-ground"></div><div class="t1-arena-msg hidden" id="rn-msg"></div></div>
       <div class="t1-shoot" id="rn-btns">${t1RainBtns()}</div>
-      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ hình thấp nhất khớp với cụm đó. Bấm cụm không có hình nào khớp là mất 1 ❤️.</div>
+      <div class="t1-hint">Bấm phím 1–${g.set.length} hoặc chạm cụm từ. Mỗi lần bắn hạ hình thấp nhất khớp với cụm đó. Bấm cụm không có hình nào khớp là mất 1 ❤️. Sau 3 đợt, boss cầm một biểu đồ: bấm đúng cụm để trừ máu boss, bấm sai thì boss hồi máu và em mất 1 ❤️.</div>
     </div>`;
 }
 function t1RainBtns() {
@@ -26030,7 +26074,8 @@ function t1RainTick(ts) {
     if (!arena) { g.stop(); return; }
     const floor = arena.clientHeight - 66;
     g.spawnIn -= dt;
-    if (g.spawnIn <= 0 && g.drops.length < 6) { t1RainSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.8, 1.2); }
+    if (g.boss) t1BossDraw(g, ts);
+    else if (g.spawnIn <= 0 && g.drops.length < 6) { t1RainSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.8, 1.2); }
     for (const d of g.drops.slice()) {
       d.y += g.speed * dt;
       d.el.style.transform = `translateY(${d.y}px)`;
@@ -26061,6 +26106,7 @@ function t1RainLand(d) {
 function t1RainShoot(i) {
   const g = _t1;
   if (!g || g.game !== 'rain' || g.paused || g.over || i < 0 || i >= g.set.length) return;
+  if (g.boss) { t1RainBossShoot(i); return; }
   const ph = g.src.phrase(g.set[i]);
   const hit = g.drops.filter(d => g.src.phrase(d.k) === ph).sort((a, b) => b.y - a.y)[0];
   const btn = document.querySelectorAll('#rn-btns .t1-shot')[i];
@@ -26090,7 +26136,7 @@ function t1RainShoot(i) {
 function t1RainWave() {
   const g = _t1;
   const total = new Set(g.src.keys.map(g.src.phrase)).size;
-  if (g.review && g.covered.size >= total) { t1RainOver(true); return; }
+  if (g.wave >= 3 || (g.review && g.covered.size >= total)) { t1RainBoss(); return; }
   g.wave++;
   if (!g.review) { g.speed *= 1.12; g.spawnEvery = Math.max(0.8, g.spawnEvery * 0.9); }
   // Drops already falling keep their phrase on a button until they are gone.
@@ -26103,11 +26149,66 @@ function t1RainWave() {
   const m = document.getElementById('rn-msg');
   if (m) { m.textContent = g.review ? `Đợt ${g.wave} · cụm mới!` : `Đợt ${g.wave} · nhanh hơn, cụm mới!`; m.classList.remove('hidden'); setTimeout(() => m.classList.add('hidden'), 1400); }
 }
+function t1RainBoss() {
+  const g = _t1;
+  g.drops.forEach(d => t1RainRemove(d, 'hit'));
+  t1BossEnter(g, 'rn-arena');
+  t1RainBossNext();
+  t1RainHud();
+  const m = document.getElementById('rn-msg');
+  if (m) { m.textContent = '👹 Boss! Bấm đúng cụm cho biểu đồ boss đang cầm.'; m.classList.remove('hidden'); clearTimeout(g.msgT); g.msgT = setTimeout(() => m.classList.add('hidden'), 1800); }
+}
+// The boss holds the chart of a button not yet beaten.
+function t1RainBossNext() {
+  const g = _t1, b = g.boss, left = g.set.filter(k => !b.used.has(g.src.phrase(k)));
+  b.k = t1Pick(left.length ? left : g.set);
+  document.getElementById('t1-boss-card').innerHTML = `<div class="t1-drop t1-boss-pic">${g.src.draw(b.k)}</div>`;
+}
+function t1RainBossShoot(i) {
+  const g = _t1, b = g.boss, k = g.set[i], ph = g.src.phrase(k), btn = document.querySelectorAll('#rn-btns .t1-shot')[i];
+  if (!b.hp) return;
+  if (ph !== g.src.phrase(b.k)) {
+    g.combo = 0;
+    g.lives--;
+    t1RainLog(k).wrong++;
+    tsSfx('wrong');
+    if (btn) { btn.classList.remove('no'); void btn.offsetWidth; btn.classList.add('no'); }
+    t1BossHeal(g);
+    const m = document.getElementById('rn-msg');
+    if (m && g.lives > 0) { m.textContent = `Biểu đồ này không phải "${ph}" · boss hồi máu · −1 ❤️`; m.classList.remove('hidden'); clearTimeout(g.msgT); g.msgT = setTimeout(() => m.classList.add('hidden'), 1500); }
+    t1RainHud();
+    if (g.lives <= 0) t1RainOver();
+    return;
+  }
+  t1RainLog(k).hit++;
+  g.kills++; g.right++; g.combo++;
+  g.score += 20 + Math.min(g.combo - 1, 8) * 2;
+  g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+  tsSfx('kill');
+  if (btn) { btn.classList.remove('ok'); void btn.offsetWidth; btn.classList.add('ok'); }
+  b.used.add(ph);
+  if (t1BossHit(g)) { g.score += 50; t1RainHud(); t1RainOver(true); return; }
+  t1RainSwap(i);
+  t1RainBossNext();
+  t1RainHud();
+}
+// A beaten phrase leaves its button to one the boss has not used.
+function t1RainSwap(i) {
+  const g = _t1, others = g.set.filter((_, j) => j !== i), taken = new Set([...others.map(g.src.phrase), ...g.boss.used]);
+  const cands = t1Shuffle(g.src.keys.filter(k => !taken.has(g.src.phrase(k)) && !others.some(x => t1Clash(x, k))));
+  const k = cands.find(x => !g.covered.has(g.src.phrase(x))) || cands[0];
+  if (!k) return;
+  g.set[i] = k;
+  g.covered.add(g.src.phrase(k));
+  document.getElementById('rn-btns').innerHTML = t1RainBtns();
+  const cov = document.getElementById('rn-cover');
+  if (cov) cov.textContent = `${g.covered.size}/${new Set(g.src.keys.map(g.src.phrase)).size}`;
+}
 function t1RainHud() {
   const g = _t1, $ = id => document.getElementById(id);
   if (!$('rn-score')) return;
   $('rn-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
-  $('rn-wave').textContent = g.wave;
+  $('rn-wave').textContent = g.boss ? 'boss' : g.wave;
   $('rn-score').textContent = g.score;
   $('rn-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
 }
@@ -26138,13 +26239,13 @@ function t1RainOver(cleared) {
     if (_t1 !== g) return;
     const list = t1RainAnswers(g);
     if (g.review) {
-      // A cleared review earns a star for each life still left.
+      // Beating the boss earns a star for each life still left.
       if (cleared) t1AddStars('rain', g.lives);
-      t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Ôn xong ${g.covered.size} cụm · ${g.kills} hình bắn hạ` : `${g.kills} hình bắn hạ · hết mạng ở đợt ${g.wave}`, icon: cleared ? '✅' : '💪', good: !!cleared, review: true, list });
+      t1Finish(g, 'rain', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: cleared ? `Hạ ${g.boss.B.name} · ôn ${g.covered.size} cụm` : `${g.kills} hình bắn hạ · hết mạng ở ${g.boss ? 'trận boss' : 'đợt ' + g.wave}`, icon: cleared ? '🏆' : '💪', good: !!cleared, review: true, list });
       return;
     }
-    t1Finish(g, 'rain', 'line_graph', { big: `${g.kills} biểu đồ bắn hạ · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: g.kills >= 20, list });
-  }, cleared ? 300 : 700);
+    t1Finish(g, 'rain', 'line_graph', { big: cleared ? `Hạ ${g.boss.B.name} · ${g.kills} biểu đồ bắn hạ` : `${g.kills} biểu đồ bắn hạ · hết mạng ở ${g.boss ? 'trận boss' : 'đợt ' + g.wave}`, icon: cleared ? '🏆' : g.kills >= 15 ? '👏' : '💪', good: !!cleared, list });
+  }, cleared ? 1100 : 700);
 }
 
 /* ── Dynamic · Rắn săn mồi ────────────────────────────────────────────────
@@ -26821,7 +26922,7 @@ function t1TypeMask(en, lv) {
 function t1TypeStart() {
   t1Leave();
   const cfg = T1_TYPE_CFG[_t1Lv];
-  const g = _t1 = { game: 'type', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, kills: 0, wave: 0,
+  const g = _t1 = { game: 'type', cfg, score: 0, combo: 0, right: 0, coins: 0, misses: [], lives: 3, kills: 0, wave: 0, seen: [],
     deck: t1Shuffle(t1Words()), di: 0, bank: [], queue: [], drops: [], spawnIn: 0, spawnEvery: cfg.spawn, speed: cfg.speed,
     between: 0, paused: false, over: false, last: 0, id: 0, lockId: 0, off: false };
   g.keyPick = () => {};
@@ -26847,7 +26948,7 @@ function t1TypeStart() {
           <div class="t1-type-bar"><input id="ty-in" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" placeholder="Gõ cụm tiếng Anh…" aria-label="Gõ cụm tiếng Anh" oninput="t1TypeInput()" onkeydown="t1TypeKey(event)"></div>
         </div>
       </div>
-      <div class="t1-hint">Nhìn nghĩa tiếng Việt, gõ cụm tiếng Anh trong bảng. Gõ sai thì bong bóng mở thêm gợi ý. Esc để xoá.</div>
+      <div class="t1-hint">Nhìn nghĩa tiếng Việt, gõ cụm tiếng Anh trong bảng. Gõ sai thì bong bóng mở thêm gợi ý. Esc để xoá. Sau 3 đợt, boss cầm một nghĩa: gõ đúng để trừ máu boss, Enter sai thì boss hồi máu.</div>
     </div>`;
   tsSfx('equip');
   t1TypeWave();
@@ -26862,6 +26963,7 @@ function t1TypeWave() {
   const n = Math.min(g.cfg.bank, g.deck.length);
   if (g.di + n > g.deck.length) { g.deck = t1Shuffle(t1Words()); g.di = 0; }
   g.bank = g.deck.slice(g.di, g.di + n).map(w => ({ w, st: '' }));
+  g.seen.push(...g.bank);
   g.di += n;
   g.queue = t1Shuffle(g.bank);
   g.spawnIn = 1.4;
@@ -26872,9 +26974,61 @@ function t1TypeWave() {
 function t1TypeBank() {
   const g = _t1, el = document.getElementById('ty-bank');
   if (!el) return;
+  if (g.boss) {
+    el.innerHTML = `<div class="t1-tb-h">👹 Boss <small>cụm đã gặp</small></div>` + g.boss.pool.slice().sort((a, b) => a.en.localeCompare(b.en))
+      .map(w => `<span class="t1-tb${g.boss.won.has(w.en) ? ' ok' : ''}">${g.boss.won.has(w.en) ? '✓ ' : ''}${escapeHtml(w.en)}</span>`).join('');
+    return;
+  }
   const done = g.bank.filter(b => b.st).length;
   el.innerHTML = `<div class="t1-tb-h">📋 Đợt ${g.wave} <small>${done}/${g.bank.length}</small></div>` +
     g.bank.slice().sort((a, b) => a.w.en.localeCompare(b.w.en)).map(b => `<span class="t1-tb${b.st ? ' ' + b.st : ''}">${b.st === 'ok' ? '✓ ' : b.st === 'no' ? '✗ ' : ''}${escapeHtml(b.w.en)}</span>`).join('');
+}
+// The boss asks first for the phrases that landed in the waves.
+function t1TypeBoss() {
+  const g = _t1;
+  t1BossEnter(g, 'ty-arena');
+  g.boss.pool = [...g.seen.filter(b => b.st === 'no'), ...t1Shuffle(g.seen.filter(b => b.st !== 'no'))].map(b => b.w);
+  g.boss.won = new Set();
+  t1TypeBank();
+  t1TypeHud();
+  t1TypeMsg('👹 Boss! Gõ cụm tiếng Anh cho nghĩa boss đang cầm.', 1800);
+  t1TypeBossNext();
+}
+function t1TypeBossNext() {
+  const g = _t1, b = g.boss;
+  const w = b.pool.find(x => !b.used.has(x.en)) || t1Shuffle(t1Words()).find(x => !b.used.has(x.en)) || b.pool[0];
+  b.used.add(w.en);
+  Object.assign(b, { w, hint: 1, answers: [w.en, ...w.alt].map(t1TypeNorm), syn: t1SynVariants(w.en), missed: false });
+  document.getElementById('t1-boss-card').innerHTML = `<span class="t1-boss-vi">${escapeHtml(w.vi)}</span><span class="t1-boss-hint" id="t1-boss-hint">${t1TypeMask(w.en, 1)}</span>`;
+}
+function t1TypeBossKey(v, raw) {
+  const g = _t1, b = g.boss;
+  if (b.syn.includes(v)) { t1TypeMsg(`“${raw}” đúng nghĩa, nhưng boss cần từ khác. Nhìn chữ cái gợi ý.`, 2600); return; }
+  g.combo = 0;
+  b.hint++;
+  document.getElementById('t1-boss-hint').textContent = t1TypeMask(b.w.en, b.hint);
+  if (!b.missed) { b.missed = true; g.misses.push(`<div class="t1-review-line"><b>${escapeHtml(b.w.en)}</b> · ${escapeHtml(b.w.vi)}<br><i>${escapeHtml(b.w.ex)}</i></div>`); }
+  t1Shake(document.getElementById('ty-in'));
+  tsSfx('wrong');
+  t1BossHeal(g);
+  t1TypeHud();
+}
+function t1TypeBossHit() {
+  const g = _t1, b = g.boss, inp = document.getElementById('ty-in');
+  inp.value = '';
+  g.kills++; g.right++; g.combo++;
+  g.score += 20 + Math.min(g.combo - 1, 8) * 2 + (b.hint > 1 ? 0 : 10);
+  g.coins += T1_LEVELS[_t1Lv].coin * walMult();
+  b.won.add(b.w.en);
+  tsSfx('kill');
+  t1TypeBank();
+  t1TypeHud();
+  if (!t1BossHit(g)) { t1TypeBossNext(); return; }
+  g.score += 50;
+  g.stop();
+  // Beating the boss earns a star for each life still left.
+  t1AddStars('type', g.lives);
+  setTimeout(() => { if (_t1 === g) t1Finish(g, 'type', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `Hạ ${b.B.name} · ${g.kills} cụm gõ đúng`, icon: '🏆', good: true }); }, 1100);
 }
 function t1TypeMsg(text, ms) {
   const m = document.getElementById('ty-msg');
@@ -26912,9 +27066,10 @@ function t1TypeTick(ts) {
     const arena = document.getElementById('ty-arena');
     if (!arena) { g.stop(); return; }
     const floor = arena.clientHeight - 60;
-    if (g.between > 0) {
+    if (g.boss) t1BossDraw(g, ts);
+    else if (g.between > 0) {
       g.between -= dt;
-      if (g.between <= 0) t1TypeWave();
+      if (g.between <= 0) { if (g.wave >= 3) t1TypeBoss(); else t1TypeWave(); }
     } else {
       g.spawnIn -= dt;
       if (g.spawnIn <= 0 && g.queue.length && g.drops.length < 4) { t1TypeSpawn(); g.spawnIn = g.spawnEvery * t1Rand(0.85, 1.15); }
@@ -26946,6 +27101,10 @@ function t1TypeHint(d) {
 function t1TypeKey(e) {
   const inp = e.target;
   if (e.key === 'Escape') { inp.value = ''; t1TypeInput(); }
+  else if (e.key === 'Enter' && t1TypeNorm(inp.value) && _t1 && _t1.boss) {
+    if (_t1.boss.hp) t1TypeBossKey(t1TypeNorm(inp.value), inp.value.trim());
+    inp.value = '';
+  }
   else if (e.key === 'Enter' && t1TypeNorm(inp.value)) {
     // A synonym of a falling answer is not a mistake; anything else that
     // shoots nothing counts as a wrong try.
@@ -26975,6 +27134,7 @@ function t1TypeInput() {
   const g = _t1, inp = document.getElementById('ty-in');
   if (!g || g.game !== 'type' || !inp) return;
   const v = t1TypeNorm(inp.value);
+  if (g.boss) { if (g.boss.hp && g.boss.answers.includes(v)) t1TypeBossHit(); return; }
   const lowest = arr => arr.sort((a, b) => b.y - a.y)[0];
   g.drops.forEach(d => d.el.classList.remove('lock'));
   if (!v) { g.off = false; g.lockId = 0; return; }
@@ -27014,7 +27174,6 @@ function t1TypeLand(d) {
   t1TypeHud();
   if (g.lives <= 0) {
     g.stop();
-    t1AddStars('type', g.kills >= 30 ? 3 : g.kills >= 20 ? 2 : g.kills >= 10 ? 1 : 0);
     setTimeout(() => { if (_t1 === g) t1Finish(g, 'type', _t1Block === 'dyn' ? 'line_graph' : 'map', { big: `${g.kills} cụm gõ đúng · đợt ${g.wave}`, icon: g.kills >= 30 ? '🏆' : g.kills >= 15 ? '👏' : '⌨️', good: g.kills >= 20 }); }, 1500);
   }
 }
@@ -27022,7 +27181,7 @@ function t1TypeHud() {
   const g = _t1, $ = id => document.getElementById(id);
   if (!$('ty-score')) return;
   $('ty-lives').textContent = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(3 - Math.max(0, g.lives));
-  $('ty-wave').textContent = g.wave;
+  $('ty-wave').textContent = g.boss ? 'boss' : g.wave;
   $('ty-score').textContent = g.score;
   $('ty-combo').textContent = g.combo >= 2 ? '🔥 x' + g.combo : '';
 }
@@ -28954,7 +29113,7 @@ const T1N_BOSSES = [
   { id: 'GiantSpirit', name: 'Hồn ma khổng lồ', idle: ['Idle.png', 5], sc: 3, kind: 'laser', say: 'Vạch đỏ mảnh là tia laser, bước ra khỏi vạch.' },
   { id: 'DemonCyclop', name: 'Quỷ một mắt', idle: ['Idle.png', 5], sc: 3, kind: 'charge', say: 'Vạch đỏ là đường nó lao tới, né sang bên.' },
   { id: 'GiantRacoon', name: 'Gấu mèo khổng lồ', idle: ['Idle.png', 6], sc: 2, kind: 'summon', say: 'Nó gọi quái con, dọn quái trước rồi đánh nó.' },
-  { id: 'GiantBlueSamurai', name: 'Samurai xanh', idle: ['Idle.png', 12], sc: 3, kind: 'spin', say: 'Vòng đỏ quanh nó là đường kiếm xoay, chạy ra ngoài.' },
+  { id: 'GiantBlueSamurai', name: 'Samurai xanh', idle: ['Idle.png', 6], sc: 3, kind: 'spin', say: 'Vòng đỏ quanh nó là đường kiếm xoay, chạy ra ngoài.' },
 ];
 const T1N_TELE = 0.8;
 /* Zones: one per stage of the essay, ground pre-rendered once from the Ninja
