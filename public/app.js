@@ -27722,12 +27722,38 @@ const T1P_PROCS = [
   ], ov: ['Overall, the monarch butterfly develops from egg to caterpillar, chrysalis and adult in a continuous cycle that takes about four to five weeks in summer.',
     ['Overall, the eggs hatch into caterpillars after three to five days.', 'Đây là chi tiết có số liệu của một bước. Overview nói các giai đoạn chính và vòng lặp.'],
     ['Overall, the process is linear and ends when the butterfly dies.', 'Sai: đây là chu trình, con cái đẻ trứng và vòng đời bắt đầu lại.']] },
+  { id: 'frog', name: 'Life cycle of the frog', icon: '🐸', sample: 'cycle-frog', kind: 'cycle', natural: true, steps: [
+    { icon: '🥚', label: 'Frogspawn laid in a pond', s: 'the female frog', act: true, base: 'lay', third: 'lays', past: 'laid', pp: 'laid', d: 'hundreds of eggs, known as frogspawn, in a pond' },
+    { icon: '🐣', label: 'Eggs hatch (about 10 days)', s: 'the eggs', pl: true, act: true, base: 'hatch', third: 'hatches', past: 'hatched', pp: 'hatched', d: 'into tadpoles after about ten days' },
+    { icon: '🐟', label: 'Tadpoles feed on algae', s: 'the tadpoles', pl: true, act: true, base: 'feed', third: 'feeds', past: 'fed', pp: 'fed', d: 'on algae and breathe through gills' },
+    { icon: '🦵', label: 'Back legs grow (6 weeks)', s: 'the tadpoles', pl: true, act: true, base: 'grow', third: 'grows', past: 'grew', pp: 'grown', d: 'back legs at around six weeks' },
+    { icon: '🐸', label: 'Froglet leaves the water (12 weeks)', s: 'the froglet', act: true, base: 'leave', third: 'leaves', past: 'left', pp: 'left', d: 'the water at around twelve weeks, when its tail has almost disappeared' },
+    { icon: '🐸', label: 'Adult returns to breed (2–3 years)', s: 'the young frog', act: true, base: 'grow', third: 'grows', past: 'grew', pp: 'grown', d: 'into an adult over two to three years and returns to the pond to breed, and the cycle begins again' },
+  ], joins: [
+    { pre: '', gap: 'After hatching from the eggs,', post: 'the tadpoles feed on algae and breathe through gills.', traps: [['After being hatched from the eggs,', 'Trứng tự nở, không ai làm nở → chủ động: After hatching.'], ['After hatch from the eggs,', 'After là giới từ → theo sau là V-ing: After hatching.'], ['After hatched from the eggs,', 'After là giới từ → V-ing, không dùng V3.']] },
+    { pre: 'The young frog grows into an adult over two to three years and returns to the pond to breed,', gap: 'at which point the cycle begins again.', post: '', traps: [['and finally the process ends.', 'Chu trình không có điểm kết thúc → the cycle begins again.'], ['at which point the cycle is begun again.', 'Chu trình tự diễn ra → chủ động: begins again.'], ['which the cycle begins again.', 'Thiếu giới từ: at which point.']] },
+  ], ov: ['Overall, the frog develops from egg to tadpole, froglet and adult in a cycle that moves from water to land and repeats when the adult returns to the pond to breed.',
+    ['Overall, the eggs hatch into tadpoles after about ten days.', 'Đây là chi tiết có số liệu của một bước. Overview nói các giai đoạn chính và vòng lặp.'],
+    ['Overall, the process begins with frogspawn and ends with an adult frog.', 'Chu trình không có điểm kết thúc: con trưởng thành quay lại ao đẻ trứng, vòng đời lặp lại.']] },
+  { id: 'watercycle', name: 'The water cycle', icon: '💧', token: '💧', sample: 'cycle-water', kind: 'cycle', natural: true, steps: [
+    { icon: '☀️', label: 'The sun heats the sea and lakes', s: 'the sun', act: true, base: 'heat', third: 'heats', past: 'heated', pp: 'heated', d: 'the surface of the sea and lakes' },
+    { icon: '💨', label: 'Evaporation: vapour rises', s: 'water', act: true, base: 'evaporate', third: 'evaporates', past: 'evaporated', pp: 'evaporated', d: 'and rises into the air as water vapour' },
+    { icon: '☁️', label: 'Condensation: clouds form', s: 'the vapour', act: true, base: 'condense', third: 'condenses', past: 'condensed', pp: 'condensed', d: 'into tiny droplets as it cools, forming clouds' },
+    { icon: '🌧️', label: 'Precipitation: rain or snow', s: 'the droplets', pl: true, act: true, base: 'fall', third: 'falls', past: 'fell', pp: 'fallen', d: 'back to the ground as rain or snow' },
+    { icon: '⛰️', label: 'Water soaks into the ground', s: 'some of this water', act: true, base: 'soak', third: 'soaks', past: 'soaked', pp: 'soaked', d: 'into the ground, where it collects as groundwater' },
+    { icon: '🌊', label: 'Rivers carry water to the sea', s: 'the rest', act: true, base: 'flow', third: 'flows', past: 'flowed', pp: 'flowed', d: 'into rivers, which carry it back to the sea, and the cycle begins again' },
+  ], joins: [
+    { pre: 'Water evaporates from the surface of the sea', gap: 'before rising', post: 'into the air as water vapour.', traps: [['before being risen', 'rise là nội động từ, không có bị động → before rising.'], ['before rise', 'before + V-ing: before rising.'], ['before raising', 'raise (nâng cái gì lên) cần tân ngữ. Hơi nước tự bay lên → rise.']] },
+    { pre: 'As the vapour cools, it condenses into droplets,', gap: 'which then form', post: 'clouds.', traps: [['which are then formed', 'Giọt nước tự kết thành mây → chủ động: which then form.'], ['which then forms', 'which thay cho droplets (số nhiều) → form.'], ['that then form', 'Sau dấu phẩy không dùng that → which.']] },
+  ], ov: ['Overall, water moves in a continuous cycle between the sea, the air and the land, driven by the heat of the sun, with no fixed beginning or end.',
+    ['Overall, water is evaporated by the sun and is then turned into clouds.', 'Quá trình tự nhiên → chủ động. Overview nói vòng lặp chung, không tả từng bước.'],
+    ['Overall, the process begins with evaporation and ends when rivers reach the sea.', 'Chu trình không có điểm kết thúc: nước về biển rồi lại bốc hơi.']] },
 ];
 // The diagram: boxes in a snake, four to a row, joined by arrows; a loop
 // arrow back for recycling. A natural cycle is drawn round a circle.
 function t1pDiagram(id, cur, done) {
   const P = T1P_PROCS.find(p => p.id === id);
-  if (P.kind === 'cycle') return t1LibCycle(P.name, P.steps.map(s => { const w = s.label.split(' '), h = Math.ceil(w.length / 2); return [s.icon, w.slice(0, h).join(' '), w.slice(h).join(' '), '']; }), 'Full cycle: about 4–5 weeks in summer');
+  if (P.kind === 'cycle') return T1_SAMPLES.find(s => s.id === P.sample).chart();
   const n = P.steps.length, cols = 4, bw = 124, bh = 84, gx = 25, gy = 46, x0 = (600 - cols * bw - (cols - 1) * gx) / 2, y0 = 12;
   const rows = Math.ceil(n / cols), H = y0 * 2 + rows * bh + (rows - 1) * gy + (P.loop ? 6 : 0);
   const pos = i => { const r = Math.floor(i / cols), c = r % 2 ? cols - 1 - (i % cols) : i % cols; return [x0 + c * (bw + gx), y0 + r * (bh + gy)]; };
@@ -27761,12 +27787,18 @@ const T1P_SEQ_WHY = {
   'In the end,': 'In the end nghĩa là "rốt cuộc thì", không dùng cho bước cuối của quy trình. Dùng Finally,.',
   'Next,': 'Bước đầu tiên chưa có gì trước nó để nói Next.',
 };
+// In a cycle the last drawn stage leads back to the first, so nothing is final.
+const T1P_CYC_WHY = {
+  'Finally,': 'Chu trình không có bước cuối: vòng lặp quay lại từ đầu. Giai đoạn cuối trên hình dùng In the final stage shown,.',
+  'In the end,': 'In the end nghĩa là "rốt cuộc thì". Giai đoạn cuối trên hình của chu trình dùng In the final stage shown,.',
+};
 // Sequencer, subject + verb, detail; each [right, ...[trap, why]], fewer at Học việc.
 function t1pParts(P, i) {
-  const st = P.steps[i], n = P.steps.length, lv = _t1Lv, k = lv === 'a' ? 2 : 3;
-  const seq = i === 0 ? [[t1Pick(['To begin with,', 'First,'])], ...['Finally,', 'At first,', 'Next,'].map(t => [t, T1P_SEQ_WHY[t]])]
-    : i === n - 1 ? [['Finally,'], ...['In the end,', 'To begin with,', 'At first,'].map(t => [t, T1P_SEQ_WHY[t]])]
-    : [[T1P_MID[(i - 1) % T1P_MID.length]], ...['To begin with,', 'Finally,', 'At first,'].map(t => [t, T1P_SEQ_WHY[t]])];
+  const st = P.steps[i], n = P.steps.length, lv = _t1Lv, k = lv === 'a' ? 2 : 3, cyc = P.kind === 'cycle';
+  const why = t => [t, (cyc && T1P_CYC_WHY[t]) || T1P_SEQ_WHY[t]];
+  const seq = i === 0 ? [[t1Pick(['To begin with,', 'First,'])], ...['Finally,', 'At first,', 'Next,'].map(why)]
+    : i === n - 1 ? (cyc ? [['In the final stage shown,'], ...['Finally,', 'To begin with,', 'In the end,'].map(why)] : [['Finally,'], ...['In the end,', 'To begin with,', 'At first,'].map(why)])
+    : [[T1P_MID[(i - 1) % T1P_MID.length]], ...['To begin with,', 'Finally,', 'At first,'].map(why)];
   const s = st.s, be = st.pl ? 'are' : 'is', was = st.pl ? 'were' : 'was', who = s.replace(/^(the|each|an|a) /, '');
   let sv;
   if (st.act) {
@@ -27822,21 +27854,58 @@ function t1ProcStart() {
         <span class="t1-stat">⭐ <strong id="p-score">0</strong></span>
       </div>
       <div class="t1m-grid">
-        <div class="t1m-stage" id="p-diagram"></div>
+        <div class="t1m-stage"><div id="p-belt"></div><div id="p-diagram"></div></div>
         <div class="t1m-panel" id="p-panel"></div>
       </div>
     </div>`;
+  t1pBeltInit(g);
   t1ProcStep();
+}
+/* The line the product rides: a conveyor for a man-made process, a wheel
+   for a natural cycle. A right sentence moves it on, a wrong one jams it. */
+function t1pBeltInit(g) {
+  const P = g.P, n = P.steps.length, el = document.getElementById('p-belt');
+  if (P.kind === 'cycle') {
+    el.className = 't1p-wheel';
+    el.innerHTML = P.steps.map((st, i) => { const a = i / n * 2 * Math.PI; return `<div class="t1p-node" style="left:${(50 + 38 * Math.sin(a)).toFixed(1)}%;top:${(50 - 38 * Math.cos(a)).toFixed(1)}%"><b>${st.icon}</b><small>${escapeHtml(st.label)}</small></div>`; }).join('')
+      + '<div class="t1p-hub">↻</div><div class="t1p-arm"><span class="t1p-tok"></span></div>';
+  } else {
+    el.className = 't1p-line';
+    el.innerHTML = '<div class="t1p-rail"></div>' + P.steps.map((st, i) => `<div class="t1p-node"><b>${st.icon}</b><small>${i + 1}</small></div>`).join('') + `<span class="t1p-tok">${P.icon}</span>`;
+  }
+}
+// i: the step being written; -1 once every step is done.
+function t1pBeltSet(g, i) {
+  const el = document.getElementById('p-belt'), P = g.P, n = P.steps.length, done = new Set(g.sents.map(x => x.i));
+  if (!el) return;
+  el.querySelectorAll('.t1p-node').forEach((nd, j) => { nd.classList.toggle('done', done.has(j)); nd.classList.toggle('cur', j === i); });
+  const tok = el.querySelector('.t1p-tok');
+  // Clockwise only: after the last stage the wheel goes on round to the first.
+  if (P.kind === 'cycle') {
+    el.style.setProperty('--a', (i < 0 ? 360 : i / n * 360) + 'deg');
+    const icon = P.token || P.steps[Math.max(i, 0)].icon;
+    if (!tok.textContent) tok.textContent = icon; else setTimeout(() => { tok.textContent = icon; }, 450);
+  } else el.style.setProperty('--x', ((i < 0 ? n - 0.15 : i + 0.5) / n * 100).toFixed(2) + '%');
+  el.classList.remove('run'); void el.offsetWidth; el.classList.add('run');
+  el.classList.toggle('end', i < 0);
+}
+function t1pBeltJam() {
+  const el = document.getElementById('p-belt');
+  if (!el) return;
+  el.classList.remove('jam'); void el.offsetWidth; el.classList.add('jam');
+  setTimeout(() => el.classList.remove('jam'), 800);
 }
 function t1ProcDraw() {
   const g = _t1, done = new Set(g.sents.map(s => s.i));
-  document.getElementById('p-diagram').innerHTML = t1pDiagram(g.P.id, g.phase === 'steps' ? g.order[g.oi] : -1, done)
+  const diag = t1pDiagram(g.P.id, g.phase === 'steps' ? g.order[g.oi] : -1, done), was = document.querySelector('#p-diagram details[open]');
+  document.getElementById('p-diagram').innerHTML = (g.P.kind === 'cycle' ? `<details class="t1p-real"${was ? ' open' : ''}><summary>📄 Sơ đồ trong đề</summary>${diag}</details>` : diag)
     + `<p class="t1p-tip">${g.P.natural ? '🌿 Quá trình tự nhiên: sinh vật tự làm → động từ <b>chủ động</b>.' : '🏭 Quy trình do con người hay máy móc làm → động từ <b>bị động</b> (is / are + V3).'}</p>`;
 }
 function t1ProcStep() {
   const g = _t1;
-  if (g.oi >= g.order.length) { t1ProcJoin(); return; }
+  if (g.oi >= g.order.length) { t1pBeltSet(g, -1); t1ProcJoin(); return; }
   const i = g.order[g.oi];
+  t1pBeltSet(g, i);
   g.cur = { i, parts: t1pParts(g.P, i).map(p => ({ opts: t1Shuffle(p), pick: null })), tries: 0 };
   t1ProcDraw();
   t1ProcBuildRender();
@@ -27869,6 +27938,7 @@ function t1ProcCheck() {
   c.parts.forEach(p => { const [t, w] = p.opts[p.pick]; if (!w) p.ok = true; else { p.bad = true; why.push(`<li><b>${escapeHtml(t)}</b>: ${escapeHtml(w)}</li>`); } });
   if (!why.length) { t1ProcStepDone(false); return; }
   tsSfx('wrong');
+  t1pBeltJam();
   g.combo = 0;
   if (c.tries >= 2) {
     c.parts.forEach(p => { p.pick = p.opts.findIndex(o => !o[1]); p.ok = true; p.bad = false; });
@@ -27983,9 +28053,10 @@ function t1GroupBars(o) {
 const T1_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 // A cycle diagram: the stages round a circle, clockwise from the top, joined
 // by arrows; the last arrow leads back to the first. Each stage is
-// [emoji, line 1, line 2, time], its label set outside the circle.
+// [emoji, line 1, line 2, time], its label set outside the circle; line 2
+// may break with \n.
 function t1LibCycle(title, stages, note) {
-  const W = 600, H = 400, cx = 300, cy = 222, R = 125, n = stages.length, deg = Math.PI / 180;
+  const n = stages.length, W = 700, H = n % 2 ? 400 : 445, cx = 350, cy = 222, R = 125, deg = Math.PI / 180;
   const at = i => -90 * deg + i * 2 * Math.PI / n, P = (a, r) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   let g = `<defs><marker id="t1cyc-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7E9C90"/></marker></defs>`;
   stages.forEach((s, i) => {
@@ -27996,7 +28067,7 @@ function t1LibCycle(title, stages, note) {
     const a = at(i), [x, y] = P(a, R), c = Math.cos(a);
     const side = c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
     const lx = side === 'start' ? x + 44 : side === 'end' ? x - 44 : x;
-    const lines = [l1, l2, time].filter(Boolean);
+    const lines = [l1, ...l2.split('\n'), time].filter(Boolean);
     const ly = side === 'middle' ? (Math.sin(a) < 0 ? y - 42 - (lines.length - 1) * 16 : y + 58) : y - (lines.length - 1) * 8 + 4;
     g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="32" class="t1-cyc-node"/><text x="${x.toFixed(1)}" y="${(y + 10).toFixed(1)}" class="t1-cyc-icon">${icon}</text>`;
     g += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="t1-cyc-lab" text-anchor="${side}">${lines.map((t, k) => `<tspan x="${lx.toFixed(1)}" dy="${k ? 16 : 0}"${t === time ? ' class="t1-cyc-time"' : ''}>${escapeHtml(t)}</tspan>`).join('')}</text>`;
@@ -28216,9 +28287,40 @@ const T1_SAMPLES = [
     ], 'Full cycle: about 4–5 weeks in summer'),
     essay: [
       'The diagram illustrates the stages in the life cycle of the monarch butterfly, from egg to adult.',
-      'Overall, there are five main stages in the cycle, which begins with eggs being laid on milkweed leaves and ends when a new adult butterfly is ready to reproduce. The whole cycle takes approximately four to five weeks in summer.',
+      'Overall, there are five main stages in the cycle, which begins with eggs being laid on milkweed leaves and repeats once a new adult butterfly is ready to reproduce. The whole cycle takes approximately four to five weeks in summer.',
       'The cycle starts when an adult female lays her eggs on the leaves of the milkweed plant. After three to five days, the eggs hatch into larvae, known as caterpillars. The caterpillars feed on milkweed leaves for ten to fourteen days before forming a chrysalis, where each one remains for about ten days.',
       'At the end of this pupa stage, an adult butterfly emerges from the chrysalis, and its wings expand and dry before it can fly. During this adult stage, the butterfly feeds on nectar from flowers. Once the adult butterfly has emerged and mated, the female lays new eggs, and the cycle begins again.',
+    ] },
+  { id: 'cycle-frog', block: 'sta', type: 'Cycle (chu trình)', icon: '🐸',
+    prompt: 'The diagram below shows the life cycle of a frog.',
+    chart: () => t1LibCycle('Life cycle of the frog', [
+      ['🥚', 'Frogspawn laid', 'in a pond', 'hatches in about 10 days'],
+      ['🐟', 'Tadpole', 'feeds on algae,\nbreathes through gills', '0–6 weeks'],
+      ['🦵', 'Tadpole grows', 'back legs', 'about 6 weeks'],
+      ['🐸', 'Froglet: front legs,', 'tail almost gone,\nleaves the water', 'at about 12 weeks'],
+      ['🐸', 'Adult frog', 'returns to the pond\nto breed', '2–3 years'],
+    ]),
+    essay: [
+      'The diagram illustrates the stages in the life cycle of a frog, from egg to adult.',
+      'Overall, the frog passes through four main forms, namely egg, tadpole, froglet and adult, in a cycle that begins in water and moves onto land. The cycle is continuous, as the adult returns to the pond to breed.',
+      'The cycle starts when a female frog lays hundreds of eggs, known as frogspawn, in a pond. After about ten days, the eggs hatch into tadpoles, which live entirely in the water, feeding on algae and breathing through gills. At around six weeks, the tadpoles grow back legs.',
+      'By about twelve weeks, the young animal has become a froglet. Its front legs have developed and its tail has almost disappeared, so it leaves the water. It then grows into an adult over two to three years, after which it returns to the pond to breed, and the cycle begins again.',
+    ] },
+  { id: 'cycle-water', block: 'sta', type: 'Cycle (chu trình)', icon: '💧',
+    prompt: 'The diagram below shows the natural water cycle.',
+    chart: () => t1LibCycle('The water cycle', [
+      ['☀️', 'The sun heats', 'the sea and lakes', ''],
+      ['💨', 'Evaporation:', 'water vapour rises', ''],
+      ['☁️', 'Condensation:', 'vapour cools, clouds form', ''],
+      ['🌧️', 'Precipitation:', 'rain or snow', ''],
+      ['⛰️', 'Some water soaks', 'into the ground', 'groundwater'],
+      ['🌊', 'Rivers carry water', 'back to the sea', ''],
+    ], 'A continuous natural cycle'),
+    essay: [
+      'The diagram illustrates how water moves continuously between the sea, the air and the land in the natural water cycle.',
+      'Overall, the cycle has six main stages and is driven by the heat of the sun. It has no fixed starting point, but it is usually described from the moment the sun heats the sea, and it repeats once rivers carry the water back to the sea.',
+      'To begin with, the sun heats the surface of the sea and lakes, so water evaporates and rises into the air as water vapour. As the vapour cools, it condenses into tiny droplets, which then form clouds.',
+      'When the droplets become heavy enough, they fall back to the ground as rain or snow. Some of this water soaks into the ground, where it collects as groundwater, while the rest flows into rivers, which carry it back to the sea, and the cycle begins again.',
     ] },
 ];
 const T1_PARA = ['Mở bài', 'Overview', 'Thân bài 1', 'Thân bài 2'];
