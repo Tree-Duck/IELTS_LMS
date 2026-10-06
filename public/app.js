@@ -26880,7 +26880,10 @@ function t1TypeSpawn() {
   for (let t = 0; t < 8; t++) { x = 10 + Math.random() * Math.max(0, W - dw - 20); if (!g.drops.some(d => d.y < 110 && Math.abs(d.x - x) < dw * 0.8)) break; }
   el.style.left = x + 'px';
   el.style.maxWidth = dw + 'px';
-  g.drops.push({ id: ++g.id, b, w, el, x, y: -50, hint: 0, answers: [w.en, ...w.alt].map(t1TypeNorm) });
+  const d = { id: ++g.id, b, w, el, x, y: -50, hint: 0, answers: [w.en, ...w.alt].map(t1TypeNorm), syn: t1SynVariants(w.en) };
+  g.drops.push(d);
+  // First letters and length from the start: several English phrases share a meaning.
+  t1TypeHint(d);
 }
 function t1TypeTick(ts) {
   const g = _t1;
@@ -26904,7 +26907,7 @@ function t1TypeTick(ts) {
       d.y += g.speed * dt;
       d.el.style.transform = `translateY(${d.y}px)`;
       // Getting low: the first letters show by themselves.
-      if (!d.hint && d.y > floor * 0.55) t1TypeHint(d);
+      if (d.hint < 2 && d.y > floor * 0.55) t1TypeHint(d);
       if (d.y >= floor) t1TypeLand(d);
       if (g.over) return;
     }
@@ -26927,8 +26930,11 @@ function t1TypeKey(e) {
   const inp = e.target;
   if (e.key === 'Escape') { inp.value = ''; t1TypeInput(); }
   else if (e.key === 'Enter' && t1TypeNorm(inp.value)) {
-    // Enter on a phrase that shoots nothing counts as a wrong try.
-    t1TypeWrong();
+    // A synonym of a falling answer is not a mistake; anything else that
+    // shoots nothing counts as a wrong try.
+    const v = t1TypeNorm(inp.value), d = _t1 && _t1.drops.find(x => x.syn.includes(v));
+    if (d) { t1TypeMsg(`“${inp.value.trim()}” đúng nghĩa, nhưng bong bóng này dùng từ khác. Nhìn chữ cái gợi ý.`, 2600); t1Shake(d.el); }
+    else t1TypeWrong();
     inp.value = '';
     t1TypeInput();
   }
@@ -26965,7 +26971,7 @@ function t1TypeInput() {
     inp.value = '';
     g.off = false; g.lockId = 0;
     g.kills++; g.right++; g.combo++;
-    g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (hit.hint ? 0 : 5);
+    g.score += 10 + Math.min(g.combo - 1, 8) * 2 + (hit.hint > 1 ? 0 : 5);
     g.coins += T1_LEVELS[_t1Lv].coin * 0.6 * walMult();
     tsSfx('kill');
     t1TypeBank();
@@ -26974,7 +26980,8 @@ function t1TypeInput() {
   }
   const lock = lowest(g.drops.filter(d => d.answers.some(a => a.startsWith(v))));
   if (lock) { lock.el.classList.add('lock'); g.lockId = lock.id; g.off = false; }
-  else t1TypeWrong();
+  // Still on the way to a synonym: wait for Enter instead of calling it wrong.
+  else if (!g.drops.some(d => d.syn.some(a => a.startsWith(v)))) t1TypeWrong();
 }
 function t1TypeLand(d) {
   const g = _t1;
@@ -30393,7 +30400,10 @@ function t1hLevelUp() {
   if (type === 'chart' && it.kind === 'card' && !(blankRe && blankRe.test(it.ex))) type = 'en';
   const others = items.filter(x => x.key !== it.key);
   const q = g.q = { it, type, m, step: 1, ok1: false, tries: 0, cz: t1hClozeSrc(it) };
-  q.sample = (q.cz && q.cz.sample) || T1_SAMPLES.find(s => s.id === (it.kind === 'chunk' ? it.S.img : (g.S || g.lastS).img));
+  // A chart sits beside the question only when the sentence comes from that
+  // chart: a model answer, or a sentence of this prompt. A flashcard's own
+  // example belongs to no chart, so it shows the card's picture instead.
+  q.sample = q.cz ? q.cz.sample : it.kind === 'chunk' ? T1_SAMPLES.find(s => s.id === it.S.img) : null;
   let right, wrong;
   if (type === 'vi') { right = it.vi; wrong = t1Shuffle([...new Set(others.map(x => x.vi))].filter(v => v && v !== right && !t1hNear(v, right))).slice(0, 3); }
   else {
@@ -30410,7 +30420,7 @@ function t1hLevelUp() {
     ? `<p class="t1h-q">Nhìn biểu đồ: cụm nào điền vào chỗ trống mà <b>đúng cả thông tin lẫn ngữ pháp</b>?</p><p class="t1h-cloze">${it.S.c.map((c, j) => j === it.i ? '<b>______</b>' : escapeHtml(c)).join(' ')}</p>`
     : `<p class="t1h-q">Cụm nào điền vào chỗ trống?</p><p class="t1h-cloze">${escapeHtml(it.ex).replace(new RegExp(t1hReEsc(escapeHtml(it.en)), 'i'), '<b>______</b>')}</p><p class="t1h-vi">${escapeHtml(it.vi)}</p>`;
   t1hModal(`<div class="t1h-lv">⬆️ Lên cấp ${g.level + 1}!</div>
-    ${t1hQHead(T1H_QLABEL[type], m)}
+    ${t1hQHead(type === 'chart' && !q.sample ? 'Bước 1 · Cụm nào điền vào câu?' : T1H_QLABEL[type], m)}
     ${prompt}<div class="t1h-opts">${q.opts.map((o, i) => `<button class="t1h-opt" onclick="t1hQuizPick(${i})"><kbd>${i + 1}</kbd>${escapeHtml(o)}</button>`).join('')}</div>
     <div id="h-qfb"></div>`, t1hQSide(q));
   g.keyPick = i => t1hQuizPick(i);
@@ -30441,24 +30451,44 @@ function t1hQuizPick(i) {
 // Dũng sĩ two gaps, Huyền thoại three gaps and then half the sentence. Inside
 // a level the scaffolding comes off as the phrase's mastery (0–4) rises:
 // longer gaps and fewer letters shown. Every gap carries its meaning.
+// Every gap always shows each word's first letter and its length: a meaning
+// alone has several right English answers, so without them the first try
+// would be luck. Phrases still new to a beginner show half of each word.
 function t1hTier(m) {
-  if (_t1Lv === 'a') return m < 2 ? 'full' : m < 4 ? 'first' : 'one';
-  if (_t1Lv === 'd') return m < 2 ? 'first' : m < 4 ? 'one' : 'none';
-  return 'none';
+  if (_t1Lv === 'a') return m < 2 ? 'half' : 'full';
+  if (_t1Lv === 'd') return m < 1 ? 'half' : 'full';
+  return 'full';
 }
-// The letters shown for a gap: full = first letters and length, first = first
-// letters, one = the first letter only. A second try opens one more word.
+// The letters shown for a gap. A second try opens one more word (or, for a
+// single word, half of it).
 function t1hHint(text, tier, extra) {
-  const words = text.split(' '), blank = w => w[0] + w.slice(1).replace(/[a-z0-9]/gi, '_');
-  if (extra && words.length === 1) { const w = words[0], n = Math.ceil(w.length / 2); return w.slice(0, n) + w.slice(n).replace(/[a-z0-9]/gi, '_'); }
-  if (extra && tier !== 'full') tier = 'first';
-  return words.map((w, i) => {
-    if (i < extra) return w;
-    if (w.length < 2 || tier === 'full') return w.length < 2 ? w : blank(w);
-    if (tier === 'first' || (tier === 'one' && i === 0)) return w[0] + '…';
-    return '…';
-  }).join(' ').replace(/^(… ?)+$/, '');
+  const words = text.split(' '), part = (w, n) => w.slice(0, n) + w.slice(n).replace(/[a-z0-9]/gi, '_');
+  if (extra && words.length === 1) return part(words[0], Math.ceil(words[0].length / 2));
+  return words.map((w, i) => i < extra || w.length < 2 ? w : part(w, tier === 'half' ? Math.ceil(w.length / 2) : 1)).join(' ');
 }
+/* Words that mean the same in a Task 1 sentence. Typing one of these where
+   the model uses another is not a mistake: the student is told the answer
+   is a different word and types again. Kept to clear swaps on purpose;
+   near meanings (rose sharply / rose slightly) never count. */
+const T1_SYN = [
+  ['in contrast', 'by contrast', 'conversely'], ['steadily', 'consistently', 'continuously'],
+  ['significantly', 'considerably', 'substantially', 'markedly'], ['roughly', 'approximately', 'about', 'around'],
+  ['rose', 'increased', 'grew', 'climbed'], ['rise', 'increase', 'growth'], ['fell', 'decreased', 'declined', 'dropped'],
+  ['fall', 'decrease', 'decline', 'drop'], ['remained stable', 'remained steady', 'remained unchanged', 'stayed the same'],
+  ['peaked at', 'reached a peak of'], ['whereas', 'while'], ['similarly', 'likewise'], ['in addition', 'furthermore', 'moreover'],
+  ['subsequently', 'after that', 'next'], ['finally', 'lastly'], ['to begin with', 'first', 'firstly', 'initially'],
+];
+// The answer with one of its words (or phrases) swapped for a synonym.
+function t1SynVariants(ans) {
+  const a = t1TypeNorm(ans), out = new Set();
+  T1_SYN.forEach(grp => grp.forEach(m => {
+    const re = new RegExp('(^| )' + t1hReEsc(m) + '(?= |$)');
+    if (re.test(a)) grp.forEach(o => { if (o !== m) out.add(a.replace(re, '$1' + o)); });
+  }));
+  out.delete(a);
+  return [...out];
+}
+function t1SynOk(typed, ans) { return t1SynVariants(ans).includes(t1TypeNorm(typed)); }
 // Phrases with a meaning, for the gaps around the main one: this block's
 // sentence chunks, its flashcards and the Gõ nghĩa words.
 function t1hPhraseBook() {
@@ -30543,7 +30573,6 @@ function t1hCloze() {
     ${t1hQHead(`Bước 2 · ${n > 1 ? n + ' ô trong ' : ''}${cz && !cz.own ? 'câu bài mẫu Task 1' : 'câu Task 1'}`, q.m)}
     ${cz ? `<p class="t1h-cloze t1h-cloze--big">${body}</p>` : `<p class="t1h-q">Gõ cụm tiếng Anh:</p>${box(q.gaps[0], 0)}`}
     <ol class="t1h-gaplist">${q.gaps.map((x, i) => { const h = t1hHint(x.ans, tier, 0); return `<li><span>🇻🇳 ${escapeHtml(x.vi)}</span><code id="h-hint${i}">${h ? escapeHtml(h) : ''}</code></li>`; }).join('')}</ol>
-    ${tier === 'none' ? '<p class="t1h-q t1h-c"><small>Không có gợi ý chữ ở mức này. Sai lần đầu sẽ mở chữ cái đầu.</small></p>' : ''}
     <div id="h-qfb"></div>
     <div class="t1h-row" id="h-qbtn"><button class="vb-start-btn" onclick="t1hClozeCheck()">Kiểm tra → <small>Enter</small></button></div>`, t1hQSide(q));
   const inputs = [...document.querySelectorAll('.t1h-gap')];
@@ -30561,16 +30590,27 @@ function t1hClozeCheck() {
   if (!q || q.step !== 2 || q.done || !inputs.length) return;
   const empty = inputs.find(x => !x.disabled && !x.value.trim());
   if (empty) { empty.focus(); return; }
-  q.tries++;
   const ok = inputs.map((inp, i) => t1TypeNorm(inp.value) === t1TypeNorm(q.gaps[i].ans));
+  const syn = inputs.map((inp, i) => !ok[i] && t1SynOk(inp.value, q.gaps[i].ans));
   inputs.forEach((inp, i) => { if (ok[i]) { inp.classList.add('ok'); inp.disabled = true; } });
-  if (ok.every(Boolean)) { t1hQuizEnd(true); return; }
+  if (ok.every(Boolean)) { q.tries++; t1hQuizEnd(true); return; }
+  const synNote = inputs.map((inp, i) => syn[i] ? `<span>Ô ${i + 1}: “${escapeHtml(inp.value.trim())}” đúng nghĩa, nhưng câu này dùng một từ khác. Nhìn chữ cái gợi ý rồi gõ lại.</span>` : '').join('');
+  if (ok.every((x, i) => x || syn[i])) {
+    // Only synonyms are off: not a mistake, so the try does not count.
+    inputs.forEach((inp, i) => { if (syn[i]) inp.value = ''; });
+    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb"><strong>Đúng nghĩa rồi.</strong>${synNote}</div>`;
+    const first = inputs.find(x => !x.disabled);
+    if (first) first.focus();
+    return;
+  }
+  q.tries++;
+  inputs.forEach((inp, i) => { if (syn[i]) inp.value = ''; });
   tsSfx('wrong');
   if (q.tries === 1) {
     // One more try: the wrong gaps open one more word each.
     const tier = t1hTier(q.m);
     q.gaps.forEach((x, i) => { if (!ok[i]) document.getElementById('h-hint' + i).textContent = t1hHint(x.ans, tier, 1); });
-    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb no"><strong>${ok.filter(Boolean).length}/${ok.length} ô đúng. Thử lại các ô còn trống.</strong><span>Gợi ý của ô sai đã mở thêm một từ.</span></div>`;
+    document.getElementById('h-qfb').innerHTML = `<div class="t1-fb no"><strong>${ok.filter(Boolean).length}/${ok.length} ô đúng. Thử lại các ô còn trống.</strong><span>Gợi ý của ô sai đã mở thêm một từ.</span>${synNote}</div>`;
     const bad = inputs.find(x => !x.disabled);
     if (bad) bad.select();
     return;

@@ -8790,7 +8790,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 /* Task 1 · Gõ nghĩa */
 .t1-tdrop { position: absolute; top: 0; padding: 0.45rem 0.7rem; background: #fff; border-radius: 12px; border: 2px solid #13294F; box-shadow: 0 6px 14px -8px rgba(19, 41, 79, 0.6); will-change: transform; transition: opacity .4s, scale .4s, border-color .15s; display: flex; flex-direction: column; gap: 0.15rem; text-align: center; }
 .t1-tdrop-vi { font-weight: 700; color: #13294F; line-height: 1.3; }
-.t1-tdrop-hint { font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.12em; color: var(--moss); font-size: 0.85rem; }
+.t1-tdrop-hint { font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.2em; color: var(--moss); font-size: 0.85rem; }
 .t1-tdrop-hint:empty { display: none; }
 .t1-tdrop-en { font-weight: 800; color: #12A150; }
 .t1-tdrop.lock { border-color: #3E6FD8; box-shadow: 0 0 0 3px rgba(62, 111, 216, 0.25); }
@@ -9031,7 +9031,7 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 .t1h-gaplist li { line-height: 1.4; }
 .t1h-gaplist li::marker { font-weight: 800; color: #5B3FD9; }
 .t1h-gaplist span { color: var(--moss); font-style: italic; }
-.t1h-gaplist code { display: block; font: 800 1.05rem/1.4 ui-monospace, Consolas, monospace; letter-spacing: 0.06em; color: #5B3FD9; }
+.t1h-gaplist code { display: block; font: 800 1.05rem/1.4 ui-monospace, Consolas, monospace; letter-spacing: 0.22em; color: #5B3FD9; }
 .t1h-gaplist code:empty { display: none; }
 .t1h-gap.ok { border-color: #12A150; background: #E8F7EE; color: #14532D; }
 .t1h-gap.no { border-color: #E5533D; background: #FFF0EC; color: #9A2A16; text-decoration: line-through; }
