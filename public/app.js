@@ -28740,10 +28740,13 @@ const T1H_WEAPONS = {
   bow:   { dmg: 15, rate: 1.55, count: 1, pierce: 3, splash: 0, speed: 680, range: 560 },
   sword: { dmg: 18, rate: 1.5, count: 1, pierce: 0, splash: 0, reach: 95, arc: 2.0 },
 };
+// Every sprite and tile is drawn at the same pixel scale, so heroes, monsters,
+// bosses and the map read as one picture. A tile is T1N_T world pixels.
+const T1N_PX = 3, T1N_T = 16 * T1N_PX;
 const T1H_FOES = {
-  zombie: { look: ['Slime', 'Mushroom', 'Skull'], hp: 22, sp: 1, r: 15, scale: 3, dmg: 1, pts: 5, exp: 1 },
-  robot:  { look: ['BlueBat', 'Spirit', 'Eye'], hp: 14, sp: 1.45, r: 14, scale: 3, dmg: 0.8, pts: 6, exp: 1 },
-  brute:  { look: ['Cyclope', 'Beast', 'Bear'], hp: 90, sp: 0.75, r: 22, scale: 4, dmg: 1.8, pts: 15, exp: 3 },
+  zombie: { look: ['Slime', 'Mushroom', 'Skull'], hp: 22, sp: 1, r: 15, scale: T1N_PX, dmg: 1, pts: 5, exp: 1 },
+  robot:  { look: ['BlueBat', 'Spirit', 'Eye'], hp: 14, sp: 1.45, r: 14, scale: T1N_PX, dmg: 0.8, pts: 6, exp: 1 },
+  brute:  { look: ['Cyclope', 'Beast', 'Bear'], hp: 90, sp: 0.75, r: 22, scale: T1N_PX, dmg: 1.8, pts: 15, exp: 3 },
 };
 const T1H_KEYS = { KeyW: 'u', ArrowUp: 'u', KeyS: 'd', ArrowDown: 'd', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
 const T1H_JOY = 46;
@@ -28780,6 +28783,10 @@ function t1dDraw(c, name, x, y, scale, flip, over, noShadow) {
    Xây tháp. */
 const T1N = {};
 const T1N_SIL = { flash: '#fff', red: '#C0392B', ice: '#7FC8F8', gold: '#F2C14E' };
+// Boss strips have empty rows above and below the body: [top, bottom] of the
+// drawn part, so a boss stands on its shadow instead of floating over it.
+const T1N_BOX = { GiantSlime: [23, 46], GiantFrog: [7, 33], GiantFlam: [3, 48], SquidRed: [14, 72], TenguRed: [25, 58], GiantSpirit: [3, 48], DemonCyclop: [10, 43],
+  GiantRacoon: [4, 55], GiantBlueSamurai: [5, 44], GiantSlime2: [23, 46], GiantFrog2: [7, 33], DemonCyclop2: [10, 43], SquidGreen: [14, 72], TenguBlue: [18, 51], GiantRacoonGold: [4, 55] };
 // Column of a 4-way sheet for a direction: down, up, left, right.
 function t1nDir(dx, dy) { return Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? 0 : 1) : (dx < 0 ? 2 : 3); }
 function t1nImg(path) {
@@ -28814,7 +28821,16 @@ function t1nGrid(c, path, dir, row, x, y, scale, over, noShadow) { t1nDraw(c, pa
 const T1N_HERO = { male: ['Hunter', 'Woman'], female: ['NinjaMageBlack', 'SorcererBlack'], knight: ['Knight', 'Princess'], archer: ['Villager5', 'Cavegirl'] };
 function t1nHeroName(h) { return (T1N_HERO[h.id] || T1N_HERO.male)[t1hSex(h) === 'f' ? 1 : 0]; }
 // Mini bosses: monster sheets drawn big.
-const T1N_MINI = [['Trex', 'Khủng long'], ['Octopus', 'Bạch tuộc'], ['Cyclope2', 'Mắt một mí'], ['Beast2', 'Mãnh thú'], ['DragonYellow', 'Rồng vàng'], ['KappaRed', 'Kappa đỏ']];
+// Mini bosses: the recoloured cousins of the big bosses, at the same scale.
+const T1N_MINI = [{ id: 'GiantSlime2', name: 'Slime em', idle: ['Idle.png', 5] }, { id: 'GiantFrog2', name: 'Ếch em', idle: ['Idle.png', 5] },
+  { id: 'DemonCyclop2', name: 'Quỷ em', idle: ['Idle.png', 5] }, { id: 'SquidGreen', name: 'Mực em', idle: ['Idle.png', 4] },
+  { id: 'TenguBlue', name: 'Tengu em', idle: ['Idle.png', 6] }, { id: 'GiantRacoonGold', name: 'Gấu mèo em', idle: ['Idle.png', 6] }];
+// Body size of a boss strip at T1N_PX, from its first frame.
+function t1nBossSize(B) {
+  const e = t1nImg(`boss/${B.id}/${B.idle[0]}`), box = T1N_BOX[B.id] || [0, 50];
+  const fw = e.ready ? e.img.width / B.idle[1] : 50;
+  return { h: (box[1] - box[0]) * T1N_PX, r: Math.max(24, fw * T1N_PX * 0.3) };
+}
 // Big bosses: strip file and frame count, draw scale, attack. Every attack is
 // telegraphed in red for 0.8 s before it lands.
 const T1N_BOSSES = [
@@ -28832,17 +28848,15 @@ const T1N_TELE = 0.8;
 /* Zones: one per stage of the essay, ground pre-rendered once from the Ninja
    tilesets at half size and drawn at 2x. A gate opens when a part is done. */
 const T1N_ZONES = [
-  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A',
-    tiles: [['tiles/TilesetField.png', 1, 4, 1]],
-    props: { column: ['tiles/TilesetNature.png', 0, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 0, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 96, 176, 16, 16, 3] },
-    decor: [['tiles/TilesetHouse.png', 0, 0, 64, 64, 4], ['tiles/TilesetHouse.png', 192, 0, 64, 64, 3], ['tiles/TilesetNature.png', 0, 160, 16, 16, 40], ['tiles/TilesetNature.png', 0, 176, 16, 16, 24], ['tiles/TilesetNature.png', 16, 176, 16, 16, 24]] },
+  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A', layout: () => t1nVillage(),
+    tiles: [], decor: [['tiles/TilesetNature.png', 0, 176, 16, 16, 1], ['tiles/TilesetNature.png', 16, 176, 16, 16, 1], ['tiles/TilesetNature.png', 48, 176, 16, 16, 1], ['tiles/TilesetNature.png', 0, 160, 16, 16, 1], ['tiles/TilesetNature.png', 32, 160, 16, 16, 1]] },
   { name: 'Rừng Overview', part: 'Overview', top: '#24452A', side: '#1A3320', line: '#4E8A4A',
     tiles: [['tiles/TilesetField.png', 1, 7, 1]],
-    props: { column: ['tiles/TilesetNature.png', 32, 0, 32, 32, 3], wall: ['tiles/TilesetNature.png', 32, 0, 32, 32, 2], rock: ['tiles/TilesetNature.png', 272, 128, 32, 32, 2.2], crate: ['tiles/TilesetNature.png', 128, 224, 32, 32, 1.6] },
+    props: { column: ['tiles/TilesetNature.png', 32, 0, 32, 32, T1N_PX], wall: ['tiles/TilesetNature.png', 32, 0, 32, 32, T1N_PX], rock: ['tiles/TilesetNature.png', 272, 128, 32, 32, T1N_PX], crate: ['tiles/TilesetNature.png', 128, 224, 32, 32, T1N_PX] },
     decor: [['tiles/TilesetNature.png', 0, 32, 64, 48, 6], ['tiles/TilesetNature.png', 64, 32, 64, 48, 5], ['tiles/TilesetNature.png', 96, 128, 32, 32, 8], ['tiles/TilesetNature.png', 64, 160, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
   { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#B5793A', side: '#94602C', line: '#E6B474',
     tiles: [['tiles/TilesetField.png', 1, 1, 1]],
-    props: { column: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 3], wall: ['tiles/TilesetDesert.png', 160, 144, 32, 32, 2], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, 2.2], crate: ['tiles/TilesetDesert.png', 112, 176, 16, 16, 3] },
+    props: { column: ['tiles/TilesetDesert.png', 160, 144, 32, 32, T1N_PX], wall: ['tiles/TilesetDesert.png', 160, 144, 32, 32, T1N_PX], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, T1N_PX], crate: ['tiles/TilesetDesert.png', 112, 176, 16, 16, T1N_PX] },
     decor: [['tiles/TilesetDesert.png', 160, 64, 64, 64, 7], ['tiles/TilesetDesert.png', 160, 160, 64, 64, 5], ['tiles/TilesetNature.png', 192, 96, 64, 48, 4]] },
   { name: 'Đấu trường trùm cuối', part: null, dungeon: true,
     tiles: [['tiles/TilesetFloor.png', 13, 15, 0.8], ['tiles/TilesetFloor.png', 15, 15, 0.2]],
@@ -28850,10 +28864,11 @@ const T1N_ZONES = [
 ];
 function t1nZoneGround(z) {
   if (z.canvas) return z.canvas;
+  if (z.layout) return t1nPlanGround(z);
   const files = [...new Set([...z.tiles, ...z.decor].map(t => t[0]))];
   if (!files.every(f => t1nImg(f).ready)) return null;
   const R = T1H_ROOM, cv = document.createElement('canvas');
-  cv.width = R.w / 2; cv.height = R.h / 2;
+  cv.width = R.w / T1N_PX; cv.height = R.h / T1N_PX;
   const x = cv.getContext('2d');
   x.imageSmoothingEnabled = false;
   for (let i = 0; i < cv.width / 16; i++) for (let j = 0; j < cv.height / 16; j++) {
@@ -28864,12 +28879,79 @@ function t1nZoneGround(z) {
   // Decor keeps clear of the middle, where the hero starts.
   z.decor.forEach(([f, sx, sy, w, h, n]) => {
     for (let k = 0, tries = 0; k < n * 2 && tries < 400; tries++) {
-      const px = Math.random() * (cv.width - w), py = R.top / 2 + Math.random() * (cv.height - R.top / 2 - h);
+      const px = Math.random() * (cv.width - w), py = R.top / T1N_PX + Math.random() * (cv.height - R.top / T1N_PX - h);
       if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 80) continue;
       x.drawImage(t1nImg(f).img, sx, sy, w, h, Math.round(px), Math.round(py), w, h);
       k++;
     }
   });
+  return (z.canvas = cv);
+}
+/* The village: a crossroads with a plaza where the hero starts, houses facing
+   the road, a ring of trees, flowers in the front gardens. Built in tiles of
+   T1N_T world pixels; the same plan gives the ground and the obstacles. */
+const T1N_TREES = [[0, 0], [32, 0], [96, 128], [224, 0]];
+function t1nVillage() {
+  const R = T1H_ROOM, T = T1N_T, cols = Math.floor(R.w / T), rows = Math.floor(R.h / T);
+  const dirt = new Set(), dig = (c0, r0, c1, r1) => { for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) dirt.add(c + ',' + r); };
+  dig(1, 14, cols - 2, 16);
+  dig(23, 3, 25, rows - 2);
+  dig(19, 12, 29, 18);
+  const obs = [], H = 'tiles/TilesetHouse.png', N = 'tiles/TilesetNature.png';
+  // A house is 4 x 3 tiles; it blocks its lower part, so a hero can pass behind the roof.
+  const house = (col, row, sx) => obs.push({ kind: 'house', x: col * T + 6, y: row * T + T * 1.1, w: 4 * T - 12, h: T * 1.9, hp: 0, hit: 0, seed: 0.9, art: [H, sx, 0, 64, 48] });
+  [[3, 9, 0], [9, 9, 64], [14, 9, 192], [31, 9, 128], [36, 9, 0], [42, 9, 64]].forEach(([c, r, sx]) => house(c, r, sx));
+  [[5, 19, 192], [12, 19, 128], [33, 19, 64], [40, 19, 192]].forEach(([c, r, sx]) => house(c, r, sx));
+  // Trees block only their trunk.
+  const holes = [0.15, 0.5, 0.85].map(f => R.wall + 50 + f * (R.w - 2 * R.wall - 100));
+  const tree = (x, y, i) => {
+    const [sx, sy] = T1N_TREES[i % T1N_TREES.length];
+    obs.push({ kind: 'tree', x: x - 18, y: y - 22, w: 36, h: 22, hp: 0, hit: 0, seed: (i * 0.37) % 1, art: [N, sx, sy, 32, 32] });
+  };
+  let i = 0;
+  for (let x = 130; x < R.w - 100; x += 118) {
+    if (holes.some(h => Math.abs(h - x) < 110)) continue;
+    tree(x, R.top + 64, i++);
+    tree(x + 40, R.h - R.wall - 4, i++);
+  }
+  for (let y = R.top + 190; y < R.h - R.wall - 90; y += 118) {
+    if (Math.abs(y - 15 * T) < 160) continue;
+    tree(R.wall + 46, y, i++);
+    tree(R.w - R.wall - 46, y, i++);
+  }
+  // Small groves between the houses and the edge.
+  [[8, 6], [17, 6], [33, 6], [44, 7], [10, 25], [17, 24], [30, 24], [38, 25], [45, 24]].forEach(([c, r]) => tree(c * T, r * T, i++));
+  // Baskets by the doors break for hearts, as crates do.
+  [[7, 13], [17, 13], [35, 13], [46, 13], [9, 22], [37, 22]].forEach(([c, r], k) =>
+    obs.push({ kind: 'crate', x: c * T + 4, y: r * T + 10, w: 40, h: 30, hp: 30, hit: 0, seed: k / 6, art: ['tiles/TilesetDesert.png', 96 + (k % 2) * 16, 176, 16, 16] }));
+  return { obs, dirt, cols, rows };
+}
+// Ground from a zone's plan: grass, and dirt paths with proper edges and corners.
+function t1nPlanGround(z) {
+  const F = t1nImg('tiles/TilesetFloor.png'), files = z.decor.map(t => t[0]);
+  if (!F.ready || !files.every(f => t1nImg(f).ready)) return null;
+  const plan = z.plan || (z.plan = z.layout()), R = T1H_ROOM, cv = document.createElement('canvas');
+  cv.width = R.w / T1N_PX; cv.height = R.h / T1N_PX;
+  const x = cv.getContext('2d'), has = (c, r) => plan.dirt.has(c + ',' + r), put = (tc, tr, c, r) => x.drawImage(F.img, tc * 16, tr * 16, 16, 16, c * 16, r * 16, 16, 16);
+  x.imageSmoothingEnabled = false;
+  for (let c = 0; c < cv.width / 16; c++) for (let r = 0; r < cv.height / 16; r++) {
+    if (!has(c, r)) { const v = Math.random(); put(v < 0.8 ? 0 : 1 + Math.floor((v - 0.8) * 20), 12, c, r); continue; }
+    const n = has(c, r - 1), so = has(c, r + 1), w = has(c - 1, r), e = has(c + 1, r);
+    if (n && so && w && e) {
+      // Inner corners where only a diagonal is grass.
+      if (!has(c + 1, r + 1)) put(5, 8, c, r); else if (!has(c - 1, r + 1)) put(6, 8, c, r);
+      else if (!has(c + 1, r - 1)) put(5, 9, c, r); else if (!has(c - 1, r - 1)) put(6, 9, c, r); else put(1, 8, c, r);
+    } else put(!w ? 0 : !e ? 2 : 1, !n ? 7 : !so ? 9 : 8, c, r);
+  }
+  // Flowers and tufts on the grass, clear of paths and of anything standing there.
+  const busy = (px, py) => plan.obs.some(o => px * T1N_PX > o.x - 30 && px * T1N_PX < o.x + o.w + 30 && py * T1N_PX > o.y - 90 && py * T1N_PX < o.y + o.h + 10);
+  for (let k = 0, tries = 0; k < 160 && tries < 2000; tries++) {
+    const c = Math.floor(Math.random() * cv.width / 16), r = 3 + Math.floor(Math.random() * (cv.height / 16 - 4));
+    if (has(c, r) || busy(c * 16 + 8, r * 16 + 8)) continue;
+    const [f, sx, sy] = z.decor[Math.floor(Math.random() * z.decor.length)];
+    x.drawImage(t1nImg(f).img, sx, sy, 16, 16, c * 16, r * 16, 16, 16);
+    k++;
+  }
   return (z.canvas = cv);
 }
 // Sentences left in the part being written, the current one included.
@@ -28900,7 +28982,7 @@ function t1nGateTick(dt) {
 function t1nZoneEnter(to, boss) {
   const g = _t1, R = T1H_ROOM;
   g.zone = to;
-  g.room = t1hRoomMake();
+  g.room = t1hRoomMake(to);
   g.foes = []; g.gems = []; g.ebul = []; g.gold = []; g.hearts = [];
   g.p.x = R.w / 2; g.p.y = R.h / 2;
   if (boss) t1hBossStart(boss);
@@ -28938,11 +29020,11 @@ function t1nDrawZoneHud(c, W) {
 /* Mini bosses: every sentence put in order calls one. A short fight that
    drops coins and EXP, earned by the sentence. */
 function t1nMiniSpawn() {
-  const g = _t1, p = g.p, k = g.minis = (g.minis || 0) + 1, [look, name] = T1N_MINI[(k - 1) % T1N_MINI.length];
+  const g = _t1, p = g.p, k = g.minis = (g.minis || 0) + 1, B = T1N_MINI[(k - 1) % T1N_MINI.length], name = B.name, sz = t1nBossSize(B);
   const a = Math.random() * Math.PI * 2, s = t1hFreeNear(p.x + Math.cos(a) * 300, p.y + Math.sin(a) * 220);
   const hp = 120 * (1 + g.si * 0.15) * (_t1Lv === 'l' ? 1.3 : _t1Lv === 'd' ? 1.15 : 1);
-  g.foes.push({ id: ++g.id, type: 'mini', mini: true, name, T: { scale: 7, pts: 40, exp: 8 }, look, sc: 7, x: s.x, y: s.y, hp, maxHp: hp,
-    sp: g.cfg.esp * 0.8, r: 34, dmg: g.cfg.dmg * 1.6, anim: 0, hit: 0, face: 1, h: 16 * 7 });
+  g.foes.push({ id: ++g.id, type: 'mini', mini: true, name, B, T: { scale: T1N_PX, pts: 40, exp: 8 }, sc: T1N_PX, x: s.x, y: s.y, hp, maxHp: hp,
+    sp: g.cfg.esp * 0.8, r: sz.r, dmg: g.cfg.dmg * 1.6, anim: 0, hit: 0, face: 1, h: sz.h });
   t1hMsg(`⚔️ Câu đúng gọi boss nhỏ ${name}! Hạ nó lấy xu và EXP.`, 2400);
 }
 
@@ -29069,13 +29151,14 @@ function t1nPreload() {
   Object.values(T1N_HERO).flat().forEach(n => { t1nImg(`hero/${n}.png`); t1nImg(`hero/${n}_face.png`); });
   Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
   T1N_BOSSES.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
-  T1N_MINI.forEach(([n]) => t1nImg(`foe/${n}.png`));
+  T1N_MINI.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
   T1N_ZONES.forEach(z => [...z.tiles, ...z.decor].forEach(t => t1nImg(t[0])));
+  ['tiles/TilesetFloor.png', 'tiles/TilesetHouse.png', 'tiles/TilesetDesert.png', 'weapon/Sword.png', 'weapon/MagicWand.png', 'weapon/Bow.png', 'weapon/Arrow.png', 'fx/Shuriken.png', 'fx/EnergyBall.png'].forEach(t1nImg);
 }
 function t1nBossDraw(c, f, over) {
   const B = f.B, path = `boss/${B.id}/${B.idle[0]}`, e = t1nImg(path);
-  const n = B.idle[1], fw = e.ready ? e.img.width / n : 50, fh = e.ready ? e.img.height : 50, k = Math.floor((_t1.time + f.id) * 8) % n;
-  t1nDraw(c, path, k * fw, 0, fw, fh, f.x, f.y - (f.air || 0), f.sc, false, over);
+  const n = B.idle[1], fw = e.ready ? e.img.width / n : 50, box = T1N_BOX[B.id] || [0, e.ready ? e.img.height : 50], k = Math.floor((_t1.time + f.id) * 8) % n;
+  t1nDraw(c, path, k * fw, box[0], fw, box[1] - box[0], f.x, f.y - (f.air || 0), T1N_PX, f.x > _t1.p.x, over);
 }
 function t1hSex(h) { try { return localStorage.getItem('t1Sex_' + h.id) || h.sex; } catch (e) { return h.sex; } }
 function t1hSetSex(id, sex) {
@@ -29213,7 +29296,7 @@ function t1hGo(id) {
   try { localStorage.setItem('t1Hero', h.id); } catch (e) {}
   t1Leave();
   t1dLoad();
-  const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake();
+  const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake(0);
   const set = t1hPickSet(), list = t1Shuffle(T1_SURV[_t1Block].filter(S => S.img === set)).sort((a, b) => order[a.part] - order[b.part]);
   const g = _t1 = { game: 'survive', cfg, hero: h, look: t1nHeroName(h), score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
     room, bag: [], ord: null,
@@ -29317,7 +29400,9 @@ function t1hGo(id) {
 }
 
 /* ── The room: walls round the edge, blocks, pillars, rocks and crates ── */
-function t1hRoomMake() {
+function t1hRoomMake(zone) {
+  const Z = T1N_ZONES[zone || 0];
+  if (Z.layout) { const plan = Z.plan || (Z.plan = Z.layout()); return { ...t1hRoomHoles(T1H_ROOM), obs: plan.obs.map(o => ({ ...o })) }; }
   const R = T1H_ROOM, obs = [], cx = R.w / 2, cy = R.h / 2;
   const free = (x, y, w, h, pad) => Math.hypot(x + w / 2 - cx, y + h / 2 - cy) > 320
     && !obs.some(o => x < o.x + o.w + pad && x + w + pad > o.x && y < o.y + o.h + pad && y + h + pad > o.y);
@@ -29332,10 +29417,12 @@ function t1hRoomMake() {
   place('column', 40, 28, 8, 120);
   place('rock', 58, 40, 6, 100);
   place('crate', 40, 30, 9, 70);
-  // Monsters climb out of holes along the walls.
-  const holes = [[0.15, 0], [0.5, 0], [0.85, 0], [0.15, 1], [0.5, 1], [0.85, 1], [0, 0.5], [1, 0.5]]
-    .map(([fx, fy]) => ({ x: R.wall + 50 + fx * (R.w - 2 * R.wall - 100), y: R.top + 40 + fy * (R.h - R.top - R.wall - 80) }));
-  return { ...R, obs, holes };
+  return { ...t1hRoomHoles(R), obs };
+}
+// The room's size, and the holes along its walls that monsters climb out of.
+function t1hRoomHoles(R) {
+  return { ...R, holes: [[0.15, 0], [0.5, 0], [0.85, 0], [0.15, 1], [0.5, 1], [0.85, 1], [0, 0.5], [1, 0.5]]
+    .map(([fx, fy]) => ({ x: R.wall + 50 + fx * (R.w - 2 * R.wall - 100), y: R.top + 40 + fy * (R.h - R.top - R.wall - 80) })) };
 }
 // Pushes a body (feet at x, y, radius r) out of every obstacle and the walls.
 function t1hPush(e, r) {
@@ -29842,7 +29929,7 @@ function t1hSpawnFoe(diff) {
   const far = g.room.holes.filter(h => Math.hypot(h.x - p.x, h.y - p.y) > 380);
   const hole = t1Pick(far.length ? far : g.room.holes);
   const elite = Math.random() < Math.min(0.3, Math.max(0, (diff - 1.2) * 0.07) + g.bosses * 0.04);
-  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale + (elite ? 1 : 0);
+  const hp = T.hp * (1 + diff * 0.35) * (elite ? 3.5 : 1), sc = T.scale;
   g.foes.push({ id: ++g.id, type, T, look, elite, sc, x: hole.x + t1Rand(-20, 20), y: hole.y + t1Rand(-12, 12), hp, maxHp: hp, sp: g.cfg.esp * T.sp * t1Rand(0.9, 1.1) * (elite ? 0.9 : 1),
     r: T.r * (elite ? 1.2 : 1), dmg: g.cfg.dmg * T.dmg * (elite ? 1.4 : 1), anim: Math.random(), hit: 0, face: 1, h: 16 * sc });
 }
@@ -30570,9 +30657,9 @@ function t1hBossStart(part) {
   }
   const n = g.bosses, a = Math.random() * Math.PI * 2, B = T1N_BOSSES[(g.bossOff + n - 1) % T1N_BOSSES.length];
   const hp = T1H_BOSS[_t1Lv] * (1 + (n - 1) * 0.45) * (1 + g.level * 0.06);
-  const e = t1nImg(`boss/${B.id}/${B.idle[0]}`), fh = e.ready ? e.img.height : 50, fw = e.ready ? e.img.width / B.idle[1] : 50;
-  const f = { id: ++g.id, boss: true, n, B, name: B.name, sc: B.sc, T: { scale: B.sc, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
-    hp, maxHp: hp, r: Math.max(26, fw * B.sc * 0.3), h: fh * B.sc, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
+  const sz = t1nBossSize(B);
+  const f = { id: ++g.id, boss: true, n, B, name: B.name, sc: T1N_PX, T: { scale: T1N_PX, pts: 100 }, x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380,
+    hp, maxHp: hp, r: Math.max(26, sz.r), h: sz.h, dmg: 18, sp: 46 + n * 6, anim: 0, hit: 0, stun: 0, face: 1, st: 'chase', stT: 2.2, cycle: 0 };
   f.x = Math.max(R.wall + 60, Math.min(R.w - R.wall - 60, f.x)); f.y = Math.max(R.top + 60, Math.min(R.h - R.wall - 60, f.y));
   f.shield = true; f.floor = hp * 0.45;
   g.bossPart = part;
@@ -30871,7 +30958,7 @@ function t1dTile(c, name, x, y, s) {
   if (r && T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], x, y, r[2] * s, r[3] * s);
 }
 function t1hDrawHero(c) {
-  const g = _t1, p = g.p, sc = 4;
+  const g = _t1, p = g.p, sc = T1N_PX;
   // Facing: where the last shot went while attacking, else the way it walks.
   const dir = p.atk > 0 ? t1nDir(Math.cos(p.aim || 0), Math.sin(p.aim || 0)) : t1nDir(p.mx || 0, p.my || 0);
   const row = p.atk > 0 ? 4 : p.moving && !p.won ? Math.floor(p.anim * 10) % 4 : 0;
@@ -30900,40 +30987,32 @@ function t1hDrawHero(c) {
     c.beginPath(); c.arc(p.x, p.y - 34, 44, 0, Math.PI * 2); c.fill(); c.stroke();
     c.restore();
   }
-  // The weapon in hand.
-  const hx = p.x + p.face * 12, hy = p.y - 26, k = g.w.kind;
+  // The weapon in hand, from the same pack as the hero. The gunner throws
+  // shuriken, so the hand stays empty.
+  const hx = p.x + p.face * 10, hy = p.y - 16, k = g.w.kind;
+  const wpn = (f, ang, ax, ay) => {
+    const e = t1nImg('weapon/' + f);
+    if (!e.ready) return;
+    c.rotate(ang);
+    c.drawImage(e.img, -e.img.width * T1N_PX * ax, -e.img.height * T1N_PX * ay, e.img.width * T1N_PX, e.img.height * T1N_PX);
+  };
   c.save();
   c.translate(hx, hy);
   c.imageSmoothingEnabled = false;
-  if (k === 'gun') {
-    // A stubby pixel blunderbuss, pointing where the last shot went.
-    const ang = p.aim || 0;
-    c.rotate(ang);
-    if (Math.cos(ang) < 0) c.scale(1, -1);
-    c.fillStyle = '#5B3A22'; c.fillRect(-6, -2, 9, 6); c.fillRect(-4, 3, 4, 6);
-    c.fillStyle = '#9AA6B2'; c.fillRect(2, -4, 18, 5);
-    c.fillStyle = '#5E6873'; c.fillRect(18, -5, 4, 7);
-  } else if (k === 'bow') {
-    // The bow faces the target with an arrow on the string, ready to fly.
+  if (k === 'bow') {
+    // The sprite lies flat, string on top and the curve below: turn the curve
+    // toward the target and hold it a little in front of the body.
     const ang = p.aim || (p.face > 0 ? 0 : Math.PI);
-    c.rotate(ang);
-    const r = T1D_RECTS.weapon_bow, s2 = 2.2, ar = T1D_RECTS.weapon_arrow;
-    if (T1D.ready) {
-      c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 / 2, r[2] * s2, r[3] * s2);
-      if (g.w.cd > 0.12 || p.atk <= 0) { c.save(); c.rotate(Math.PI / 2); const pull = p.atk > 0 ? 0 : 6; c.drawImage(T1D.img, ar[0], ar[1], ar[2], ar[3], -ar[2] * 0.9, -ar[3] * 1.8 + pull + 14, ar[2] * 1.8, ar[3] * 1.8); c.restore(); }
-    }
+    c.translate(Math.cos(ang) * 14 - p.face * 10, Math.sin(ang) * 10 + 4);
+    wpn('Bow.png', ang - Math.PI / 2, 0.5, 0.3);
   } else if (k === 'magic') {
-    // The staff stands upright, leaning a little; the gem glows brighter on a cast.
-    c.rotate(p.face * (0.12 + (p.atk > 0 ? 0.25 : 0)));
-    const r = T1D_RECTS.weapon_red_magic_staff, s2 = 2;
-    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 + 16, r[2] * s2, r[3] * s2);
-    c.fillStyle = `rgba(190,140,255,${p.atk > 0 ? 0.8 : 0.45})`; c.shadowColor = '#A66BFF'; c.shadowBlur = p.atk > 0 ? 18 : 10;
-    c.beginPath(); c.arc(0, -r[3] * s2 + 22, p.atk > 0 ? 7 : 5, 0, Math.PI * 2); c.fill();
-  } else {
-    const ang = p.atk <= 0 ? (p.face > 0 ? -0.9 : -2.24) : (p.aim || 0);
-    c.rotate(ang + Math.PI / 2);
-    const r = T1D_RECTS.weapon_knight_sword, s2 = 2;
-    if (T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2] * s2 / 2, -r[3] * s2 * 0.8, r[2] * s2, r[3] * s2);
+    wpn('MagicWand.png', p.face * (0.35 + (p.atk > 0 ? 0.5 : 0)), 0.5, 0.9);
+    c.fillStyle = `rgba(190,140,255,${p.atk > 0 ? 0.7 : 0.35})`; c.shadowColor = '#A66BFF'; c.shadowBlur = p.atk > 0 ? 16 : 8;
+    c.beginPath(); c.arc(0, -26, p.atk > 0 ? 6 : 4, 0, Math.PI * 2); c.fill();
+  } else if (k === 'sword') {
+    // Guard on top, blade pointing down the sprite: held low at rest, swung toward the target.
+    const ang = p.atk <= 0 ? -p.face * 0.5 : (p.aim || 0) - Math.PI / 2;
+    wpn('Sword.png', ang, 0.5, 0.1);
   }
   c.restore();
   const bw = 46, f = Math.max(0, p.hp / p.maxHp);
@@ -30983,6 +31062,7 @@ function t1hDrawFoe(c, f) {
 // Obstacles, drawn in depth order with the people.
 function t1hDrawProp(c, o) {
   const cx = o.x + o.w / 2, by = o.y + o.h;
+  if (o.art) { const [f, sx, sy, w, h] = o.art; t1nDraw(c, f, sx, sy, w, h, cx, by + (o.kind === 'house' ? 0 : 4), T1N_PX, o.kind !== 'house' && o.seed < 0.5, o.hit > 0 ? [['flash', 0.6]] : null, o.kind === 'house'); return; }
   const zp = (T1N_ZONES[_t1.zone || 0].props || {})[o.kind];
   if (zp) {
     const [f, sx, sy, w, h, sc] = zp, over = o.hit > 0 ? [['flash', 0.6]] : null;
@@ -31055,12 +31135,19 @@ function t1hDrawGem(c, m, gold, idx) {
 }
 function t1hDrawShot(c, s) {
   c.save();
+  const sheet = (f, n, size, ang) => {
+    const e = t1nImg(f);
+    if (!e.ready) return false;
+    const fw = e.img.width / n, k = Math.floor(_t1.time * 14) % n;
+    c.imageSmoothingEnabled = false; c.translate(s.x, s.y); c.rotate(ang);
+    c.drawImage(e.img, k * fw, 0, fw, e.img.height, -size / 2, -size * e.img.height / fw / 2, size, size * e.img.height / fw);
+    return true;
+  };
   if (s.kind === 'gun') {
-    c.strokeStyle = 'rgba(255,200,60,.5)'; c.lineWidth = 3; c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - s.vx * 0.03, s.y - s.vy * 0.03); c.stroke();
-    c.fillStyle = '#FFD84D'; c.beginPath(); c.arc(s.x, s.y, 3.5, 0, Math.PI * 2); c.fill();
+    if (!sheet('fx/Shuriken.png', 2, 16 * T1N_PX * 0.75, _t1.time * 18)) { c.fillStyle = '#FFD84D'; c.beginPath(); c.arc(s.x, s.y, 3.5, 0, Math.PI * 2); c.fill(); }
   } else if (s.kind === 'magic') {
-    c.shadowColor = '#A66BFF'; c.shadowBlur = 14; c.fillStyle = '#C9A6FF';
-    c.beginPath(); c.arc(s.x, s.y, 6.5, 0, Math.PI * 2); c.fill();
+    c.shadowColor = '#A66BFF'; c.shadowBlur = 12;
+    if (!sheet('fx/EnergyBall.png', 4, 16 * T1N_PX * 0.8, Math.atan2(s.vy, s.vx))) { c.fillStyle = '#C9A6FF'; c.beginPath(); c.arc(s.x, s.y, 6.5, 0, Math.PI * 2); c.fill(); }
   } else if (s.kind === 'missile') {
     const a = Math.atan2(s.vy, s.vx);
     c.translate(s.x, s.y); c.rotate(a);
@@ -31072,9 +31159,10 @@ function t1hDrawShot(c, s) {
     c.strokeStyle = 'rgba(110,231,249,.9)'; c.shadowColor = '#22D3EE'; c.shadowBlur = 12; c.lineWidth = 4; c.lineCap = 'round';
     c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x - s.vx * 0.05, s.y - s.vy * 0.05); c.stroke();
   } else {
-    c.translate(s.x, s.y); c.rotate(Math.atan2(s.vy, s.vx) + Math.PI / 2);
-    const r = T1D_RECTS.weapon_arrow;
-    if (T1D.ready) { c.imageSmoothingEnabled = false; c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -r[2], -r[3], r[2] * 2, r[3] * 2); }
+    // The arrow sprite points right.
+    const e = t1nImg('weapon/Arrow.png');
+    c.translate(s.x, s.y); c.rotate(Math.atan2(s.vy, s.vx));
+    if (e.ready) { c.imageSmoothingEnabled = false; c.drawImage(e.img, -e.img.width * T1N_PX / 2, -e.img.height * T1N_PX / 2, e.img.width * T1N_PX, e.img.height * T1N_PX); }
   }
   c.restore();
 }
