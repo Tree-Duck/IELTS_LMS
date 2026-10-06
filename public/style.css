@@ -8679,6 +8679,10 @@ input.ts-input.tw-input { margin-top: 0; flex: 1; }
 /* ─── TASK 1 · BẢN ĐỒ (SVG towns, time slider, sentence building) ─── */
 .t1m-svg { display: block; width: 100%; height: auto; border-radius: 14px; border: 2px solid #C9D8CC; background: #F4EFE1; }
 .t1m-land { fill: #F4EFE1; }
+.t1m-pix image { image-rendering: pixelated; }
+.t1m-pix .t1m-lab { stroke: #FFFFFF; stroke-width: 4px; }
+.t1m-pix .t1m-roadlab { fill: #3E2A18; stroke: #FFFFFF; stroke-width: 4px; font-weight: 700; }
+.t1m-pix .t1m-p { stroke: #FFFFFF; stroke-width: 4px; paint-order: stroke; }
 .t1m-water { fill: #9CCBEA; stroke: #6FA8D1; stroke-width: 1.5; }
 .t1m-area { stroke: rgba(30, 43, 37, 0.25); stroke-width: 1.5; }
 .t1m-furrow { stroke: #CDB86A; stroke-width: 1.5; }
