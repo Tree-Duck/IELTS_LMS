@@ -28761,26 +28761,11 @@ function t1dLoad() {
   img.onload = () => { T1D.flash = t1hSilhouette(img, '#fff'); T1D.red = t1hSilhouette(img, '#C0392B'); T1D.ice = t1hSilhouette(img, '#7FC8F8'); T1D.gold = t1hSilhouette(img, '#F2C14E'); T1D.ready = true; };
   img.src = '/img/t1/dungeon.png';
 }
-// One frame with its feet at (x, y), crisp pixels, optional shadow and overlays.
-function t1dDraw(c, name, x, y, scale, flip, over, noShadow) {
-  const r = T1D_RECTS[name];
-  if (!r) return;
-  const w = r[2] * scale, h = r[3] * scale;
-  if (!noShadow) { c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x, y - 1, w * 0.4, 3 + scale * 1.2, 0, 0, Math.PI * 2); c.fill(); }
-  if (!T1D.ready) return;
-  c.save();
-  c.imageSmoothingEnabled = false;
-  c.translate(x, y);
-  if (flip) c.scale(-1, 1);
-  c.drawImage(T1D.img, r[0], r[1], r[2], r[3], -w / 2, -h, w, h);
-  (over || []).forEach(([k, a]) => { if (a > 0) { c.globalAlpha = a; c.drawImage(T1D[k], r[0], r[1], r[2], r[3], -w / 2, -h, w, h); } });
-  c.restore();
-}
 /* Ninja Adventure sprites (Pixel-boy & AAA, CC0; public/img/t1/ninja). Heroes,
    foes and bosses of Sinh tồn ghép câu. Hero and foe sheets are 16px cells,
    four columns facing down, up, left, right, one row per frame. Boss sheets
-   are horizontal strips. The 0x72 atlas above stays for weapons, props and
-   Xây tháp. */
+   are horizontal strips. The 0x72 atlas above is
+   only for Xây tháp now. */
 const T1N = {};
 const T1N_SIL = { flash: '#fff', red: '#C0392B', ice: '#7FC8F8', gold: '#F2C14E' };
 // Boss strips have empty rows above and below the body: [top, bottom] of the
@@ -28848,43 +28833,49 @@ const T1N_TELE = 0.8;
 /* Zones: one per stage of the essay, ground pre-rendered once from the Ninja
    tilesets at half size and drawn at 2x. A gate opens when a part is done. */
 const T1N_ZONES = [
-  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A', layout: () => t1nVillage(),
-    tiles: [], decor: [['tiles/TilesetNature.png', 0, 176, 16, 16, 1], ['tiles/TilesetNature.png', 16, 176, 16, 16, 1], ['tiles/TilesetNature.png', 48, 176, 16, 16, 1], ['tiles/TilesetNature.png', 0, 160, 16, 16, 1], ['tiles/TilesetNature.png', 32, 160, 16, 16, 1]] },
-  { name: 'Rừng Overview', part: 'Overview', top: '#24452A', side: '#1A3320', line: '#4E8A4A',
-    tiles: [['tiles/TilesetField.png', 1, 7, 1]],
-    props: { column: ['tiles/TilesetNature.png', 32, 0, 32, 32, T1N_PX], wall: ['tiles/TilesetNature.png', 32, 0, 32, 32, T1N_PX], rock: ['tiles/TilesetNature.png', 272, 128, 32, 32, T1N_PX], crate: ['tiles/TilesetNature.png', 128, 224, 32, 32, T1N_PX] },
-    decor: [['tiles/TilesetNature.png', 0, 32, 64, 48, 6], ['tiles/TilesetNature.png', 64, 32, 64, 48, 5], ['tiles/TilesetNature.png', 96, 128, 32, 32, 8], ['tiles/TilesetNature.png', 64, 160, 16, 16, 30], ['tiles/TilesetNature.png', 16, 160, 16, 16, 40]] },
-  { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#B5793A', side: '#94602C', line: '#E6B474',
-    tiles: [['tiles/TilesetField.png', 1, 1, 1]],
-    props: { column: ['tiles/TilesetDesert.png', 160, 144, 32, 32, T1N_PX], wall: ['tiles/TilesetDesert.png', 160, 144, 32, 32, T1N_PX], rock: ['tiles/TilesetNature.png', 208, 128, 32, 32, T1N_PX], crate: ['tiles/TilesetDesert.png', 112, 176, 16, 16, T1N_PX] },
-    decor: [['tiles/TilesetDesert.png', 160, 64, 64, 64, 7], ['tiles/TilesetDesert.png', 160, 160, 64, 64, 5], ['tiles/TilesetNature.png', 192, 96, 64, 48, 4]] },
-  { name: 'Đấu trường trùm cuối', part: null, dungeon: true,
-    tiles: [['tiles/TilesetFloor.png', 13, 15, 0.8], ['tiles/TilesetFloor.png', 15, 15, 0.2]],
-    decor: [['tiles/TilesetDungeon.png', 32, 48, 16, 16, 10], ['tiles/TilesetDungeon.png', 128, 48, 16, 16, 8]] },
+  { name: 'Làng Mở bài', part: 'Mở bài', top: '#3F6B2E', side: '#2F5222', line: '#7FB04A', layout: () => t1nVillage() },
+  { name: 'Rừng Overview', part: 'Overview', top: '#1F3A24', side: '#17301C', line: '#4E8A4A', layout: () => t1nForest() },
+  { name: 'Sa mạc Thân bài', part: 'Thân bài', top: '#A0672F', side: '#83542A', line: '#E6B474', layout: () => t1nDesert() },
+  { name: 'Đấu trường trùm cuối', part: null, top: '#35313F', side: '#2A2733', line: '#6B6377', layout: () => t1nArena() },
 ];
+// The zone's ground, drawn once from its plan: base tiles, paths with proper
+// edges and corners, ponds, and small decor on the open ground.
 function t1nZoneGround(z) {
   if (z.canvas) return z.canvas;
-  if (z.layout) return t1nPlanGround(z);
-  const files = [...new Set([...z.tiles, ...z.decor].map(t => t[0]))];
-  if (!files.every(f => t1nImg(f).ready)) return null;
+  const plan = z.plan || (z.plan = z.layout()), G = plan.ground, F = t1nImg('tiles/TilesetFloor.png'), Wt = t1nImg('tiles/TilesetWater.png');
+  if (!F.ready || !Wt.ready || !plan.decor.every(d => t1nImg(d[0]).ready)) return null;
   const R = T1H_ROOM, cv = document.createElement('canvas');
   cv.width = R.w / T1N_PX; cv.height = R.h / T1N_PX;
-  const x = cv.getContext('2d');
+  const x = cv.getContext('2d'), has = (c, r) => plan.dirt.has(c + ',' + r), wet = (c, r) => plan.water.has(c + ',' + r);
+  const put = (img, tc, tr, c, r) => x.drawImage(img, tc * 16, tr * 16, 16, 16, c * 16, r * 16, 16, 16);
   x.imageSmoothingEnabled = false;
-  for (let i = 0; i < cv.width / 16; i++) for (let j = 0; j < cv.height / 16; j++) {
-    let r = Math.random(), t = z.tiles[0];
-    for (const tt of z.tiles) { if (r < tt[3]) { t = tt; break; } r -= tt[3]; }
-    x.drawImage(t1nImg(t[0]).img, t[1] * 16, t[2] * 16, 16, 16, i * 16, j * 16, 16, 16);
-  }
-  // Decor keeps clear of the middle, where the hero starts.
-  z.decor.forEach(([f, sx, sy, w, h, n]) => {
-    for (let k = 0, tries = 0; k < n * 2 && tries < 400; tries++) {
-      const px = Math.random() * (cv.width - w), py = R.top / T1N_PX + Math.random() * (cv.height - R.top / T1N_PX - h);
-      if (Math.hypot(px + w / 2 - cv.width / 2, py + h / 2 - cv.height / 2) < 80) continue;
-      x.drawImage(t1nImg(f).img, sx, sy, w, h, Math.round(px), Math.round(py), w, h);
-      k++;
+  for (let c = 0; c < cv.width / 16; c++) for (let r = 0; r < cv.height / 16; r++) {
+    if (wet(c, r)) {
+      const [ox, oy] = G.water;
+      put(Wt.img, ox + (!wet(c - 1, r) ? 0 : !wet(c + 1, r) ? 2 : 1), oy + (!wet(c, r - 1) ? 0 : !wet(c, r + 1) ? 2 : 1), c, r);
+      continue;
     }
-  });
+    if (!has(c, r)) {
+      const v = Math.random(), t = v < 0.8 ? G.base : G.vars[Math.floor((v - 0.8) / 0.2 * G.vars.length)];
+      put(F.img, t[0], t[1], c, r);
+      continue;
+    }
+    const n = has(c, r - 1), so = has(c, r + 1), w = has(c - 1, r), e = has(c + 1, r), [bx, by] = G.blob, [ix, iy] = G.inner;
+    if (n && so && w && e) {
+      // Inner corners, where only a diagonal neighbour is off the path.
+      if (!has(c + 1, r + 1)) put(F.img, ix, iy, c, r); else if (!has(c - 1, r + 1)) put(F.img, ix + 1, iy, c, r);
+      else if (!has(c + 1, r - 1)) put(F.img, ix, iy + 1, c, r); else if (!has(c - 1, r - 1)) put(F.img, ix + 1, iy + 1, c, r); else put(F.img, bx + 1, by + 1, c, r);
+    } else put(F.img, bx + (!w ? 0 : !e ? 2 : 1), by + (!n ? 0 : !so ? 2 : 1), c, r);
+  }
+  // Decor on the open ground, clear of paths, water and anything standing there.
+  const busy = (px, py) => plan.obs.some(o => px * T1N_PX > o.x - 30 && px * T1N_PX < o.x + o.w + 30 && py * T1N_PX > o.y - 90 && py * T1N_PX < o.y + o.h + 10);
+  for (let k = 0, tries = 0; k < plan.decorN && tries < 3000; tries++) {
+    const c = Math.floor(Math.random() * cv.width / 16), r = 3 + Math.floor(Math.random() * (cv.height / 16 - 4));
+    if (has(c, r) || wet(c, r) || wet(c, r + 1) || wet(c, r - 1) || busy(c * 16 + 8, r * 16 + 8)) continue;
+    const [f, sx, sy] = plan.decor[Math.floor(Math.random() * plan.decor.length)];
+    x.drawImage(t1nImg(f).img, sx, sy, 16, 16, c * 16, r * 16, 16, 16);
+    k++;
+  }
   return (z.canvas = cv);
 }
 /* The village: a crossroads with a plaza where the hero starts, houses facing
@@ -28892,67 +28883,133 @@ function t1nZoneGround(z) {
    T1N_T world pixels; the same plan gives the ground and the obstacles. */
 const T1N_TREES = [[0, 0], [32, 0], [96, 128], [224, 0]];
 function t1nVillage() {
-  const R = T1H_ROOM, T = T1N_T, cols = Math.floor(R.w / T), rows = Math.floor(R.h / T);
-  const dirt = new Set(), dig = (c0, r0, c1, r1) => { for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) dirt.add(c + ',' + r); };
-  dig(1, 14, cols - 2, 16);
-  dig(23, 3, 25, rows - 2);
-  dig(19, 12, 29, 18);
-  const obs = [], H = 'tiles/TilesetHouse.png', N = 'tiles/TilesetNature.png';
+  const K = t1nKit(7), { T, R } = K, N = 'tiles/TilesetNature.png';
+  K.dig(1, 14, K.cols - 2, 16);
+  K.dig(23, 3, 25, K.rows - 2);
+  K.dig(19, 12, 29, 18);
   // A house is 4 x 3 tiles; it blocks its lower part, so a hero can pass behind the roof.
-  const house = (col, row, sx) => obs.push({ kind: 'house', x: col * T + 6, y: row * T + T * 1.1, w: 4 * T - 12, h: T * 1.9, hp: 0, hit: 0, seed: 0.9, art: [H, sx, 0, 64, 48] });
+  const house = (col, row, sx) => K.obs.push({ kind: 'house', x: col * T + 6, y: row * T + T * 1.1, w: 4 * T - 12, h: T * 1.9, hp: 0, hit: 0, seed: 0.9, art: ['tiles/TilesetHouse.png', sx, 0, 64, 48] });
   [[3, 9, 0], [9, 9, 64], [14, 9, 192], [31, 9, 128], [36, 9, 0], [42, 9, 64]].forEach(([c, r, sx]) => house(c, r, sx));
   [[5, 19, 192], [12, 19, 128], [33, 19, 64], [40, 19, 192]].forEach(([c, r, sx]) => house(c, r, sx));
-  // Trees block only their trunk.
   const holes = [0.15, 0.5, 0.85].map(f => R.wall + 50 + f * (R.w - 2 * R.wall - 100));
-  const tree = (x, y, i) => {
-    const [sx, sy] = T1N_TREES[i % T1N_TREES.length];
-    obs.push({ kind: 'tree', x: x - 18, y: y - 22, w: 36, h: 22, hp: 0, hit: 0, seed: (i * 0.37) % 1, art: [N, sx, sy, 32, 32] });
-  };
   let i = 0;
+  const tree = (x, y) => { const [sx, sy] = T1N_TREES[i % T1N_TREES.length]; K.put('tree', [N, sx, sy, 32, 32], x, y, 36, 22, (i * 0.37) % 1); i++; };
   for (let x = 130; x < R.w - 100; x += 118) {
     if (holes.some(h => Math.abs(h - x) < 110)) continue;
-    tree(x, R.top + 64, i++);
-    tree(x + 40, R.h - R.wall - 4, i++);
+    tree(x, R.top + 64);
+    tree(x + 40, R.h - R.wall - 4);
   }
   for (let y = R.top + 190; y < R.h - R.wall - 90; y += 118) {
     if (Math.abs(y - 15 * T) < 160) continue;
-    tree(R.wall + 46, y, i++);
-    tree(R.w - R.wall - 46, y, i++);
+    tree(R.wall + 46, y);
+    tree(R.w - R.wall - 46, y);
   }
   // Small groves between the houses and the edge.
-  [[8, 6], [17, 6], [33, 6], [44, 7], [10, 25], [17, 24], [30, 24], [38, 25], [45, 24]].forEach(([c, r]) => tree(c * T, r * T, i++));
-  // Baskets by the doors break for hearts, as crates do.
-  [[7, 13], [17, 13], [35, 13], [46, 13], [9, 22], [37, 22]].forEach(([c, r], k) =>
-    obs.push({ kind: 'crate', x: c * T + 4, y: r * T + 10, w: 40, h: 30, hp: 30, hit: 0, seed: k / 6, art: ['tiles/TilesetDesert.png', 96 + (k % 2) * 16, 176, 16, 16] }));
-  return { obs, dirt, cols, rows };
+  [[8, 6], [17, 6], [33, 6], [44, 7], [10, 25], [17, 24], [30, 24], [38, 25], [45, 24]].forEach(([c, r]) => tree(c * T, r * T));
+  // Baskets by the doors break for hearts.
+  [[7, 13], [17, 13], [35, 13], [46, 13], [9, 22], [37, 22]].forEach(([c, r], k) => K.crate(['tiles/TilesetDesert.png', 96 + (k % 2) * 16, 176, 16, 16], c * T + 24, r * T + 40));
+  return K.done({ base: [0, 12], vars: [[1, 12], [2, 12], [3, 12], [4, 12]], blob: [0, 7], inner: [5, 8], water: [0, 6] },
+    [[N, 0, 176], [N, 16, 176], [N, 48, 176], [N, 0, 160], [N, 32, 160]], 160);
 }
-// Ground from a zone's plan: grass, and dirt paths with proper edges and corners.
-function t1nPlanGround(z) {
-  const F = t1nImg('tiles/TilesetFloor.png'), files = z.decor.map(t => t[0]);
-  if (!F.ready || !files.every(f => t1nImg(f).ready)) return null;
-  const plan = z.plan || (z.plan = z.layout()), R = T1H_ROOM, cv = document.createElement('canvas');
-  cv.width = R.w / T1N_PX; cv.height = R.h / T1N_PX;
-  const x = cv.getContext('2d'), has = (c, r) => plan.dirt.has(c + ',' + r), put = (tc, tr, c, r) => x.drawImage(F.img, tc * 16, tr * 16, 16, 16, c * 16, r * 16, 16, 16);
-  x.imageSmoothingEnabled = false;
-  for (let c = 0; c < cv.width / 16; c++) for (let r = 0; r < cv.height / 16; r++) {
-    if (!has(c, r)) { const v = Math.random(); put(v < 0.8 ? 0 : 1 + Math.floor((v - 0.8) * 20), 12, c, r); continue; }
-    const n = has(c, r - 1), so = has(c, r + 1), w = has(c - 1, r), e = has(c + 1, r);
-    if (n && so && w && e) {
-      // Inner corners where only a diagonal is grass.
-      if (!has(c + 1, r + 1)) put(5, 8, c, r); else if (!has(c - 1, r + 1)) put(6, 8, c, r);
-      else if (!has(c + 1, r - 1)) put(5, 9, c, r); else if (!has(c - 1, r - 1)) put(6, 9, c, r); else put(1, 8, c, r);
-    } else put(!w ? 0 : !e ? 2 : 1, !n ? 7 : !so ? 9 : 8, c, r);
+/* Shared kit for zone plans: tiles of T1N_T world pixels, dirt paths and
+   ponds as tile sets, obstacles with art and a footprint at their feet, and
+   a seeded random so a zone looks the same every time. */
+function t1nKit(seed) {
+  const R = T1H_ROOM, T = T1N_T, cols = Math.floor(R.w / T), rows = Math.floor(R.h / T);
+  const dirt = new Set(), water = new Set(), obs = [];
+  let sd = seed * 7919 + 1;
+  const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const holes = t1hRoomHoles(R).holes;
+  const K = {
+    R, T, cols, rows, dirt, water, obs, rnd,
+    dig: (c0, r0, c1, r1) => { for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) dirt.add(c + ',' + r); },
+    // A pond blocks movement inside its shore.
+    pond: (c0, r0, c1, r1) => {
+      for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) water.add(c + ',' + r);
+      obs.push({ kind: 'water', x: c0 * T + 14, y: r0 * T + 18, w: (c1 - c0 + 1) * T - 28, h: (r1 - r0 + 1) * T - 30, hp: 0, hit: 0, seed: 0 });
+    },
+    // Feet at (x, y); the footprint is fw x fh, centred under the art.
+    put: (kind, art, x, y, fw, fh, seed) => obs.push({ kind, x: Math.round(x - fw / 2), y: Math.round(y - fh), w: fw, h: fh, hp: 0, hit: 0, seed: seed == null ? rnd() : seed, art }),
+    crate: (art, x, y) => obs.push({ kind: 'crate', x: Math.round(x - 20), y: Math.round(y - 30), w: 40, h: 30, hp: 30, hit: 0, seed: rnd(), art }),
+    // Room for something with feet at (x, y): off paths and water, away from
+    // the start, the monster holes and other obstacles.
+    clear: (x, y, pad) => {
+      const c = Math.floor(x / T), r = Math.floor(y / T);
+      for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 0; dr++) if (dirt.has((c + dc) + ',' + (r + dr)) || water.has((c + dc) + ',' + (r + dr))) return false;
+      if (water.has(c + ',' + (r + 1))) return false;
+      if (Math.hypot(x - R.w / 2, y - R.h / 2) < 300 || holes.some(h => Math.hypot(h.x - x, h.y - y) < 150)) return false;
+      if (x < R.wall + 30 || x > R.w - R.wall - 30 || y < R.top + 40 || y > R.h - R.wall) return false;
+      return !obs.some(o => x > o.x - pad && x < o.x + o.w + pad && y > o.y - pad && y < o.y + o.h + pad);
+    },
+    // Up to n of something at random clear spots in a box.
+    scatter: (n, x0, y0, x1, y1, pad, fn) => {
+      for (let k = 0, t = 0; k < n && t < n * 40; t++) {
+        const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0);
+        if (K.clear(x, y, pad)) { fn(x, y); k++; }
+      }
+    },
+    done: (ground, decor, decorN) => ({ obs, dirt, water, ground, decor, decorN }),
+  };
+  return K;
+}
+// The forest: a ring of dense trees, a clearing in the middle, paths out, two ponds.
+function t1nForest() {
+  const K = t1nKit(11), { R, T } = K, N = 'tiles/TilesetNature.png';
+  K.dig(16, 9, 33, 21);
+  K.dig(1, 14, 16, 15); K.dig(33, 15, K.cols - 2, 16);
+  K.dig(24, 3, 25, 9); K.dig(24, 21, 25, K.rows - 2);
+  K.pond(6, 4, 11, 7); K.pond(37, 21, 42, 24);
+  const trees = [[32, 0], [32, 0], [0, 0], [96, 128]];
+  const tree = (x, y) => { const [sx, sy] = trees[Math.floor(K.rnd() * trees.length)]; K.put('tree', [N, sx, sy, 32, 32], x, y, 36, 22); };
+  // Dense near the edge, a few groves inside.
+  for (let x = 100; x < R.w - 60; x += 92) for (let y = R.top + 70; y < R.h - 10; y += 88) {
+    const edge = x < 360 || x > R.w - 360 || y < R.top + 240 || y > R.h - 240;
+    const jx = x + (K.rnd() - 0.5) * 40, jy = y + (K.rnd() - 0.5) * 30;
+    if (edge && K.rnd() < 0.85 && K.clear(jx, jy, 26)) tree(jx, jy);
   }
-  // Flowers and tufts on the grass, clear of paths and of anything standing there.
-  const busy = (px, py) => plan.obs.some(o => px * T1N_PX > o.x - 30 && px * T1N_PX < o.x + o.w + 30 && py * T1N_PX > o.y - 90 && py * T1N_PX < o.y + o.h + 10);
-  for (let k = 0, tries = 0; k < 160 && tries < 2000; tries++) {
-    const c = Math.floor(Math.random() * cv.width / 16), r = 3 + Math.floor(Math.random() * (cv.height / 16 - 4));
-    if (has(c, r) || busy(c * 16 + 8, r * 16 + 8)) continue;
-    const [f, sx, sy] = z.decor[Math.floor(Math.random() * z.decor.length)];
-    x.drawImage(t1nImg(f).img, sx, sy, 16, 16, c * 16, r * 16, 16, 16);
-    k++;
-  }
-  return (z.canvas = cv);
+  [[11, 11], [38, 8], [9, 21], [41, 13], [30, 25], [18, 5]].forEach(([c, r]) => K.scatter(4, c * T - 110, r * T - 90, c * T + 110, r * T + 90, 26, tree));
+  K.scatter(6, 300, 300, R.w - 300, R.h - 200, 60, (x, y) => K.put('rock', [N, 272, 128, 32, 32], x, y, 70, 30));
+  K.scatter(4, 300, 300, R.w - 300, R.h - 200, 60, (x, y) => K.put('stump', [N, 0, 128, 32, 32], x, y, 60, 26));
+  K.scatter(6, 300, 260, R.w - 300, R.h - 200, 40, (x, y) => K.crate([N, 128 + Math.floor(K.rnd() * 2) * 32, 224, 32, 32], x, y));
+  return K.done({ base: [11, 12], vars: [[12, 12], [13, 12], [14, 12], [15, 12]], blob: [11, 7], inner: [16, 8], water: [0, 6] },
+    [[N, 0, 160], [N, 16, 160], [N, 48, 160], [N, 64, 160], [N, 96, 160], [N, 112, 160], [N, 64, 176], [N, 96, 176], [N, 128, 176]], 150);
+}
+// The desert: a winding caravan road of pale sand, oases ringed with palms, rocks, two domed houses.
+function t1nDesert() {
+  const K = t1nKit(23), { R, T } = K, D = 'tiles/TilesetDesert.png', N = 'tiles/TilesetNature.png';
+  K.dig(1, 6, 14, 8); K.dig(12, 6, 14, 16); K.dig(12, 14, 36, 16); K.dig(34, 14, 36, 24); K.dig(34, 22, K.cols - 2, 24);
+  K.dig(21, 12, 29, 18);
+  K.pond(4, 18, 9, 22); K.pond(39, 4, 44, 8); K.pond(26, 4, 29, 6);
+  const palm = (x, y) => K.put('tree', [D, 160 + Math.floor(K.rnd() * 2) * 32, 160, 32, 32], x, y, 34, 22);
+  // Palms around each oasis.
+  [[4, 18, 9, 22], [39, 4, 44, 8], [26, 4, 29, 6]].forEach(([c0, r0, c1, r1]) => {
+    const x0 = c0 * T - 40, x1 = (c1 + 1) * T + 40, y0 = r0 * T - 10, y1 = (r1 + 1) * T + 60;
+    // Every other spot on the ring, nudged, so it reads as a grove and not a hedge.
+    const at = (x, y) => { const jx = x + (K.rnd() - 0.5) * 50, jy = y + (K.rnd() - 0.5) * 36; if (K.rnd() < 0.55 && K.clear(jx, jy, 30)) palm(jx, jy); };
+    for (let x = x0; x <= x1; x += 70) { at(x, y0); at(x, y1); }
+    for (let y = y0 + 70; y < y1; y += 70) { at(x0, y); at(x1, y); }
+  });
+  K.put('house', [D, 0, 0, 32, 48], 12 * T, 20 * T, 84, 56, 0.9);
+  K.put('house', [D, 48, 0, 32, 64], 44 * T, 13 * T, 84, 56, 0.9);
+  K.scatter(10, 200, 220, R.w - 200, R.h - 100, 50, (x, y) => K.put('rock', [N, 208, 128, 32, 32], x, y, 70, 30));
+  K.scatter(3, 300, 300, R.w - 300, R.h - 200, 80, (x, y) => K.put('rock', [N, 256, 160, 48, 48], x, y, 110, 40));
+  K.scatter(10, 120, 200, R.w - 120, R.h - 60, 60, palm);
+  K.scatter(6, 300, 260, R.w - 300, R.h - 200, 40, (x, y) => K.crate([D, 96 + Math.floor(K.rnd() * 2) * 16, 176, 16, 16], x, y));
+  return K.done({ base: [0, 5], vars: [[1, 5], [2, 5], [3, 5], [4, 5]], blob: [0, 0], inner: [5, 1], water: [0, 0] },
+    [[D, 256, 176], [D, 272, 176], [D, 288, 176], [D, 304, 176], [N, 192, 288], [N, 208, 288], [N, 224, 288]], 70);
+}
+// The arena: a pit of packed earth in a stone court, ringed with pillars, statues in the corners.
+function t1nArena() {
+  const K = t1nKit(31), { R, T } = K, H = 'tiles/TilesetHouse.png', D = 'tiles/TilesetDesert.png';
+  K.dig(7, 5, 42, 25);
+  const pillar = (x, y) => K.put('pillar', [H, 0, 304, 16, 48], x, y, 34, 20, 0.9);
+  for (let c = 7; c <= 43; c += 4) { pillar(c * T, 5 * T - 4); pillar(c * T, 27 * T); }
+  for (let r = 9; r <= 23; r += 4) { if (Math.abs(r - 15) < 3) continue; pillar(6 * T, r * T); pillar(44 * T, r * T); }
+  [[3, 6], [47, 6], [3, 27], [47, 27]].forEach(([c, r]) => K.put('statue', [H, 16, 304, 32, 48], c * T, r * T, 84, 40, 0.9));
+  [[16, 28], [34, 28]].forEach(([c, r]) => K.put('statue', [H, 48, 304, 32, 32], c * T, r * T, 76, 30, 0.9));
+  K.scatter(4, 500, 400, R.w - 500, R.h - 300, 80, (x, y) => K.crate([D, 96 + Math.floor(K.rnd() * 2) * 16, 176, 16, 16], x, y));
+  return K.done({ base: [11, 19], vars: [[12, 19], [13, 19], [14, 19], [15, 19]], blob: [11, 14], inner: [16, 15], water: [0, 6] },
+    [[D, 256, 176], [D, 288, 176]], 30);
 }
 // Sentences left in the part being written, the current one included.
 function t1nLeft() {
@@ -29152,8 +29209,7 @@ function t1nPreload() {
   Object.values(T1H_FOES).forEach(T => T.look.forEach(n => t1nImg(`foe/${n}.png`)));
   T1N_BOSSES.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
   T1N_MINI.forEach(B => { t1nImg(`boss/${B.id}/${B.idle[0]}`); t1nImg(`boss/${B.id}/Faceset.png`); });
-  T1N_ZONES.forEach(z => [...z.tiles, ...z.decor].forEach(t => t1nImg(t[0])));
-  ['tiles/TilesetFloor.png', 'tiles/TilesetHouse.png', 'tiles/TilesetDesert.png', 'weapon/Sword.png', 'weapon/MagicWand.png', 'weapon/Bow.png', 'weapon/Arrow.png', 'fx/Shuriken.png', 'fx/EnergyBall.png'].forEach(t1nImg);
+  ['tiles/TilesetFloor.png', 'tiles/TilesetWater.png', 'tiles/TilesetHole.png', 'tiles/TilesetNature.png', 'tiles/TilesetHouse.png', 'tiles/TilesetDesert.png', 'items/Heart.png', 'weapon/Sword.png', 'weapon/MagicWand.png', 'weapon/Bow.png', 'weapon/Arrow.png', 'fx/Shuriken.png', 'fx/EnergyBall.png'].forEach(t1nImg);
 }
 function t1nBossDraw(c, f, over) {
   const B = f.B, path = `boss/${B.id}/${B.idle[0]}`, e = t1nImg(path);
@@ -29182,7 +29238,6 @@ function t1hChosen() { let id = 'male'; try { id = localStorage.getItem('t1Hero'
 /* Hero select: owned heroes play, the rest unlock with coins. */
 function t1SurvStart() {
   t1Leave();
-  t1dLoad();
   t1nPreload();
   t1hPickScreen();
   walLoad().then(() => { if (!_t1 && t1Root()?.querySelector('.t1h-pick')) t1hPickScreen(); });
@@ -29295,7 +29350,6 @@ function t1hGo(id) {
   const h = T1H_HEROES.find(x => x.id === id && t1hOwned(x)) || T1H_HEROES[0];
   try { localStorage.setItem('t1Hero', h.id); } catch (e) {}
   t1Leave();
-  t1dLoad();
   const cfg = T1H_CFG[_t1Lv], order = { 'Mở bài': 0, 'Overview': 1, 'Thân bài': 2 }, room = t1hRoomMake(0);
   const set = t1hPickSet(), list = t1Shuffle(T1_SURV[_t1Block].filter(S => S.img === set)).sort((a, b) => order[a.part] - order[b.part]);
   const g = _t1 = { game: 'survive', cfg, hero: h, look: t1nHeroName(h), score: 0, combo: 0, right: 0, coins: 0, misses: [], missed: {}, list, si: 0,
@@ -29401,23 +29455,8 @@ function t1hGo(id) {
 
 /* ── The room: walls round the edge, blocks, pillars, rocks and crates ── */
 function t1hRoomMake(zone) {
-  const Z = T1N_ZONES[zone || 0];
-  if (Z.layout) { const plan = Z.plan || (Z.plan = Z.layout()); return { ...t1hRoomHoles(T1H_ROOM), obs: plan.obs.map(o => ({ ...o })) }; }
-  const R = T1H_ROOM, obs = [], cx = R.w / 2, cy = R.h / 2;
-  const free = (x, y, w, h, pad) => Math.hypot(x + w / 2 - cx, y + h / 2 - cy) > 320
-    && !obs.some(o => x < o.x + o.w + pad && x + w + pad > o.x && y < o.y + o.h + pad && y + h + pad > o.y);
-  const place = (kind, w, h, n, pad) => {
-    for (let k = 0, t = 0; k < n && t < 600; t++) {
-      const x = Math.round(t1Rand(R.wall + 90, R.w - R.wall - 90 - w)), y = Math.round(t1Rand(R.top + 110, R.h - R.wall - 70 - h));
-      if (free(x, y, w, h, pad)) { obs.push({ kind, x, y, w, h, hp: kind === 'crate' ? 30 : 0, hit: 0, seed: Math.random() }); k++; }
-    }
-  };
-  place('wall', 192, 48, 2, 150);
-  place('wall', 48, 192, 2, 150);
-  place('column', 40, 28, 8, 120);
-  place('rock', 58, 40, 6, 100);
-  place('crate', 40, 30, 9, 70);
-  return { ...t1hRoomHoles(R), obs };
+  const Z = T1N_ZONES[zone || 0], plan = Z.plan || (Z.plan = Z.layout());
+  return { ...t1hRoomHoles(T1H_ROOM), obs: plan.obs.map(o => ({ ...o })) };
 }
 // The room's size, and the holes along its walls that monsters climb out of.
 function t1hRoomHoles(R) {
@@ -29486,20 +29525,6 @@ function t1hFit() {
 }
 // A dungeon floor tile built from the atlas once it has loaded: mostly plain
 // stone, some cracked, the odd skull.
-function t1hGround(c) {
-  const t = document.createElement('canvas'), N = 8, S = 48;
-  t.width = t.height = N * S;
-  const x = t.getContext('2d');
-  x.imageSmoothingEnabled = false;
-  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
-    const r = Math.random(), f = r < 0.78 ? 1 : r < 0.86 ? 2 : r < 0.92 ? 3 : 4 + Math.floor(Math.random() * 5);
-    const R = T1D_RECTS['floor_' + f];
-    x.drawImage(T1D.img, R[0], R[1], R[2], R[3], i * S, j * S, S, S);
-  }
-  x.fillStyle = 'rgba(18,12,26,.3)'; x.fillRect(0, 0, t.width, t.height);
-  for (let k = 0; k < 2; k++) { const R = T1D_RECTS.skull; x.drawImage(T1D.img, R[0], R[1], R[2], R[3], Math.floor(Math.random() * N) * S, Math.floor(Math.random() * N) * S, S, S); }
-  return c.createPattern(t, 'repeat');
-}
 function t1hSentence() {
   const g = _t1;
   g.S = g.lastS = g.list[g.si];
@@ -30952,11 +30977,6 @@ function t1hRR(c, x, y, w, h, r) {
   c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
-// One atlas tile with its top-left at (x, y).
-function t1dTile(c, name, x, y, s) {
-  const r = T1D_RECTS[name];
-  if (r && T1D.ready) c.drawImage(T1D.img, r[0], r[1], r[2], r[3], x, y, r[2] * s, r[3] * s);
-}
 function t1hDrawHero(c) {
   const g = _t1, p = g.p, sc = T1N_PX;
   // Facing: where the last shot went while attacking, else the way it walks.
@@ -31061,48 +31081,9 @@ function t1hDrawFoe(c, f) {
 }
 // Obstacles, drawn in depth order with the people.
 function t1hDrawProp(c, o) {
-  const cx = o.x + o.w / 2, by = o.y + o.h;
-  if (o.art) { const [f, sx, sy, w, h] = o.art; t1nDraw(c, f, sx, sy, w, h, cx, by + (o.kind === 'house' ? 0 : 4), T1N_PX, o.kind !== 'house' && o.seed < 0.5, o.hit > 0 ? [['flash', 0.6]] : null, o.kind === 'house'); return; }
-  const zp = (T1N_ZONES[_t1.zone || 0].props || {})[o.kind];
-  if (zp) {
-    const [f, sx, sy, w, h, sc] = zp, over = o.hit > 0 ? [['flash', 0.6]] : null;
-    if (o.kind !== 'wall') { t1nDraw(c, f, sx, sy, w, h, cx, by + 4, sc, o.seed < 0.5, over); return; }
-    // A wall becomes a row (or column) of trees standing on its footprint.
-    const step = w * sc * 0.7, n = Math.max(1, Math.round(Math.max(o.w, o.h) / step));
-    for (let i = 0; i < n; i++) {
-      const t = (i + 0.5) / n;
-      t1nDraw(c, f, sx, sy, w, h, o.w > o.h ? o.x + o.w * t : cx, o.w > o.h ? by + 4 : o.y + o.h * t + 12, sc, (o.seed * 7 + i) % 2 < 1, null);
-    }
-    return;
-  }
-  if (o.kind === 'column') { t1dDraw(c, 'column', cx, by + 6, 3, false, null, false); return; }
-  if (o.kind === 'crate') { t1dDraw(c, 'crate', cx, by + 4, 2.6, false, o.hit > 0 ? [['flash', 0.6]] : null, false); return; }
-  if (o.kind === 'rock') {
-    // A boulder in three shades, chunky like the tiles around it.
-    const w = o.w, h = o.h + 18, x = o.x, y = by - h, s = o.seed;
-    c.save();
-    c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(cx, by, w * 0.55, 8, 0, 0, Math.PI * 2); c.fill();
-    c.fillStyle = '#4A4458'; c.beginPath();
-    c.moveTo(x + 4, by - 4); c.lineTo(x, y + h * 0.5); c.lineTo(x + w * (0.2 + s * 0.1), y + 6); c.lineTo(x + w * 0.62, y); c.lineTo(x + w, y + h * 0.42); c.lineTo(x + w - 3, by - 3); c.closePath(); c.fill();
-    c.fillStyle = '#6E6880'; c.beginPath();
-    c.moveTo(x + 8, y + h * 0.5); c.lineTo(x + w * (0.22 + s * 0.1), y + 10); c.lineTo(x + w * 0.6, y + 5); c.lineTo(x + w * 0.78, y + h * 0.35); c.lineTo(x + w * 0.4, y + h * 0.55); c.closePath(); c.fill();
-    c.fillStyle = '#9C97AE'; c.fillRect(x + w * 0.42, y + 9, 8, 4); c.fillRect(x + w * 0.3, y + 16, 5, 3);
-    c.strokeStyle = '#231C2C'; c.lineWidth = 2; c.beginPath();
-    c.moveTo(x + 4, by - 4); c.lineTo(x, y + h * 0.5); c.lineTo(x + w * (0.2 + s * 0.1), y + 6); c.lineTo(x + w * 0.62, y); c.lineTo(x + w, y + h * 0.42); c.lineTo(x + w - 3, by - 3); c.closePath(); c.stroke();
-    c.restore();
-    return;
-  }
-  // A brick block: a dark top, then the brick face down to its footprint.
-  c.save();
-  c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(o.x - 4, by - 4, o.w + 8, 10);
-  // The top face: the same bricks, darkened, so it reads as the top of the wall.
-  c.beginPath(); c.rect(o.x, o.y - 48, o.w, o.h); c.clip();
-  for (let tx = o.x; tx < o.x + o.w; tx += 48) for (let ty = o.y - 48; ty < o.y - 48 + o.h; ty += 48) t1dTile(c, 'wall_mid', tx, ty, 3);
-  c.fillStyle = 'rgba(28,18,40,.62)'; c.fillRect(o.x, o.y - 48, o.w, o.h);
-  c.restore(); c.save();
-  c.fillStyle = '#5A4B6E'; c.fillRect(o.x, o.y - 48, o.w, 4); c.fillRect(o.x, o.y - 48, 3, o.h); c.fillRect(o.x + o.w - 3, o.y - 48, 3, o.h);
-  for (let tx = o.x; tx < o.x + o.w; tx += 48) t1dTile(c, 'wall_mid', tx, by - 48, 3);
-  c.restore();
+  if (!o.art) return;
+  const [f, sx, sy, w, h] = o.art, still = o.kind === 'house' || o.kind === 'pillar' || o.kind === 'statue';
+  t1nDraw(c, f, sx, sy, w, h, o.x + o.w / 2, o.y + o.h + (still ? 0 : 4), T1N_PX, !still && o.seed < 0.5, o.hit > 0 ? [['flash', 0.6]] : null, still);
 }
 // Purple gems carry chunks of the sentence; gold ones are the boss's linkers.
 // Drawn in screen pixels so labels stay readable when the room is zoomed out.
@@ -31209,25 +31190,10 @@ function t1hDrawFx(c, e) {
 }
 // Walls round the room: bricks along the top with banners, dark stone on the other sides.
 function t1hDrawWalls(c) {
-  const z = T1N_ZONES[_t1.zone || 0];
-  if (!z.dungeon) {
-    const R = _t1.room;
-    c.fillStyle = z.top; c.fillRect(0, 0, R.w, R.top);
-    c.fillStyle = z.side; c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
-    c.fillStyle = z.line; c.fillRect(0, R.top - 4, R.w, 4); c.fillRect(R.wall - 4, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 4);
-    return;
-  }
-  const R = _t1.room, banners = ['wall_banner_red', 'wall_banner_blue', 'wall_banner_green'];
-  c.fillStyle = '#1C1524'; c.fillRect(0, 0, R.w, R.top - 96);
-  for (let x = 0, i = 0; x < R.w; x += 48, i++) {
-    t1dTile(c, 'wall_mid', x, R.top - 96, 3);
-    t1dTile(c, i % 7 === 3 ? banners[(i / 7 | 0) % 3] : 'wall_mid', x, R.top - 48, 3);
-  }
-  c.fillStyle = '#4E4160'; c.fillRect(0, R.top - 100, R.w, 4);
-  c.fillStyle = '#231A2D';
-  c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
-  c.fillStyle = '#3A2F48';
-  c.fillRect(R.wall - 6, R.top, 6, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 6, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 6);
+  const z = T1N_ZONES[_t1.zone || 0], R = _t1.room;
+  c.fillStyle = z.top; c.fillRect(0, 0, R.w, R.top);
+  c.fillStyle = z.side; c.fillRect(0, R.top, R.wall, R.h - R.top); c.fillRect(R.w - R.wall, R.top, R.wall, R.h - R.top); c.fillRect(0, R.h - R.wall, R.w, R.wall);
+  c.fillStyle = z.line; c.fillRect(0, R.top - 4, R.w, 4); c.fillRect(R.wall - 4, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.w - R.wall, R.top, 4, R.h - R.top - R.wall); c.fillRect(R.wall, R.h - R.wall, R.w - 2 * R.wall, 4);
 }
 function t1hDraw() {
   const g = _t1, c = g.ctx, p = g.p, W = g.W, H = g.H, R = g.room;
@@ -31235,7 +31201,6 @@ function t1hDraw() {
   c.setTransform(g.dpr, 0, 0, g.dpr, 0, 0);
   const z = g.zoom || 1, VW = W / z, VH = H / z;
   const camX = g.camX = Math.max(0, Math.min(R.w - VW, p.x - VW / 2)), camY = g.camY = Math.max(0, Math.min(R.h - VH, p.y - VH / 2 - 20));
-  if (!g.pat && T1D.ready) g.pat = t1hGround(c);
   c.fillStyle = '#120C18'; c.fillRect(0, 0, W, H);
   c.save();
   c.scale(z, z);
@@ -31243,12 +31208,15 @@ function t1hDraw() {
   c.imageSmoothingEnabled = false;
   const zc = t1nZoneGround(T1N_ZONES[g.zone || 0]);
   if (zc) c.drawImage(zc, 0, 0, zc.width, zc.height, 0, 0, R.w, R.h);
-  else { c.fillStyle = g.pat || '#2A2333'; c.fillRect(R.wall, R.top, R.w - 2 * R.wall, R.h - R.top - R.wall); }
-  R.holes.forEach(h => { c.globalAlpha = 0.9; t1dTile(c, 'hole', h.x - 24, h.y - 24, 3); c.globalAlpha = 1; });
+  else { c.fillStyle = T1N_ZONES[g.zone || 0].side; c.fillRect(0, 0, R.w, R.h); }
+  // Monster holes: a 2 x 2 pit from the Ninja hole tiles.
+  const hole = t1nImg('tiles/TilesetHole.png');
+  if (hole.ready) R.holes.forEach(h => [[0, 0], [2, 0], [0, 2], [2, 2]].forEach(([tc, tr], i) =>
+    c.drawImage(hole.img, tc * 16, tr * 16, 16, 16, h.x - T1N_T + (i % 2) * T1N_T, h.y - T1N_T + (i >> 1) * T1N_T, T1N_T, T1N_T)));
   t1hDrawWalls(c);
   t1nDrawGate(c);
   c.font = '20px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1dDraw(c, 'ui_heart_full', h.x, h.y + 2 + Math.sin(g.time * 4) * 2, 2.4, false, null, true); });
+  g.hearts.forEach(h => { c.globalAlpha = h.life < 3 && Math.sin(h.life * 14) < 0 ? 0.4 : 1; t1nDraw(c, 'items/Heart.png', 0, 0, 9, 8, h.x, h.y + 6 + Math.sin(g.time * 4) * 2, T1N_PX, false, null, true); });
   c.globalAlpha = 1;
   g.zones.forEach(z => {
     c.save();
