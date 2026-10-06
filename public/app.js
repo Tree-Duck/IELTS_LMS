@@ -26528,7 +26528,10 @@ function t1PieSvg(slices, size) {
    Two ways to group, the two a static chart usually asks for: the big items
    against the rest (a bar chart or a pie), and where each side is ahead (a
    table with two columns). A bar runs down for a speed bonus but the chart
-   never hides. Eight rounds, three lives. */
+   never hides. Each item is a card that flies into the box of its
+   paragraph, lighting its part of the chart; a wrong grouping costs a life
+   and sends the misplaced cards back for a second try. Eight rounds, three
+   lives. */
 const T1_GROUP_CFG = { a: { n: 5, gap: 1.8, diff: 12 }, d: { n: 6, gap: 1.5, diff: 7 }, l: { n: 6, gap: 1.3, diff: 4 } };
 const T1_GROUP_ROUNDS = 8, T1_GROUP_SECS = 20;
 const T1_GROUP_BAR = [
@@ -26626,7 +26629,7 @@ function t1GroupSide() {
     kind: 'side', items: shown,
     chart: `<div class="t1-chart"><div class="t1-chart-title">${escapeHtml(C.title)}</div><table class="t1-gtable"><thead><tr><th></th><th>${escapeHtml(C.a)}</th><th>${escapeHtml(C.b)}</th></tr></thead><tbody>${shown.map(i => `<tr><th>${escapeHtml(i.name)}</th><td>${t1Num(i.a)}${unit}</td><td>${t1Num(i.b)}${unit}</td></tr>`).join('')}</tbody></table></div>`,
     label: i => `${t1Num(i.a)}${unit} · ${t1Num(i.b)}${unit}`,
-    ask: `Where is ${x} ahead, and where is ${y} ahead?`,
+    ask: `Which items are higher for ${x}, and which are higher for ${y}?`,
     ok: s1 => t1GrpSame(s1, A) || t1GrpSame(s1, B),
     canon: i => i.g,
     stem: `Chọn câu mở đoạn về những mục ${C.a} cao hơn:`,
@@ -26653,18 +26656,20 @@ function t1GroupStart() {
 function t1GroupNew() {
   const g = _t1, kind = g.kinds[g.n];
   g.q = kind === 'side' ? t1GroupSide() : t1GroupGap(kind === 'pie');
+  g.fixed = null;
   g.as = {};
+  g.tries = 0;
   g.phase = 'group';
   g.answered = false;
   g.t0 = performance.now();
   t1Root().innerHTML = `
     <div class="lv-wrap lv-wrap--narrow t1-play t1-group">
       ${t1ArcTop(g, `<span class="t1-stat">Vòng <strong>${g.n + 1}</strong>/${T1_GROUP_ROUNDS}</span>`)}
-      ${g.q.chart}
+      <div id="gp-chart">${g.q.chart}</div>
       <div class="t1-flash-bar"><i id="gp-bar"></i></div>
       <p class="t1-stem">Chia các mục thành <b>2 đoạn thân bài</b>.</p>
       <div class="t1-proc-q">💡 <i>${escapeHtml(g.q.ask)}</i></div>
-      <div class="t1-gp-rows" id="gp-rows"></div>
+      <div class="t1-gp-board" id="gp-board"></div>
       <div id="gp-fb"></div>
     </div>`;
   const bar = document.getElementById('gp-bar');
@@ -26672,19 +26677,32 @@ function t1GroupNew() {
   requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
   t1GroupRows();
 }
-function t1GroupRows(result) {
-  const g = _t1, el = document.getElementById('gp-rows');
+// Cards not yet placed wait above the two paragraph boxes. Each redraw
+// slides every card from where it was to where it now is.
+function t1GroupRows(done) {
+  const g = _t1, el = document.getElementById('gp-board');
   if (!el) return;
+  const was = {};
+  el.querySelectorAll('.t1-gp-card').forEach(c => { was[c.dataset.n] = c.getBoundingClientRect(); });
   const all = g.q.items.every(i => g.as[i.name]);
-  el.innerHTML = g.q.items.map((it, i) => {
-    const a = g.as[it.name], tag = result ? (result(it) === a ? ' ok' : ' no') : '';
-    return `<div class="t1-gp-row${tag}">
-      <span class="t1-gp-name">${escapeHtml(it.name)} <small>${escapeHtml(g.q.label(it))}</small></span>
-      ${[1, 2].map(p => `<button class="t1-gp-b${a === p ? ' on' : ''}" ${result ? 'disabled' : ''} onclick="t1GroupSet(${i},${p})">Đoạn ${p}</button>`).join('')}
-      ${result && result(it) !== a ? `<em>→ Đoạn ${result(it)}</em>` : ''}
-    </div>`;
-  }).join('') + (result ? '' : `<button class="vb-start-btn t1-next" ${all ? '' : 'disabled'} onclick="t1GroupCheck()">Kiểm tra → <small>Enter</small></button>`);
-  if (!result) g.answered = all;
+  const card = (it, i) => {
+    const a = g.as[it.name], name = `<span class="t1-gp-name">${escapeHtml(it.name)} <small>${escapeHtml(g.q.label(it))}</small></span>`;
+    if (!a) return `<div class="t1-gp-card" data-n="${i}">${name}<span class="t1-gp-acts">${[1, 2].map(p => `<button class="t1-gp-b b${p}" onclick="t1GroupSet(${i},${p})">Đoạn ${p}</button>`).join('')}</span></div>`;
+    return `<button class="t1-gp-card in${g.fixed && g.fixed.has(it.name) ? ' fixed' : ''}" data-n="${i}" ${done ? 'disabled' : ''} onclick="t1GroupSet(${i},${a})" title="Bấm để đưa thẻ ra lại">${name}${done ? '' : '<span class="t1-gp-out" aria-hidden="true">↩</span>'}</button>`;
+  };
+  const pool = g.q.items.map((it, i) => g.as[it.name] ? '' : card(it, i)).join('');
+  el.innerHTML = `${pool ? `<div class="t1-gp-pool">${pool}</div>` : ''}
+    <div class="t1-gp-boxes">${[1, 2].map(p => `<div class="t1-gp-box b${p}"><div class="t1-gp-boxh">Đoạn ${p} <small>thân bài ${p}</small></div>
+      ${g.q.items.map((it, i) => g.as[it.name] === p ? card(it, i) : '').join('')}</div>`).join('')}</div>
+    ${done ? '' : `<button class="vb-start-btn t1-next" ${all ? '' : 'disabled'} onclick="t1GroupCheck()">Kiểm tra → <small>Enter</small></button>`}`;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) el.querySelectorAll('.t1-gp-card').forEach(c => {
+    const a = was[c.dataset.n], b = c.getBoundingClientRect();
+    if (a && (a.left !== b.left || a.top !== b.top)) c.animate([{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)` }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.3, 1.25, 0.5, 1)' });
+  });
+  // The chart lights each item in its paragraph's colour.
+  const ch = document.getElementById('gp-chart'), parts = g.q.kind === 'side' ? [ch.querySelectorAll('tbody tr')] : g.q.kind === 'pie' ? [ch.querySelectorAll('svg path'), ch.querySelectorAll('.t1-legend span')] : [ch.querySelectorAll('.t1-bar-row')];
+  parts.forEach(list => list.forEach((x, i) => { const a = g.as[g.q.items[i].name]; x.classList.toggle('gp-p1', a === 1); x.classList.toggle('gp-p2', a === 2); }));
+  if (!done) g.answered = all;
 }
 function t1GroupSet(i, p) {
   const g = _t1;
@@ -26699,18 +26717,34 @@ function t1GroupCheck() {
   if (!g || g.phase !== 'group' || !g.q.items.every(i => g.as[i.name])) return;
   const s1 = g.q.items.filter(i => g.as[i.name] === 1).map(i => i.name);
   const ok = g.q.ok(s1), secs = (performance.now() - g.t0) / 1000;
-  // A right grouping may put either group first; mark it against the student's own order.
-  const flip = ok && g.q.items.some(i => g.as[i.name] !== g.q.canon(i));
-  const want = i => flip ? 3 - g.q.canon(i) : g.q.canon(i);
-  if (ok) t1Hit(g, Math.max(0, Math.round((T1_GROUP_SECS - secs) / 2)));
+  // Either group may come first: mark against the order closer to the student's.
+  const same = g.q.items.filter(i => g.as[i.name] === g.q.canon(i)).length;
+  const want = i => same * 2 >= g.q.items.length ? g.q.canon(i) : 3 - g.q.canon(i);
+  g.tries++;
+  if (ok) { if (g.tries === 1) t1Hit(g, Math.max(0, Math.round((T1_GROUP_SECS - secs) / 2))); else tsSfx('coin'); }
   else {
-    t1Miss(g);
+    const off = g.q.items.filter(i => g.as[i.name] !== want(i));
+    if (g.tries === 1) {
+      // First miss: the misplaced cards shake and fly back for a second try.
+      t1Miss(g);
+      t1ArcHud();
+      off.forEach(i => t1Shake(document.querySelector(`#gp-board .t1-gp-card[data-n="${g.q.items.indexOf(i)}"]`)));
+      document.getElementById('gp-fb').innerHTML = `<div class="t1-fb no"><strong>${off.length} thẻ sai đoạn, đã trả về.</strong><span>Xem lại biểu đồ rồi chia lại. Lần này sai nữa thì hiện đáp án.</span></div>`;
+      g.answered = false;
+      g.timers.push(setTimeout(() => { if (_t1 !== g || g.phase !== 'group') return; off.forEach(i => { g.as[i.name] = 0; }); t1GroupRows(); }, 500));
+      if (g.lives <= 0) { g.phase = 'done'; g.answered = true; document.getElementById('gp-fb').innerHTML += `<button class="vb-start-btn t1-next" onclick="_t1.next()">Xem kết quả → <small>Enter</small></button>`; }
+      return;
+    }
+    // Second miss: every card flies to its right box.
     g.misses.push(`${g.q.chart}<div class="t1-review-line">${escapeHtml(g.q.why)}</div>`);
+    g.fixed = new Set(off.map(i => i.name));
+    off.forEach(i => { g.as[i.name] = want(i); });
   }
   document.getElementById('gp-bar').style.transition = 'none';
-  t1GroupRows(want);
+  t1GroupRows(true);
+  if (ok) document.getElementById('gp-board').classList.add('win');
   t1ArcHud();
-  const fb = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? 'Chia đúng!' : 'Chưa đúng cách chia.'}</strong><span>${escapeHtml(g.q.why)}</span></div>`;
+  const fb = `<div class="t1-fb ${ok ? 'ok' : 'no'}"><strong>${ok ? (g.tries === 1 ? 'Chia đúng!' : 'Chia đúng ở lần thứ hai.') : 'Đáp án đúng đã hiện, thẻ viền đỏ là thẻ em để sai.'}</strong><span>${escapeHtml(g.q.why)}</span></div>`;
   if (g.lives <= 0) {
     g.phase = 'done';
     g.answered = true;
