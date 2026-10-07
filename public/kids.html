@@ -40,6 +40,7 @@
   .tile .stars { margin-top: 6px; font-size: 1.2rem; letter-spacing: 2px; }
   .t1 { background: linear-gradient(135deg, #8E6CF0, #B48BFF); } .t2 { background: linear-gradient(135deg, #4FB3F0, #6FD0FF); }
   .t3 { background: linear-gradient(135deg, #FF7A59, #FFA26B); } .t4 { background: linear-gradient(135deg, #5CC47A, #8BDC77); } .t5 { background: linear-gradient(135deg, #F06BA8, #FF9CC7); }
+  .t6 { background: linear-gradient(135deg, #14A5A0, #3CCFB4); }
   .stars i { font-style: normal; color: rgba(255, 255, 255, 0.45); } .stars i.on { color: #FFE066; }
 
   /* Steps */
@@ -72,6 +73,7 @@
   .face .vi { font-size: 2rem; font-weight: 700; color: #C2410C; }
   .face .ex { font-size: 1.3rem; } .face .exvi { font-size: 1.15rem; color: var(--soft); }
   .face .tip { font-size: 1rem; color: var(--soft); }
+  .face .note { font-size: 1.05rem; color: #0F766E; background: #E3F7F4; border-radius: 12px; padding: 4px 12px; }
   .dots { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
   .dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--line); } .dots i.seen { background: var(--grass); } .dots i.cur { outline: 3px solid var(--sun); }
 
@@ -132,6 +134,30 @@
   .vi-big { text-align: center; font-size: 2.1rem; font-weight: 700; color: #C2410C; margin: 6px 0 4px; }
   .ex-line { text-align: center; font-size: 1.3rem; color: var(--soft); margin-bottom: 14px; }
 
+  /* Word search */
+  .ws { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: start; }
+  .wsg { display: grid; gap: 5px; max-width: 470px; width: 100%; margin: 0 auto; }
+  .wc { aspect-ratio: 1; border-radius: 12px; background: #F6F3FF; font-size: 1.7rem; font-weight: 700; text-transform: lowercase; display: grid; place-items: center; transition: background 0.15s, transform 0.15s; }
+  .wc.a { background: var(--sun); transform: scale(1.08); }
+  .wc.f0 { background: #BDEBCB; } .wc.f1 { background: #BFE3FF; } .wc.f2 { background: #FFD6C2; } .wc.f3 { background: #E2D5FF; }
+  .wc.f4 { background: #FFE9A8; } .wc.f5 { background: #C8F0EA; } .wc.f6 { background: #FFD1E3; }
+  .wl { display: flex; flex-direction: column; gap: 8px; }
+  .wl div { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 14px; background: #fff; border: 3px solid var(--line); font-size: 1.3rem; font-weight: 600; }
+  .wl div span { font-size: 1.6rem; white-space: nowrap; }
+  .wl div small { font-size: 1rem; color: var(--soft); font-weight: 500; margin-left: auto; }
+  .wl div.got { border-color: var(--ok); background: #E9F9EF; }
+  .wl div.got b { text-decoration: line-through; text-decoration-color: var(--ok); text-decoration-thickness: 3px; }
+  /* Unscramble */
+  .lslots { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+  .lslot { width: 64px; height: 72px; border-radius: 16px; border: 4px dashed #CFC4F5; background: #F6F3FF; display: grid; place-items: center; font-size: 2.2rem; font-weight: 700; }
+  .lslot.fill { border-style: solid; border-color: #FFD98A; background: #fff; }
+  .lslot.ok { border-color: var(--ok); background: #E9F9EF; }
+  .lpool { display: flex; gap: 12px; justify-content: center; margin-top: 18px; min-height: 76px; flex-wrap: wrap; }
+  .lchip { width: 68px; height: 72px; border-radius: 18px; background: #fff; border: 4px solid #FFD98A; box-shadow: 0 5px 0 #F1C15A; font-size: 2.2rem; font-weight: 700; }
+  .lchip:active { transform: translateY(3px); }
+  .scr { text-align: center; font-size: 1.25rem; color: var(--soft); margin-top: 4px; }
+  .scr b { color: #7C3AED; letter-spacing: 2px; }
+
   /* Result + album */
   .result { text-align: center; }
   .result .stars { font-size: 3.2rem; letter-spacing: 6px; }
@@ -156,6 +182,9 @@
     .rule { grid-template-columns: 1fr; }
     .face .en { font-size: 1.7rem; } .face .vi { font-size: 1.55rem; }
     .chip { font-size: 1.3rem; padding: 8px 12px; }
+    .ws { grid-template-columns: 1fr; } .wl { flex-direction: row; flex-wrap: wrap; } .wl div { font-size: 1.05rem; padding: 4px 10px; }
+    .wc { font-size: 1.3rem; border-radius: 9px; } .wsg { gap: 4px; }
+    .lslot, .lchip { width: 54px; height: 60px; font-size: 1.8rem; }
   }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -222,6 +251,25 @@ const LESSONS = [
       { s: 'This cake is for {*you|I}.', vi: 'Cái bánh này là cho **bạn**.', why: { I: 'Đứng sau "for" (cho) → you hoặc me, không dùng I.' } },
       { s: 'The cat is small. {*It|Them} is cute.', vi: 'Con mèo nhỏ. **Nó** dễ thương.', why: { Them: 'Một con mèo → It. "them" là nhiều người, nhiều vật.' } },
       { s: 'Dad helps {they|*them}.', vi: 'Bố giúp **họ**.', why: { they: 'Bố là người giúp. Họ được giúp, đứng sau → them.' } },
+    ] },
+  // Worksheet "Parts of the body": word search, unscramble (deah → head), write.
+  { id: 'l3', title: 'Bài 3 · Cơ thể', sub: 'Parts of the body · 14 từ', mascot: 'giraffe', cls: 't6', search: true, typeRest: true,
+    scramble: ['head', 'tail', 'body', 'hair', 'foot', 'nose'],
+    cards: [
+      { pic: '👤', en: 'head', vi: 'cái đầu', ex: 'Touch your head.', exVi: 'Chạm vào đầu của bạn.' },
+      { pic: '👂', en: 'ear', vi: 'cái tai', ex: 'I have two ears.', exVi: 'Tớ có hai cái tai.' },
+      { pic: '👁️', en: 'eye', vi: 'con mắt', ex: 'I have two eyes.', exVi: 'Tớ có hai con mắt.' },
+      { pic: '👄', en: 'mouth', vi: 'cái miệng', ex: 'Open your mouth.', exVi: 'Há miệng ra nào.' },
+      { pic: '👃', en: 'nose', vi: 'cái mũi', ex: 'My nose is small.', exVi: 'Mũi của tớ nhỏ.' },
+      { pic: '💇', en: 'hair', vi: 'tóc', ex: 'Her hair is long.', exVi: 'Tóc của cô ấy dài.' },
+      { pic: '🙂', en: 'face', vi: 'khuôn mặt', ex: 'This is my face.', exVi: 'Đây là khuôn mặt của tớ.' },
+      { pic: '🐒', en: 'tail', vi: 'cái đuôi', ex: 'The monkey has a long tail.', exVi: 'Con khỉ có cái đuôi dài.' },
+      { pic: '✋', en: 'hand', vi: 'bàn tay', ex: 'Raise your hand.', exVi: 'Giơ tay lên nào.' },
+      { pic: '💪', en: 'arm', vi: 'cánh tay', ex: 'My arm is strong.', exVi: 'Cánh tay của tớ khỏe.' },
+      { pic: '🦵', en: 'leg', vi: 'cái chân', ex: 'A dog has four legs.', exVi: 'Con chó có bốn cái chân.' },
+      { pic: '🦶', en: 'foot', vi: 'một bàn chân', ex: 'I stand on one foot.', exVi: 'Tớ đứng bằng một chân.', note: 'Một bàn chân: foot · Hai bàn chân: feet' },
+      { pic: '🦶🦶', en: 'feet', vi: 'hai bàn chân', ex: 'Wash your feet.', exVi: 'Rửa hai bàn chân đi.', note: 'Một bàn chân: foot · Hai bàn chân: feet' },
+      { pic: '🧍', en: 'body', vi: 'cơ thể', ex: 'Move your body!', exVi: 'Vận động cơ thể nào!' },
     ] },
 ];
 // Nhìn & gõ: look at the picture and the meaning, type the English.
@@ -299,7 +347,12 @@ let G = null;
 function start(id) {
   const L = LESSONS.find(x => x.id === id) || TYPE_SETS.find(x => x.id === id);
   const stages = [];
-  if (L.cards) stages.push({ t: 'cards' }, { t: 'match', kind: 'mean' });
+  // More than 8 cards: matching and word search run in two rounds of about 7, so a screen never gets too long.
+  const halves = () => { const idx = shuffle(L.cards.map((_, i) => i)), h = Math.ceil(idx.length / 2); return L.cards.length > 8 ? [idx.slice(0, h), idx.slice(h)] : [idx]; };
+  if (L.cards) { stages.push({ t: 'cards' }); halves().forEach(part => stages.push({ t: 'match', kind: 'mean', part })); }
+  if (L.search) halves().forEach(part => stages.push({ t: 'search', part }));
+  if (L.scramble) shuffle(L.scramble).forEach(en => stages.push({ t: 'scramble', w: L.cards.find(c => c.en === en) }));
+  if (L.typeRest) shuffle(L.cards.filter(c => !(L.scramble || []).includes(c.en))).forEach(c => stages.push({ t: 'word', w: { en: c.en, vi: c.vi, pic: c.pic, ex: '' } }));
   if (L.pairs) stages.push({ t: 'match', kind: 'pairs' });
   if (L.rule) stages.push({ t: 'rule' });
   (L.sents || []).forEach(S => stages.push({ t: 'sent', S: parse(S) }));
@@ -332,7 +385,7 @@ function next(stars) {
 }
 function stage() {
   const s = G.stages[G.i];
-  ({ cards: cardsStage, match: matchStage, rule: ruleStage, sent: chooseStep, word: wordStage })[s.t](s);
+  ({ cards: cardsStage, match: matchStage, rule: ruleStage, sent: chooseStep, word: wordStage, search: searchStage, scramble: scrambleStage })[s.t](s);
 }
 
 /* ── Word cards: flip each one ── */
@@ -343,7 +396,7 @@ function cardsStage() {
   frame(`<b>🃏 Thẻ từ</b> Chạm thẻ để xem nghĩa`, `
     <div class="flip" id="flip"><div class="flip-in" onclick="flipCard()">
       <div class="face front"><div class="pic">${c.pic}</div><div class="en">${esc(c.en)}</div><div class="tip">👆 Chạm để lật</div></div>
-      <div class="face back"><div class="vi">${esc(c.vi)}</div><div class="ex">${esc(c.ex)}</div><div class="exvi">${esc(c.exVi)}</div></div>
+      <div class="face back"><div class="vi">${esc(c.vi)}</div><div class="ex">${esc(c.ex)}</div><div class="exvi">${esc(c.exVi)}</div>${c.note ? `<div class="note">${esc(c.note)}</div>` : ''}</div>
     </div></div>
     <div class="dots">${cards.map((_, i) => `<i class="${G.seen.has(i) ? 'seen' : ''}${i === G.ci ? ' cur' : ''}"></i>`).join('')}</div>
     <div class="row"><button class="say" onclick="say('${esc(c.en)}')" aria-label="Nghe">🔊</button>
@@ -362,7 +415,7 @@ function moveCard(d) { G.ci = Math.max(0, Math.min(G.L.cards.length - 1, G.ci + 
 
 /* ── Matching: English with meaning, or the two forms of a pronoun ── */
 function matchStage(s) {
-  const pairs = s.kind === 'pairs' ? PAIRS.map(p => [`${p[3]} ${p[0]}`, p[1], p[0] + p[1]]) : G.L.cards.map(c => [`${c.pic} ${c.en}`, c.vi, c.en]);
+  const pairs = s.kind === 'pairs' ? PAIRS.map(p => [`${p[3]} ${p[0]}`, p[1], p[0] + p[1]]) : G.L.cards.filter((_, i) => !s.part || s.part.includes(i)).map(c => [`${c.pic} ${c.en}`, c.vi, c.en]);
   G.m = { pairs, left: shuffle(pairs), right: shuffle(pairs), sel: null, done: new Set(), miss: 0 };
   const rule = s.kind === 'pairs' ? ruleHtml() : '';
   frame(s.kind === 'pairs' ? `<b>👫 Ghép đôi</b> Ai làm? ↔ Đứng sau` : `<b>🧩 Ghép nghĩa</b> Chạm cụm tiếng Anh, rồi chạm nghĩa đúng`, `${rule}
@@ -468,6 +521,120 @@ function orderCheck() {
     o.placed = keep; orderDraw();
   }, 500);
 }
+
+/* ── Word search: a fresh grid every round, words across or down only ── */
+const WS_N = 7, WS_FILL = 'abcdefghiklmnoprstuwy';
+function wsCount(g, w) {
+  let n = 0;
+  for (let r = 0; r < WS_N; r++) for (let c = 0; c < WS_N; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) {
+    let k = 0; while (k < w.length && r + dr * k < WS_N && c + dc * k < WS_N && g[r + dr * k][c + dc * k] === w[k]) k++;
+    if (k === w.length) n++;
+  }
+  return n;
+}
+function wsGrid(words) {
+  for (let tries = 0; tries < 300; tries++) {
+    const g = Array.from({ length: WS_N }, () => Array(WS_N).fill('')), at = {};
+    let ok = true;
+    for (const w of shuffle(words).sort((a, b) => b.length - a.length)) {
+      let placed = false;
+      for (let k = 0; k < 120 && !placed; k++) {
+        const [dr, dc] = Math.random() < 0.5 ? [0, 1] : [1, 0];
+        const r = Math.floor(Math.random() * (WS_N - dr * (w.length - 1))), c = Math.floor(Math.random() * (WS_N - dc * (w.length - 1)));
+        if ([...w].every((ch, i) => !g[r + dr * i][c + dc * i] || g[r + dr * i][c + dc * i] === ch)) {
+          [...w].forEach((ch, i) => { g[r + dr * i][c + dc * i] = ch; }); at[w] = { r, c, dr, dc }; placed = true;
+        }
+      }
+      if (!placed) { ok = false; break; }
+    }
+    if (!ok) continue;
+    g.forEach(row => row.forEach((x, j) => { if (!x) row[j] = WS_FILL[Math.floor(Math.random() * WS_FILL.length)]; }));
+    // Each word must be findable in exactly one place, so tapping is reading, not luck.
+    if (words.every(w => wsCount(g, w) === 1)) return { g, at };
+  }
+  return null;
+}
+function searchStage(s) {
+  const cards = G.L.cards.filter((_, i) => s.part.includes(i)), grid = wsGrid(cards.map(c => c.en));
+  G.ws = { cards, ...grid, a: null, got: [], miss: 0 };
+  frame(`<b>🔍 Tìm từ</b> Chạm chữ đầu, rồi chạm chữ cuối của từ`, `<div class="ws">
+      <div class="wsg" id="wsg" style="grid-template-columns:repeat(${WS_N},1fr)">${G.ws.g.map((row, r) => row.map((ch, c) => `<button class="wc" id="wc${r}_${c}" onclick="wsTap(${r},${c})">${ch}</button>`).join('')).join('')}</div>
+      <div class="wl" id="wl"></div></div>`);
+  wsList();
+  talk(`Tìm ${cards.length} từ: chữ chạy ngang hoặc chạy dọc. Chạm chữ đầu, rồi chạm chữ cuối nhé.`);
+}
+function wsList() {
+  const w = G.ws;
+  $('wl').innerHTML = w.cards.map(c => `<div class="${w.got.includes(c.en) ? 'got' : ''}"><span>${c.pic}</span><b>${esc(c.en)}</b>${w.got.includes(c.en) ? `<small>${esc(c.vi)}</small>` : ''}</div>`).join('');
+}
+function wsTap(r, c) {
+  const w = G.ws, cell = $(`wc${r}_${c}`);
+  if (!w.a) { w.a = [r, c]; cell.classList.add('a'); tone('key'); return; }
+  const [r0, c0] = w.a; w.a = null;
+  document.querySelectorAll('.wc.a').forEach(x => x.classList.remove('a'));
+  if (r0 === r && c0 === c) return;
+  // The two taps may come in either order; read the straight line between them.
+  const word = r0 === r || c0 === c
+    ? (() => { const [a, b] = r0 === r ? [Math.min(c0, c), Math.max(c0, c)] : [Math.min(r0, r), Math.max(r0, r)];
+        let t = ''; for (let k = a; k <= b; k++) t += r0 === r ? w.g[r][k] : w.g[k][c]; return t; })()
+    : '';
+  const hit = w.cards.find(x => x.en === word && !w.got.includes(x.en));
+  const p = hit && w.at[word];
+  const sameLine = p && (r0 === r ? p.dr === 0 && p.r === r && p.c === Math.min(c0, c) : p.dc === 0 && p.c === c && p.r === Math.min(r0, r));
+  if (!sameLine) {
+    w.miss++; tone('no'); shake($(`wc${r0}_${c0}`)); shake(cell);
+    talk(word.length > 1 && w.cards.some(x => x.en === word) ? 'Từ này em tìm được rồi!' : 'Chưa phải từ cần tìm. Nhìn lại chữ đầu và chữ cuối nhé.', 'no');
+    return;
+  }
+  const f = 'f' + (w.got.length % 7);
+  for (let k = 0; k < word.length; k++) $(`wc${p.r + p.dr * k}_${p.c + p.dc * k}`).classList.add(f);
+  w.got.push(word); tone('ok'); say(word); wsList();
+  talk(`${hit.pic} <b>${esc(word)}</b> = ${esc(hit.vi)}`, 'ok');
+  if (w.got.length === w.cards.length) { const g = G, at = G.i; setTimeout(() => { if (G === g && G.i === at) next(w.miss === 0 ? 3 : w.miss <= 2 ? 2 : 1); }, 1400); }
+}
+
+/* ── Unscramble: like "deah → head" on the worksheet ── */
+function scrambleStage(s) {
+  const w = s.w;
+  let pool = shuffle([...w.en].map((t, i) => ({ t, i })));
+  while (pool.map(p => p.t).join('') === w.en) pool = shuffle(pool);
+  G.sc = { w, pool, placed: [], miss: 0, scr: pool.map(p => p.t).join('') };
+  frame(`<b>🔤 Sắp xếp chữ</b> Chạm các chữ cái theo đúng thứ tự`, `
+    <div class="pic-big">${w.pic}</div><div class="vi-big">${esc(w.vi)}</div>
+    <div class="scr">Chữ bị xáo: <b>${esc(G.sc.scr)}</b></div>
+    <div class="lslots" id="lslots"></div><div class="lpool" id="lpool"></div>
+    <div class="row"><button class="say" onclick="say(G.sc.w.en)" aria-label="Nghe">🔊</button></div>`);
+  scDraw();
+  talk('Chạm chữ cái để xếp thành từ đúng. Chạm chữ đã xếp để trả lại.');
+}
+function scDraw() {
+  const sc = G.sc, n = sc.w.en.length;
+  $('lslots').innerHTML = Array.from({ length: n }, (_, k) => { const p = sc.placed[k];
+    return p ? `<button class="lslot fill${p.ok ? ' ok' : ''}" onclick="scBack(${k})">${esc(p.t)}</button>` : '<span class="lslot"></span>'; }).join('');
+  $('lpool').innerHTML = sc.pool.map((p, k) => `<button class="lchip" onclick="scPut(${k})">${esc(p.t)}</button>`).join('');
+}
+function scPut(k) {
+  const sc = G.sc;
+  sc.placed.push(sc.pool.splice(k, 1)[0]); tone('key'); scDraw();
+  if (sc.placed.length < sc.w.en.length) return;
+  const wrong = sc.placed.map((p, i) => p.t !== sc.w.en[i]);
+  if (!wrong.some(Boolean)) {
+    sc.placed.forEach(p => { p.ok = true; }); scDraw(); tone('ok'); say(sc.w.en); talk(`Đúng rồi! <b>${esc(sc.w.en)}</b> = ${esc(sc.w.vi)}`, 'ok');
+    const g = G, at = G.i; setTimeout(() => { if (G === g && G.i === at) next(sc.miss === 0 ? 3 : sc.miss === 1 ? 2 : 1); }, 1400);
+    return;
+  }
+  // Correct letters at the start stay; the rest shake and go back.
+  sc.miss++; tone('no');
+  const slots = document.querySelectorAll('#lslots .lslot');
+  wrong.forEach((x, i) => { if (x) shake(slots[i]); });
+  talk('Chưa đúng. Các chữ đúng ở đầu được giữ lại, xếp tiếp nhé.', 'no');
+  setTimeout(() => {
+    const keep = [];
+    sc.placed.forEach((p, i) => { if (wrong[i] || keep.length !== i) sc.pool.push(p); else { p.ok = true; keep.push(p); } });
+    sc.placed = keep; scDraw();
+  }, 500);
+}
+function scBack(k) { const sc = G.sc; if (sc.placed[k].ok) return; sc.pool.push(...sc.placed.splice(k)); scDraw(); }
 
 /* ── Step 3 and Nhìn & gõ: guided typing, letter by letter ── */
 const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
