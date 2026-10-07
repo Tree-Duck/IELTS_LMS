@@ -523,6 +523,29 @@ app.post('/api/plv/essays', authenticate, (req, res) => {
   }
 });
 
+// ─── Speech Score library ────────────────────────────────────────────────────
+// public/speech-score.html: the teacher saves a marked-up passage, every signed-in
+// student sees the list. edits/words are the page's own per-word overrides.
+app.get('/api/speech-lib', authenticate, (req, res) => {
+  res.json({ items: db.getSpeechLib(), canSave: req.user.role === 'teacher' || req.user.role === 'admin' });
+});
+
+app.post('/api/speech-lib', authenticate, teacherOrAdmin, (req, res) => {
+  const { title, text, edits, words } = req.body || {};
+  const t = String(title || '').trim().slice(0, 80), body = String(text || '').slice(0, 20000);
+  if (!t || !body.trim()) return res.status(400).json({ error: 'Cần tên bài và đoạn văn.' });
+  const obj = v => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+  if (JSON.stringify(obj(edits)).length + JSON.stringify(obj(words)).length > 200000) return res.status(400).json({ error: 'Bài quá dài.' });
+  const item = { id: 's' + Date.now().toString(36), title: t, text: body, edits: obj(edits), words: obj(words), date: Date.now(), by: req.user.id };
+  db.addSpeechLib(item);
+  res.json(item);
+});
+
+app.delete('/api/speech-lib/:id', authenticate, teacherOrAdmin, (req, res) => {
+  if (!db.deleteSpeechLib(String(req.params.id))) return res.status(404).json({ error: 'Không tìm thấy bài.' });
+  res.json({ success: true });
+});
+
 app.get('/api/plv/essays', authenticate, (req, res) => {
   res.json(db.getPlvEssays(req.user.id));
 });
