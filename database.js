@@ -407,6 +407,19 @@ const db = {
     return [...out.values()].sort((a, b) => b.createdAt - a.createdAt);
   },
 
+  // Writing games: one progress blob per user (Leitner boxes, imported errors, theses).
+  getWgState(user_id) {
+    const r = (load().wg_states || []).find(x => x.user_id === user_id);
+    return r ? r.blob : null;
+  },
+  setWgState(user_id, blob) {
+    const data = load();
+    if (!data.wg_states) data.wg_states = [];
+    const r = data.wg_states.find(x => x.user_id === user_id);
+    if (r) { r.blob = blob; r.updated = Date.now(); } else data.wg_states.push({ user_id, blob, updated: Date.now() });
+    save(data);
+  },
+
   // Speech Score: passages the teacher marked up (stress, pauses, tones) for students.
   getSpeechLib() {
     return (load().speech_lib || []).slice().sort((a, b) => b.date - a.date);
@@ -1875,6 +1888,7 @@ function classifyTask2Type(q) {
   if (!data._ids.collocation_sets) { data._ids.collocation_sets = 0; changed = true; }
   if (!data.speaking_model_answers) { data.speaking_model_answers = []; changed = true; }
   if (!data.speech_lib) { data.speech_lib = []; changed = true; }
+  if (!data.wg_states) { data.wg_states = []; changed = true; }
   if (!data._ids.speaking_model_answers) { data._ids.speaking_model_answers = 0; changed = true; }
   if (changed) save(data);
 })();
