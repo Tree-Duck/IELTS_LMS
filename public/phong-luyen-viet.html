@@ -67,6 +67,10 @@ select,input[type=text]{font:400 .9rem var(--font-ui);color:var(--ink);backgroun
 textarea{width:100%;min-height:52vh;resize:vertical;font:400 1rem/1.7 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
 textarea[readonly]{background:var(--bg)}
 .notice{font-size:.85rem;padding:8px 12px;border-radius:8px;background:var(--coral-soft);color:var(--coral)}
+.syncbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--amber-soft);padding:12px 14px;border-radius:8px;margin-bottom:16px}
+.badge.loc{background:var(--line);color:var(--muted)}
+.hrow .bs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.fb ul{margin:4px 0 0;padding-left:20px;white-space:normal}
 .okbox{background:var(--green-soft);color:var(--green);padding:12px 14px;border-radius:8px}
 .check{display:grid;gap:8px}
 .check label{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
@@ -167,6 +171,7 @@ textarea.draft{min-height:150px;font-size:.92rem;line-height:1.6;padding:10px 12
       <button role="tab" id="tab-guide" aria-selected="false">Mở &amp; kết bài</button>
     </div>
   </div>
+  <div class="syncbar" id="syncBar" hidden></div>
 
   <!-- ============ SETUP ============ -->
   <section id="v-setup" class="grid">
@@ -289,11 +294,10 @@ textarea.draft{min-height:150px;font-size:.92rem;line-height:1.6;padding:10px 12
     <div class="card grid">
       <h2>Tiến độ</h2>
       <div class="stat" id="stats"></div>
-      <div class="trend" id="trend" hidden></div>
     </div>
     <div class="card grid">
       <h2>Các bài đã viết</h2>
-      <div class="sub">Bài được lưu trên trình duyệt của máy này. Muốn được chấm, mở một bài rồi bấm <b>Sao chép bài</b>, sau đó dán cho Claude hoặc gửi giáo viên.</div>
+      <div class="sub">Khi đã đăng nhập tintinlab, bài lưu lên tài khoản (☁️): xem được trên iPad hay máy khác, và giáo viên chấm ngay trong đó. Bài ghi 💻 chỉ nằm trên trình duyệt của máy này.</div>
       <div class="hist" id="hist"></div>
     </div>
     <div class="card grid" id="detail" hidden></div>
@@ -973,12 +977,42 @@ function renderChecklist(){
   updBrackets();
 }
 
-/* ---------- db ---------- */
-let db=null, essays=[], local=store.get('plv_local')||[];
+/* ---------- lưu bài ---------- */
+// Đã đăng nhập tintinlab (cùng tên miền nên dùng chung token) thì bài lên tài khoản:
+// xem được trên mọi máy và vào Hàng chờ chấm của giáo viên. Bản trên máy luôn được giữ;
+// cờ up đánh dấu bài đã lên tài khoản để không hỏi lại.
+let essays=[], local=store.get('plv_local')||[], me=null;
+async function api(path, body){
+  let t=null; try{ t=localStorage.getItem('ielts_token'); }catch(e){}
+  if(!t) throw new Error('login');
+  const r = await fetch(path, body ? {method:'POST', headers:{'Authorization':'Bearer '+t,'Content-Type':'application/json'}, body:JSON.stringify(body)} : {headers:{'Authorization':'Bearer '+t}});
+  if(r.status===401) throw new Error('login');
+  if(!r.ok) throw new Error('net');
+  return r.json();
+}
+async function loadCloud(){
+  try{ me = me || await api('/api/user/profile'); essays = await api('/api/plv/essays'); }
+  catch(e){ if(e.message==='login'){ me=null; essays=[]; } }
+  const ids=new Set(essays.map(e=>e.id)); let ch=false;
+  for(const e of local) if(!e.up && ids.has(e.id)){ e.up=1; ch=true; }
+  if(ch) store.set('plv_local',local);
+  renderSync(); renderHist();
+}
+function renderSync(){
+  const left = me ? local.filter(e=>!e.up) : [];
+  $('syncBar').hidden = !left.length;
+  if(!left.length) return;
+  $('syncBar').innerHTML = `<span>Máy này có <b>${left.length} bài</b> chưa lên tài khoản <b>${esc(me.name||'')}</b>. Đưa lên để xem trên iPad, máy khác và để giáo viên chấm.</span><button class="btn" id="syncGo">Đưa lên tài khoản</button>`;
+  $('syncGo').onclick=async()=>{
+    $('syncGo').disabled=true;
+    try{ await api('/api/plv/essays',{essays:left}); left.forEach(e=>e.up=1); store.set('plv_local',local); await loadCloud(); }
+    catch(e){ $('syncGo').disabled=false; $('syncGo').textContent='Chưa được, bấm lại'; }
+  };
+}
 $('save').onclick=async()=>{
   saveEditor();
   const doc = { createdAt: sess.startedAt, savedAt: Date.now(), mode: sess.mode, level: lvOf(sess), minutes: sess.minutes, usedSec: sess.usedSec, timeUp: !!sess.timeUp,
-    checks: sess.checks, status: 'waiting' };
+    checks: sess.checks };
   for(const t of ['t1','t2']) if(sess[t].prompt){
     const p=sess[t];
     doc[t] = { prompt:p.prompt, promptId:p.promptId||null, dang:p.dang||null, frame:p.frame||null, stance:p.stance||null, topic:p.topic||null, sub:p.sub||null, source:p.source||null,
@@ -986,59 +1020,64 @@ $('save').onclick=async()=>{
     if(t==='t2'){ doc.t2.plan = p.plan||{}; doc.t2.planSec = p.planSec||null; }
   }
   $('save').disabled=true;
-  let ok=false;
-  if(db){ try{ await db.collection('essays').doc(sess.id).set(doc); ok=true; }catch(e){ ok=false; } }
-  if(!ok){ local.unshift({id:sess.id, ...doc}); store.set('plv_local',local); }
-  $('saveMsg').innerHTML = ok
-    ? '<div class="okbox">Đã lưu. Nhắn Claude: <b>chấm bài mới nhất</b>.</div><div class="row" style="margin-top:8px"><button class="btn" id="again">Viết bài mới</button></div>'
-    : '<div class="okbox">Đã lưu trên trình duyệt này. Muốn được chấm thì bấm Sao chép bài rồi dán cho Claude hoặc gửi giáo viên.</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="copy">Sao chép bài</button><button class="btn" id="again">Viết bài mới</button></div>';
+  const entry = {id:sess.id, ...doc};
+  let err=null;
+  try{ await api('/api/plv/essays',{essays:[entry]}); }catch(e){ err=e.message; }
+  entry.up = err?0:1; local.unshift(entry); store.set('plv_local',local);
+  const again = '<button class="btn" id="again">Viết bài mới</button>';
+  $('saveMsg').innerHTML = !err
+    ? `<div class="okbox">Đã lưu lên tài khoản. Giáo viên sẽ chấm, nhận xét hiện trong tab Lịch sử, xem được trên iPad hay máy khác.</div><div class="row" style="margin-top:8px">${again}</div>`
+    : `<div class="okbox">${err==='login'
+        ? 'Đã lưu trên máy này. Bạn chưa đăng nhập tintinlab nên bài chưa lên tài khoản. Đăng nhập tintinlab.com, mở lại trang này rồi bấm <b>Đưa lên tài khoản</b> để giáo viên chấm.'
+        : 'Đã lưu trên máy này nhưng mạng lỗi nên chưa lên tài khoản. Khi có mạng, mở lại trang này rồi bấm <b>Đưa lên tài khoản</b>.'}</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="copy">Sao chép bài</button>${again}</div>`;
   if($('copy')) $('copy').onclick=()=>{ const txt=['t1','t2'].filter(t=>doc[t]).map(t=>`[${t.toUpperCase()}] ${doc[t].prompt}\n\n${doc[t].final}`).join('\n\n-----\n\n'); navigator.clipboard.writeText(txt).catch(()=>{}); };
   $('backBox').innerHTML='<button class="btn ghost" id="back">← Chọn đề khác</button>'; $('back').onclick=()=>$('again').click();
   $('again').onclick=()=>{ $('clock').classList.remove('low'); sess=null; store.del('plv_session'); clearInterval(tick); picked=null; $('ownT2').value=''; $('t1prompt').value=''; renderList(); renderChosen(); $('save').disabled=false; $('saveMsg').innerHTML=''; resetBack(); showTab('write'); renderHist(); };
-  renderHist();
+  if(err) renderHist(); else loadCloud();
 };
 
 function allEssays(){ const ids=new Set(essays.map(e=>e.id)); return essays.concat(local.filter(e=>!ids.has(e.id))).sort((a,b)=>b.createdAt-a.createdAt); }
+function badges(e){
+  if(!e.cloud) return '<span class="badge loc">💻 Chỉ máy này</span>';
+  const ps=['t1','t2'].filter(t=>e[t]).map(t=>e[t]);
+  const done=ps.every(p=>p.grade), one=ps.length===1&&done&&ps[0].grade.overall!=null;
+  return `<span class="badge">☁️ Tài khoản</span>${done?`<span class="badge done">Đã chấm${one?' · '+ps[0].grade.overall:''}</span>`:'<span class="badge wait">Chờ chấm</span>'}`;
+}
 function renderHist(){
   const list=allEssays();
   const weekStart = (()=>{ const d=new Date(); const day=(d.getDay()+6)%7; d.setHours(0,0,0,0); d.setDate(d.getDate()-day); return d.getTime(); })();
   const thisWeek = list.filter(e=>e.createdAt>=weekStart).length;
   const full = list.filter(e=>e.createdAt>=weekStart && (e.mode!=='t2' || !e.level || e.level===4)).length;
   $('weekline').textContent = `Tuần này ${thisWeek} bài, trong đó ${full} bài đủ giờ thi thật. Mục tiêu 3 bài đủ giờ mỗi tuần.`;
-  const marked = list.filter(e=>e.marks);
   $('stats').innerHTML = [
     ['Tổng số bài', list.length],
     ['Tuần này', thisWeek+' / 3'],
   ].map(([l,n])=>`<div><div class="label">${l}</div><div class="n">${n}</div></div>`).join('');
-  const last = marked.slice(0,10).reverse();
-  if(!last.length){ $('trend').innerHTML='<div class="empty">Chưa có bài nào được chấm. Sau khi Claude chấm, số lỗi từng loại sẽ hiện ở đây.</div>'; }
-  else {
-    const maxV = Math.max(1, ...last.flatMap(e=>ERR.map(x=>+e.marks[x.k]||0)));
-    $('trend').innerHTML = ERR.map(x=>{
-      const w=300, h=34, bw=w/10;
-      const bars = last.map((e,i)=>{ const v=+e.marks[x.k]||0; const bh=Math.max(2,(v/maxV)*(h-12)); const isLast=i===last.length-1;
-        return `<rect x="${i*bw+3}" y="${h-bh}" width="${bw-6}" height="${bh}" rx="2" fill="${isLast?'var(--teal)':'var(--line)'}"><title>${fmtD(e.createdAt)}: ${v} lỗi</title></rect><text x="${i*bw+bw/2}" y="${h-bh-2}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="JetBrains Mono,monospace">${v}</text>`; }).join('');
-      return `<div class="trow"><div style="font-size:.85rem">${x.n}</div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${x.n}">${bars}</svg></div>`;
-    }).join('');
-  }
   $('hist').innerHTML = list.map((e,i)=>{
-    const t = e.t2||e.t1; const st = e.marks ? '<span class="badge done">Đã chấm</span>' : '<span class="badge wait">Chờ chấm</span>';
-    return `<button class="hrow" data-i="${i}"><span class="d">${fmtD(e.createdAt)}</span><span class="t">${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level&&e.level<4?' · Bậc '+e.level:''} · ${esc(t?t.prompt:'')}</span>${st}</button>`;
+    const t = e.t2||e.t1;
+    return `<button class="hrow" data-i="${i}"><span class="d">${fmtD(e.createdAt)}</span><span class="t">${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level&&e.level<4?' · Bậc '+e.level:''} · ${esc(t?t.prompt:'')}</span><span class="bs">${badges(e)}</span></button>`;
   }).join('') || '<div class="empty">Chưa có bài nào. Vào tab Viết bài, chọn một đề, rồi bấm Bắt đầu tính giờ.</div>';
   $('hist').querySelectorAll('.hrow').forEach(b=>b.onclick=()=>showDetail(list[+b.dataset.i]));
+}
+function gradeHtml(t,p){
+  if(!p.subId) return '';
+  const cm = (p.comments||[]).length ? `<div class="fb">${p.comments.map(c=>`<div>💬 ${esc(c)}</div>`).join('')}</div>` : '';
+  if(!p.grade) return `<div class="sub">☁️ Đã lên tài khoản, đang chờ giáo viên chấm.</div>${cm}`;
+  const g=p.grade, n=[t==='t1'?'TA':'TR','CC','LR','GRA'];
+  const li = a => '<ul>'+a.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
+  return `<div class="fb"><b>Giáo viên chấm${g.overall!=null?' · Band '+g.overall:''}</b><div class="sub">${n.map((k,i)=>g.scores[i]!=null?k+' '+g.scores[i]:'').filter(Boolean).join(' · ')}</div>${g.feedback?`<div>${esc(g.feedback)}</div>`:''}${g.strengths.length?'<div><b>Điểm mạnh</b>'+li(g.strengths)+'</div>':''}${g.improvements.length?'<div><b>Cần sửa</b>'+li(g.improvements)+'</div>':''}</div>${cm}`;
 }
 function showDetail(e){
   const parts = ['t1','t2'].filter(t=>e[t]).map(t=>{ const p=e[t]; const changed = p.atTime!==p.final;
     return `<div class="grid" style="gap:8px"><div class="label">${t==='t1'?'Task 1':'Task 2'}${p.topic?' · '+esc(p.topic):''}</div><div class="promptbox">${esc(p.prompt)}</div>
     ${t==='t2'&&p.plan&&Object.values(p.plan).some(v=>(v||'').trim()) ? `<div class="planview"><div class="label">Ô lên ý${p.planSec?' · '+fmtT(p.planSec):''}</div>${Object.entries(p.plan).filter(([k,v])=>(v||'').trim()).map(([k,v])=>`<div><b>${esc((PFIELDS[k]||{l:k}).l)}</b> · ${esc(v)}</div>`).join('')}</div>` : ''}
-    <div class="sub">${p.wordsFinal} từ${changed?`, tự soát đã sửa (lúc hết giờ ${p.wordsAtTime} từ)`:', không sửa gì khi tự soát'}</div><div class="essay">${esc(p.final)}</div></div>`; }).join('');
-  const marks = e.marks ? `<div class="tscroll"><table><tr><th>Lỗi</th><th>Số lần</th></tr>${ERR.map(x=>`<tr><td>${x.n}</td><td>${+e.marks[x.k]||0}</td></tr>`).join('')}${e.marks.other?`<tr><td>Lỗi khác</td><td>${+e.marks.other||0}</td></tr>`:''}</table></div>` : '';
-  const fb = e.feedback ? `<div class="label">Nhận xét của Claude</div><div class="fb">${esc(e.feedback)}</div>` : '<div class="row"><button class="btn ghost" id="copyD">Sao chép bài</button><span class="sub" id="copyMsg"></span></div>';
-  const used = e.usedSec ? `Dùng ${fmtT(e.usedSec)} trên ${e.minutes}:00${e.timeUp?', hết giờ tự khóa':''}.` : '';
+    <div class="sub">${p.wordsFinal} từ${changed?`, tự soát đã sửa (lúc hết giờ ${p.wordsAtTime} từ)`:', không sửa gì khi tự soát'}</div><div class="essay">${esc(p.final)}</div>${gradeHtml(t,p)}</div>`; }).join('');
+  const where = e.cloud ? '☁️ Đã lưu lên tài khoản.' : '💻 Chỉ trên máy này. Đăng nhập tintinlab rồi bấm Đưa lên tài khoản để giáo viên chấm.';
+  const used = e.usedSec ? ` Dùng ${fmtT(e.usedSec)} trên ${e.minutes}:00${e.timeUp?', hết giờ tự khóa':''}.` : '';
   $('detail').hidden=false;
-  $('detail').innerHTML = `<div class="row" style="justify-content:space-between"><h2>${fmtD(e.createdAt)} · ${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level?' · '+esc((LEVELS[e.level]||{n:''}).n):''}</h2><button class="btn ghost" id="closeD">Đóng</button></div><div class="sub">${used}</div>${parts}${fb}${marks}`;
+  $('detail').innerHTML = `<div class="row" style="justify-content:space-between"><h2>${fmtD(e.createdAt)} · ${MODE_NAME[e.mode]||''}${e.mode==='t2'&&e.level?' · '+esc((LEVELS[e.level]||{n:''}).n):''}</h2><button class="btn ghost" id="closeD">Đóng</button></div><div class="sub">${where}${used}</div>${parts}<div class="row"><button class="btn ghost" id="copyD">Sao chép bài</button><span class="sub" id="copyMsg"></span></div>`;
   $('closeD').onclick=()=>{$('detail').hidden=true};
-  if($('copyD')) $('copyD').onclick=()=>{ const txt=['t1','t2'].filter(t=>e[t]).map(t=>{ const p=e[t]; const pl=(t==='t2'&&p.plan)?Object.entries(p.plan).filter(([k,v])=>(v||'').trim()).map(([k,v])=>`- ${(PFIELDS[k]||{l:k}).l}: ${v}`).join('\n'):''; return `[${t.toUpperCase()}${e.level&&e.mode==='t2'?' · Bậc '+e.level:''}] ${p.prompt}${pl?'\n\nÔ lên ý\n'+pl:''}\n\n${p.final}`; }).join('\n\n-----\n\n'); navigator.clipboard.writeText(txt).then(()=>{$('copyMsg').textContent='Đã sao chép.';}).catch(()=>{$('copyMsg').textContent='Máy không cho sao chép tự động. Hãy bôi đen bài ở trên rồi sao chép.';}); };
+  $('copyD').onclick=()=>{ const txt=['t1','t2'].filter(t=>e[t]).map(t=>{ const p=e[t]; const pl=(t==='t2'&&p.plan)?Object.entries(p.plan).filter(([k,v])=>(v||'').trim()).map(([k,v])=>`- ${(PFIELDS[k]||{l:k}).l}: ${v}`).join('\n'):''; return `[${t.toUpperCase()}${e.level&&e.mode==='t2'?' · Bậc '+e.level:''}] ${p.prompt}${pl?'\n\nÔ lên ý\n'+pl:''}\n\n${p.final}`; }).join('\n\n-----\n\n'); navigator.clipboard.writeText(txt).then(()=>{$('copyMsg').textContent='Đã sao chép.';}).catch(()=>{$('copyMsg').textContent='Máy không cho sao chép tự động. Hãy bôi đen bài ở trên rồi sao chép.';}); };
   $('detail').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -1046,14 +1085,7 @@ function showDetail(e){
 if(sess){ if(!sess.level) sess.level=4; if(sess.t2 && sess.t2.plan && sess.t2.plan.notes){ sess.t2.draft = sess.t2.plan.notes; delete sess.t2.plan.notes; } if(sess.t2 && sess.t2.planDone===undefined){ sess.t2.planDone=true; sess.t2.plan=sess.t2.plan||{}; } activeT = sess.mode==='t2'?'t2':'t1'; enterExam(); } else showTab('write');
 $('lvlCard').hidden = mode!=='t2';
 renderHist();
-(async()=>{
-  try{ db = await window.claude?.use?.('db'); }catch(e){ db=null; }
-  if(!db) return;
-  db.collection('essays').orderBy('createdAt','desc').limit(200).onSnapshot(snap=>{
-    essays = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    renderHist();
-  }, ()=>{});
-})();
+loadCloud();
 })();
 </script>
 

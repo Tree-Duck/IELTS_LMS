@@ -477,6 +477,56 @@ app.post('/api/submissions', authenticate, aiLimiter, async (req, res) => {
   }
 });
 
+// ─── Phòng Luyện Viết ─────────────────────────────────────────────────────────
+// The timed writing room (public/phong-luyen-viet.html) saves here when the
+// student is signed in, so the essay follows them to any device and lands in
+// the teacher's grade queue. Everything is clamped: the body comes from the page.
+const plvStr = (v, max) => String(v ?? '').slice(0, max);
+const plvNum = v => (Number.isFinite(+v) ? +v : null);
+const plvWords = s => (s.trim().match(/\S+/g) || []).length;
+function cleanPlvTask(p) {
+  if (!p || typeof p !== 'object') return null;
+  const t = { prompt: plvStr(p.prompt, 4000), atTime: plvStr(p.atTime, 20000), final: plvStr(p.final, 20000) };
+  if (!t.prompt.trim() || !t.final.trim()) return null;
+  t.wordsAtTime = plvWords(t.atTime);
+  t.wordsFinal = plvWords(t.final);
+  for (const k of ['promptId', 'dang', 'frame', 'stance', 'topic', 'sub', 'source']) if (p[k] != null) t[k] = plvStr(p[k], 200);
+  if (p.plan && typeof p.plan === 'object') {
+    t.plan = {};
+    for (const [k, v] of Object.entries(p.plan).slice(0, 20)) t.plan[plvStr(k, 40)] = plvStr(v, 2000);
+  }
+  if (plvNum(p.planSec) != null) t.planSec = plvNum(p.planSec);
+  return t;
+}
+
+app.post('/api/plv/essays', authenticate, (req, res) => {
+  try {
+    const items = [];
+    for (const e of (Array.isArray(req.body?.essays) ? req.body.essays.slice(0, 100) : [])) {
+      const sid = plvStr(e && e.id, 64);
+      if (!/^[\w-]+$/.test(sid)) continue;
+      const parts = {};
+      for (const part of ['t1', 't2']) { const t = cleanPlvTask(e[part]); if (t) parts[part] = t; }
+      if (!Object.keys(parts).length) continue;
+      const checks = {};
+      if (e.checks && typeof e.checks === 'object') for (const [k, v] of Object.entries(e.checks).slice(0, 30)) checks[plvStr(k, 40)] = !!v;
+      items.push({ sid, parts, meta: {
+        createdAt: plvNum(e.createdAt) || Date.now(), savedAt: plvNum(e.savedAt) || Date.now(),
+        mode: ['t1', 't2', 'full'].includes(e.mode) ? e.mode : (parts.t1 ? 't1' : 't2'),
+        level: plvNum(e.level), minutes: plvNum(e.minutes), usedSec: plvNum(e.usedSec), timeUp: !!e.timeUp, checks
+      } });
+    }
+    res.json({ added: db.insertPlvEssays(req.user.id, items) });
+  } catch (err) {
+    console.error('PLV save error:', err);
+    res.status(500).json({ error: 'Chưa lưu được bài.' });
+  }
+});
+
+app.get('/api/plv/essays', authenticate, (req, res) => {
+  res.json(db.getPlvEssays(req.user.id));
+});
+
 app.get('/api/submissions', authenticate, (req, res) => {
   const submissions = db.getSubmissionsByUser(req.user.id);
   res.json(submissions);
