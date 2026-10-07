@@ -158,6 +158,31 @@
   .scr { text-align: center; font-size: 1.25rem; color: var(--soft); margin-top: 4px; }
   .scr b { color: #7C3AED; letter-spacing: 2px; }
 
+  /* Bong bóng chữ */
+  .arena { position: relative; height: 300px; border-radius: 22px; overflow: hidden; background: linear-gradient(180deg, #CDEEFF 0%, #EAF8FF 70%); }
+  .arena .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(180deg, #8BDC77, #5CC47A); }
+  .balloon { position: absolute; top: 0; left: 0; width: 132px; display: flex; flex-direction: column; align-items: center; will-change: transform; }
+  .balloon .ball { width: 132px; height: 132px; border-radius: 50%; display: grid; place-items: center; font-size: 4rem; line-height: 1;
+    background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95) 0 10%, rgba(255, 255, 255, 0.35) 22%, rgba(186, 230, 253, 0.55) 60%, rgba(125, 211, 252, 0.75) 100%);
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.8), 0 6px 14px rgba(56, 130, 180, 0.25); }
+  .balloon .ball img { width: 92px; height: auto; }
+  .balloon .string { width: 2px; height: 26px; background: #9CC6E0; }
+  .balloon.pop .ball { animation: popb 0.45s ease-out forwards; }
+  .balloon.pop .string { opacity: 0; }
+  .balloon.landed .ball { box-shadow: inset 0 0 0 4px #FFC93C, 0 4px 10px rgba(0, 0, 0, 0.15); }
+  @keyframes popb { 60% { transform: scale(1.25); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
+  .pctx { text-align: center; font-size: 1.35rem; color: var(--soft); margin: 10px 0 2px; min-height: 1.6em; }
+  .pslots { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  .ps { width: 46px; height: 56px; border-bottom: 5px solid #D9D2F5; display: grid; place-items: center; font-size: 2.2rem; font-weight: 700; }
+  .ps.ghost { color: #C4BEDF; }
+  .ps.done { border-bottom-color: var(--grass); color: var(--ink); }
+  .ps.next { border-bottom-color: var(--sky); animation: blink 1s infinite; }
+  .ptools { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  .hint-btn { min-height: 52px; padding: 0 18px; border-radius: 999px; background: #FFF2C4; box-shadow: 0 4px 0 #E5C76B; font-size: 1.2rem; font-weight: 700; }
+  .hint-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #E5C76B; }
+  .slow-btn { min-height: 52px; padding: 0 16px; border-radius: 999px; background: #fff; box-shadow: 0 4px 0 var(--line); font-size: 1.1rem; font-weight: 600; }
+  .slow-btn[aria-pressed="true"] { background: #E3F7F4; box-shadow: 0 4px 0 #9AD9CC; }
+
   /* Result + album */
   .result { text-align: center; }
   .result .stars { font-size: 3.2rem; letter-spacing: 6px; }
@@ -185,6 +210,8 @@
     .ws { grid-template-columns: 1fr; } .wl { flex-direction: row; flex-wrap: wrap; } .wl div { font-size: 1.05rem; padding: 4px 10px; }
     .wc { font-size: 1.3rem; border-radius: 9px; } .wsg { gap: 4px; }
     .lslot, .lchip { width: 54px; height: 60px; font-size: 1.8rem; }
+    .arena { height: 240px; } .balloon, .balloon .ball { width: 108px; } .balloon .ball { height: 108px; font-size: 3.2rem; } .balloon .ball img { width: 74px; }
+    .ps { width: 34px; height: 46px; font-size: 1.7rem; }
   }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -274,12 +301,15 @@ const LESSONS = [
 ];
 // Nhìn & gõ: look at the picture and the meaning, type the English.
 const TYPE_SETS = [
-  { id: 'tw', title: 'Nhìn & gõ · Từ trong bài', sub: '12 từ', mascot: 'owl', cls: 't3', words: [
+  { id: 'tw', title: 'Nhìn & gõ · Từ trong bài', sub: '12 từ · bong bóng', mascot: 'owl', cls: 't3', words: [
     ['like', 'thích', '👍', 'I ___ it.'], ['is', 'là', '🐘', 'It ___ big.'], ['it', 'nó', '🍪', 'I like ___.'], ['of', 'vì, tại (because of)', '🙋‍♂️', 'because ___ him'],
     ['for', 'cho', '🎁', 'The cookies are ___ them.'], ['me', 'tớ (đứng sau)', '🙋', 'Look at ___!'], ['him', 'cậu ấy (đứng sau)', '👦', 'I like ___.'],
     ['her', 'cô ấy (đứng sau)', '👧', 'I met ___.'], ['us', 'chúng tớ (đứng sau)', '👫', 'Mom loves ___.'], ['them', 'họ (đứng sau)', '👨‍👩‍👧', 'for ___'],
     ['mom', 'mẹ', '👩', 'My ___ loves us.'], ['cookies', 'bánh quy', '🍪', 'We baked ___.']] },
-  { id: 'ta', title: 'Nhìn & gõ · Con vật', sub: '10 con mỗi lượt', mascot: 'monkey', cls: 't4', animals: true },
+  { id: 'ta', title: 'Nhìn & gõ · Con vật', sub: '10 con mỗi lượt · bong bóng', mascot: 'monkey', cls: 't4', animals: true },
+  // Body words from Bài 3; the card's example sentence becomes the hint with the word blanked out.
+  { id: 'tb', title: 'Nhìn & gõ · Cơ thể', sub: '10 từ mỗi lượt · bong bóng', mascot: 'gorilla', cls: 't6', pick: 10,
+    words: LESSONS.find(l => l.id === 'l3').cards.map(c => [c.en, c.vi, c.pic, c.ex.replace(new RegExp('\\b' + c.en + '(s?)\\b', 'i'), '___$1')]) },
 ];
 
 /* ── Storage, sound, speech ── */
@@ -324,6 +354,7 @@ const starsHtml = n => [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}">★</
 
 /* ── Home ── */
 function home() {
+  if (G && G.p) cancelAnimationFrame(G.p.raf);
   G = null;
   const own = store.get('stickers', []);
   app.innerHTML = `
@@ -356,9 +387,9 @@ function start(id) {
   if (L.pairs) stages.push({ t: 'match', kind: 'pairs' });
   if (L.rule) stages.push({ t: 'rule' });
   (L.sents || []).forEach(S => stages.push({ t: 'sent', S: parse(S) }));
-  if (L.words) shuffle(L.words).forEach(w => stages.push({ t: 'word', w: { en: w[0], vi: w[1], pic: w[2], ex: w[3] } }));
-  if (L.animals) shuffle(ANIMALS).slice(0, 10).forEach(([en, vi]) => stages.push({ t: 'word', w: { en, vi, img: IMG(en), ex: '' } }));
-  G = { L, stages, i: 0, earned: [] };
+  if (L.words) shuffle(L.words).slice(0, L.pick || L.words.length).forEach(w => stages.push({ t: 'pop', w: { en: w[0], vi: w[1], pic: w[2], ex: w[3] } }));
+  if (L.animals) shuffle(ANIMALS).slice(0, 10).forEach(([en, vi]) => stages.push({ t: 'pop', w: { en, vi, img: IMG(en), ex: '' } }));
+  G = { L, stages, i: 0, earned: [], fall: 22 };
   stage();
 }
 function parse(S) {
@@ -385,7 +416,7 @@ function next(stars) {
 }
 function stage() {
   const s = G.stages[G.i];
-  ({ cards: cardsStage, match: matchStage, rule: ruleStage, sent: chooseStep, word: wordStage, search: searchStage, scramble: scrambleStage })[s.t](s);
+  ({ cards: cardsStage, match: matchStage, rule: ruleStage, sent: chooseStep, word: wordStage, search: searchStage, scramble: scrambleStage, pop: popStage })[s.t](s);
 }
 
 /* ── Word cards: flip each one ── */
@@ -402,8 +433,11 @@ function cardsStage() {
     <div class="row"><button class="say" onclick="say('${esc(c.en)}')" aria-label="Nghe">🔊</button>
       <button class="big-btn blue" onclick="moveCard(-1)" ${G.ci ? '' : 'disabled'}>◀</button>
       <button class="big-btn blue" onclick="moveCard(1)" ${G.ci < cards.length - 1 ? '' : 'disabled'}>▶</button>
-      ${G.seen.size === cards.length ? `<button class="big-btn" onclick="G.ci = 0; next()">Chơi ghép nghĩa →</button>` : ''}</div>`);
-  talk(G.seen.size === cards.length ? 'Xem hết thẻ rồi! Giờ mình ghép nghĩa nhé.' : `Lật hết ${cards.length} thẻ nhé. Bấm 🔊 để nghe.`);
+      </div>
+    <div class="row">${G.seen.size === cards.length ? `<button class="big-btn" onclick="G.ci = 0; next()">Chơi ghép nghĩa →</button>`
+      : G.seen.has(G.ci) ? `<button class="big-btn" onclick="nextCard()">Thẻ tiếp →</button>` : ''}</div>`);
+  talk(G.seen.size === cards.length ? 'Xem hết thẻ rồi! Giờ mình ghép nghĩa nhé.'
+    : G.seen.has(G.ci) ? `Lật xong rồi! Bấm <b>Thẻ tiếp →</b> nhé. Còn ${cards.length - G.seen.size} thẻ.` : `Chạm vào thẻ để lật. Có ${cards.length} thẻ, bấm 🔊 để nghe.`);
 }
 function flipCard() {
   const f = $('flip'), first = !G.seen.has(G.ci);
@@ -411,6 +445,8 @@ function flipCard() {
   G.seen.add(G.ci);
   if (first) { tone('key'); setTimeout(() => { if (G && G.stages[G.i] && G.stages[G.i].t === 'cards') { const on = f.classList.contains('on'); cardsStage(); if (on) $('flip').classList.add('on'); } }, 550); }
 }
+// The next card not flipped yet, after this one (wrapping round).
+function nextCard() { const n = G.L.cards.length; for (let k = 1; k <= n; k++) { const j = (G.ci + k) % n; if (!G.seen.has(j)) { G.ci = j; break; } } cardsStage(); }
 function moveCard(d) { G.ci = Math.max(0, Math.min(G.L.cards.length - 1, G.ci + d)); cardsStage(); }
 
 /* ── Matching: English with meaning, or the two forms of a pronoun ── */
@@ -677,6 +713,7 @@ function typeDraw() {
   if (want && t.here >= 2) document.querySelector(`.key[data-k="${want.toLowerCase()}"]`)?.classList.add('glow');
 }
 function typeKey(ch) {
+  if (G && G.p) return popKey(ch);
   const t = G && G.t;
   if (!t || !$('tline') || t.wi >= t.toks.length) return;
   const want = t.toks[t.wi].letters[t.ci], key = document.querySelector(`.key[data-k="${ch}"]`);
@@ -696,8 +733,96 @@ function typeKey(ch) {
 }
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (/^[a-z]$/i.test(e.key) && G && G.t) { e.preventDefault(); typeKey(e.key.toLowerCase()); }
+  if (/^[a-z]$/i.test(e.key) && G && (G.t || G.p)) { e.preventDefault(); typeKey(e.key.toLowerCase()); }
 });
+
+/* ── Bong bóng chữ: one balloon drifts down, typing the word pops it ──
+   Only the picture (and, for small words, a sentence with a gap) is shown.
+   💡 reveals one more letter and says the word; it costs stars, never a life.
+   A balloon that lands just waits: the answer shows in grey, the child still
+   types it, and the word comes back once at the end of the round. */
+const POP_MIN = 12, POP_SLOW = 1.6;
+function popStage(s) {
+  const w = s.w;
+  G.p = { w, s, letters: [...w.en.replace(/[^A-Za-z]/g, '')], ci: 0, shown: 0, hints: 0, miss: 0, y: -30, x: 0, landed: false, done: false, t0: 0, last: 0 };
+  frame(`<b>🎈 Bong bóng chữ</b> Nhìn hình, gõ từ tiếng Anh`, `
+    <div class="arena" id="arena"><div class="ground"></div>
+      <div class="balloon" id="balloon"><div class="ball">${w.img ? `<img src="${w.img}" alt="">` : w.pic}</div><div class="string"></div></div></div>
+    <div class="pctx">${w.ex ? esc(w.ex) : ''}</div>
+    <div class="pslots" id="pslots"></div>
+    <div class="ptools"><button class="hint-btn" onclick="popHint()">💡 Gợi ý</button>
+      <button class="slow-btn" id="slowBtn" aria-pressed="${store.get('slow', false)}" onclick="popSlow()">🐢 Chậm</button></div>
+    ${keyboard()}`);
+  popDraw();
+  const a = $('arena');
+  G.p.x = 10 + Math.random() * Math.max(0, a.clientWidth - $('balloon').offsetWidth - 20);
+  talk(s.again ? 'Từ này quay lại nè. Em nhớ không?' : 'Gõ từ tiếng Anh để làm nổ bóng. Cần giúp thì bấm 💡 nhé.');
+  const g = G, p = G.p;
+  const step = ts => {
+    if (G !== g || G.p !== p || p.done) return;
+    if (!p.t0) p.t0 = p.last = ts;
+    const dt = Math.min(0.1, (ts - p.last) / 1000); p.last = ts;
+    const ar = $('arena'), b = $('balloon');
+    if (!ar || !b) return;
+    const floor = ar.clientHeight - 34 - b.offsetHeight + 8, secs = G.fall * (store.get('slow', false) ? POP_SLOW : 1);
+    if (!p.landed) {
+      p.y += (floor + 30) / secs * dt;
+      if (p.y >= floor) { p.y = floor; popLand(); }
+    }
+    const sway = p.landed ? 0 : Math.sin((ts - p.t0) / 700) * 10;
+    b.style.transform = `translate(${p.x + sway}px, ${p.y}px)`;
+    p.raf = requestAnimationFrame(step);
+  };
+  p.raf = requestAnimationFrame(step);
+}
+function popDraw() {
+  const p = G.p;
+  $('pslots').innerHTML = p.letters.map((ch, i) => {
+    const done = i < p.ci, show = done || i < p.shown;
+    return `<span class="ps${done ? ' done' : show ? ' ghost' : ''}${i === p.ci ? ' next' : ''}">${show ? esc(ch) : ''}</span>`;
+  }).join('');
+}
+function popHint() {
+  const p = G && G.p; if (!p || p.done) return;
+  if (p.shown <= p.ci) p.shown = p.ci;
+  if (p.shown < p.letters.length) { p.shown++; p.hints++; }
+  say(p.w.en); tone('key'); popDraw();
+  talk('Chữ mờ là gợi ý. Gõ theo nhé!');
+}
+function popSlow() {
+  const on = !store.get('slow', false); store.set('slow', on);
+  $('slowBtn').setAttribute('aria-pressed', on);
+  talk(on ? '🐢 Bóng rơi chậm hơn rồi.' : 'Bóng rơi tốc độ thường.');
+}
+function popLand() {
+  const p = G.p;
+  p.landed = true; p.shown = p.letters.length;
+  $('balloon').classList.add('landed'); tone('no'); popDraw();
+  talk('Bóng chạm đất rồi! Không sao, gõ theo chữ mờ nhé. Từ này sẽ quay lại cuối lượt.', 'no');
+  if (!p.s.again) G.stages.push({ t: 'pop', w: p.w, again: true });
+}
+function popKey(ch) {
+  const p = G.p;
+  if (!p || p.done || !$('pslots')) return;
+  const want = p.letters[p.ci], key = document.querySelector(`.key[data-k="${ch}"]`);
+  if (ch !== want.toLowerCase()) {
+    p.miss++; tone('no');
+    if (key) { key.classList.add('bad'); setTimeout(() => key.classList.remove('bad'), 300); }
+    shake($('pslots')); return;
+  }
+  tone('key');
+  if (key) { key.classList.add('press'); setTimeout(() => key.classList.remove('press'), 120); }
+  p.ci++; popDraw();
+  if (p.ci < p.letters.length) return;
+  p.done = true; cancelAnimationFrame(p.raf);
+  $('balloon').classList.add('pop'); tone('ok'); say(p.w.en);
+  talk(`${p.w.img ? '' : p.w.pic + ' '}<b>${esc(p.w.en)}</b> = ${esc(p.w.vi)} ✨`, 'ok');
+  // Each popped balloon falls a little faster next time, never faster than POP_MIN seconds.
+  if (!p.landed) G.fall = Math.max(POP_MIN, G.fall - 1.2);
+  const stars = p.landed ? 1 : p.hints === 0 && p.miss === 0 ? 3 : p.hints <= 1 && p.miss <= 2 ? 2 : 1;
+  const g = G; G.p = null;
+  setTimeout(() => { if (G === g) next(stars); }, 1400);
+}
 
 /* ── The end of a lesson: stars and a sticker ── */
 function finish() {
