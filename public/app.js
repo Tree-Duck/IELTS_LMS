@@ -5617,7 +5617,7 @@ function renderQueueItem(s) {
       <div class="queue-item-header">
         <span class="submission-badge ${badgeClass}" style="width:auto;padding:3px 10px">${taskLabel}</span>
         <span class="queue-student">👤 ${escHtml(s.student_name)}${s.student_email ? `<span class="archive-student-email">&nbsp;·&nbsp;${escHtml(s.student_email)}</span>` : ''}</span>
-        <span class="queue-meta">${s.word_count} words · ${formatDate(s.created_at)}</span>
+        <span class="queue-meta">${s.plv ? '⏱ Phòng Luyện Viết · ' : ''}${s.word_count} words · ${formatDate(s.created_at)}</span>
       </div>
       <div class="queue-prompt"><strong>Prompt:</strong> ${escHtml(s.prompt)}</div>
       <div class="queue-essay-preview">${essayPreview}</div>

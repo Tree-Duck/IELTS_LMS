@@ -359,6 +359,54 @@ const db = {
       });
   },
 
+  // Phòng Luyện Viết: each task part of a saved session becomes a teacher-mode
+  // submission tagged plv {sid, part, ...}. A (user, sid, part) already stored is
+  // skipped, so a device can resend its old essays without making duplicates.
+  insertPlvEssays(user_id, items) {
+    const data = load();
+    let added = 0;
+    for (const { sid, meta, parts } of items) {
+      for (const [part, task] of Object.entries(parts)) {
+        if (data.submissions.some(s => s.user_id === user_id && s.plv && s.plv.sid === sid && s.plv.part === part)) continue;
+        data._ids.submissions = (data._ids.submissions || 0) + 1;
+        data.submissions.push({
+          id: data._ids.submissions, user_id,
+          task_type: part === 't1' ? 'task1' : 'task2',
+          prompt: task.prompt, essay: task.final, word_count: task.wordsFinal,
+          grading_mode: 'teacher', status: 'pending_review', paste_stats: null, comments: [],
+          created_at: new Date(meta.createdAt).toISOString(),
+          plv: { sid, part, ...meta, task }
+        });
+        added++;
+      }
+    }
+    if (added) save(data);
+    return added;
+  },
+
+  // The student's Phòng Luyện Viết sessions rebuilt from those submissions, with
+  // the teacher's grade on each part once it exists.
+  getPlvEssays(user_id) {
+    const data = load();
+    const out = new Map();
+    const list = v => { try { return Array.isArray(v) ? v : JSON.parse(v || '[]'); } catch { return []; } };
+    for (const s of data.submissions) {
+      if (s.user_id !== user_id || !s.plv) continue;
+      const { sid, part, task, ...meta } = s.plv;
+      const e = out.get(sid) || { id: sid, ...meta, cloud: true };
+      const f = data.feedback.find(f => f.submission_id === s.id) || {};
+      e[part] = { ...task, subId: s.id, status: s.status,
+        grade: s.status === 'graded' ? {
+          overall: f.overall_band ?? null,
+          scores: [f.task_achievement, f.coherence_cohesion, f.lexical_resource, f.grammatical_range],
+          feedback: f.detailed_feedback || '', strengths: list(f.strengths), improvements: list(f.improvements)
+        } : null,
+        comments: (s.comments || []).map(c => c.text) };
+      out.set(sid, e);
+    }
+    return [...out.values()].sort((a, b) => b.createdAt - a.createdAt);
+  },
+
   insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd, graded_by = null, annotations = null) {
     const data = load();
     data._ids.feedback = (data._ids.feedback || 0) + 1;
