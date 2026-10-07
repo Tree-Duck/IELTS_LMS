@@ -117,6 +117,39 @@ td.empty{background:transparent;border:1px dashed var(--line)}
 .axis{position:absolute;font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .note{font-size:13px;color:var(--muted);margin:0;padding:0 4px;max-width:70ch}
 .quad-sub{margin-top:16px}
+/* mirror */
+.mirror{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:12px;align-items:start;background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:12px}
+.mirror figure{margin:0;text-align:center}
+.mirror figcaption{font-size:12.5px;color:var(--muted);margin-top:4px}
+.mirror svg{width:100%;height:auto;display:block;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.mirror video{width:100%;aspect-ratio:4/3;object-fit:cover;transform:scaleX(-1);border-radius:14px;background:#000;display:block}
+.mirror .mir-note{grid-column:1/-1;margin:0;font-size:13px;color:var(--muted)}
+/* minimal pairs */
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.pchip{font:500 13px var(--body);color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.pchip b{font-family:var(--ipa);font-weight:600}
+.pchip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pchip:focus-visible,.popt:focus-visible{outline:3px solid var(--nasal);outline-offset:2px}
+.ptop{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-bottom:8px}
+.popts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.popt{font:600 22px var(--body);color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line);border-radius:16px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.popt small{font:500 15px var(--ipa);color:var(--muted)}
+.popt:hover:not(:disabled){border-color:var(--accent)}
+.popt.ok{border-color:var(--air);background:var(--air-soft)}
+.popt.no{border-color:var(--accent);background:var(--accent-soft)}
+.popt:disabled{cursor:default}
+.pfb{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.pfb:empty{display:none}
+.pres{font-size:15px}
+.pres.ok{color:var(--air)}
+.pres.no{color:var(--accent-ink)}
+.pcmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pside{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+.pside svg{width:110px;height:92px;display:block;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.pside .pph{font:700 22px var(--ipa);color:var(--accent-ink)}
+.pside p{margin:0;font-size:13px;color:var(--muted)}
+.pside .row2{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.pbig{font:800 30px var(--display)}
 /* diagram animations */
 .waves path{stroke:var(--voice);stroke-width:3;fill:none;stroke-linecap:round;opacity:0}
 .waves.on path{animation:wave 1s ease-in-out infinite}
@@ -152,6 +185,8 @@ td.empty{background:transparent;border:1px dashed var(--line)}
       <p>Bấm một âm để xem môi, răng và lưỡi đặt ở đâu. Ký hiệu theo Cambridge Dictionary, giọng Mỹ.</p>
     </div>
     <div class="toggles">
+      <a class="tog" href="#pairsCard" style="text-decoration:none">🎧 Cặp âm dễ nhầm</a>
+      <button class="tog" id="tMirror" aria-pressed="false">🪞 Soi gương</button>
       <button class="tog" id="tSlow" aria-pressed="false">Chậm</button>
       <button class="tog" id="tLabels" aria-pressed="true">Tên bộ phận</button>
     </div>
@@ -169,6 +204,12 @@ td.empty{background:transparent;border:1px dashed var(--line)}
           <svg id="front" viewBox="0 0 120 100" role="img" aria-label="Khẩu hình nhìn thẳng"></svg>
           <figcaption>Nhìn thẳng</figcaption>
         </figure>
+      </div>
+
+      <div class="mirror" id="mirror" hidden>
+        <figure><svg id="mirFront" viewBox="0 0 120 100" role="img" aria-label="Khẩu hình mẫu nhìn thẳng"></svg><figcaption>Mẫu</figcaption></figure>
+        <figure><video id="mirVid" playsinline muted autoplay></video><figcaption>Bạn, như soi gương</figcaption></figure>
+        <p class="mir-note" id="mirNote"></p>
       </div>
 
       <div class="diagram" id="diagram">
@@ -245,6 +286,12 @@ td.empty{background:transparent;border:1px dashed var(--line)}
           <h3>Nguyên âm đôi, lưỡi trượt từ âm đầu sang âm sau</h3>
           <div class="diph" id="diph"></div>
         </div>
+      </div>
+      <div class="card" id="pairsCard">
+        <h2>Cặp âm dễ nhầm</h2>
+        <p class="legend">Nghe một từ rồi chọn từ bạn nghe được. Sau mỗi câu, xem hai khẩu hình cạnh nhau và nghe lại cả hai từ. Câu sai sẽ quay lại ở cuối lượt.</p>
+        <div class="pchips" id="pSets" role="group" aria-label="Chọn cặp âm"></div>
+        <div id="pBox" aria-live="polite"></div>
       </div>
       <p class="note">Hình là sơ đồ đơn giản hóa. Mỗi người đặt lưỡi hơi khác nhau, và khi nói liền, các âm ảnh hưởng lẫn nhau. Dùng hình để biết đặt lưỡi ở đâu, rồi luyện bằng tai và gương.</p>
     </section>
@@ -564,19 +611,20 @@ function render(S){
   renderFront(S);
 }
 
-function renderFront(S){
+// Front view as SVG markup. uid keeps clipPath ids unique when several views share the page.
+function frontSvg(S,uid){
   var r=S.round, sp=S.spread, c=S.close, ld=S.ld;
   var W=46+14*sp-20*r;
   var H=c>.5?0:(ld>.5?2:(3+34*S.jaw)*(1-.25*r));
   if(r>.5) W=Math.max(Math.min(W,H+12),18);
-  var cx=60, cy=60, out="";
+  var cx=60, cy=60, out="", cid="mclip"+uid;
   out+='<ellipse cx="60" cy="66" rx="58" ry="60" fill="var(--skin)"/>';
   out+='<path d="M50,20 C54,26 66,26 70,20" fill="none" stroke="var(--skin-edge)" stroke-width="2" stroke-linecap="round"/>';
   out+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2+8)+'" ry="'+f(Math.max(H/2+7,7))+'" fill="var(--lip)"/>';
   if(H>0.8){
-    out+='<clipPath id="mclip"><ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2)+'" ry="'+f(H/2)+'"/></clipPath>';
+    out+='<clipPath id="'+cid+'"><ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2)+'" ry="'+f(H/2)+'"/></clipPath>';
     out+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2)+'" ry="'+f(H/2)+'" fill="var(--cavity)"/>';
-    out+='<g clip-path="url(#mclip)">';
+    out+='<g clip-path="url(#'+cid+')">';
     if(r<.7) out+='<rect x="'+f(cx-W*.32)+'" y="'+f(cy-H/2-1)+'" width="'+f(W*.64)+'" height="'+f(Math.min(8,H*.45)+1)+'" rx="2" fill="var(--tooth)"/>';
     if(S.tongueOut) out+='<ellipse cx="'+cx+'" cy="'+f(cy+1)+'" rx="9" ry="4" fill="var(--tongue)" stroke="var(--tongue-edge)" stroke-width="1"/>';
     else if(H>9) out+='<ellipse cx="'+cx+'" cy="'+f(cy+H/2)+'" rx="'+f(W*.34)+'" ry="'+f(H*.35)+'" fill="var(--tongue)"/>';
@@ -585,7 +633,11 @@ function renderFront(S){
     out+='<path d="M'+f(cx-W/2)+','+cy+' Q'+cx+','+(cy+2)+' '+f(cx+W/2)+','+cy+'" stroke="#B85466" stroke-width="2" fill="none" stroke-linecap="round"/>';
   }
   if(ld>.5) out+='<rect x="'+(cx-11)+'" y="'+(cy-6)+'" width="22" height="7" rx="2" fill="var(--tooth)" stroke="var(--tooth-edge)" stroke-width="1"/>';
-  $("front").innerHTML=out;
+  return out;
+}
+function renderFront(S){
+  $("front").innerHTML=frontSvg(S,"f");
+  if(mirStream) $("mirFront").innerHTML=frontSvg(S,"m");
 }
 
 // ---------- animation ----------
@@ -888,8 +940,9 @@ function playClip(b64){
   }catch(e){ return false; }
 }
 function playPhon(id){ if(AUD.ph[id]) playClip(AUD.ph[id]); }
-function speak(word){
-  var k=word.toLowerCase(); if(AUD.w[k] && playClip(AUD.w[k])) return;
+function speak(word, noClip){
+  var k=word.toLowerCase(); if(!noClip && AUD.w[k] && playClip(AUD.w[k])) return;
+  try{ player.pause(); }catch(e){}
   if(!hasTTS){ note(NOTE_FAIL,true); return; }
   var synth=window.speechSynthesis, started=false;
   if(!voice) pickVoice();
@@ -902,6 +955,123 @@ function speak(word){
     setTimeout(function(){ if(!started && !synth.speaking) note(NOTE_FAIL,true); },2500);
   }catch(e){ note(NOTE_FAIL,true); }
 }
+
+// ---------- mirror ----------
+// Camera trước của máy, lật ngang như gương, đặt cạnh khẩu hình mẫu.
+// Hình chỉ hiện trên máy, không ghi lại và không gửi đi đâu.
+var mirStream=null;
+function mirrorOff(){
+  if(mirStream) mirStream.getTracks().forEach(function(t){ t.stop(); });
+  mirStream=null; $("mirVid").srcObject=null; $("mirror").hidden=true; $("tMirror").setAttribute("aria-pressed","false");
+}
+function mirrorOn(){
+  $("mirror").hidden=false; $("tMirror").setAttribute("aria-pressed","true");
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ $("mirNote").textContent="Trình duyệt này không mở được camera. Hãy dùng Safari trên iPad, hoặc Chrome hay Edge trên máy tính."; return; }
+  $("mirNote").textContent="Đang mở camera...";
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false}).then(function(st){
+    if($("mirror").hidden){ st.getTracks().forEach(function(t){ t.stop(); }); return; }
+    mirStream=st; $("mirVid").srcObject=st; var pl=$("mirVid").play(); if(pl&&pl.catch) pl.catch(function(){});
+    draw();
+    $("mirNote").textContent="Đưa miệng vào giữa khung. Bấm Xem lại chuyển động, vừa đọc theo vừa so môi và răng với hình mẫu. Hình không được lưu hay gửi đi.";
+  }).catch(function(e){
+    $("mirNote").textContent = e && (e.name==="NotAllowedError"||e.name==="SecurityError")
+      ? "Camera chưa được cho phép. Bấm vào biểu tượng trên thanh địa chỉ, cho phép Camera, rồi bấm Soi gương lần nữa."
+      : "Không mở được camera trên máy này. Có thể ứng dụng khác đang dùng camera.";
+    $("tMirror").setAttribute("aria-pressed","false");
+  });
+}
+$("tMirror").addEventListener("click",function(){ if(mirStream || this.getAttribute("aria-pressed")==="true") mirrorOff(); else mirrorOn(); });
+document.addEventListener("visibilitychange",function(){ if(document.hidden && mirStream) mirrorOff(); });
+
+// ---------- minimal pairs ----------
+// Mỗi bộ: âm a (từ đầu của cặp) và âm b (từ sau). Phiên âm kiểu Cambridge giọng Mỹ, như cả trang.
+var PAIRS=[
+ {a:"iː",b:"ɪ",w:[["sheep","ʃiːp","ship","ʃɪp"],["leave","liːv","live","lɪv"],["seat","siːt","sit","sɪt"],["feel","fiːl","fill","fɪl"],["eat","iːt","it","ɪt"]]},
+ {a:"æ",b:"e",w:[["bad","bæd","bed","bed"],["man","mæn","men","men"],["sad","sæd","said","sed"],["pan","pæn","pen","pen"],["had","hæd","head","hed"]]},
+ {a:"ʌ",b:"ɑː",w:[["cut","kʌt","cot","kɑːt"],["luck","lʌk","lock","lɑːk"],["duck","dʌk","dock","dɑːk"],["hut","hʌt","hot","hɑːt"]]},
+ {a:"eɪ",b:"e",w:[["late","leɪt","let","let"],["wait","weɪt","wet","wet"],["pain","peɪn","pen","pen"],["sale","seɪl","sell","sel"],["date","deɪt","debt","det"]]},
+ {a:"ʊ",b:"uː",w:[["full","fʊl","fool","fuːl"],["pull","pʊl","pool","puːl"]]},
+ {a:"p",b:"b",w:[["pig","pɪg","big","bɪg"],["pack","pæk","back","bæk"],["pear","per","bear","ber"],["pie","paɪ","buy","baɪ"],["cap","kæp","cab","kæb"]]},
+ {a:"θ",b:"t",w:[["three","θriː","tree","triː"],["thin","θɪn","tin","tɪn"],["thank","θæŋk","tank","tæŋk"],["both","boʊθ","boat","boʊt"],["thought","θɑːt","taught","tɑːt"]]},
+ {a:"θ",b:"s",w:[["think","θɪŋk","sink","sɪŋk"],["thick","θɪk","sick","sɪk"],["mouth","maʊθ","mouse","maʊs"],["path","pæθ","pass","pæs"],["worth","wɝːθ","worse","wɝːs"]]},
+ {a:"s",b:"ʃ",w:[["see","siː","she","ʃiː"],["sip","sɪp","ship","ʃɪp"],["sell","sel","shell","ʃel"],["sort","sɔːrt","short","ʃɔːrt"],["save","seɪv","shave","ʃeɪv"]]},
+ {a:"tʃ",b:"ʃ",w:[["chip","tʃɪp","ship","ʃɪp"],["chair","tʃer","share","ʃer"],["cheap","tʃiːp","sheep","ʃiːp"],["watch","wɑːtʃ","wash","wɑːʃ"]]},
+ {a:"l",b:"n",w:[["light","laɪt","night","naɪt"],["lock","lɑːk","knock","nɑːk"],["low","loʊ","no","noʊ"],["line","laɪn","nine","naɪn"]]},
+ {a:"n",b:"ŋ",w:[["fan","fæn","fang","fæŋ"],["ban","bæn","bang","bæŋ"],["sin","sɪn","sing","sɪŋ"],["ran","ræn","rang","ræŋ"],["win","wɪn","wing","wɪŋ"]]},
+ {a:"v",b:"w",w:[["vine","vaɪn","wine","waɪn"],["vest","vest","west","west"],["vet","vet","wet","wet"],["vow","vaʊ","wow","waʊ"]]},
+ {a:"z",b:"s",w:[["eyes","aɪz","ice","aɪs"],["prize","praɪz","price","praɪs"],["peas","piːz","peace","piːs"],["rise","raɪz","rice","raɪs"]]}
+];
+var pr={set:-1, items:[], at:0, first:0, picked:null, missed:[], requeued:0};
+function pShuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+// The two words of a pair must sound the same apart from the target sound: if only
+// one of them has a recorded clip, both are read by the synthetic voice so the
+// voice itself never gives the answer away.
+function pSay(word, other){ speak(word, !(AUD.w[word] && AUD.w[other])); }
+function pPose(id){ var d=BY[id], S=clonePose(d.kind==="diph"?PO[d.from]:PO[d.pose]); S.tongueOut=S.tg[0]<82; return S; }
+function pRenderSets(){
+  var h='<button class="pchip" data-set="-1" aria-pressed="'+(pr.set===-1)+'">Trộn tất cả</button>';
+  PAIRS.forEach(function(P,i){ h+='<button class="pchip" data-set="'+i+'" aria-pressed="'+(pr.set===i)+'"><b>/'+P.a+'/ – /'+P.b+'/</b> '+P.w[0][0]+', '+P.w[0][2]+'</button>'; });
+  $("pSets").innerHTML=h;
+}
+function pStart(){
+  var pool=[]; (pr.set===-1?PAIRS:[PAIRS[pr.set]]).forEach(function(P){ P.w.forEach(function(w){ pool.push({P:P,w:w}); }); });
+  var items=[], n=8;
+  while(items.length<n){ pShuffle(pool).forEach(function(x){ if(items.length<n) items.push({P:x.P,w:x.w,k:Math.random()<.5?0:1}); }); }
+  pr.items=items; pr.at=0; pr.first=0; pr.missed=[]; pr.requeued=0; pr.picked=null;
+  pRender(true);
+}
+function pCur(){ return pr.items[pr.at]; }
+function pWord(it,k){ return {w:it.w[k*2], ip:it.w[k*2+1], ph:k?it.P.b:it.P.a}; }
+function pRender(autoplay){
+  var box=$("pBox");
+  if(!pr.items.length){ box.innerHTML='<p class="legend" style="margin:0">Chọn một cặp âm ở trên, hoặc Trộn tất cả, rồi bấm Bắt đầu.</p><button class="btn" id="pGo">Bắt đầu</button>'; $("pGo").onclick=pStart; return; }
+  if(pr.at>=pr.items.length){
+    var n=pr.items.length-pr.requeued;
+    var miss=pr.missed.map(function(it){ var a=pWord(it,0), b=pWord(it,1); return '<div class="row2" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" data-say="'+a.w+'" data-other="'+b.w+'">🔊 '+a.w+' /'+a.ip+'/</button><button class="btn ghost" data-say="'+b.w+'" data-other="'+a.w+'">🔊 '+b.w+' /'+b.ip+'/</button></div>'; }).join("");
+    box.innerHTML='<div class="pbig">'+(pr.first===n?"🌟":pr.first>=n*.75?"👍":"💪")+' '+pr.first+'/'+n+'</div><p class="legend" style="margin:4px 0 10px">Số câu đúng ngay lần đầu.'+(miss?' Nghe lại các cặp đã nhầm:':'')+'</p>'+miss+'<div style="margin-top:12px"><button class="btn" id="pGo">Làm lượt mới</button></div>';
+    $("pGo").onclick=pStart; return;
+  }
+  var it=pCur(), A=pWord(it,0), B=pWord(it,1), heard=pWord(it,it.k), other=pWord(it,1-it.k);
+  var h='<div class="ptop"><span>Câu '+(pr.at+1)+'/'+pr.items.length+'</span><span>Đúng ngay lần đầu '+pr.first+'</span><span>/'+it.P.a+'/ – /'+it.P.b+'/</span></div>'+
+    '<button class="btn ghost" id="pAgain">🔊 Nghe lại</button>'+
+    '<div class="popts">'+[A,B].map(function(x,i){ return '<button class="popt" data-k="'+i+'"><span>'+x.w+'</span><small>/'+x.ip+'/</small></button>'; }).join("")+'</div>'+
+    '<div class="pfb" id="pFb"></div>';
+  box.innerHTML=h;
+  $("pAgain").onclick=function(){ pSay(heard.w, other.w); };
+  if(autoplay) pSay(heard.w, other.w);
+}
+function pSide(x){
+  var d=BY[x.ph];
+  var what = d.kind==="vowel" ? d.desc+", "+d.lips.toLowerCase() : d.kind==="diph" ? "Trượt từ âm đầu sang âm sau" : d.place+", "+(KIND[d.kind]||"").toLowerCase()+(d.v?", rung cổ":", không rung cổ");
+  return '<div class="pside"><div class="pph">/'+x.ph+'/</div><svg viewBox="0 0 120 100" aria-hidden="true">'+frontSvg(pPose(x.ph),"p"+(pSide.n=(pSide.n||0)+1))+'</svg>'+
+    '<p><b style="color:var(--ink)">'+x.w+'</b> /'+x.ip+'/</p><p>'+what+'</p><p>'+d.steps[0]+'</p>'+
+    '<div class="row2"><button class="btn ghost" data-say="'+x.w+'">🔊 Nghe</button><button class="btn ghost" data-see="'+x.ph+'">Xem mặt cắt</button></div></div>';
+}
+function pPick(k){
+  if(pr.picked!=null) return;
+  var it=pCur(), ok=k===it.k, heard=pWord(it,it.k), A=pWord(it,0), B=pWord(it,1);
+  pr.picked=k;
+  if(ok && !it.again) pr.first++;
+  if(!ok && !it.again){ pr.missed.push(it); if(pr.requeued<4){ pr.items.push({P:it.P,w:it.w,k:it.k,again:1}); pr.requeued++; } }
+  document.querySelectorAll("#pBox .popt").forEach(function(b){ b.disabled=true; var bk=+b.getAttribute("data-k"); if(bk===it.k) b.classList.add("ok"); else if(bk===k) b.classList.add("no"); });
+  $("pFb").innerHTML='<div class="pres '+(ok?'ok':'no')+'">'+(ok?'Đúng. Từ được đọc là <b>'+heard.w+'</b> /'+heard.ip+'/.':'Chưa đúng. Từ được đọc là <b>'+heard.w+'</b> /'+heard.ip+'/. Nghe lại cả hai từ bên dưới rồi để ý khác nhau ở đâu.')+'</div>'+
+    '<div class="pcmp">'+pSide(A)+pSide(B)+'</div><div><button class="btn" id="pNext">Câu tiếp →</button></div>';
+  $("pNext").onclick=pNext; $("pNext").focus({preventScroll:true});
+}
+function pNext(){ pr.at++; pr.picked=null; pRender(true); }
+$("pSets").addEventListener("click",function(e){ var b=e.target.closest("[data-set]"); if(!b) return; pr.set=+b.getAttribute("data-set"); pRenderSets(); pStart(); });
+$("pBox").addEventListener("click",function(e){
+  var o=e.target.closest(".popt"); if(o){ pPick(+o.getAttribute("data-k")); return; }
+  var s2=e.target.closest("[data-say]"); if(s2){ var w=s2.getAttribute("data-say"), it=pCur(), ot=s2.getAttribute("data-other"); if(!ot && it) ot = it.w[0]===w?it.w[2]:it.w[0]; pSay(w, ot||w); return; }
+  var v=e.target.closest("[data-see]"); if(v){ select(v.getAttribute("data-see"),{scroll:true}); if(window.innerWidth>=980) $("stage").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"}); }
+});
+$("pairsCard").addEventListener("keydown",function(e){
+  if(e.target.tagName==="INPUT") return;
+  if(!pr.items.length || pr.at>=pr.items.length) return;
+  if(pr.picked==null && (e.key==="1"||e.key==="2")){ e.preventDefault(); pPick(+e.key-1); }
+  else if(pr.picked!=null && e.key==="Enter" && e.target.id!=="pNext"){ e.preventDefault(); pNext(); }
+});
+pRenderSets(); pRender(false);
 
 select("θ",{instant:true});
 })();

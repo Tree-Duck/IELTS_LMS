@@ -407,6 +407,25 @@ const db = {
     return [...out.values()].sort((a, b) => b.createdAt - a.createdAt);
   },
 
+  // Speech Score: passages the teacher marked up (stress, pauses, tones) for students.
+  getSpeechLib() {
+    return (load().speech_lib || []).slice().sort((a, b) => b.date - a.date);
+  },
+  addSpeechLib(item) {
+    const data = load();
+    if (!data.speech_lib) data.speech_lib = [];
+    data.speech_lib.push(item);
+    save(data);
+  },
+  deleteSpeechLib(id) {
+    const data = load();
+    const before = (data.speech_lib || []).length;
+    data.speech_lib = (data.speech_lib || []).filter(x => x.id !== id);
+    if (data.speech_lib.length === before) return false;
+    save(data);
+    return true;
+  },
+
   insertFeedback(submission_id, task_achievement, coherence_cohesion, lexical_resource, grammatical_range, overall_band, detailed_feedback, strengths, improvements, sentence_analysis, criterion_details, overall_improvements, tokens_used, cost_usd, graded_by = null, annotations = null) {
     const data = load();
     data._ids.feedback = (data._ids.feedback || 0) + 1;
@@ -1855,6 +1874,7 @@ function classifyTask2Type(q) {
   if (!data.collocation_sets) { data.collocation_sets = []; changed = true; }
   if (!data._ids.collocation_sets) { data._ids.collocation_sets = 0; changed = true; }
   if (!data.speaking_model_answers) { data.speaking_model_answers = []; changed = true; }
+  if (!data.speech_lib) { data.speech_lib = []; changed = true; }
   if (!data._ids.speaking_model_answers) { data._ids.speaking_model_answers = 0; changed = true; }
   if (changed) save(data);
 })();
