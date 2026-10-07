@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Writing 8.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Same tokens as phong-luyen-viet.html: quiet cards, teal for action, coral for errors. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#16213A; --muted:#5E6B80; --line:#D9E0EA;
+  --navy:#15294B; --teal:#0E7C86; --teal-soft:#E3F2F3; --coral:#B93A2E; --coral-soft:#FBEDEB; --amber:#A9741A; --amber-soft:#FBF3E4; --green:#2F7A55; --green-soft:#E8F3ED;
+  --en:#13487A;
+  --font-ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1422; --surface:#161E30; --ink:#E6EBF4; --muted:#9AA7BD; --line:#2A3550;
+  --navy:#9FB6E0; --teal:#4FC1C9; --teal-soft:#123338; --coral:#F08A7E; --coral-soft:#3A1F1D; --amber:#E0B25C; --amber-soft:#3A2E17; --green:#6CC498; --green-soft:#16302A;
+  --en:#8CB8E8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1422; --surface:#161E30; --ink:#E6EBF4; --muted:#9AA7BD; --line:#2A3550;
+  --navy:#9FB6E0; --teal:#4FC1C9; --teal-soft:#123338; --coral:#F08A7E; --coral-soft:#3A1F1D; --amber:#E0B25C; --amber-soft:#3A2E17; --green:#6CC498; --green-soft:#16302A;
+  --en:#8CB8E8; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:18px 60px}
+h1,h2,h3{text-wrap:balance;margin:0;color:var(--navy)}
+h1{font-size:1.45rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.sub{color:var(--muted);font-size:.9rem}
+.label{font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.grid{display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid transparent;background:var(--teal);color:#fff;font:600 .9rem var(--font-ui);padding:10px 18px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--teal);border-color:var(--teal)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.tok:focus-visible,.opt:focus-visible,textarea:focus-visible,input:focus-visible,label:focus-within{outline:2px solid var(--teal);outline-offset:2px}
+textarea,input[type=text]{width:100%;font:400 1rem/1.5 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.games{display:grid;gap:14px}
+@media (min-width:760px){.games{grid-template-columns:1fr 1fr}}
+.game{display:flex;flex-direction:column;gap:10px}
+.counts{display:flex;flex-wrap:wrap;gap:8px}
+.badge{font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--teal-soft);color:var(--teal);white-space:nowrap}
+.badge.new{background:var(--amber-soft);color:var(--amber)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.92rem;cursor:pointer}
+.check input{margin-top:4px;width:18px;height:18px;flex:none}
+.streak{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.day{width:38px;text-align:center;font-size:.72rem;color:var(--muted)}
+.day i{display:block;width:26px;height:26px;margin:0 auto 2px;border-radius:50%;border:2px solid var(--line)}
+.day.on i{background:var(--teal);border-color:var(--teal)}
+.day.today i{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--teal-soft)}
+/* play */
+.playbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.playbar b{color:var(--navy)}
+.clock{font:500 .9rem var(--font-mono);color:var(--muted)}
+.stage{display:flex;flex-direction:column;gap:14px}
+.sent{font-size:1.25rem;line-height:2.1;color:var(--en)}
+.tok{font:inherit;color:inherit;background:transparent;border:1px solid transparent;border-radius:6px;padding:0 3px;margin:0 -1px;cursor:pointer;line-height:1.5}
+.tok:hover:not(:disabled){border-color:var(--line);background:var(--bg)}
+.tok[aria-pressed="true"]{background:var(--amber-soft);border-color:var(--amber);color:var(--ink)}
+.tok:disabled{cursor:default}
+.tok.bad{text-decoration:line-through;text-decoration-color:var(--coral);text-decoration-thickness:2px;color:var(--coral);background:var(--coral-soft)}
+.tok.miss{background:transparent;border:1px dashed var(--amber)}
+.wrongpart{color:var(--coral);text-decoration:line-through;text-decoration-thickness:2px;background:var(--coral-soft);border-radius:4px;padding:0 3px}
+mark.fix{background:var(--green-soft);color:var(--green);font-weight:600;border-radius:4px;padding:0 3px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;font:400 1rem/1.5 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer}
+.opt .n{font:600 .8rem var(--font-mono);color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px;flex:none;margin-top:2px}
+.opt .why{display:block;font-size:.86rem;color:var(--muted);margin-top:4px}
+.opt:hover:not(:disabled){border-color:var(--teal)}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--green);background:var(--green-soft)}
+.opt.no{border-color:var(--coral);background:var(--coral-soft)}
+.fb{border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.fb:empty{display:none}
+.fb.ok{background:var(--green-soft)}
+.fb.no{background:var(--coral-soft)}
+.fb b.res{font-size:1rem}
+.fb.ok b.res{color:var(--green)}
+.fb.no b.res{color:var(--coral)}
+.promptbox{border-left:4px solid var(--teal);background:var(--teal-soft);border-radius:0 8px 8px 0;padding:12px 14px;color:var(--en);font-style:italic}
+.frame{color:var(--en);line-height:1.9}
+.slot{display:inline-block;font-style:normal;font-size:.85rem;background:var(--amber-soft);color:var(--amber);border-radius:999px;padding:0 9px;line-height:1.6}
+.timer{font:600 1.05rem var(--font-mono);color:var(--teal);background:var(--teal-soft);border-radius:999px;padding:3px 12px}
+.timer.late{color:var(--amber);background:var(--amber-soft)}
+.thesis{font-size:1.05rem;color:var(--en);background:var(--bg);border-radius:8px;padding:10px 12px}
+.thesis .rw{background:var(--amber-soft);color:var(--amber);font-weight:600;border-radius:4px;padding:0 2px}
+.auto{display:flex;gap:8px;align-items:baseline;font-size:.92rem}
+.auto .ic{font-weight:700;width:1.2em;flex:none}
+.auto.pass .ic{color:var(--green)}
+.auto.fail .ic{color:var(--coral)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:.8rem}
+.big{font:700 2rem var(--font-ui);color:var(--navy)}
+.hlist{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.hlist li{min-width:0;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.hlist .p{color:var(--muted);font-size:.8rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg{font-size:.9rem}
+.msg.ok{color:var(--green)}
+.msg.bad{color:var(--coral)}
+.kbd{font:500 .78rem var(--font-mono);color:var(--muted)}
+@media (max-width:480px){.sent{font-size:1.1rem}.btn{padding:10px 14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="label">IELTS Writing · Mỗi ngày 10 phút</div>
+      <h1>Writing 8.0</h1>
+    </div>
+    <div class="sub" id="who">Đang tải...</div>
+  </div>
+
+  <!-- ============ HUB ============ -->
+  <section id="vHub" class="grid">
+    <div class="card grid" style="gap:8px">
+      <div class="label">7 ngày qua</div>
+      <div class="streak" id="streak"></div>
+    </div>
+    <div class="games">
+      <article class="card game">
+        <h2>🔎 Error Hunter</h2>
+        <p class="sub">Tìm chỗ sai trong câu rồi sửa. Lỗi lấy từ bài em đã được chấm, từ lỗi em tự thêm và từ bộ lỗi chung. Khoảng 1 trong 5 câu là câu đúng.</p>
+        <div class="counts" id="ehCounts"></div>
+        <label class="check"><input type="checkbox" id="onlyOwn"><span>Chỉ lỗi của em <span class="sub" id="ownN"></span></span></label>
+        <div><button class="btn" id="goEH">Bắt đầu</button></div>
+        <div class="msg" id="ehMsg" aria-live="polite"></div>
+      </article>
+      <article class="card game">
+        <h2>⚒️ Thesis Forge</h2>
+        <p class="sub">Luyện câu thesis cho 11 dạng đề Task 2. Hai lần đầu chọn câu tốt nhất, sau đó tự viết trong khoảng 90 giây.</p>
+        <div class="counts" id="tfCounts"></div>
+        <div><button class="btn" id="goTF">Bắt đầu</button></div>
+        <div class="msg" id="tfMsg" aria-live="polite"></div>
+      </article>
+    </div>
+    <div class="card grid">
+      <h2>Thêm lỗi của em</h2>
+      <p class="sub">Dán nội dung file lỗi (dạng <code>{"tlgames":1, "errors":[...]}</code>) hoặc chọn file .json. Mỗi lỗi cần có câu, phần sai nằm trong câu, và cách sửa.</p>
+      <textarea id="impText" rows="4" spellcheck="false" placeholder='{"tlgames":1,"errors":[{"cat":"sva","text":"...","wrong":"...","fix":"...","accept":[]}]}'></textarea>
+      <div class="row"><input type="file" id="impFile" accept=".json,application/json" aria-label="Chọn file lỗi"><button class="btn" id="impGo">Thêm lỗi</button></div>
+      <div class="msg" id="impMsg" aria-live="polite"></div>
+    </div>
+    <div class="card grid">
+      <div class="row" style="justify-content:space-between"><h2>Thesis em đã viết</h2><button class="btn ghost" id="copyTh">Sao chép 10 câu gần nhất</button></div>
+      <div class="msg" id="copyMsg" aria-live="polite"></div>
+      <ul class="hlist" id="thList"></ul>
+    </div>
+  </section>
+
+  <!-- ============ PLAY ============ -->
+  <section id="vPlay" hidden>
+    <div class="card playbar">
+      <div class="row"><b id="pGame"></b><span class="sub" id="pProg"></span></div>
+      <div class="row"><span class="clock" id="pClock">0:00 / 10:00</span><button class="btn ghost" id="pEnd">Kết thúc</button></div>
+    </div>
+    <div class="card stage" id="stage"></div>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section id="vSum" hidden>
+    <div class="card grid" id="sum" aria-live="polite"></div>
+  </section>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const shuffle = a => { a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const hash = s => { let h = 5381; for(const c of String(s)) h = (h * 33 + c.codePointAt(0)) >>> 0; return h.toString(36); };
+const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+/* ---------- engine settings ---------- */
+const DAY = 86400000;
+const BOX_DAYS = [0, 0, 1, 3, 7, 14];   // index = box. Box 1 comes back in the same session.
+const SESSION_MS = 10 * 60 * 1000, MAX_NEW = 8, TYPE_AFTER = 2, CLEAN_SHARE = 0.2;
+
+let DATA = null, user = null, key = 'guest';
+let ST = {items:{}, days:{}}, OWN = [], THESES = [], AUTO = [];
+
+/* ---------- account + storage ---------- */
+// Logged in: localStorage copy keyed by user id, mirrored to /api/wg/state so the
+// boxes follow the student between devices. Guest: this browser only.
+async function api(path, opt = {}){
+  let t = null; try{ t = localStorage.getItem('ielts_token'); }catch(e){}
+  if(!t) throw new Error('login');
+  const r = await fetch(path, { method: opt.method || (opt.body ? 'POST' : 'GET'), keepalive: !!opt.keepalive,
+    headers: { 'Authorization': 'Bearer ' + t, ...(opt.body ? {'Content-Type': 'application/json'} : {}) },
+    body: opt.body ? JSON.stringify(opt.body) : undefined });
+  if(r.status === 401) throw new Error('login');
+  if(!r.ok) throw new Error('net');
+  return r.json();
+}
+function loadLocal(){
+  const s = LS.get('wg_state_' + key, null) || {};
+  ST = { items: s.items || {}, days: s.days || {} };
+  OWN = LS.get('wg_own_' + key, []) || [];
+  THESES = LS.get('wg_theses_' + key, []) || [];
+}
+function saveLocal(){ LS.set('wg_state_' + key, ST); LS.set('wg_own_' + key, OWN); LS.set('wg_theses_' + key, THESES); }
+let pushTimer = null;
+function save(){ saveLocal(); if(!user) return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); }
+function push(keepalive){
+  clearTimeout(pushTimer);
+  if(!user) return Promise.resolve();
+  return api('/api/wg/state', { method: 'PUT', keepalive, body: { state: ST, own: OWN, theses: THESES } }).catch(() => {});
+}
+// Item by item, the more recently answered copy wins; imported errors and theses are unions.
+function merge(a, b){
+  const items = Object.assign({}, a.state.items);
+  for(const [k, v] of Object.entries((b.state || {}).items || {})) if(!items[k] || (v.seen || 0) > (items[k].seen || 0)) items[k] = v;
+  const days = Object.assign({}, a.state.days);
+  for(const [d, n] of Object.entries((b.state || {}).days || {})) days[d] = Math.max(days[d] || 0, n);
+  const own = a.own.slice(), ids = new Set(own.map(x => x.id));
+  for(const x of (b.own || [])) if(x && !ids.has(x.id)){ own.push(x); ids.add(x.id); }
+  const th = a.theses.slice(), ts = new Set(th.map(x => x.t));
+  for(const x of (b.theses || [])) if(x && !ts.has(x.t)) th.push(x);
+  th.sort((x, y) => y.t - x.t);
+  return { state: { items, days }, own, theses: th.slice(0, 50) };
+}
+window.addEventListener('pagehide', () => { if(user) push(true); });
+
+/* ---------- Leitner boxes ---------- */
+const rec = (g, id) => ST.items[g + ':' + id];
+const modeOf = (g, id) => ((rec(g, id) || {}).ok || 0) >= TYPE_AFTER ? 'type' : 'choose';
+function grade(g, id, ok){
+  const k = g + ':' + id, now = Date.now();
+  const r = ST.items[k] || { box: 1, ok: 0 };
+  if(ok){ r.box = Math.min(5, r.box + 1); r.ok = (r.ok || 0) + 1; r.due = now + BOX_DAYS[r.box] * DAY; }
+  else { r.box = 1; r.due = now; }
+  r.seen = now; ST.items[k] = r;
+  const d = dayKey(now); ST.days[d] = (ST.days[d] || 0) + 1;
+  save();
+}
+function counts(g, pool){
+  const now = Date.now(); let due = 0, fresh = 0;
+  for(const it of pool){ const r = rec(g, it.id); if(!r) fresh++; else if(r.due <= now) due++; }
+  return { due, fresh };
+}
+// Due items first (lowest box first), then at most MAX_NEW unseen ones in pool order.
+function baseQueue(g, pool){
+  const now = Date.now();
+  const due = pool.filter(it => { const r = rec(g, it.id); return r && r.due <= now; })
+    .sort((a, b) => rec(g, a.id).box - rec(g, b.id).box || rec(g, a.id).due - rec(g, b.id).due);
+  const fresh = pool.filter(it => !rec(g, it.id)).slice(0, MAX_NEW);
+  return due.concat(fresh);
+}
+
+/* ---------- Error Hunter ---------- */
+const catLabel = it => it.label || (DATA.errorCategories || {})[it.cat] || it.cat || 'Lỗi khác';
+// Where `wrong` sits in `text`: the first occurrence that starts and ends on a word edge,
+// so "is" in "this policy ... is obvious" lands on the real "is".
+function spanOf(text, wrong){
+  const w = /\w/;
+  for(let i = text.indexOf(wrong); i >= 0; i = text.indexOf(wrong, i + 1)){
+    const a = i, b = i + wrong.length;
+    const okA = a === 0 || !w.test(wrong[0]) || !w.test(text[a - 1]);
+    const okB = b === text.length || !w.test(wrong[wrong.length - 1]) || !w.test(text[b]);
+    if(okA && okB) return [a, b];
+  }
+  const i = text.indexOf(wrong); return [i, i + wrong.length];
+}
+function tokens(text){
+  const re = /[A-Za-z0-9]+(?:['’\-][A-Za-z0-9]+)*|[^\sA-Za-z0-9]/g, out = []; let m;
+  while((m = re.exec(text))) out.push({ x: m[0], s: m.index, e: m.index + m[0].length });
+  return out;
+}
+const norm = s => String(s).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').trim().replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').replace(/[.!?]+$/, '');
+function autoItems(ep){
+  const out = [], seen = new Set();
+  for(const r of (ep && ep.recurring) || []) for(const x of r.examples || []){
+    if(!x.quote || !x.fix) continue;
+    const id = 'ep-' + hash(x.quote);
+    if(seen.has(id)) continue; seen.add(id);
+    out.push({ id, text: x.quote, wrong: x.quote, fix: x.fix, accept: [], label: r.label, cat: 'ep:' + r.label, auto: true });
+  }
+  return out;
+}
+const onlyOwn = () => !!LS.get('wg_onlyown', false);
+// Personal errors first, so the new picks of a session favour the student's own mistakes.
+function ehErrors(){ const own = AUTO.concat(OWN); return onlyOwn() ? own : own.concat(shuffle(DATA.errors)); }
+const ehClean = () => DATA.cleanSentences.map(c => ({ id: c.id, text: c.text, clean: true }));
+function ehQueue(){
+  const q = baseQueue('eh', ehErrors());
+  if(onlyOwn() || !q.length) return q;
+  // About one clean sentence in five: due ones first, then the least recently seen.
+  const now = Date.now();
+  const clean = ehClean().sort((a, b) => {
+    const ra = rec('eh', a.id), rb = rec('eh', b.id);
+    const da = ra && ra.due <= now ? 0 : 1, db = rb && rb.due <= now ? 0 : 1;
+    return da - db || ((ra || {}).seen || 0) - ((rb || {}).seen || 0);
+  });
+  const n = Math.min(clean.length, Math.max(1, Math.round(q.length * CLEAN_SHARE / (1 - CLEAN_SHARE))));
+  const out = q.slice(), step = Math.max(2, Math.floor(out.length / n));
+  for(let i = 0; i < n; i++) out.splice(Math.min(out.length, (i + 1) * step + i - 1), 0, clean[i]);
+  return out;
+}
+function ehDistractor(it){
+  const bad = new Set([it.fix, it.wrong].concat(it.accept || []).map(x => norm(x).toLowerCase()));
+  const all = ehErrors().concat(DATA.errors).filter(x => x.id !== it.id && x.fix && !bad.has(norm(x.fix).toLowerCase()));
+  const same = all.filter(x => x.cat === it.cat);
+  const from = same.length ? same : all;
+  return from.length ? pick(from).fix : null;
+}
+function corrected(it){
+  const [a, b] = spanOf(it.text, it.wrong);
+  return esc(it.text.slice(0, a)) + '<mark class="fix">' + esc(it.fix) + '</mark>' + esc(it.text.slice(b));
+}
+const EH = {
+  id: 'eh', name: 'Error Hunter',
+  queue: ehQueue,
+  render(it, mode, el, ctx){
+    const tk = tokens(it.text);
+    const [a, b] = it.clean ? [-1, -1] : spanOf(it.text, it.wrong);
+    const inSpan = t => t.s < b && t.e > a;
+    let ok1 = true;
+    const sentHtml = () => {
+      let h = '', at = 0;
+      tk.forEach((t, i) => { h += esc(it.text.slice(at, t.s)) + '<button class="tok" data-k="' + i + '" aria-pressed="false">' + esc(t.x) + '</button>'; at = t.e; });
+      return h + esc(it.text.slice(at));
+    };
+    if(it.auto){
+      el.innerHTML = '<div class="label">Lỗi trong bài em đã được chấm · ' + esc(catLabel(it)) + '</div>' +
+        '<p class="sub">Cả câu trích dưới đây là chỗ giáo viên đánh dấu sai.</p>' +
+        '<div class="sent"><span class="wrongpart">' + esc(it.text) + '</span></div><div id="ehStep2"></div>';
+      return step2();
+    }
+    el.innerHTML = '<div class="label">Bước 1 · Tìm lỗi</div>' +
+      '<p class="sub">Bấm vào từ hoặc dấu câu bị sai (chọn được nhiều), rồi bấm Chốt. Nếu câu không có lỗi, bấm Câu này đúng. <span class="kbd">Bàn phím: Tab tới từ, Space chọn, Enter chốt</span></p>' +
+      '<div class="sent" id="ehSent">' + sentHtml() + '</div>' +
+      '<div class="row" id="ehBtns"><button class="btn" id="ehLock" disabled data-primary>Chốt</button><button class="btn ghost" id="ehClean">Câu này đúng</button></div>' +
+      '<div class="fb" id="ehFb1" aria-live="polite"></div><div id="ehStep2"></div>';
+    const btns = [...el.querySelectorAll('.tok')];
+    btns.forEach(bt => bt.onclick = () => {
+      bt.setAttribute('aria-pressed', bt.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      $('ehLock').disabled = !btns.some(x => x.getAttribute('aria-pressed') === 'true');
+    });
+    // On a word, Space toggles it (native button) and Enter locks the answer.
+    btns.forEach(bt => bt.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); if(!$('ehLock').disabled) $('ehLock').click(); } }));
+    const finish1 = saidClean => {
+      const sel = btns.filter(x => x.getAttribute('aria-pressed') === 'true').map(x => +x.dataset.k);
+      btns.forEach(x => x.disabled = true); $('ehBtns').hidden = true;
+      if(it.clean){
+        const good = saidClean;
+        $('ehFb1').className = 'fb ' + (good ? 'ok' : 'no');
+        $('ehFb1').innerHTML = '<b class="res">' + (good ? 'Đúng. Câu này không có lỗi.' : 'Câu này không có lỗi.') + '</b>' +
+          (good ? '' : '<span class="sub">Đọc lại câu và thử xem vì sao từng phần đều đúng, trước khi đi tiếp.</span>');
+        ctx.report(good, 'Bắt nhầm câu đúng');
+        return ctx.nextButton($('ehFb1'));
+      }
+      // Right if the pick touches the error and stays next to it; clicking the whole sentence is not finding it.
+      const idx = tk.map((t, i) => inSpan(t) ? i : -1).filter(i => i >= 0);
+      const lo = Math.min(...idx), hi = Math.max(...idx);
+      ok1 = !saidClean && sel.some(i => i >= lo && i <= hi) && sel.every(i => i >= lo - 1 && i <= hi + 1);
+      btns.forEach((x, i) => { if(i >= lo && i <= hi) x.classList.add('bad'); else if(sel.includes(i)) x.classList.add('miss'); });
+      $('ehFb1').className = 'fb ' + (ok1 ? 'ok' : 'no');
+      $('ehFb1').innerHTML = '<b class="res">' + (ok1 ? 'Đúng chỗ sai.' : (saidClean ? 'Câu này có lỗi.' : 'Chưa đúng chỗ.') + ' Chỗ sai là phần gạch đỏ.') + '</b>';
+      step2();
+    };
+    $('ehLock').onclick = () => finish1(false);
+    $('ehClean').onclick = () => finish1(true);
+
+    function step2(){
+      const box = $('ehStep2');
+      const done = (ok2, shown) => {
+        const ok = ok1 && ok2;
+        const alts = (it.accept || []).filter(Boolean);
+        box.insertAdjacentHTML('beforeend', '<div class="fb ' + (ok ? 'ok' : 'no') + '" id="ehFb2"><b class="res">' +
+          (ok2 ? 'Sửa đúng.' : 'Chưa đúng. Đáp án: ' + esc(it.fix) + '.') + (ok2 && !ok1 ? ' Câu này vẫn tính là sai vì bước 1 chưa đúng.' : '') + '</b>' +
+          '<div class="sent" style="font-size:1.1rem;line-height:1.7">' + corrected(it) + '</div>' +
+          '<div class="sub">Loại lỗi: <b>' + esc(catLabel(it)) + '</b>' + (alts.length ? ' · Cũng đúng: ' + alts.map(esc).join(', ') : '') + '</div></div>');
+        ctx.report(ok, catLabel(it));
+        ctx.nextButton($('ehFb2'));
+      };
+      if(mode === 'choose'){
+        const d = ehDistractor(it);
+        const opts = shuffle([it.fix, it.wrong].concat(d ? [d] : []));
+        box.innerHTML = '<div class="label">Bước 2 · Sửa lỗi</div><p class="sub">' + (it.auto ? 'Chọn câu đã sửa đúng.' : 'Phần gạch đỏ nên sửa thành gì?') + ' <span class="kbd">Phím 1–' + opts.length + '</span></p>' +
+          '<div class="opts">' + opts.map((o, i) => '<button class="opt" data-n="' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span>' + esc(o) + '</span></button>').join('') + '</div>';
+        box.querySelectorAll('.opt').forEach(o => o.onclick = () => {
+          const v = opts[+o.dataset.n - 1], good = v === it.fix;
+          box.querySelectorAll('.opt').forEach(x => { x.disabled = true; if(opts[+x.dataset.n - 1] === it.fix) x.classList.add('ok'); });
+          if(!good) o.classList.add('no');
+          done(good);
+        });
+        const first = box.querySelector('.opt'); if(first) first.focus({preventScroll:true});
+      } else {
+        box.innerHTML = '<div class="label">Bước 2 · Sửa lỗi, tự gõ</div>' +
+          '<p class="sub">' + (it.auto ? 'Gõ lại cả câu đã sửa.' : 'Gõ phần thay cho chỗ gạch đỏ: <span class="wrongpart">' + esc(it.wrong) + '</span>. Giữ cả dấu câu nếu cần.') + '</p>' +
+          (it.auto ? '<textarea id="ehIn" rows="3" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>' : '<input type="text" id="ehIn" spellcheck="false" autocapitalize="off" autocomplete="off">') +
+          '<div class="row"><button class="btn" id="ehCheck">Kiểm tra</button><span class="kbd">Enter</span></div>';
+        const inp = $('ehIn');
+        const check = () => {
+          if(!inp.value.trim()) return inp.focus();
+          // Case only matters away from the start of the sentence.
+          const atStart = spanOf(it.text, it.wrong)[0] === 0 || it.auto;
+          const f = s => { s = norm(s); return atStart ? s.charAt(0).toLowerCase() + s.slice(1) : s; };
+          const good = [it.fix].concat(it.accept || []).some(x => f(x) === f(inp.value));
+          inp.disabled = true; $('ehCheck').disabled = true;
+          done(good);
+        };
+        $('ehCheck').onclick = check;
+        inp.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); check(); } });
+        inp.focus({preventScroll:true});
+      }
+    }
+  }
+};
+
+/* ---------- Thesis Forge ---------- */
+function tfItems(){
+  const out = [];
+  for(const [type, T] of Object.entries(DATA.types)) for(const S of T.stances) out.push({ id: type + '/' + S.key, type, T, S });
+  return out;
+}
+const frameHtml = s => esc(s).replace(/\[([^\]]+)\]/g, '<span class="slot">$1</span>');
+const REASON = /\b(because|since|as|so|which|while)\b/gi;
+const wordsOf = s => (s.trim().match(/\S+/g) || []).length;
+const fmtClock = sec => (sec < 0 ? '+' : '') + Math.floor(Math.abs(sec) / 60) + ':' + String(Math.abs(sec) % 60).padStart(2, '0');
+let tfTick = null;
+const TF = {
+  id: 'tf', name: 'Thesis Forge',
+  queue(){ const all = tfItems(); return baseQueue('tf', shuffle(all)); },
+  render(it, mode, el, ctx){
+    const { T, S } = it;
+    const head = '<div class="label">' + esc(T.name) + (S.name ? ' · Lập trường: ' + esc(S.name) : '') + '</div>';
+    const reveal = topic => '<div class="label">Hai khung thesis cho lập trường này</div>' +
+      S.thesis.map(f => '<div class="frame">' + frameHtml(f) + '</div>').join('') +
+      '<div class="label" style="margin-top:6px">Ví dụ cho đề mẫu</div><div class="promptbox" style="font-size:.9rem">' + esc(T.exampleTopic) + '</div>' +
+      S.thesisExample.map(x => '<div class="frame">' + esc(x) + '</div>').join('');
+    if(mode === 'choose'){
+      const opts = shuffle([{ text: S.thesisExample[0], good: true }].concat(T.badThesis.map(x => ({ text: x.text, why: x.why }))));
+      el.innerHTML = head + '<p class="sub">' + esc(S.when || '') + '</p><div class="promptbox">' + esc(T.exampleTopic) + '</div>' +
+        '<p class="sub">Chọn câu thesis tốt nhất cho đề trên. <span class="kbd">Phím 1–3</span></p>' +
+        '<div class="opts">' + opts.map((o, i) => '<button class="opt" data-n="' + (i + 1) + '"><span class="n">' + (i + 1) + '</span><span>' + esc(o.text) + '<span class="why" hidden></span></span></button>').join('') + '</div>' +
+        '<div class="fb" id="tfFb"></div>';
+      el.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+        const o = opts[+b.dataset.n - 1];
+        el.querySelectorAll('.opt').forEach(x => {
+          const ox = opts[+x.dataset.n - 1]; x.disabled = true;
+          if(ox.good) x.classList.add('ok');
+          else { const w = x.querySelector('.why'); w.hidden = false; w.textContent = 'Vì sao chưa tốt: ' + ox.why; }
+        });
+        if(!o.good) b.classList.add('no');
+        $('tfFb').className = 'fb ' + (o.good ? 'ok' : 'no');
+        $('tfFb').innerHTML = '<b class="res">' + (o.good ? 'Đúng. Câu này trả lời thẳng đề và có lý do cụ thể.' : 'Chưa đúng. Câu tốt nhất là câu viền xanh.') + '</b>' + reveal();
+        ctx.report(o.good, T.name);
+        ctx.nextButton($('tfFb'));
+      });
+      el.querySelector('.opt').focus({preventScroll:true});
+      return;
+    }
+    // type mode: a real prompt of the same type, or the example topic when the bank has none
+    const prompts = DATA.prompts.filter(p => p.type === it.type);
+    const prompt = prompts.length ? pick(prompts).p : T.exampleTopic;
+    el.innerHTML = head + '<p class="sub">' + esc(S.when || '') + '</p><div class="promptbox">' + esc(prompt) + '</div>' +
+      '<div class="row" style="justify-content:space-between"><span class="sub">Viết một câu thesis cho đề trên. Không cần vội, giờ chỉ để em tự canh.</span><span class="timer" id="tfT" role="timer">1:30</span></div>' +
+      '<textarea id="tfIn" rows="3" spellcheck="false" placeholder="I ... because ..."></textarea>' +
+      '<div class="row"><button class="btn" id="tfGo">Nộp</button><span class="kbd">Enter để nộp, Shift+Enter xuống dòng</span></div><div id="tfChk"></div>';
+    const t0 = Date.now();
+    clearInterval(tfTick);
+    tfTick = setInterval(() => {
+      const left = 90 - Math.floor((Date.now() - t0) / 1000);
+      const t = $('tfT'); if(!t){ clearInterval(tfTick); return; }
+      t.textContent = fmtClock(left); t.classList.toggle('late', left <= 0);
+    }, 500);
+    const inp = $('tfIn');
+    const submit = () => {
+      const text = inp.value.trim(); if(!text) return inp.focus();
+      clearInterval(tfTick);
+      const sec = Math.round((Date.now() - t0) / 1000);
+      inp.disabled = true; $('tfGo').disabled = true;
+      const n = wordsOf(text), short = n < 30;
+      const announce = /^\s*this essay will\b/i.test(text) && !/\b(because|since|as)\b/i.test(text);
+      const found = [...new Set((text.match(REASON) || []).map(x => x.toLowerCase()))];
+      $('tfChk').innerHTML = '<div class="grid" style="gap:10px;margin-top:4px">' +
+        '<div class="label">Tự kiểm tra · hãy tick trung thực, tick sai thì người thiệt là em</div>' +
+        '<div class="thesis">' + esc(text).replace(REASON, m => '<span class="rw">' + m + '</span>') + '</div>' +
+        '<label class="check"><input type="checkbox" id="c1"><span>1. Trả lời thẳng câu hỏi của đề?</span></label>' +
+        '<label class="check"><input type="checkbox" id="c2"><span>2. Có lý do cụ thể (because, since, as, so, which, while)? <span class="sub">' +
+          (found.length ? 'Máy thấy: ' + found.join(', ') + '. Có từ nối chưa chắc đã có lý do cụ thể.' : 'Máy chưa thấy từ nối lý do nào.') + '</span></span></label>' +
+        '<div class="auto ' + (short ? 'pass' : 'fail') + '"><span class="ic">' + (short ? '✓' : '✗') + '</span><span>3. Dưới 30 chữ? Câu của em có ' + n + ' chữ.</span></div>' +
+        '<div class="auto ' + (!announce ? 'pass' : 'fail') + '"><span class="ic">' + (!announce ? '✓' : '✗') + '</span><span>4. Không dùng câu chỉ báo trước nội dung?' + (announce ? ' Câu bắt đầu bằng "This essay will" mà không nêu lý do.' : '') + '</span></div>' +
+        '<div class="row"><button class="btn" id="tfDone">Chấm</button></div><div class="fb" id="tfFb"></div></div>';
+      $('tfDone').onclick = () => {
+        const ok = $('c1').checked && $('c2').checked && short && !announce;
+        $('c1').disabled = $('c2').disabled = true; $('tfDone').hidden = true;
+        $('tfFb').className = 'fb ' + (ok ? 'ok' : 'no');
+        $('tfFb').innerHTML = '<b class="res">' + (ok ? 'Đạt cả 4 tiêu chí.' : 'Chưa đạt cả 4 tiêu chí. Câu này sẽ quay lại sớm.') + '</b>' + reveal();
+        THESES.unshift({ t: Date.now(), type: it.type, stance: S.key, typeName: T.name, stanceName: S.name, prompt, text, ok, sec });
+        THESES = THESES.slice(0, 50);
+        ctx.report(ok, T.name);
+        ctx.nextButton($('tfFb'));
+      };
+      $('c1').focus({preventScroll:true});
+    };
+    $('tfGo').onclick = submit;
+    inp.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submit(); } });
+    inp.focus({preventScroll:true});
+  }
+};
+
+// Phase 2 games plug in here: { id, name, queue(), render(item, mode, el, ctx) }.
+const GAMES = { eh: EH, tf: TF };
+
+/* ---------- session ---------- */
+let S = null, clockTick = null;
+function show(v){ for(const x of ['vHub', 'vPlay', 'vSum']) $(x).hidden = x !== v; window.scrollTo(0, 0); }
+function start(g){
+  const q = GAMES[g].queue();
+  if(!q.length){ const m = $(g + 'Msg'); m.className = 'msg'; m.textContent = 'Hôm nay không còn câu nào đến hạn. Quay lại vào ngày mai nhé.'; return; }
+  S = { g, game: GAMES[g], q, i: 0, t0: Date.now(), right: 0, total: 0, miss: {}, tries: {}, reported: false };
+  $('pGame').textContent = S.game.name;
+  show('vPlay');
+  clearInterval(clockTick);
+  clockTick = setInterval(() => {
+    const sec = Math.floor((Date.now() - S.t0) / 1000);
+    $('pClock').textContent = sec >= 600 ? 'Hết 10 phút · làm nốt câu này' : fmtClock(sec) + ' / 10:00';
+  }, 1000);
+  next();
+}
+function next(){
+  if(!S) return;
+  if(S.i >= S.q.length || Date.now() - S.t0 >= SESSION_MS) return finish();
+  const it = S.q[S.i];
+  S.reported = false;
+  $('pProg').textContent = 'Câu ' + (S.i + 1) + ' · đúng ' + S.right + '/' + S.total;
+  S.game.render(it, it.clean ? 'choose' : modeOf(S.g, it.id), $('stage'), ctx);
+}
+const ctx = {
+  report(ok, cat){
+    if(!S || S.reported) return;
+    S.reported = true;
+    const it = S.q[S.i];
+    grade(S.g, it.id, ok);
+    S.total++;
+    if(ok) S.right++;
+    else {
+      S.miss[cat] = (S.miss[cat] || 0) + 1;
+      // Box 1 comes back in the same session, a few items later, at most twice.
+      S.tries[it.id] = (S.tries[it.id] || 0) + 1;
+      if(S.tries[it.id] < 2) S.q.splice(Math.min(S.q.length, S.i + 4), 0, it);
+    }
+    $('pProg').textContent = 'Câu ' + (S.i + 1) + ' · đúng ' + S.right + '/' + S.total;
+  },
+  nextButton(after){
+    const b = document.createElement('div');
+    b.className = 'row';
+    b.innerHTML = '<button class="btn" id="nextBtn">Câu tiếp →</button><span class="kbd">Enter</span>';
+    after.appendChild(b);
+    $('nextBtn').onclick = () => { S.i++; next(); };
+    $('nextBtn').focus({preventScroll:true});
+  }
+};
+async function finish(){
+  if(!S) return;
+  clearInterval(clockTick); clearInterval(tfTick);
+  const s = S; S = null;
+  save(); push();
+  const rows = Object.entries(s.miss).sort((a, b) => b[1] - a[1]);
+  $('sum').innerHTML = '<h2>' + esc(s.game.name) + ' · xong lượt</h2>' +
+    '<div class="big">' + s.right + '/' + s.total + '</div><p class="sub">câu đúng trong lượt này.</p><div class="msg" id="coinMsg"></div>' +
+    (rows.length ? '<div class="label">' + (s.g === 'eh' ? 'Lỗi còn sai, theo loại' : 'Còn sai, theo dạng đề') + '</div><table><tr><th>Loại</th><th>Số lần sai</th></tr>' +
+      rows.map(([c, n]) => '<tr><td>' + esc(c) + '</td><td>' + n + '</td></tr>').join('') + '</table>'
+      : (s.total ? '<p class="msg ok">Không sai câu nào.</p>' : '')) +
+    '<div class="row"><button class="btn" id="sumHub">Về trang chính</button></div>';
+  $('sumHub').onclick = () => { renderHub(); show('vHub'); };
+  show('vSum');
+  $('sumHub').focus({preventScroll:true});
+  if(user && s.right > 0){
+    try{ const r = await api('/api/game/wallet/earn', { body: { amount: s.right } }); $('coinMsg').className = 'msg ok'; $('coinMsg').textContent = r.added ? '+' + r.added + ' 🪙 xu' : 'Hôm nay đã đủ xu tối đa.'; }catch(e){}
+  }
+}
+$('pEnd').onclick = () => finish();
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if(tag === 'textarea' || tag === 'input') return;
+  if(/^[1-9]$/.test(e.key)){
+    const b = document.querySelector('#stage .opt[data-n="' + e.key + '"]:not(:disabled)');
+    if(b){ e.preventDefault(); b.click(); }
+    return;
+  }
+  if(e.key === 'Enter' && tag !== 'button'){
+    const nb = $('nextBtn') || document.querySelector('#stage [data-primary]:not(:disabled)');
+    if(nb && !$('vPlay').hidden){ e.preventDefault(); nb.click(); }
+  }
+});
+
+/* ---------- hub ---------- */
+function renderHub(){
+  const now = Date.now();
+  // streak: consecutive days with practice, counting back from today (or yesterday)
+  let streak = 0;
+  for(let d = 0; d < 400; d++){
+    const k = dayKey(now - d * DAY);
+    if(ST.days[k]) streak++; else if(d > 0) break;
+  }
+  const names = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  let h = '';
+  for(let d = 6; d >= 0; d--){
+    const t = now - d * DAY, k = dayKey(t);
+    h += '<div class="day' + (ST.days[k] ? ' on' : '') + (d === 0 ? ' today' : '') + '" title="' + k + (ST.days[k] ? ': ' + ST.days[k] + ' câu' : '') + '"><i></i>' + (d === 0 ? 'Nay' : names[new Date(t).getDay()]) + '</div>';
+  }
+  $('streak').innerHTML = h + '<span class="sub" style="margin-left:6px">' + (streak ? 'Chuỗi ' + streak + ' ngày' : 'Chưa có chuỗi ngày nào. Làm một lượt để bắt đầu.') + '</span>';
+  const eh = counts('eh', ehErrors()), tf = counts('tf', tfItems());
+  const badge = c => '<span class="badge">' + c.due + ' câu đến hạn</span><span class="badge new">' + c.fresh + ' câu mới</span>';
+  $('ehCounts').innerHTML = badge(eh);
+  $('tfCounts').innerHTML = badge(tf);
+  $('onlyOwn').checked = onlyOwn();
+  $('ownN').textContent = '(' + (AUTO.length + OWN.length) + ' câu: ' + AUTO.length + ' từ bài đã chấm, ' + OWN.length + ' tự thêm)';
+  $('thList').innerHTML = THESES.slice(0, 10).map(x => '<li><span class="p">' + esc(x.typeName) + (x.stanceName ? ' · ' + esc(x.stanceName) : '') + ' · ' + esc(x.prompt) + '</span>' + (x.ok ? '✓ ' : '✗ ') + esc(x.text) + '</li>').join('') ||
+    '<li class="sub">Chưa có câu nào. Khi một dạng đề chuyển sang tự gõ, câu em viết sẽ hiện ở đây.</li>';
+}
+$('goEH').onclick = () => start('eh');
+$('goTF').onclick = () => start('tf');
+$('onlyOwn').onchange = e => { LS.set('wg_onlyown', e.target.checked); renderHub(); };
+$('copyTh').onclick = () => {
+  const txt = THESES.slice(0, 10).map((x, i) => (i + 1) + '. [' + x.typeName + (x.stanceName ? ' · ' + x.stanceName : '') + ']\nĐề: ' + x.prompt + '\nThesis: ' + x.text).join('\n\n');
+  if(!txt){ $('copyMsg').textContent = 'Chưa có câu nào để sao chép.'; return; }
+  navigator.clipboard.writeText(txt).then(() => { $('copyMsg').className = 'msg ok'; $('copyMsg').textContent = 'Đã sao chép ' + Math.min(10, THESES.length) + ' câu.'; })
+    .catch(() => { $('copyMsg').className = 'msg bad'; $('copyMsg').textContent = 'Máy không cho sao chép tự động.'; });
+};
+
+/* ---------- import ---------- */
+function importErrors(raw){
+  let obj;
+  try{ obj = JSON.parse(raw); }catch(e){ return { error: 'Nội dung không phải JSON hợp lệ.' }; }
+  const list = Array.isArray(obj) ? obj : (obj && Array.isArray(obj.errors) ? obj.errors : null);
+  if(!list) return { error: 'Không thấy danh sách "errors" trong file.' };
+  let added = 0; const skipped = [];
+  const have = new Set(OWN.map(x => x.text + '\u0000' + x.wrong));
+  list.forEach((e, n) => {
+    const where = 'Lỗi ' + (n + 1) + (e && e.id ? ' (' + e.id + ')' : '');
+    if(!e || typeof e.text !== 'string' || typeof e.wrong !== 'string' || typeof e.fix !== 'string' || !e.text.trim() || !e.wrong || !e.fix.trim()) return skipped.push(where + ': thiếu câu, phần sai hoặc cách sửa.');
+    if(!e.text.includes(e.wrong)) return skipped.push(where + ': phần sai "' + e.wrong + '" không nằm trong câu.');
+    if(have.has(e.text + '\u0000' + e.wrong)) return skipped.push(where + ': đã có rồi.');
+    have.add(e.text + '\u0000' + e.wrong);
+    OWN.push({ id: 'own-' + hash(e.text + '|' + e.wrong), cat: typeof e.cat === 'string' ? e.cat : 'other', text: e.text.slice(0, 600), wrong: e.wrong, fix: e.fix.slice(0, 300),
+      accept: Array.isArray(e.accept) ? e.accept.filter(x => typeof x === 'string').slice(0, 10) : [], own: true });
+    added++;
+  });
+  save();
+  return { added, skipped };
+}
+$('impFile').onchange = () => {
+  const f = $('impFile').files[0]; if(!f) return;
+  f.text().then(t => { $('impText').value = t; }).catch(() => { $('impMsg').className = 'msg bad'; $('impMsg').textContent = 'Không đọc được file.'; });
+};
+$('impGo').onclick = () => {
+  const raw = $('impText').value.trim();
+  if(!raw){ $('impMsg').className = 'msg bad'; $('impMsg').textContent = 'Hãy dán nội dung hoặc chọn file trước.'; return; }
+  const r = importErrors(raw);
+  if(r.error){ $('impMsg').className = 'msg bad'; $('impMsg').textContent = r.error; return; }
+  $('impMsg').className = 'msg ' + (r.added ? 'ok' : 'bad');
+  $('impMsg').innerHTML = esc(r.added + ' lỗi đã thêm' + (r.skipped.length ? ', ' + r.skipped.length + ' bị bỏ qua.' : '.')) +
+    (r.skipped.length ? '<ul class="sub" style="margin:4px 0 0;padding-left:18px">' + r.skipped.slice(0, 5).map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>' : '');
+  if(r.added){ $('impText').value = ''; $('impFile').value = ''; }
+  renderHub();
+};
+
+/* ---------- boot ---------- */
+(async () => {
+  try{ DATA = await (await fetch('/data/writing-games-data.json')).json(); }
+  catch(e){ $('who').textContent = 'Không tải được dữ liệu trò chơi. Kiểm tra mạng rồi tải lại trang.'; return; }
+  try{ user = await api('/api/user/profile'); key = String(user.id); }catch(e){ user = null; key = 'guest'; }
+  loadLocal();
+  if(user){
+    try{
+      const srv = await api('/api/wg/state');
+      if(srv && srv.state){ const m = merge({ state: ST, own: OWN, theses: THESES }, srv); ST = m.state; OWN = m.own; THESES = m.theses; }
+      saveLocal(); push();
+    }catch(e){}
+    try{ AUTO = autoItems(await api('/api/error-profile')); }catch(e){ AUTO = []; }
+  }
+  $('who').textContent = user ? 'Tiến độ lưu vào tài khoản ' + (user.name || '') + ', làm trên máy nào cũng được.' : 'Chưa đăng nhập: tiến độ chỉ lưu trên máy này.';
+  renderHub();
+})();
+})();
+</script>
+</body>
+</html>

@@ -523,6 +523,26 @@ app.post('/api/plv/essays', authenticate, (req, res) => {
   }
 });
 
+// ─── Writing games ───────────────────────────────────────────────────────────
+// public/writing-games.html keeps a copy in localStorage and mirrors it here so
+// the student's boxes follow them between PC and iPad. Only ever read back by
+// the same user; the page escapes everything it renders.
+app.get('/api/wg/state', authenticate, (req, res) => {
+  res.json(db.getWgState(req.user.id) || {});
+});
+
+app.put('/api/wg/state', authenticate, (req, res) => {
+  const { state, own, theses } = req.body || {};
+  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+  if (!isObj(state) || !isObj(state.items) || !isObj(state.days) || !Array.isArray(own) || !Array.isArray(theses)) {
+    return res.status(400).json({ error: 'Sai định dạng.' });
+  }
+  const blob = { state: { items: state.items, days: state.days }, own: own.slice(0, 500), theses: theses.slice(0, 50) };
+  if (JSON.stringify(blob).length > 500000) return res.status(413).json({ error: 'Dữ liệu quá lớn.' });
+  db.setWgState(req.user.id, blob);
+  res.json({ success: true });
+});
+
 // ─── Speech Score library ────────────────────────────────────────────────────
 // public/speech-score.html: the teacher saves a marked-up passage, every signed-in
 // student sees the list. edits/words are the page's own per-word overrides.

@@ -1,0 +1,1882 @@
+{
+ "version": 1,
+ "note": "Writing games data. American spelling. Frames and examples come from Phong Luyen Viet (artifact version 14).",
+ "errorCategories": {
+  "sva": "Chia động từ theo chủ ngữ chính",
+  "boundary": "Ranh giới câu và dấu câu",
+  "pattern": "Mẫu động từ sau động từ khác",
+  "parallel": "Song song, chủ động và bị động",
+  "artprep": "Mạo từ và giới từ",
+  "word": "Từ gần đúng nghĩa, văn nói"
+ },
+ "types": {
+  "agree": {
+   "name": "Đồng ý / Không đồng ý",
+   "detect": "Đề kết thúc bằng \"To what extent do you agree or disagree?\" hoặc \"Do you agree or disagree?\".",
+   "exampleTopic": "There are old people who cannot look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree?",
+   "opener1": [
+    "Some people argue that [mệnh đề nói lại đề].",
+    "It is often proposed that [mệnh đề nói lại đề].",
+    "One school of thought holds that [mệnh đề nói lại đề]."
+   ],
+   "stances": [
+    {
+     "key": "dis",
+     "name": "Không đồng ý",
+     "when": "Ta thấy phe kia có lý do, nhưng kết luận của họ sai.",
+     "thesis": [
+      "I disagree with [đề xuất trong đề], because [lý do chính cụ thể].",
+      "While [điểm phe kia đúng], I would argue that [đề xuất] would [hậu quả cụ thể] for [ai], unless [điều kiện]."
+     ],
+     "thesisExample": [
+      "I disagree with making adult children legally responsible for their parents, because many of them cannot afford care while raising their own children.",
+      "While families should support their elders, I would argue that a legal duty would push low-income workers into debt, unless the state covered most of the cost."
+     ],
+     "body1": [
+      "Proponents of [danh từ] often base their arguments on [danh từ].",
+      "Critics of [danh từ] often argue that [mệnh đề]."
+     ],
+     "body2": [
+      "However, this perspective overlooks the fact that [mệnh đề].",
+      "However, this viewpoint fails to recognize [danh từ]."
+     ],
+     "conclusion": [
+      "In conclusion, while it is understandable to [V nguyên thể], it is shortsighted to dismiss [danh từ] as [tính từ].",
+      "In conclusion, while [mệnh đề nhượng bộ], [V-ing] is neither practical nor ethical."
+     ],
+     "note": null
+    },
+    {
+     "key": "chal",
+     "name": "Bác bỏ thẳng",
+     "when": "Ta phản đối rõ ràng, và muốn dành một đoạn cho lý lẽ hoặc giải pháp của riêng mình.",
+     "thesis": [
+      "In this essay, I will challenge this view, because [lý do chính], and argue that [giải pháp tốt hơn] would work better.",
+      "I firmly reject [đề xuất], since it would [hậu quả xấu cụ thể] and ignores [điều phe kia bỏ sót]."
+     ],
+     "thesisExample": [
+      "In this essay, I will challenge this view, because legal duties damage family relationships, and argue that state-funded care would work better.",
+      "I firmly reject this proposal, since it would punish adults for their parents’ poverty and ignores the role of public pensions."
+     ],
+     "body1": [
+      "Admittedly, proponents of [danh từ] might argue that [mệnh đề]. However, this perspective glosses over [danh từ].",
+      "Granted, [danh từ] is posing a threat to [danh từ] to some extent."
+     ],
+     "body2": [
+      "In light of the aforementioned limitations, I believe the following measures would be more effective in countering [danh từ].",
+      "It is also noteworthy that [V-ing] is nowhere near a futile effort."
+     ],
+     "conclusion": [
+      "To summarize, I am strongly convinced that [danh từ] falls short as an effective solution to [danh từ].",
+      "In conclusion, while [mệnh đề nhượng bộ], I would contend that [mệnh đề lập trường], given [danh từ lý do]."
+     ],
+     "note": null
+    },
+    {
+     "key": "agr",
+     "name": "Đồng ý",
+     "when": "Ta đồng ý với nhận định trong đề.",
+     "thesis": [
+      "I agree with [đề xuất], because [lý do chính cụ thể].",
+      "I also hold this view, because [lý do chính], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "I agree that adult children should be legally required to support their parents, because otherwise many elderly people would be left without any income.",
+      "I also hold this view, because parents spend decades supporting their children, as long as the required amount matches each child’s income."
+     ],
+     "body1": [
+      "Perhaps the foremost argument for this view lies in [danh từ].",
+      "The primary reason for my belief is that [mệnh đề]."
+     ],
+     "body2": [
+      "Granted, proponents of [danh từ] often highlight [danh từ]. However, it must be recognized that [mệnh đề].",
+      "Proponents of [danh từ] claim that [mệnh đề]. However, these arguments often overlook [danh từ]."
+     ],
+     "conclusion": [
+      "In conclusion, while [danh từ] may have its merits, [ai] should [V nguyên thể].",
+      "In conclusion, I am convinced that [danh từ] is promising in terms of [V-ing], as long as [mệnh đề]."
+     ],
+     "note": null
+    },
+    {
+     "key": "part",
+     "name": "Đồng ý có giới hạn",
+     "when": "Ta thấy đề đúng trong một số trường hợp, sai trong những trường hợp khác.",
+     "thesis": [
+      "I agree only in part, because [đề xuất] makes sense for [trường hợp đúng] but not for [trường hợp sai].",
+      "I also hold this view, albeit with some reservations, because [lý do chính], unless [trường hợp ngoại lệ]."
+     ],
+     "thesisExample": [
+      "I agree only in part, because a legal duty makes sense for wealthy families but not for those who are already struggling financially.",
+      "I also hold this view, albeit with some reservations, because children who can afford it owe their parents support, unless doing so would leave their own families in poverty."
+     ],
+     "body1": [
+      "On the one hand, it is understandable why some people believe that [mệnh đề].",
+      "On the one hand, [ai] should be encouraged to [V nguyên thể]."
+     ],
+     "body2": [
+      "However, I am convinced that the aforementioned arguments are questionable at best.",
+      "On the other hand, [V-ing] is not a viable option for every [danh từ]."
+     ],
+     "conclusion": [
+      "In conclusion, while there are justifications for believing [mệnh đề], I would contend that [mệnh đề lập trường], given [danh từ lý do].",
+      "In conclusion, while there are certain benefits that [danh từ] can confer upon [ai], I believe it can prove unfeasible in [trường hợp]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Ở lập trường Đồng ý có giới hạn, câu \"I agree only in part\" nghĩa là đồng ý và không đồng ý gần ngang nhau, còn câu \"albeit with some reservations\" nghĩa là ta đồng ý phần lớn. Chọn câu khớp với ý mình.",
+   "badThesis": [
+    {
+     "text": "I disagree with this proposal, despite acknowledging the reasons for it.",
+     "why": "Chung chung. Không nói đề xuất nào, cũng không có lý do."
+    },
+    {
+     "text": "This essay will discuss the advantages and disadvantages of supporting the elderly.",
+     "why": "Lạc dạng đề. Đề hỏi đồng ý tới đâu, câu này không nêu lập trường."
+    }
+   ]
+  },
+  "discuss": {
+   "name": "Hai phe",
+   "detect": "Đề nêu hai ý kiến (Some people think… Others believe…) rồi hỏi \"Discuss both views and give your opinion.\"",
+   "exampleTopic": "Some people think criminals who commit the same crime should receive the same punishment, while others believe the circumstances should be taken into account. Discuss both views and give your opinion.",
+   "opener1": [
+    "Some people hold the belief that [mệnh đề phe 1].",
+    "Some believe that [mệnh đề phe 1], while others contend that [mệnh đề phe 2].",
+    "The debate over whether [ai] should [V1] or [V2] is a divisive one."
+   ],
+   "stances": [
+    {
+     "key": "one1",
+     "name": "Theo ý 1",
+     "when": "Ta thấy ý thứ nhất trong đề đúng hơn.",
+     "thesis": [
+      "While some believe [ý 2], I side with those who argue that [ý 1], because [lý do chính].",
+      "Others, myself included, believe that [ý 1], because [lý do chính], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "While some believe each case should be judged on its circumstances, I side with those who favor fixed punishments, because equal sentences make the law predictable for everyone.",
+      "Others, myself included, believe that the same crime deserves the same punishment, because this stops judges from favoring the rich, as long as offenders keep the right to appeal."
+     ],
+     "body1": [
+      "Granted, proponents of [danh từ ý 2] might argue that [mệnh đề].",
+      "Granted, there are good grounds for [V-ing ý 2]."
+     ],
+     "body2": [
+      "Nevertheless, I am convinced that [mệnh đề ý 1].",
+      "However, this view overlooks [danh từ]."
+     ],
+     "conclusion": [
+      "To summarize, while [danh từ ý 2] has certain benefits, I side with those who [V ý 1], believing that [mệnh đề].",
+      "In conclusion, while [mệnh đề ý 2], I feel that [mệnh đề ý 1]."
+     ],
+     "note": null
+    },
+    {
+     "key": "one2",
+     "name": "Theo ý 2",
+     "when": "Ta thấy ý thứ hai trong đề đúng hơn.",
+     "thesis": [
+      "While some believe [ý 1], I side with those who argue that [ý 2], because [lý do chính].",
+      "Others, myself included, believe that [ý 2], because [lý do chính], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "While some believe the same crime deserves the same punishment, I side with those who argue that circumstances matter, because a starving thief and a professional burglar pose very different risks.",
+      "Others, myself included, believe that sentences should reflect each case, because motives differ greatly, as long as judges follow clear guidelines."
+     ],
+     "body1": [
+      "Granted, proponents of [danh từ ý 1] might argue that [mệnh đề].",
+      "Granted, there are good grounds for [V-ing ý 1]."
+     ],
+     "body2": [
+      "Nevertheless, I am convinced that [mệnh đề ý 2].",
+      "However, this view overlooks [danh từ]."
+     ],
+     "conclusion": [
+      "To summarize, while [danh từ ý 1] has certain benefits, I side with those who [V ý 2], believing that [mệnh đề].",
+      "In conclusion, while [mệnh đề ý 1], I feel that [mệnh đề ý 2]."
+     ],
+     "note": null
+    },
+    {
+     "key": "both",
+     "name": "Kết hợp hai ý",
+     "when": "Ta thấy cả hai phe đều đúng một phần, và cách tốt nhất là kết hợp.",
+     "thesis": [
+      "I believe both views have merit, and the best approach is to [cách kết hợp cụ thể].",
+      "While [ý 1] ensures [lợi ích 1], [ý 2] ensures [lợi ích 2], so a combination of the two is the fairest option."
+     ],
+     "thesisExample": [
+      "I believe both views have merit, and the best approach is to set a fixed range for each crime while letting judges choose within it.",
+      "While fixed punishments ensure consistency, flexible sentences ensure fairness, so a combination of the two is the fairest option."
+     ],
+     "body1": [
+      "On the one hand, proponents of the idea that [mệnh đề phe 1] argue that [mệnh đề].",
+      "The argument for [danh từ phe 1] rests on the principle of [danh từ]."
+     ],
+     "body2": [
+      "On the other hand, those who assert that [mệnh đề phe 2] argue that [mệnh đề].",
+      "On the other end of the spectrum, advocates for [danh từ phe 2] argue that [mệnh đề]."
+     ],
+     "conclusion": [
+      "Upon weighing both views, I believe the challenge is not in [V-ing] but in [V-ing].",
+      "From my perspective, a concerted effort from both [A] and [B] is wholly warranted to [V nguyên thể]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Đề yêu cầu \"give your opinion\". Nêu ý kiến ngay câu 2 của mở bài, rồi giữ đúng ý kiến đó tới kết bài.",
+   "badThesis": [
+    {
+     "text": "This essay will first examine both views before presenting my own opinion.",
+     "why": "Giấu ý kiến. Đề yêu cầu nêu ý kiến, câu này chỉ báo trước."
+    },
+    {
+     "text": "I believe crime is a serious problem in modern society.",
+     "why": "Lạc đề. Không trả lời phe nào đúng hơn."
+    }
+   ]
+  },
+  "outweigh": {
+   "name": "Lợi lớn hơn hại?",
+   "detect": "Đề hỏi \"Do the advantages outweigh the disadvantages?\", tức là lợi có lớn hơn hại không. Ta phải chọn một bên nặng hơn. Đề chỉ hỏi lợi và hại là gì, hoặc \"Discuss the advantages and disadvantages\", thì chọn ô Lợi và hại.",
+   "exampleTopic": "In some countries, young people are required to do unpaid work in their local community. Do the advantages of this outweigh the disadvantages?",
+   "opener1": [
+    "The idea of [V-ing] has gained traction in some circles.",
+    "Whether [mệnh đề] has been a question of debate lately.",
+    "Some [nơi chốn] have experimented with [danh từ], [V-ing chi tiết]."
+   ],
+   "stances": [
+    {
+     "key": "dis",
+     "name": "Hại lớn hơn",
+     "when": "Ta thấy cái giá phải trả nặng hơn lợi ích.",
+     "thesis": [
+      "I believe the drawbacks of [danh từ] outweigh its benefits, because [tác hại lớn nhất cụ thể].",
+      "While [danh từ] offers [lợi ích], I believe its disadvantages are greater, because [tác hại lớn nhất], at least until [điều kiện]."
+     ],
+     "thesisExample": [
+      "I believe the drawbacks of compulsory community work outweigh its benefits, because forced volunteering often turns young people against helping others.",
+      "While compulsory community work offers useful experience, I believe its disadvantages are greater, because it takes time from students’ studies, at least until schools reduce homework loads."
+     ],
+     "body1": [
+      "Advocates for [danh từ] often highlight two main benefits.",
+      "On the one hand, [danh từ] can bring about certain benefits."
+     ],
+     "body2": [
+      "However, I am convinced that these benefits are overshadowed by significant drawbacks.",
+      "Notwithstanding the aforementioned benefits, I believe the disadvantages of [danh từ] are more substantial."
+     ],
+     "conclusion": [
+      "In conclusion, while [danh từ] may offer some benefits, these are largely overshadowed by [danh từ].",
+      "In conclusion, while the goals of [danh từ] and [danh từ] are laudable, I would contend that [V-ing] can do more harm than good."
+     ],
+     "note": null
+    },
+    {
+     "key": "adv",
+     "name": "Lợi lớn hơn",
+     "when": "Ta thấy tác hại có thật nhưng xử lý được, còn lợi ích lớn hơn.",
+     "thesis": [
+      "I am convinced that the benefits of [danh từ] far outweigh its drawbacks, because [lợi ích lớn nhất cụ thể].",
+      "While [danh từ] has certain drawbacks, I believe its benefits are more significant, because [lợi ích lớn nhất], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "I am convinced that the benefits of compulsory community work far outweigh its drawbacks, because it gives teenagers practical skills that classrooms rarely teach.",
+      "While compulsory community work has certain drawbacks, I believe its benefits are more significant, because students learn responsibility, as long as the hours are capped."
+     ],
+     "body1": [
+      "Opponents of [danh từ] often raise two main concerns.",
+      "One potential drawback is [danh từ]."
+     ],
+     "body2": [
+      "These challenges, nevertheless, are far from insurmountable.",
+      "The advantages of [V-ing] are overwhelmingly greater."
+     ],
+     "conclusion": [
+      "In conclusion, while [V-ing] presents challenges, these are manageable with thoughtful planning.",
+      "In conclusion, although [danh từ] has some drawbacks, its benefits are far more significant, as [mệnh đề]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Bài mẫu bên lợi lớn hơn viết 3 thân bài: tác hại, cách khắc phục, rồi lợi ích. Nếu chỉ viết 2 thân bài thì gộp cách khắc phục và lợi ích vào thân 2.",
+   "badThesis": [
+    {
+     "text": "I believe the disadvantages outweigh the advantages.",
+     "why": "Có phe nhưng thiếu lý do. Người chấm không biết hại lớn nhất là gì."
+    },
+    {
+     "text": "There are both advantages and disadvantages to this policy.",
+     "why": "Không chọn bên nào nặng hơn, trong khi đề hỏi đúng điều đó."
+    }
+   ]
+  },
+  "posneg": {
+   "name": "Tích cực hay tiêu cực",
+   "detect": "Đề chỉ hỏi một câu \"Is this a positive or negative development?\". Nếu đề hỏi thêm \"Why…?\" thì đó là dạng hai câu hỏi, chọn \"Vì sao + đánh giá\".",
+   "exampleTopic": "Organized tours to remote communities are becoming increasingly popular. Is this a positive or negative development?",
+   "opener1": [
+    "It is widely recognized that [mệnh đề nói lại đề].",
+    "More and more [ai, số nhiều] are now choosing to [V nguyên thể]."
+   ],
+   "stances": [
+    {
+     "key": "pos",
+     "name": "Tích cực",
+     "when": "Ta thấy xu hướng này nhìn chung có lợi.",
+     "thesis": [
+      "Despite some legitimate concerns, I believe this is a welcome development, because [lợi ích lớn nhất cụ thể].",
+      "In my view, this trend is largely positive, because [lợi ích lớn nhất], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "Despite some legitimate concerns, I believe this is a welcome development, because tourist spending creates jobs in villages that have few other sources of income.",
+      "In my view, this trend is largely positive, because it brings income to isolated communities, as long as visitor numbers are limited."
+     ],
+     "body1": [
+      "Granted, opponents might argue that [mệnh đề]. These problems, however, are far from insurmountable, as [mệnh đề].",
+      "Admittedly, [danh từ] may raise concerns about [danh từ], but these can be addressed through [danh từ]."
+     ],
+     "body2": [
+      "The argument in favor of [danh từ] is further fortified by the numerous benefits it can confer upon [ai].",
+      "More importantly, [danh từ] can bring considerable benefits to [ai]."
+     ],
+     "conclusion": [
+      "In conclusion, although there are some concerns about [danh từ], I would contend that these problems can be countered with [danh từ]. In addition, this trend is generally positive, considering [danh từ].",
+      "In conclusion, despite some drawbacks, I believe [danh từ] is a positive development because it [động từ]."
+     ],
+     "note": null
+    },
+    {
+     "key": "neg",
+     "name": "Tiêu cực",
+     "when": "Ta thấy xu hướng này nhìn chung có hại.",
+     "thesis": [
+      "Despite some apparent benefits, I believe this is a worrying development, because [tác hại lớn nhất cụ thể].",
+      "In my view, the drawbacks of this trend outweigh its benefits, because [tác hại lớn nhất], unless [điều kiện]."
+     ],
+     "thesisExample": [
+      "Despite some apparent benefits, I believe this is a worrying development, because large tour groups can damage the traditions they come to see.",
+      "In my view, the drawbacks of this trend outweigh its benefits, because most profits go to outside agencies, unless local people run the tours themselves."
+     ],
+     "body1": [
+      "Granted, proponents might argue that [mệnh đề]. However, these benefits are limited to [danh từ].",
+      "Admittedly, [danh từ] can bring some benefits, such as [danh từ], but these are mostly short-term."
+     ],
+     "body2": [
+      "The argument against [danh từ] is further fortified by the damage it can cause to [danh từ].",
+      "More importantly, [danh từ] can seriously harm [ai] by [V-ing]."
+     ],
+     "conclusion": [
+      "In conclusion, although [danh từ] brings certain benefits, I would contend that it is a negative development overall, considering the toll it could take on [danh từ].",
+      "In conclusion, despite some benefits, I believe [danh từ] is a negative development because it [động từ]."
+     ],
+     "note": "Khung bên tiêu cực được soạn theo cấu trúc của bài mẫu bên tích cực, vì bộ bài mẫu chỉ có bài viết bên tích cực."
+    }
+   ],
+   "note": null,
+   "badThesis": [
+    {
+     "text": "I believe this is a welcome development overall.",
+     "why": "Có đánh giá nhưng thiếu lý do cụ thể."
+    },
+    {
+     "text": "This development has both positive and negative sides.",
+     "why": "Không chọn tích cực hay tiêu cực."
+    }
+   ]
+  },
+  "cause": {
+   "name": "Nguyên nhân + giải pháp",
+   "detect": "Đề hỏi \"What are the causes / reasons…?\" rồi \"How can we solve…?\" hoặc \"What can be done…?\". Cũng dùng cho đề hỏi nguyên nhân và hình phạt. Đề hỏi \"What problems…\" thì chọn ô Vấn đề + giải pháp.",
+   "exampleTopic": "Anti-social behavior and a lack of respect for others are increasing. What are the causes, and what can be done about it?",
+   "opener1": [
+    "[Danh từ] has become a prevalent issue in today’s world.",
+    "Recent years have seen a troubling rise in [danh từ]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "This problem stems mainly from [nguyên nhân chính], and the most effective solution is to [giải pháp cụ thể].",
+      "This essay will argue that [nguyên nhân chính] is the root cause, and that [ai] should [giải pháp] to address it."
+     ],
+     "thesisExample": [
+      "This problem stems mainly from the decline of community life, and the most effective solution is to give young people more shared local activities.",
+      "This essay will argue that excessive screen time is the root cause, and that schools should teach responsible technology use to address it."
+     ],
+     "body1": [
+      "[Danh từ vấn đề] is largely attributed to [danh từ] and [danh từ].",
+      "One primary cause of [danh từ] is [danh từ]."
+     ],
+     "body2": [
+      "To combat [danh từ], the following steps should be taken.",
+      "Addressing [danh từ] requires a multifaceted approach."
+     ],
+     "conclusion": [
+      "To summarize, what seems to be at the core of [danh từ] is [danh từ]. By [V-ing], [ai] can work towards reversing this troubling trend.",
+      "In conclusion, [danh từ] stems from [danh từ]. Combating this issue will require [danh từ]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Sau \"it is imperative that\" động từ để nguyên thể, không thêm s. Ví dụ \"it is imperative that the government invest\".",
+   "badThesis": [
+    {
+     "text": "This essay will delve into the causes of this phenomenon before proposing some solutions.",
+     "why": "Chỉ báo trước, không nêu nguyên nhân hay giải pháp nào."
+    },
+    {
+     "text": "Anti-social behavior has many negative effects on society.",
+     "why": "Lạc đề. Đề hỏi nguyên nhân và giải pháp, câu này nói ảnh hưởng."
+    }
+   ]
+  },
+  "effect": {
+   "name": "Nguyên nhân + ảnh hưởng",
+   "detect": "Đề hỏi lý do và hậu quả, ví dụ \"What are the reasons? What are the impacts?\" hoặc \"What problems does this cause, and what are the reasons?\".",
+   "exampleTopic": "Families today rarely eat meals together. Why is this happening, and what effects does it have?",
+   "opener1": [
+    "It is widely recognized that [mệnh đề nói lại đề].",
+    "There is an increasing trend towards [V-ing]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "This trend is mainly caused by [nguyên nhân chính], and its most serious effect is [ảnh hưởng chính] for [ai].",
+      "In this essay, I will argue that [nguyên nhân chính] lies behind this trend, which could [động từ ảnh hưởng] [danh từ]."
+     ],
+     "thesisExample": [
+      "This trend is mainly caused by longer working hours, and its most serious effect is weaker communication between parents and children.",
+      "In this essay, I will argue that busy work schedules lie behind this trend, which could weaken family bonds."
+     ],
+     "body1": [
+      "[Danh từ] is largely a result of [danh từ].",
+      "The main reason for [danh từ] is [danh từ]."
+     ],
+     "body2": [
+      "[Danh từ] could have several far-reaching repercussions.",
+      "This trend can have serious consequences for [ai]."
+     ],
+     "conclusion": [
+      "In conclusion, [danh từ] seems to be the root cause of [danh từ]. This trend is nowhere near beneficial, considering the toll it could take on [danh từ].",
+      "In conclusion, [danh từ] is mainly caused by [danh từ], and it may harm [ai] if nothing is done."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Viết theo đúng thứ tự câu hỏi của đề. Đề hỏi vấn đề trước, nguyên nhân sau, thì thân 1 viết vấn đề.",
+   "badThesis": [
+    {
+     "text": "This essay will outline the causes and effects of this trend.",
+     "why": "Chỉ báo trước, không nêu nguyên nhân hay ảnh hưởng nào."
+    },
+    {
+     "text": "Families should make time to eat together every evening.",
+     "why": "Lạc đề. Đề không hỏi giải pháp."
+    }
+   ]
+  },
+  "which": {
+   "name": "Vì sao + đánh giá",
+   "detect": "Đề hỏi \"Why…?\" rồi hỏi tiếp \"Is it a positive or negative development?\" hoặc \"Which development do you think is better?\". Ta phải trả lời cả lý do lẫn đánh giá.",
+   "exampleTopic": "In some cities people increasingly prefer cars, while in others bicycles are becoming more popular. Why is this? Which development is better?",
+   "opener1": [
+    "In recent years, [nơi chốn] have witnessed divergent trends in [danh từ], with some favoring [A] while others embrace [B].",
+    "There is an increasing trend towards [V-ing]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "These contrasting trends stem mainly from [lý do chính], and I believe [xu hướng tốt hơn] is the better choice, because [lý do đánh giá].",
+      "This trend is driven largely by [lý do chính], and I believe it is a [positive/negative] development, because [lý do đánh giá]."
+     ],
+     "thesisExample": [
+      "These contrasting trends stem mainly from differences in city infrastructure, and I believe the shift towards bicycles is the better choice, because it reduces both traffic and pollution.",
+      "This trend is driven largely by rising incomes, and I believe it is a negative development, because more cars mean more congestion in already crowded cities."
+     ],
+     "body1": [
+      "The preference for [danh từ] often stems from [danh từ].",
+      "Perhaps the foremost reason for [danh từ] lies in [danh từ]."
+     ],
+     "body2": [
+      "From an evaluative perspective, [danh từ] offers more far-reaching benefits.",
+      "In my view, this is a [positive/negative] development, since [mệnh đề]."
+     ],
+     "conclusion": [
+      "To summarize, [danh từ] is shaped by [danh từ]. From my perspective, [V-ing] represents a more forward-thinking approach.",
+      "In conclusion, [danh từ] is mainly the result of [danh từ], and I believe it is a [positive/negative] trend overall."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Đề so sánh hai xu hướng thì bài mẫu viết 3 thân bài: lý do của xu hướng A, lý do của xu hướng B, rồi đánh giá.",
+   "badThesis": [
+    {
+     "text": "There are many reasons for this, and I believe it is a positive development.",
+     "why": "Không nói lý do nào, cũng không nói xu hướng nào tốt hơn."
+    },
+    {
+     "text": "Cars are faster than bicycles.",
+     "why": "Lạc đề, không trả lời câu hỏi nào."
+    }
+   ]
+  },
+  "how": {
+   "name": "Vì sao + cách làm",
+   "detect": "Đề hỏi \"Why…?\" rồi hỏi \"What can be done to…?\" hoặc \"How can people…?\". Đề có hai câu hỏi kiểu khác thì chọn ô Hai câu hỏi khác.",
+   "exampleTopic": "In some societies the elderly are respected, while in others they are neglected. Why is this, and how can greater respect be encouraged?",
+   "opener1": [
+    "It is widely recognized that [mệnh đề nói lại đề].",
+    "There is an increasing trend towards [V-ing]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "This difference stems mainly from [nguyên nhân chính], and [ai] can [V nguyên thể] by [cách làm cụ thể].",
+      "This essay will argue that [nguyên nhân chính] explains this trend, and that [ai] should [cách làm] to [mục đích]."
+     ],
+     "thesisExample": [
+      "This difference stems mainly from cultural values, and societies can encourage respect by involving children in caring for their grandparents.",
+      "This essay will argue that the loss of traditional family roles explains this trend, and that schools should run projects that bring young and old together."
+     ],
+     "body1": [
+      "Perhaps the foremost reason for [danh từ] lies in [danh từ].",
+      "To begin with, [danh từ] can be attributed to two main reasons."
+     ],
+     "body2": [
+      "In order to [V nguyên thể], a concerted effort should be made by both [A] and [B].",
+      "Given the aforementioned reasons, the following steps should be taken to [V nguyên thể]."
+     ],
+     "conclusion": [
+      "In conclusion, [danh từ] can be attributed to [danh từ]. To [V nguyên thể], it is imperative that [A] and [B] work in concert to [V nguyên thể].",
+      "To summarize, [danh từ] stems from [danh từ]. By [V-ing], [ai] can [V nguyên thể]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Sau \"it is imperative that\" động từ để nguyên thể, không thêm s.",
+   "badThesis": [
+    {
+     "text": "This essay will outline the causes and suggest some solutions.",
+     "why": "Chỉ báo trước, không nêu nguyên nhân hay cách làm nào."
+    },
+    {
+     "text": "Elderly people deserve respect from everyone.",
+     "why": "Không trả lời vì sao, cũng không nói cách làm."
+    }
+   ]
+  },
+  "advdis": {
+   "name": "Lợi và hại",
+   "detect": "Đề hỏi \"What are the advantages and disadvantages of…?\" hoặc \"Discuss the advantages and disadvantages\". Đề không hỏi bên nào nặng hơn, nên hai thân bài dài gần bằng nhau. Đề có thêm \"give your opinion\" thì chọn ô \"Có hỏi ý kiến\".",
+   "exampleTopic": "Some cities have introduced car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+   "opener1": [
+    "[Danh từ] has become increasingly common in [nơi chốn].",
+    "More and more [ai, số nhiều] are now choosing to [V nguyên thể]."
+   ],
+   "stances": [
+    {
+     "key": "bal",
+     "name": "Không hỏi ý kiến",
+     "when": "Đề chỉ hỏi lợi và hại là gì.",
+     "thesis": [
+      "While [danh từ] offers [lợi ích chính cụ thể], it also [tác hại chính cụ thể].",
+      "This essay will examine how [danh từ] benefits [ai] through [lợi ích chính], and how it harms [ai] through [tác hại chính]."
+     ],
+     "thesisExample": [
+      "While car-free days offer cleaner air in city centers, they also make travel harder for commuters without access to public transport.",
+      "This essay will examine how car-free days benefit residents through cleaner air, and how they harm commuters through longer journeys."
+     ],
+     "body1": [
+      "The most significant advantage of [danh từ] is that [mệnh đề].",
+      "On the positive side, [danh từ] allows [ai] to [V nguyên thể]."
+     ],
+     "body2": [
+      "On the other hand, [danh từ] also has several drawbacks, the most serious of which is [danh từ].",
+      "However, [danh từ] is not without its downsides, as [mệnh đề]."
+     ],
+     "conclusion": [
+      "In conclusion, [danh từ] brings [lợi chính], but it also [hại chính].",
+      "To summarize, although [danh từ] offers [lợi chính], [ai] should be aware of [hại chính]."
+     ],
+     "note": null
+    },
+    {
+     "key": "op",
+     "name": "Có hỏi ý kiến",
+     "when": "Đề có thêm \"give your opinion\" hoặc \"What is your view?\".",
+     "thesis": [
+      "Although [danh từ] brings [lợi ích chính], I believe its drawbacks are more significant, because [tác hại chính].",
+      "Although [danh từ] causes [tác hại chính], I believe it is beneficial overall, because [lợi ích chính], as long as [điều kiện]."
+     ],
+     "thesisExample": [
+      "Although car-free days bring cleaner air, I believe their drawbacks are more significant, because they strand commuters who have no alternative.",
+      "Although car-free days cause some travel delays, I believe they are beneficial overall, because they cut pollution, as long as extra buses are provided."
+     ],
+     "body1": [
+      "Admittedly, [danh từ] offers some clear advantages, the most notable being [danh từ].",
+      "Admittedly, [danh từ] has certain drawbacks, the most notable being [danh từ]."
+     ],
+     "body2": [
+      "Nevertheless, these benefits come at a considerable cost, since [mệnh đề].",
+      "Nevertheless, these drawbacks matter less than what [danh từ] offers [ai]."
+     ],
+     "conclusion": [
+      "In conclusion, while [danh từ] brings [lợi], I believe [hại] is the greater concern.",
+      "In conclusion, while [danh từ] has some drawbacks, I believe its benefits for [ai] matter more."
+     ],
+     "note": "Cách 1 ở mọi ô là nghiêng về hại, cách 2 là nghiêng về lợi. Chọn một số và dùng số đó cho cả bài. Vẫn viết đủ cả lợi lẫn hại, hai đoạn dài gần bằng nhau, khác dạng \"Lợi lớn hơn hại?\"."
+    }
+   ],
+   "note": null,
+   "badThesis": [
+    {
+     "text": "This policy has both benefits and drawbacks.",
+     "why": "Chung chung. Không nói lợi gì, hại gì."
+    },
+    {
+     "text": "I believe car-free days should be introduced in every city.",
+     "why": "Chỉ nêu ý kiến, bỏ qua phần lợi và hại mà đề hỏi."
+    }
+   ]
+  },
+  "probsol": {
+   "name": "Vấn đề + giải pháp",
+   "detect": "Đề hỏi \"What problems does this cause?\" rồi \"What solutions / measures…?\". Khác dạng Nguyên nhân + giải pháp ở thân 1. Thân 1 viết hậu quả, tức là ai bị thiệt và thiệt gì, không viết vì sao nó xảy ra.",
+   "exampleTopic": "In many countries, the gap between the rich and the poor is becoming wider. What problems does this cause, and what measures could be taken to reduce it?",
+   "opener1": [
+    "[Danh từ] has become a growing concern in [nơi chốn].",
+    "In many countries, [mệnh đề nói lại đề]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "This trend mainly harms [ai] by [vấn đề chính], but [giải pháp cụ thể] could ease the problem.",
+      "The most serious problem is [vấn đề chính], and the best response would be for [ai] to [giải pháp]."
+     ],
+     "thesisExample": [
+      "This trend mainly harms poorer families by limiting their access to good schools, but free public education could ease the problem.",
+      "The most serious problem is unequal access to healthcare, and the best response would be for governments to fund free clinics in low-income areas."
+     ],
+     "body1": [
+      "The most serious problem caused by [danh từ] is [danh từ].",
+      "[Danh từ] creates several difficulties for [ai], most notably [danh từ]."
+     ],
+     "body2": [
+      "To tackle these problems, [ai] should [V nguyên thể].",
+      "The most effective way to address [danh từ] would be to [V nguyên thể]."
+     ],
+     "conclusion": [
+      "In conclusion, [danh từ] leads to [vấn đề chính], but [giải pháp] could go a long way towards solving it.",
+      "To summarize, the main problems of [danh từ] are [danh từ], and they are best addressed by [V-ing]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Mỗi giải pháp ở thân 2 phải trị đúng một vấn đề ở thân 1. Thân 1 nêu 2 vấn đề thì thân 2 có 2 giải pháp, theo đúng thứ tự.",
+   "badThesis": [
+    {
+     "text": "This essay will examine the problems and the solutions.",
+     "why": "Chỉ báo trước, không nêu vấn đề hay giải pháp nào."
+    },
+    {
+     "text": "The main reason for this gap is unequal access to education.",
+     "why": "Lạc đề. Đề hỏi vấn đề (hậu quả), câu này nói nguyên nhân."
+    }
+   ]
+  },
+  "twoq": {
+   "name": "Hai câu hỏi khác",
+   "detect": "Đề có hai câu hỏi mà không khớp các dạng trên, ví dụ \"What makes a good leader? Can leadership be taught?\". Mỗi câu hỏi một thân bài, dài gần bằng nhau.",
+   "exampleTopic": "What qualities make a good leader? Can these qualities be taught?",
+   "opener1": [
+    "[Danh từ] has long been a subject of discussion.",
+    "It is widely recognized that [mệnh đề nói lại đề]."
+   ],
+   "stances": [
+    {
+     "key": "x",
+     "name": "",
+     "when": "",
+     "thesis": [
+      "In my view, [trả lời câu 1, nêu cụ thể], and [trả lời câu 2, nêu cụ thể].",
+      "I believe [trả lời câu 1], because [lý do], while [trả lời câu 2]."
+     ],
+     "thesisExample": [
+      "In my view, a good leader needs sound judgment and the ability to listen, and the second of these can certainly be taught.",
+      "I believe judgment matters most in a leader, because every team depends on clear decisions, while listening skills can be developed through training."
+     ],
+     "body1": [
+      "To begin with, [trả lời câu 1], mainly because [mệnh đề].",
+      "The main reason why [mệnh đề] is that [mệnh đề]."
+     ],
+     "body2": [
+      "As for whether [nội dung câu hỏi 2], I believe [mệnh đề].",
+      "When it comes to [chủ đề câu 2], [trả lời câu 2]."
+     ],
+     "conclusion": [
+      "In conclusion, [trả lời câu 1], and [trả lời câu 2].",
+      "To summarize, while [trả lời câu 1], [trả lời câu 2]."
+     ],
+     "note": null
+    }
+   ],
+   "note": "Câu 2 của mở bài phải trả lời cả hai câu hỏi. Đọc riêng câu đó, người chấm phải biết ta trả lời gì.",
+   "badThesis": [
+    {
+     "text": "This essay will answer both questions.",
+     "why": "Chỉ báo trước, không trả lời câu nào."
+    },
+    {
+     "text": "Leadership is very important in modern companies.",
+     "why": "Lạc đề, không trả lời câu nào."
+    }
+   ]
+  }
+ },
+ "prompts": [
+  {
+   "id": "2-22",
+   "p": "The values that we learn from our parents and family have a greater influence on our future success than knowledge and skills we learn at school. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "7-11",
+   "p": "Many parents these days work in other countries, taking their families with them. Do you think the advantages of this development outweigh its disadvantages?",
+   "type": "outweigh",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "1-14",
+   "p": "In some parts of the world it is becoming increasingly popular to try to find out one's own family history. Why do you think people do this? Do you think it is a positive or negative development?",
+   "type": "which",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "2-2",
+   "p": "There are old people who can not mentally, physically, financially look after themselves. Should they be legally supported by young family members? To what extent do you agree or disagree.",
+   "type": "agree",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "2-17",
+   "p": "In many countries, life expectancy is increasing, leading to a growing proportion of elderly people. What problems does this cause for individuals and society, and what are the reasons for this trend?",
+   "type": "effect",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "x1B0",
+   "p": "In many countries, the retirement age is being raised. Do the advantages of this outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": true
+  },
+  {
+   "id": "x1B1",
+   "p": "Some people think that older people should live with their children, while others believe they are better cared for in nursing homes. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": true
+  },
+  {
+   "id": "2-14",
+   "p": "Nowadays, some parents put a lot of pressure on their children. What is the reason for this? Is this a positive or negative development for the children?",
+   "type": "which",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "2-18",
+   "p": "Many children face pressure from their peers to conform to certain behaviors. Do the disadvantages of peer pressure outweigh the advantages?",
+   "type": "outweigh",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "2-21",
+   "p": "Nowadays young people are admiring media and sports stars, even though they often do not set a good example. Do you think this is a positive or negative development?",
+   "type": "posneg",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "3-14",
+   "p": "Some people believe that individuals under 18 years old should focus all their time on education. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "3-18",
+   "p": "Young people today face high academic pressure. Some people argue that governments should invest in after-school activities to alleviate this stress. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tuổi tác, thế hệ và gia đình",
+   "custom": false
+  },
+  {
+   "id": "1-1",
+   "p": "Many customs and traditional ways of behavior are no longer relevant to modern life and not worth keeping. Do you agree or disagree?",
+   "type": "agree",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "1-16",
+   "p": "Some believe that history has little to teach us about today while others think that the study of the past helps us to understand the present. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "16-2",
+   "p": "Important historical objects should be returned to their country of original. Agree or disagree?",
+   "type": "agree",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "1-2",
+   "p": "Some people think the increasing business and cultural contact between countries brings many positive effects. Others say it causes the loss of national identities. Discuss both of these views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "1-11",
+   "p": "Some people say that the increasing business and cultural contact between countries has positive effects. Others say it would lead to the loss of national identities. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "5-8",
+   "p": "Some people believe it is better to import foreign films and TV programs, while others argue that countries should produce their own shows. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "6-6",
+   "p": "Most of today's urgent problems could be solved by international cooperation. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "1-13",
+   "p": "The tendency of human beings to copy one another is shown in the popularity of areas such as fashion and consumer goods. To what extent do you agree?",
+   "type": "agree",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "1-15",
+   "p": "If people go to live in another country, they should follow the local customs and traditions. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "18-2",
+   "p": "Some people think that it is necessary to travel abroad to learn about other countries, while other people think that it is not necessary to travel abroad because all the information can be seen on TV and the Internet. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Văn hóa và toàn cầu hóa",
+   "custom": false
+  },
+  {
+   "id": "3-3",
+   "p": "Children today find it difficult to concentrate on or to pay attention to school. What are the reasons? How can we solve this problem?",
+   "type": "cause",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-8",
+   "p": "In recent years, an increasing number of parents are choosing to educate their children at home rather than sending them to school. Do the advantages of home education outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-10",
+   "p": "Some people think secondary school students should study international news as one of their subjects, while others believe that this is a waste of valuable school time. Discuss both these views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-11",
+   "p": "Many people say that schools are no longer necessary as a lot of information is available on the internet, so children can study at home. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "20-1",
+   "p": "Some people argue that language learning is only effective in small classes, while others believe that class size does not matter. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-2",
+   "p": "Recently, many parents have suggested that their children should spend less time studying and instead devote more time to physical activities. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-15",
+   "p": "Many parents suggest that children should spend less time studying and more time engaging in physical activities. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "7-3",
+   "p": "Some students choose to work or travel after leaving school and before going to university. Many people, however, say that working experience is more useful in adult life than travel. Do you agree or disagree with this statement?",
+   "type": "agree",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-4",
+   "p": "In some countries, students pay their college or university fees, while in some others, the government pays for them. Do you think the advantages that the government pays the money outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "3-19",
+   "p": "Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and state your own opinion.",
+   "type": "discuss",
+   "topic": "Giáo dục",
+   "custom": false
+  },
+  {
+   "id": "4-9",
+   "p": "Most countries aim to improve their standard of living through economic development, but many important social values can be lost as a result. Do the advantages of economic development outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "7-5",
+   "p": "The directors of large organizations receive much higher salaries than ordinary workers. Some people consider this to be unfair. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "8-6",
+   "p": "Pollution and environmental damage are inevitable as a country becomes richer and more developed. Do you agree or disagree?",
+   "type": "agree",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "x4A0",
+   "p": "In many countries, the gap between the rich and the poor is becoming wider. What problems does this cause, and what measures could be taken to reduce it?",
+   "type": "probsol",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": true
+  },
+  {
+   "id": "x4A1",
+   "p": "Some people believe that a country's success should be measured by the happiness of its people rather than by the size of its economy. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": true
+  },
+  {
+   "id": "11-6",
+   "p": "Today's food travels thousands of miles before it reaches customers. Why is this the case? Is this a positive or negative development?",
+   "type": "which",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "14-5",
+   "p": "Some people suggest that moving factories and industrial sites to rural regions can solve urban problems. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "5-2",
+   "p": "These days consumers are faced with an increasing amount of advertising from various companies. To what extent do you think consumers are influenced by advertising? What measures should be taken to protect them?",
+   "type": "twoq",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "5-10",
+   "p": "Some people believe that the sole purpose of advertising is to encourage consumers to buy products they do not actually need. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "17-3",
+   "p": "In many parts of the world, people now often throw things away when they are broken and buy new ones, whereas in the past, old things were repaired and used again. Discuss.",
+   "type": "discuss",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "17-4",
+   "p": "More and more people today expect to get what they want instantly (e.g. goods, services, news), without having to wait. Why is this? Do you think this is a positive or negative development?",
+   "type": "which",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "2-10",
+   "p": "People's shopping habits depend more on the age group they belong to than other factors. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Kinh tế, tiền và tiêu dùng",
+   "custom": false
+  },
+  {
+   "id": "5-1",
+   "p": "Some people say that news is a good medium to learn, while others argue that other media are more effective. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-7",
+   "p": "News plays an important part in most people's lives and news media has become more influential in people's lives. Why do you think this is the case? Is it a positive or negative development?",
+   "type": "which",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-11",
+   "p": "Some people believe that news media should focus more on reporting positive news rather than negative stories. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-6",
+   "p": "In some countries, celebrities complain about the way the media publicize their private lives. Some people say that they should accept it as part of their fame. Do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-15",
+   "p": "More and more people no longer read newspapers or watch TV programs to get news. They get news about the world through the Internet. Is this a positive or negative development?",
+   "type": "posneg",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-5",
+   "p": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "1-17",
+   "p": "Nowadays, there are many celebrities who are famous for their glamour and wealth rather than achievements and this sets a bad example for young people. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "x5B0",
+   "p": "Some people think that social media companies should be held responsible for the false information that appears on their platforms. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": true
+  },
+  {
+   "id": "x5B1",
+   "p": "Many young people now spend several hours a day on social media. Why is this the case? Is this a positive or negative development?",
+   "type": "which",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": true
+  },
+  {
+   "id": "5-3",
+   "p": "Some people believe that watching TV is bad for children, while others claim it has positive effects as children grow up. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-19",
+   "p": "Some people say that what children watch on television influences their behavior, others say that the amount of time children watch on television influences their behavior most. Discuss both views.",
+   "type": "discuss",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-9",
+   "p": "Media coverage of violent crime frightens people and encourages criminals. Some people say it should be banned from newspapers and TV programmes. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "5-16",
+   "p": "Films and computer games containing violence are popular. Some people say they have a negative effect on society and should be banned. Others say they are just harmless relaxation. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Truyền thông và mạng xã hội",
+   "custom": false
+  },
+  {
+   "id": "11-7",
+   "p": "Some people say in order to prevent illness and disease, government should focus on reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "11-1",
+   "p": "It is more important to spend public money promoting a healthy lifestyle in order to prevent illness than to spend it on the treatment of people who are already ill. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "16-1",
+   "p": "Some people believe that it is important for governments to pay for large pieces of art, such as sculptures, to put on public display in outdoor places. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "15-1",
+   "p": "Many countries spend large amounts of money preparing athletes for major competitions, whereas others argue that these funds should instead be prioritized for children to participate in sports from a young age.",
+   "type": "discuss",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "14-1",
+   "p": "To build a better future for a city, investment should be made in young people. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "7-9",
+   "p": "Some countries have introduced laws to limit working hours for employees. Why are these laws introduced? Do you think they are a positive or negative development?",
+   "type": "which",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "11-5",
+   "p": "Some people think that shops should not be allowed to sell food or drinks that are scientifically proven to be bad for people's health. What extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "12-1",
+   "p": "The only way to improve safety on our roads is to give much stricter punishments for driving offences. What extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "14-7",
+   "p": "It is important for all towns and cities to have large public outdoor places like squares and parks. To what extent do you agree or disagree with this statement?",
+   "type": "agree",
+   "topic": "Chính phủ và dịch vụ công",
+   "custom": false
+  },
+  {
+   "id": "7-4",
+   "p": "Remote work benefits employees more than employers. Agree or disagree?",
+   "type": "agree",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "7-6",
+   "p": "Employers should give their staff at least 4-week holiday a year to help employees perform better in their jobs. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "7-1",
+   "p": "Interviews are one of the ways to recruit employees in many companies. Some people believe that interviews are an unreliable way of choosing employees, while other people believe that there are better methods. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "7-2",
+   "p": "Professional workers like doctors, nurses and teachers make a greater contribution to society, so they should be paid more than sports and entertainment personalities. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "7-7",
+   "p": "Money is considered the primary factor in motivating employees in the workplace. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "7-8",
+   "p": "The only reason why people work hard is to earn money and there is no other reason for doing so. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Công việc và sự nghiệp",
+   "custom": false
+  },
+  {
+   "id": "x7C0",
+   "p": "Some people think that employees work best when they are closely supervised, while others believe that they perform better when they are given the freedom to make their own decisions. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Công việc và sự nghiệp",
+   "custom": true
+  },
+  {
+   "id": "x7C1",
+   "p": "Many employers now offer benefits such as flexible hours and training courses instead of higher pay. Do the advantages of this trend outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Công việc và sự nghiệp",
+   "custom": true
+  },
+  {
+   "id": "8-5",
+   "p": "The natural resources such as oil, forests and fresh water are being consumed at an alarming rate. What problems does it cause? How can we solve these problems?",
+   "type": "probsol",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "19-1",
+   "p": "Many animals are in danger of extinction. Some people think that we should only protect animals that are useful to humans. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "19-2",
+   "p": "A significant amount of time and resources is dedicated to protecting wild animals. To what extent do you agree or disagree that these resources should be spent elsewhere?",
+   "type": "agree",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "8-10",
+   "p": "As demand for oil and gas increases, some people advocate searching for these energy sources in untouched natural areas. Do the advantages of this trend outweigh its disadvantages?",
+   "type": "outweigh",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "8-1",
+   "p": "Long distance flight consumes the amount of the fuel that a car uses for many years and pollutes the air. Some people think that we should discourage non-essential flights, such as tourist travel, rather than limit the uses of the cars. Do you agree or disagree?",
+   "type": "agree",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "x8B0",
+   "p": "Some people believe that governments should invest in nuclear power, while others think that renewable sources such as wind and solar energy are a better option. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Môi trường và năng lượng",
+   "custom": true
+  },
+  {
+   "id": "x8B1",
+   "p": "In many countries, household energy consumption is rising every year. What are the causes of this, and what measures could be taken to reduce it?",
+   "type": "cause",
+   "topic": "Môi trường và năng lượng",
+   "custom": true
+  },
+  {
+   "id": "8-8",
+   "p": "Some people believe that the best way to solve the world's environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Môi trường và năng lượng",
+   "custom": false
+  },
+  {
+   "id": "9-2",
+   "p": "Some people think that the rapid development of smart mobile devices, e.g. smartphones, tablets and other mobile devices, are disadvantageous to human. Agree or disagree?",
+   "type": "agree",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-9",
+   "p": "Nowadays, fewer people are writing by hand due to the widespread use of computers and digital technology. Do the advantages of this development outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-1",
+   "p": "Some groups of people have benefited from modern communications technology, but some people do not benefit at all. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-8",
+   "p": "There have been many inventions in human history, such as the wheel. Some people think the most important thing is the internet. To what extent do you agree or disagree with this opinion?",
+   "type": "agree",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-6",
+   "p": "Many people believe robots are important for humans' future developments, while others think robots are dangerous and have negative effects on society. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-3",
+   "p": "More people today put their personal and private information online (address, telephone number, credit card number) to do everyday activities such as banking, shopping, and socializing. Is this a positive or negative development?",
+   "type": "posneg",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "9-7",
+   "p": "Some people think technology development decrease crime while others believe it actually encourages crime. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": false
+  },
+  {
+   "id": "x9C0",
+   "p": "Many companies now use artificial intelligence to screen job applications before a human reads them. Do the advantages of this development outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": true
+  },
+  {
+   "id": "x9C1",
+   "p": "Some people believe that governments should strictly limit the personal data that technology companies can collect, while others think individuals should be responsible for protecting their own information. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Khoa học, công nghệ và AI",
+   "custom": true
+  },
+  {
+   "id": "12-4",
+   "p": "Some cities have banned private vehicles, such as cars and motorcycles, on designated car-free days, allowing only bicycles and public transportation. Discuss the advantages and disadvantages of this policy and give your own opinion.",
+   "type": "advdis",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": false
+  },
+  {
+   "id": "12-6",
+   "p": "Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": false
+  },
+  {
+   "id": "12-8",
+   "p": "The use of bicycles as the main form of transport has declined in many places. Why and what can be done to encourage people to use bicycles more?",
+   "type": "cause",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": false
+  },
+  {
+   "id": "14-2",
+   "p": "In many cities, governments have located shops, office, schools far from each other. Do you think the advantages of this policy outweigh the disadvantages?",
+   "type": "outweigh",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": false
+  },
+  {
+   "id": "14-4",
+   "p": "In many modern cities, urban planners locate shops, schools, and housing in separate, distinct areas. What are the causes of this development, and is it a positive or negative trend?",
+   "type": "which",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": false
+  },
+  {
+   "id": "x10C0",
+   "p": "In many cities, the cost of housing has risen much faster than wages. What are the causes of this problem, and what measures could be taken to solve it?",
+   "type": "cause",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": true
+  },
+  {
+   "id": "x10C1",
+   "p": "Some people think that governments should build low-cost housing in city centers, while others believe this land should be used for businesses and offices. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Giao thông, đô thị và nhà ở",
+   "custom": true
+  },
+  {
+   "id": "11-3",
+   "p": "In some parts of the world, traditional food is gradually being replaced by fast food, and this trend is having a negative effect on families and society. To what extent do you agree or disagree with this belief?",
+   "type": "agree",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": false
+  },
+  {
+   "id": "11-8",
+   "p": "To what extent do you agree or disagree that international fast food is replacing traditional food and negatively affecting families and society?",
+   "type": "agree",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": false
+  },
+  {
+   "id": "11-2",
+   "p": "In many countries, children are becoming overweight and unhealthy. Some people think that the government should have the responsibility. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": false
+  },
+  {
+   "id": "x11B0",
+   "p": "In many countries, people are eating more processed food and cooking less at home. What are the causes of this trend, and what can be done to encourage healthier eating?",
+   "type": "cause",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": true
+  },
+  {
+   "id": "x11B1",
+   "p": "Some people believe that governments should tax unhealthy food and drinks in order to improve public health. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": true
+  },
+  {
+   "id": "11-4",
+   "p": "An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why do people have operations to change the way they look? Do you think this is a positive or negative development?",
+   "type": "which",
+   "topic": "Sức khỏe, thực phẩm và lối sống",
+   "custom": false
+  },
+  {
+   "id": "16-3",
+   "p": "Towns and cities are attractive places. Some people suggest that the government should spend money putting in more works of art like paintings and statues to make them better to live in. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": false
+  },
+  {
+   "id": "16-4",
+   "p": "Museums and art galleries should concentrate on works that show history and culture of their own country rather than works of the other parts in the world. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": false
+  },
+  {
+   "id": "16-5",
+   "p": "In today's world of advanced science and technology, we still greatly value our artists such as musicians, painters and writers. What can the arts tell us about life that science and technology cannot?",
+   "type": "twoq",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": false
+  },
+  {
+   "id": "15-5",
+   "p": "Some people view sport merely as a leisure activity, while others argue that it plays a vital role in society. Discuss both views and give your opinion.",
+   "type": "discuss",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": false
+  },
+  {
+   "id": "x12B0",
+   "p": "Some people think that governments should spend money on building sports facilities in local communities rather than on hosting international sporting events. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": true
+  },
+  {
+   "id": "x12B1",
+   "p": "Some people believe that all children should be required to take part in team sports at school, while others think they should be free to choose their own physical activities. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Nghệ thuật, thể thao và giải trí",
+   "custom": true
+  },
+  {
+   "id": "10-4",
+   "p": "Some people believe that providing criminals with education will reduce the recidivism rate. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tội phạm và pháp luật",
+   "custom": false
+  },
+  {
+   "id": "10-5",
+   "p": "Research shows that many criminals continue to commit crimes after being released from prison. What is the cause and solution?",
+   "type": "cause",
+   "topic": "Tội phạm và pháp luật",
+   "custom": false
+  },
+  {
+   "id": "x13B0",
+   "p": "Some people believe that community service is a better punishment for minor crimes than a prison sentence. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tội phạm và pháp luật",
+   "custom": true
+  },
+  {
+   "id": "x13B1",
+   "p": "Some people think that prisoners should be given the opportunity to work while they are serving their sentences, while others believe that prison should be a punishment only. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Tội phạm và pháp luật",
+   "custom": true
+  },
+  {
+   "id": "10-2",
+   "p": "Nowadays, a growing number of children are committing crimes. What are the reasons for this, and what punishments should be imposed?",
+   "type": "cause",
+   "topic": "Tội phạm và pháp luật",
+   "custom": false
+  },
+  {
+   "id": "10-9",
+   "p": "Some people believe that young people who commit crimes should receive the same punishments as adults. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tội phạm và pháp luật",
+   "custom": false
+  },
+  {
+   "id": "10-7",
+   "p": "Research shows that most criminals have low levels of education. Therefore, some believe that the best way to reduce crime is to educate prisoners while in prison so they can secure employment upon release. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tội phạm và pháp luật",
+   "custom": false
+  },
+  {
+   "id": "x13C0",
+   "p": "Some people believe that the best way to prevent crime among young people is to provide more after-school activities and youth programs. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Tội phạm và pháp luật",
+   "custom": true
+  },
+  {
+   "id": "x13C1",
+   "p": "In many countries, young people from poor neighborhoods are more likely to become involved in crime. What are the causes of this problem, and what can be done to address it?",
+   "type": "cause",
+   "topic": "Tội phạm và pháp luật",
+   "custom": true
+  },
+  {
+   "id": "2-9",
+   "p": "Some people believe that women should play an equal role as men in a country's police force or military force, while others think women are not suitable for these kinds of jobs. Discuss both views and give opinion.",
+   "type": "discuss",
+   "topic": "Xã hội, bình đẳng và đạo đức",
+   "custom": false
+  },
+  {
+   "id": "13-7",
+   "p": "Some people think that charity organizations should only offer help to people of their own country. But others believe that these organizations should give aid to people in great need wherever they live. Discuss.",
+   "type": "discuss",
+   "topic": "Xã hội, bình đẳng và đạo đức",
+   "custom": false
+  },
+  {
+   "id": "x14B0",
+   "p": "Some people believe that wealthy individuals have a moral obligation to donate a large part of their income to charity. To what extent do you agree or disagree?",
+   "type": "agree",
+   "topic": "Xã hội, bình đẳng và đạo đức",
+   "custom": true
+  },
+  {
+   "id": "x14B1",
+   "p": "Some people think that it is the responsibility of governments to help people in need, while others believe that individuals and local communities should take on this role. Discuss both views and give your own opinion.",
+   "type": "discuss",
+   "topic": "Xã hội, bình đẳng và đạo đức",
+   "custom": true
+  }
+ ],
+ "errors": [
+  {
+   "id": "c01",
+   "cat": "sva",
+   "text": "The number of students who live in dormitories have increased sharply.",
+   "wrong": "have",
+   "fix": "has",
+   "accept": []
+  },
+  {
+   "id": "c02",
+   "cat": "sva",
+   "text": "Banning private cars from city centers reduce air pollution.",
+   "wrong": "reduce",
+   "fix": "reduces",
+   "accept": []
+  },
+  {
+   "id": "c03",
+   "cat": "sva",
+   "text": "The benefits of this policy for low-income families is obvious.",
+   "wrong": "is",
+   "fix": "are",
+   "accept": []
+  },
+  {
+   "id": "c04",
+   "cat": "sva",
+   "text": "One of the main reasons for these changes are rising housing costs.",
+   "wrong": "are",
+   "fix": "is",
+   "accept": []
+  },
+  {
+   "id": "c05",
+   "cat": "sva",
+   "text": "Providing free meals at schools also encourage regular attendance.",
+   "wrong": "encourage",
+   "fix": "encourages",
+   "accept": []
+  },
+  {
+   "id": "c06",
+   "cat": "sva",
+   "text": "Each of these solutions require significant government funding.",
+   "wrong": "require",
+   "fix": "requires",
+   "accept": []
+  },
+  {
+   "id": "c07",
+   "cat": "boundary",
+   "text": "Cities are growing quickly, many residents cannot afford housing.",
+   "wrong": ", many",
+   "fix": ", so many",
+   "accept": [
+    "; many",
+    ". Many",
+    ", and many"
+   ]
+  },
+  {
+   "id": "c08",
+   "cat": "boundary",
+   "text": "Online learning is flexible; especially for working adults.",
+   "wrong": "; especially",
+   "fix": ", especially",
+   "accept": []
+  },
+  {
+   "id": "c09",
+   "cat": "boundary",
+   "text": "Public transport is cheap. But it is often overcrowded.",
+   "wrong": ". But",
+   "fix": ", but",
+   "accept": []
+  },
+  {
+   "id": "c10",
+   "cat": "pattern",
+   "text": "This policy forces drivers paying higher parking fees.",
+   "wrong": "paying",
+   "fix": "to pay",
+   "accept": []
+  },
+  {
+   "id": "c11",
+   "cat": "pattern",
+   "text": "High rents prevent young people to buy their own homes.",
+   "wrong": "to buy",
+   "fix": "from buying",
+   "accept": []
+  },
+  {
+   "id": "c12",
+   "cat": "pattern",
+   "text": "Remote work allows employees saving time on commuting.",
+   "wrong": "saving",
+   "fix": "to save",
+   "accept": []
+  },
+  {
+   "id": "c13",
+   "cat": "pattern",
+   "text": "Parents should avoid to give young children smartphones.",
+   "wrong": "to give",
+   "fix": "giving",
+   "accept": []
+  },
+  {
+   "id": "c14",
+   "cat": "pattern",
+   "text": "The new law makes it harder for patients getting treatment.",
+   "wrong": "getting",
+   "fix": "to get",
+   "accept": []
+  },
+  {
+   "id": "c15",
+   "cat": "parallel",
+   "text": "The government should raise taxes and investing more in schools.",
+   "wrong": "investing",
+   "fix": "invest",
+   "accept": []
+  },
+  {
+   "id": "c16",
+   "cat": "parallel",
+   "text": "Private cars were banned from the center and only allow buses.",
+   "wrong": "only allow buses",
+   "fix": "only buses were allowed",
+   "accept": [
+    "buses alone were allowed"
+   ]
+  },
+  {
+   "id": "c17",
+   "cat": "parallel",
+   "text": "The program not only reduces costs but also improving safety.",
+   "wrong": "improving",
+   "fix": "improves",
+   "accept": []
+  },
+  {
+   "id": "c18",
+   "cat": "artprep",
+   "text": "This trend has a negative impact on the society.",
+   "wrong": "the society",
+   "fix": "society",
+   "accept": []
+  },
+  {
+   "id": "c19",
+   "cat": "artprep",
+   "text": "Low-income families are in disadvantage when services move online.",
+   "wrong": "in disadvantage",
+   "fix": "at a disadvantage",
+   "accept": []
+  },
+  {
+   "id": "c20",
+   "cat": "artprep",
+   "text": "Education should be of top priority for any government.",
+   "wrong": "of top priority",
+   "fix": "a top priority",
+   "accept": []
+  },
+  {
+   "id": "c21",
+   "cat": "artprep",
+   "text": "People are now more aware about the risks of processed food.",
+   "wrong": "aware about",
+   "fix": "aware of",
+   "accept": []
+  },
+  {
+   "id": "c22",
+   "cat": "artprep",
+   "text": "The government should invest more money on public transport.",
+   "wrong": "on public transport",
+   "fix": "in public transport",
+   "accept": []
+  },
+  {
+   "id": "c23",
+   "cat": "artprep",
+   "text": "Many young people are interested about local politics.",
+   "wrong": "interested about",
+   "fix": "interested in",
+   "accept": []
+  },
+  {
+   "id": "c24",
+   "cat": "word",
+   "text": "It is not sure if this policy will reduce traffic.",
+   "wrong": "It is not sure if",
+   "fix": "It is unclear whether",
+   "accept": [
+    "It is uncertain whether",
+    "It is not certain whether"
+   ]
+  },
+  {
+   "id": "c25",
+   "cat": "word",
+   "text": "The government can reach the target of cutting emissions by 2030.",
+   "wrong": "reach the target of",
+   "fix": "achieve the goal of",
+   "accept": [
+    "meet the target of"
+   ]
+  },
+  {
+   "id": "c26",
+   "cat": "word",
+   "text": "Many commuters will ditch their cars if buses become cheaper.",
+   "wrong": "ditch",
+   "fix": "give up",
+   "accept": [
+    "abandon",
+    "stop using"
+   ]
+  }
+ ],
+ "cleanSentences": [
+  {
+   "id": "k01",
+   "clean": true,
+   "text": "The number of cars in the city has doubled since 2010."
+  },
+  {
+   "id": "k02",
+   "clean": true,
+   "text": "High rents prevent young people from buying their own homes."
+  },
+  {
+   "id": "k03",
+   "clean": true,
+   "text": "Each of these measures requires careful planning."
+  },
+  {
+   "id": "k04",
+   "clean": true,
+   "text": "Older residents are at a disadvantage when services move online."
+  },
+  {
+   "id": "k05",
+   "clean": true,
+   "text": "Public transport is cheaper, so many commuters leave their cars at home."
+  },
+  {
+   "id": "k06",
+   "clean": true,
+   "text": "Investing in rural schools would narrow the gap between regions."
+  },
+  {
+   "id": "k07",
+   "clean": true,
+   "text": "Many parents are concerned about the amount of time children spend online."
+  },
+  {
+   "id": "k08",
+   "clean": true,
+   "text": "Neither the students nor the teacher was informed about the change."
+  }
+ ]
+}
