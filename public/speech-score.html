@@ -224,7 +224,7 @@ $("app").innerHTML=
     '<p class="status" id="saveStatus"></p></section>'+
   '</aside>'+
   '<section class="card script-card">'+
-   '<div class="script-head"><div class="title" id="sTitle">Bản đánh dấu</div><div class="row"><button class="chip" id="bListen">▶ Nghe đọc mẫu</button><button class="chip" id="tSlowRead" aria-pressed="false">Đọc chậm</button><button class="chip" id="tEdit" aria-pressed="false">Chế độ sửa</button><button class="chip" id="bReset" hidden>Bỏ hết chỗ đã sửa</button></div></div>'+
+   '<div class="script-head"><div class="title" id="sTitle">Bản đánh dấu</div><div class="row"><button class="chip" id="bListen">▶ Nghe đọc mẫu</button><button class="chip" id="tSlowRead" aria-pressed="false">Đọc chậm</button><select class="chip" id="rdVoiceSel" aria-label="Giọng đọc" hidden></select><button class="chip" id="tEdit" aria-pressed="false">Chế độ sửa</button><button class="chip" id="bReset" hidden>Bỏ hết chỗ đã sửa</button></div></div>'+
    '<div class="legend" id="legend">'+
     '<span><b class="lg-nuc">WORD</b> nhấn mạnh nhất trong cụm</span>'+
     '<span><b>ex<span class="lg-str">TRAOR</span>dinary</b> âm tiết được nhấn</span>'+
@@ -839,7 +839,7 @@ function drillStart(mode){
 function drillSay(text){
   try{
     var u=new SpeechSynthesisUtterance(text); u.lang=state.accent==="uk"?"en-GB":"en-US"; u.rate=.9;
-    var v=speechSynthesis.getVoices().filter(function(x){ return x.lang && x.lang.replace("_","-").indexOf(u.lang)===0; })[0]; if(v) u.voice=v;
+    var v=rdVoice(); if(v) u.voice=v;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -963,7 +963,7 @@ $("src").addEventListener("input",function(){ state.text=this.value; state.curre
 $("bSample").addEventListener("click",function(){ state.text=SAMPLE; state.edits={}; state.wordsAt={}; state.current=null; $("src").value=SAMPLE; render(); });
 $("bClear").addEventListener("click",function(){ state.text=""; state.edits={}; state.wordsAt={}; state.current=null; $("src").value=""; render(); $("src").focus(); });
 $("layers").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; var k=b.getAttribute("data-l"); state.layers[k]=state.layers[k]?0:1; if(k==="ipaonly" && state.layers.ipaonly) state.layers.ipa=1; if(k==="ipa" && !state.layers.ipa) state.layers.ipaonly=0; lsSet("layers",state.layers); applyLayers(); });
-$("accent").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; state.accent=b.getAttribute("data-a"); lsSet("accent",state.accent); if(!state.layers.ipa && !state.layers.ipaonly){ state.layers.ipa=1; lsSet("layers",state.layers); } applyLayers(); render(); drillStart(); });
+$("accent").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; state.accent=b.getAttribute("data-a"); lsSet("accent",state.accent); if(!state.layers.ipa && !state.layers.ipaonly){ state.layers.ipa=1; lsSet("layers",state.layers); } applyLayers(); render(); drillStart(); rdFill(); });
 $("drillModes").addEventListener("click",function(e){ var b=e.target.closest(".chip"); if(!b) return; if(b.id==="drNew") drillStart(); else drillStart(b.getAttribute("data-m")); });
 $("tPresent").addEventListener("click",function(){ var on=this.getAttribute("aria-pressed")!=="true"; this.setAttribute("aria-pressed",on); $("wrap").classList.toggle("present",on); });
 $("tBig").addEventListener("click",function(){ var on=this.getAttribute("aria-pressed")!=="true"; this.setAttribute("aria-pressed",on); $("wrap").classList.toggle("big",on); });
@@ -1037,10 +1037,22 @@ window.addEventListener("resize",closePop);
 // Đọc từng câu bằng giọng của trình duyệt, UK hay US theo lựa chọn. Câu đang đọc sáng lên;
 // trình duyệt nào báo được vị trí từng từ (Safari, Edge) thì từ đang đọc cũng sáng.
 var rd={on:false, slow:lsGet("slowread",0), id:0};
-function rdVoice(){
+// Neural voices (Edge "Online (Natural)", iOS Premium/Enhanced) sound far better than the
+// default robotic ones, so they are ranked first; the teacher can still pick any voice.
+function rdScore(v){ var n=v.name||""; return /Natural|Neural|Online|Premium|Enhanced/i.test(n)?3 : /Google/i.test(n)?2 : /Samantha|Daniel|Serena|Karen|Moira|Ava|Zoe|Evan|Allison|Susan|Arthur|Martha/i.test(n)?1 : 0; }
+function rdVoices(){
   var lang=state.accent==="uk"?"en-GB":"en-US";
-  var vs=speechSynthesis.getVoices().filter(function(v){ return (v.lang||"").replace("_","-").indexOf(lang)===0; });
-  return vs.filter(function(v){ return /Natural|Google|Samantha|Daniel|Aria|Jenny|Sonia|Libby|Serena|Arthur/i.test(v.name); })[0]||vs[0]||null;
+  try{ return speechSynthesis.getVoices().filter(function(v){ return (v.lang||"").replace("_","-").indexOf(lang)===0; }).sort(function(a,b){ return rdScore(b)-rdScore(a); }); }catch(e){ return []; }
+}
+function rdVoice(){
+  var vs=rdVoices(), want=lsGet("voice_"+state.accent,"");
+  return vs.filter(function(v){ return v.name===want; })[0]||vs[0]||null;
+}
+function rdFill(){
+  var sel=$("rdVoiceSel"); if(!sel) return;
+  var vs=rdVoices(), cur=rdVoice();
+  sel.hidden=vs.length<2;
+  sel.innerHTML=vs.map(function(v){ return '<option'+(cur&&v.name===cur.name?' selected':'')+'>'+esc(v.name)+'</option>'; }).join("");
 }
 function rdSents(){
   var out=[];
@@ -1088,7 +1100,8 @@ function rdPlay(from,only){
 $("bListen").addEventListener("click",function(){ if(rd.on) rdStop(); else rdPlay(0,false); });
 $("tSlowRead").setAttribute("aria-pressed",rd.slow?"true":"false");
 $("tSlowRead").addEventListener("click",function(){ rd.slow=rd.slow?0:1; lsSet("slowread",rd.slow); this.setAttribute("aria-pressed",rd.slow?"true":"false"); });
-if("speechSynthesis" in window){ try{ speechSynthesis.getVoices(); }catch(e){} }
+$("rdVoiceSel").addEventListener("change",function(){ lsSet("voice_"+state.accent,this.value); if(rd.on) rdPlay(0,false); });
+if("speechSynthesis" in window){ try{ speechSynthesis.getVoices(); speechSynthesis.addEventListener("voiceschanged",rdFill); }catch(e){} rdFill(); }
 
 // ---------------- library (tintinlab server) ----------------
 // Giáo viên lưu và xoá bài mẫu; học sinh đăng nhập thấy danh sách. Server báo canSave theo vai trò.
