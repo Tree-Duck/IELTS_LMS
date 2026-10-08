@@ -128,6 +128,7 @@ textarea.draft{min-height:150px;font-size:.92rem;line-height:1.6;padding:10px 12
 .pfield small{color:var(--muted);font-size:.78rem}
 .pfield input,.pfield textarea{width:100%;font:400 .92rem/1.5 var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .pfield textarea{min-height:64px;resize:vertical}
+.pfield textarea.short{min-height:42px;field-sizing:content;overflow-wrap:anywhere}
 .pfield input:focus-visible,.pfield textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
 .thesis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
 .tick{padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
@@ -818,6 +819,8 @@ function enterExam(){
 
 /* ---------- ô lên ý ---------- */
 function inGate(){ return !!sess && activeT==='t2' && sess.phase==='write' && sess.t2 && sess.t2.prompt && !sess.t2.planDone; }
+/* Ô Lên ý tự cao theo chữ; kéo góc dưới phải để phóng to thêm. Trình duyệt có field-sizing thì CSS tự lo. */
+function grow(t){ if(!t.classList.contains('short') || CSS.supports('field-sizing','content')) return; t.style.height='auto'; if(t.scrollHeight) t.style.height=t.scrollHeight+2+'px'; }
 function renderPlan(){
   const on = !!sess && activeT==='t2' && !!sess.t2.prompt;
   $('planCard').hidden = !on;
@@ -827,10 +830,10 @@ function renderPlan(){
   $('planFields').innerHTML = L.fields.map(k=>{
     const F = PFIELDS[k]; const label = (k==='b1' && L.roles[0]==='body1') ? 'Ý của đoạn này, nói trong một câu' : F.l;
     const ph = k==='side' ? (SIDE_PH[fk]||'') : (F.ph||'');
-    const ctl = F.area ? `<textarea id="pl-${k}" placeholder="${esc(ph)}">${esc(plan[k]||'')}</textarea>` : `<input type="text" id="pl-${k}" placeholder="${esc(ph)}" value="${esc(plan[k]||'')}">`;
+    const ctl = `<textarea id="pl-${k}"${F.area?'':' class="short" rows="1"'} placeholder="${esc(ph)}">${esc(plan[k]||'')}</textarea>`;
     return `<div class="pfield"><label for="pl-${k}">${esc(label)}</label>${ctl}<small>${esc(F.h)}</small></div>`;
   }).join('');
-  L.fields.forEach(k=>{ $('pl-'+k).addEventListener('input',e=>{ plan[k]=e.target.value; if(k==='side') autoStance(e.target.value); store.set('plv_session',sess); renderTicks(); renderNext(); if(k==='side'){ $('planWarn').hidden=true; planWarned=false; $('planDone').textContent='Xong ý, bắt đầu viết →'; } }); });
+  L.fields.forEach(k=>{ grow($('pl-'+k)); $('pl-'+k).addEventListener('input',e=>{ grow(e.target); plan[k]=e.target.value; if(k==='side') autoStance(e.target.value); store.set('plv_session',sess); renderTicks(); renderNext(); if(k==='side'){ $('planWarn').hidden=true; planWarned=false; $('planDone').textContent='Xong ý, bắt đầu viết →'; } }); });
   renderTicks(); renderPlanStance();
 }
 /* Thân 1 và thân 2 theo lập trường đang chọn, kèm mọi câu mở đoạn của mỗi thân. */

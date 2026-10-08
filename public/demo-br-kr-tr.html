@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dạy demo /br/ /kr/ /tr/</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;500;600&family=Noto+Sans:wght@500;700&display=swap">
+<!-- Demo lesson page (Global Success 10, Unit 1). Self-contained: delete this file and the
+     "Dạy demo" link in mouth-map.html to remove it. Audio comes from /audio/mm and /audio/demo. -->
+<style>
+:root{
+  --bg:#EDF5F1; --surface:#FFFFFF; --surface-2:#F5FAF7; --ink:#2A2233; --muted:#665F70; --line:#D3E1DA;
+  --accent:#D9557A; --accent-soft:#FBE3EA; --ok:#2E9E7C; --ok-soft:#DAF2E9; --bad:#C2413B; --bad-soft:#FBE4E2;
+  --br:#2F6FD0; --br-soft:#E1ECFB; --cr:#2E9E5B; --cr-soft:#DDF3E6; --tr:#D9731F; --tr-soft:#FDEBDB;
+  --display:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;
+  --body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ipa:"Noto Sans","Segoe UI","Arial Unicode MS",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#15121A; --surface:#211C28; --surface-2:#2A2432; --ink:#F1EBF4; --muted:#ADA3B6; --line:#3A3245;
+    --accent:#F07B9A; --accent-soft:#3F2330; --ok:#5CCB9F; --ok-soft:#183A30; --bad:#F08A84; --bad-soft:#40211F;
+    --br:#7FAEF5; --br-soft:#1C2A42; --cr:#6FD39A; --cr-soft:#173526; --tr:#F2A35E; --tr-soft:#3D2A17;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#15121A; --surface:#211C28; --surface-2:#2A2432; --ink:#F1EBF4; --muted:#ADA3B6; --line:#3A3245;
+  --accent:#F07B9A; --accent-soft:#3F2330; --ok:#5CCB9F; --ok-soft:#183A30; --bad:#F08A84; --bad-soft:#40211F;
+  --br:#7FAEF5; --br-soft:#1C2A42; --cr:#6FD39A; --cr-soft:#173526; --tr:#F2A35E; --tr-soft:#3D2A17;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding:20px 16px 48px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,42px);line-height:1.05;margin:0}
+h1 .br{color:var(--br)} h1 .cr{color:var(--cr)} h1 .tr{color:var(--tr)}
+header p{margin:6px 0 0;color:var(--muted)}
+.back{font:500 14px var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:7px 15px;text-decoration:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px}
+h2{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.2;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--br);outline-offset:2px}
+.say{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:8px 14px;font-weight:500;display:inline-block}
+.say::before{content:"🔊";font-size:.85em;margin-right:6px}
+.say.playing{border-color:var(--accent);background:var(--accent-soft)}
+.say b{font-weight:700}
+.g-br b{color:var(--br)} .g-cr b{color:var(--cr)} .g-tr b{color:var(--tr)}
+.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.col{border-radius:18px;padding:14px;border:1.5px solid transparent}
+.col.g-br{background:var(--br-soft)} .col.g-cr{background:var(--cr-soft)} .col.g-tr{background:var(--tr-soft)}
+.col h3{font-family:var(--ipa);font-size:30px;margin:0 0 8px;line-height:1}
+.g-br h3{color:var(--br)} .g-cr h3{color:var(--cr)} .g-tr h3{color:var(--tr)}
+.ladder{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:10px}
+.ladder .arrow{color:var(--muted)}
+.col p{margin:6px 0 0;font-size:14.5px}
+.col a{color:inherit}
+.tips{margin:14px 0 0;padding-left:1.3em}
+.tips li{margin:4px 0}
+.board{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--surface-2);border:1px dashed var(--line);font-size:15px}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.grp .tag{font-family:var(--ipa);font-weight:700;min-width:44px}
+.quiz{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.qhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.big{font:600 16px var(--body);border:none;border-radius:14px;padding:11px 20px;background:var(--accent);color:#fff}
+.big.ghost{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--line)}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+.opt{font:600 20px var(--body);min-width:120px;padding:14px 20px;border-radius:16px;border:2px solid var(--line);background:var(--surface)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.fb{min-height:1.5em;font-weight:500}
+.prog{color:var(--muted);font-size:14px}
+.sp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
+.pair{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.pair .n{font-weight:700;color:var(--muted);width:1.4em}
+.sp .say.hit{border-color:var(--accent);background:var(--accent-soft)}
+.dlg{display:flex;flex-direction:column;gap:8px}
+.line{display:flex;gap:10px;align-items:baseline;text-align:left;width:100%;border:1.5px solid var(--line);background:var(--surface-2);border-radius:14px;padding:10px 14px}
+.line .who{font-weight:700;color:var(--muted);min-width:1.6em}
+.line.playing{border-color:var(--accent);background:var(--accent-soft)}
+.line b.br{color:var(--br)} .line b.cr{color:var(--cr)} .line b.tr{color:var(--tr)}
+.line i{color:var(--muted);font-style:normal}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}
+.dgt{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.dgt .l{font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
+.dgt .ipa{font-family:var(--ipa);color:var(--accent)}
+.dgt a{font-size:14px;color:var(--ink)}
+.foot{color:var(--muted);font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Dạy demo <span class="br">/br/</span> <span class="cr">/kr/</span> <span class="tr">/tr/</span></h1>
+      <p>Tiếng Anh 10 Global Success · Unit 1 Family Life · Pronunciation, trang 9</p>
+    </div>
+    <a class="back" href="/mouth-map.html">← Mouth Map</a>
+  </header>
+
+  <section class="card">
+    <h2>Mẹo 3 bước</h2>
+    <p class="sub">Bấm lần lượt từ trái sang phải. Nút có ký hiệu là bản thu âm đơn của người thật. Từ đầu tiên không có r, từ cuối có r: mất r là đổi từ.</p>
+    <div class="steps3">
+      <div class="col g-br">
+        <h3>br</h3>
+        <div class="ladder"><button class="say" data-ph="b">/b/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="bread"><b>br</b>ead</button></div>
+        <div class="ladder"><button class="say" data-w="bed">bed</button><span class="arrow">≠</span><button class="say" data-w="bread"><b>br</b>ead</button></div>
+        <p>Khẩu hình: <a href="/mouth-map.html#b">/b/</a> rồi <a href="/mouth-map.html#r">/r/</a></p>
+      </div>
+      <div class="col g-cr">
+        <h3>cr</h3>
+        <div class="ladder"><button class="say" data-ph="k">/k/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="crane"><b>cr</b>ane</button></div>
+        <div class="ladder"><button class="say" data-w="cane">cane</button><span class="arrow">≠</span><button class="say" data-w="crane"><b>cr</b>ane</button></div>
+        <p>Khẩu hình: <a href="/mouth-map.html#k">/k/</a> rồi <a href="/mouth-map.html#r">/r/</a></p>
+      </div>
+      <div class="col g-tr">
+        <h3>tr</h3>
+        <div class="ladder"><button class="say" data-ph="t">/t/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="tree"><b>tr</b>ee</button></div>
+        <div class="ladder"><button class="say" data-w="tea">tea</button><span class="arrow">≠</span><button class="say" data-w="tree"><b>tr</b>ee</button></div>
+        <p>Khẩu hình: <a href="/mouth-map.html#t">/t/</a> rồi <a href="/mouth-map.html#r">/r/</a>. Âm tr bắt đầu như t trong tea, không đọc như "tr" tiếng Việt.</p>
+      </div>
+    </div>
+    <ol class="tips">
+      <li>Bắt đầu bằng b, c hoặc t, thật ngắn.</li>
+      <li>Chuyển ngay sang r: môi tròn, lưỡi không chạm vào đâu.</li>
+      <li>Không chèn "ơ" ở giữa.</li>
+    </ol>
+    <div class="board">✓ bread · ✗ "bơ-rét" (thừa "ơ") · ✗ bed (mất r). Mất r là thành từ khác: bread ≠ bed, tree ≠ tea.</div>
+  </section>
+
+  <section class="card">
+    <h2>Từ trong bài</h2>
+    <p class="sub">9 từ của bài 1 (Listen and repeat), thêm các từ dùng trong tiết. Bấm để nghe.</p>
+    <div class="grp g-br"><span class="tag" style="color:var(--br)">/br/</span><button class="say" data-w="breadwinner"><b>br</b>eadwinner</button><button class="say" data-w="breakfast"><b>br</b>eakfast</button><button class="say" data-w="brown"><b>br</b>own</button><button class="say" data-w="bread"><b>br</b>ead</button><button class="say" data-w="brother"><b>br</b>other</button><button class="say" data-demo="broken-rice"><b>br</b>oken rice</button></div>
+    <div class="grp g-cr"><span class="tag" style="color:var(--cr)">/kr/</span><button class="say" data-w="crash"><b>cr</b>ash</button><button class="say" data-w="crane"><b>cr</b>ane</button><button class="say" data-w="cream"><b>cr</b>eam</button><button class="say" data-w="crab"><b>cr</b>ab</button></div>
+    <div class="grp g-tr"><span class="tag" style="color:var(--tr)">/tr/</span><button class="say" data-w="track"><b>tr</b>ack</button><button class="say" data-w="tree"><b>tr</b>ee</button><button class="say" data-w="train"><b>tr</b>ain</button><button class="say" data-w="trash"><b>tr</b>ash</button></div>
+  </section>
+
+  <section class="card" id="quizCard">
+    <h2>Em nghe thấy từ nào?</h2>
+    <p class="sub">8 câu giống bài Kahoot. Bấm Nghe, rồi chọn từ em nghe được. Có 2 câu đáp án là từ không có r.</p>
+    <div class="quiz" id="quiz" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <h2>Say &amp; point</h2>
+    <p class="sub">Bấm từng từ để nghe. Hoặc bấm "Đọc ngẫu nhiên", cả lớp chỉ vào từ vừa nghe, rồi bấm "Hiện đáp án".</p>
+    <div class="qhead" style="margin-bottom:12px"><button class="big" id="spRand">🎲 Đọc ngẫu nhiên</button><button class="big ghost" id="spShow" disabled>Hiện đáp án</button></div>
+    <div class="sp" id="sp"></div>
+  </section>
+
+  <section class="card">
+    <h2>Hội thoại: bữa sáng gia đình</h2>
+    <p class="sub">Bấm từng câu để nghe. Chữ trong ngoặc là chỗ học sinh thay bằng thông tin của mình.</p>
+    <div class="dlg">
+      <button class="line" data-demo="d1"><span class="who">A</span><span>Who makes <b class="br">br</b>eakfast in your family?</span></button>
+      <button class="line" data-demo="d2"><span class="who">B</span><span>My <i>(mum / dad / grandma)</i> makes <b class="br">br</b>eakfast.</span></button>
+      <button class="line" data-demo="d3"><span class="who">A</span><span>What do you have for <b class="br">br</b>eakfast?</span></button>
+      <button class="line" data-demo="d4"><span class="who">B</span><span>I have <i>(<b class="br">br</b>ead / rice / noodles)</i>.</span></button>
+      <button class="line" data-demo="d5"><span class="who">A</span><span>Who takes out the <b class="tr">tr</b>ash?</span></button>
+      <button class="line" data-demo="d6"><span class="who">B</span><span>My <b class="br">br</b>other takes out the <b class="tr">tr</b>ash. <i>/ I do.</i></span></button>
+    </div>
+    <div class="board">Ngân hàng từ: bread · <b style="color:var(--br)">br</b>oken rice (cơm tấm) · sticky rice (xôi) · noodle soup (phở, hủ tiếu) · eggs</div>
+  </section>
+
+  <section class="card">
+    <h2>Chữ ghép: hai chữ, một âm</h2>
+    <p class="sub">Khác với br, cr, tr (hai âm đọc liền), các cặp chữ dưới đây chỉ đọc thành một âm. Bấm từ để nghe, bấm "Xem khẩu hình" để mở âm đó trong Mouth Map.</p>
+    <div class="dg">
+      <div class="dgt"><span class="l">sh</span><span class="ipa">/ʃ/</span><button class="say" data-w="ship"><b>sh</b>ip</button><a href="/mouth-map.html#ʃ">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">ch</span><span class="ipa">/tʃ/</span><button class="say" data-w="chair"><b>ch</b>air</button><a href="/mouth-map.html#tʃ">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">th</span><span class="ipa">/θ/ · /ð/</span><button class="say" data-w="think"><b>th</b>ink</button><button class="say" data-w="this"><b>th</b>is</button><a href="/mouth-map.html#θ">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">ph</span><span class="ipa">/f/</span><button class="say" data-demo="phone"><b>ph</b>one</button><a href="/mouth-map.html#f">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">ng</span><span class="ipa">/ŋ/</span><button class="say" data-w="sing">si<b>ng</b></button><a href="/mouth-map.html#ŋ">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">ck</span><span class="ipa">/k/</span><button class="say" data-w="back">ba<b>ck</b></button><a href="/mouth-map.html#k">Xem khẩu hình</a></div>
+    </div>
+  </section>
+
+  <p class="foot">Giọng đọc từ và câu: Emma (Microsoft, neural). Âm đơn: bản thu trên Wikimedia Commons, nguồn ghi ở cuối trang Mouth Map.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){ return document.getElementById(id); };
+var player=new Audio(), playingEl=null;
+function src(el){
+  if(el.dataset.w) return "/audio/mm/w/"+el.dataset.w+".mp3";
+  if(el.dataset.ph) return "/audio/mm/ph/"+el.dataset.ph+".mp3";
+  if(el.dataset.demo) return "/audio/demo/"+el.dataset.demo+".mp3";
+}
+function mark(el){ if(playingEl) playingEl.classList.remove("playing"); playingEl=el; if(el) el.classList.add("playing"); }
+player.addEventListener("ended",function(){ mark(null); });
+function play(url, el){ try{ player.pause(); player.src=url; mark(el||null); var p=player.play(); if(p&&p.catch) p.catch(function(){ mark(null); }); }catch(e){} }
+function word(w){ play("/audio/mm/w/"+w+".mp3"); }
+
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-w],[data-ph],[data-demo]");
+  if(b && !b.closest("#quiz")) play(src(b), b);
+});
+
+// ----- quiz: the 8 Kahoot items from the lesson plan -----
+var Q=[["bread","bed","bread"],["crash","cash","cash"],["crane","cane","crane"],["tree","tea","tea"],["track","tack","track"],["brush","bush","brush"],["brain","crane","train","train"],["bride","cried","tried","cried"]];
+var qi=0, score=0, answered=false;
+function qRender(){
+  var box=$("quiz");
+  if(qi>=Q.length){
+    box.innerHTML='<p class="fb">Xong! Đúng '+score+'/'+Q.length+' câu.'+(score>=6?' Đạt mục tiêu 6/8.':' Mục tiêu là 6/8, làm lại nhé.')+'</p><button class="big" id="qAgain">Làm lại</button>';
+    return;
+  }
+  var q=Q[qi], opts=q.slice(0,-1);
+  answered=false;
+  box.innerHTML='<div class="qhead"><span class="prog">Câu '+(qi+1)+'/'+Q.length+'</span><button class="big" id="qHear">▶ Nghe</button></div>'+
+    '<div class="opts">'+opts.map(function(o){ return '<button class="opt" data-o="'+o+'">'+o+'</button>'; }).join("")+'</div>'+
+    '<p class="fb" id="qFb"></p>';
+}
+function qAnswer(o){
+  if(answered) return; answered=true;
+  var q=Q[qi], ans=q[q.length-1], ok=o===ans; if(ok) score++;
+  document.querySelectorAll("#quiz .opt").forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.o===ans) b.classList.add("right"); else if(b.dataset.o===o) b.classList.add("wrong");
+  });
+  var hasR=/r/.test(ans.slice(1,3));
+  $("qFb").innerHTML=(ok?"✓ Đúng! ":"✗ Chưa đúng. ")+"Từ vừa đọc là <b>"+ans+"</b>"+(hasR?", có âm r.":", không có âm r.")+' Bấm từng ô để nghe lại.';
+  var nx=document.createElement("button"); nx.className="big"; nx.id="qNext"; nx.textContent=qi+1<Q.length?"Câu tiếp →":"Xem kết quả";
+  $("quiz").appendChild(nx); nx.focus();
+}
+$("quiz").addEventListener("click",function(e){
+  var t=e.target;
+  if(t.id==="qHear"){ word(Q[qi][Q[qi].length-1]); return; }
+  if(t.id==="qNext"){ qi++; qRender(); var h=$("qHear"); if(h){ h.focus(); word(Q[qi][Q[qi].length-1]); } return; }
+  if(t.id==="qAgain"){ qi=0; score=0; qRender(); return; }
+  var o=t.closest(".opt"); if(!o) return;
+  if(o.disabled) word(o.dataset.o); else qAnswer(o.dataset.o);
+});
+// answered options stay clickable for listening again
+$("quiz").addEventListener("click",function(e){ var o=e.target.closest(".opt.right,.opt.wrong"); if(o) word(o.dataset.o); },true);
+qRender();
+
+// ----- say & point -----
+var SP=[["bread","bed"],["brush","bush"],["crash","cash"],["crane","cane"],["tree","tea"],["track","tack"]], last=null;
+$("sp").innerHTML=SP.map(function(p,i){ return '<div class="pair"><span class="n">'+(i+1)+'</span><button class="say" data-w="'+p[0]+'">'+p[0]+'</button><button class="say" data-w="'+p[1]+'">'+p[1]+'</button></div>'; }).join("");
+$("spRand").addEventListener("click",function(){
+  document.querySelectorAll("#sp .hit").forEach(function(b){ b.classList.remove("hit"); });
+  var all=[].concat.apply([],SP), w; do{ w=all[Math.floor(Math.random()*all.length)]; }while(w===last); last=w;
+  word(w); $("spShow").disabled=false;
+});
+$("spShow").addEventListener("click",function(){
+  if(!last) return;
+  var b=document.querySelector('#sp [data-w="'+last+'"]'); if(b) b.classList.add("hit");
+});
+})();
+</script>
+</body>
+</html>
