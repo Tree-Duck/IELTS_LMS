@@ -165,6 +165,48 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .check li{padding:6px 0;border-bottom:1px solid var(--line)}
 .check li::before{content:"☐ ";color:var(--muted)}
 .foot{color:var(--muted);font-size:13.5px}
+/* how-it-works strip with worked examples */
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin:0 0 14px;padding:0;list-style:none}
+.how li{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.how .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:15px}
+.how .t{font-weight:600}
+.ex{font-size:14.5px;padding:8px 10px;border-radius:10px;background:var(--surface);border-left:3px solid var(--accent)}
+.ex::before{content:"Example: ";font-weight:700;color:var(--accent)}
+#pairs.playing .how{display:none}
+.pcbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;width:100%;padding:10px 12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.pcbar .holder{font-weight:600}
+.pcbar .dots{letter-spacing:3px;color:var(--accent)}
+.pcbar .prog{margin-left:auto}
+.inst{font-size:20px;font-weight:600;margin:0}
+.inst .step{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-size:16px;margin-right:6px;vertical-align:2px}
+.hint2{margin:0;color:var(--muted)}
+.lbl2{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600}
+/* homework steps */
+.hwsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:hw}
+.hwsteps>li{position:relative;padding:14px 14px 14px 56px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);counter-increment:hw}
+.hwsteps>li::before{content:counter(hw);position:absolute;left:14px;top:14px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:grid;place-items:center}
+.hwsteps h3{margin:0 0 4px;font-size:17px}
+.hwsteps p{margin:0 0 8px}
+.hwsteps .qa{margin:8px 0 0}
+.hwsteps .qa .q{background:var(--surface)}
+/* recorder: always shows what state it is in */
+.recorder{display:flex;flex-direction:column;gap:10px;margin-top:8px;padding:12px;border-radius:14px;background:var(--surface);border:1.5px solid var(--line)}
+.recorder[data-state="rec"]{border-color:var(--bad)}
+.recorder .script{font-size:17px}
+.recorder .script b{font-weight:600}
+.recrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.recbtn{font:700 16px var(--body);border:none;border-radius:999px;padding:12px 20px;background:var(--bad);color:#fff}
+.recorder[data-state="rec"] .recbtn{background:var(--ink);color:var(--surface)}
+.rstate{font-weight:600}
+.rstate .dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:-1px;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+.recorder[data-state="done"] .rstate{color:var(--ok)}
+.recorder[data-state="err"] .rstate{color:var(--bad)}
+.meter{display:none;align-items:center;gap:3px;height:36px}
+.recorder[data-state="rec"] .meter{display:flex}
+.meter i{flex:1;max-width:8px;min-height:3px;height:3px;border-radius:3px;background:var(--bad);transition:height .08s}
+.recorder audio{width:100%;max-width:420px}
+@media (prefers-reduced-motion: reduce){ .rstate .dot{animation:none} }
 .waves path{stroke:var(--voice);stroke-width:3;fill:none;stroke-linecap:round;opacity:0}
 .waves.on path{animation:wave 1s ease-in-out infinite}
 .waves.on path:nth-child(2){animation-delay:.15s}
@@ -313,7 +355,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
   <section class="card" id="pairs">
     <h2>Pair check</h2>
-    <p class="sub">Work in pairs with one phone. The Speaker reads a secret word. The Listener does not look, chooses the word they heard, and checks the sounds. Then swap.<span class="vi">Làm theo cặp, một máy. Bạn nói đọc một từ bí mật. Bạn nghe không nhìn màn hình, chọn từ mình nghe được và chấm. Xong thì đổi vai.</span></p>
+    <p class="sub">2 students, 1 phone, about 5 minutes. One student speaks, the other listens and checks. Then you swap.<span class="vi">2 bạn, 1 máy, khoảng 5 phút. Một bạn nói, bạn kia nghe và chấm. Rồi đổi vai.</span></p>
+    <ol class="how">
+      <li><span class="num">1</span><span class="t">🗣 The Speaker reads the secret word out loud.</span><span class="vi">Bạn nói đọc to từ bí mật.</span><span class="ex">Lan sees <b>crane</b> and says “crane”. Hoa doesn't look.</span></li>
+      <li><span class="num">2</span><span class="t">👂 The Listener takes the phone and taps the word they heard.</span><span class="vi">Bạn nghe cầm máy, bấm từ mình nghe được.</span><span class="ex">Hoa heard “crane”, so she taps <b>crane</b>, not <i>cane</i>.</span></li>
+      <li><span class="num">3</span><span class="t">👂 The Listener answers 2 questions about the sounds.</span><span class="vi">Bạn nghe trả lời 2 câu về âm.</span><span class="ex">“Clear /r/? Yes. Extra ơ? No.”</span></li>
+      <li><span class="num">4</span><span class="t">Wrong word? The Speaker gets one more try.</span><span class="vi">Nghe sai thì bạn nói được đọc lại một lần.</span><span class="ex">Hoa tapped <i>cane</i>, so Lan says “crane” again, more clearly.</span></li>
+    </ol>
     <div class="pc" id="pcBox" aria-live="polite"></div>
   </section>
 
@@ -346,33 +394,60 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 
   <section class="card hw" id="hw">
     <h2>Homework</h2>
-    <p class="sub">About 15 minutes at home. No login needed.<span class="vi">Khoảng 15 phút ở nhà. Không cần đăng nhập.</span></p>
-    <ol>
-      <li>Listen to the 3 questions and the sample answers.<span class="vi">Nghe 3 câu hỏi và câu trả lời mẫu.</span></li>
-      <li>Record your own answers below and listen back. Record again until you are happy.<span class="vi">Tự thu câu trả lời của mình ở dưới rồi nghe lại. Thu lại tới khi thấy ổn.</span></li>
-      <li>Check the 9 words with <a href="#sayit">Say it</a>. Take a screenshot of your best result.<span class="vi">Kiểm tra 9 từ bằng Say it, chụp màn hình kết quả tốt nhất.</span></li>
-      <li>Send a voice message (about 30 seconds) answering the 3 questions to your teacher or your group of 4 on Zalo.<span class="vi">Gửi tin nhắn thoại khoảng 30 giây trả lời 3 câu hỏi cho giáo viên hoặc nhóm 4 bạn trên Zalo.</span></li>
-      <li>Your buddy listens and replies ✅ (all good) or 🔁 (try again), using the checklist.<span class="vi">Bạn cặp nghe rồi trả lời ✅ (đạt) hoặc 🔁 (làm lại) theo bảng kiểm.</span></li>
+    <p class="sub">About 15 minutes at home, no login. <b>You are done when</b> you have sent 1 voice message and 1 screenshot on Zalo.<span class="vi">Khoảng 15 phút ở nhà, không cần đăng nhập. Xong khi đã gửi 1 tin nhắn thoại và 1 ảnh chụp màn hình qua Zalo.</span></p>
+    <ol class="hwsteps">
+      <li>
+        <h3>Listen</h3>
+        <p>Listen to the 3 questions and the sample answers.<span class="vi">Nghe 3 câu hỏi và câu trả lời mẫu.</span></p>
+        <div class="qa">
+          <div class="q"><span>1. Who makes <b>br</b>eakfast in your family?</span><button class="say" data-demo="d1">Question</button><button class="say" data-demo="d2">Sample answer</button></div>
+          <div class="q"><span>2. What do you have for <b>br</b>eakfast?</span><button class="say" data-demo="d3">Question</button><button class="say" data-demo="d4">Sample answer</button></div>
+          <div class="q"><span>3. Who takes out the <b>tr</b>ash?</span><button class="say" data-demo="d5">Question</button><button class="say" data-demo="d6">Sample answer</button></div>
+        </div>
+      </li>
+      <li>
+        <h3>Test your microphone</h3>
+        <p>Tap the red button and read the sentence. Then listen back. If you can hear yourself clearly, go to step 3.<span class="vi">Bấm nút đỏ rồi đọc câu dưới đây. Sau đó nghe lại. Nghe rõ giọng mình thì sang bước 3.</span></p>
+        <div class="recorder" data-max="20">
+          <div class="script">Read: <b>“My <span style="color:var(--br)">br</span>other has <span style="color:var(--br)">br</span>ead and <span style="color:var(--cr)">cr</span>eam for <span style="color:var(--br)">br</span>eakfast.”</b> <button class="say" data-demo="mictest">Listen first</button></div>
+          <div class="recrow"><button class="recbtn">● Start recording</button><span class="rstate" aria-live="polite">Ready. Tap the red button.</span></div>
+          <div class="meter" aria-hidden="true"></div>
+          <audio controls hidden></audio>
+        </div>
+      </li>
+      <li>
+        <h3>Practise your answers</h3>
+        <p>Answer the 3 questions about <b>your</b> family. Record, listen, and record again until you are happy.<span class="vi">Trả lời 3 câu hỏi về gia đình em. Thu, nghe lại, thu lại tới khi thấy ổn.</span></p>
+        <div class="ex">“My mum makes breakfast. I have bread. My brother takes out the trash.”</div>
+        <div class="recorder" data-max="90">
+          <div class="script">1. Who makes <b>br</b>eakfast? · 2. What do you have for <b>br</b>eakfast? · 3. Who takes out the <b>tr</b>ash?</div>
+          <div class="recrow"><button class="recbtn">● Start recording</button><span class="rstate" aria-live="polite">Ready. Tap the red button.</span></div>
+          <div class="meter" aria-hidden="true"></div>
+          <audio controls hidden></audio>
+        </div>
+        <p class="hint2" style="margin-top:6px">Your recordings stay on this phone. Nobody else can hear them.<span class="vi">Bản thu chỉ nằm trên máy này, không ai khác nghe được.</span></p>
+      </li>
+      <li>
+        <h3>Check the 9 words</h3>
+        <p>Go to <a href="#sayit">Say it</a>. Say each word until the phone shows ✓. Take a screenshot of your best result.<span class="vi">Vào Say it, nói từng từ tới khi máy hiện ✓. Chụp màn hình kết quả tốt nhất.</span></p>
+      </li>
+      <li>
+        <h3>Send it on Zalo</h3>
+        <p>Open Zalo → your teacher (or your group of 4) → hold the 🎤 button and answer the 3 questions (about 30 seconds) → send your screenshot.<span class="vi">Mở Zalo, vào chat với giáo viên hoặc nhóm 4 bạn, nhấn giữ nút 🎤 để trả lời 3 câu (khoảng 30 giây), rồi gửi ảnh chụp màn hình.</span></p>
+        <div class="ex">“Hi teacher, I'm Lan from 10A3. Here is my homework.” + 🎤 0:30 + 📷</div>
+      </li>
+      <li>
+        <h3>Check your buddy</h3>
+        <p>Listen to your buddy's voice message. Reply ✅ if all 4 points are OK. If not, reply 🔁 and one short note.<span class="vi">Nghe tin nhắn thoại của bạn cặp. Đạt cả 4 ý thì trả lời ✅, chưa đạt thì trả lời 🔁 kèm một ghi chú ngắn.</span></p>
+        <div class="ex">“🔁 I couldn't hear the r in breakfast.”</div>
+        <ul class="check" style="margin-top:8px">
+          <li>I can hear the /r/ sound.<span class="vi">Có phát âm âm /r/.</span></li>
+          <li>No extra "ơ" between the two consonants.<span class="vi">Không chèn nguyên âm giữa hai phụ âm.</span></li>
+          <li>I understand every word.<span class="vi">Người nghe xác định đúng từ.</span></li>
+          <li>After my feedback, my buddy fixed it.<span class="vi">Tự sửa được sau phản hồi.</span></li>
+        </ul>
+      </li>
     </ol>
-    <div class="qa">
-      <div class="q"><span>1. Who makes <b>br</b>eakfast in your family?</span><button class="say" data-demo="d1">Question</button><button class="say" data-demo="d2">Sample answer</button></div>
-      <div class="q"><span>2. What do you have for <b>br</b>eakfast?</span><button class="say" data-demo="d3">Question</button><button class="say" data-demo="d4">Sample answer</button></div>
-      <div class="q"><span>3. Who takes out the <b>tr</b>ash?</span><button class="say" data-demo="d5">Question</button><button class="say" data-demo="d6">Sample answer</button></div>
-    </div>
-    <div class="rec">
-      <button class="big" id="recBtn">🎙 Record</button>
-      <audio id="recAudio" controls hidden></audio>
-      <span class="sub" id="recNote" style="margin:0">Your recording stays on this phone.<span class="vi">Bản thu chỉ nằm trên máy này.</span></span>
-    </div>
-    <div class="board">
-      <b>Buddy checklist</b>
-      <ul class="check">
-        <li>I can hear the /r/ sound.<span class="vi">Có phát âm âm /r/.</span></li>
-        <li>No extra "ơ" between the two consonants.<span class="vi">Không chèn nguyên âm giữa hai phụ âm.</span></li>
-        <li>I understand every word.<span class="vi">Người nghe xác định đúng từ.</span></li>
-        <li>After my feedback, my buddy fixed it.<span class="vi">Tự sửa được sau phản hồi.</span></li>
-      </ul>
-    </div>
   </section>
 
   <p class="foot">Words and sentences: Emma voice (Microsoft, neural). Single sounds: recordings from Wikimedia Commons, credits at the bottom of Mouth Map.</p>
@@ -747,7 +822,7 @@ $("siWords").innerHTML=SIW.map(function(w){ return '<button class="chip" data-si
 $("siWords").addEventListener("click",function(e){ var b=e.target.closest("[data-si]"); if(!b) return; siCur=b.dataset.si; $("siWord").textContent=siCur; $("siOut").innerHTML=""; document.querySelectorAll("#siWords .chip").forEach(function(c){ c.setAttribute("aria-pressed",c.dataset.si===siCur?"true":"false"); }); word(siCur); });
 $("siMic").addEventListener("click",function(){
   var btn=this; if(btn.classList.contains("on")){ try{ recog&&recog.stop(); }catch(e){} return; }
-  btn.classList.add("on"); $("siOut").className="heard"; $("siOut").innerHTML="Listening… say “"+siCur+"”";
+  btn.classList.add("on"); $("siOut").className="heard"; $("siOut").innerHTML="● Listening… say “"+siCur+"” now";
   listen(siCur,function(res){ btn.classList.remove("on"); var h=heardHtml(siCur,res); $("siOut").className="heard "+(res.alts?(h.ok?"ok":"no"):""); $("siOut").innerHTML=h.html; });
 });
 if(!SR){ $("siMic").disabled=true; $("siOut").innerHTML=heardHtml("",{err:"unsupported"}).html; }
@@ -765,41 +840,53 @@ function pcNewTurn(){
     var target = (i===noR && other.length) ? other[0] : rw[Math.floor(Math.random()*rw.length)];
     return {opts:shuffle(s), target:target, tries:0, firstOk:false, fixed:false, r:null, noV:null, mic:null}; });
 }
-function pcStart(){ pc={names:[$("pcA").value.trim()||"Student A",$("pcB").value.trim()||"Student B"], turn:0, i:0, items:[pcNewTurn(),pcNewTurn()], step:"speak"}; pcRender(); }
+function pcStart(){ $("pairs").classList.add("playing"); pc={names:[$("pcA").value.trim()||"Speaker",$("pcB").value.trim()||"Listener"], turn:0, i:0, items:[pcNewTurn(),pcNewTurn()], step:"speak"}; pcRender(); }
 function pcIntro(){
-  $("pcBox").innerHTML='<div class="row"><input id="pcA" placeholder="Student A" aria-label="Name of student A"><input id="pcB" placeholder="Student B" aria-label="Name of student B"></div>'+
-    '<p class="sub" style="margin:0">Each of you reads '+PER+' words. Takes about 5 minutes.<span class="vi">Mỗi bạn đọc '+PER+' từ, khoảng 5 phút.</span></p><button class="big" id="pcGo">Start</button>';
+  $("pairs").classList.remove("playing");
+  $("pcBox").innerHTML='<div class="row"><label class="lbl2">🗣 Speaks first<input id="pcA" placeholder="e.g. Lan"></label><label class="lbl2">👂 Listens first<input id="pcB" placeholder="e.g. Hoa"></label></div>'+
+    '<button class="big" id="pcGo">Start: '+PER+' words each</button>';
 }
 function it(){ return pc.items[pc.turn][pc.i]; }
-function spk(){ return pc.names[pc.turn]; } function lis(){ return pc.names[1-pc.turn]; }
+function spk(){ return esc(pc.names[pc.turn]); } function lis(){ return esc(pc.names[1-pc.turn]); }
+// Every screen starts with the same bar: who holds the phone, how far along you are.
+function bar(holder){
+  var dots=""; for(var k=0;k<PER;k++) dots+=k<pc.i?"●":(k===pc.i?"◉":"○");
+  return '<div class="pcbar"><span class="holder">📱 '+holder+' holds the phone</span><span class="dots" aria-hidden="true">'+dots+'</span><span class="prog">Word '+(pc.i+1)+' of '+PER+' · '+spk()+' speaks</span></div>';
+}
+function inst(n, html, vi){ return '<p class="inst"><span class="step">'+n+'</span>'+html+'<span class="vi">'+vi+'</span></p>'; }
 function pcRender(){
-  var b=$("pcBox"), x=it(), n=(pc.i+1)+"/"+PER;
+  var b=$("pcBox"), x=it();
   if(pc.step==="speak"){
-    b.innerHTML='<span class="who">👀 Only '+esc(spk())+' looks · word '+n+'</span>'+
-      '<p class="sub" style="margin:0">'+esc(spk())+', say this word to '+esc(lis())+'. Use the 3 steps.'+(x.tries?' <b>Try again, more clearly!</b>':'')+'<span class="vi">Đọc từ này cho bạn nghe. Nhớ 3 bước.'+(x.tries?' Đọc lại rõ hơn nhé!':'')+'</span></p>'+
-      '<div class="secret">'+x.target+'</div>'+
-      '<div class="row"><button class="big" id="pcSaid">I said it → '+esc(lis())+'\'s turn</button></div>';
+    b.innerHTML=bar(spk())+inst(1, x.tries?spk()+', say it again, more clearly:':spk()+', read this word out loud to '+lis()+':', x.tries?'Đọc lại rõ hơn, nhớ 3 bước.':'Đọc to từ này cho bạn nghe.')+
+      '<div class="secret">'+x.target+'</div><p class="hint2">🙈 '+lis()+', don\'t look at the screen.</p>'+
+      '<button class="big" id="pcSaid">I said it. Give the phone to '+lis()+' →</button>';
   } else if(pc.step==="pick"){
-    b.innerHTML='<span class="who">👂 '+esc(lis())+' · word '+n+'</span><p class="fb">Which word did you hear?<span class="vi">Bạn nghe được từ nào?</span></p>'+
+    b.innerHTML=bar(lis())+inst(2, lis()+', which word did '+spk()+' say?', 'Bạn nghe được từ nào?')+
       '<div class="opts">'+x.opts.map(function(o){ return '<button class="opt" data-pk="'+o+'">'+o+'</button>'; }).join("")+'</div>';
+  } else if(pc.step==="retry"){
+    b.innerHTML=bar(lis())+'<p class="inst">✗ That was not the word.</p><p class="hint2">Give the phone back to '+spk()+'. '+spk()+' gets one more try.<span class="vi">Đưa máy lại cho bạn nói. Bạn ấy được đọc lại một lần.</span></p>'+
+      '<button class="big" id="pcBack">'+spk()+' has the phone →</button>';
   } else if(pc.step==="check"){
-    b.innerHTML='<span class="who">👂 '+esc(lis())+' · word '+n+'</span><p class="fb">✓ You understood <b>'+x.target+'</b>. Now check the sounds:</p>'+
+    b.innerHTML=bar(lis())+'<p class="fb">✓ Right word: <b>'+x.target+'</b></p>'+inst(3, lis()+', check '+spk()+'\'s sounds:', 'Chấm âm của bạn nói:')+
       '<div class="yn"><p>Did you hear a clear /r/?<span class="vi">Có nghe rõ âm /r/ không?</span></p><button class="opt" data-r="1">Yes</button><button class="opt" data-r="0">No</button></div>'+
-      '<div class="yn"><p>Was there an extra “ơ” between the two consonants?<span class="vi">Có chèn "ơ" giữa hai phụ âm không?</span></p><button class="opt" data-v="1">No, clean</button><button class="opt" data-v="0">Yes, extra ơ</button></div>';
+      '<div class="yn"><p>Was there an extra “ơ” between the two consonants?<span class="vi">Có chèn "ơ" giữa hai phụ âm không?</span></p><button class="opt" data-v="1">No, it was clean</button><button class="opt" data-v="0">Yes, extra ơ</button></div>';
   } else if(pc.step==="done"){
-    var ok=x.firstOk||x.fixed;
-    b.innerHTML='<span class="who">Word '+n+'</span><p class="fb">'+(ok?'✓ ':'✗ ')+'The word was <b>'+x.target+'</b>'+(x.fixed?' · fixed on the second try 👏':'')+(!ok?' · keep practising':'')+'</p>'+
-      '<div class="row"><button class="say" data-w="'+x.target+'">Model</button>'+(SR?'<button class="mic" id="pcMic">🎤 '+esc(spk())+': check with the phone</button>':'')+'</div><p class="heard" id="pcHeard"></p>'+
+    var ok=x.firstOk||x.fixed, notes=[];
+    notes.push(ok?(x.fixed?"understood on the 2nd try 👏":"understood"):"not understood");
+    if(x.r!==null) notes.push(x.r?"clear /r/":"/r/ not clear");
+    if(x.noV!==null) notes.push(x.noV?"no extra ơ":"extra ơ");
+    b.innerHTML=bar("You both")+'<p class="inst">'+(ok?'✓':'✗')+' The word was <b>'+x.target+'</b></p><p class="hint2">'+notes.join(" · ")+'</p>'+
+      '<div class="row"><button class="say" data-w="'+x.target+'">Hear the model</button>'+(SR?'<button class="mic" id="pcMic">🎤 '+spk()+', say “'+x.target+'” to the phone</button>':'')+'</div><p class="heard" id="pcHeard"></p>'+
       '<button class="big" id="pcNext">'+(pc.i+1<PER?'Next word →':(pc.turn===0?'Swap roles →':'See results'))+'</button>';
   } else if(pc.step==="swap"){
-    b.innerHTML='<p class="fb">🔄 Swap! Now <b>'+esc(pc.names[1])+'</b> speaks and <b>'+esc(pc.names[0])+'</b> listens.<span class="vi">Đổi vai.</span></p><button class="big" id="pcCont">Continue</button>';
+    b.innerHTML='<p class="inst">🔄 Swap roles!</p><p class="hint2">Now <b>'+esc(pc.names[1])+'</b> speaks and <b>'+esc(pc.names[0])+'</b> listens. Give the phone to '+esc(pc.names[1])+'.<span class="vi">Đổi vai, đưa máy cho bạn kia.</span></p><button class="big" id="pcCont">'+esc(pc.names[1])+' has the phone →</button>';
   } else {
     var rows=[0,1].map(function(t){ var L=pc.items[t], wr=L.filter(function(z){ return hasR(z.target); });
       function c(fn,list){ return list.filter(fn).length+"/"+list.length; }
       var tried=L.filter(function(z){ return !z.firstOk; }), mics=L.filter(function(z){ return z.mic!==null; });
       return '<tr><th>'+esc(pc.names[t])+'</th><td class="n">'+c(function(z){ return z.r; },wr)+'</td><td class="n">'+c(function(z){ return z.noV; },wr)+'</td><td class="n">'+c(function(z){ return z.firstOk; },L)+'</td><td class="n">'+(tried.length?c(function(z){ return z.fixed; },tried):"–")+'</td><td class="n">'+(mics.length?c(function(z){ return z.mic; },mics):"–")+'</td></tr>'; }).join("");
-    b.innerHTML='<p class="fb">Results — show your teacher.<span class="vi">Kết quả, đưa giáo viên xem.</span></p><div style="overflow-x:auto;width:100%"><table class="sum"><tr><th></th><th>Clear /r/</th><th>No extra ơ</th><th>Partner understood</th><th>Fixed after feedback</th><th>Phone ✓</th></tr>'+rows+'</table></div>'+
-      '<button class="big ghost" id="pcAgain">New round</button>';
+    b.innerHTML='<p class="inst">Results: show your teacher.<span class="vi">Kết quả, đưa giáo viên xem.</span></p><div style="overflow-x:auto;width:100%"><table class="sum"><tr><th></th><th>Clear /r/</th><th>No extra ơ</th><th>Partner understood</th><th>Fixed after feedback</th><th>Phone ✓</th></tr>'+rows+'</table></div>'+
+      '<p class="hint2">5/6 means 5 of 6 words. “–” means it didn\'t happen.<span class="vi">5/6 là 5 trên 6 từ. Dấu – là không có lượt nào.</span></p><button class="big ghost" id="pcAgain">New round</button>';
   }
 }
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -809,12 +896,13 @@ $("pcBox").addEventListener("click",function(e){
   if(t.id==="pcAgain"){ pcIntro(); return; }
   if(!pc) return;
   if(t.id==="pcSaid"){ pc.step="pick"; pcRender(); return; }
+  if(t.id==="pcBack"){ pc.step="speak"; pcRender(); return; }
   var pk=t.closest("[data-pk]");
   if(pk && pc.step==="pick"){
     x.tries++;
     var right=pk.dataset.pk===x.target;
     if(right){ if(x.tries===1) x.firstOk=true; else x.fixed=true; pc.step=hasR(x.target)?"check":"done"; if(!hasR(x.target)){ x.r=null; x.noV=null; } }
-    else if(x.tries<2){ pc.step="speak"; }
+    else if(x.tries<2){ pc.step="retry"; }
     else pc.step="done";
     pcRender(); return;
   }
@@ -826,7 +914,7 @@ $("pcBox").addEventListener("click",function(e){
     return;
   }
   if(t.id==="pcMic"){
-    t.classList.add("on"); $("pcHeard").innerHTML="Listening…";
+    t.classList.add("on"); $("pcHeard").className="heard"; $("pcHeard").innerHTML="● Listening… say “"+x.target+"” now";
     listen(x.target,function(res){ t.classList.remove("on"); var h=heardHtml(x.target,res); if(res.alts) x.mic=h.ok; $("pcHeard").className="heard "+(res.alts?(h.ok?"ok":"no"):""); $("pcHeard").innerHTML=h.html; });
     return;
   }
@@ -840,23 +928,58 @@ $("pcBox").addEventListener("click",function(e){
 });
 pcIntro();
 
-// ---------- homework recorder (stays on the device) ----------
-var mrec=null, chunks=[];
-$("recBtn").addEventListener("click",function(){
-  var btn=this;
-  if(mrec && mrec.state==="recording"){ mrec.stop(); return; }
-  if(!navigator.mediaDevices || !window.MediaRecorder){ $("recNote").textContent="This browser can't record. Use the Zalo voice message directly."; return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-    chunks=[]; mrec=new MediaRecorder(stream);
-    mrec.ondataavailable=function(e){ if(e.data.size) chunks.push(e.data); };
-    mrec.onstop=function(){
-      stream.getTracks().forEach(function(tr){ tr.stop(); });
-      var a=$("recAudio"); a.src=URL.createObjectURL(new Blob(chunks,{type:mrec.mimeType||"audio/webm"})); a.hidden=false;
-      btn.textContent="🎙 Record again"; btn.classList.remove("ghost");
-    };
-    mrec.start(); btn.textContent="■ Stop"; btn.classList.add("ghost");
-  }).catch(function(){ $("recNote").textContent="Please allow the microphone, then try again."; });
-});
+// ---------- recorders (stay on the device) ----------
+// Each recorder always shows its state: ready, asking for the mic, recording (blinking dot,
+// timer, live level bars), done (length + player) or an error with what to do next.
+var active=null;
+function fmt(sec){ sec=Math.floor(sec); return Math.floor(sec/60)+":"+("0"+sec%60).slice(-2); }
+function makeRecorder(root){
+  var btn=root.querySelector(".recbtn"), st=root.querySelector(".rstate"), meter=root.querySelector(".meter"), au=root.querySelector("audio");
+  var max=+root.dataset.max||90, mr=null, stream=null, ctx=null, an=null, raf=0, t0=0, chunks=[], loud=0;
+  meter.innerHTML=new Array(24).join("<i></i>")+"<i></i>";
+  var bars=meter.querySelectorAll("i");
+  function set(state, html){ root.dataset.state=state; st.innerHTML=html; }
+  set("idle", st.innerHTML);
+  function tick(){
+    var sec=(performance.now()-t0)/1000;
+    if(an){
+      var d=new Uint8Array(an.fftSize); an.getByteTimeDomainData(d);
+      var peak=0; for(var i=0;i<d.length;i++) peak=Math.max(peak,Math.abs(d[i]-128)/128);
+      if(peak>.06) loud=sec;
+      for(var j=bars.length-1;j>0;j--) bars[j].style.height=bars[j-1].style.height;
+      bars[0].style.height=Math.max(3,Math.min(36,peak*90))+"px";
+    }
+    var quiet = sec-loud>3 ? ' <span class="hint2">We can\'t hear you. Speak louder or move closer.</span>' : '';
+    st.innerHTML='<span class="dot"></span>Recording '+fmt(sec)+' / '+fmt(max)+quiet;
+    if(sec>=max){ stop(); return; }
+    raf=requestAnimationFrame(tick);
+  }
+  function stop(){ if(mr && mr.state==="recording") mr.stop(); }
+  function cleanup(){ cancelAnimationFrame(raf); if(stream) stream.getTracks().forEach(function(tr){ tr.stop(); }); if(ctx) try{ ctx.close(); }catch(e){} stream=ctx=an=null; if(active===api) active=null; }
+  function start(){
+    if(!navigator.mediaDevices || !window.MediaRecorder){ set("err","This browser can't record. Open the page in Chrome or Safari, or use the Zalo voice message."); return; }
+    if(active && active!==api) active.stop();
+    set("ask","Allow the microphone in the pop-up…");
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+      stream=s; chunks=[]; active=api;
+      try{ var AC=window.AudioContext||window.webkitAudioContext; ctx=new AC(); an=ctx.createAnalyser(); an.fftSize=512; ctx.createMediaStreamSource(s).connect(an); }catch(e){ an=null; }
+      mr=new MediaRecorder(s);
+      mr.ondataavailable=function(e){ if(e.data.size) chunks.push(e.data); };
+      mr.onstop=function(){
+        var len=(performance.now()-t0)/1000; cleanup();
+        au.src=URL.createObjectURL(new Blob(chunks,{type:mr.mimeType||"audio/webm"})); au.hidden=false;
+        btn.textContent="● Record again";
+        set("done","✓ Recorded "+fmt(len)+". Tap ▶ below to listen.");
+      };
+      au.hidden=true; mr.start(); t0=performance.now(); loud=0;
+      btn.textContent="■ Stop recording";
+      set("rec",""); tick();
+    }).catch(function(){ set("err","The microphone is blocked. Allow it in your browser settings, then try again."); });
+  }
+  btn.addEventListener("click",function(){ if(root.dataset.state==="rec") stop(); else start(); });
+  var api={stop:stop}; return api;
+}
+document.querySelectorAll(".recorder").forEach(makeRecorder);
 })();
 </script>
 </body>
