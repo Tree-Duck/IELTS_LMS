@@ -1,19 +1,23 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Dạy demo /br/ /kr/ /tr/</title>
+<title>Pronunciation demo /br/ /kr/ /tr/</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;500;600&family=Noto+Sans:wght@500;700&display=swap">
-<!-- Demo lesson page (Global Success 10, Unit 1). Self-contained: delete this file and the
-     "Dạy demo" link in mouth-map.html to remove it. Audio comes from /audio/mm and /audio/demo. -->
+<!-- Demo lesson page (Global Success 10, Unit 1). Self-contained on purpose: the mouth drawing
+     code is copied from mouth-map.html, so deleting this file, /audio/demo/ and the "Dạy demo"
+     link in mouth-map.html removes the demo completely. -->
 <style>
 :root{
   --bg:#EDF5F1; --surface:#FFFFFF; --surface-2:#F5FAF7; --ink:#2A2233; --muted:#665F70; --line:#D3E1DA;
   --accent:#D9557A; --accent-soft:#FBE3EA; --ok:#2E9E7C; --ok-soft:#DAF2E9; --bad:#C2413B; --bad-soft:#FBE4E2;
   --br:#2F6FD0; --br-soft:#E1ECFB; --cr:#2E9E5B; --cr-soft:#DDF3E6; --tr:#D9731F; --tr-soft:#FDEBDB;
+  --voice:#E7A91F; --nasal:#3F8FCB; --air:#2E9E7C;
+  --skin:#F8D6C1; --skin-edge:#E2A88A; --lip:#E68391; --cavity:#56385C; --tongue:#F2849E; --tongue-edge:#C24F6C;
+  --tooth:#FFFDF6; --tooth-edge:#CBBFAE; --velum:#EC98AE;
   --display:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;
   --body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   --ipa:"Noto Sans","Segoe UI","Arial Unicode MS",sans-serif;
@@ -33,49 +37,108 @@
   --br:#7FAEF5; --br-soft:#1C2A42; --cr:#6FD39A; --cr-soft:#173526; --tr:#F2A35E; --tr-soft:#3D2A17;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding:20px 16px 48px}
 .wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,42px);line-height:1.05;margin:0}
 h1 .br{color:var(--br)} h1 .cr{color:var(--cr)} h1 .tr{color:var(--tr)}
 header p{margin:6px 0 0;color:var(--muted)}
-.back{font:500 14px var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:7px 15px;text-decoration:none}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.back,.vibtn{font:500 14px var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:7px 15px;text-decoration:none}
+.vibtn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+nav.jump{display:flex;gap:6px;flex-wrap:wrap}
+nav.jump a{font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-decoration:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;scroll-margin-top:12px}
 h2{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.2;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
+.vi{display:none;color:var(--muted);font-style:italic;font-size:.92em}
+html.show-vi .vi{display:block}
+html.show-vi span.vi,html.show-vi small.vi{display:inline}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,a:focus-visible{outline:3px solid var(--br);outline-offset:2px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--br);outline-offset:2px}
 .say{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:8px 14px;font-weight:500;display:inline-block}
 .say::before{content:"🔊";font-size:.85em;margin-right:6px}
 .say.playing{border-color:var(--accent);background:var(--accent-soft)}
 .say b{font-weight:700}
 .g-br b{color:var(--br)} .g-cr b{color:var(--cr)} .g-tr b{color:var(--tr)}
+.big{font:600 16px var(--body);border:none;border-radius:14px;padding:11px 20px;background:var(--accent);color:#fff}
+.big.ghost{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--line)}
+.big:disabled{opacity:.5;cursor:default}
+.board{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--surface-2);border:1px dashed var(--line);font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* mouth model */
+.model{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:860px){.model{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+.stagebox{display:flex;flex-direction:column;gap:10px}
+.diagram{position:relative;background:var(--surface-2);border-radius:18px;border:1px solid var(--line);overflow:hidden}
+.diagram svg{display:block;width:100%;height:auto}
+.front{position:absolute;left:10px;bottom:8px;margin:0;text-align:center}
+.front svg{width:96px;height:80px;display:block;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.front figcaption{font-size:11.5px;color:var(--muted)}
+@media (max-width:600px){.front svg{width:68px;height:57px}}
+.strip{min-height:56px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px 12px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.strip .hint{color:var(--muted);font-size:14px}
+.strip .tk{display:inline-flex;flex-direction:column;align-items:center;padding:4px 8px;border-radius:10px;transition:background .15s}
+.strip .tk b{font:800 24px var(--display);line-height:1.1}
+.strip .tk small{font-family:var(--ipa);color:var(--muted);font-size:13px}
+.strip .tk.now{background:var(--accent-soft)}
+.strip .tk.bad b{color:var(--bad)}
+.strip .cap{flex-basis:100%;font-size:14px;color:var(--muted)}
+.panel{display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
+.sbtns{display:flex;gap:8px;flex-wrap:wrap}
+.sbtn{font:700 22px var(--ipa);min-width:64px;padding:8px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface)}
+.sbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.info ol{margin:0;padding-left:1.3em}
+.info li{margin:3px 0}
+.clrow{display:flex;flex-direction:column;gap:8px}
+.cl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;border-radius:14px}
+.cl.g-br{background:var(--br-soft)} .cl.g-cr{background:var(--cr-soft)} .cl.g-tr{background:var(--tr-soft)}
+.cl .nm{font:800 22px var(--display);min-width:40px}
+.g-br .nm{color:var(--br)} .g-cr .nm{color:var(--cr)} .g-tr .nm{color:var(--tr)}
+.mini{font:600 14px var(--body);border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 11px}
+.mini.wrong{color:var(--bad)}
+
+/* three steps */
 .steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
-.col{border-radius:18px;padding:14px;border:1.5px solid transparent}
+.col{border-radius:18px;padding:14px}
 .col.g-br{background:var(--br-soft)} .col.g-cr{background:var(--cr-soft)} .col.g-tr{background:var(--tr-soft)}
 .col h3{font-family:var(--ipa);font-size:30px;margin:0 0 8px;line-height:1}
 .g-br h3{color:var(--br)} .g-cr h3{color:var(--cr)} .g-tr h3{color:var(--tr)}
 .ladder{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:10px}
 .ladder .arrow{color:var(--muted)}
-.col p{margin:6px 0 0;font-size:14.5px}
-.col a{color:inherit}
 .tips{margin:14px 0 0;padding-left:1.3em}
 .tips li{margin:4px 0}
-.board{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--surface-2);border:1px dashed var(--line);font-size:15px}
-.words{display:flex;flex-wrap:wrap;gap:8px}
 .grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .grp .tag{font-family:var(--ipa);font-weight:700;min-width:44px}
+
+/* quiz, pair check, say it */
 .quiz{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
-.qhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.big{font:600 16px var(--body);border:none;border-radius:14px;padding:11px 20px;background:var(--accent);color:#fff}
-.big.ghost{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--line)}
+.prog{color:var(--muted);font-size:14px}
 .opts{display:flex;flex-wrap:wrap;gap:10px}
 .opt{font:600 20px var(--body);min-width:120px;padding:14px 20px;border-radius:16px;border:2px solid var(--line);background:var(--surface)}
 .opt.right{border-color:var(--ok);background:var(--ok-soft)}
 .opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
-.opt:disabled{cursor:default}
-.fb{min-height:1.5em;font-weight:500}
-.prog{color:var(--muted);font-size:14px}
+.fb{min-height:1.5em;font-weight:500;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 15px var(--body);border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 13px}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.mic{font:700 18px var(--body);border:none;border-radius:999px;padding:14px 24px;background:var(--ink);color:var(--surface)}
+.mic.on{background:var(--bad);color:#fff}
+.heard{font-size:18px;margin:0}
+.heard b{font-size:22px}
+.heard.ok b{color:var(--ok)} .heard.no b{color:var(--bad)}
+.pc{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.pc .who{font:800 15px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.pc .secret{font:800 clamp(40px,10vw,64px) var(--display);line-height:1}
+.pc input{font:inherit;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);width:min(100%,220px)}
+.yn{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.yn p{margin:0;flex-basis:100%;font-weight:500}
+.sum{width:100%;border-collapse:collapse;font-size:15px}
+.sum th,.sum td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+.sum td.n{font-weight:700;text-align:center}
 .sp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
 .pair{display:flex;align-items:center;gap:8px;padding:10px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
 .pair .n{font-weight:700;color:var(--muted);width:1.4em}
@@ -91,74 +154,172 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--br);outline-offset:
 .dgt .l{font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
 .dgt .ipa{font-family:var(--ipa);color:var(--accent)}
 .dgt a{font-size:14px;color:var(--ink)}
+.hw ol{margin:0 0 12px;padding-left:1.3em}
+.hw li{margin:5px 0}
+.qa{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.qa .q{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.qa .q span{flex:1 1 220px}
+.rec{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rec audio{max-width:100%}
+.check{margin:0;padding-left:0;list-style:none}
+.check li{padding:6px 0;border-bottom:1px solid var(--line)}
+.check li::before{content:"☐ ";color:var(--muted)}
 .foot{color:var(--muted);font-size:13.5px}
+.waves path{stroke:var(--voice);stroke-width:3;fill:none;stroke-linecap:round;opacity:0}
+.waves.on path{animation:wave 1s ease-in-out infinite}
+.waves.on path:nth-child(2){animation-delay:.15s}
+.waves.on path:nth-child(3){animation-delay:.3s}
+@keyframes wave{0%,100%{opacity:.15}50%{opacity:1}}
+.folds.on{animation:buzz .09s linear infinite}
+@keyframes buzz{0%{transform:translateY(0)}50%{transform:translateY(.8px)}100%{transform:translateY(0)}}
+.glow circle{fill:none;stroke-width:3;transition:opacity .25s}
+.glow .close{stroke:var(--voice);fill:rgba(231,169,31,.35)}
+.glow .narrow{stroke:#fff;stroke-dasharray:4 3;animation:spin 1.2s linear infinite;transform-box:fill-box;transform-origin:center}
+.glow .near{stroke:#fff;stroke-dasharray:1 4;stroke-linecap:round}
+@keyframes spin{to{transform:rotate(360deg)}}
+.arrow{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;transition:opacity .2s}
+.arrow.oral{stroke:var(--air)}
+.arrow.nose{stroke:var(--nasal)}
+.arrow.puff{animation:puff .7s ease-out 2}
+@keyframes puff{0%{opacity:0;transform:translateX(8px)}30%{opacity:1}100%{opacity:0;transform:translateX(-10px)}}
+.lbl text{font:600 13px var(--body);fill:var(--ink)}
+.lbl line{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 3}
+.lbl{transition:opacity .2s}
+.hide-labels .lbl{opacity:0}
+@media (prefers-reduced-motion: reduce){
+  .waves.on path,.folds.on,.glow .narrow,.arrow.puff{animation:none}
+  .waves.on path{opacity:.8}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>Dạy demo <span class="br">/br/</span> <span class="cr">/kr/</span> <span class="tr">/tr/</span></h1>
-      <p>Tiếng Anh 10 Global Success · Unit 1 Family Life · Pronunciation, trang 9</p>
+      <h1>Pronunciation <span class="br">/br/</span> <span class="cr">/kr/</span> <span class="tr">/tr/</span></h1>
+      <p>English 10 Global Success · Unit 1 Family Life · Pronunciation, page 9</p>
     </div>
-    <a class="back" href="/mouth-map.html">← Mouth Map</a>
+    <div class="hbtns">
+      <button class="vibtn" id="viBtn" aria-pressed="false" title="Hiện lời dịch tiếng Việt">VI</button>
+      <a class="back" href="/mouth-map.html">← Mouth Map</a>
+    </div>
   </header>
+  <nav class="jump" aria-label="Sections">
+    <a href="#mouth">Mouth</a><a href="#steps">3 steps</a><a href="#words">Words</a><a href="#quiz">Listen</a><a href="#point">Say &amp; point</a><a href="#sayit">Say it</a><a href="#pairs">Pair check</a><a href="#dialogue">Dialogue</a><a href="#digraphs">sh ch th</a><a href="#hw">Homework</a>
+  </nav>
 
-  <section class="card">
-    <h2>Mẹo 3 bước</h2>
-    <p class="sub">Bấm lần lượt từ trái sang phải. Nút có ký hiệu là bản thu âm đơn của người thật. Từ đầu tiên không có r, từ cuối có r: mất r là đổi từ.</p>
+  <section class="card" id="mouth">
+    <h2>Watch the mouth</h2>
+    <p class="sub">Tap a sound to see the lips and tongue and hear it. Then watch how br, cr and tr join two sounds together.<span class="vi">Bấm một âm để xem môi, lưỡi và nghe âm đó. Sau đó xem br, cr, tr nối hai âm liền nhau thế nào.</span></p>
+    <div class="model">
+      <div class="stagebox">
+        <div class="diagram">
+          <svg id="mouth" viewBox="-75 60 475 345" role="img" aria-label="Side view of the mouth">
+            <path id="head" fill="var(--skin)" stroke="var(--skin-edge)" stroke-width="2" stroke-linejoin="round"/>
+            <path id="ulip" fill="var(--lip)"/>
+            <path id="llip" fill="var(--lip)"/>
+            <path id="nasalCav" fill="var(--cavity)"/>
+            <path id="cav" fill="var(--cavity)"/>
+            <path id="velum" fill="var(--velum)" stroke="var(--tongue-edge)" stroke-width="1.5"/>
+            <path id="tongue" fill="var(--tongue)" stroke="var(--tongue-edge)" stroke-width="2" stroke-linejoin="round"/>
+            <path id="tongueHi" fill="none" stroke="#FFC2D1" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+            <path id="uTooth" d="M72,177 C71,187 74,197 78,203 C82,201 87,191 89,180 Z" fill="var(--tooth)" stroke="var(--tooth-edge)" stroke-width="1.5"/>
+            <path id="lTooth" d="M81,210 C84,212 88,220 92,234 L80,236 C79,226 79,216 81,210 Z" fill="var(--tooth)" stroke="var(--tooth-edge)" stroke-width="1.5"/>
+            <g class="folds" id="folds">
+              <path id="foldL" fill="var(--velum)" stroke="var(--tongue-edge)" stroke-width="1"/>
+              <path id="foldR" fill="var(--velum)" stroke="var(--tongue-edge)" stroke-width="1"/>
+            </g>
+            <g class="waves" id="waves"></g>
+            <path class="arrow oral" id="arMouth"/>
+            <path class="arrow nose" id="arNose" d="M52,160 L32,174 M32,166 L32,174 L40,175"/>
+            <g class="glow" id="glow"><circle id="glowC" r="8" cx="0" cy="0"/></g>
+            <g class="lbl" id="labels"></g>
+          </svg>
+          <figure class="front"><svg id="front" viewBox="0 0 120 100" role="img" aria-label="Front view of the lips"></svg><figcaption>Front</figcaption></figure>
+        </div>
+        <div class="strip" id="strip"><span class="hint">Tap a sound or a word on the right.</span></div>
+      </div>
+      <div class="panel">
+        <div>
+          <h3>Single sounds</h3>
+          <div class="sbtns" id="sbtns"></div>
+        </div>
+        <div class="info" id="info"></div>
+        <div>
+          <h3>Two sounds together</h3>
+          <div class="clrow" id="clrow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="steps">
+    <h2>3 steps</h2>
+    <p class="sub">Tap from left to right. The first word has no r, the last word has r: no r = a different word.<span class="vi">Bấm lần lượt từ trái sang phải. Từ đầu không có r, từ cuối có r: mất r là thành từ khác.</span></p>
     <div class="steps3">
       <div class="col g-br">
         <h3>br</h3>
         <div class="ladder"><button class="say" data-ph="b">/b/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="bread"><b>br</b>ead</button></div>
         <div class="ladder"><button class="say" data-w="bed">bed</button><span class="arrow">≠</span><button class="say" data-w="bread"><b>br</b>ead</button></div>
-        <p>Khẩu hình: <a href="/mouth-map.html#b">/b/</a> rồi <a href="/mouth-map.html#r">/r/</a></p>
       </div>
       <div class="col g-cr">
         <h3>cr</h3>
         <div class="ladder"><button class="say" data-ph="k">/k/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="crane"><b>cr</b>ane</button></div>
         <div class="ladder"><button class="say" data-w="cane">cane</button><span class="arrow">≠</span><button class="say" data-w="crane"><b>cr</b>ane</button></div>
-        <p>Khẩu hình: <a href="/mouth-map.html#k">/k/</a> rồi <a href="/mouth-map.html#r">/r/</a></p>
       </div>
       <div class="col g-tr">
         <h3>tr</h3>
         <div class="ladder"><button class="say" data-ph="t">/t/</button><span class="arrow">→</span><button class="say" data-ph="r">/r/</button><span class="arrow">→</span><button class="say" data-w="tree"><b>tr</b>ee</button></div>
         <div class="ladder"><button class="say" data-w="tea">tea</button><span class="arrow">≠</span><button class="say" data-w="tree"><b>tr</b>ee</button></div>
-        <p>Khẩu hình: <a href="/mouth-map.html#t">/t/</a> rồi <a href="/mouth-map.html#r">/r/</a>. Âm tr bắt đầu như t trong tea, không đọc như "tr" tiếng Việt.</p>
       </div>
     </div>
     <ol class="tips">
-      <li>Bắt đầu bằng b, c hoặc t, thật ngắn.</li>
-      <li>Chuyển ngay sang r: môi tròn, lưỡi không chạm vào đâu.</li>
-      <li>Không chèn "ơ" ở giữa.</li>
+      <li>Start with b, c or t. Make it very short.<span class="vi">Bắt đầu bằng b, c hoặc t, thật ngắn.</span></li>
+      <li>Move straight to r: round your lips, your tongue touches nothing.<span class="vi">Chuyển ngay sang r: môi tròn, lưỡi không chạm vào đâu.</span></li>
+      <li>Don't add "ơ" in the middle.<span class="vi">Không chèn "ơ" ở giữa.</span></li>
     </ol>
-    <div class="board">✓ bread · ✗ "bơ-rét" (thừa "ơ") · ✗ bed (mất r). Mất r là thành từ khác: bread ≠ bed, tree ≠ tea.</div>
+    <div class="board">✓ bread · ✗ "bơ-rét" (extra "ơ") · ✗ bed (no r). No r = a different word: bread ≠ bed, tree ≠ tea.<span class="vi">Thừa "ơ" hoặc mất r đều sai. Mất r là thành từ khác.</span></div>
   </section>
 
-  <section class="card">
-    <h2>Từ trong bài</h2>
-    <p class="sub">9 từ của bài 1 (Listen and repeat), thêm các từ dùng trong tiết. Bấm để nghe.</p>
+  <section class="card" id="words">
+    <h2>Words from the book</h2>
+    <p class="sub">The 9 words in Exercise 1 (Listen and repeat), plus words we use today. Tap to listen.<span class="vi">9 từ của bài 1, thêm các từ dùng trong tiết. Bấm để nghe.</span></p>
     <div class="grp g-br"><span class="tag" style="color:var(--br)">/br/</span><button class="say" data-w="breadwinner"><b>br</b>eadwinner</button><button class="say" data-w="breakfast"><b>br</b>eakfast</button><button class="say" data-w="brown"><b>br</b>own</button><button class="say" data-w="bread"><b>br</b>ead</button><button class="say" data-w="brother"><b>br</b>other</button><button class="say" data-demo="broken-rice"><b>br</b>oken rice</button></div>
     <div class="grp g-cr"><span class="tag" style="color:var(--cr)">/kr/</span><button class="say" data-w="crash"><b>cr</b>ash</button><button class="say" data-w="crane"><b>cr</b>ane</button><button class="say" data-w="cream"><b>cr</b>eam</button><button class="say" data-w="crab"><b>cr</b>ab</button></div>
     <div class="grp g-tr"><span class="tag" style="color:var(--tr)">/tr/</span><button class="say" data-w="track"><b>tr</b>ack</button><button class="say" data-w="tree"><b>tr</b>ee</button><button class="say" data-w="train"><b>tr</b>ain</button><button class="say" data-w="trash"><b>tr</b>ash</button></div>
   </section>
 
-  <section class="card" id="quizCard">
-    <h2>Em nghe thấy từ nào?</h2>
-    <p class="sub">8 câu giống bài Kahoot. Bấm Nghe, rồi chọn từ em nghe được. Có 2 câu đáp án là từ không có r.</p>
-    <div class="quiz" id="quiz" aria-live="polite"></div>
+  <section class="card" id="quiz">
+    <h2>Which word do you hear?</h2>
+    <p class="sub">8 questions, like the Kahoot game. Tap Listen, then choose the word you hear. In 2 questions the answer has no r.<span class="vi">8 câu giống bài Kahoot. Bấm Listen rồi chọn từ em nghe được. Có 2 câu đáp án là từ không có r.</span></p>
+    <div class="quiz" id="quizBox" aria-live="polite"></div>
   </section>
 
-  <section class="card">
+  <section class="card" id="point">
     <h2>Say &amp; point</h2>
-    <p class="sub">Bấm từng từ để nghe. Hoặc bấm "Đọc ngẫu nhiên", cả lớp chỉ vào từ vừa nghe, rồi bấm "Hiện đáp án".</p>
-    <div class="qhead" style="margin-bottom:12px"><button class="big" id="spRand">🎲 Đọc ngẫu nhiên</button><button class="big ghost" id="spShow" disabled>Hiện đáp án</button></div>
+    <p class="sub">Tap a word to hear it. Or tap "Random word": everyone points to the word they hear, then tap "Show answer".<span class="vi">Bấm từng từ để nghe. Hoặc bấm "Random word", cả lớp chỉ vào từ vừa nghe, rồi bấm "Show answer".</span></p>
+    <div class="row" style="margin-bottom:12px"><button class="big" id="spRand">🎲 Random word</button><button class="big ghost" id="spShow" disabled>Show answer</button></div>
     <div class="sp" id="sp"></div>
   </section>
 
-  <section class="card">
-    <h2>Hội thoại: bữa sáng gia đình</h2>
-    <p class="sub">Bấm từng câu để nghe. Chữ trong ngoặc là chỗ học sinh thay bằng thông tin của mình.</p>
+  <section class="card" id="sayit">
+    <h2>Say it: the phone listens</h2>
+    <p class="sub">Choose a word, tap the microphone and say it. The phone writes what it heard. Same word = ✓. If not, try again with the 3 steps.<span class="vi">Chọn từ, bấm micro rồi nói. Máy ghi ra từ nó nghe được. Đúng từ là ✓, chưa đúng thì làm lại theo 3 bước.</span></p>
+    <div class="chips" id="siWords" role="group" aria-label="Choose a word"></div>
+    <div class="row" style="margin-top:14px"><button class="mic" id="siMic">🎤 Say “<span id="siWord">bread</span>”</button></div>
+    <p class="heard" id="siOut" aria-live="polite" style="margin-top:12px"></p>
+    <p class="sub" id="siNote" style="margin:10px 0 0">The phone sometimes guesses wrong, especially in a noisy room. Your partner's ears count too.<span class="vi">Máy đôi khi đoán sai, nhất là khi lớp ồn. Tai của bạn cặp cũng quan trọng.</span></p>
+  </section>
+
+  <section class="card" id="pairs">
+    <h2>Pair check</h2>
+    <p class="sub">Work in pairs with one phone. The Speaker reads a secret word. The Listener does not look, chooses the word they heard, and checks the sounds. Then swap.<span class="vi">Làm theo cặp, một máy. Bạn nói đọc một từ bí mật. Bạn nghe không nhìn màn hình, chọn từ mình nghe được và chấm. Xong thì đổi vai.</span></p>
+    <div class="pc" id="pcBox" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="dialogue">
+    <h2>Dialogue: family breakfast</h2>
+    <p class="sub">Tap a line to listen. Change the words in brackets to talk about your family.<span class="vi">Bấm từng câu để nghe. Thay chữ trong ngoặc bằng thông tin gia đình mình.</span></p>
     <div class="dlg">
       <button class="line" data-demo="d1"><span class="who">A</span><span>Who makes <b class="br">br</b>eakfast in your family?</span></button>
       <button class="line" data-demo="d2"><span class="who">B</span><span>My <i>(mum / dad / grandma)</i> makes <b class="br">br</b>eakfast.</span></button>
@@ -167,29 +328,68 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--br);outline-offset:
       <button class="line" data-demo="d5"><span class="who">A</span><span>Who takes out the <b class="tr">tr</b>ash?</span></button>
       <button class="line" data-demo="d6"><span class="who">B</span><span>My <b class="br">br</b>other takes out the <b class="tr">tr</b>ash. <i>/ I do.</i></span></button>
     </div>
-    <div class="board">Ngân hàng từ: bread · <b style="color:var(--br)">br</b>oken rice (cơm tấm) · sticky rice (xôi) · noodle soup (phở, hủ tiếu) · eggs</div>
+    <div class="board">Word bank: bread · <b style="color:var(--br)">br</b>oken rice · sticky rice · noodle soup · eggs<span class="vi">broken rice = cơm tấm · sticky rice = xôi · noodle soup = phở, hủ tiếu</span></div>
   </section>
 
-  <section class="card">
-    <h2>Chữ ghép: hai chữ, một âm</h2>
-    <p class="sub">Khác với br, cr, tr (hai âm đọc liền), các cặp chữ dưới đây chỉ đọc thành một âm. Bấm từ để nghe, bấm "Xem khẩu hình" để mở âm đó trong Mouth Map.</p>
+  <section class="card" id="digraphs">
+    <h2>Two letters, one sound</h2>
+    <p class="sub">br, cr and tr are two sounds. These letter pairs make only one sound. Tap the word to listen, tap "See the mouth" to open the sound in Mouth Map.<span class="vi">br, cr, tr là hai âm. Các cặp chữ dưới đây chỉ là một âm. Bấm từ để nghe, bấm "See the mouth" để mở khẩu hình trong Mouth Map.</span></p>
     <div class="dg">
-      <div class="dgt"><span class="l">sh</span><span class="ipa">/ʃ/</span><button class="say" data-w="ship"><b>sh</b>ip</button><a href="/mouth-map.html#ʃ">Xem khẩu hình</a></div>
-      <div class="dgt"><span class="l">ch</span><span class="ipa">/tʃ/</span><button class="say" data-w="chair"><b>ch</b>air</button><a href="/mouth-map.html#tʃ">Xem khẩu hình</a></div>
-      <div class="dgt"><span class="l">th</span><span class="ipa">/θ/ · /ð/</span><button class="say" data-w="think"><b>th</b>ink</button><button class="say" data-w="this"><b>th</b>is</button><a href="/mouth-map.html#θ">Xem khẩu hình</a></div>
-      <div class="dgt"><span class="l">ph</span><span class="ipa">/f/</span><button class="say" data-demo="phone"><b>ph</b>one</button><a href="/mouth-map.html#f">Xem khẩu hình</a></div>
-      <div class="dgt"><span class="l">ng</span><span class="ipa">/ŋ/</span><button class="say" data-w="sing">si<b>ng</b></button><a href="/mouth-map.html#ŋ">Xem khẩu hình</a></div>
-      <div class="dgt"><span class="l">ck</span><span class="ipa">/k/</span><button class="say" data-w="back">ba<b>ck</b></button><a href="/mouth-map.html#k">Xem khẩu hình</a></div>
+      <div class="dgt"><span class="l">sh</span><span class="ipa">/ʃ/</span><button class="say" data-w="ship"><b>sh</b>ip</button><a href="/mouth-map.html#ʃ">See the mouth</a></div>
+      <div class="dgt"><span class="l">ch</span><span class="ipa">/tʃ/</span><button class="say" data-w="chair"><b>ch</b>air</button><a href="/mouth-map.html#tʃ">See the mouth</a></div>
+      <div class="dgt"><span class="l">th</span><span class="ipa">/θ/ · /ð/</span><button class="say" data-w="think"><b>th</b>ink</button><button class="say" data-w="this"><b>th</b>is</button><a href="/mouth-map.html#θ">See the mouth</a></div>
+      <div class="dgt"><span class="l">ph</span><span class="ipa">/f/</span><button class="say" data-demo="phone"><b>ph</b>one</button><a href="/mouth-map.html#f">See the mouth</a></div>
+      <div class="dgt"><span class="l">ng</span><span class="ipa">/ŋ/</span><button class="say" data-w="sing">si<b>ng</b></button><a href="/mouth-map.html#ŋ">See the mouth</a></div>
+      <div class="dgt"><span class="l">ck</span><span class="ipa">/k/</span><button class="say" data-w="back">ba<b>ck</b></button><a href="/mouth-map.html#k">See the mouth</a></div>
     </div>
   </section>
 
-  <p class="foot">Giọng đọc từ và câu: Emma (Microsoft, neural). Âm đơn: bản thu trên Wikimedia Commons, nguồn ghi ở cuối trang Mouth Map.</p>
+  <section class="card hw" id="hw">
+    <h2>Homework</h2>
+    <p class="sub">About 15 minutes at home. No login needed.<span class="vi">Khoảng 15 phút ở nhà. Không cần đăng nhập.</span></p>
+    <ol>
+      <li>Listen to the 3 questions and the sample answers.<span class="vi">Nghe 3 câu hỏi và câu trả lời mẫu.</span></li>
+      <li>Record your own answers below and listen back. Record again until you are happy.<span class="vi">Tự thu câu trả lời của mình ở dưới rồi nghe lại. Thu lại tới khi thấy ổn.</span></li>
+      <li>Check the 9 words with <a href="#sayit">Say it</a>. Take a screenshot of your best result.<span class="vi">Kiểm tra 9 từ bằng Say it, chụp màn hình kết quả tốt nhất.</span></li>
+      <li>Send a voice message (about 30 seconds) answering the 3 questions to your teacher or your group of 4 on Zalo.<span class="vi">Gửi tin nhắn thoại khoảng 30 giây trả lời 3 câu hỏi cho giáo viên hoặc nhóm 4 bạn trên Zalo.</span></li>
+      <li>Your buddy listens and replies ✅ (all good) or 🔁 (try again), using the checklist.<span class="vi">Bạn cặp nghe rồi trả lời ✅ (đạt) hoặc 🔁 (làm lại) theo bảng kiểm.</span></li>
+    </ol>
+    <div class="qa">
+      <div class="q"><span>1. Who makes <b>br</b>eakfast in your family?</span><button class="say" data-demo="d1">Question</button><button class="say" data-demo="d2">Sample answer</button></div>
+      <div class="q"><span>2. What do you have for <b>br</b>eakfast?</span><button class="say" data-demo="d3">Question</button><button class="say" data-demo="d4">Sample answer</button></div>
+      <div class="q"><span>3. Who takes out the <b>tr</b>ash?</span><button class="say" data-demo="d5">Question</button><button class="say" data-demo="d6">Sample answer</button></div>
+    </div>
+    <div class="rec">
+      <button class="big" id="recBtn">🎙 Record</button>
+      <audio id="recAudio" controls hidden></audio>
+      <span class="sub" id="recNote" style="margin:0">Your recording stays on this phone.<span class="vi">Bản thu chỉ nằm trên máy này.</span></span>
+    </div>
+    <div class="board">
+      <b>Buddy checklist</b>
+      <ul class="check">
+        <li>I can hear the /r/ sound.<span class="vi">Có phát âm âm /r/.</span></li>
+        <li>No extra "ơ" between the two consonants.<span class="vi">Không chèn nguyên âm giữa hai phụ âm.</span></li>
+        <li>I understand every word.<span class="vi">Người nghe xác định đúng từ.</span></li>
+        <li>After my feedback, my buddy fixed it.<span class="vi">Tự sửa được sau phản hồi.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="foot">Words and sentences: Emma voice (Microsoft, neural). Single sounds: recordings from Wikimedia Commons, credits at the bottom of Mouth Map.</p>
 </div>
 
 <script>
 (function(){
 "use strict";
 var $=function(id){ return document.getElementById(id); };
+
+// ---------- VI toggle ----------
+function setVi(on){ document.documentElement.classList.toggle("show-vi",on); $("viBtn").setAttribute("aria-pressed",on?"true":"false"); try{ localStorage.setItem("demo_vi",on?"1":"0"); }catch(e){} }
+var viOn=false; try{ viOn=localStorage.getItem("demo_vi")==="1"; }catch(e){}
+setVi(viOn);
+$("viBtn").addEventListener("click",function(){ viOn=!viOn; setVi(viOn); });
+
+// ---------- audio ----------
 var player=new Audio(), playingEl=null;
 function src(el){
   if(el.dataset.w) return "/audio/mm/w/"+el.dataset.w+".mp3";
@@ -200,52 +400,317 @@ function mark(el){ if(playingEl) playingEl.classList.remove("playing"); playingE
 player.addEventListener("ended",function(){ mark(null); });
 function play(url, el){ try{ player.pause(); player.src=url; mark(el||null); var p=player.play(); if(p&&p.catch) p.catch(function(){ mark(null); }); }catch(e){} }
 function word(w){ play("/audio/mm/w/"+w+".mp3"); }
-
 document.addEventListener("click",function(e){
   var b=e.target.closest("[data-w],[data-ph],[data-demo]");
-  if(b && !b.closest("#quiz")) play(src(b), b);
+  if(b) play(src(b), b);
 });
 
-// ----- quiz: the 8 Kahoot items from the lesson plan -----
+// ---------- mouth model (drawing code copied from mouth-map.html) ----------
+function T(t,b,f,k,r,u){ u = u || [t[0]+4, t[1]+11]; return [t[0],t[1],b[0],b[1],f[0],f[1],k[0],k[1],r[0],r[1],u[0],u[1]]; }
+function P(o){ return Object.assign({jaw:.3,round:0,spread:.15,close:0,ld:0,velum:0,tg:null}, o); }
+
+var TG = {
+  restLow: T([99,211],[122,203],[158,195],[200,198],[236,236],[103,222]),
+  schwa:   T([100,222],[124,208],[162,194],[204,196],[236,238]),
+  dental:  T([71,208],[92,203],[140,199],[195,201],[236,238],[80,214]),
+  alv:     T([97,183],[115,186],[150,194],[196,200],[236,238],[104,195]),
+  lat:     T([97,183],[115,187],[152,198],[198,190],[240,240],[104,195]),
+  sib:     T([98,187],[114,184],[150,193],[196,200],[236,238],[104,198]),
+  post:    T([102,196],[123,175],[155,186],[198,198],[236,238],[107,207]),
+  postStop:T([101,192],[122,170],[155,182],[198,198],[236,238],[106,204]),
+  velar:   T([102,217],[125,209],[165,190],[220,159],[240,228],[106,228]),
+  velarN:  T([102,217],[125,209],[168,192],[224,172],[242,228],[106,228]),
+  retro:   T([120,181],[134,195],[162,190],[200,196],[248,236],[111,206]),
+  pal:     T([100,218],[122,196],[160,162],[205,184],[232,240],[104,228]),
+  labvel:  T([102,218],[124,210],[165,194],[213,166],[242,232],[106,228]),
+  i:  T([100,218],[122,194],[160,164],[205,186],[230,244]),
+  I:  T([100,219],[124,198],[163,173],[206,190],[232,242]),
+  e:  T([100,224],[124,205],[160,187],[205,196],[234,240]),
+  ae: T([100,236],[124,224],[158,210],[204,208],[238,244]),
+  V:  T([100,228],[126,214],[165,200],[205,200],[242,244]),
+  A:  T([100,236],[126,228],[165,218],[208,208],[250,248]),
+  O:  T([102,232],[128,222],[168,208],[210,194],[248,244]),
+  U:  T([102,222],[126,210],[168,194],[208,174],[242,236]),
+  u:  T([102,220],[126,210],[168,190],[212,164],[242,232]),
+  a:  T([100,234],[125,224],[162,214],[205,210],[244,246]),
+  o:  T([102,226],[127,216],[168,200],[210,182],[244,238])
+};
+var PO = {
+  schwa: P({jaw:.35,tg:TG.schwa}),
+  bilab: P({jaw:.04,close:1,tg:TG.restLow}),
+  bilabN:P({jaw:.04,close:1,velum:1,tg:TG.restLow}),
+  labden:P({jaw:.12,ld:1,tg:TG.restLow}),
+  dental:P({jaw:.22,tg:TG.dental}),
+  alv:   P({jaw:.08,tg:TG.alv}),
+  alvN:  P({jaw:.08,velum:1,tg:TG.alv}),
+  lat:   P({jaw:.12,tg:TG.lat}),
+  sib:   P({jaw:.05,spread:.35,tg:TG.sib}),
+  post:  P({jaw:.1,round:.6,tg:TG.post}),
+  postStop:P({jaw:.08,round:.6,tg:TG.postStop}),
+  velar: P({jaw:.15,tg:TG.velar}),
+  velarN:P({jaw:.15,velum:1,tg:TG.velarN}),
+  retro: P({jaw:.2,round:.45,tg:TG.retro}),
+  rhot:  P({jaw:.25,round:.4,tg:TG.retro}),
+  pal:   P({jaw:.1,spread:.5,tg:TG.pal}),
+  labvel:P({jaw:.1,round:1,spread:0,tg:TG.labvel}),
+  glot:  P({jaw:.35,tg:TG.schwa}),
+  i:  P({jaw:.1,spread:1,tg:TG.i}),
+  I:  P({jaw:.2,spread:.5,tg:TG.I}),
+  e:  P({jaw:.4,spread:.4,tg:TG.e}),
+  ae: P({jaw:.9,spread:.6,tg:TG.ae}),
+  V:  P({jaw:.55,spread:.1,tg:TG.V}),
+  A:  P({jaw:.9,spread:.1,tg:TG.A}),
+  O:  P({jaw:.7,round:.6,spread:0,tg:TG.O}),
+  U:  P({jaw:.25,round:.5,spread:0,tg:TG.U}),
+  u:  P({jaw:.15,round:1,spread:0,tg:TG.u}),
+  a:  P({jaw:.85,spread:.2,tg:TG.a}),
+  o:  P({jaw:.45,round:.8,spread:0,tg:TG.o})
+};
+
+// contact points
+var CP = {lips:[64,197], ld:[78,203], dent:[74,206], alv:[99,181], sib:[99,184], post:[123,171], retro:[121,173], pal:[160,158], vel:[220,157], velN:[224,169], labvel:[213,160], glot:[249,342]};
+
+// ---------- phoneme data ----------
+// kind: stop, fric, affr, nasal, flap, approx, lat, vowel, diph
+
+function f(n){ return Math.round(n*10)/10; }
+function crClosed(pts){
+  var n=pts.length, d="M"+f(pts[0][0])+","+f(pts[0][1]);
+  for(var i=0;i<n;i++){
+    var p0=pts[(i-1+n)%n], p1=pts[i], p2=pts[(i+1)%n], p3=pts[(i+2)%n];
+    var c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6];
+    var c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d+=" C"+f(c1[0])+","+f(c1[1])+" "+f(c2[0])+","+f(c2[1])+" "+f(p2[0])+","+f(p2[1]);
+  }
+  return d+" Z";
+}
+function crOpen(pts){
+  var n=pts.length, d="M"+f(pts[0][0])+","+f(pts[0][1]);
+  for(var i=0;i<n-1;i++){
+    var p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,n-1)];
+    d+=" C"+f(p1[0]+(p2[0]-p0[0])/6)+","+f(p1[1]+(p2[1]-p0[1])/6)+" "+f(p2[0]-(p3[0]-p1[0])/6)+","+f(p2[1]-(p3[1]-p1[1])/6)+" "+f(p2[0])+","+f(p2[1]);
+  }
+  return d;
+}
+var VEL_UP  =[212,148, 230,142,250,138,266,142, 264,150,258,154,248,156, 236,158,224,160,212,158];
+var VEL_DOWN=[212,148, 224,150,238,160,246,178, 250,186,246,192,240,188, 232,180,222,166,212,158];
+
+function render(S){
+  var dy=S.jaw*24, r=S.round, c=S.close, ld=S.ld, sx=9*ld;
+  var ULb=194+3*c, ULox=54-7*r, ULoy=184;
+  var LLt=204+dy; LLt=LLt+(ULb-LLt)*c; LLt=LLt+(201-LLt)*ld;
+  var LLox=55-7*r+sx, LLoy=LLt+9, LLix=79+sx*.2;
+  var head="M300,405 L300,130 C300,85 255,62 205,62 L150,62 C105,62 76,84 72,112 C70,124 56,130 46,140 C40,147 44,155 54,155 L62,155 C65,161 64,167 63,172"+
+    " C60,175 "+f(ULox)+",178 "+f(ULox)+","+ULoy+
+    " C"+f(ULox)+","+f(ULb-2)+" 66,"+f(ULb+1)+" 73,"+f(ULb)+
+    " L"+f(LLix)+","+f(LLt)+
+    " C"+f(70+sx)+","+f(LLt-1)+" "+f(LLox+1)+","+f(LLt+1)+" "+f(LLox)+","+f(LLoy)+
+    " C"+f(LLox-1)+","+f(LLt+17)+" "+f(60+sx*.4)+","+f(LLt+21)+" "+f(62+sx*.2)+","+f(234+dy)+
+    " C56,"+f(248+dy)+" 60,"+f(264+dy)+" 74,"+f(268+dy)+
+    " C90,"+f(272+dy)+" 104,"+f(274+dy)+" 120,"+f(277+dy)+
+    " C150,"+f(285+dy*.6)+" 174,300 180,330 L184,405 Z";
+  $("head").setAttribute("d",head);
+  $("ulip").setAttribute("d","M63,172 C60,175 "+f(ULox)+",178 "+f(ULox)+","+ULoy+" C"+f(ULox)+","+f(ULb-2)+" 66,"+f(ULb+1)+" 73,"+f(ULb)+" C72,186 70,178 66,172 Z");
+  $("llip").setAttribute("d","M"+f(LLix)+","+f(LLt)+" C"+f(70+sx)+","+f(LLt-1)+" "+f(LLox+1)+","+f(LLt+1)+" "+f(LLox)+","+f(LLoy)+
+    " C"+f(LLox-1)+","+f(LLt+14)+" "+f(62+sx*.4)+","+f(LLt+16)+" "+f(68+sx*.3)+","+f(LLt+15)+" C"+f(74+sx*.2)+","+f(LLt+12)+" 78,"+f(LLt+6)+" "+f(LLix)+","+f(LLt)+" Z");
+  $("nasalCav").setAttribute("d","M58,156 C62,147 70,140 84,136 C120,126 180,120 230,124 C252,126 264,134 268,144 L268,150 L214,150 C190,148 160,148 130,153 C108,157 88,162 70,162 C64,162 60,160 58,156 Z");
+  $("cav").setAttribute("d","M73,"+f(ULb)+" L88,190 C94,183 97,181 101,180 C107,178 112,173 118,168 C135,160 155,153 178,152 C195,152 205,154 214,156 L214,150 L268,150"+
+    " C272,190 272,240 268,290 C266,312 263,328 262,338 L262,405 L236,405 L236,346 C236,332 234,318 236,302"+
+    " C215,297 190,290 160,282 C135,275 118,"+f(266+dy*.4)+" 108,"+f(258+dy*.8)+" L94,"+f(232+dy)+" L"+f(LLix)+","+f(LLt)+" Z");
+  var v=S.velum, vp=VEL_UP.map(function(a,i){return a+(VEL_DOWN[i]-a)*v;});
+  function pr(i){ return f(vp[i])+","+f(vp[i+1]); }
+  $("velum").setAttribute("d","M"+pr(0)+" C"+pr(2)+" "+pr(4)+" "+pr(6)+" C"+pr(8)+" "+pr(10)+" "+pr(12)+" C"+pr(14)+" "+pr(16)+" "+pr(18)+" Z");
+  var g=S.tg;
+  var tpts=[[g[10],g[11]],[g[0],g[1]],[g[2],g[3]],[g[4],g[5]],[g[6],g[7]],[g[8],g[9]],[240,306],[192,296+dy*.3],[116,268+dy*.8]];
+  $("tongue").setAttribute("d",crClosed(tpts));
+  $("tongueHi").setAttribute("d",crOpen([[g[2]+6,g[3]+7],[g[4],g[5]+7],[g[6]-4,g[7]+8]]));
+  $("lTooth").setAttribute("transform","translate(0,"+f(dy)+")");
+  var gap=S.voiced?1.5:9;
+  $("foldL").setAttribute("d","M236,337 L"+f(249-gap/2)+",342 L236,347 Z");
+  $("foldR").setAttribute("d","M262,337 L"+f(249+gap/2)+",342 L262,347 Z");
+  var my=(ULb+LLt)/2;
+  $("arMouth").setAttribute("d","M44,"+f(my)+" L20,"+f(my)+" M27,"+f(my-6)+" L20,"+f(my)+" L27,"+f(my+6));
+  renderFront(S);
+}
+
+function frontSvg(S,uid){
+  var r=S.round, sp=S.spread, c=S.close, ld=S.ld;
+  var W=46+14*sp-20*r;
+  var H=c>.5?0:(ld>.5?2:(3+34*S.jaw)*(1-.25*r));
+  if(r>.5) W=Math.max(Math.min(W,H+12),18);
+  var cx=60, cy=60, out="", cid="mclip"+uid;
+  out+='<ellipse cx="60" cy="66" rx="58" ry="60" fill="var(--skin)"/>';
+  out+='<path d="M50,20 C54,26 66,26 70,20" fill="none" stroke="var(--skin-edge)" stroke-width="2" stroke-linecap="round"/>';
+  out+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2+8)+'" ry="'+f(Math.max(H/2+7,7))+'" fill="var(--lip)"/>';
+  if(H>0.8){
+    out+='<clipPath id="'+cid+'"><ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2)+'" ry="'+f(H/2)+'"/></clipPath>';
+    out+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+f(W/2)+'" ry="'+f(H/2)+'" fill="var(--cavity)"/>';
+    out+='<g clip-path="url(#'+cid+')">';
+    if(r<.7) out+='<rect x="'+f(cx-W*.32)+'" y="'+f(cy-H/2-1)+'" width="'+f(W*.64)+'" height="'+f(Math.min(8,H*.45)+1)+'" rx="2" fill="var(--tooth)"/>';
+    if(S.tongueOut) out+='<ellipse cx="'+cx+'" cy="'+f(cy+1)+'" rx="9" ry="4" fill="var(--tongue)" stroke="var(--tongue-edge)" stroke-width="1"/>';
+    else if(H>9) out+='<ellipse cx="'+cx+'" cy="'+f(cy+H/2)+'" rx="'+f(W*.34)+'" ry="'+f(H*.35)+'" fill="var(--tongue)"/>';
+    out+='</g>';
+  } else {
+    out+='<path d="M'+f(cx-W/2)+','+cy+' Q'+cx+','+(cy+2)+' '+f(cx+W/2)+','+cy+'" stroke="#B85466" stroke-width="2" fill="none" stroke-linecap="round"/>';
+  }
+  if(ld>.5) out+='<rect x="'+(cx-11)+'" y="'+(cy-6)+'" width="22" height="7" rx="2" fill="var(--tooth)" stroke="var(--tooth-edge)" stroke-width="1"/>';
+  return out;
+}
+// ---------- animation ----------
+var KEYS=["jaw","round","spread","close","ld","velum"];
+function clonePose(p){ return {jaw:p.jaw,round:p.round,spread:p.spread,close:p.close,ld:p.ld,velum:p.velum,tg:p.tg.slice()}; }
+var cur=clonePose(PO.schwa), anim=null, slow=false, voicedNow=false;
+var reduce=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function lerpPose(a,b,t){
+  var o={tg:[]}; KEYS.forEach(function(k){o[k]=a[k]+(b[k]-a[k])*t;});
+  for(var i=0;i<a.tg.length;i++) o.tg.push(a.tg[i]+(b.tg[i]-a.tg[i])*t);
+  return o;
+}
+function ease(t){ return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+function draw(){ var s=clonePose(cur); s.voiced=voicedNow; s.tongueOut=cur.tg[0]<82; render(s); }
+var seqId=0, seqTimers=[];
+function later(fn,ms){ var id=seqId, t=setTimeout(function(){ if(id===seqId) fn(); },ms); seqTimers.push(t); }
+function stopSeq(){ seqId++; seqTimers.forEach(clearTimeout); seqTimers=[]; if(anim) cancelAnimationFrame(anim.raf); anim=null; }
+function runSeq(steps,done,factor){
+  stopSeq();
+  var my=seqId, k=(factor||1)*(slow?2.2:1), i=0;
+  function next(){
+    if(my!==seqId) return;
+    if(i>=steps.length){ anim=null; if(done) done(); return; }
+    var st=steps[i++], from=clonePose(cur), to=st.pose, dur=reduce?1:Math.max(1,st.d*k), hold=reduce?0:((st.h||0)*k), t0=null;
+    if(st.on) st.on();
+    function frame(ts){
+      if(my!==seqId) return;
+      if(t0===null) t0=ts;
+      var t=Math.min(1,(ts-t0)/dur);
+      cur=lerpPose(from,to,ease(t)); draw();
+      if(t<1) anim.raf=requestAnimationFrame(frame);
+      else later(next,hold);
+    }
+    anim={raf:requestAnimationFrame(frame)};
+  }
+  next();
+}
+function renderFront(S){ $("front").innerHTML=frontSvg(S,"f"); }
+var GLOWTYPE={stop:"close",nasal:"close",approx:"near"};
+var REST=P({jaw:.1,tg:TG.restLow});
+// The four sounds of the lesson. Steps are short on purpose: grade 10, A2 English.
+var SND={
+  b:{kind:"stop",v:1,pose:"bilab",cp:"lips",ex:["bed","brown"],
+     steps:["Press your lips together.","Open them quickly.","Your throat buzzes."],
+     vi:["Mím hai môi lại.","Mở môi ra thật nhanh.","Cổ họng rung."]},
+  k:{kind:"stop",v:0,pose:"velar",cp:"vel",ex:["cup","cream"],
+     steps:["Lift the back of your tongue to the soft palate.","Let the air out with a small puff.","No buzz in your throat."],
+     vi:["Nâng cuống lưỡi chạm vòm mềm.","Thả hơi ra, có tiếng bật nhẹ.","Cổ họng không rung."]},
+  t:{kind:"stop",v:0,pose:"alv",cp:"alv",ex:["ten","tree"],
+     steps:["Touch the ridge behind your top teeth with the tip of your tongue.","Let the air out with a small puff.","Not the Vietnamese “t”: the tongue is behind the teeth, not on them."],
+     vi:["Đầu lưỡi chạm gờ lợi, ngay sau răng cửa trên.","Thả hơi ra, có tiếng bật nhẹ.","Khác chữ t tiếng Việt: lưỡi nằm sau răng, không chạm răng."]},
+  r:{kind:"approx",v:1,pose:"retro",cp:"retro",ex:["red","very"],
+     steps:["Curl the tip of your tongue up and back.","Your tongue touches nothing.","Round your lips a little. Your throat buzzes."],
+     vi:["Cong đầu lưỡi lên và lùi ra sau.","Lưỡi không chạm vào đâu.","Môi hơi tròn. Cổ họng rung."]}
+};
+var TOK={b:SND.b,k:SND.k,t:SND.t,r:SND.r,
+  d:{kind:"stop",v:1,pose:"alv",cp:"alv"}, n:{kind:"nasal",v:1,pose:"alvN",cp:"alv"},
+  e:{kind:"vowel",pose:"e"}, "iː":{kind:"vowel",pose:"i"}, "ə":{kind:"vowel",pose:"schwa"}, "eɪ":{kind:"diph",from:"e",to:"I"}};
+var CL={
+  br:{w:"bread",t:["b","r","e","d"],s:["b","r","ea","d"]},
+  cr:{w:"crane",t:["k","r","eɪ","n"],s:["c","r","a","ne"]},
+  tr:{w:"tree",t:["t","r","iː"],s:["t","r","ee"]}
+};
+function setInd(d){
+  var vo=d.kind==="vowel"||d.kind==="diph"||!!d.v; voicedNow=vo;
+  $("waves").classList.toggle("on",vo); $("folds").classList.toggle("on",vo);
+  var nasal=d.kind==="nasal";
+  $("arNose").style.opacity=nasal?1:0; $("arMouth").style.opacity=(!nasal&&d.kind!=="stop")?1:0; $("arMouth").classList.remove("puff");
+  var g=$("glowC");
+  if(d.cp){ var p=CP[d.cp]; g.setAttribute("cx",p[0]); g.setAttribute("cy",p[1]); g.setAttribute("class",GLOWTYPE[d.kind]); g.style.opacity=1; }
+  else g.style.opacity=0;
+}
+function clearInd(){ $("glowC").style.opacity=0; $("arMouth").style.opacity=0; $("arNose").style.opacity=0; voicedNow=false; $("waves").classList.remove("on"); $("folds").classList.remove("on"); }
+function puff(){
+  var a=$("arMouth"); a.style.opacity=1; a.classList.remove("puff"); void a.getBoundingClientRect(); a.classList.add("puff");
+  a.addEventListener("animationend",function h(){ a.style.opacity=0; a.classList.remove("puff"); a.removeEventListener("animationend",h); });
+}
+function toRest(){ later(function(){ runSeq([{pose:REST,d:300,on:clearInd}],function(){ lit(-1); },1); },700); }
+function lit(i){ document.querySelectorAll("#strip .tk").forEach(function(x){ x.classList.toggle("now",+x.dataset.i===i); }); }
+
+function showSound(id, quiet){
+  var d=SND[id];
+  document.querySelectorAll(".sbtn").forEach(function(b){ b.setAttribute("aria-pressed",b.dataset.s===id?"true":"false"); });
+  $("info").innerHTML='<h3>How to say /'+id+'/</h3><ol>'+d.steps.map(function(s,i){ return '<li>'+s+'<span class="vi">'+d.vi[i]+'</span></li>'; }).join("")+'</ol>'+
+    '<div class="row" style="margin-top:8px"><button class="say" data-ph="'+id+'">/'+id+'/ sound</button>'+d.ex.map(function(w){ return '<button class="say" data-w="'+w+'">'+w+'</button>'; }).join("")+'</div>';
+  $("strip").innerHTML='<span class="tk now" data-i="0"><b>'+(id==="k"?"c / k":id)+'</b><small>/'+id+'/</small></span>';
+  if(quiet){ cur=clonePose(PO[d.pose]); setInd(d); draw(); return; }
+  runSeq([{pose:PO.schwa,d:200,h:60,on:clearInd},{pose:PO[d.pose],d:330,on:function(){ setInd(d); }}], d.kind==="stop"?function(){ later(puff,250); }:null);
+  play("/audio/mm/ph/"+id+".mp3");
+}
+// mode: "slow" = silent slow motion, "normal" = with the word audio, "wrong" = an extra "ơ" after the first sound
+function showCluster(key, mode){
+  var c=CL[key], toks=c.t.slice(), spell=c.s.slice(), bad=-1;
+  if(mode==="wrong"){ toks.splice(1,0,"ə"); spell.splice(1,0,"ơ"); bad=1; }
+  var cap = mode==="slow" ? "Slow motion: watch the tongue move from /"+toks[0]+"/ straight to /r/."+'<span class="vi">Quay chậm: xem lưỡi đi thẳng từ âm đầu sang /r/.</span>'
+          : mode==="wrong" ? "✗ Wrong: the mouth opens for an extra “ơ”, so "+c.w+" sounds like two parts."+'<span class="vi">Sai: miệng mở thêm một nhịp "ơ", nên từ bị tách làm hai.</span>'
+          : "✓ "+c.w+" at normal speed."+'<span class="vi">Tốc độ bình thường, có tiếng.</span>';
+  $("strip").innerHTML=spell.map(function(s,i){ return '<span class="tk'+(i===bad?' bad':'')+'" data-i="'+i+'"><b>'+s+'</b><small>/'+toks[i]+'/</small></span>'; }).join("")+'<span class="cap">'+cap+'</span>';
+  var st=[{pose:REST,d:160,h:80,on:clearInd}];
+  toks.forEach(function(t,i){
+    var d=TOK[t], on=function(){ lit(i); setInd(d); };
+    if(d.kind==="diph"){ st.push({pose:PO[d.from],d:130,h:40,on:on}); st.push({pose:PO[d.to],d:170,h:60}); }
+    else st.push({pose:PO[d.pose],d:d.kind==="vowel"?150:120,h:d.kind==="stop"?80:(d.kind==="vowel"?110:90),on:on});
+  });
+  if(mode==="normal") word(c.w);
+  runSeq(st,toRest,mode==="normal"?1.15:3.2);
+}
+$("sbtns").innerHTML=["b","k","t","r"].map(function(s){ return '<button class="sbtn" data-s="'+s+'" aria-pressed="false" aria-label="Sound '+s+'">/'+s+'/</button>'; }).join("");
+$("clrow").innerHTML=Object.keys(CL).map(function(k){ var c=CL[k];
+  return '<div class="cl g-'+k+'"><span class="nm">'+k+'</span><button class="mini" data-cl="'+k+'" data-m="slow">▶ Slow motion</button><button class="mini" data-cl="'+k+'" data-m="normal">🔊 '+c.w+'</button><button class="mini wrong" data-cl="'+k+'" data-m="wrong">✗ '+c.s[0]+'-ơ-r…</button></div>'; }).join("");
+$("sbtns").addEventListener("click",function(e){ var b=e.target.closest(".sbtn"); if(b) showSound(b.dataset.s); });
+$("clrow").addEventListener("click",function(e){ var b=e.target.closest("[data-cl]"); if(b) showCluster(b.dataset.cl,b.dataset.m); });
+var LB=[
+  ["Nasal cavity",312,122,225,128,"start"],["Hard palate",312,150,172,154,"start"],["Soft palate",312,178,232,158,"start"],
+  ["Tongue",312,250,205,252,"start"],["Vocal cords",312,346,258,342,"start"],
+  ["Tooth ridge",8,160,100,180,"end"],["Teeth",8,184,74,188,"end"],["Lips",8,236,56,214,"end"]
+];
+$("labels").innerHTML=LB.map(function(l){
+  var lx = l[5]==="start" ? l[1]-4 : l[1]+4;
+  return '<line x1="'+lx+'" y1="'+(l[2]-4)+'" x2="'+l[3]+'" y2="'+l[4]+'"/><text x="'+l[1]+'" y="'+l[2]+'" text-anchor="'+l[5]+'">'+l[0]+'</text>';
+}).join("");
+$("waves").innerHTML=[8,14,20].map(function(r){ return '<path d="M'+f(178-r*.5)+','+f(342-r*.87)+' A'+r+','+r+' 0 0 0 '+f(178-r*.5)+','+f(342+r*.87)+'"/>'; }).join("");
+showSound("b",true);
+
+// ---------- quiz: the 8 Kahoot items from the lesson plan ----------
 var Q=[["bread","bed","bread"],["crash","cash","cash"],["crane","cane","crane"],["tree","tea","tea"],["track","tack","track"],["brush","bush","brush"],["brain","crane","train","train"],["bride","cried","tried","cried"]];
 var qi=0, score=0, answered=false;
+var hasR=function(w){ return /^(br|cr|tr)/.test(w); };
 function qRender(){
-  var box=$("quiz");
+  var box=$("quizBox");
   if(qi>=Q.length){
-    box.innerHTML='<p class="fb">Xong! Đúng '+score+'/'+Q.length+' câu.'+(score>=6?' Đạt mục tiêu 6/8.':' Mục tiêu là 6/8, làm lại nhé.')+'</p><button class="big" id="qAgain">Làm lại</button>';
+    box.innerHTML='<p class="fb">Finished! '+score+'/'+Q.length+' correct. '+(score>=6?'You reached the goal (6/8). 🎉':'The goal is 6/8. Try again!')+'</p><button class="big" id="qAgain">Try again</button>';
     return;
   }
-  var q=Q[qi], opts=q.slice(0,-1);
-  answered=false;
-  box.innerHTML='<div class="qhead"><span class="prog">Câu '+(qi+1)+'/'+Q.length+'</span><button class="big" id="qHear">▶ Nghe</button></div>'+
-    '<div class="opts">'+opts.map(function(o){ return '<button class="opt" data-o="'+o+'">'+o+'</button>'; }).join("")+'</div>'+
-    '<p class="fb" id="qFb"></p>';
+  var q=Q[qi], opts=q.slice(0,-1); answered=false;
+  box.innerHTML='<div class="row"><span class="prog">Question '+(qi+1)+'/'+Q.length+'</span><button class="big" id="qHear">▶ Listen</button></div>'+
+    '<div class="opts">'+opts.map(function(o){ return '<button class="opt" data-o="'+o+'">'+o+'</button>'; }).join("")+'</div><p class="fb" id="qFb"></p>';
 }
 function qAnswer(o){
   if(answered) return; answered=true;
   var q=Q[qi], ans=q[q.length-1], ok=o===ans; if(ok) score++;
-  document.querySelectorAll("#quiz .opt").forEach(function(b){
-    b.disabled=true;
-    if(b.dataset.o===ans) b.classList.add("right"); else if(b.dataset.o===o) b.classList.add("wrong");
-  });
-  var hasR=/r/.test(ans.slice(1,3));
-  $("qFb").innerHTML=(ok?"✓ Đúng! ":"✗ Chưa đúng. ")+"Từ vừa đọc là <b>"+ans+"</b>"+(hasR?", có âm r.":", không có âm r.")+' Bấm từng ô để nghe lại.';
-  var nx=document.createElement("button"); nx.className="big"; nx.id="qNext"; nx.textContent=qi+1<Q.length?"Câu tiếp →":"Xem kết quả";
-  $("quiz").appendChild(nx); nx.focus();
+  document.querySelectorAll("#quizBox .opt").forEach(function(b){ if(b.dataset.o===ans) b.classList.add("right"); else if(b.dataset.o===o) b.classList.add("wrong"); });
+  $("qFb").innerHTML=(ok?"✓ Correct! ":"✗ Not quite. ")+"The word was <b>"+ans+"</b>"+(hasR(ans)?", with /r/.":", with no /r/.")+" Tap each word to hear it again.";
+  var nx=document.createElement("button"); nx.className="big"; nx.id="qNext"; nx.textContent=qi+1<Q.length?"Next →":"See my score";
+  $("quizBox").appendChild(nx); nx.focus();
 }
-$("quiz").addEventListener("click",function(e){
+$("quizBox").addEventListener("click",function(e){
   var t=e.target;
   if(t.id==="qHear"){ word(Q[qi][Q[qi].length-1]); return; }
   if(t.id==="qNext"){ qi++; qRender(); var h=$("qHear"); if(h){ h.focus(); word(Q[qi][Q[qi].length-1]); } return; }
   if(t.id==="qAgain"){ qi=0; score=0; qRender(); return; }
   var o=t.closest(".opt"); if(!o) return;
-  if(o.disabled) word(o.dataset.o); else qAnswer(o.dataset.o);
+  if(answered) word(o.dataset.o); else qAnswer(o.dataset.o);
 });
-// answered options stay clickable for listening again
-$("quiz").addEventListener("click",function(e){ var o=e.target.closest(".opt.right,.opt.wrong"); if(o) word(o.dataset.o); },true);
 qRender();
 
-// ----- say & point -----
+// ---------- say & point ----------
 var SP=[["bread","bed"],["brush","bush"],["crash","cash"],["crane","cane"],["tree","tea"],["track","tack"]], last=null;
 $("sp").innerHTML=SP.map(function(p,i){ return '<div class="pair"><span class="n">'+(i+1)+'</span><button class="say" data-w="'+p[0]+'">'+p[0]+'</button><button class="say" data-w="'+p[1]+'">'+p[1]+'</button></div>'; }).join("");
 $("spRand").addEventListener("click",function(){
@@ -253,9 +718,144 @@ $("spRand").addEventListener("click",function(){
   var all=[].concat.apply([],SP), w; do{ w=all[Math.floor(Math.random()*all.length)]; }while(w===last); last=w;
   word(w); $("spShow").disabled=false;
 });
-$("spShow").addEventListener("click",function(){
-  if(!last) return;
-  var b=document.querySelector('#sp [data-w="'+last+'"]'); if(b) b.classList.add("hit");
+$("spShow").addEventListener("click",function(){ var b=last && document.querySelector('#sp [data-w="'+last+'"]'); if(b) b.classList.add("hit"); });
+
+// ---------- speech recognition (the "phone listens" check) ----------
+// Uses the browser's recogniser (Chrome, Edge, Safari). It needs internet and the microphone,
+// and like Google Translate it can guess wrong, so it is a second opinion next to the partner.
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition, recog=null;
+function listen(target, onDone){
+  if(!SR){ onDone({err:"unsupported"}); return; }
+  try{ if(recog) recog.abort(); }catch(e){}
+  var r=new SR(); recog=r; r.lang="en-US"; r.interimResults=false; r.maxAlternatives=5;
+  var got=false;
+  r.onresult=function(e){ got=true; var alts=[]; for(var i=0;i<e.results[0].length;i++) alts.push(e.results[0][i].transcript.toLowerCase().replace(/[^a-z ]/g,"").trim()); onDone({alts:alts}); };
+  r.onerror=function(e){ got=true; onDone({err:e.error}); };
+  r.onend=function(){ recog=null; if(!got) onDone({err:"no-speech"}); };
+  r.start();
+}
+function heardHtml(target, res){
+  if(res.err==="unsupported") return {ok:false, html:"This browser can't listen. Open the page in Chrome or Safari (not inside Zalo)."};
+  if(res.err==="not-allowed"||res.err==="service-not-allowed") return {ok:false, html:"Please allow the microphone, then try again."};
+  if(res.err==="network") return {ok:false, html:"The phone needs internet to listen."};
+  if(res.err) return {ok:false, html:"I didn't hear anything. Tap and speak a bit louder."};
+  var top=res.alts[0]||"", ok=top===target, close=!ok && res.alts.indexOf(target)>0;
+  return {ok:ok, html:'The phone heard: <b>“'+(top||"…")+'”</b> '+(ok?"✓":"✗")+(close?' <span class="sub">(It wasn\'t sure. Say it again, more clearly.)</span>':"")};
+}
+var SIW=["bread","breakfast","breadwinner","brown","brother","crash","crane","cream","crab","track","tree","train","trash"], siCur="bread";
+$("siWords").innerHTML=SIW.map(function(w){ return '<button class="chip" data-si="'+w+'" aria-pressed="'+(w===siCur)+'">'+w+'</button>'; }).join("");
+$("siWords").addEventListener("click",function(e){ var b=e.target.closest("[data-si]"); if(!b) return; siCur=b.dataset.si; $("siWord").textContent=siCur; $("siOut").innerHTML=""; document.querySelectorAll("#siWords .chip").forEach(function(c){ c.setAttribute("aria-pressed",c.dataset.si===siCur?"true":"false"); }); word(siCur); });
+$("siMic").addEventListener("click",function(){
+  var btn=this; if(btn.classList.contains("on")){ try{ recog&&recog.stop(); }catch(e){} return; }
+  btn.classList.add("on"); $("siOut").className="heard"; $("siOut").innerHTML="Listening… say “"+siCur+"”";
+  listen(siCur,function(res){ btn.classList.remove("on"); var h=heardHtml(siCur,res); $("siOut").className="heard "+(res.alts?(h.ok?"ok":"no"):""); $("siOut").innerHTML=h.html; });
+});
+if(!SR){ $("siMic").disabled=true; $("siOut").innerHTML=heardHtml("",{err:"unsupported"}).html; }
+
+// ---------- pair check ----------
+// One phone per pair. Each student speaks 6 words; most have br/cr/tr, a few don't, so the
+// listener can't just pick the word with r. The 4 checklist points come from the lesson's
+// peer feedback checklist.
+var PSETS=[["bread","bed"],["brush","bush"],["crash","cash"],["crane","cane"],["tree","tea"],["track","tack"],["brain","crane","train"],["bride","cried","tried"],["brown","down"],["cream","team"],["crab","cab"],["train","rain"]];
+var PER=6, pc=null;
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pcNewTurn(){
+  var sets=shuffle(PSETS).slice(0,PER), noR=Math.floor(Math.random()*PER);
+  return sets.map(function(s,i){ var rw=s.filter(hasR), other=s.filter(function(w){ return !hasR(w); });
+    var target = (i===noR && other.length) ? other[0] : rw[Math.floor(Math.random()*rw.length)];
+    return {opts:shuffle(s), target:target, tries:0, firstOk:false, fixed:false, r:null, noV:null, mic:null}; });
+}
+function pcStart(){ pc={names:[$("pcA").value.trim()||"Student A",$("pcB").value.trim()||"Student B"], turn:0, i:0, items:[pcNewTurn(),pcNewTurn()], step:"speak"}; pcRender(); }
+function pcIntro(){
+  $("pcBox").innerHTML='<div class="row"><input id="pcA" placeholder="Student A" aria-label="Name of student A"><input id="pcB" placeholder="Student B" aria-label="Name of student B"></div>'+
+    '<p class="sub" style="margin:0">Each of you reads '+PER+' words. Takes about 5 minutes.<span class="vi">Mỗi bạn đọc '+PER+' từ, khoảng 5 phút.</span></p><button class="big" id="pcGo">Start</button>';
+}
+function it(){ return pc.items[pc.turn][pc.i]; }
+function spk(){ return pc.names[pc.turn]; } function lis(){ return pc.names[1-pc.turn]; }
+function pcRender(){
+  var b=$("pcBox"), x=it(), n=(pc.i+1)+"/"+PER;
+  if(pc.step==="speak"){
+    b.innerHTML='<span class="who">👀 Only '+esc(spk())+' looks · word '+n+'</span>'+
+      '<p class="sub" style="margin:0">'+esc(spk())+', say this word to '+esc(lis())+'. Use the 3 steps.'+(x.tries?' <b>Try again, more clearly!</b>':'')+'<span class="vi">Đọc từ này cho bạn nghe. Nhớ 3 bước.'+(x.tries?' Đọc lại rõ hơn nhé!':'')+'</span></p>'+
+      '<div class="secret">'+x.target+'</div>'+
+      '<div class="row"><button class="big" id="pcSaid">I said it → '+esc(lis())+'\'s turn</button></div>';
+  } else if(pc.step==="pick"){
+    b.innerHTML='<span class="who">👂 '+esc(lis())+' · word '+n+'</span><p class="fb">Which word did you hear?<span class="vi">Bạn nghe được từ nào?</span></p>'+
+      '<div class="opts">'+x.opts.map(function(o){ return '<button class="opt" data-pk="'+o+'">'+o+'</button>'; }).join("")+'</div>';
+  } else if(pc.step==="check"){
+    b.innerHTML='<span class="who">👂 '+esc(lis())+' · word '+n+'</span><p class="fb">✓ You understood <b>'+x.target+'</b>. Now check the sounds:</p>'+
+      '<div class="yn"><p>Did you hear a clear /r/?<span class="vi">Có nghe rõ âm /r/ không?</span></p><button class="opt" data-r="1">Yes</button><button class="opt" data-r="0">No</button></div>'+
+      '<div class="yn"><p>Was there an extra “ơ” between the two consonants?<span class="vi">Có chèn "ơ" giữa hai phụ âm không?</span></p><button class="opt" data-v="1">No, clean</button><button class="opt" data-v="0">Yes, extra ơ</button></div>';
+  } else if(pc.step==="done"){
+    var ok=x.firstOk||x.fixed;
+    b.innerHTML='<span class="who">Word '+n+'</span><p class="fb">'+(ok?'✓ ':'✗ ')+'The word was <b>'+x.target+'</b>'+(x.fixed?' · fixed on the second try 👏':'')+(!ok?' · keep practising':'')+'</p>'+
+      '<div class="row"><button class="say" data-w="'+x.target+'">Model</button>'+(SR?'<button class="mic" id="pcMic">🎤 '+esc(spk())+': check with the phone</button>':'')+'</div><p class="heard" id="pcHeard"></p>'+
+      '<button class="big" id="pcNext">'+(pc.i+1<PER?'Next word →':(pc.turn===0?'Swap roles →':'See results'))+'</button>';
+  } else if(pc.step==="swap"){
+    b.innerHTML='<p class="fb">🔄 Swap! Now <b>'+esc(pc.names[1])+'</b> speaks and <b>'+esc(pc.names[0])+'</b> listens.<span class="vi">Đổi vai.</span></p><button class="big" id="pcCont">Continue</button>';
+  } else {
+    var rows=[0,1].map(function(t){ var L=pc.items[t], wr=L.filter(function(z){ return hasR(z.target); });
+      function c(fn,list){ return list.filter(fn).length+"/"+list.length; }
+      var tried=L.filter(function(z){ return !z.firstOk; }), mics=L.filter(function(z){ return z.mic!==null; });
+      return '<tr><th>'+esc(pc.names[t])+'</th><td class="n">'+c(function(z){ return z.r; },wr)+'</td><td class="n">'+c(function(z){ return z.noV; },wr)+'</td><td class="n">'+c(function(z){ return z.firstOk; },L)+'</td><td class="n">'+(tried.length?c(function(z){ return z.fixed; },tried):"–")+'</td><td class="n">'+(mics.length?c(function(z){ return z.mic; },mics):"–")+'</td></tr>'; }).join("");
+    b.innerHTML='<p class="fb">Results — show your teacher.<span class="vi">Kết quả, đưa giáo viên xem.</span></p><div style="overflow-x:auto;width:100%"><table class="sum"><tr><th></th><th>Clear /r/</th><th>No extra ơ</th><th>Partner understood</th><th>Fixed after feedback</th><th>Phone ✓</th></tr>'+rows+'</table></div>'+
+      '<button class="big ghost" id="pcAgain">New round</button>';
+  }
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+$("pcBox").addEventListener("click",function(e){
+  var t=e.target, x=pc&&it();
+  if(t.id==="pcGo"){ pcStart(); return; }
+  if(t.id==="pcAgain"){ pcIntro(); return; }
+  if(!pc) return;
+  if(t.id==="pcSaid"){ pc.step="pick"; pcRender(); return; }
+  var pk=t.closest("[data-pk]");
+  if(pk && pc.step==="pick"){
+    x.tries++;
+    var right=pk.dataset.pk===x.target;
+    if(right){ if(x.tries===1) x.firstOk=true; else x.fixed=true; pc.step=hasR(x.target)?"check":"done"; if(!hasR(x.target)){ x.r=null; x.noV=null; } }
+    else if(x.tries<2){ pc.step="speak"; }
+    else pc.step="done";
+    pcRender(); return;
+  }
+  var rr=t.closest("[data-r]"), vv=t.closest("[data-v]");
+  if(rr||vv){
+    if(rr){ x.r=rr.dataset.r==="1"; rr.parentNode.querySelectorAll(".opt").forEach(function(o){ o.classList.toggle("right",o===rr); }); }
+    if(vv){ x.noV=vv.dataset.v==="1"; vv.parentNode.querySelectorAll(".opt").forEach(function(o){ o.classList.toggle("right",o===vv); }); }
+    if(x.r!==null && x.noV!==null){ pc.step="done"; setTimeout(pcRender,350); }
+    return;
+  }
+  if(t.id==="pcMic"){
+    t.classList.add("on"); $("pcHeard").innerHTML="Listening…";
+    listen(x.target,function(res){ t.classList.remove("on"); var h=heardHtml(x.target,res); if(res.alts) x.mic=h.ok; $("pcHeard").className="heard "+(res.alts?(h.ok?"ok":"no"):""); $("pcHeard").innerHTML=h.html; });
+    return;
+  }
+  if(t.id==="pcNext"){
+    if(pc.i+1<PER){ pc.i++; pc.step="speak"; }
+    else if(pc.turn===0){ pc.step="swap"; }
+    else pc.step="result";
+    pcRender(); return;
+  }
+  if(t.id==="pcCont"){ pc.turn=1; pc.i=0; pc.step="speak"; pcRender(); }
+});
+pcIntro();
+
+// ---------- homework recorder (stays on the device) ----------
+var mrec=null, chunks=[];
+$("recBtn").addEventListener("click",function(){
+  var btn=this;
+  if(mrec && mrec.state==="recording"){ mrec.stop(); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){ $("recNote").textContent="This browser can't record. Use the Zalo voice message directly."; return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    chunks=[]; mrec=new MediaRecorder(stream);
+    mrec.ondataavailable=function(e){ if(e.data.size) chunks.push(e.data); };
+    mrec.onstop=function(){
+      stream.getTracks().forEach(function(tr){ tr.stop(); });
+      var a=$("recAudio"); a.src=URL.createObjectURL(new Blob(chunks,{type:mrec.mimeType||"audio/webm"})); a.hidden=false;
+      btn.textContent="🎙 Record again"; btn.classList.remove("ghost");
+    };
+    mrec.start(); btn.textContent="■ Stop"; btn.classList.add("ghost");
+  }).catch(function(){ $("recNote").textContent="Please allow the microphone, then try again."; });
 });
 })();
 </script>
